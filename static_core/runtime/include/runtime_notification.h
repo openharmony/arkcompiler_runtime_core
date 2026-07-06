@@ -155,98 +155,93 @@ public:
 
     void AddListener(RuntimeListener *listener, uint32_t eventMask)
     {
-        ScopedSuspendAllThreads ssat(rendezvous_);
         AddListenerIfMatches(listener, eventMask, &bytecodePcListeners_, Event::BYTECODE_PC_CHANGED,
-                             &hasBytecodePcListeners_);
+                             &hasBytecodePcListeners_, bytecodePcLock_);
 
-        AddListenerIfMatches(listener, eventMask, &loadModuleListeners_, Event::LOAD_MODULE, &hasLoadModuleListeners_);
+        AddListenerIfMatches(listener, eventMask, &loadModuleListeners_, Event::LOAD_MODULE, &hasLoadModuleListeners_,
+                             loadModuleLock_);
 
-        {
-            // ThreadEnd events can be issued concurrently during threads termination
-            os::memory::WriteLockHolder rwLock(threadEventLock_);
-            AddListenerIfMatches(listener, eventMask, &threadEventsListeners_, Event::THREAD_EVENTS,
-                                 &hasThreadEventsListeners_);
-        }
+        AddListenerIfMatches(listener, eventMask, &threadEventsListeners_, Event::THREAD_EVENTS,
+                             &hasThreadEventsListeners_, threadEventsLock_);
 
         AddListenerIfMatches(listener, eventMask, &exceptionListeners_, Event::EXCEPTION_EVENTS,
-                             &hasExceptionListeners_);
+                             &hasExceptionListeners_, exceptionLock_);
 
-        AddListenerIfMatches(listener, eventMask, &vmEventsListeners_, Event::VM_EVENTS, &hasVmEventsListeners_);
+        AddListenerIfMatches(listener, eventMask, &vmEventsListeners_, Event::VM_EVENTS, &hasVmEventsListeners_,
+                             vmEventsLock_);
 
-        AddListenerIfMatches(listener, eventMask, &methodListeners_, Event::METHOD_EVENTS, &hasMethodListeners_);
+        AddListenerIfMatches(listener, eventMask, &methodListeners_, Event::METHOD_EVENTS, &hasMethodListeners_,
+                             methodLock_);
 
-        AddListenerIfMatches(listener, eventMask, &classListeners_, Event::CLASS_EVENTS, &hasClassListeners_);
+        AddListenerIfMatches(listener, eventMask, &classListeners_, Event::CLASS_EVENTS, &hasClassListeners_,
+                             classLock_);
 
-        AddListenerIfMatches(listener, eventMask, &monitorListeners_, Event::MONITOR_EVENTS, &hasMonitorListeners_);
+        AddListenerIfMatches(listener, eventMask, &monitorListeners_, Event::MONITOR_EVENTS, &hasMonitorListeners_,
+                             monitorLock_);
 
         AddListenerIfMatches(listener, eventMask, &allocationListeners_, Event::ALLOCATION_EVENTS,
-                             &hasAllocationListeners_);
+                             &hasAllocationListeners_, allocationLock_);
 
-        AddListenerIfMatches(listener, eventMask, &consoleListeners_, Event::CONSOLE_EVENTS, &hasConsoleListeners_);
+        AddListenerIfMatches(listener, eventMask, &consoleListeners_, Event::CONSOLE_EVENTS, &hasConsoleListeners_,
+                             consoleLock_);
 
         AddListenerIfMatches(listener, eventMask, &allocationFailedListeners_, Event::OUT_OF_MEMORY_EVENTS,
-                             &hasAllocationFailedListeners_);
+                             &hasAllocationFailedListeners_, allocationFailedLock_);
 
         AddListenerIfMatches(listener, eventMask, &nativeMethodCallListeners_, Event::NATIVE_METHOD_CALL_EVENTS,
-                             &hasNativeMethodCallListeners_);
+                             &hasNativeMethodCallListeners_, nativeMethodCallLock_);
 
-        {
-            // We cannot stop GC thread, so holding lock to avoid data race
-            os::memory::WriteLockHolder rwlock(gcEventLock_);
-            AddListenerIfMatches(listener, eventMask, &garbageCollectorListeners_, Event::GARBAGE_COLLECTOR_EVENTS,
-                                 &hasGarbageCollectorListeners_);
-        }
+        AddListenerIfMatches(listener, eventMask, &garbageCollectorListeners_, Event::GARBAGE_COLLECTOR_EVENTS,
+                             &hasGarbageCollectorListeners_, garbageCollectorLock_);
     }
 
     void RemoveListener(RuntimeListener *listener, uint32_t eventMask)
     {
-        ScopedSuspendAllThreads ssat(rendezvous_);
         RemoveListenerIfMatches(listener, eventMask, &bytecodePcListeners_, Event::BYTECODE_PC_CHANGED,
-                                &hasBytecodePcListeners_);
+                                &hasBytecodePcListeners_, bytecodePcLock_);
 
         RemoveListenerIfMatches(listener, eventMask, &loadModuleListeners_, Event::LOAD_MODULE,
-                                &hasLoadModuleListeners_);
+                                &hasLoadModuleListeners_, loadModuleLock_);
 
-        {
-            // ThreadEnd events can be issued concurrently during threads termination
-            os::memory::WriteLockHolder rwLock(threadEventLock_);
-            RemoveListenerIfMatches(listener, eventMask, &threadEventsListeners_, Event::THREAD_EVENTS,
-                                    &hasThreadEventsListeners_);
-        }
+        RemoveListenerIfMatches(listener, eventMask, &threadEventsListeners_, Event::THREAD_EVENTS,
+                                &hasThreadEventsListeners_, threadEventsLock_);
 
         RemoveListenerIfMatches(listener, eventMask, &exceptionListeners_, Event::EXCEPTION_EVENTS,
-                                &hasExceptionListeners_);
+                                &hasExceptionListeners_, exceptionLock_);
 
-        RemoveListenerIfMatches(listener, eventMask, &vmEventsListeners_, Event::VM_EVENTS, &hasVmEventsListeners_);
+        RemoveListenerIfMatches(listener, eventMask, &vmEventsListeners_, Event::VM_EVENTS, &hasVmEventsListeners_,
+                                vmEventsLock_);
 
-        RemoveListenerIfMatches(listener, eventMask, &methodListeners_, Event::METHOD_EVENTS, &hasMethodListeners_);
+        RemoveListenerIfMatches(listener, eventMask, &methodListeners_, Event::METHOD_EVENTS, &hasMethodListeners_,
+                                methodLock_);
 
-        RemoveListenerIfMatches(listener, eventMask, &classListeners_, Event::CLASS_EVENTS, &hasClassListeners_);
+        RemoveListenerIfMatches(listener, eventMask, &classListeners_, Event::CLASS_EVENTS, &hasClassListeners_,
+                                classLock_);
 
-        RemoveListenerIfMatches(listener, eventMask, &monitorListeners_, Event::MONITOR_EVENTS, &hasMonitorListeners_);
+        RemoveListenerIfMatches(listener, eventMask, &monitorListeners_, Event::MONITOR_EVENTS, &hasMonitorListeners_,
+                                monitorLock_);
 
         RemoveListenerIfMatches(listener, eventMask, &allocationListeners_, Event::ALLOCATION_EVENTS,
-                                &hasAllocationListeners_);
+                                &hasAllocationListeners_, allocationLock_);
 
-        RemoveListenerIfMatches(listener, eventMask, &consoleListeners_, Event::CONSOLE_EVENTS, &hasConsoleListeners_);
+        RemoveListenerIfMatches(listener, eventMask, &consoleListeners_, Event::CONSOLE_EVENTS, &hasConsoleListeners_,
+                                consoleLock_);
 
         RemoveListenerIfMatches(listener, eventMask, &allocationFailedListeners_, Event::OUT_OF_MEMORY_EVENTS,
-                                &hasAllocationFailedListeners_);
+                                &hasAllocationFailedListeners_, allocationFailedLock_);
 
         RemoveListenerIfMatches(listener, eventMask, &nativeMethodCallListeners_, Event::NATIVE_METHOD_CALL_EVENTS,
-                                &hasNativeMethodCallListeners_);
+                                &hasNativeMethodCallListeners_, nativeMethodCallLock_);
 
-        {
-            // We cannot stop GC thread, so holding lock to avoid data race
-            os::memory::WriteLockHolder rwlock(gcEventLock_);
-            RemoveListenerIfMatches(listener, eventMask, &garbageCollectorListeners_, Event::GARBAGE_COLLECTOR_EVENTS,
-                                    &hasGarbageCollectorListeners_);
-        }
+        RemoveListenerIfMatches(listener, eventMask, &garbageCollectorListeners_, Event::GARBAGE_COLLECTOR_EVENTS,
+                                &hasGarbageCollectorListeners_, garbageCollectorLock_);
     }
 
     void LoadModuleEvent(std::string_view name)
     {
-        if (UNLIKELY(hasLoadModuleListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasLoadModuleListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(loadModuleLock_);
             for (auto *listener : loadModuleListeners_) {
                 if (listener != nullptr) {
                     listener->LoadModule(name);
@@ -257,8 +252,9 @@ public:
 
     void ThreadStartEvent(ManagedThread *managedThread)
     {
-        if (UNLIKELY(hasThreadEventsListeners_)) {
-            os::memory::ReadLockHolder rwlock(threadEventLock_);
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasThreadEventsListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(threadEventsLock_);
             for (auto *listener : threadEventsListeners_) {
                 if (listener != nullptr) {
                     listener->ThreadStart(managedThread);
@@ -269,8 +265,9 @@ public:
 
     void ThreadEndEvent(ManagedThread *managedThread)
     {
-        if (UNLIKELY(hasThreadEventsListeners_)) {
-            os::memory::ReadLockHolder rwlock(threadEventLock_);
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasThreadEventsListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(threadEventsLock_);
             for (auto *listener : threadEventsListeners_) {
                 if (listener != nullptr) {
                     listener->ThreadEnd(managedThread);
@@ -281,7 +278,9 @@ public:
 
     void BytecodePcChangedEvent(ManagedThread *thread, Method *method, uint32_t bcOffset)
     {
-        if (UNLIKELY(hasBytecodePcListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasBytecodePcListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(bytecodePcLock_);
             for (auto *listener : bytecodePcListeners_) {
                 if (listener != nullptr) {
                     listener->BytecodePcChanged(thread, method, bcOffset);
@@ -292,8 +291,9 @@ public:
 
     void GarbageCollectorStartEvent()
     {
-        if (UNLIKELY(hasGarbageCollectorListeners_)) {
-            os::memory::ReadLockHolder rwlock(gcEventLock_);
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasGarbageCollectorListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(garbageCollectorLock_);
             for (auto *listener : garbageCollectorListeners_) {
                 if (listener != nullptr) {
                     listener->GarbageCollectorStart();
@@ -304,8 +304,9 @@ public:
 
     void GarbageCollectorFinishEvent()
     {
-        if (UNLIKELY(hasGarbageCollectorListeners_)) {
-            os::memory::ReadLockHolder rwlock(gcEventLock_);
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasGarbageCollectorListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(garbageCollectorLock_);
             for (auto *listener : garbageCollectorListeners_) {
                 if (listener != nullptr) {
                     listener->GarbageCollectorFinish();
@@ -316,7 +317,9 @@ public:
 
     void ExceptionThrowEvent(ManagedThread *thread, Method *method, ObjectHeader *exceptionObject, uint32_t bcOffset)
     {
-        if (UNLIKELY(hasExceptionListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasExceptionListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(exceptionLock_);
             [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
             VMHandle<ObjectHeader> objHandle(thread, exceptionObject);
             for (auto *listener : exceptionListeners_) {
@@ -329,7 +332,9 @@ public:
 
     void ExceptionCatchEvent(ManagedThread *thread, Method *method, ObjectHeader *exceptionObject, uint32_t bcOffset)
     {
-        if (UNLIKELY(hasExceptionListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasExceptionListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(exceptionLock_);
             [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
             VMHandle<ObjectHeader> objHandle(thread, exceptionObject);
             for (auto *listener : exceptionListeners_) {
@@ -342,7 +347,9 @@ public:
 
     void VmStartEvent()
     {
-        if (UNLIKELY(hasVmEventsListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasVmEventsListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(vmEventsLock_);
             for (auto *listener : vmEventsListeners_) {
                 if (listener != nullptr) {
                     listener->VmStart();
@@ -353,7 +360,9 @@ public:
 
     void VmInitializationEvent(ManagedThread *managedThread)
     {
-        if (UNLIKELY(hasVmEventsListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasVmEventsListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(vmEventsLock_);
             for (auto *listener : vmEventsListeners_) {
                 if (listener != nullptr) {
                     listener->VmInitialization(managedThread);
@@ -365,7 +374,9 @@ public:
     // Deprecated API
     void VmInitializationEvent(ManagedThread::ThreadId threadId)
     {
-        if (UNLIKELY(hasVmEventsListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasVmEventsListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(vmEventsLock_);
             for (auto *listener : vmEventsListeners_) {
                 if (listener != nullptr) {
                     listener->VmInitialization(threadId);
@@ -376,7 +387,9 @@ public:
 
     void VmDeathEvent()
     {
-        if (UNLIKELY(hasVmEventsListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasVmEventsListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(vmEventsLock_);
             for (auto *listener : vmEventsListeners_) {
                 if (listener != nullptr) {
                     listener->VmDeath();
@@ -387,7 +400,9 @@ public:
 
     void MethodEntryEvent(ManagedThread *thread, Method *method)
     {
-        if (UNLIKELY(hasMethodListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasMethodListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(methodLock_);
             for (auto *listener : methodListeners_) {
                 if (listener != nullptr) {
                     listener->MethodEntry(thread, method);
@@ -398,7 +413,9 @@ public:
 
     void MethodExitEvent(ManagedThread *thread, Method *method)
     {
-        if (UNLIKELY(hasMethodListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasMethodListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(methodLock_);
             for (auto *listener : methodListeners_) {
                 if (listener != nullptr) {
                     listener->MethodExit(thread, method);
@@ -409,7 +426,9 @@ public:
 
     void ClassLoadEvent(Class *klass)
     {
-        if (UNLIKELY(hasClassListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasClassListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(classLock_);
             for (auto *listener : classListeners_) {
                 if (listener != nullptr) {
                     listener->ClassLoad(klass);
@@ -420,7 +439,9 @@ public:
 
     void ClassPrepareEvent(Class *klass)
     {
-        if (UNLIKELY(hasClassListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasClassListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(classLock_);
             for (auto *listener : classListeners_) {
                 if (listener != nullptr) {
                     listener->ClassPrepare(klass);
@@ -431,7 +452,9 @@ public:
 
     void MonitorWaitEvent(ObjectHeader *object, int64_t timeout)
     {
-        if (UNLIKELY(hasMonitorListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasMonitorListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(monitorLock_);
             // If we need to support multiple monitor listeners,
             // the object must be wrapped to ObjectHandle to protect from GC move
             ASSERT(monitorListeners_.size() == 1);
@@ -444,7 +467,9 @@ public:
 
     void MonitorWaitedEvent(ObjectHeader *object, bool timedOut)
     {
-        if (UNLIKELY(hasMonitorListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasMonitorListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(monitorLock_);
             // If we need to support multiple monitor listeners,
             // the object must be wrapped to ObjectHandle to protect from GC move
             ASSERT(monitorListeners_.size() == 1);
@@ -457,7 +482,9 @@ public:
 
     void MonitorContendedEnterEvent(ObjectHeader *object)
     {
-        if (UNLIKELY(hasMonitorListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasMonitorListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(monitorLock_);
             // If we need to support multiple monitor listeners,
             // the object must be wrapped to ObjectHandle to protect from GC move
             ASSERT(monitorListeners_.size() == 1);
@@ -470,7 +497,9 @@ public:
 
     void MonitorContendedEnteredEvent(ObjectHeader *object)
     {
-        if (UNLIKELY(hasMonitorListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasMonitorListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(monitorLock_);
             // If we need to support multiple monitor listeners,
             // the object must be wrapped to ObjectHandle to protect from GC move
             ASSERT(monitorListeners_.size() == 1);
@@ -483,17 +512,21 @@ public:
 
     bool HasAllocationListeners() const
     {
-        return hasAllocationListeners_;
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        return hasAllocationListeners_.load(std::memory_order_relaxed);
     }
 
     bool HasAllocationFailedListeners() const
     {
-        return hasAllocationFailedListeners_;
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        return hasAllocationFailedListeners_.load(std::memory_order_relaxed);
     }
 
     void OutOfMemoryEvent(size_t size, SpaceType spaceType)
     {
-        if (UNLIKELY(hasAllocationFailedListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasAllocationFailedListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(allocationFailedLock_);
             for (auto *listener : allocationFailedListeners_) {
                 if (listener != nullptr) {
                     listener->OutOfMemory(size, spaceType);
@@ -504,7 +537,9 @@ public:
 
     void ObjectAllocEvent(BaseClass *klass, ObjectHeader *object, ManagedThread *thread, size_t size) const
     {
-        if (UNLIKELY(hasAllocationListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasAllocationListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(allocationLock_);
             // If we need to support multiple allocation listeners,
             // the object must be wrapped to ObjectHandle to protect from GC move
             ASSERT(allocationListeners_.size() == 1);
@@ -518,7 +553,9 @@ public:
     void ConsoleCallEvent(ManagedThread *thread, ConsoleCallType type, uint64_t timestamp,
                           [[maybe_unused]] const PandaVector<TypedValue> &arguments) const
     {
-        if (UNLIKELY(hasConsoleListeners_)) {
+        // Atomic with relaxed order reason: sync with adding/removing listeners
+        if (UNLIKELY(hasConsoleListeners_.load(std::memory_order_relaxed))) {
+            os::memory::ReadLockHolder rwlock(consoleLock_);
             for (auto listener : consoleListeners_) {
                 if (listener != nullptr) {
                     listener->ConsoleCall(thread, type, timestamp, arguments);
@@ -565,11 +602,6 @@ public:
         return true;
     }
 
-    void SetRendezvous(Rendezvous *rendezvous)
-    {
-        rendezvous_ = rendezvous;
-    }
-
     void AddDebuggerListener(DebuggerListener *listener)
     {
         os::memory::WriteLockHolder holder(debuggerLock_);
@@ -584,11 +616,11 @@ public:
 
 private:
     // NOLINTBEGIN(misc-unused-parameters)
-    template <typename FlagType>
     static void AddListenerIfMatches(RuntimeListener *listener, uint32_t eventMask,
                                      PandaList<RuntimeListener *> *listenerGroup, Event eventModifier,
-                                     FlagType *eventFlag)
+                                     std::atomic<bool> *eventFlag, os::memory::RWLock &lock)
     {
+        os::memory::WriteLockHolder holder(lock);
         if ((eventMask & eventModifier) != 0) {
             // If a free group item presents, use it, otherwise push back a new item
             auto it = std::find(listenerGroup->begin(), listenerGroup->end(), nullptr);
@@ -597,7 +629,8 @@ private:
             } else {
                 listenerGroup->push_back(listener);
             }
-            *eventFlag = true;
+            // Atomic with relaxed order reason: need other threads to see added listener
+            eventFlag->store(true, std::memory_order_relaxed);
         }
     }
 
@@ -607,11 +640,11 @@ private:
         c.erase(std::remove_if(c.begin(), c.end(), [&listener](const T &elem) { return listener == elem; }));
     }
 
-    template <typename FlagType>
     static void RemoveListenerIfMatches(RuntimeListener *listener, uint32_t eventMask,
                                         PandaList<RuntimeListener *> *listenerGroup, Event eventModifier,
-                                        FlagType *eventFlag)
+                                        std::atomic<bool> *eventFlag, os::memory::RWLock &lock)
     {
+        os::memory::WriteLockHolder holder(lock);
         if ((eventMask & eventModifier) != 0) {
             auto it = std::find(listenerGroup->begin(), listenerGroup->end(), listener);
             if (it == listenerGroup->end()) {
@@ -624,44 +657,56 @@ private:
             // Check if any listener presents and update the flag if not
             if (std::find_if(listenerGroup->begin(), listenerGroup->end(),
                              [](RuntimeListener *item) { return item != nullptr; }) == listenerGroup->end()) {
-                *eventFlag = false;
+                // Atomic with relaxed order reason: need other threads to see removed listener
+                eventFlag->store(false, std::memory_order_relaxed);
             }
         }
     }
     // NOLINTEND(misc-unused-parameters)
 
-    PandaList<RuntimeListener *> bytecodePcListeners_;
-    PandaList<RuntimeListener *> loadModuleListeners_;
-    PandaList<RuntimeListener *> threadEventsListeners_;
-    PandaList<RuntimeListener *> garbageCollectorListeners_;
-    PandaList<RuntimeListener *> exceptionListeners_;
-    PandaList<RuntimeListener *> vmEventsListeners_;
-    PandaList<RuntimeListener *> methodListeners_;
-    PandaList<RuntimeListener *> classListeners_;
-    PandaList<RuntimeListener *> monitorListeners_;
-    PandaList<RuntimeListener *> allocationListeners_;
-    PandaList<RuntimeListener *> consoleListeners_;
-    PandaList<RuntimeListener *> allocationFailedListeners_;
+    PandaList<RuntimeListener *> bytecodePcListeners_ GUARDED_BY(bytecodePcLock_);
+    PandaList<RuntimeListener *> loadModuleListeners_ GUARDED_BY(loadModuleLock_);
+    PandaList<RuntimeListener *> threadEventsListeners_ GUARDED_BY(threadEventsLock_);
+    PandaList<RuntimeListener *> garbageCollectorListeners_ GUARDED_BY(garbageCollectorLock_);
+    PandaList<RuntimeListener *> exceptionListeners_ GUARDED_BY(exceptionLock_);
+    PandaList<RuntimeListener *> vmEventsListeners_ GUARDED_BY(vmEventsLock_);
+    PandaList<RuntimeListener *> methodListeners_ GUARDED_BY(methodLock_);
+    PandaList<RuntimeListener *> classListeners_ GUARDED_BY(classLock_);
+    PandaList<RuntimeListener *> monitorListeners_ GUARDED_BY(monitorLock_);
+    PandaList<RuntimeListener *> allocationListeners_ GUARDED_BY(allocationLock_);
+    PandaList<RuntimeListener *> consoleListeners_ GUARDED_BY(consoleLock_);
+    PandaList<RuntimeListener *> allocationFailedListeners_ GUARDED_BY(allocationFailedLock_);
     PandaList<RuntimeListener *> nativeMethodCallListeners_;
 
-    bool hasBytecodePcListeners_ = false;
-    bool hasLoadModuleListeners_ = false;
+    std::atomic<bool> hasBytecodePcListeners_ = false;
+    std::atomic<bool> hasLoadModuleListeners_ = false;
     std::atomic<bool> hasThreadEventsListeners_ = false;
     std::atomic<bool> hasGarbageCollectorListeners_ = false;
-    bool hasExceptionListeners_ = false;
-    bool hasVmEventsListeners_ = false;
-    bool hasMethodListeners_ = false;
-    bool hasClassListeners_ = false;
-    bool hasMonitorListeners_ = false;
-    bool hasAllocationListeners_ = false;
-    bool hasConsoleListeners_ = false;
-    bool hasAllocationFailedListeners_ = false;
-    bool hasNativeMethodCallListeners_ = false;
-    Rendezvous *rendezvous_ {nullptr};
+    std::atomic<bool> hasExceptionListeners_ = false;
+    std::atomic<bool> hasVmEventsListeners_ = false;
+    std::atomic<bool> hasMethodListeners_ = false;
+    std::atomic<bool> hasClassListeners_ = false;
+    std::atomic<bool> hasMonitorListeners_ = false;
+    std::atomic<bool> hasAllocationListeners_ = false;
+    std::atomic<bool> hasConsoleListeners_ = false;
+    std::atomic<bool> hasAllocationFailedListeners_ = false;
+    std::atomic<bool> hasNativeMethodCallListeners_ = false;
+
+    os::memory::RWLock bytecodePcLock_;
+    os::memory::RWLock loadModuleLock_;
+    os::memory::RWLock threadEventsLock_;
+    os::memory::RWLock garbageCollectorLock_;
+    os::memory::RWLock exceptionLock_;
+    os::memory::RWLock vmEventsLock_;
+    os::memory::RWLock methodLock_;
+    os::memory::RWLock classLock_;
+    os::memory::RWLock monitorLock_;
+    mutable os::memory::RWLock allocationLock_;
+    mutable os::memory::RWLock consoleLock_;
+    os::memory::RWLock allocationFailedLock_;
+    os::memory::RWLock nativeMethodCallLock_;
 
     os::memory::RWLock debuggerLock_;
-    os::memory::RWLock threadEventLock_;
-    os::memory::RWLock gcEventLock_;
     PandaList<DebuggerListener *> debuggerListeners_;
 };
 
