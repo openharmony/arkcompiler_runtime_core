@@ -603,8 +603,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @FaAndStageModel
      */
     public copyWithin(target: int): {{element['name']}}Array {
-        this.copyWithinImpl(target, 0, this.lengthInt)
-        return this
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**

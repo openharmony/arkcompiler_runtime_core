@@ -606,8 +606,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @FaAndStageModel
      */
     public copyWithin(target: int): {{N}}Array {
-        this.copyWithinImpl(target, 0, this.lengthInt)
-        return this
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     {% set TBoxed = T[0].upper() + T[1:] -%}

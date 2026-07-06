@@ -453,6 +453,10 @@ export final class String extends Object implements Comparable<String>, Iterable
     private static readonly LOCALE_COMPARE_FAST_UNSUPPORTED: int = -2;
 
     // The ASCII weights below match ICU collation only for this allowlist and default options.
+    // NOTE: this flag is cached at class-init from the default locale and is NOT refreshed if the
+    // default locale changes at runtime. Re-querying on every localeCompare call would defeat the
+    // fast path; the trade-off is accepted here (callers that change the default locale at runtime
+    // should construct an explicit Intl.Collator instead of relying on localeCompare's fast path).
     private static readonly localeCompareDefaultFastEnabled: boolean =
         String.localeCompareDefaultCanUseFastPath(Intl.Locale.defaultTag());
 
@@ -929,9 +933,9 @@ export final class String extends Object implements Comparable<String>, Iterable
      *     The search starts from specified index.
      *
      * @param { String } str string to search
-     * @param { int } fromIndex index to start search from
+     * @param { int } fromIndex index to start search from (negative values are treated as 0,
+     *     matching indexOf semantics; this method does not validate the range)
      * @throws { NullPointerError } if str param is null
-     * @throws { StringIndexOutOfBoundsError } if fromIndex param is negative or >= length
      * @returns { boolean } true if this String contains str and false otherwise
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -1101,7 +1105,17 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @FaAndStageModel
      */
     public static join(strings: String[], delim: String): String {
-        return String.join(strings, delim, '', '');
+        let length = strings.length;
+        if (length == 0) {
+            return '';
+        }
+        let sb: StringBuilder = new StringBuilder();
+        for (let i: int = 0; i < length - 1; i++) {
+            sb.append(strings[i]);
+            sb.append(delim);
+        }
+        sb.append(strings[length - 1]);
+        return sb.toString();
     }
 
     /**
@@ -1122,14 +1136,21 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @FaAndStageModel
      */
     public static join(strings: String[], delim: String, prefix: String, suffix: String): String {
-        let resStr: String = '';
-        for (let i: int = 0; i < strings.length; i++) {
-            resStr += prefix + strings[i] + suffix;
-            if (i != strings.length - 1) {
-                resStr += delim;
-            }
+        let length = strings.length;
+        if (length == 0) {
+            return '';
         }
-        return resStr;
+        let sb: StringBuilder = new StringBuilder();
+        for (let i: int = 0; i < length - 1; i++) {
+            sb.append(prefix);
+            sb.append(strings[i]);
+            sb.append(suffix);
+            sb.append(delim);
+        }
+        sb.append(prefix);
+        sb.append(strings[length - 1]);
+        sb.append(suffix);
+        return sb.toString();
     }
 
     /**
@@ -2126,19 +2147,20 @@ export final class String extends Object implements Comparable<String>, Iterable
             position = this.indexOf(searchValue, position + advanceBy)
         }
         let endOfLastMatch = 0
-        let result = ''
+        let result = new StringBuilder()
         let arrayMatchPositions = matchPositions.toArray()
         for (let i = 0; i < arrayMatchPositions.length; ++i) {
             let p = arrayMatchPositions[i]
             let preserved = this.substring(endOfLastMatch, p)
             let replacement = replacer(searchValue, [new Double(p), this])
-            result = result + preserved + replacement
+            result.append(preserved)
+            result.append(replacement)
             endOfLastMatch = p + searchLength
         }
         if (endOfLastMatch < this.getLength()) {
-            result += this.substring(endOfLastMatch)
+            result.append(this.substring(endOfLastMatch))
         }
-        return result
+        return result.toString()
     }
 
     /**

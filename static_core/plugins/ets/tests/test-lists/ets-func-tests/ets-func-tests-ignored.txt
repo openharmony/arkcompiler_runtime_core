@@ -354,6 +354,5 @@ regression/15278_0.ets
 std/core/EAWorker_out_of_coro_creation.ets
 
 #31475
-std/core/DateTest.ets
 std/concurrency/message_basic_interface.ets
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/string/expr/string-expression-assert.ets

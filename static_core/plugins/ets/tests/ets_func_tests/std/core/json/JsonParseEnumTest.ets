@@ -60,10 +60,24 @@ function jsonParseForPureEnum(): void {
     arktest.assertEQ(parsedEnumStr, EnumTestStr.s1)
 }
 
+enum EnumColor {
+    RED = 1,
+    GREEN = 2,
+    BLUE = 3
+}
+
+function jsonParseEnumWithBigIntMode2(): void {
+    let cls = Class.from<EnumColor>()
+    let opts = { bigIntMode: jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT } as jsonx.ParseOptions
+    let result = JSON.parse<EnumColor>('2', undefined, cls, opts)
+    arktest.assertTrue(result === EnumColor.GREEN)
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite('Json stringify for ArrayLike tests ')
     suite.addTest('JSON.parse for Class with Enum', jsonParseEnumForClass);
     suite.addTest('JSON.parse for pure Enum', jsonParseForPureEnum);
+    suite.addTest('JSON.parse for Enum with bigIntMode=2', jsonParseEnumWithBigIntMode2);
 
     return suite.run()
 }

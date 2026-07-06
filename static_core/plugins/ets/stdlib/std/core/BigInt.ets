@@ -1608,7 +1608,13 @@ export final class BigInt {
         let shift: int = 0
         let expPosition: int = s.indexOf(c'e')
         if (expPosition > 0) {
-            shift = BigInt.parseInt(s, expPosition + 1, len)
+            // Parse the exponent with overflow detection. BigInt.parseInt accumulates into a
+            // signed `int` with no overflow check, so an adversarial exponent (e.g. "0e2147483647")
+            // wraps to a garbage value and/or drives the unbounded `for (i < shift) digits.push(0)`
+            // loop below until the process is OOM-killed. parseExponent rejects any exponent whose
+            // resulting magnitude would exceed baseSys - 1 bits -- the same limit operatorLeftShift
+            // enforces -- with a catchable "too many digits in integer" error.
+            shift = BigInt.parseExponent(s, expPosition + 1, len).toInt()
             len = expPosition
         }
         let digits = new Array<Int>()
@@ -1655,6 +1661,55 @@ export final class BigInt {
 
         for (let i = start; i < end; ++i) {
             value = value * 10 + (s.charAt(i).toInt() - c'0'.toInt())
+        }
+
+        return sign * value
+    }
+
+    /**
+     * Parses a decimal exponent substring into a `long`, rejecting values that would produce a
+     * BigInt too large to represent.
+     *
+     * Unlike `parseInt`, this accumulates into a `long` so that overflow is detectable instead of
+     * silently wrapping. An adversarial exponent (e.g. the "2147483647" in "0e2147483647") would
+     * otherwise wrap to a garbage `int` in `parseInt` and/or drive the unbounded
+     * `for (i < shift) digits.push(0)` allocation in `parseFromString` until the process is
+     * OOM-killed.
+     *
+     * A decimal exponent `E` yields roughly `E * BITS_PER_1024_DEC / 1024` bits. The BigInt
+     * container can hold at most `baseSys - 1` bits (this is the same cap `operatorLeftShift`
+     * enforces), so any exponent whose resulting bit length exceeds that is rejected with the
+     * same "BigInt: too many digits in integer" error for consistency. This keeps a single
+     * upper bound on representable magnitude across all construction paths.
+     *
+     * @param s source string
+     * @param start inclusive start index of the exponent substring
+     * @param end exclusive end index
+     * @returns the parsed exponent as a `long`
+     * @throws { Error } "BigInt: too many digits in integer" if the resulting magnitude would
+     *     exceed baseSys - 1 bits
+     */
+    private static parseExponent(s: string, start: int, end: int): long {
+        let value: long = 0
+        let sign: long = 1
+        let firstChar = s.charAt(start)
+        if (firstChar == c'-' || firstChar == c'+') {
+            start += 1
+            if (firstChar == c'-') {
+                sign = -1
+            }
+        }
+
+        // Max representable magnitude, in bits, is baseSys - 1 (same cap as operatorLeftShift).
+        // Convert it to a max decimal-exponent count: each decimal digit is ~BITS_PER_1024_DEC/1024
+        // bits, so maxExponent = (baseSys - 1) * 1024 / BITS_PER_1024_DEC.
+        let maxBits: long = BigInt.baseSys - (1 as long)
+        let maxExponent: long = (maxBits * (1024 as long)) / BigInt.BITS_PER_1024_DEC.toLong()
+        for (let i = start; i < end; ++i) {
+            value = value * (10 as long) + (s.charAt(i).toLong() - c'0'.toLong())
+            if (value > maxExponent) {
+                throw new Error("BigInt: too many digits in integer")
+            }
         }
 
         return sign * value

@@ -232,7 +232,7 @@ export class Set<K> implements ReadonlySet<K> {
      * @FaAndStageModel
      */
     constructor(values: K[]) {
-        this.elements = new FinalMap<K, K>()
+        this.elements = new FinalMap<K, K>(values.length)
         for (let i = 0; i < values.length; ++i) {
             this.elements.set(values[i], values[i])
         }
@@ -381,7 +381,7 @@ export class Set<K> implements ReadonlySet<K> {
      * @FaAndStageModel
      */
     override $_iterator(): IterableIterator<K> {
-        return new SetIteratorImpl<K>(this.values())
+        return new SetIteratorImpl<K>(this.elements.values())
     }
 
     /**
