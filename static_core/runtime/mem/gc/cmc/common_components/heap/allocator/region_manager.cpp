@@ -34,6 +34,8 @@
 
 #include "libarkbase/os/mem.h"
 #include "libarkbase/utils/logger.h"
+#include "runtime/include/panda_vm.h"
+#include "runtime/include/runtime.h"
 
 #if defined(_WIN64)
 #include <sysinfoapi.h>
@@ -222,29 +224,44 @@ void RegionList::MergeRegionList(RegionList &srcList, RegionDesc::RegionType reg
 
 static const char *RegionDescRegionTypeToString(RegionDesc::RegionType type)
 {
-    static constexpr const char *enumStr[] = {
-        [static_cast<uint8_t>(RegionDesc::RegionType::FREE_REGION)] = "FREE_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::GARBAGE_REGION)] = "GARBAGE_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::THREAD_LOCAL_REGION)] = "THREAD_LOCAL_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::THREAD_LOCAL_OLD_REGION)] = "THREAD_LOCAL_OLD_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::RECENT_FULL_REGION)] = "RECENT_FULL_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::FROM_REGION)] = "FROM_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::LONE_FROM_REGION)] = "LONE_FROM_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::EXEMPTED_FROM_REGION)] = "EXEMPTED_FROM_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::TO_REGION)] = "TO_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::OLD_REGION)] = "OLD_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::FULL_POLYSIZE_NONMOVABLE_REGION)] =
-            "FULL_POLYSIZE_NONMOVABLE_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::RECENT_POLYSIZE_NONMOVABLE_REGION)] =
-            "RECENT_POLYSIZE_NONMOVABLE_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::MONOSIZE_NONMOVABLE_REGION)] = "MONOSIZE_NONMOVABLE_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::FULL_MONOSIZE_NONMOVABLE_REGION)] =
-            "FULL_MONOSIZE_NONMOVABLE_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::RECENT_LARGE_REGION)] = "RECENT_LARGE_REGION",
-        [static_cast<uint8_t>(RegionDesc::RegionType::LARGE_REGION)] = "LARGE_REGION",
-    };
-    ASSERT_PRINT(type < RegionDesc::RegionType::END_OF_REGION_TYPE, "Invalid region type");
-    return enumStr[static_cast<uint8_t>(type)];
+    switch (type) {
+        case RegionDesc::RegionType::FREE_REGION:
+            return "FREE_REGION";
+        case RegionDesc::RegionType::GARBAGE_REGION:
+            return "GARBAGE_REGION";
+        case RegionDesc::RegionType::THREAD_LOCAL_REGION:
+            return "THREAD_LOCAL_REGION";
+        case RegionDesc::RegionType::THREAD_LOCAL_OLD_REGION:
+            return "THREAD_LOCAL_OLD_REGION";
+        case RegionDesc::RegionType::RECENT_FULL_REGION:
+            return "RECENT_FULL_REGION";
+        case RegionDesc::RegionType::FROM_REGION:
+            return "FROM_REGION";
+        case RegionDesc::RegionType::LONE_FROM_REGION:
+            return "LONE_FROM_REGION";
+        case RegionDesc::RegionType::EXEMPTED_FROM_REGION:
+            return "EXEMPTED_FROM_REGION";
+        case RegionDesc::RegionType::TO_REGION:
+            return "TO_REGION";
+        case RegionDesc::RegionType::OLD_REGION:
+            return "OLD_REGION";
+        case RegionDesc::RegionType::RECENT_POLYSIZE_NONMOVABLE_REGION:
+            return "RECENT_POLYSIZE_NONMOVABLE_REGION";
+        case RegionDesc::RegionType::FULL_POLYSIZE_NONMOVABLE_REGION:
+            return "FULL_POLYSIZE_NONMOVABLE_REGION";
+        case RegionDesc::RegionType::MONOSIZE_NONMOVABLE_REGION:
+            return "MONOSIZE_NONMOVABLE_REGION";
+        case RegionDesc::RegionType::FULL_MONOSIZE_NONMOVABLE_REGION:
+            return "FULL_MONOSIZE_NONMOVABLE_REGION";
+        case RegionDesc::RegionType::RECENT_LARGE_REGION:
+            return "RECENT_LARGE_REGION";
+        case RegionDesc::RegionType::LARGE_REGION:
+            return "LARGE_REGION";
+        case RegionDesc::RegionType::END_OF_REGION_TYPE:
+            break;
+    }
+    ASSERT_PRINT(false, "Invalid region type");
+    return "INVALID_REGION";
 }
 
 void RegionList::PrependRegion(RegionDesc *region, RegionDesc::RegionType type)
@@ -485,19 +502,13 @@ void RegionManager::ForEachObjectUnsafe(const std::function<void(BaseObject *)> 
 void RegionManager::ForEachObjectSafe(const std::function<void(BaseObject *)> &visitor) const
 {
     ScopedNativeCodeThread scope(ManagedThread::GetCurrent());
-    STWParam stwParam {"visit-all-objects"};
-    ScopedStopTheWorld stw(stwParam);
+    ark::ScopedStopTheWorld stw;
     ForEachObjectUnsafe(visitor);
 }
 
 RegionDesc *RegionManager::TakeRegion(size_t num, RegionDesc::UnitRole type, bool expectPhysicalMem, bool allowGC,
                                       bool isCopy)
 {
-    // a chance to invoke heuristic gc.
-    if (allowGC && !Heap::GetHeap().IsGcStarted()) {
-        Heap::GetHeap().TryHeuristicGC();
-    }
-
     // check for allocation since we do not want gc threads and mutators do any harm to each other.
     size_t size = num * RegionDesc::UNIT_SIZE;
     RequestForRegion(size);
@@ -603,11 +614,12 @@ void RegionManager::RequestForRegion(size_t size)
     }
 
     Heap &heap = Heap::GetHeap();
-    GCStats &gcstats = heap.GetCollector().GetGCStats();
-    size_t allocatedBytes = heap.GetAllocatedSize() - gcstats.liveBytesAfterGC;
+    auto *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
+    size_t liveBytesAfterGC = gc->GetLiveBytesAfterGC();
+    size_t allocatedBytes = heap.GetAllocatedSize() - liveBytesAfterGC;
     constexpr double pi = 3.14;
-    size_t availableBytesAfterGC = heap.GetMaxCapacity() - gcstats.liveBytesAfterGC;
-    double heuAllocRate = std::cos((pi / 2.0) * allocatedBytes / availableBytesAfterGC) * gcstats.collectionRate;
+    size_t availableBytesAfterGC = heap.GetMaxCapacity() - liveBytesAfterGC;
+    double heuAllocRate = std::cos((pi / 2.0) * allocatedBytes / availableBytesAfterGC) * gc->GetCollectionRate();
     // for maximum performance, choose the larger one.
     double allocRate = std::max(
         static_cast<double>(Heap::GetHeap().GetHeapParam().allocationRate) * MB / SECOND_TO_NANO_SECOND, heuAllocRate);

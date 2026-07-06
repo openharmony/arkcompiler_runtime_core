@@ -165,7 +165,7 @@ DebugSessionAttachErrorCode Tools::AttachDebugSession()
     PandaSet<Method *> compiledMethods;
     {
         auto *vm = thread->GetVM();
-        [[maybe_unused]] ScopedSuspendAllThreads ssat(vm->GetRendezvous());
+        [[maybe_unused]] ScopedStopTheWorld stw(vm->GetRendezvous());
 
         // 3. Switch all threads to use debug dispatch table.
         vm->GetThreadManager()->EnumerateThreads([](ManagedThread *t) {

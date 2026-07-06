@@ -25,10 +25,9 @@
 
 #include "common_components/base/globals.h"
 #include "common_interfaces/objects/base_object.h"
-#include "common_components/heap/collector/gc_request.h"
-#include "common_components/heap/collector/gc_stats.h"
 #include "common_interfaces/thread/mutator.h"
 #include "libarkbase/os/mutex.h"
+#include "runtime/include/gc_task.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "common_interfaces/heap/visitor.h"
 
@@ -58,15 +57,8 @@ public:
 
     virtual void RunGarbageCollection(uint64_t, ark::GCTask &) = 0;
 
-    virtual GCStats &GetGCStats()
-    {
-        LOG(FATAL, COMMON) << "Unresolved fatal";
-        UNREACHABLE();
-    }
-
     virtual ObjectHeader *ForwardObject(ObjectHeader *) = 0;
 
-    virtual bool ShouldIgnoreRequest(GCRequest &quest) = 0;
     virtual bool IsFromObject(ObjectHeader *) const = 0;
     virtual bool IsUnmovableFromObject(BaseObject *) const = 0;
     virtual BaseObject *FindToVersion(BaseObject *obj) const = 0;

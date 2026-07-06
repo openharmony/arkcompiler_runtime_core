@@ -147,8 +147,6 @@ public:
     size_t GetFootprintBytes() const override;
     size_t GetSurvivedSize() const override;
     size_t GetRemainHeapSize() const override;
-    size_t GetAccumulatedAllocateSize() const override;
-    size_t GetAccumulatedFreeSize() const override;
     HeapAddress GetStartAddress() const override;
     HeapAddress GetSpaceEndAddress() const override;
     bool ForEachObject(const std::function<void(BaseObject *)> &, bool) override;
@@ -156,7 +154,6 @@ public:
     void RegisterAllocBuffer(AllocationBuffer &buffer) override;
     void UnregisterAllocBuffer(AllocationBuffer &buffer) override;
     void StopGCWork() override;
-    void TryHeuristicGC() override;
     void NotifyNativeAllocation(size_t bytes) override;
     void NotifyNativeFree(size_t bytes) override;
     void NotifyNativeReset(size_t oldBytes, size_t newBytes) override;
@@ -244,11 +241,6 @@ void HeapImpl::StopRuntimeThreads()
 HeuristicGCPolicy &HeapImpl::GetHeuristicGCPolicy()
 {
     return heuristicGCPolicy_;
-}
-
-void HeapImpl::TryHeuristicGC()
-{
-    heuristicGCPolicy_.TryHeuristicGC();
 }
 
 void HeapImpl::NotifyNativeAllocation(size_t bytes)
@@ -362,16 +354,6 @@ size_t HeapImpl::GetRemainHeapSize() const
 size_t HeapImpl::GetSurvivedSize() const
 {
     return theSpace_->GetSurvivedSize();
-}
-
-size_t HeapImpl::GetAccumulatedAllocateSize() const
-{
-    return collectorResources_.GetGCStats().GetAccumulatedFreeSize() + theSpace_->GetAllocatedBytes();
-}
-
-size_t HeapImpl::GetAccumulatedFreeSize() const
-{
-    return collectorResources_.GetGCStats().GetAccumulatedFreeSize();
 }
 
 HeapAddress HeapImpl::GetStartAddress() const

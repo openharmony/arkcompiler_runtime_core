@@ -202,37 +202,18 @@ public:
         return largeSpace_.GetAllocatedSize();
     }
 
-    size_t GetFootprintBytes() const override
+    size_t GetFootprintBytes() const override;
+
+    size_t GetObjectSpaceFootprintBytes() const
     {
-        // Atomic with relaxed order reason: footprintBytes_ only needs uniqueness, not synchronization with other
-        return footprintBytes_.load(std::memory_order_relaxed);
+        return toSpace_.CountAllocatedBytes() + youngSpace_.CountAllocatedBytes() + oldSpace_.CountAllocatedBytes();
     }
 
     // OnAllocate is called for all allocations going through Allocate() / AllocateNoGC(),
     // including readonly, large, nonmovable and movable (young/old) objects.
     // It's not called for TLAB allocations (which bypass these methods).
-    // OnAllocate increments value of footprintBytes_ counter of heap usage on each non-TL allocation.
-    // TL allocations don't call OnAllocate, so RecalculateFootprint is used for that
-    void OnAllocate(size_t bytes)
-    {
-        // Atomic with relaxed order reason: footprintBytes_ only needs uniqueness, not synchronization with other
-        footprintBytes_.fetch_add(bytes, std::memory_order_relaxed);
-    }
-
-    // Corrects (recalculates) value of footprintBytes_ counter of heap usage by summing up
-    // allocated bytes across all spaces (to, young, old, non-movable, large object spaces),
-    // including TL allocation buffer (TLAB) allocations not captured by OnAllocate().
-    // fromSpace_ is excluded: after GC it is already reclaimed and contains no actual data.
-    // Recalculation occurs during STW pauses after GC to ensure accurate accounting
-    // without races from mutator threads.
-    void RecalculateFootprint() override
-    {
-        size_t total = toSpace_.CountAllocatedBytes() + youngSpace_.CountAllocatedBytes() +
-                       oldSpace_.CountAllocatedBytes() + nonMovableSpace_.CountAllocatedBytes() +
-                       largeSpace_.CountAllocatedBytes();
-        // Atomic with relaxed order reason: footprintBytes_ only needs uniqueness, not synchronization with other
-        footprintBytes_.store(total, std::memory_order_relaxed);
-    }
+    // OnAllocate records each non-TL allocation in MemStats.
+    void OnAllocate(size_t bytes, AllocType allocType);
 
     size_t FromSpaceSize() const
     {
@@ -451,7 +432,6 @@ private:
     void ForEachAwaitingJitFortUnsafe(const std::function<void(BaseObject *)> &visitor) const;
     void MarkJitFortMemAwaitingInstall(BaseObject *obj);
 
-    std::atomic<size_t> footprintBytes_ {0};
     HeapAddress reservedStart_ = 0;
     HeapAddress reservedEnd_ = 0;
     RegionManager regionManager_;

@@ -54,22 +54,25 @@ private:
     MutatorLock *mutatorLock_;
 };
 
-class ScopedSuspendAllThreads {
+// Scoped stop the world.
+class ScopedStopTheWorld {
 public:
-    explicit ScopedSuspendAllThreads(Rendezvous *rendezvous) ACQUIRE(*rendezvous_->GetMutatorLock())
+    explicit ScopedStopTheWorld(Rendezvous *rendezvous) ACQUIRE(*rendezvous_->GetMutatorLock())
         : rendezvous_(rendezvous)
     {
         ASSERT(rendezvous_ != nullptr);
         rendezvous_->SafepointBegin();
     }
-    ~ScopedSuspendAllThreads() RELEASE(*rendezvous_->GetMutatorLock())
+    // Convenience ctor: stops the world on the current VM's rendezvous.
+    ScopedStopTheWorld() ACQUIRE(*rendezvous_->GetMutatorLock());
+    ~ScopedStopTheWorld() RELEASE(*rendezvous_->GetMutatorLock())
     {
         ASSERT(rendezvous_ != nullptr);
         rendezvous_->SafepointEnd();
     }
 
-    NO_COPY_SEMANTIC(ScopedSuspendAllThreads);
-    NO_MOVE_SEMANTIC(ScopedSuspendAllThreads);
+    NO_COPY_SEMANTIC(ScopedStopTheWorld);
+    NO_MOVE_SEMANTIC(ScopedStopTheWorld);
 
 private:
     Rendezvous *rendezvous_;

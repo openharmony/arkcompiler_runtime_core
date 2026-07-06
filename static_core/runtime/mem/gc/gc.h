@@ -44,6 +44,7 @@
 #include "runtime/mem/gc/gc_stats.h"
 #include "runtime/mem/gc/gc_types.h"
 #include "runtime/mem/refstorage/reference.h"
+#include "runtime/mem/rendezvous.h"
 #include "runtime/mem/gc/bitmap.h"
 #include "runtime/mem/gc/workers/gc_worker.h"
 #include "runtime/mem/object_helpers.h"
@@ -526,6 +527,31 @@ public:
     virtual size_t AdjustStartupLimit(size_t startupLimit)
     {
         return startupLimit;
+    }
+
+    virtual double GetCollectionRate() const
+    {
+        UNREACHABLE();
+    }
+
+    virtual size_t GetThreshold() const
+    {
+        UNREACHABLE();
+    }
+
+    virtual size_t GetLiveBytesAfterGC() const
+    {
+        UNREACHABLE();
+    }
+
+    virtual bool ShouldRequestYoung() const
+    {
+        UNREACHABLE();
+    }
+
+    virtual bool NeedToTrackFreedObjects() const
+    {
+        return false;
     }
 
 protected:

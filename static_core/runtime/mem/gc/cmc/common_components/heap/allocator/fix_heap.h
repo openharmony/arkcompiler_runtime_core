@@ -127,7 +127,7 @@ public:
     // NOTE(d.chikunov) - make it PandaStack in future
     static std::stack<std::pair<RegionList *, RegionDesc *>> emptyRegionsToCollect;
     static void AddEmptyRegionToCollectDuringPostFix(RegionList *list, RegionDesc *region);
-    static void CollectEmptyRegions();
+    static size_t CollectEmptyRegions();
 
     bool Run([[maybe_unused]] uint32_t threadIndex) override;
 

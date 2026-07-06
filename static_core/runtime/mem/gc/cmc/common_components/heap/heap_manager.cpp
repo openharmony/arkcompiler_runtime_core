@@ -27,7 +27,7 @@ HeapAddress HeapManager::Allocate(size_t allocSize, AllocType allocType, bool al
     return Heap::GetHeap().Allocate(allocSize, allocType, allowGC);
 }
 
-void HeapManager::Init(const RuntimeParam &param)
+void HeapManager::Init(const mem::RuntimeParam &param)
 {
     Heap::GetHeap().Init(param);
 }

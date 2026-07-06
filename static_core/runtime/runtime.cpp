@@ -625,7 +625,7 @@ bool Runtime::Destroy()
 
     instance_->StopCoverageListener();
 
-    // Listeners that use RemoveListener (ScopedSuspendAllThreads) must be cleared while mutators can still rendezvous.
+    // Listeners that use RemoveListener (ScopedStopTheWorld) must be cleared while mutators can still rendezvous.
     instance_->GetPandaVM()->StopListeners();
 
     // Note JIT thread (compiler) may access to thread data,
@@ -1244,12 +1244,7 @@ PandaString Runtime::GetMemoryStatistics()
 
 PandaString Runtime::GetFinalStatistics()
 {
-#if defined(ARK_USE_COMMON_RUNTIME)
-    auto stats = common_vm::Heap::GetHeap().GetCollector().GetGCStats();
-    return PandaString(stats.GetFinalStatistics());
-#else
     return pandaVm_->GetGCStats()->GetFinalStatistics(pandaVm_->GetHeapManager());
-#endif  // ARK_USE_COMMON_RUNTIME
 }
 
 void Runtime::NotifyAboutLoadedModules()

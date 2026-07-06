@@ -22,6 +22,8 @@
 #endif
 
 #include "runtime/trace.h"
+#include "runtime/include/panda_vm.h"
+#include "runtime/include/runtime.h"
 
 namespace ark::common_vm {
 
@@ -44,6 +46,8 @@ void LargeSpace::CollectFixTasks(FixHeapTaskList &taskList)
 size_t LargeSpace::CollectLargeGarbage()
 {
     ScopedTrace tracer("CollectLargeGarbage", ENABLE_GC_TRACING);
+    size_t freedObjectCount = 0;
+    size_t freedObjectBytes = 0;
     size_t garbageSize = 0;
     RegionDesc *region = largeRegionList_.GetHeadRegion();
     while (region != nullptr) {
@@ -55,12 +59,15 @@ size_t LargeSpace::CollectLargeGarbage()
             continue;
         }
         if (!RegionalHeap::IsSurvivedObject(obj) && !region->IsNewObjectSinceMarking(obj)) {
+            LOG_DEBUG_OBJECT_EVENTS << "DELETE LARGE object " << obj;
             LOG(DEBUG, GC) << "reclaim large region " << region << "@0x" << std::hex << region->GetRegionStart() << "+"
                            << std::dec << region->GetRegionAllocatedSize() << " type "
                            << static_cast<size_t>(region->GetRegionType());
             RegionDesc *del = region;
             region = region->GetNextRegion();
             largeRegionList_.DeleteRegion(del);
+            freedObjectCount++;
+            freedObjectBytes += del->GetRegionAllocatedSize();
             if (del->GetRegionSize() > RegionDesc::LARGE_OBJECT_RELEASE_THRESHOLD) {
                 garbageSize += regionManager_.ReleaseRegion(del);
             } else {
@@ -77,6 +84,11 @@ size_t LargeSpace::CollectLargeGarbage()
     region = recentLargeRegionList_.GetHeadRegion();
     while (region != nullptr) {
         region = region->GetNextRegion();
+    }
+
+    if (freedObjectBytes > 0) {
+        Runtime::GetCurrent()->GetPandaVM()->GetMemStats()->RecordFreeObjects(
+            freedObjectCount, freedObjectBytes, ark::SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
     }
 
     return garbageSize;

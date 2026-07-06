@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -161,7 +161,6 @@ TEST(SchedGCOnNthAllocTriggerTest, TestTrigger)
     Runtime::Create(GetRuntimeOptions("debug-never"));
     ManagedThread *thread = ark::ManagedThread::GetCurrent();
     thread->ManagedCodeBegin();
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
     PandaVM *vm = Runtime::GetCurrent()->GetPandaVM();
     auto *trigger = vm->GetGCTrigger();
     ASSERT_EQ(mem::GCTriggerType::ON_NTH_ALLOC, trigger->GetType());
@@ -169,11 +168,12 @@ TEST(SchedGCOnNthAllocTriggerTest, TestTrigger)
     GCChecker checker;
     vm->GetGC()->AddListener(&checker);
 
+    constexpr size_t STRING_SIZE = 12 * 1024;
     schedTrigger->ScheduleGc(GCTaskCause::YOUNG_GC_CAUSE, 2);
-    coretypes::String::CreateEmptyString(ctx, vm);
+    ark::mem::ObjectAllocator::AllocString(STRING_SIZE);
     EXPECT_FALSE(schedTrigger->IsTriggered());
     EXPECT_EQ(GCTaskCause::INVALID_CAUSE, checker.GetCause());
-    coretypes::String::CreateEmptyString(ctx, vm);
+    ark::mem::ObjectAllocator::AllocString(STRING_SIZE);
     EXPECT_EQ(GCTaskCause::YOUNG_GC_CAUSE, checker.GetCause());
     EXPECT_TRUE(schedTrigger->IsTriggered());
 

@@ -25,6 +25,7 @@
 #include "common_components/heap/collector/heuristic_gc_policy.h"
 #include "common_interfaces/base/runtime_param.h"
 #include "common_interfaces/objects/base_object.h"
+#include "runtime/include/gc_task.h"
 
 namespace ark::common_vm {
 class Allocator;
@@ -91,7 +92,6 @@ public:
     virtual Collector &GetCollector() = 0;
     virtual Allocator &GetAllocator() = 0;
     virtual HeuristicGCPolicy &GetHeuristicGCPolicy() = 0;
-    virtual void TryHeuristicGC() = 0;
     virtual void NotifyNativeAllocation(size_t bytes) = 0;
     virtual void NotifyNativeFree(size_t bytes) = 0;
     virtual void NotifyNativeReset(size_t oldBytes, size_t newBytes) = 0;
@@ -151,9 +151,6 @@ public:
     {
         return GetMaxCapacity();
     }
-
-    virtual size_t GetAccumulatedAllocateSize() const = 0;
-    virtual size_t GetAccumulatedFreeSize() const = 0;
 
     virtual HeapAddress GetStartAddress() const = 0;
     virtual HeapAddress GetSpaceEndAddress() const = 0;

@@ -47,9 +47,6 @@ public:
     // More precise than GetAllocatedBytes() which uses page-level granularity for full regions
     virtual size_t GetFootprintBytes() const = 0;
 
-    // Recalculate byte-level footprint after GC by walking all regions
-    virtual void RecalculateFootprint() = 0;
-
     virtual size_t GetSurvivedSize() const = 0;
 
     inline void RegisterAllocBuffer(AllocationBuffer &buffer) const

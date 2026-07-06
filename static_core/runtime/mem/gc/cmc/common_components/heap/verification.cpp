@@ -450,8 +450,7 @@ void WVerify::VerifyAfterMark(mem::GCPhase phase, bool isWorldStopped)
 #endif
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     if (!isWorldStopped) {
-        STWParam stwParam {"WGC-verify-aftermark"};
-        ScopedStopTheWorld stw(stwParam);
+        ark::ScopedStopTheWorld stw;
         VerifyAfterMarkInternal(space, phase);
     } else {
         VerifyAfterMarkInternal(space, phase);
@@ -478,8 +477,7 @@ void WVerify::VerifyAfterForward(mem::GCPhase phase, bool isWorldStopped)
 #endif
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     if (!isWorldStopped) {
-        STWParam stwParam {"WGC-verify-afterforward"};
-        ScopedStopTheWorld stw(stwParam);
+        ark::ScopedStopTheWorld stw;
         VerifyAfterForwardInternal(space, phase);
     } else {
         VerifyAfterForwardInternal(space, phase);
@@ -508,8 +506,7 @@ void WVerify::VerifyAfterFix(mem::GCPhase phase, bool isWorldStopped)
 #endif
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     if (!isWorldStopped) {
-        STWParam stwParam {"WGC-verify-afterfix"};
-        ScopedStopTheWorld stw(stwParam);
+        ark::ScopedStopTheWorld stw;
         VerifyAfterFixInternal(space, phase);
     } else {
         VerifyAfterFixInternal(space, phase);
@@ -535,8 +532,7 @@ void WVerify::EnableReadBarrierDFX(bool isWorldStopped)
 #endif
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     if (!isWorldStopped) {
-        STWParam stwParam {"WGC-verify-enable-rb-dfx"};
-        ScopedStopTheWorld stw(stwParam);
+        ark::ScopedStopTheWorld stw;
         EnableReadBarrierDFXInternal(space);
     } else {
         EnableReadBarrierDFXInternal(space);
@@ -559,8 +555,7 @@ void WVerify::DisableReadBarrierDFX(bool isWorldStopped)
 #endif
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     if (!isWorldStopped) {
-        STWParam stwParam {"WGC-verify-disable-rb-dfx"};
-        ScopedStopTheWorld stw(stwParam);
+        ark::ScopedStopTheWorld stw;
         DisableReadBarrierDFXInternal(space);
     } else {
         DisableReadBarrierDFXInternal(space);

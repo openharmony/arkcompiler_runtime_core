@@ -26,7 +26,7 @@ namespace ark::mem {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_TLAB_ALLOCATOR(level) LOG(level, ALLOC) << "TLAB: "
 
-#if defined(NDEBUG) || defined(ARK_USE_COMMON_RUNTIME)
+#if defined(NDEBUG)
 static constexpr bool PANDA_TRACK_TLAB_ALLOCATIONS = false;
 #else
 static constexpr bool PANDA_TRACK_TLAB_ALLOCATIONS = true;

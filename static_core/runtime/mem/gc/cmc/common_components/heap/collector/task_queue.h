@@ -20,7 +20,6 @@
 #include <list>
 
 #include "common_components/common/page_allocator.h"
-#include "common_components/heap/collector/gc_request.h"
 #include "common_components/heap/collector/ark_mutator_container.h"
 #include "common_components/heap/heap.h"
 

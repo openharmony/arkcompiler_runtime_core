@@ -145,6 +145,25 @@ bool RegionalHeap::ShouldRetryAllocation(size_t &tryTimes) const
     }
 }
 
+size_t RegionalHeap::GetFootprintBytes() const
+{
+    return toSpace_.CountAllocatedBytes() + youngSpace_.CountAllocatedBytes() + oldSpace_.CountAllocatedBytes() +
+           nonMovableSpace_.CountAllocatedBytes() + largeSpace_.CountAllocatedBytes();
+}
+
+void RegionalHeap::OnAllocate(size_t bytes, AllocType allocType)
+{
+    auto typeMem = ark::SpaceType::SPACE_TYPE_OBJECT;
+    if (bytes >= RegionDesc::LARGE_OBJECT_DEFAULT_THRESHOLD) {
+        typeMem = ark::SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT;
+    } else if (allocType == AllocType::NONMOVABLE_OBJECT) {
+        typeMem = ark::SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT;
+    } else {
+        ASSERT(allocType == AllocType::MOVEABLE_OBJECT || allocType == AllocType::MOVEABLE_OLD_OBJECT);
+    }
+    Runtime::GetCurrent()->GetPandaVM()->GetMemStats()->RecordAllocateObject(bytes, typeMem);
+}
+
 mem::TLAB *RegionalHeap::CreateTLAB()
 {
     AllocationBuffer *allocBuffer = AllocationBuffer::GetOrCreateAllocBuffer();
@@ -211,10 +230,7 @@ HeapAddress RegionalHeap::Allocate(size_t size, AllocType allocType)
     if (internalAddr == 0) {
         return 0;
     }
-    // Increments value of footprintBytes_ counter of heap usage on each non-TL allocation.
-    // TL allocations don't call OnAllocate, so RecalculateFootprint is used for that
-    // (see MarkingCollector::RunGarbageCollection, call Heap::GetHeap().GetAllocator().RecalculateFootprint)
-    OnAllocate(allocSize);
+    OnAllocate(allocSize, allocType);
 #if defined(COMMON_TSAN_SUPPORT)
     Sanitizer::TsanAllocObject(reinterpret_cast<void *>(internalAddr), allocSize);
 #endif
@@ -239,7 +255,7 @@ HeapAddress RegionalHeap::AllocateNoGC(size_t size, AllocType allocType)
     if (internalAddr == 0) {
         return 0;
     }
-    OnAllocate(allocSize);  // The same usage as in RegionalHeap::Allocate
+    OnAllocate(allocSize, allocType);  // The same usage as in RegionalHeap::Allocate
 #if defined(COMMON_TSAN_SUPPORT)
     Sanitizer::TsanAllocObject(reinterpret_cast<void *>(internalAddr), allocSize);
 #endif

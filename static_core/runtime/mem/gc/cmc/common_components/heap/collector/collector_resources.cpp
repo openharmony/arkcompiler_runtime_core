@@ -34,7 +34,6 @@ void CollectorResources::Init()
     finishedGcIndex_.store(0, std::memory_order_seq_cst);
     gcCompletedCount_.store(0, std::memory_order_seq_cst);
     StartGCThreads();
-    gcStats_.Init();
     hasRelease = false;
 }
 

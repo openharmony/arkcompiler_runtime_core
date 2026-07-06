@@ -94,15 +94,6 @@ public:
     }
 
     void BroadcastGCFinished();
-    GCStats &GetGCStats()
-    {
-        return gcStats_;
-    }
-    const GCStats &GetGCStats() const
-    {
-        return gcStats_;
-    }
-
     void StartRuntimeThreads();
     void StopRuntimeThreads();
 
@@ -157,7 +148,6 @@ private:
     }
 #endif
     Collector *collector_;
-    GCStats gcStats_;
     bool hasRelease = false;
 };
 }  // namespace ark::common_vm
