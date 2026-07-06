@@ -174,10 +174,6 @@
 07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_7.ets
 07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_8.ets
 
-#34965
-07.expressions/10.field_access_expressions/03.accessing_superclass_accessors/accessing_by_super_indirect_1.ets
-07.expressions/10.field_access_expressions/03.accessing_superclass_accessors/multiple_interface_access_1.ets
-
 #33798: Proper CTE for type-erased instanceof
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_0.ets
 07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_1.ets
@@ -231,21 +227,6 @@
 07.expressions/16.instanceof_expression/array_type_preserve_5.ets
 07.expressions/16.instanceof_expression/array_type_preserve_n_2.ets
 07.expressions/16.instanceof_expression/array_type_preserve_n_3.ets
-
-#34467 No expected ClassCastError on casting with Char and Boolean
-07.expressions/17.cast_expressions/cast_to_char_w_1.ets
-07.expressions/17.cast_expressions/cast_to_char_w_2.ets
-07.expressions/17.cast_expressions/cast_to_char_w_3.ets
-07.expressions/17.cast_expressions/cast_to_char_w_4.ets
-07.expressions/17.cast_expressions/cast_to_char_w_5.ets
-07.expressions/17.cast_expressions/cast_to_char_w_6.ets
-07.expressions/17.cast_expressions/cast_to_numeric_w_0.ets
-07.expressions/17.cast_expressions/cast_to_numeric_w_1.ets
-07.expressions/17.cast_expressions/cast_to_numeric_w_2.ets
-07.expressions/17.cast_expressions/cast_to_numeric_w_3.ets
-07.expressions/17.cast_expressions/cast_to_numeric_w_4.ets
-07.expressions/17.cast_expressions/cast_to_numeric_w_5.ets
-07.expressions/17.cast_expressions/cast_to_string_w_0.ets
 
 #33632
 07.expressions/20.nullish-coalescing_expression/resulting_type_n.ets
@@ -443,9 +424,6 @@
 15.semantic_rules/09.overriding/03.override-compatible_signatures/object_literal_5.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/object_literal_7.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/object_literal_11.ets
-
-#34276
-15.semantic_rules/09.overriding/03.override-compatible_signatures/void_return_overrides_any.ets
 
 #34956
 15.semantic_rules/10.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_5.ets
