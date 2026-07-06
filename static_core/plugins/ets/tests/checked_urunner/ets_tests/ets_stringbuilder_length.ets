@@ -19,12 +19,12 @@
 
 //! CHECKER     StringBuilder length field access AOT unoptimized
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-optimize-string-concat=true \
+//! RUN_PAOC    options: "--compiler-regex='.*stringCalculation0[0-1]' \
 //!                       --compiler-inlining=false --compiler-check-final=false \
 //!                       --compiler-simplify-string-builder=false"
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation00"
-//! PASS_AFTER  "OptimizeStringConcat"
+//! PASS_AFTER  "BranchElimination"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT  /StringBuilder::<ctor>/,3
 //! INST_COUNT  /Intrinsic.StdCoreSbToString/,3
@@ -35,11 +35,11 @@
 
 //! CHECKER     StringBuilder length field access AOT optimized
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*stringCalculation0[0-1]' --compiler-optimize-string-concat=true \
+//! RUN_PAOC    options: "--compiler-regex='.*stringCalculation0[0-1]' \
 //!                       --compiler-inlining=false --compiler-check-final=false"
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation00"
-//! PASS_AFTER  "OptimizeStringConcat"
+//! PASS_AFTER  "BranchElimination"
 //! INST_COUNT  /StringBuilder::<ctor>/,3
 //! INST_COUNT  /Intrinsic.StdCoreSbToString/,3
 //! INST_COUNT  /LenArray/,4
@@ -51,7 +51,7 @@
 //! INST        /LoadObject \d+ std.core.StringBuilder.length/
 //!
 //! METHOD      "ets_stringbuilder_length.ETSGLOBAL::stringCalculation01"
-//! PASS_AFTER  "OptimizeStringConcat"
+//! PASS_AFTER  "BranchElimination"
 //! INST_COUNT  /StringBuilder::<ctor>/,3
 //! INST_COUNT  /Intrinsic.StdCoreSbToString/,3
 //! PASS_AFTER  "SimplifyStringBuilder"
@@ -61,8 +61,7 @@
 //! RUN         entry: "ets_stringbuilder_length.ETSGLOBAL::main", result: 0
 
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc
-//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true \
-//!                       --bco-compiler --compiler-optimize-string-concat=true"
+//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
 
 //! CHECKER     BCO, StringBuilder length field access BCO optimized
 //! DEFINE_FRONTEND_OPTIONS            RUN_BCO reuse .abc

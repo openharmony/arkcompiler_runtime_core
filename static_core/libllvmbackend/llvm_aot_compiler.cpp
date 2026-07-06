@@ -37,7 +37,6 @@
 #include "optimizer/optimizations/lse.h"
 #include "optimizer/optimizations/memory_barriers.h"
 #include "optimizer/optimizations/object_type_check_elimination.h"
-#include "optimizer/optimizations/optimize_string_concat.h"
 #include "optimizer/optimizations/peepholes.h"
 #include "optimizer/optimizations/redundant_loop_elimination.h"
 #include "optimizer/optimizations/reserve_string_builder_buffer.h"
@@ -306,7 +305,6 @@ bool LLVMAotCompiler::RunArkPasses(compiler::Graph *graph)
         }
         graph->RunPass<compiler::Peepholes>();
         graph->RunPass<compiler::BranchElimination>();
-        graph->RunPass<compiler::OptimizeStringConcat>();
         graph->RunPass<compiler::SimplifyStringBuilder>();
         graph->RunPass<compiler::Inlining>(llvmPreOpt == 0);
         graph->RunPass<compiler::Cleanup>();

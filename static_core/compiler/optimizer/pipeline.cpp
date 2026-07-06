@@ -52,7 +52,6 @@
 #include "optimizer/optimizations/memory_barriers.h"
 #include "optimizer/optimizations/memory_coalescing.h"
 #include "optimizer/optimizations/native_call_optimization.h"
-#include "optimizer/optimizations/optimize_string_concat.h"
 #include "optimizer/optimizations/peepholes.h"
 #include "optimizer/optimizations/phi_type_resolving.h"
 #include "optimizer/optimizations/redundant_loop_elimination.h"
@@ -183,7 +182,6 @@ bool Pipeline::RunOptimizations()
         graph->RunPass<Cleanup>(false);
     }
     graph->RunPass<BranchElimination>();
-    graph->RunPass<OptimizeStringConcat>();
 
     // The problem with inlining in OSR mode can be found in `bitops-nsieve-bits` benchmark and it is in the
     // following: we inline the method that has user X within a loop, then peepholes optimize datflow and def of
