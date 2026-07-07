@@ -237,14 +237,16 @@ private:
 
     class ForeignFieldKey {
     public:
-        ForeignFieldKey(panda_file::BaseClassItem *klass, panda_file::StringItem *name, panda_file::TypeItem *type)
-            : klass_(klass), name_(name), type_(type)
+        ForeignFieldKey(panda_file::BaseClassItem *klass, panda_file::StringItem *name, panda_file::TypeItem *type,
+                        uint32_t staticAccessFlag)
+            : klass_(klass), name_(name), type_(type), staticAccessFlag_(staticAccessFlag)
         {
         }
 
         bool operator==(const ForeignFieldKey &other) const
         {
-            return klass_ == other.klass_ && name_ == other.name_ && type_ == other.type_;
+            return klass_ == other.klass_ && name_ == other.name_ && type_ == other.type_ &&
+                   staticAccessFlag_ == other.staticAccessFlag_;
         }
 
         panda_file::BaseClassItem *GetClass() const
@@ -262,10 +264,16 @@ private:
             return type_;
         }
 
+        uint32_t GetStaticAccessFlag() const
+        {
+            return staticAccessFlag_;
+        }
+
     private:
         panda_file::BaseClassItem *klass_;
         panda_file::StringItem *name_;
         panda_file::TypeItem *type_;
+        uint32_t staticAccessFlag_;
     };
 
     class ForeignMethodKey {
@@ -313,7 +321,9 @@ private:
     public:
         size_t operator()(const ForeignFieldKey &key) const
         {
-            return CombineHash(CombineHash(CombineHash(0, key.GetClass()), key.GetName()), key.GetType());
+            auto hash = CombineHash(CombineHash(CombineHash(0, key.GetClass()), key.GetName()), key.GetType());
+            return hash ^ (std::hash<uint32_t> {}(key.GetStaticAccessFlag()) + HASH_MAGIC + (hash << HASH_LEFT_SHIFT) +
+                           (hash >> HASH_RIGHT_SHIFT));
         }
     };
 
