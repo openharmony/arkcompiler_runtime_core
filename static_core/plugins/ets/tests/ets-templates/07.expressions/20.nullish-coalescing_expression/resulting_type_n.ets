@@ -23,7 +23,7 @@ desc:  >-
     Type T is a subtype of union type U(U1|...|Un) if for some i there is T which is a subtype of Ui
     ( Enum <: double = false || Enum <: string = false => false )
 tags: [compile-only, negative]
-expected_out: "#TBD, see issue #33632"
+expected_out: "Semantic error ESE0318: Type 'Enum|\"aa\"' cannot be assigned to type 'Double|String'"
 ---*/
 
 enum Enum:double { A = 1.2, B = 0.0}

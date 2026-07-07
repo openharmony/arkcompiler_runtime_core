@@ -228,9 +228,6 @@
 07.expressions/16.instanceof_expression/array_type_preserve_n_2.ets
 07.expressions/16.instanceof_expression/array_type_preserve_n_3.ets
 
-#33632
-07.expressions/20.nullish-coalescing_expression/resulting_type_n.ets
-
 #30340 &&= ||= ??= still not supported in code
 07.expressions/32.assignment/02.compound_assignment_operators/ops_12.ets
 07.expressions/32.assignment/02.compound_assignment_operators/ops_13.ets
