@@ -28,6 +28,7 @@
         "deps": {
             "components": [
                 "bounds_checking_function",
+                "ets_frontend",
                 "ets_runtime",
                 "faultloggerd",
                 "hilog",
