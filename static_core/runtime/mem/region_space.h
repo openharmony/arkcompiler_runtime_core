@@ -482,6 +482,11 @@ public:
         return spaces_->GetMaxYoungSize();
     }
 
+    size_t GetInitialMaxYoungSize() const
+    {
+        return spaces_->GetInitialMaxYoungSize();
+    }
+
     ~RegionPool() = default;
     NO_COPY_SEMANTIC(RegionPool);
     NO_MOVE_SEMANTIC(RegionPool);
@@ -584,6 +589,11 @@ public:
     void SetDesiredEdenLength(size_t edenLength)
     {
         desiredEdenLength_ = edenLength;
+    }
+
+    size_t GetEmptyYoungRegionsCount() const
+    {
+        return emptyYoungRegions_.size();
     }
 
 private:

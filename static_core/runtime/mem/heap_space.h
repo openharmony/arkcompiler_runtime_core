@@ -150,6 +150,11 @@ protected:
             return minSize_;
         }
 
+        size_t GetInitialMaxSize() const
+        {
+            return initialMaxSize_;
+        }
+
         void SetMaxSize(size_t size)
         {
             maxSize_ = size;
@@ -191,6 +196,7 @@ protected:
         size_t currentSize_ {0};
         size_t minSize_ {0};
         size_t maxSize_ {0};
+        size_t initialMaxSize_ {0};
     };
 
     // For avoid zero division
@@ -333,6 +339,8 @@ public:
     size_t GetCurrentYoungSize() const;
 
     size_t GetMaxYoungSize() const;
+
+    size_t GetInitialMaxYoungSize() const;
 
     void UseFullYoungSpace();
 
