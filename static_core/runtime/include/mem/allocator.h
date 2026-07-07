@@ -639,7 +639,6 @@ using ObjectAllocatorPtr = AllocatorPtr<AllocatorPurpose::ALLOCATOR_PURPOSE_OBJE
 template <InternalAllocatorConfig CONFIG>
 using InternalAllocatorT = AllocatorSingleT<InternalAllocator<CONFIG>, AllocatorPurpose::ALLOCATOR_PURPOSE_INTERNAL>;
 
-template <MTModeT MT_MODE = MT_MODE_MULTI>
 class ObjectAllocatorNoGen : public ObjectAllocatorBase {
     using ObjectAllocator = RunSlotsAllocator<ObjectAllocConfig>;       // Allocator used for middle size allocations
     using LargeObjectAllocator = FreeListAllocator<ObjectAllocConfig>;  // Allocator used for large objects

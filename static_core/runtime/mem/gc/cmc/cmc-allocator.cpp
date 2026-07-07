@@ -31,9 +31,8 @@ namespace ark::mem {
 
 namespace cvm = common_vm;
 
-template <MTModeT MT_MODE>
-CMCObjectAllocator<MT_MODE>::CMCObjectAllocator(MemStatsType *memStats, bool createPygoteSpaceAllocator)
-    : ObjectAllocatorNoGen<MT_MODE>(memStats, createPygoteSpaceAllocator)
+CMCObjectAllocator::CMCObjectAllocator(MemStatsType *memStats, bool createPygoteSpaceAllocator)
+    : ObjectAllocatorNoGen(memStats, createPygoteSpaceAllocator)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     auto param = cvm::BaseRuntimeParam::DefaultRuntimeParam();
@@ -78,8 +77,7 @@ CMCObjectAllocator<MT_MODE>::CMCObjectAllocator(MemStatsType *memStats, bool cre
 }
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-template <MTModeT MT_MODE>
-CMCObjectAllocator<MT_MODE>::~CMCObjectAllocator()
+CMCObjectAllocator::~CMCObjectAllocator()
 {
     // since there might be failure during initialization,
     // here we need to check and call fini.
@@ -93,11 +91,10 @@ CMCObjectAllocator<MT_MODE>::~CMCObjectAllocator()
 }
 #endif
 
-template <MTModeT MT_MODE>
-void *CMCObjectAllocator<MT_MODE>::Allocate([[maybe_unused]] size_t size, [[maybe_unused]] Alignment align,
-                                            [[maybe_unused]] ark::ManagedThread *thread,
-                                            [[maybe_unused]] ObjectAllocatorBase::ObjMemInitPolicy objInit,
-                                            [[maybe_unused]] bool pinned)
+void *CMCObjectAllocator::Allocate([[maybe_unused]] size_t size, [[maybe_unused]] Alignment align,
+                                   [[maybe_unused]] ark::ManagedThread *thread,
+                                   [[maybe_unused]] ObjectAllocatorBase::ObjMemInitPolicy objInit,
+                                   [[maybe_unused]] bool pinned)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     return reinterpret_cast<void *>(ark::common_vm::HeapAllocator::AllocateInYoungOrHuge(size));
@@ -106,10 +103,9 @@ void *CMCObjectAllocator<MT_MODE>::Allocate([[maybe_unused]] size_t size, [[mayb
 #endif
 }
 
-template <MTModeT MT_MODE>
-void *CMCObjectAllocator<MT_MODE>::AllocateNonMovable([[maybe_unused]] size_t size, [[maybe_unused]] Alignment align,
-                                                      [[maybe_unused]] ark::ManagedThread *thread,
-                                                      [[maybe_unused]] ObjectAllocatorBase::ObjMemInitPolicy objInit)
+void *CMCObjectAllocator::AllocateNonMovable([[maybe_unused]] size_t size, [[maybe_unused]] Alignment align,
+                                             [[maybe_unused]] ark::ManagedThread *thread,
+                                             [[maybe_unused]] ObjectAllocatorBase::ObjMemInitPolicy objInit)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     return reinterpret_cast<ObjectHeader *>(ark::common_vm::HeapAllocator::AllocateInNonmoveOrHuge(size));
@@ -118,8 +114,7 @@ void *CMCObjectAllocator<MT_MODE>::AllocateNonMovable([[maybe_unused]] size_t si
 #endif
 }
 
-template <MTModeT MT_MODE>
-void CMCObjectAllocator<MT_MODE>::IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor)
+void CMCObjectAllocator::IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     auto visitor = [&](ark::common_vm::BaseObject *obj) { objectVisitor(reinterpret_cast<ObjectHeader *>(obj)); };
@@ -127,8 +122,7 @@ void CMCObjectAllocator<MT_MODE>::IterateOverObjectsSafe([[maybe_unused]] const 
 #endif  // ARK_USE_COMMON_RUNTIME
 }
 
-template <MTModeT MT_MODE>
-TLAB *CMCObjectAllocator<MT_MODE>::CreateNewTLAB([[maybe_unused]] size_t size)
+TLAB *CMCObjectAllocator::CreateNewTLAB([[maybe_unused]] size_t size)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     return reinterpret_cast<TLAB *>(ark::common_vm::HeapAllocator::CreateTLAB());
@@ -137,8 +131,7 @@ TLAB *CMCObjectAllocator<MT_MODE>::CreateNewTLAB([[maybe_unused]] size_t size)
 #endif
 }
 
-template <MTModeT MT_MODE>
-size_t CMCObjectAllocator<MT_MODE>::GetTLABMaxAllocSize()
+size_t CMCObjectAllocator::GetTLABMaxAllocSize()
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     return ark::common_vm::HeapAllocator::GetTLABMaxAllocSize();
@@ -146,9 +139,5 @@ size_t CMCObjectAllocator<MT_MODE>::GetTLABMaxAllocSize()
     return 0;
 #endif
 }
-
-template class CMCObjectAllocator<MT_MODE_SINGLE>;
-template class CMCObjectAllocator<MT_MODE_MULTI>;
-template class CMCObjectAllocator<MT_MODE_TASK>;
 
 }  // namespace ark::mem

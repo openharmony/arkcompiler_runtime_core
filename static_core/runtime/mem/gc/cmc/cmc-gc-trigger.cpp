@@ -18,6 +18,7 @@
 #include "common_components/heap/allocator/allocator.h"
 #include "common_components/heap/allocator/regional_heap.h"
 #include "common_components/heap/heap.h"
+#include "runtime/mem/gc/cmc/cmc-allocator.h"
 #endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark::mem {
@@ -33,10 +34,11 @@ void GCCmcTrigger::TriggerGcIfNeeded([[maybe_unused]] GC *gc)
         if (gcFinishTime != 0 && time::GetCurrentTimeInNanos() - gcFinishTime < minIntervalNs) {
             return;
         }
-        size_t threshold = gc->GetThreshold();
+        auto *cmcAllocator = static_cast<CMCObjectAllocator *>(gc->GetObjectAllocator());
+        size_t threshold = cmcAllocator->GetHeapThreshold();
         size_t allocated = common_vm::Heap::GetHeap().GetAllocator().GetAllocatedBytes();
         if (allocated >= threshold) {
-            if (gc->ShouldRequestYoung()) {
+            if (cmcAllocator->ShouldRequestYoung()) {
                 LOG(DEBUG, GC) << "request heu gc: young " << allocated << ", threshold " << threshold;
                 auto task = MakePandaUnique<ark::GCTask>(GCTaskCause::YOUNG_GC_CAUSE);
                 gc->AddGCTask(false, std::move(task));

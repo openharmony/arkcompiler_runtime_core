@@ -21,6 +21,7 @@
 #include "common_components/heap/allocator/regional_heap.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
+#include "runtime/mem/gc/cmc/cmc-allocator.h"
 
 namespace ark::common_vm {
 
@@ -192,7 +193,9 @@ size_t PostFixHeapWorker::CollectEmptyRegions()
 {
     RegionalHeap &theAllocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     RegionManager &regionManager = theAllocator.GetRegionManager();
-    bool trackFreedObjects = Runtime::GetCurrent()->GetPandaVM()->GetGC()->NeedToTrackFreedObjects();
+    bool trackFreedObjects =
+        static_cast<mem::CMCObjectAllocator *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator())
+            ->NeedToTrackFreedObjects();
     size_t garbageSize = 0;
     size_t freedObjectBytes = 0;
     size_t freedObjectCount = 0;

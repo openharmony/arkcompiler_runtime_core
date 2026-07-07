@@ -20,6 +20,7 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/gc/gc.h"
+#include "runtime/mem/gc/cmc/cmc-allocator.h"
 
 namespace ark::common_vm {
 
@@ -77,8 +78,9 @@ bool HeuristicGCPolicy::ShouldRestrainGCInSensitive(size_t currentSize)
             if (GetRecordHeapObjectSizeBeforeSensitive() == 0) {
                 SetRecordHeapObjectSizeBeforeSensitive(currentSize);
             }
-            auto *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
-            if (gc->ShouldRequestYoung()) {
+            auto *cmcAllocator = static_cast<mem::CMCObjectAllocator *>(
+                Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
+            if (cmcAllocator->ShouldRequestYoung()) {
                 return false;
             }
             if (currentSize < (GetRecordHeapObjectSizeBeforeSensitive() + INC_OBJ_SIZE_IN_SENSITIVE)) {
