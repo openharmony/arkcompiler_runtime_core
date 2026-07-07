@@ -38,7 +38,7 @@ VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::H
     auto *ctx = imethod.GetClass()->GetLoadContext();
     auto imethodProto = imethod.GetProtoId();
     MethodInfo imethodInfo(&imethod);
-    uint32_t imethodNameHash = GetHash32String(imethodInfo.GetName().data);
+    uint32_t imethodNameHash = imethodInfo.GetNameHash();
 
     MethodInfo const *superclassResolved = nullptr;
     size_t superclassVtableIdx = 0;
@@ -125,10 +125,10 @@ VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocator>::G
     Method *inherited) const
 {
     auto idx = inherited->GetVTableIndex();
-    if (idx >= baseMethodInfoByIndex_->size()) {
+    if (idx >= baseMethodInfoByIndex_.size()) {
         return {ClassOverrideResult::Kind::NONE, 0};
     }
-    auto it = vtable_->Methods().find((*baseMethodInfoByIndex_)[idx]);
+    auto it = vtable_->Methods().find(&baseMethodInfoByIndex_[idx]);
     if (it == vtable_->Methods().end()) {
         return {ClassOverrideResult::Kind::NONE, 0};
     }
@@ -148,7 +148,7 @@ void VarianceVTableBuilder<ProtoCompatibility, OverridePred, SharedArenaAllocato
             continue;
         }
         if (!info->IsBase() || entry.GetCandidate() != nullptr) {
-            ownMethodNameHashes_->insert(GetHash32String(info->GetName().data));
+            ownMethodNameHashes_->insert(info->GetNameHash());
         }
     }
 }

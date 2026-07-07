@@ -55,6 +55,9 @@ struct ClassInfo {
     PandaUniquePtr<IMTableBuilder> imtableBuilder;
 
     Span<Field> fields;
+    Span<const Method> vmethods;
+    Span<const Method> smethods;
+    Span<Method> allMethods;  // vmethods + smethods + copiedMethods
     size_t size;
     size_t numSfields;
 };
@@ -139,15 +142,8 @@ void ClassLinker::FreeClassData(Class *classPtr)
         classPtr->SetMethods(Span<Method>(), 0, 0);
     }
     bool hasOwnItable = !classPtr->IsArrayClass();
-    auto itable = classPtr->GetITable().Get();
-    if (hasOwnItable && !itable.Empty()) {
-        for (size_t i = 0; i < itable.Size(); i++) {
-            Span<Method *> imethods = itable[i].GetMethods();
-            if (!imethods.Empty()) {
-                allocator_->Free(imethods.begin());
-            }
-        }
-        allocator_->Free(itable.begin());
+    if (hasOwnItable) {
+        ITable::Free(allocator_, classPtr->GetITable());
         classPtr->SetITable(ITable());
     }
     Span<Class *> interfaces = classPtr->GetInterfaces();
@@ -363,14 +359,6 @@ static void UpdateClassSize(ClassInfo &info)
                                         num64bitSfields, numRefSfields, numTaggedSfields);
 }
 
-void ClassLinker::FreeITableAndInterfaces(ITable itable, Span<Class *> interfaces)
-{
-    ITable::Free(allocator_, itable);
-    if (!interfaces.Empty()) {
-        allocator_->Free(interfaces.begin());
-    }
-}
-
 ClassInfo ClassLinker::CreateClassInfo(LanguageContext ctx, ClassLinkerErrorHandler *errorHandler)
 {
     ClassInfo classInfo;
@@ -418,7 +406,7 @@ static bool SetupFields(ClassInfo &info, panda_file::ClassDataAccessor *dataAcce
                              panda_file::Type::GetTypeFromFieldEncoding(fda.GetType()));
         });
     if (numFields != fieldCount) {
-        // field count mismatch, possibly bytecode file curruption or attack payload.
+        // field count mismatch, possibly bytecode file corruption or attack payload.
         allocator->Free(fields.data());
         OnError(errorHandler, ClassLinker::Error::FIELD_NOT_FOUND, "invalid field len");
         return false;
@@ -426,10 +414,53 @@ static bool SetupFields(ClassInfo &info, panda_file::ClassDataAccessor *dataAcce
     // Copy instanceFields to end of staticFields
     MemcpyUnsafe(staticFields, instanceFieldsStart, (instanceFields - instanceFieldsStart) * sizeof(Field));
     info.fields = fields;
-
     return true;
 }
 
+static void SetupAllMethods(mem::InternalAllocatorPtr allocator, ClassInfo &info)
+{
+    auto copiedMethods = info.vtableBuilder->GetCopiedMethods();
+
+    const size_t numVMethods = info.vmethods.size();
+    const size_t numSMethods = info.smethods.size();
+    const size_t numAllMethods = numVMethods + numSMethods + copiedMethods.size();
+    if (numAllMethods == 0) {
+        return;
+    }
+
+    Method *methods = allocator->AllocArray<Method>(numAllMethods);
+    info.allMethods = Span {methods, numAllMethods};
+
+    // Copy vmethods and smethods to allMethods
+    MemcpyUnsafe(methods, info.vmethods.data(), numVMethods * sizeof(Method));
+    methods += numVMethods;
+
+    MemcpyUnsafe(methods, info.smethods.data(), numSMethods * sizeof(Method));
+    methods += numSMethods;
+
+    // Initialize copied methods
+    for (auto &copiedMethod : copiedMethods) {
+        Method *method = methods++;
+        InitializeMemory(method, copiedMethod.GetMethod());
+        method->SetIsDefaultInterfaceMethod();
+        switch (copiedMethod.GetStatus()) {
+            case CopiedMethod::Status::ORDINARY:
+                break;
+            case CopiedMethod::Status::ABSTRACT:
+                method->SetCompiledEntryPoint(GetAbstractMethodStub());
+                break;
+            case CopiedMethod::Status::CONFLICT:
+                method->SetCompiledEntryPoint(GetDefaultConflictMethodStub());
+                break;
+        }
+    }
+}
+
+/**
+ * Initializes ClassInfo, creates itableBuilder, vtableBuilder, imtableBuilder, fields, methods, etc.
+ *
+ * Caller is responsible to release fields, allMethods, interfaces
+ */
 bool ClassLinker::SetupClassInfo(ClassInfo &info, panda_file::ClassDataAccessor *dataAccessor, Class *base,
                                  Span<Class *> interfaces, ClassLinkerContext *context,
                                  ClassLinkerErrorHandler *errorHandler)
@@ -442,28 +473,40 @@ bool ClassLinker::SetupClassInfo(ClassInfo &info, panda_file::ClassDataAccessor 
         return false;
     }
 
+    // Allocate temp array for vmethods and smethods.
+    if (!SetupMethods(info, dataAccessor, ctx, errorHandler)) {
+        return false;
+    }
+
     ASSERT(info.itableBuilder != nullptr);
     if (!info.itableBuilder->Build(this, base, interfaces, dataAccessor->IsInterface())) {
         return false;
     }
     ASSERT(info.vtableBuilder != nullptr);
     ASSERT(info.vtableBuilder->GetAllocator() != nullptr);
-    if (!info.vtableBuilder->Build(dataAccessor, base, info.itableBuilder->GetITable(), context)) {
-        FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
+
+    ITable itable = info.itableBuilder->GetITable();
+    if (!info.vtableBuilder->Build(dataAccessor, info.vmethods, base, itable, context)) {
         return false;
     }
-    info.imtableBuilder->Build(dataAccessor, info.itableBuilder->GetITable());
+
+    SetupAllMethods(allocator_, info);
+
+    info.imtableBuilder->Build(dataAccessor, itable);
 
     UpdateClassSize(info);
     return true;
 }
 
-bool ClassLinker::SetupClassInfo(ClassInfo &info, Span<Method> methods, Span<Field> fields, Class *base,
+bool ClassLinker::SetupClassInfo(ClassInfo &info, Span<Method> vmethods, Span<Field> fields, Class *base,
                                  Span<Class *> interfaces, bool isInterface, ClassLinkerErrorHandler *errorHandler)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*base);
 
     info = CreateClassInfo(ctx, errorHandler);
+    info.fields = fields;
+    info.vmethods = vmethods.ToConst();
+    info.allMethods = vmethods;
 
     ASSERT(info.itableBuilder != nullptr);
     if (!info.itableBuilder->Build(this, base, interfaces, isInterface)) {
@@ -471,13 +514,14 @@ bool ClassLinker::SetupClassInfo(ClassInfo &info, Span<Method> methods, Span<Fie
     }
     ASSERT(info.vtableBuilder != nullptr);
     ASSERT(info.vtableBuilder->GetAllocator() != nullptr);
-    if (!info.vtableBuilder->Build(methods, base, info.itableBuilder->GetITable(), isInterface)) {
-        FreeITableAndInterfaces(info.itableBuilder->GetITable(), interfaces);
+
+    ITable itable = info.itableBuilder->GetITable();
+    if (!info.vtableBuilder->Build(vmethods, base, itable, isInterface)) {
         return false;
     }
-    info.imtableBuilder->Build(info.itableBuilder->GetITable(), isInterface);
 
-    info.fields = fields;
+    info.imtableBuilder->Build(itable, isInterface);
+
     UpdateClassSize(info);
     return true;
 }
@@ -510,11 +554,12 @@ static void LoadMethod(Method *method, panda_file::MethodDataAccessor *methodDat
     } else {
         InitializeMemory(method, klass, &pf, methodDataAccessor->GetMethodId(), codeId.value(), accessFlags, numArgs,
                          reinterpret_cast<const uint16_t *>(pda.GetShorty().Data()));
-        method->SetCompiledEntryPoint(GetCompiledCodeToInterpreterBridge(method));
+        method->SetCompiledEntryPoint(GetCompiledCodeToInterpreterBridge());
     }
 }
 
-static void MaybeLinkMethodToAotCode(Method *method, const compiler::AotClass &aotClass, size_t methodIndex)
+static void MaybeLinkMethodToAotCode(Method *method, const compiler::AotClass &aotClass, size_t methodIndex,
+                                     panda_file::ClassDataAccessor *dataAccessor = nullptr)
 {
     ASSERT(aotClass.IsValid());
     if (method->IsIntrinsic()) {
@@ -523,89 +568,74 @@ static void MaybeLinkMethodToAotCode(Method *method, const compiler::AotClass &a
     auto entry = aotClass.FindMethodCodeEntry(methodIndex);
     if (entry != nullptr) {
         method->SetCompiledEntryPoint(entry);
+        PandaString methodName;
+        if (method->GetClass() == nullptr && dataAccessor != nullptr) {
+            methodName = PandaString(dataAccessor->DemangledName()) + method->GetFullName();
+        } else {
+            methodName = method->GetFullName();
+        }
         LOG(DEBUG, AOT) << "Found AOT entrypoint ["
                         << reinterpret_cast<const void *>(aotClass.FindMethodCodeSpan(methodIndex).data()) << ":"
                         << reinterpret_cast<const void *>(aotClass.FindMethodCodeSpan(methodIndex).end())
-                        << "] for method: " << method->GetFullName();
-
-        EVENT_AOT_ENTRYPOINT_FOUND(method->GetFullName());
+                        << "] for method: " << methodName;
+        EVENT_AOT_ENTRYPOINT_FOUND(methodName);
         ASSERT(aotClass.FindMethodHeader(methodIndex)->methodId == method->GetFileId().GetOffset());
     }
 }
 
-static void SetupCopiedMethods(Span<Method> methods, Span<const CopiedMethod> copiedMethods)
+bool ClassLinker::SetupMethods(ClassInfo &info, panda_file::ClassDataAccessor *dataAccessor, LanguageContext ctx,
+                               [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
 {
-    size_t const numMethods = methods.size() - copiedMethods.size();
-
-    for (size_t i = 0; i < copiedMethods.size(); i++) {
-        Method *method = &methods[numMethods + i];
-        InitializeMemory(method, copiedMethods[i].GetMethod());
-        method->SetIsDefaultInterfaceMethod();
-        switch (copiedMethods[i].GetStatus()) {
-            case CopiedMethod::Status::ORDINARY:
-                break;
-            case CopiedMethod::Status::ABSTRACT:
-                method->SetCompiledEntryPoint(GetAbstractMethodStub());
-                break;
-            case CopiedMethod::Status::CONFLICT:
-                method->SetCompiledEntryPoint(GetDefaultConflictMethodStub());
-                break;
-        }
-    }
-}
-
-bool ClassLinker::LoadMethods(Class *klass, ClassInfo *classInfo, panda_file::ClassDataAccessor *dataAccessor,
-                              [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
-{
-    uint32_t numMethods = dataAccessor->GetMethodsNumber();
-
-    uint32_t numVmethods = klass->GetNumVirtualMethods();
-    uint32_t numSmethods = numMethods - numVmethods;
-
-    auto copiedMethods = classInfo->vtableBuilder->GetCopiedMethods();
-    uint32_t totalNumMethods = numMethods + copiedMethods.size();
-    if (totalNumMethods == 0) {
+    size_t methodsNum = dataAccessor->GetMethodsNumber();
+    if (methodsNum == 0) {
         return true;
     }
 
-    Span<Method> methods {allocator_->AllocArray<Method>(totalNumMethods), totalNumMethods};
-
-    size_t smethodIdx = numVmethods;
-    size_t vmethodIdx = 0;
-
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*klass);
+    Method *const vMethodsStart = info.vtableBuilder->GetAllocator()->AllocArray<Method>(methodsNum);
+    Method *const sMethodsStart = info.vtableBuilder->GetAllocator()->AllocArray<Method>(methodsNum);
+    Method *vMethods = vMethodsStart;
+    Method *sMethods = sMethodsStart;
+    const auto &pf = dataAccessor->GetPandaFile();
     auto *ext = GetExtension(ctx);
     ASSERT(ext != nullptr);
 
     const compiler::AotPandaFile *aotPfile = nullptr;
     if (CanLinkAotEntrypoints()) {
-        aotPfile = aotManager_->FindPandaFile(klass->GetPandaFile()->GetFullFileName());
+        aotPfile = aotManager_->FindPandaFile(pf.GetFullFileName());
         if (aotPfile != nullptr) {
-            EVENT_AOT_LOADED_FOR_CLASS(PandaString(aotPfile->GetFileName()), PandaString(klass->GetName()));
+            EVENT_AOT_LOADED_FOR_CLASS(PandaString(aotPfile->GetFileName()),
+                                       PandaString(dataAccessor->DemangledName()));
         }
     }
-
-    compiler::AotClass aotClass =
-        (aotPfile != nullptr) ? aotPfile->GetClass(klass->GetFileId().GetOffset()) : compiler::AotClass::Invalid();
+    compiler::AotClass aotClass = (aotPfile != nullptr) ? aotPfile->GetClass(dataAccessor->GetClassId().GetOffset())
+                                                        : compiler::AotClass::Invalid();
 
     size_t methodIndex = 0;
-    dataAccessor->EnumerateMethods([klass, &smethodIdx, &vmethodIdx, &methods, aotClass, ctx, ext,
-                                    &methodIndex](panda_file::MethodDataAccessor &methodDataAccessor) {
-        Method *method = methodDataAccessor.IsStatic() ? &methods[smethodIdx++] : &methods[vmethodIdx++];
-        LoadMethod(method, &methodDataAccessor, klass, ctx, ext);
-        if (aotClass.IsValid()) {
-            MaybeLinkMethodToAotCode(method, aotClass, methodIndex);
+    dataAccessor->EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
+        if (methodIndex >= methodsNum) {
+            return;
         }
-        // Instead of checking if the method is abstract before every virtual call
-        // the special stub throwing AbstractMethodError is registered as compiled entry point.
+
+        Method *method = mda.IsStatic() ? sMethods++ : vMethods++;
+        LoadMethod(method, &mda, nullptr, ctx, ext);
+
+        if (aotClass.IsValid()) {
+            MaybeLinkMethodToAotCode(method, aotClass, methodIndex, dataAccessor);
+        }
+
         if (method->IsAbstract()) {
             method->SetCompiledEntryPoint(GetAbstractMethodStub());
         }
+
         methodIndex++;
     });
-
-    SetupCopiedMethods(methods, copiedMethods);
-    klass->SetMethods(methods, numVmethods, numSmethods);
+    if (methodIndex != methodsNum) {
+        // File corrupted
+        OnError(errorHandler, Error::METHOD_NOT_FOUND, "method count mismatch");
+        return false;
+    }
+    info.vmethods = {vMethodsStart, vMethods};
+    info.smethods = {sMethodsStart, sMethods};
     return true;
 }
 
@@ -940,17 +970,25 @@ static uint64_t GetClassUniqueHash(uint32_t pandaFileHash, uint32_t classId)
     return (static_cast<uint64_t>(pandaFileHash) << bitsToShuffle) | static_cast<uint64_t>(classId);
 }
 
-Class *ClassLinker::LoadClass(panda_file::ClassDataAccessor *classDataAccessor, const uint8_t *descriptor,
-                              Class *baseClass, Span<Class *> interfaces, ClassLinkerContext *context,
-                              ClassLinkerExtension *ext, ClassLinkerErrorHandler *errorHandler)
+static void CleanupClassInfo(mem::InternalAllocatorPtr allocator, ClassInfo &&info, Span<Class *> interfaces)
 {
-    ASSERT(context != nullptr);
-    ClassInfo classInfo {};
-    if (!SetupClassInfo(classInfo, classDataAccessor, baseClass, interfaces, context, errorHandler)) {
-        return nullptr;
+    ASSERT(allocator != nullptr);
+    if (!info.allMethods.empty()) {
+        allocator->Free(info.allMethods.data());
     }
+    if (!info.fields.empty()) {
+        allocator->Free(info.fields.data());
+    }
+    if (!interfaces.empty()) {
+        allocator->Free(interfaces.data());
+    }
+    ITable::Free(allocator, info.itableBuilder->GetITable());
+}
 
-    ASSERT(classInfo.vtableBuilder != nullptr);
+// NOLINTNEXTLINE(readability-function-size)
+static Class *CreateClass(const uint8_t *descriptor, Class *baseClass, Span<Class *> interfaces, ClassInfo &classInfo,
+                          ClassLinkerContext *context, ClassLinkerExtension *ext, uint32_t accessFlags)
+{
     auto *klass = ext->CreateClass(descriptor, classInfo.vtableBuilder->GetVTableSize(),
                                    classInfo.imtableBuilder->GetIMTSize(), classInfo.size);
 
@@ -961,32 +999,55 @@ Class *ClassLinker::LoadClass(panda_file::ClassDataAccessor *classDataAccessor, 
     klass->SetLoadContext(context);
     klass->SetBase(baseClass);
     klass->SetInterfaces(interfaces);
-    klass->SetFileId(classDataAccessor->GetClassId());
-    klass->SetPandaFile(&classDataAccessor->GetPandaFile());
-    klass->SetAccessFlags(classDataAccessor->GetAccessFlags());
-
-    auto &pf = classDataAccessor->GetPandaFile();
-    auto classId = classDataAccessor->GetClassId();
-    klass->SetClassIndex(pf.GetClassIndex(classId));
-    klass->SetMethodIndex(pf.GetMethodIndex(classId));
-    klass->SetFieldIndex(pf.GetFieldIndex(classId));
-
-    klass->SetNumVirtualMethods(classInfo.vtableBuilder->GetNumVirtualMethods());
-    klass->SetNumCopiedMethods(classInfo.vtableBuilder->GetCopiedMethods().size());
+    klass->SetAccessFlags(accessFlags);
 
     for (Field &field : classInfo.fields) {
         field.SetClass(klass);
     }
     klass->SetFields(classInfo.fields, classInfo.numSfields);
 
+    for (auto &method : classInfo.allMethods.SubSpan(0, classInfo.vmethods.size() + classInfo.smethods.size())) {
+        method.SetClass(klass);
+    }
+    klass->SetMethods(classInfo.allMethods, classInfo.vmethods.size(), classInfo.smethods.size());
+
+    return klass;
+}
+
+Class *ClassLinker::LoadClass(panda_file::ClassDataAccessor *classDataAccessor, const uint8_t *descriptor,
+                              Class *baseClass, Span<Class *> interfaces, ClassLinkerContext *context,
+                              ClassLinkerExtension *ext, ClassLinkerErrorHandler *errorHandler)
+{
+    ASSERT(context != nullptr);
+    ClassInfo classInfo {};
+    if (!SetupClassInfo(classInfo, classDataAccessor, baseClass, interfaces, context, errorHandler)) {
+        CleanupClassInfo(allocator_, std::move(classInfo), interfaces);
+        return nullptr;
+    }
+
+    ASSERT(classInfo.vtableBuilder != nullptr);
+
+    uint32_t accessFlags = classDataAccessor->GetAccessFlags();
+    auto *klass = CreateClass(descriptor, baseClass, interfaces, classInfo, context, ext, accessFlags);
+
+    if (UNLIKELY(klass == nullptr)) {
+        CleanupClassInfo(allocator_, std::move(classInfo), interfaces);
+        return nullptr;
+    }
+
+    auto &pf = classDataAccessor->GetPandaFile();
+    auto classId = classDataAccessor->GetClassId();
+    klass->SetFileId(classId);
+    klass->SetPandaFile(&pf);
+    klass->SetClassIndex(pf.GetClassIndex(classId));
+    klass->SetMethodIndex(pf.GetMethodIndex(classId));
+    klass->SetFieldIndex(pf.GetFieldIndex(classId));
+
     auto const onFail = [this, descriptor, klass](std::string_view msg) {
         FreeClass(klass);
         LOG(ERROR, CLASS_LINKER) << msg << " '" << descriptor << "'";
         return nullptr;
     };
-    if (!LoadMethods(klass, &classInfo, classDataAccessor, errorHandler)) {
-        return onFail("Cannot load methods of class");
-    }
     if (!LinkMethods(klass, &classInfo, errorHandler)) {
         return onFail("Cannot link methods of class");
     }
@@ -1179,7 +1240,6 @@ bool ClassLinker::LinkEntitiesAndInitClass(Class *klass, ClassInfo *classInfo, C
 
     if (!ext->InitializeClass(klass)) {
         LOG(ERROR, CLASS_LINKER) << "Language specific initialization for class '" << descriptor << "' failed";
-        FreeClass(klass);
         return false;
     }
 
@@ -1187,40 +1247,22 @@ bool ClassLinker::LinkEntitiesAndInitClass(Class *klass, ClassInfo *classInfo, C
 }
 
 // CC-OFFNXT(huge_method) solid logic
-Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFlags, Span<Method> methods,
-                                   Span<Field> fields, Class *baseClass, Span<Class *> interfaces,
-                                   ClassLinkerContext *context, ClassLinkerExtension *ext, ClassInfo classInfo)
+Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFlags, Class *baseClass,
+                                   Span<Class *> interfaces, ClassLinkerContext *context, ClassLinkerExtension *ext,
+                                   ClassInfo classInfo)
 {
+    // SetupClassInfo MUST have been called
     ASSERT(classInfo.vtableBuilder != nullptr);
-    auto *klass = ext->CreateClass(descriptor, classInfo.vtableBuilder->GetVTableSize(),
-                                   classInfo.imtableBuilder->GetIMTSize(), classInfo.size);
+    auto *klass = CreateClass(descriptor, baseClass, interfaces, classInfo, context, ext, accessFlags);
 
     if (UNLIKELY(klass == nullptr)) {
+        CleanupClassInfo(allocator_, std::move(classInfo), interfaces);
         return nullptr;
-    }
-
-    klass->SetLoadContext(context);
-    klass->SetBase(baseClass);
-    klass->SetInterfaces(interfaces);
-    klass->SetAccessFlags(accessFlags);
-
-    klass->SetNumVirtualMethods(classInfo.vtableBuilder->GetNumVirtualMethods());
-    klass->SetNumCopiedMethods(classInfo.vtableBuilder->GetCopiedMethods().size());
-
-    size_t numSmethods = methods.size() - klass->GetNumVirtualMethods();
-    klass->SetMethods(methods, klass->GetNumVirtualMethods(), numSmethods);
-    klass->SetFields(fields, classInfo.numSfields);
-
-    for (auto &method : methods) {
-        method.SetClass(klass);
-    }
-
-    for (auto &field : fields) {
-        field.SetClass(klass);
     }
 
     klass->CalcHaveNoRefsInParents();
     if (UNLIKELY(!LinkEntitiesAndInitClass(klass, &classInfo, ext, descriptor))) {
+        FreeClass(klass);
         return nullptr;
     }
 
@@ -1246,7 +1288,7 @@ Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFla
 }
 
 Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool needCopyDescriptor, uint32_t accessFlags,
-                               Span<Method> methods, Span<Field> fields, Class *baseClass, Span<Class *> interfaces,
+                               Span<Method> vmethods, Span<Field> fields, Class *baseClass, Span<Class *> interfaces,
                                ClassLinkerContext *context, bool isInterface)
 {
     ASSERT(context != nullptr);
@@ -1260,12 +1302,12 @@ Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool needCopyDescripto
     ASSERT(ext != nullptr);
 
     ClassInfo classInfo {};
-    if (!SetupClassInfo(classInfo, methods, fields, baseClass, interfaces, isInterface, ext->GetErrorHandler())) {
+    if (!SetupClassInfo(classInfo, vmethods, fields, baseClass, interfaces, isInterface, ext->GetErrorHandler())) {
+        CleanupClassInfo(allocator_, std::move(classInfo), interfaces);
         return nullptr;
     }
 
-    return BuildClassImpl(descriptor, accessFlags, methods, fields, baseClass, interfaces, context, ext,
-                          std::move(classInfo));
+    return BuildClassImpl(descriptor, accessFlags, baseClass, interfaces, context, ext, std::move(classInfo));
 }
 
 class ClassLinker::InterfaceProxyBuilder final {
@@ -1274,140 +1316,95 @@ public:
     NO_COPY_SEMANTIC(InterfaceProxyBuilder);
 
     explicit InterfaceProxyBuilder(ClassLinkerExtension *ext, mem::InternalAllocatorPtr allocator)
-        : ext_(ext), allocator_(allocator), tempProxyClass_(nullptr, ClassDeleter(ext))
+        : ext_(ext), allocator_(allocator)
     {
     }
 
     ~InterfaceProxyBuilder()
     {
-        if (UNLIKELY(needReleaseItable_)) {
-            ITable::Free(allocator_, itable_);
-        }
-        if (UNLIKELY(needReleaseProxyMethods_)) {
-            allocator_->Delete(proxyMethods_.Data());
+        if (tempProxyClass_ != nullptr) {
+            ext_->FreeClass(tempProxyClass_);
         }
     }
 
     Class *Build(LanguageContext ctx, ClassInfo classInfo, const uint8_t *descriptor, uint32_t accessFlags,
-                 Span<Field> fields, Class *baseClass, Span<Class *> interfaces, ClassLinkerContext *context,
+                 Class *baseClass, Span<Class *> interfaces, ClassLinkerContext *context,
                  ClassLinkerErrorHandler *errorHandler)
     {
         ClassLinker *linker = ext_->GetClassLinker();
 
-        bool buildItable = !classInfo.itableBuilder->Build(linker, baseClass, interfaces, false);
-        itable_ = classInfo.itableBuilder->GetITable();
+        do {
+#define CHECK_OK(T)                        \
+    if UNLIKELY (!(T))                     \
+    /* CC-OFFNXT(G.PRE.05) function gen */ \
+    break
 
-        if (UNLIKELY(buildItable)) {
-            return nullptr;
-        }
+            // build itable
+            CHECK_OK(classInfo.itableBuilder->Build(linker, baseClass, interfaces, false));
 
-        // Since the creation of a target proxy class requires already built methods,
-        // but the building of methods requires an owner class to be set,
-        // it is necessary to create a temporary class with the same access flags and loading context
-        // as the target proxy will have.
-        if (UNLIKELY(!AllocateTemporaryProxyClass(descriptor, context, accessFlags))) {
-            return nullptr;
-        }
-        if (UNLIKELY(!CollectMethodsFromItable(itable_))) {
-            return nullptr;
-        }
-        if (UNLIKELY(!FilterMethods(ctx.CreateVTableBuilder(errorHandler), baseClass))) {
-            return nullptr;
-        }
-        auto proxyMethodsOpt = AllocateProxyMethods();
-        if (UNLIKELY(!proxyMethodsOpt.has_value())) {
-            return nullptr;
-        }
-        proxyMethods_ = proxyMethodsOpt.value();
-        if (UNLIKELY(!classInfo.vtableBuilder->Build(proxyMethods_, baseClass, itable_, false))) {
-            return nullptr;
-        }
-        classInfo.imtableBuilder->Build(itable_, false);
+            // Since the creation of a target proxy class requires already built methods,
+            // but the building of methods requires an owner class to be set,
+            // it is necessary to create a temporary class with the same access flags and loading context
+            // as the target proxy will have.
+            CHECK_OK(AllocateTemporaryProxyClass(descriptor, context, accessFlags));
 
-        classInfo.fields = fields;
-        UpdateClassSize(classInfo);
+            ITable itable = classInfo.itableBuilder->GetITable();
+            auto proxyMethodsOpt = AllocateProxyMethods(ctx.CreateVTableBuilder(errorHandler), baseClass, itable);
+            CHECK_OK(proxyMethodsOpt.has_value());
 
-        auto *klass = linker->BuildClassImpl(descriptor, accessFlags, proxyMethods_, fields, baseClass, interfaces,
-                                             context, ext_, std::move(classInfo));
-        if (UNLIKELY(klass == nullptr)) {
-            return nullptr;
-        }
+            Span<Method> proxyMethods = proxyMethodsOpt.value();
+            classInfo.vmethods = proxyMethods.ToConst();
+            classInfo.allMethods = proxyMethods;
 
-        needReleaseItable_ = false;
-        needReleaseProxyMethods_ = false;
-        return klass;
+            CHECK_OK(classInfo.vtableBuilder->Build(proxyMethods, baseClass, itable, false));
+            classInfo.imtableBuilder->Build(itable, false);
+
+            UpdateClassSize(classInfo);
+
+            return linker->BuildClassImpl(descriptor, accessFlags, baseClass, interfaces, context, ext_,
+                                          std::move(classInfo));
+#undef CHECK_OK
+        } while (0);
+
+        // fail
+        CleanupClassInfo(allocator_, std::move(classInfo), interfaces);
+        return nullptr;
     }
 
 private:
     bool AllocateTemporaryProxyClass(const uint8_t *descriptor, ClassLinkerContext *context, uint32_t accessFlags)
     {
-        tempProxyClass_ =
-            PandaUniquePtr<Class, ClassDeleter>(ext_->CreateClass(descriptor, 0, 0, sizeof(Class)), ClassDeleter(ext_));
-        if (UNLIKELY(tempProxyClass_ == nullptr)) {
+        Class *klass = ext_->CreateClass(descriptor, 0, 0, sizeof(Class));
+        if UNLIKELY (klass == nullptr) {
             return false;
         }
-        tempProxyClass_->SetLoadContext(context);
-        tempProxyClass_->SetAccessFlags(accessFlags);
+        klass->SetLoadContext(context);
+        klass->SetAccessFlags(accessFlags);
+        tempProxyClass_ = klass;
         return true;
     }
 
-    bool CollectMethodsFromItable(ITable itable)
+    std::optional<Span<Method>> AllocateProxyMethods(PandaUniquePtr<VTableBuilder> vtableBuilder, Class *baseClass,
+                                                     ITable itable)
     {
         auto methods = ext_->BuildProxyClassMethodsSpan(itable);
-        if (UNLIKELY(!methods.has_value())) {
-            return false;
+        if UNLIKELY (!methods.has_value()) {
+            return std::nullopt;
         }
 
-        allInterfacesMethods_ = std::move(*methods);
-        return true;
-    }
-
-    bool FilterMethods(PandaUniquePtr<VTableBuilder> vtableBuilder, Class *baseClass)
-    {
         PandaVector<Method *> candidates(allocator_->Adapter());
-        if (!vtableBuilder->FilterProxyClassMethods(Span<Method *>(allInterfacesMethods_), &candidates, baseClass)) {
-            return false;
-        }
-        filteredMethods_ = std::move(candidates);
-        return true;
-    }
-
-    std::optional<Span<Method>> AllocateProxyMethods()
-    {
-        return ext_->GenerateProxyClassMethods(tempProxyClass_.get(), Span<Method *>(filteredMethods_));
-    }
-
-private:
-    class ClassDeleter {
-    public:
-        explicit ClassDeleter(ClassLinkerExtension *ext) : ext_(ext) {}
-
-        void operator()(Class *tempClassPtr) const
-        {
-            if (tempClassPtr != nullptr) {
-                ext_->FreeClass(tempClassPtr);
-            }
+        if (!vtableBuilder->FilterProxyClassMethods(Span(*methods), &candidates, baseClass)) {
+            return std::nullopt;
         }
 
-    private:
-        ClassLinkerExtension *ext_ {nullptr};
-    };
+        // allocate proxy methods
+        return ext_->GenerateProxyClassMethods(tempProxyClass_, Span(candidates));
+    }
 
 private:
     ClassLinkerExtension *ext_ {nullptr};
     mem::InternalAllocatorPtr allocator_;
-
-    ITable itable_;
-    bool needReleaseItable_ {true};
-
-    PandaVector<Method *> allInterfacesMethods_;
-
-    PandaVector<Method *> filteredMethods_;
-
-    Span<Method> proxyMethods_;
-    bool needReleaseProxyMethods_ {true};
-
-    PandaUniquePtr<Class, ClassDeleter> tempProxyClass_;
+    Class *tempProxyClass_ {nullptr};
 };
 
 Class *ClassLinker::BuildProxyClass(const uint8_t *descriptor, bool needCopyDescriptor, uint32_t accessFlags,
@@ -1426,9 +1423,10 @@ Class *ClassLinker::BuildProxyClass(const uint8_t *descriptor, bool needCopyDesc
 
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*baseClass);
     ClassInfo classInfo = CreateClassInfo(ctx, errorHandler);
+    classInfo.fields = fields;
 
     InterfaceProxyBuilder builder(ext, allocator_);
-    return builder.Build(ctx, std::move(classInfo), descriptor, accessFlags, fields, baseClass, interfaces, context,
+    return builder.Build(ctx, std::move(classInfo), descriptor, accessFlags, baseClass, interfaces, context,
                          errorHandler);
 }
 

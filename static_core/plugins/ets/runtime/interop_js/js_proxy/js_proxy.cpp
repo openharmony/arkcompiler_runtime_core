@@ -215,12 +215,11 @@ JSProxy *JSProxy::CreateProxy(const uint8_t *descriptor, Class *baseClass, Span<
         interfacesSpan[i] = interfaces[i];
     }
 
+    // If BuildClass fails, proxyMethods and interfacesSpan will be released by ClassLinker.
     Class *proxyCls = classLinker->BuildClass(descriptor, true, accessFlags, proxyMethods, fields, baseClass,
                                               interfacesSpan, context, false);
     if (UNLIKELY(proxyCls == nullptr)) {
         ASSERT(EtsExecutionContext::GetCurrent()->GetMT()->HasPendingException());
-        classLinker->GetAllocator()->Delete<Method>(proxyMethods.Data());
-        classLinker->GetAllocator()->Delete<Class *>(interfacesSpan.Data());
         return nullptr;
     }
     proxyCls->SetState(Class::State::INITIALIZING);
