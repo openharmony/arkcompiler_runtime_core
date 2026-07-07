@@ -26,35 +26,43 @@
 
 namespace panda::disasm {
 
-void Disassembler::Disassemble(const std::string &filename_in, const bool quiet, const bool skip_strings)
+bool Disassembler::Disassemble(const std::string &filenameIn, const bool quiet, const bool skipStrings)
 {
-    auto file_new = panda_file::File::Open(filename_in);
+    auto file_new = panda_file::File::Open(filenameIn);
+    if (file_new == nullptr) {
+        file_.reset();
+        LOG(ERROR, DISASSEMBLER) << "> unable to open specified pandafile: <" << filenameIn << ">";
+        return false;
+    }
+
     file_.swap(file_new);
 
-    if (file_ != nullptr) {
-        prog_ = pandasm::Program {};
+    prog_ = pandasm::Program {};
 
-        record_name_to_id_.clear();
-        method_name_to_id_.clear();
-        string_offset_to_name_.clear();
-        skip_strings_ = skip_strings;
-        quiet_ = quiet;
+    record_name_to_id_.clear();
+    method_name_to_id_.clear();
+    string_offset_to_name_.clear();
+    skip_strings_ = skipStrings;
+    quiet_ = quiet;
 
-        prog_info_ = ProgInfo {};
+    prog_info_ = ProgInfo {};
 
-        prog_ann_ = ProgAnnotations {};
+    prog_ann_ = ProgAnnotations {};
 
-        GetRecords();
-        GetLiteralArrays();
+    GetRecords();
+    GetLiteralArrays();
 
-        GetLanguageSpecificMetadata();
-    } else {
-        LOG(ERROR, DISASSEMBLER) << "> unable to open specified pandafile: <" << filename_in << ">";
-    }
+    GetLanguageSpecificMetadata();
+    return true;
 }
 
 void Disassembler::CollectInfo()
 {
+    if (file_ == nullptr) {
+        LOG(ERROR, DISASSEMBLER) << "> unable to collect program info: pandafile is not opened";
+        return;
+    }
+
     LOG(DEBUG, DISASSEMBLER) << "\n[getting program info]\n";
 
     debug_info_extractor_ = std::make_unique<panda_file::DebugInfoExtractor>(file_.get());
@@ -753,8 +761,8 @@ void Disassembler::GetParams(pandasm::Function *method, const panda_file::File::
         return;
     }
 
-    for (uint8_t i = 0; i < params_num; i++) {
-        method->params.push_back(pandasm::Function::Parameter(pandasm::Type("any", 0), method->language));
+    for (uint32_t i = 0; i < params_num; i++) {
+        method->params.emplace_back(pandasm::Type("any", 0), method->language);
     }
 }
 
@@ -1659,52 +1667,6 @@ void Disassembler::Serialize(const pandasm::Record &record, std::ostream &os, bo
     os << "}\n\n";
 }
 
-void Disassembler::DumpLiteralArray(const pandasm::LiteralArray &literal_array, std::stringstream &ss) const
-{
-    ss << "[";
-    bool firstItem = true;
-    for (const auto &item : literal_array.literals_) {
-        if (!firstItem) {
-            ss << ", ";
-        } else {
-            firstItem = false;
-        }
-
-        switch (item.tag_) {
-            case panda_file::LiteralTag::DOUBLE: {
-                ss << std::get<double>(item.value_);
-                break;
-            }
-            case panda_file::LiteralTag::BOOL: {
-                ss << std::get<bool>(item.value_);
-                break;
-            }
-            case panda_file::LiteralTag::STRING: {
-                ss << "\"" << std::get<std::string>(item.value_) << "\"";
-                break;
-            }
-            case panda_file::LiteralTag::LITERALARRAY: {
-                std::string offset_str = std::get<std::string>(item.value_);
-                uint32_t lit_array_fffset = std::stoi(offset_str, nullptr, 16);
-                pandasm::LiteralArray lit_array;
-                GetLiteralArrayByOffset(&lit_array, panda_file::File::EntityId(lit_array_fffset));
-                DumpLiteralArray(lit_array, ss);
-                break;
-            }
-            case panda_file::LiteralTag::BUILTINTYPEINDEX: {
-                // By convention, BUILTINTYPEINDEX is used to store type of empty arrays,
-                // therefore it has no value
-                break;
-            }
-            default: {
-                UNREACHABLE();
-                break;
-            }
-        }
-    }
-    ss << "]";
-}
-
 void Disassembler::SerializeFieldValue(const pandasm::Field &f, std::stringstream &ss) const
 {
     if (f.type.GetId() == panda_file::Type::TypeId::U32) {
@@ -1718,12 +1680,11 @@ void Disassembler::SerializeFieldValue(const pandasm::Field &f, std::stringstrea
     } else if (f.type.GetId() == panda_file::Type::TypeId::REFERENCE && f.type.GetName() == "panda.String") {
         ss << " = \"" << static_cast<std::string>(f.metadata->GetValue().value().GetValue<std::string>()) << "\"";
     } else if (f.type.GetRank() > 0) {
-        uint32_t lit_array_fffset =
+        uint32_t litArrayOffset =
             std::stoi(static_cast<std::string>(f.metadata->GetValue().value().GetValue<std::string>()));
-        pandasm::LiteralArray lit_array;
-        GetLiteralArrayByOffset(&lit_array, panda_file::File::EntityId(lit_array_fffset));
+        std::unordered_set<uint32_t> visiting;
         ss << " = ";
-        DumpLiteralArray(lit_array, ss);
+        DumpLiteralArrayByOffset(litArrayOffset, ss, visiting);
     }
 }
 
@@ -1769,51 +1730,6 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
     }
 }
 
-std::string Disassembler::getLiteralArrayTypeFromValue(const pandasm::LiteralArray &literal_array) const
-{
-    [[maybe_unused]] auto size = literal_array.literals_.size();
-    ASSERT(size > 0);
-    switch (literal_array.literals_[0].tag_) {
-        case panda_file::LiteralTag::DOUBLE: {
-            return "f64[]";
-        }
-        case panda_file::LiteralTag::BOOL: {
-            return "u1[]";
-        }
-        case panda_file::LiteralTag::STRING: {
-            return "panda.String[]";
-        }
-        case panda_file::LiteralTag::LITERALARRAY: {
-            std::string offset_str = std::get<std::string>(literal_array.literals_[0].value_);
-            uint32_t lit_array_fffset = std::stoi(offset_str, nullptr, 16);
-            pandasm::LiteralArray lit_array;
-            GetLiteralArrayByOffset(&lit_array, panda_file::File::EntityId(lit_array_fffset));
-            return getLiteralArrayTypeFromValue(lit_array) + "[]";
-        }
-        case panda_file::LiteralTag::BUILTINTYPEINDEX: {
-            uint8_t typeIndex = std::get<uint8_t>(literal_array.literals_[0].value_);
-            static constexpr uint8_t EMPTY_LITERAL_ARRAY_WITH_NUMBER_TYPE = 0;
-            static constexpr uint8_t EMPTY_LITERAL_ARRAY_WITH_BOOLEAN_TYPE = 1;
-            static constexpr uint8_t EMPTY_LITERAL_ARRAY_WITH_STRING_TYPE = 2;
-            switch (typeIndex) {
-                case EMPTY_LITERAL_ARRAY_WITH_NUMBER_TYPE:
-                    return "f64[]";
-                case EMPTY_LITERAL_ARRAY_WITH_BOOLEAN_TYPE:
-                    return "u1[]";
-                case EMPTY_LITERAL_ARRAY_WITH_STRING_TYPE:
-                    return "panda.String[]";
-                default:
-                    UNREACHABLE();
-                    break;
-            }
-        }
-        default: {
-            UNREACHABLE();
-            break;
-        }
-    }
-}
-
 void Disassembler::SerializeAnnotationElement(const std::vector<pandasm::AnnotationElement> &elements,
                                               std::stringstream &ss, uint32_t idx) const
 {
@@ -1840,12 +1756,11 @@ void Disassembler::SerializeAnnotationElement(const std::vector<pandasm::Annotat
                << " " << elem.GetName() << " { \"";
             ss << elem.GetValue()->GetAsScalar()->GetValue<std::string>() << "\" }";
         } else if (type == pandasm::Value::Type::LITERALARRAY) {
-            uint32_t lit_array_fffset = std::stoi(elem.GetValue()->GetAsScalar()->GetValue<std::string>());
-            pandasm::LiteralArray lit_array;
-            GetLiteralArrayByOffset(&lit_array, panda_file::File::EntityId(lit_array_fffset));
-            std::string typeName = getLiteralArrayTypeFromValue(lit_array);
+            uint32_t litArrayOffset = std::stoi(elem.GetValue()->GetAsScalar()->GetValue<std::string>());
+            std::unordered_set<uint32_t> visiting;
+            std::string typeName = getLiteralArrayTypeByOffset(litArrayOffset, visiting);
             ss << "\t" << typeName << " " << elem.GetName() << " { ";
-            DumpLiteralArray(lit_array, ss);
+            DumpLiteralArrayByOffset(litArrayOffset, ss, visiting);
             ss << " }";
         } else {
             UNREACHABLE();
@@ -1934,8 +1849,8 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
     if (method.params.size() > 0) {
         os << method.params[0].type.GetPandasmName() << " a0";
 
-        for (uint8_t i = 1; i < method.params.size(); i++) {
-            os << ", " << method.params[i].type.GetPandasmName() << " a" << (size_t)i;
+        for (size_t i = 1; i < method.params.size(); i++) {
+            os << ", " << method.params[i].type.GetPandasmName() << " a" << i;
         }
     }
     os << ")";

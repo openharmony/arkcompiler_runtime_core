@@ -23,6 +23,7 @@ arkdisassembler_sources = [
   "$target_gen_dir/opcode_translator.cpp",
   "$target_gen_dir/type_to_pandasm_type.cpp",
   "disassembler.cpp",
+  "disassembler_literal_array.cpp",
 ]
 
 arkdisassembler_configs = [

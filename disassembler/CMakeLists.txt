@@ -39,6 +39,7 @@ panda_isa_gen(
 
 add_library(arkdisassembler ${PANDA_DEFAULT_LIB_TYPE}
     disassembler.cpp
+    disassembler_literal_array.cpp
     opcode_translator.cpp
     bc_ins_to_pandasm_ins.cpp
     get_ins_info.cpp

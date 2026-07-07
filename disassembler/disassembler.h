@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 
 #include "accumulators.h"
 
@@ -56,7 +57,7 @@ public:
     Disassembler() = default;
     ~Disassembler() = default;
 
-    void Disassemble(const std::string &filename_in, const bool quiet = false, const bool skip_strings = false);
+    bool Disassemble(const std::string &filenameIn, const bool quiet = false, const bool skipStrings = false);
     void CollectInfo();
     void Serialize(std::ostream &os, bool add_separators = false, bool print_information = false) const;
 
@@ -193,6 +194,14 @@ private:
 
     std::string getLiteralArrayTypeFromValue(const pandasm::LiteralArray &literal_array) const;
     void DumpLiteralArray(const pandasm::LiteralArray &literal_array, std::stringstream &ss) const;
+
+    std::string getLiteralArrayTypeContent(const pandasm::LiteralArray &literal_array,
+                                           std::unordered_set<uint32_t> &visiting) const;
+    std::string getLiteralArrayTypeByOffset(uint32_t offset, std::unordered_set<uint32_t> &visiting) const;
+    void DumpLiteralArrayContent(const pandasm::LiteralArray &literal_array, std::stringstream &ss,
+                                 std::unordered_set<uint32_t> &visiting) const;
+    void DumpLiteralArrayByOffset(uint32_t offset, std::stringstream &ss,
+                                  std::unordered_set<uint32_t> &visiting) const;
     void SerializeFieldValue(const pandasm::Field &f, std::stringstream &ss) const;
 
     std::unique_ptr<const panda_file::File> file_;
