@@ -4,12 +4,6 @@ std/core/MathClz32Test.ets
 #24357 Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.ets
 
-#34658
-ets_func_tests/spec/03.types/References_Types/Bigint/bigint-arithmetic-sub-2-operands-negative-number-2.ets
-#33832
-#33585
-#34645
-ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_PopTest.ets
 #34920
 ets_func_tests/std/core/get_hash.ets
 #34681
@@ -17,7 +11,7 @@ ets_func_tests/std/core/IntlLocaleThreadSafetyTest.ets
 #34646
 std/core/std_core_typedarrays_methods__Float64Array_001.ets
 
-#34658
+#34645
 ets_func_tests/algorithms/PrimesTest.ets
 ets_func_tests/regression/12961_loop_and_lambda_050.ets
 ets_func_tests/regression/12961_loop_and_lambda_051.ets
@@ -42,6 +36,7 @@ ets_func_tests/spec/03.types/References_Types/Bigint/bigint-arithmetic-minus.ets
 ets_func_tests/spec/03.types/References_Types/Bigint/bigint-arithmetic-mul-2-operands-union.ets
 ets_func_tests/spec/03.types/References_Types/Bigint/bigint-arithmetic-mul-4-operands.ets
 ets_func_tests/spec/03.types/References_Types/Bigint/bigint-arithmetic-sub-2-union.ets
+ets_func_tests/spec/03.types/References_Types/Bigint/bigint-arithmetic-sub-2-operands-negative-number-2.ets
 ets_func_tests/spec/03.types/References_Types/Bigint/bigint-arithmetic-sub-3-operands.ets
 ets_func_tests/spec/03.types/References_Types/Bigint/bigint-arithmetic-underscore-literals.ets
 ets_func_tests/spec/03.types/References_Types/Bigint/bigint-bitwise-shift-left-3.ets
@@ -96,6 +91,7 @@ ets_func_tests/std/concurrency/workerlocal_test.ets
 ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_AddTest.ets
 ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_GetEndTest.ets
 ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_PollTest.ets
+ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_PopTest.ets
 ets_func_tests/std/containers/ArrayBufferIsViewTest.ets
 ets_func_tests/std/containers/ArrayReduceRightTest.ets
 ets_func_tests/std/containers/blocking_queue.ets
