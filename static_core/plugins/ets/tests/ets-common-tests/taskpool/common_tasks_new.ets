@@ -72,7 +72,7 @@ async function taskpoolScalingShouldNotOverExpand(): Promise<void> {
     }
     arktest.assertEQ(CoroutineExtras.getTaskPoolWorkersNum(), limit);
     flag.set(true);
-    Promise.all(promises);
+    await Promise.all(promises);
 }
 
 async function cancelInSuccessCallback() {
@@ -132,10 +132,12 @@ async function getcurrentTask() {
         await delay()
     }
 
+    let promises: Promise<Any>[] = [];
     // two t2 tasks can ensure that there is at least one t2'sworker assigned to t1' worker
     for (let i = 0; i < 2; ++i) {
         let t2: taskpool.Task = new taskpool.Task(fun2)
-        taskpool.execute(t2);
+        let p2 = taskpool.execute(t2);
+        promises.push(p2);
     }
 
     try {
@@ -143,6 +145,7 @@ async function getcurrentTask() {
     } catch(e) {
         arktest.assertTrue(false, e.message)
     }
+    await Promise.all(promises);
 }
 
 async function testTaskInfoDuration() {
@@ -154,7 +157,7 @@ async function testTaskInfoDuration() {
         event2.resolve(undefined);
         await event1.promise;
     });
-    taskpool.execute(task);
+    let p = taskpool.execute(task);
     await event2.promise;
     let info = taskpool.getTaskPoolInfo();
     arktest.assertNE(info.taskInfos.length, 0);
@@ -168,6 +171,7 @@ async function testTaskInfoDuration() {
     }
     event1.resolve(undefined);
     arktest.assertEQ(found, true);
+    await p;
 }
 
 async function onExecutionFailedtestAsyncfun() {
@@ -181,9 +185,10 @@ async function onExecutionFailedtestAsyncfun() {
        catchSuccess++;
        event.resolve(undefined);
     });
-    taskpool.execute(task);
+    let p = taskpool.execute(task);
     await event.promise;
     arktest.assertEQ(catchSuccess, 1);
+    await p.catch((e: Error) => {});
 }
 
 async function onExecutionFailedtestmultAsyncfun(){
@@ -211,13 +216,16 @@ async function onExecutionFailedtestmultAsyncfun(){
        catchSuccess++; 
        event3.resolve(undefined);
     });
-    taskpool.execute(task1);
-    taskpool.execute(task2);
-    taskpool.execute(task3);
+    let p1 = taskpool.execute(task1);
+    let p2 = taskpool.execute(task2);
+    let p3 = taskpool.execute(task3);
     await event1.promise;
     await event2.promise;
     await event3.promise;
     arktest.assertEQ(catchSuccess,3);
+    await p1.catch((e: Error) => {});
+    await p2.catch((e: Error) => {});
+    await p3.catch((e: Error) => {});
 }
 
 async function onFailCallbackExceptionTest() {
@@ -354,17 +362,19 @@ async function onEnqueuedNestedExecuteTest() {
     let failed: boolean = false;
     let event = new PromiseWithResolvers<void>();
     let outerTask = new taskpool.Task(returnAbc);
+    let promises: Promise<Any>[] = [];
 
     outerTask.onEnqueued(() => {
         callbackCalled = true;
         let innerTask = new taskpool.Task(returnAbc);
-        taskpool.execute(innerTask).then((res: Any) => {
+        let p = taskpool.execute(innerTask).then((res: Any) => {
             innerResult = res as string;
             event.resolve(undefined);
         }).catch((e: Error) => {
             failed = true;
             event.resolve(undefined);
         });
+        promises.push(p);
     });
 
     let outerResult = await taskpool.execute(outerTask);
@@ -373,6 +383,7 @@ async function onEnqueuedNestedExecuteTest() {
     await event.promise;
     arktest.assertEQ(failed, false);
     arktest.assertEQ(innerResult, 'abc');
+    await Promise.all(promises);
 }
 
 async function onEnqueuedNestedRunnerExecuteTest() {
@@ -909,6 +920,7 @@ async function cancelGroupSettlesWhileQueued(): Promise<void> {
     let releaseFlag = new AtomicFlag(false);
     let blockersStarted = new AtomicInt(0);
     let workersFull = new PromiseWithResolvers<void>();
+    let promises: Promise<Any>[] = [];
 
     try {
         CoroutineExtras.setTaskPoolWorkersLimit(workerLimit);
@@ -917,26 +929,28 @@ async function cancelGroupSettlesWhileQueued(): Promise<void> {
             let blocker = new taskpool.Task(
                 cancelGroupCpuBlockTask, releaseFlag, blockersStarted, workerLimit, workersFull
             );
-            taskpool.execute(blocker, { priority: taskpool.Priority.HIGH });
+            let p = taskpool.execute(blocker, { priority: taskpool.Priority.HIGH });
+            promises.push(p);
         }
         await workersFull.promise;
-
         for (let i: int = 0; i < floodCount; i++) {
             let floodTask = new taskpool.Task(
                 cancelGroupCpuBlockTask, releaseFlag, blockersStarted, workerLimit, workersFull
             );
-            taskpool.execute(floodTask, { priority: taskpool.Priority.HIGH });
+            let p = taskpool.execute(floodTask, { priority: taskpool.Priority.HIGH });
+            promises.push(p);
         }
 
         let settled = false;
         let group = buildCancelGroupSettleGroup();
-        taskpool.execute(group, { priority: taskpool.Priority.HIGH, timeout: 0 })
+        let p = taskpool.execute(group, { priority: taskpool.Priority.HIGH, timeout: 0 })
             .then(() => {
                 settled = true;
             })
             .catch(() => {
                 settled = true;
             });
+        promises.push(p.catch((e: Error) => {}));
         taskpool.cancel(group);
         await yieldSchedulerRounds(yieldRounds);
         arktest.assertTrue(
@@ -945,6 +959,7 @@ async function cancelGroupSettlesWhileQueued(): Promise<void> {
         );
     } finally {
         releaseFlag.set(true);
+        await Promise.all(promises);
     }
 }
 
@@ -1015,6 +1030,24 @@ async function cancelPeriodicTaskByIdAfterExecution(): Promise<void> {
     await verifyCancelPeriodicTaskAfterExecution(true);
 }
 
+async function testNoEAWorker() {
+    // --taskpool-mode=launch
+    if (CoroutineExtras.isTaskpoolUsingLaunchMode()) {
+        return;
+    }
+    // --taskpool-mode=eaworker
+
+    let event = new PromiseWithResolvers<void>();
+    let p = taskpool.execute(() => {
+        arktest.expectError(() => {
+            EAWorker.current();
+        }, new Error('EAWorker:: Cannot get current worker in taskpool'));
+        event.resolve(undefined);
+    });
+    await event.promise;
+    await p;
+}
+
 async function main(): Promise<int> {
     let commonTaskSuite = new arktest.ArkTestsuite('taskpool.CommonTask');
     let commonTaskSuiteDisabled = new arktest.ArkTestsuite('taskpool.CommonTask.DISABLED');
@@ -1070,6 +1103,7 @@ async function main(): Promise<int> {
     commonTaskSuite.addAsyncTest('cancelPeriodicTaskStopsExecution', cancelPeriodicTaskStopsExecution);
     commonTaskSuite.addAsyncTest('cancelPeriodicTaskByTaskAfterExecution', cancelPeriodicTaskByTaskAfterExecution);
     commonTaskSuite.addAsyncTest('cancelPeriodicTaskByIdAfterExecution', cancelPeriodicTaskByIdAfterExecution);
+    commonTaskSuite.addAsyncTest('testNoEAWorker', testNoEAWorker);
 
     let res = await commonTaskSuite.runAsync();
     

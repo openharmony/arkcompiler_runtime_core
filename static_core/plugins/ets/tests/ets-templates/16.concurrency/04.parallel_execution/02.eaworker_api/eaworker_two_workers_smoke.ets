@@ -25,7 +25,17 @@ expected_out:
 tags: [no-warmup]
 ---*/
 
-async function startTest() {
+class ConsoleLogger {
+    public log(s: string) {
+        this.m.lock()
+        console.log(s)
+        this.m.unlock()
+    }
+
+    private m = new Mutex();
+}
+
+function startTest() {
   let rwLock = new RWLock()
   let readLock = rwLock.readLock()
   let writeLock = rwLock.writeLock()
@@ -34,6 +44,8 @@ async function startTest() {
   let writeRun = false
   let i = 0
 
+  let logger = new ConsoleLogger()
+
   const ea1 = new EAWorker()
   ea1.start()
 
@@ -41,21 +53,18 @@ async function startTest() {
   ea2.start()
 
   let job1 = ea1.run<undefined>(() => {
-    (async () => {
-      console.log("S1=" + readRun) // To ensure the async function has started.
+      logger.log("S1=" + readRun) // To ensure the async function has started.
       readLock.lock()
       readRun = true
       i++
       arktest.assertEQ(1, i)
       i--
       readLock.unlock()
-      console.log("F1=" + readRun) // To ensure the async function has completed.
-    })().awaitSync()
+      logger.log("F1=" + readRun) // To ensure the async function has completed.
   })
 
   let job2 = ea2.run<undefined>(() => {
-    (async () => {
-      console.log("S2=" + writeRun) // To ensure the async function has started.
+      logger.log("S2=" + writeRun) // To ensure the async function has started.
       writeLock.lock()
       writeRun = true
       i++
@@ -63,14 +72,13 @@ async function startTest() {
       i--
       Coroutine.Schedule()
       writeLock.unlock()
-      console.log("F2=" + writeRun) // To ensure the async function has completed.
-    })().awaitSync()
+      logger.log("F2=" + writeRun) // To ensure the async function has completed.
   })
 
   job1.Await()
   job2.Await()
 
-  console.log("M=" + readRun + "-" + writeRun)
+  logger.log("M=" + readRun + "-" + writeRun)
 
   arktest.assertEQ(readRun, true)
   arktest.assertEQ(writeRun, true)

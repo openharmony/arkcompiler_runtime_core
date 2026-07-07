@@ -364,6 +364,7 @@ function messageSendToTargetConcurrentTest() {
     eaw.join();
 }
 
+// For failing tests please fix them or move to `eaworker_message_ignored.ets`
 function main() {
     const suite = new arktest.ArkTestsuite('EAWorker Message Test Suite');
     suite.addTest('testNamedEAWorker', testNamedEAWorker);

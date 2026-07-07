@@ -94,7 +94,6 @@ ets_func_tests/spec/17.Experimental_Features/17.3.Indexable_Types/idx-s02-0001.e
 ets_func_tests/spec/17.Experimental_Features/17.9.Default_and_Static_Interface_Methods/17.9.1.Default_Method_Declarations/default_method_0003.ets
 ets_func_tests/spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-11.ets
 ets_func_tests/spec/17.Experimental_Features/Iterable_Types/for-of-s01-string-03.ets
-ets_func_tests/std/concurrency/eaworker_message.ets
 ets_func_tests/std/concurrency/workerlocal_test.ets
 ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_AddTest.ets
 ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_GetEndTest.ets
