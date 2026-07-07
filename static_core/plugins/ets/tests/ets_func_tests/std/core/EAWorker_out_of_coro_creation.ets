@@ -14,18 +14,18 @@
  */
 
 
-async function out_of_coro_test() {
-    const coro_to_create = 2000;
+async function outOfCoroTest() {
+    const coroToCreate = 2000;
     let arr = new Int32Array(new ArrayBuffer(1024))
 
-    let jobs = new Array<Job<void>>();
+    let jobs: Job<void>[] = [];
 
     arktest.expectError(() => {
         let wait_func = async (arr: Int32Array) => { await Atomics.asyncWait(arr, 0, 0); }
         let mainWaitJob = launch() { wait_func(arr) }
         let awaitIt = async () => { mainWaitJob.Await() }
 
-        for (let i = 1; i < coro_to_create; ++ i) {
+        for (let i = 1; i < coroToCreate; ++ i) {
             jobs.push(launch(awaitIt));
         }
     }, new CoroutinesLimitExceedError('Unable to create a new coroutine: reached the limit for the number of existing coroutines.'));
@@ -35,6 +35,25 @@ async function out_of_coro_test() {
 
     let eaw2 = new EAWorker();
     eaw2.start();
+    await eaw2.run<void>(() => {});
+
+    let awaitIt = (): void => { blocker.promise.awaitSync(); }
+
+    try {
+        for (let i = 0; i < coroToCreate; ++i) {
+            jobs.push(launch(awaitIt));
+        }
+    } catch (e) {
+        errorCaught = true;
+        arktest.assertTrue(e instanceof CoroutinesLimitExceedError);
+        arktest.assertEQ(
+            e.toString(),
+            'CoroutinesLimitExceedError: Unable to create a new coroutine: reached the limit for the number of existing coroutines.'
+        );
+    }
+    arktest.assertTrue(errorCaught, 'Coroutine limit error was expected');
+
+    blocker.resolve(undefined);
 
     Atomics.store(arr, 0, 1);
     Atomics.notify(arr, 0);
@@ -49,7 +68,7 @@ async function out_of_coro_test() {
 }
 
 async function main(): Promise<int> {
-    let testsuite = new arktest.ArkTestsuite("EAWorker");
-    testsuite.addAsyncTest("out_of_coro_test", out_of_coro_test)
+    let testsuite = new arktest.ArkTestsuite('EAWorker');
+    testsuite.addAsyncTest('outOfCoroTest', outOfCoroTest)
     return await testsuite.runAsync();
 }

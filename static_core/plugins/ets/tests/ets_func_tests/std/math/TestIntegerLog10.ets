@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,31 +15,32 @@
 
 function main(): int {
     let failures: int = 0;
-    failures += test(good(1, 0), "Log10 from int 1");
-    failures += test(good(10, 1), "Log10 from int 10");
-    failures += test(good(100, 2), "Log10 from int 100");
-    failures += test(good(1000, 3), "Log10 from int 1000");
-    failures += test(good(10000, 4), "Log10 from int 10000");
-    failures += test(good(100000, 5), "Log10 from int 100000");
-    failures += test(good(1000000, 6), "Log10 from int 1000000");
-    failures += test(good(10000000, 7), "Log10 from int 10000000");
-    failures += test(good(100000000, 8), "Log10 from int 100000000");
-    failures += test(good(1000000000, 9), "Log10 from int 1000000000");
+    failures += test(good(1, 0), 'Log10 from int 1');
+    failures += test(good(10, 1), 'Log10 from int 10');
+    failures += test(good(100, 2), 'Log10 from int 100');
+    failures += test(good(1000, 3), 'Log10 from int 1000');
+    failures += test(good(10000, 4), 'Log10 from int 10000');
+    failures += test(good(100000, 5), 'Log10 from int 100000');
+    failures += test(good(1000000, 6), 'Log10 from int 1000000');
+    failures += test(good(10000000, 7), 'Log10 from int 10000000');
+    failures += test(good(100000000, 8), 'Log10 from int 100000000');
+    failures += test(good(1000000000, 9), 'Log10 from int 1000000000');
     return failures
 }
 
 function test(result: int, message: String ): int {
-    if(result == 0) {
+    if (result == 0) {
       return 0;      
     }
-    console.println("FAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('FAILED: ' + message);
     return 1;
 }
 
 function bad():int {
     try {
         log10(-1)
-    } catch(e) {
+    } catch (e) {
         return 0;   
     }
     return 1;
@@ -47,9 +48,11 @@ function bad():int {
 
 function good(v: int, expected: int):int {
     try {
-        if(log10(v) == expected) return 0;
+        if (log10(v) == expected) {
+            return 0;
+        }
         return 1;
-    } catch(e) {
+    } catch (e) {
         return 1;
     }
 }

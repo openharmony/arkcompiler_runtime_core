@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,29 +17,27 @@ let flag: int = 0;
 const arr: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 function main() {
-    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueConstructorTest");
+    let arrayBlockingQueueTestsuite = new arktest.ArkTestsuite('ArrayBlockingQueueConstructorTest');
 
-    ArrayBlockingQueueTestsuite.addTest("ConstructorTestInt001", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('ConstructorTestInt001', () => {
         let queueIntA: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         arktest.assertEQ(queueIntA.isEmpty(), true);
         arktest.assertEQ(queueIntA.size, 0);
     });
-    ArrayBlockingQueueTestsuite.addTest("ConstructorTestInt002", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('ConstructorTestInt002', () => {
         let array = Array.from<number>(arr);
-        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(array);
-        arktest.assertEQ(ConcurrentSetTest.size, 10);
+        let concurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(array);
+        arktest.assertEQ(concurrentSetTest.size, 10);
         flag = 0;
-        ConcurrentSetTest.forEach((val: number) => {
+        concurrentSetTest.forEach((val: number) => {
             arktest.assertEQ(val, flag++);
         });
-        let iter = ConcurrentSetTest.keys();
+        let iter = concurrentSetTest.keys();
         let queueIntA: containers.ArrayBlockingQueue<number> = new containers.ArrayBlockingQueue<number>(200, iter);
         for (let i = 0; i < 10; i++) {
             arktest.assertEQ(queueIntA.pop(), i);
         }
     });
 
-    ArrayBlockingQueueTestsuite.run();
+    arrayBlockingQueueTestsuite.run();
 }

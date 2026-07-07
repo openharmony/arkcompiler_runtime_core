@@ -14,7 +14,7 @@
  */
 
 function getTestName(arrayType: string): string {
-    return arrayType + " meta $_set/$_get";
+    return arrayType + ' meta $_set/$_get';
 }
 
 function testUint8ClampedArrayMetaSetGetClamp(): void {
@@ -33,8 +33,8 @@ function testUint8ArrayMetaSetGetWrap(): void {
     arr.$_set(1, -1);
     arr.$_set(2, 256);
     arktest.assertEQ(255, arr.$_get(0).toDouble());
-    arktest.assertEQ(255, arr.$_get(1).toDouble());  // -1 mod 256
-    arktest.assertEQ(0, arr.$_get(2).toDouble());    // 256 mod 256
+    arktest.assertEQ(255, arr.$_get(1).toDouble()); // -1 mod 256
+    arktest.assertEQ(0, arr.$_get(2).toDouble()); // 256 mod 256
 }
 
 function testUint16ArrayMetaSetGetWrap(): void {
@@ -44,7 +44,7 @@ function testUint16ArrayMetaSetGetWrap(): void {
     arr.$_set(2, 65536);
     arktest.assertEQ(65535, arr.$_get(0).toDouble());
     arktest.assertEQ(65535, arr.$_get(1).toDouble()); // -1 mod 65536
-    arktest.assertEQ(0, arr.$_get(2).toDouble());     // 65536 mod 65536
+    arktest.assertEQ(0, arr.$_get(2).toDouble()); // 65536 mod 65536
 }
 
 function testUint32ArrayMetaSetGetWrap(): void {
@@ -54,7 +54,7 @@ function testUint32ArrayMetaSetGetWrap(): void {
     arr.$_set(2, 4294967296);
     arktest.assertEQ(4294967295, arr.$_get(0).toDouble());
     arktest.assertEQ(4294967295, arr.$_get(1).toDouble()); // -1 mod 2^32
-    arktest.assertEQ(0, arr.$_get(2).toDouble());          // 2^32 mod 2^32
+    arktest.assertEQ(0, arr.$_get(2).toDouble()); // 2^32 mod 2^32
 }
 
 function testBigUint64ArrayMetaSetGetWrap(): void {
@@ -66,15 +66,15 @@ function testBigUint64ArrayMetaSetGetWrap(): void {
     arr.$_set(2, wrap);
     arktest.assertEQ(max, arr.$_get(0));
     arktest.assertEQ(max, arr.$_get(1)); // -1 mod 2^64
-    arktest.assertEQ(0n, arr.$_get(2));  // wrap mod 2^64
+    arktest.assertEQ(0n, arr.$_get(2)); // wrap mod 2^64
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("TypedUArrayMetaSetGet");
-    suite.addTest(getTestName("Uint8ClampedArray"), testUint8ClampedArrayMetaSetGetClamp);
-    suite.addTest(getTestName("Uint8Array"), testUint8ArrayMetaSetGetWrap);
-    suite.addTest(getTestName("Uint16Array"), testUint16ArrayMetaSetGetWrap);
-    suite.addTest(getTestName("Uint32Array"), testUint32ArrayMetaSetGetWrap);
-    suite.addTest(getTestName("BigUint64Array"), testBigUint64ArrayMetaSetGetWrap);
+    const suite = new arktest.ArkTestsuite('TypedUArrayMetaSetGet');
+    suite.addTest(getTestName('Uint8ClampedArray'), testUint8ClampedArrayMetaSetGetClamp);
+    suite.addTest(getTestName('Uint8Array'), testUint8ArrayMetaSetGetWrap);
+    suite.addTest(getTestName('Uint16Array'), testUint16ArrayMetaSetGetWrap);
+    suite.addTest(getTestName('Uint32Array'), testUint32ArrayMetaSetGetWrap);
+    suite.addTest(getTestName('BigUint64Array'), testBigUint64ArrayMetaSetGetWrap);
     return suite.run();
 }

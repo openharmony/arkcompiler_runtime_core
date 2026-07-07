@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
  ---*/
 
 class A {
- n: int
+ public n: int
  constructor(n: int){
   this.n = n
  }
@@ -29,5 +29,5 @@ class A {
 function main(): void {
   let a = new A(1)
   let b = $$a 
-  arktest.assertEQ(b.n,  1)
+  arktest.assertEQ(b.n, 1)
 }

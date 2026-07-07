@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
+import { launch } from 'std/concurrency'
 
 const elementsNum: int = 100;
 let testArrayInt: int[] = Array.create<int>(elementsNum, 0);
@@ -43,7 +43,7 @@ function pusherInt() {
 function pusherObj() {
     for (let i = 0; i < elementsNum; i++) {
         wait();
-        let el = new Object();
+        let el: Object = {};
         testArrayObj[i] = el;
         queueObj.push(el);
     }
@@ -53,11 +53,11 @@ function pusherStr() {
     for (let i = 0; i < elementsNum; i++) {
         wait();
         if (i == 0) {
-            let el = String("abacaba");
+            let el = String('abacaba');
             testArrayStr[i] = el;
             queueStr.push(el);
         } else {
-            let el = testArrayStr[i - 1] + "aba";
+            let el = testArrayStr[i - 1] + 'aba';
             testArrayStr[i] = el;
             queueStr.push(el);
         }

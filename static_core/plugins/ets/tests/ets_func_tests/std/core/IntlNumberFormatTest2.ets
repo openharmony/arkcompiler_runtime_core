@@ -17,11 +17,11 @@ const success: int = 0;
 const fail: int = 1;
 
 function main(): int {
-    arktest.assertEQ( languageCodes.length, countryCodes.length,  'Error! Size of languageCodes should be the same as countryCodes')
+    arktest.assertEQ( languageCodes.length, countryCodes.length, 'Error! Size of languageCodes should be the same as countryCodes')
 
     let failures: int = 0;
-    failures += check(FormatNumber(), 'Intl NumberFormat.format +-numbers and -Inf');
-    failures += check(FormatNumberUnion(), 'Intl NumberFormat.format +-numbers and -Inf. Called union-type arg');
+    failures += check(formatNumber(), 'Intl NumberFormat.format +-numbers and -Inf');
+    failures += check(formatNumberUnion(), 'Intl NumberFormat.format +-numbers and -Inf. Called union-type arg');
     return failures;
 }
 
@@ -29,12 +29,13 @@ function check(result: number, message: string): int {
     if (result == 0) {
         return success;
     }
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.println('\nFAILED: ' + message);
     return fail;
 }
 
-const languageCodes: string[] = [ 'en', 'fr', 'ca', 'el', 'no', 'it', 'zh', 'ja', 'de', 'ru'];
-const countryCodes: string[] = [ 'US', 'FR', 'ES', 'GR', 'NO',  '',   'CN', 'JP', 'GE', 'RU'];
+const languageCodes: string[] = ['en', 'fr', 'ca', 'el', 'no', 'it', 'zh', 'ja', 'de', 'ru'];
+const countryCodes: string[] = ['US', 'FR', 'ES', 'GR', 'NO', '', 'CN', 'JP', 'GE', 'RU'];
 const numberValues: Number[] = [-1234.5, 1234.5, -Infinity];
 const bigIntValues = Array.of<BigInt>(-123456789000123456789000n, 123456789000123456789000n);
 const EN: int = 0;
@@ -49,10 +50,13 @@ const GE: int = 8;
 const RU: int = 9;
 const IR: int = 10;
 
-function FormatNumber(): int {
-    const funcName = 'FormatNumber';
+function formatNumber(): int {
+    const funcName = 'formatNumber';
     const values = numberValues;
-    const exp = Array.of<Array<string>>(negativeNumbersAsStrings(), positiveNumbersAsStrings(), negativeInfsAsStrings());
+    const exp = Array.of<Array<string>>(
+        negativeNumbersAsStrings(),
+        positiveNumbersAsStrings(),
+        negativeInfsAsStrings());
     for (let i = 0; i < languageCodes.length; i++) {
         let locale: string = languageCodes[i];
         if (countryCodes[i] != '') {
@@ -60,7 +64,7 @@ function FormatNumber(): int {
         }
         for (let j = 0; j < values.length; j++) {
             const expected = exp[j][i];
-            if (CheckFormatNumber(locale, funcName, values[j], expected) == fail) {
+            if (checkFormatNumber(locale, funcName, values[j], expected) == fail) {
                 return fail;
             }
         }
@@ -68,10 +72,13 @@ function FormatNumber(): int {
     return success;
 }
 
-function FormatNumberUnion(): int {
-    const funcName = 'FormatNumberUnion';
+function formatNumberUnion(): int {
+    const funcName = 'formatNumberUnion';
     const values = numberValues;
-    const exp = Array.of<Array<string>>(negativeNumbersAsStrings(), positiveNumbersAsStrings(), negativeInfsAsStrings());
+    const exp = Array.of<Array<string>>(
+        negativeNumbersAsStrings(),
+        positiveNumbersAsStrings(),
+        negativeInfsAsStrings());
     for (let i = 0; i < languageCodes.length; i++) {
         let locale: string = languageCodes[i];
         if (countryCodes[i] != '') {
@@ -79,7 +86,7 @@ function FormatNumberUnion(): int {
         }
         for (let j = 0; j < values.length; j++) {
             const expected = exp[j][i];
-            if (CheckFormatUnion(locale, funcName, values[j], expected) == fail) {
+            if (checkFormatUnion(locale, funcName, values[j], expected) == fail) {
                 return fail;
             }
         }
@@ -115,7 +122,7 @@ function negativeNumbersAsStrings(): Array<string> {
     expected[CH] = expected[EN];
     expected[JP] = expected[CH];
     expected[GE] = expected[ES];
-    expected[RU] = String.fromCharCode(45, 49, 160, 50 ,51 ,52, 44, 53);
+    expected[RU] = String.fromCharCode(45, 49, 160, 50, 51, 52, 44, 53);
     return expected;
 }
 
@@ -150,11 +157,12 @@ function separatorsBetweenNegAndPosAsStrings(): Array<string> {
     return separators;
 }
 
-function CheckFormatNumber(locale: string, funcName: string, value: number, expected: string): int {
+function checkFormatNumber(locale: string, funcName: string, value: number, expected: string): int {
     let nf: Intl.NumberFormat;
     try {
         nf = new Intl.NumberFormat(locale);
-    } catch(e) {
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Crashed call \"nf = new Intl.NumberFormat(' + locale + ')\"');
         return fail;
     }
@@ -162,32 +170,44 @@ function CheckFormatNumber(locale: string, funcName: string, value: number, expe
     let str: string;
     try {
         str = nf.format(value);
-    } catch(e) {
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Crashed call \"nf.formatRange\". ' + locale );
         return fail;
     }
 
-    if (str == "") {
+    if (str == '') {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Got empty str result. ' + locale);
         return fail;
     }
 
     if (expected != str) {
-        let arr = new Array<Number>(str.length, (index: int) => str.codePointAt(index)!);
+        let arr: Number[] = [];
+        for (let index: int = 0; index < str.length; index++) {
+            arr.push(str.codePointAt(index)!);
+        }
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Got: \"' + str + '\" Codes: ' + arr.join(','));
-        arr = new Array<Number>(expected.length, (index: int) => expected.codePointAt(index)!);
+        arr = [];
+        for (let index: int = 0; index < expected.length; index++) {
+            arr.push(expected.codePointAt(index)!);
+        }
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Exp: Codes: ' + arr.join(','));
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Detected on ' + locale);
         return fail;
     }
     return success;
 }
 
-function CheckFormatUnion(locale: string, funcName: string, value: number | bigint, expected: string): int {
+function checkFormatUnion(locale: string, funcName: string, value: number | bigint, expected: string): int {
     let nf: Intl.NumberFormat;
     try {
         nf = new Intl.NumberFormat(locale);
-    } catch(e) {
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Crashed call \"nf = new Intl.NumberFormat(' + locale + ')\"');
         return fail;
     }
@@ -195,21 +215,32 @@ function CheckFormatUnion(locale: string, funcName: string, value: number | bigi
     let str: string;
     try {
         str = nf.format(value);
-    } catch(e) {
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Crashed call \"nf.formatRange\". ' + locale );
         return fail;
     }
 
     if (str == '') {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Got empty str result. ' + locale);
         return fail;
     }
 
     if (expected != str) {
-        let arr = new Array<Number>(str.length, (index: int) => str.codePointAt(index)!);
+        let arr: Number[] = [];
+        for (let index: int = 0; index < str.length; index++) {
+            arr.push(str.codePointAt(index)!);
+        }
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Got: \"' + str + '\" Codes: ' + arr.join(','));
-        arr = new Array<Number>(expected.length, (index: int) => expected.codePointAt(index)!);
+        arr = [];
+        for (let index: int = 0; index < expected.length; index++) {
+            arr.push(expected.codePointAt(index)!);
+        }
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Exp: Codes: ' + arr.join(','));
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Detected on ' + locale);
         return fail;
     }

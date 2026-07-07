@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,20 +54,21 @@ function stringGetTest5() {
 }
 
 function stringGetTest6(): void {
-    const str: string = "Aαあ😀🌍";
+    const str: string = 'Aαあ😀🌍';
 
     arktest.assertEQ(str.length, 7);
     arktest.assertEQ(str[0], 'A');
     arktest.assertEQ(str[1], 'α');
     arktest.assertEQ(str[2], 'あ');
-    arktest.assertEQ(str[3]+str[4], '😀');
-    arktest.assertEQ(str.slice(5,7), '🌍');
+    arktest.assertEQ(str[3] + str[4], '😀');
+    arktest.assertEQ(str.slice(5, 7), '🌍');
 }
 
 function stringGetTest7() {
     let str: string = 'abcd'
     let errorFlag = 0;
     try {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(str[-1]);
     } catch (e) {
         if (e instanceof StringIndexOutOfBoundsError) {
@@ -79,6 +80,7 @@ function stringGetTest7() {
     arktest.assertEQ(1, errorFlag);
 
     try {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(str[4]);
     } catch (e) {
         if (e instanceof StringIndexOutOfBoundsError) {

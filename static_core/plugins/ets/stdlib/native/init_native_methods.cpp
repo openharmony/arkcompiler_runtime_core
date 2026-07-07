@@ -14,9 +14,9 @@
  */
 
 #include "plugins/ets/stdlib/native/init_native_methods.h"
-#include "plugins/ets/stdlib/native/core/Process.h"
-#include "plugins/ets/stdlib/native/core/regexp/RegExp.h"
-#include "plugins/ets/stdlib/native/core/Intl.h"
+#include "plugins/ets/stdlib/native/core/process.h"
+#include "plugins/ets/stdlib/native/core/regexp/regexp.h"
+#include "plugins/ets/stdlib/native/core/intl.h"
 #include "plugins/ets/stdlib/native/core/stdlib_ani_helpers.h"
 
 namespace ark::ets::stdlib {

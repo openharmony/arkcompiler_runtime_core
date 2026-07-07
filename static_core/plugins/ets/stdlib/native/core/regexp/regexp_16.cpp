@@ -149,9 +149,7 @@ Pcre2Obj RegExp16::CreatePcre2Object(const uint16_t *pattern, uint32_t flags, ui
 }
 
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
-bool RegExp16::CompileAndTest(const uint16_t *pattern, int patternLen, uint32_t compileFlags, uint32_t extraFlags,
-                              const uint16_t *input, int inputLen, int startOffset, uint32_t matchFlags,
-                              int32_t &endIndex)
+bool RegExp16::CompileAndTest(const RegExp16CompileAndTestData &data, int32_t &endIndex)
 {
     int errorNumber;
     PCRE2_SIZE errorOffset;
@@ -159,9 +157,9 @@ bool RegExp16::CompileAndTest(const uint16_t *pattern, int patternLen, uint32_t 
     if (compileContext == nullptr) {
         return false;
     }
-    pcre2_set_compile_extra_options(compileContext, extraFlags | EXTRA_FLAGS_MASK);
-    auto *code = pcre2_compile(reinterpret_cast<PCRE2_SPTR>(pattern), patternLen, compileFlags, &errorNumber,
-                               &errorOffset, compileContext);
+    pcre2_set_compile_extra_options(compileContext, data.extraFlags | EXTRA_FLAGS_MASK);
+    auto *code = pcre2_compile(reinterpret_cast<PCRE2_SPTR>(data.pattern), data.patternLen, data.compileFlags,
+                               &errorNumber, &errorOffset, compileContext);
     if (code == nullptr) {
         return false;
     }
@@ -174,7 +172,8 @@ bool RegExp16::CompileAndTest(const uint16_t *pattern, int patternLen, uint32_t 
         return false;
     }
     MatchDataScope16 matchDataScope(matchDataHandle.tls, matchData, matchDataHandle.usePrealloc);
-    const auto resultCount = pcre2_match(code, input, inputLen, startOffset, matchFlags, matchData, nullptr);
+    const auto resultCount =
+        pcre2_match(code, data.input, data.inputLen, data.startOffset, data.matchFlags, matchData, nullptr);
     if (resultCount < 0) {
         return false;
     }

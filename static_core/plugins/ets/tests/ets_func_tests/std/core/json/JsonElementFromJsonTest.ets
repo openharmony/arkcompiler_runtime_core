@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-import { jsonx } from "std/core"
+import { jsonx } from 'std/core'
 
 function main() {
-	const suite = new arktest.ArkTestsuite("jsonx.fromJson")
+	const suite = new arktest.ArkTestsuite('jsonx.fromJson')
 
-	suite.addTest("Test fromJson", testFromJson)
+	suite.addTest('Test fromJson', testFromJson)
 }
 
 function testFromJson() {
 	let jsonStr = `
 		{
-			"foo": 42,
-			"bar": "myBar",
-			"t2": {
-				"newName": false
+			'foo': 42,
+			'bar': 'myBar',
+			't2': {
+				'newName': false
 			}
 		}
 	`
@@ -35,34 +35,34 @@ function testFromJson() {
 	let t1 = new T1
 	t1.fromJSON(parsed)
 	arktest.assertEQ(t1.foo, 42)
-	arktest.assertEQ(t1.bar, "myBar")
+	arktest.assertEQ(t1.bar, 'myBar')
 	arktest.assertFalse(t1.t2.biz)
 }
 
 class T2 implements jsonx.JsonElementDeserializable {
-	biz: boolean
+	public biz: boolean
 
 	fromJSON(jsonElem: jsonx.JsonElement) {
-		this.biz = jsonElem.getBoolean("newName")
+		this.biz = jsonElem.getBoolean('newName')
 	}
 }
 
 class T1 implements jsonx.JsonElementDeserializable {
-	foo: int
-	bar: string
-	t2: T2
+	public foo: int
+	public bar: string
+	public t2: T2
 
 	constructor() {
 		this.foo = 1
-		this.bar = "bar"
+		this.bar = 'bar'
 		this.t2 = new T2
 	}
 
 	fromJSON(jsonElem: jsonx.JsonElement) {
-		this.foo = jsonElem.getInteger("foo") 
-		this.bar = jsonElem.getString("bar")
+		this.foo = jsonElem.getInteger('foo') 
+		this.bar = jsonElem.getString('bar')
 		let myT2 = new T2
-		myT2.fromJSON(jsonElem.getElement("t2"))
+		myT2.fromJSON(jsonElem.getElement('t2'))
 		this.t2 = myT2
 	}
 }

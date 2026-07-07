@@ -49,6 +49,7 @@ function check(result: int, message: string): int {
     if (result == 0) {
         return success
     }
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.println('\nFAILED: ' + message)
     return fail
 }
@@ -57,8 +58,7 @@ function testDefaultCollator() : int {
     const standardCollator = new Intl.Collator()
     if (standardCollator.resolvedOptions().locale == 'ru-RU') {
         arktest.assertEQ(standardCollator.compare('Дом', 'дом'), 1)
-    }
-    else {
+    } else {
         arktest.assertEQ(standardCollator.compare('House', 'house'), 1)
     }
     let options = standardCollator.resolvedOptions()
@@ -80,7 +80,7 @@ function testAccents(collator : Intl.Collator, expected : int) {
     let input3 = 'CARAÁÁÁÁÁCTER IS PERSONALITY CANA PESO HABIA'
     let processed3 = 'CARAAAAAACTER IS PERSONALITY CANA PESO HABIA'
     arktest.assertEQ(collator.compare(input3, processed3), expected)
-    arktest.assertEQ(collator.compare('á','áu'), -1)
+    arktest.assertEQ(collator.compare('á', 'áu'), -1)
 }
 
 function containsRuLocale(collator : Intl.Collator) : boolean {
@@ -92,8 +92,7 @@ function testSensivity() : int {
         const collator = new Intl.Collator(RU_RU, {sensitivity: 'base'} as Intl.CollatorOptions)
         if (containsRuLocale(collator)) {
             arktest.assertEQ(collator.compare('Дом', 'дом'), 0)
-        }
-        else {
+        } else {
             arktest.assertEQ(collator.compare('House', 'house'), 0)
         }
         arktest.assertEQ(collator.compare('House', 'house'), 0)
@@ -104,8 +103,7 @@ function testSensivity() : int {
         const collator = new Intl.Collator(RU_RU, {sensitivity: 'accent'} as Intl.CollatorOptions)
         if (containsRuLocale(collator)) {
             arktest.assertEQ(collator.compare('Дом', 'дом'), 0)
-        }
-        else {
+        } else {
             arktest.assertEQ(collator.compare('House', 'house'), 0)
         }
         arktest.assertNE(collator.compare('efw', 'hgfcjg'), 0)
@@ -115,8 +113,7 @@ function testSensivity() : int {
         const collator = new Intl.Collator(RU_RU, {sensitivity: 'case'} as Intl.CollatorOptions)
         if (containsRuLocale(collator)) {
             arktest.assertEQ(collator.compare('Дом', 'дом'), 1)
-        }
-        else {
+        } else {
             arktest.assertEQ(collator.compare('House', 'house'), 1)
         }
         arktest.assertNE(collator.compare('efw', 'hgfcjg'), 0)
@@ -126,8 +123,7 @@ function testSensivity() : int {
         const collator = new Intl.Collator(RU_RU, {sensitivity: 'variant'} as Intl.CollatorOptions)
         if (containsRuLocale(collator)) {
             arktest.assertEQ(collator.compare('Дом', 'дом'), 1)
-        }
-        else {
+        } else {
             arktest.assertEQ(collator.compare('House', 'house'), 1)
         }
         arktest.assertNE(collator.compare('efw', 'hgfcjg'), 0)
@@ -150,7 +146,7 @@ function testPunctuation() : int {
 }
 
 function testNumeric() : int {
-    const collator = new Intl.Collator(RU_RU, {sensitivity: 'base', numeric: true}  as Intl.CollatorOptions)
+    const collator = new Intl.Collator(RU_RU, {sensitivity: 'base', numeric: true} as Intl.CollatorOptions)
     const standardCollator = new Intl.Collator(RU_RU, {sensitivity: 'base', numeric: false} as Intl.CollatorOptions)
     arktest.assertEQ(collator.compare('3', '14'), -1)
     arktest.assertEQ(collator.compare('2', '15'), -1)
@@ -191,8 +187,7 @@ function testNumeric() : int {
 
     if (containsRuLocale(collator)) {
         arktest.assertEQ(collator.compare('Дом', 'дом'), 0)
-    }
-    else {
+    } else {
         arktest.assertEQ(collator.compare('House', 'house'), 0)
     }
     return success
@@ -203,8 +198,7 @@ function testCaseFirst() : int {
         const collator = new Intl.Collator(RU_RU, {caseFirst: 'upper'} as Intl.CollatorOptions)
         if (containsRuLocale(collator)) {
             arktest.assertEQ(collator.compare('Дом', 'дом'), -1)
-        }
-        else {
+        } else {
             arktest.assertEQ(collator.compare('House', 'house'), -1)
         }
     }
@@ -212,8 +206,7 @@ function testCaseFirst() : int {
         const collator = new Intl.Collator(RU_RU, {caseFirst: 'false'} as Intl.CollatorOptions)
         if (containsRuLocale(collator)) {
             arktest.assertEQ(collator.compare('Дом', 'дом'), 1)
-        }
-        else {
+        } else {
             arktest.assertEQ(collator.compare('House', 'house'), 1)
         }
     }
@@ -226,8 +219,7 @@ function testCaseFirst() : int {
             arktest.assertEQ(collator.compare('дщооом', 'дЩооом'), -1)
             arktest.assertEQ(collator.compare('дооооМ', 'доооом'), 1)
             arktest.assertEQ(collator.compare('доооом', 'доооом'), 0)
-        }
-        else {
+        } else {
             arktest.assertEQ(collator.compare('House', 'house'), 1)
             arktest.assertEQ(collator.compare('hOuse', 'house'), 1)
             arktest.assertEQ(collator.compare('hxouse', 'hXouse'), -1)
@@ -263,15 +255,14 @@ function testCompareStrings() : int {
     return success
 }
 
-function testSupportedLocalesOf() : int  {
+function testSupportedLocalesOf() : int {
     let supportedLocales : string[] = Intl.Collator.supportedLocalesOf(localeList)
     arktest.assertTrue(supportedLocales.toString().includes(RU_RU))
 
     return success
 }
 
-function testSetOptions()
-{
+function testSetOptions() {
     {
         const collator = new Intl.Collator(EN_US, {ignorePunctuation: true} as Intl.CollatorOptions)
         arktest.assertTrue(collator.resolvedOptions().ignorePunctuation)
@@ -323,8 +314,7 @@ function testUsage() : int {
             const collator = new Intl.Collator(EN_US, options)
             if (containsRuLocale(collator)) {
                 arktest.assertEQ(collator.compare('дщооом', 'дЩооом'), -1)
-            }
-            else {
+            } else {
                 arktest.assertEQ(collator.compare('hxouse', 'hXouse'), -1)
             }
         }
@@ -333,14 +323,13 @@ function testUsage() : int {
             const collator = new Intl.Collator(EN_US, options)
             if (containsRuLocale(collator)) {
                 arktest.assertEQ(collator.compare('дщооом', 'дЩооом'), 1)
-            }
-            else {
+            } else {
                 arktest.assertEQ(collator.compare('hxouse', 'hXouse'), 1)
             }
         }
     }
     {
-        let options = {sensitivity: 'base', numeric: true}  as Intl.CollatorOptions
+        let options = {sensitivity: 'base', numeric: true} as Intl.CollatorOptions
         {
             const collator = new Intl.Collator(RU_RU, options)
             arktest.assertEQ(collator.compare('3', '14'), -1);
@@ -357,8 +346,7 @@ function testUsage() : int {
             const collator = new Intl.Collator(RU_RU, options)
             if (containsRuLocale(collator)) {
                 arktest.assertEQ(collator.compare('дом', 'Дом'), -1)
-            }
-            else {
+            } else {
                 arktest.assertEQ(collator.compare('house', 'House'), -1)
             }
         }
@@ -367,8 +355,7 @@ function testUsage() : int {
             const collator = new Intl.Collator(RU_RU, options)
             if (containsRuLocale(collator)) {
                 arktest.assertEQ(collator.compare('дом', 'Дом'), 1)
-            }
-            else {
+            } else {
                 arktest.assertEQ(collator.compare('house', 'House'), 1)
             }
         }
@@ -381,8 +368,8 @@ function testCollation() : int {
         // https://snipp.ru/handbk/emoji
         let c = new Intl.Collator(EN_US, {collation: 'emoji'} as Intl.CollatorOptions)
         arktest.assertEQ(c.resolvedOptions().collation, 'emoji')
-        arktest.assertEQ(c.compare('😀','😄'), -1)
-        arktest.assertEQ(c.compare('😀','😀'), 0)
+        arktest.assertEQ(c.compare('😀', '😄'), -1)
+        arktest.assertEQ(c.compare('😀', '😀'), 0)
         arktest.assertEQ(c.compare('&#128512;', '&#128516;'), -1)
         arktest.assertEQ(c.compare('&#129315;', '&#128516;'), 1)
     }

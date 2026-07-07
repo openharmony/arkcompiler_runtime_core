@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,16 +18,16 @@ function eArabic(x: Number): string {
 }
 
 function testEArabic1(): void {
-    arktest.assertEQ("ليس\u00A0رقم", eArabic(NaN), "Number toLocaleString not equals to ليس رقم");
+    arktest.assertEQ('ليس\u00A0رقم', eArabic(NaN), 'Number toLocaleString not equals to ليس رقم');
 }
 
 function testEArabic2(): void {
-    arktest.assertEQ("١٬٢٣٤", eArabic(1234), "1234 should format as '١٬٢٣٤'");
+    arktest.assertEQ('١٬٢٣٤', eArabic(1234), '1234 should format as \'١٬٢٣٤\'');
 }
 
 function main() {
-    let myTestsuite = new arktest.ArkTestsuite("myTestsuite");
-    myTestsuite.addTest("testEArabic1", testEArabic1);
-    myTestsuite.addTest("testEArabic2", testEArabic2);
+    let myTestsuite = new arktest.ArkTestsuite('myTestsuite');
+    myTestsuite.addTest('testEArabic1', testEArabic1);
+    myTestsuite.addTest('testEArabic2', testEArabic2);
     myTestsuite.run();
 }

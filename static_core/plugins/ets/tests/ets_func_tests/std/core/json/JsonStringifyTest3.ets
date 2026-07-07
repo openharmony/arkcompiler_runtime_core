@@ -14,9 +14,9 @@
  */
 
 class SimpleObj {
-    name: string = '';
-    year: number = 0;
-    value: number = 0;
+    public name: string = '';
+    public year: number = 0;
+    public value: number = 0;
 }
 
 function main(): int {

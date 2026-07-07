@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,15 @@
 
 type FormatToPartsResult = [string | undefined, Intl.DateTimeFormatOptions | undefined, Intl.DateTimeFormatPart[]]
 
-const FORMAT_RESULTS = new Array<FormatToPartsResult>()
+const FORMAT_RESULTS: FormatToPartsResult[] = []
 
 class FmtPart implements Intl.DateTimeFormatPart {
     private _type: Intl.DateTimeFormatPartTypes
     private _value: String
 
     constructor() {
-        this._type = "literal"
-        this._value = ""
+        this._type = 'literal'
+        this._value = ''
     }
 
     constructor(type: Intl.DateTimeFormatPartTypes, value: string) {
@@ -52,20 +52,25 @@ class FmtPart implements Intl.DateTimeFormatPart {
     }
 }
 
-function addFormatToPartsResult(locale: string | undefined, options: Intl.DateTimeFormatOptions | undefined, result: Intl.DateTimeFormatPart[]): void {
-    const res: [string | undefined, Intl.DateTimeFormatOptions | undefined, Intl.DateTimeFormatPart[]] = [locale, options, result]
+function addFormatToPartsResult(
+    locale: string | undefined,
+    options: Intl.DateTimeFormatOptions | undefined,
+    result: Intl.DateTimeFormatPart[]): void {
+    const res:
+        [string | undefined, Intl.DateTimeFormatOptions | undefined, Intl.DateTimeFormatPart[]] =
+        [locale, options, result]
     FORMAT_RESULTS.push(res)
 }
 
-const TEST_DATE = new Date("2023-10-11T00:20:00Z")
+const TEST_DATE = new Date('2023-10-11T00:20:00Z')
 
 function initFormatResults(): void {
     if (FORMAT_RESULTS.length > 0) {
         return
     }
 
-    const result001:Intl.DateTimeFormatPart[] = [FmtPart("year", "2023"), FmtPart("literal", "/"), FmtPart("month", "10"), FmtPart("literal", "/"), FmtPart("day", "11")]
-    addFormatToPartsResult("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" }, result001)
+    const result001:Intl.DateTimeFormatPart[] = [FmtPart('year', '2023'), FmtPart('literal', '/'), FmtPart('month', '10'), FmtPart('literal', '/'), FmtPart('day', '11')]
+    addFormatToPartsResult('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }, result001)
 }
 
 function verifyResults(actual: Intl.DateTimeFormatPart[], expected: Intl.DateTimeFormatPart[]): boolean {
@@ -99,7 +104,7 @@ function dateFormatToPartsWithOptions(): void {
 function main(): int {
     initFormatResults()
 
-    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat.formatToParts()")
-    suite.addTest("with formatting options", dateFormatToPartsWithOptions)
+    const suite = new arktest.ArkTestsuite('Intl.DateTimeFormat.formatToParts()')
+    suite.addTest('with formatting options', dateFormatToPartsWithOptions)
     return suite.run()
 }

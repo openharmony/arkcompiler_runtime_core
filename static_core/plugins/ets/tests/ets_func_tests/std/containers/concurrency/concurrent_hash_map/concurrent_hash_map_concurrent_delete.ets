@@ -15,77 +15,89 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T>(arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+function awaitAll<T>(arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
-	for (let i = 0; i < arr.length; ++ i)
+	for (let i = 0; i < arr.length; ++ i) {
 		res.push(arr[i].Await());
+	}
 	return res;
 }
 
-function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
-	arktest.assertEQ(to.length, from.length);
-	for (let i = 0; i < to.length; ++ i) {
-		to[i] += from[i];
-	}
+function sumArrInto(to: FixedArray<int>, from: FixedArray<int>): void {
+    arktest.assertEQ(to.length, from.length);
+    for (let i = 0; i < to.length; ++ i) {
+        to[i] += from[i];
+    }
 }
 
 function assertEQAll(array: FixedArray<int>, value: int): void {
-	for (let i=0; i < array.length; ++ i)
-		arktest.assertEQ(array[i], value)
+    for (let i = 0; i < array.length; ++i) {
+        arktest.assertEQ(array[i], value)
+    }
 }
 
 function testConcurrentDelete() {
 	const JOB_COUNT = 7;
 	const SET_COUNT = 100;
 
-	let map = new CHMap();
+    let map = new CHMap();
 
 	let deleteJobs: Job<void>[] = [];
 	let makeDeleteF = (start: int, end: int, shouldBe: boolean) => () => {
-		for (let i = start; i < end; ++ i)
+		for (let i = start; i < end; ++ i) {
 			arktest.assertEQ(map.delete(i), shouldBe);
+		}
 	}
-	for (let i = 0; i < JOB_COUNT; ++ i)
+	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(deleteJobs, makeDeleteF(i * SET_COUNT, (i + 1) * SET_COUNT, false));
+	}
 	awaitAll(deleteJobs);
 
 	deleteJobs = [];
-	for (let i = 0; i < SET_COUNT * JOB_COUNT; ++ i)
+	for (let i = 0; i < SET_COUNT * JOB_COUNT; ++ i) {
 		map.set(i, i);
-	for (let i = 0; i < JOB_COUNT; ++ i)
+	}
+	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(deleteJobs, makeDeleteF(i * SET_COUNT, (i + 1) * SET_COUNT, true));
+	}
 	awaitAll(deleteJobs);
-	for (let i = 0; i < JOB_COUNT * SET_COUNT; ++ i)
+	for (let i = 0; i < JOB_COUNT * SET_COUNT; ++ i) {
 		arktest.assertFalse(map.has(i));
+	}
 }
 
 function testConcurrentDelete2() {
 	const JOB_COUNT = 10;
 	const SET_COUNT = 100;
 
-	let map = new CHMap();
+    let map = new CHMap();
 
 	let deleteJobs: Job<FixedArray<int>>[] = [];
 	let deleteF: ()=>FixedArray<int> = () => {
 		let arr: FixedArray<int> = new FixedArray<int>(SET_COUNT);
-		for (let i = 0; i < SET_COUNT; ++ i)
-			if(map.delete(i))
+		for (let i = 0; i < SET_COUNT; ++ i) {
+			if (map.delete(i)) {
 				arr[i] = 1;
+			}
+		}
 		return arr;
 	}
 
-	for (let i = 0; i < SET_COUNT; ++ i)
+	for (let i = 0; i < SET_COUNT; ++ i) {
 		map.set(i, i);
-	for (let i = 0; i < JOB_COUNT; ++ i)
+	}
+	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(deleteJobs, deleteF);
+	}
 	let arrs = awaitAll(deleteJobs);
 	let accum = arrs[0];
-	for (let i = 1; i < JOB_COUNT; ++ i )
+	for (let i = 1; i < JOB_COUNT; ++ i ) {
 		sumArrInto(accum, arrs[i]);
+	}
 	assertEQAll(accum, 1);
 }
 
@@ -123,10 +135,10 @@ function testConcurrentDeleteSetAndHas() {
 }
 
 function main(): int {
-    let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
-	CHMTestSuitecase.addTest("testConcurrentDelete", testConcurrentDelete);
-	CHMTestSuitecase.addTest("testConcurrentDelete2", testConcurrentDelete2);
-	CHMTestSuitecase.addTest("testConcurrentDeleteSetAndHas", testConcurrentDeleteSetAndHas);
+    let chmTestSuitecase = new arktest.ArkTestsuite('ConcurrentHashMapTest')
+	chmTestSuitecase.addTest('testConcurrentDelete', testConcurrentDelete);
+	chmTestSuitecase.addTest('testConcurrentDelete2', testConcurrentDelete2);
+	chmTestSuitecase.addTest('testConcurrentDeleteSetAndHas', testConcurrentDeleteSetAndHas);
 
-    return CHMTestSuitecase.run();
+    return chmTestSuitecase.run();
 }

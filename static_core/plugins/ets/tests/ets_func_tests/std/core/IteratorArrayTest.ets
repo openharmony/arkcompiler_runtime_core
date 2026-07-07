@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +14,20 @@
  */
 
 const success : int = 0;
-const fail    : int = 1;
+const fail : int = 1;
 
 function main(): int {
     let failures: int = 0;
-    failures += check((): int => { return testIteratorWithEmptyArray() }, "testIteratorWithEmptyArray");
-    failures += check((): int => { return testIteratorWithModifyArrayDuringIteration() }, "testIteratorWithModifyArrayDuringIteration");
-    failures += check((): int => { return testIteratorWithDeleteElementDuringIteration() }, "testIteratorWithDeleteElementDuringIteration");
-    return check(failures, "All tests run");
+    failures += check((): int => { return testIteratorWithEmptyArray() }, 'testIteratorWithEmptyArray');
+    failures += check((): int => { return testIteratorWithModifyArrayDuringIteration() }, 'testIteratorWithModifyArrayDuringIteration');
+    failures += check((): int => { return testIteratorWithDeleteElementDuringIteration() }, 'testIteratorWithDeleteElementDuringIteration');
+    return check(failures, 'All tests run');
 }
 
 const dd: Number[] = [1, 0, 3, 4, 0, 6];
 
 function testIteratorWithEmptyArray(): int {
-    const arr = new Array<Number>;
+    const arr: number[] = [];
     const iterator = arr.$_iterator();
     const v = iterator.next();
     if (!v.done) {
@@ -37,7 +37,7 @@ function testIteratorWithEmptyArray(): int {
 }
 
 function testIteratorWithModifyArrayDuringIteration(): int {
-    const arr = new Array<Number>;
+    const arr: number[] = [];
     let iterator = arr.$_iterator();
     let i: int = 0;
 
@@ -64,7 +64,7 @@ function testIteratorWithModifyArrayDuringIteration(): int {
 }
 
 function testIteratorWithDeleteElementDuringIteration(): int {
-    const arr = new Array<Number>;
+    const arr: number[] = [];
     let iterator = arr.$_iterator();
     let i: int = 0;
 
@@ -95,7 +95,8 @@ function check(result: int, message: String): int {
     if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }
 
@@ -103,13 +104,15 @@ function check(fn: () => int, message: String): int {
     let result: int = 0;
     try {
         result = fn();
-    } catch(e) {
-        console.println("FAILED: " + message + " => Error catched: " + e);
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: ' + message + ' => Error catched: ' + e);
         return fail;
     }
     if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }

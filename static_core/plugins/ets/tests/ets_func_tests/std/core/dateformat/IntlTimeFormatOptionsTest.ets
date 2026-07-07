@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const FORMAT_RESULTS = new Array<[Date, string, Intl.DateTimeFormatOptions, string]>()
+const FORMAT_RESULTS: [Date, string, Intl.DateTimeFormatOptions, string][] = []
 function addFormatResult(date: Date, locale: string, options: Intl.DateTimeFormatOptions, result: string): void {
     const formatResult: [Date, string, Intl.DateTimeFormatOptions, string] = [date, locale, options, result]
     FORMAT_RESULTS.push(formatResult)
@@ -24,25 +24,25 @@ function initFormatResults(): void {
         return
     }
 
-    const testDate = new Date("2023-10-05T15:10:20.345Z")
+    const testDate = new Date('2023-10-05T15:10:20.345Z')
 
-    addFormatResult(testDate, "zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 3, timeZone: "UTC" }, "15:10:20.345")
-    addFormatResult(testDate, "zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 2, timeZone: "UTC" }, "15:10:20.34")
-    addFormatResult(testDate, "zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 1, timeZone: "UTC" }, "15:10:20.3")
+    addFormatResult(testDate, 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3, timeZone: 'UTC' }, '15:10:20.345')
+    addFormatResult(testDate, 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 2, timeZone: 'UTC' }, '15:10:20.34')
+    addFormatResult(testDate, 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 1, timeZone: 'UTC' }, '15:10:20.3')
 
-    addFormatResult(testDate, "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Europe/Berlin", timeZoneName: "short" }, "05:10:20 PM GMT+2")
-    addFormatResult(testDate, "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Europe/Berlin", timeZoneName: "long" }, "05:10:20 PM Central European Summer Time")
-    addFormatResult(testDate, "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Europe/Berlin", timeZoneName: "shortGeneric" }, "05:10:20 PM Germany Time")
-    addFormatResult(testDate, "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Europe/Berlin", timeZoneName: "shortOffset" }, "05:10:20 PM GMT+2")
-    addFormatResult(testDate, "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Europe/Berlin", timeZoneName: "longGeneric" }, "05:10:20 PM Central European Time")
-    addFormatResult(testDate, "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Europe/Berlin", timeZoneName: "longOffset" }, "05:10:20 PM GMT+02:00")
+    addFormatResult(testDate, 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'short' }, '05:10:20 PM GMT+2')
+    addFormatResult(testDate, 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'long' }, '05:10:20 PM Central European Summer Time')
+    addFormatResult(testDate, 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'shortGeneric' }, '05:10:20 PM Germany Time')
+    addFormatResult(testDate, 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'shortOffset' }, '05:10:20 PM GMT+2')
+    addFormatResult(testDate, 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'longGeneric' }, '05:10:20 PM Central European Time')
+    addFormatResult(testDate, 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'longOffset' }, '05:10:20 PM GMT+02:00')
 
-    addFormatResult(testDate, "zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Europe/Berlin", timeZoneName: "short" }, "GMT+2 17:10:20")
-    addFormatResult(testDate, "zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Europe/Berlin", timeZoneName: "long" }, "中欧夏令时间 17:10:20")
-    addFormatResult(testDate, "zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Europe/Berlin", timeZoneName: "shortGeneric" }, "德国时间 17:10:20")
-    addFormatResult(testDate, "zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Europe/Berlin", timeZoneName: "shortOffset" }, "GMT+2 17:10:20")
-    addFormatResult(testDate, "zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Europe/Berlin", timeZoneName: "longGeneric" }, "中欧时间 17:10:20")
-    addFormatResult(testDate, "zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Europe/Berlin", timeZoneName: "longOffset" }, "GMT+02:00 17:10:20")
+    addFormatResult(testDate, 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'short' }, 'GMT+2 17:10:20')
+    addFormatResult(testDate, 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'long' }, '中欧夏令时间 17:10:20')
+    addFormatResult(testDate, 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'shortGeneric' }, '德国时间 17:10:20')
+    addFormatResult(testDate, 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'shortOffset' }, 'GMT+2 17:10:20')
+    addFormatResult(testDate, 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'longGeneric' }, '中欧时间 17:10:20')
+    addFormatResult(testDate, 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'longOffset' }, 'GMT+02:00 17:10:20')
 }
 
 function testTimeFormatWithLocaleAndOptions(): void {
@@ -61,17 +61,17 @@ function testTimeFormatWithLocaleAndOptions(): void {
 }
 
 function testTimeFormatWithInvalidFractionalSecondDigitsOption(): void {
-    const options: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", second: "2-digit", fractionalSecondDigits: 10 }
+    const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 10 }
     arktest.expectError(() => {
-        const formatter = new Intl.DateTimeFormat("en-US", options)
-    }, "invalid digits value: 10")
+        const formatter = new Intl.DateTimeFormat('en-US', options)
+    }, 'invalid digits value: 10')
 }
 
 function main(): int {
     initFormatResults()
 
-    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat API time format tests")
-    suite.addTest("time format with custom locale and options", testTimeFormatWithLocaleAndOptions)
-    suite.addTest("time format with invalid fractionalSecondDigits", testTimeFormatWithInvalidFractionalSecondDigitsOption)
+    const suite = new arktest.ArkTestsuite('Intl.DateTimeFormat API time format tests')
+    suite.addTest('time format with custom locale and options', testTimeFormatWithLocaleAndOptions)
+    suite.addTest('time format with invalid fractionalSecondDigits', testTimeFormatWithInvalidFractionalSecondDigitsOption)
     return suite.run()
 }

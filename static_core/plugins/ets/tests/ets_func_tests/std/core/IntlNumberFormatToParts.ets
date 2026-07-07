@@ -15,22 +15,22 @@
 
 class NumberFormatOptionsBuilder {
     // Default decimal style with default precision
-    compactDisplay?: 'short' | 'long' = undefined;
-    currency?: string = undefined;
-    currencyDisplay?: 'code' | 'symbol' | 'narrowSymbol' | 'name' = undefined;
-    currencySign?: 'standard' | 'accounting' = undefined;
-    localeMatcher?: 'lookup' | 'best fit' = undefined;
-    maximumFractionDigits?: int = 3;
-    maximumSignificantDigits?: int = undefined;
-    minimumFractionDigits?: int = 0;
-    minimumIntegerDigits?: int = 1;
-    minimumSignificantDigits?: int = undefined;
-    notation?: 'standard' | 'scientific' | 'engineering' | 'compact' = 'standard';
-    signDisplay?: 'auto' | 'never' | 'always' | 'exceptZero' = 'auto';
-    style?: 'decimal' | 'percent' | 'currency' | 'unit' = 'decimal';
-    unit?: string = undefined;
-    unitDisplay?: 'short' | 'long' | 'narrow' = undefined;
-    useGrouping?: boolean = true;
+    public compactDisplay?: 'short' | 'long' = undefined;
+    public currency?: string = undefined;
+    public currencyDisplay?: 'code' | 'symbol' | 'narrowSymbol' | 'name' = undefined;
+    public currencySign?: 'standard' | 'accounting' = undefined;
+    public localeMatcher?: 'lookup' | 'best fit' = undefined;
+    public maximumFractionDigits?: int = 3;
+    public maximumSignificantDigits?: int = undefined;
+    public minimumFractionDigits?: int = 0;
+    public minimumIntegerDigits?: int = 1;
+    public minimumSignificantDigits?: int = undefined;
+    public notation?: 'standard' | 'scientific' | 'engineering' | 'compact' = 'standard';
+    public signDisplay?: 'auto' | 'never' | 'always' | 'exceptZero' = 'auto';
+    public style?: 'decimal' | 'percent' | 'currency' | 'unit' = 'decimal';
+    public unit?: string = undefined;
+    public unitDisplay?: 'short' | 'long' | 'narrow' = undefined;
+    public useGrouping?: boolean = true;
 
     static newDefault(): NumberFormatOptionsBuilder {
         return new NumberFormatOptionsBuilder();
@@ -144,7 +144,7 @@ class NumberFormatOptionsBuilder {
             this.maximumFractionDigits = 0
             this.minimumFractionDigits = 0
             this.useGrouping = true
-        } else  if (this.style == 'currency') {
+        } else if (this.style == 'currency') {
             if (this.currencySign == undefined) {
                 this.currencySign = 'standard';
             }

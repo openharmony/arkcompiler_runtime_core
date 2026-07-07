@@ -14,19 +14,19 @@
  */
 
 const success : int = 0;
-const fail    : int = 1;
+const fail : int = 1;
 
 function main(): int {
     let failures: int = 0;
-    failures += check((): int => { return findIndexFuncArg1() }, "findIndexFuncArg1");
-    failures += check((): int => { return findIndexFuncArg2() }, "findIndexFuncArg2");
-    failures += check((): int => { return findIndexFuncArg3ArrayNumber() }, "findIndexFuncArg3ArrayNumber");
-    failures += check((): int => { return findLastIndexFuncArg1() }, "findLastIndexFuncArg1");
-    failures += check((): int => { return findLastFuncArg1() }, "findLastFuncArg1");
-    failures += check((): int => { return mapFuncArg1() }, "mapFuncArg1");
-    failures += check((): int => { return mapFuncArg2() }, "mapFuncArg2");
-    failures += check((): int => { return mapFuncArg3ArrayNumber() }, "mapFuncArg3ArrayNumber");
-    return check(failures, "All tests run");
+    failures += check((): int => { return findIndexFuncArg1() }, 'findIndexFuncArg1');
+    failures += check((): int => { return findIndexFuncArg2() }, 'findIndexFuncArg2');
+    failures += check((): int => { return findIndexFuncArg3ArrayNumber() }, 'findIndexFuncArg3ArrayNumber');
+    failures += check((): int => { return findLastIndexFuncArg1() }, 'findLastIndexFuncArg1');
+    failures += check((): int => { return findLastFuncArg1() }, 'findLastFuncArg1');
+    failures += check((): int => { return mapFuncArg1() }, 'mapFuncArg1');
+    failures += check((): int => { return mapFuncArg2() }, 'mapFuncArg2');
+    failures += check((): int => { return mapFuncArg3ArrayNumber() }, 'mapFuncArg3ArrayNumber');
+    return check(failures, 'All tests run');
 }
 
 
@@ -49,7 +49,7 @@ function check<T>(newArrayFn: () => Array<T>, testFn: (a: Array<T>) => int): int
 }
 
 function findIndexFuncArg1(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
         }
@@ -66,7 +66,7 @@ function findIndexFuncArg1(): int {
 }
 
 function findIndexFuncArg2(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         for (let i: int = 0; i < d.length; ++i) {
            arr.push(d[i]);
         }
@@ -91,7 +91,7 @@ function findIndexFuncArg2(): int {
 }
 
 function findIndexFuncArg3ArrayNumber(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
         }
@@ -116,7 +116,7 @@ function findIndexFuncArg3ArrayNumber(): int {
 }
 
 function findLastIndexFuncArg1(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
         }
@@ -133,7 +133,7 @@ function findLastIndexFuncArg1(): int {
 }
 
 function findLastFuncArg1(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
         }
@@ -150,7 +150,7 @@ function findLastFuncArg1(): int {
 }
 
 function mapFuncArg1(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let fn = (elem: number): number => {
             return elem * elem;
         };
@@ -174,7 +174,7 @@ function mapFuncArg1(): int {
 }
 
 function mapFuncArg2(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let fn = (elem: number, index: number): number => {
             if (index < 4) {
                 return elem * elem;
@@ -195,7 +195,7 @@ function mapFuncArg2(): int {
         for (let i: int = 0; i < res.length; ++i) {
             if (res.at(i) == undefined) { return fail; }
             if (i < 4) {
-                tmp = new Number(arr.at(i)! * arr.at(i)!);
+                tmp = Number(arr.at(i)! * arr.at(i)!);
             } else {
                 tmp = 0;
             }
@@ -208,7 +208,7 @@ function mapFuncArg2(): int {
 }
 
 function mapFuncArg3ArrayNumber(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let fn = (elem: number, index: number, arr: Array<Number>): number => {
             if ((index < 4) && (index < arr.length)) {
                 return arr.at(index)! * arr.at(index)!;
@@ -229,7 +229,7 @@ function mapFuncArg3ArrayNumber(): int {
         for (let i: int = 0; i < res.length; ++i) {
             if (res.at(i) == undefined) { return fail; }
             if (i < 4) {
-                tmp = new Number(arr.at(i)! * arr.at(i)!);
+                tmp = Number(arr.at(i)! * arr.at(i)!);
             } else {
                 tmp = 0;
             }
@@ -245,7 +245,8 @@ function check(result: int, message: String): int {
     if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }
 
@@ -253,13 +254,15 @@ function check(fn: () => int, message: String): int {
     let result: int = 0;
     try {
         result = fn();
-    } catch(e) {
-        console.println("FAILED: " + message + " => Error catched: " + e);
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: ' + message + ' => Error catched: ' + e);
         return fail;
     }
     if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }

@@ -19,7 +19,7 @@ function main() {
 
 function testArraySplice() {
     {
-        const arr = new Array<number>(1, 2, 3, 4, 5);
+        const arr = [1, 2, 3, 4, 5];
         const removed = arr.splice(1, 2);
         arktest.assertEQ(arr.length, 3)
         arktest.assertEQ(arr[0], 1)
@@ -30,7 +30,7 @@ function testArraySplice() {
         arktest.assertEQ(removed[1], 3)
     }
     {
-        const arr = new Array<number>(1, 2, 3);
+        const arr = [1, 2, 3];
         const removed = arr.splice(1, 0, 4, 5);
         arktest.assertEQ(arr.length, 5)
         arktest.assertEQ(arr[0], 1)
@@ -41,7 +41,7 @@ function testArraySplice() {
         arktest.assertEQ(removed.length, 0)
     }
     {
-        const arr = new Array<number>(1, 2, 3);
+        const arr = [1, 2, 3];
         const removed = arr.splice(1, undefined, 4, 5);
         arktest.assertEQ(arr.length, 5)
         arktest.assertEQ(arr[0], 1)
@@ -52,7 +52,7 @@ function testArraySplice() {
         arktest.assertEQ(removed.length, 0)
     }
     {
-        const arr = new Array<number>(1, 2, 3, 4);
+        const arr = [1, 2, 3, 4];
         const removed = arr.splice(1, 2, 5, 6);
         arktest.assertEQ(arr.length, 4)
         arktest.assertEQ(arr[0], 1)
@@ -64,7 +64,7 @@ function testArraySplice() {
         arktest.assertEQ(removed[1], 3)
     }
     {
-        const arr = new Array<number>();
+        const arr: int[] = [];
         const removed = arr.splice(0, 0, 1, 2);
         arktest.assertEQ(arr.length, 2)
         arktest.assertEQ(arr[0], 1)
@@ -72,7 +72,7 @@ function testArraySplice() {
         arktest.assertEQ(removed.length, 0)
     }
     {
-        const arr = new Array<number>(1, 2, 3);
+        const arr = [1, 2, 3];
         const removed = arr.splice(0, 3);
         arktest.assertEQ(arr.length, 0)
         arktest.assertEQ(removed.length, 3)
@@ -81,7 +81,7 @@ function testArraySplice() {
         arktest.assertEQ(removed[2], 3)
     }
     {
-        const arr = new Array<number>(1, 2, 3, 4, 5);
+        const arr = [1, 2, 3, 4, 5];
         const removed = arr.splice(2);
         arktest.assertEQ(arr.length, 2)
         arktest.assertEQ(arr[0], 1)
@@ -92,7 +92,7 @@ function testArraySplice() {
         arktest.assertEQ(removed[2], 5)
     }
     {
-        const arr = new Array<number>(1, 2, 3);
+        const arr = [1, 2, 3];
         const removed = arr.splice(1, undefined);
         arktest.assertEQ(arr.length, 3)
         arktest.assertEQ(arr[0], 1)

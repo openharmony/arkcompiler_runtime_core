@@ -14,14 +14,14 @@
  */
 
 class SubObj {
-    s: string = "qwerty"
+    public s: string = 'qwerty'
 }
 class ObjToDump {
-    a: bigint = new BigInt(1)
-    b: string = "abcbcb"
-    c: Number = 21222.22219
-    d: undefined = undefined
-    e: SubObj = new SubObj()
+    public a: bigint = new BigInt(1)
+    public b: string = 'abcbcb'
+    public c: Number = 21222.22219
+    public d: undefined = undefined
+    public e: SubObj = new SubObj()
 }
 
 function main(): void {
@@ -36,40 +36,42 @@ function main(): void {
 }
 
 function testStringigyEmptyStr() {
-    arktest.assertEQ(JSON.stringify(""), "\"\"")
+    arktest.assertEQ(JSON.stringify(''), '""')
 }
 
 function testStringifyObj() {
-    arktest.assertEQ(JSON.stringify(new ObjToDump()), "{\"a\":1,\"b\":\"abcbcb\",\"c\":21222.22219,\"e\":{\"s\":\"qwerty\"}}")
+    arktest.assertEQ(JSON.stringify(new ObjToDump()), '{"a":1,"b":"abcbcb","c":21222.22219,"e":{"s":"qwerty"}}')
 }
 
 function testStringifyObjWithArrayReplacer() {
-    arktest.assertEQ(JSON.stringify(new ObjToDump(), ["a", "b"]), "{\"a\":1,\"b\":\"abcbcb\"}" )
+    arktest.assertEQ(JSON.stringify(new ObjToDump(), ['a', 'b']), '{"a":1,"b":"abcbcb"}' )
 }
 
 function testStringifyObjWithFuncReplacer() {
     let f = (k: string, value: Any): Any => {
-        if (k === "a") {
+        if (k === 'a') {
             return 77777
-        } else if (k === "not existing") {
-            return "blablabla"
+        } else if (k === 'not existing') {
+            return 'blablabla'
         }
         return value
     }
-    arktest.assertEQ(JSON.stringify(new ObjToDump(), f, " "), "{\n" + " \"a\": 77777,\n" + " \"b\": \"abcbcb\",\n" + 
-        " \"c\": 21222.22219,\n" + " \"e\": {\n" + "  \"s\": \"qwerty\"\n" + " }\n" +"}")
+    arktest.assertEQ(JSON.stringify(new ObjToDump(), f, ' '), '{\n' + ' "a": 77777,\n' + ' "b": "abcbcb",\n' + 
+        ' "c": 21222.22219,\n' + ' "e": {\n' + '  "s": "qwerty"\n' + ' }\n' + '}')
 }
 
 function testStringifyObjNullReplacer() {
-    arktest.assertEQ(JSON.stringify(new ObjToDump(), null, 0), "{\"a\":1,\"b\":\"abcbcb\",\"c\":21222.22219,\"e\":{\"s\":\"qwerty\"}}")
+    arktest.assertEQ(JSON.stringify(new ObjToDump(), null, 0),
+                                    '{"a":1,"b":"abcbcb","c":21222.22219,"e":{"s":"qwerty"}}')
 }
 
 function testStringifyObjUndefReplacer() {
-    arktest.assertEQ(JSON.stringify(new ObjToDump(), undefined, 0), "{\"a\":1,\"b\":\"abcbcb\",\"c\":21222.22219,\"e\":{\"s\":\"qwerty\"}}")
+    arktest.assertEQ(JSON.stringify(new ObjToDump(), undefined, 0),
+                                    '{"a":1,"b":"abcbcb","c":21222.22219,"e":{"s":"qwerty"}}')
 }
 
 function testStringifyNull() {
-    arktest.assertEQ(JSON.stringify(null, undefined, 0), "null")
+    arktest.assertEQ(JSON.stringify(null, undefined, 0), 'null')
 }
 
 function testStringifyUndefined() {

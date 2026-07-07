@@ -26,7 +26,7 @@ function cmp(x: FixedArray<long>, y: FixedArray<long>): boolean {
     return true;
 }
 
-function prime_factors_trivial(n0: long): FixedArray<long> {
+function primeFactorsTrivial(n0: long): FixedArray<long> {
     let primes: FixedArray<long> = []
     let factor: long = 2
     let n = n0;
@@ -41,7 +41,7 @@ function prime_factors_trivial(n0: long): FixedArray<long> {
     return primes;
 }
 
-function prime_factors_trivial_plus(n0: long): FixedArray<long> {
+function primeFactorsTrivialPlus(n0: long): FixedArray<long> {
     let primes: FixedArray<long> = [];
     let factor: long = 3;
     let n: long = n0;
@@ -63,20 +63,20 @@ function prime_factors_trivial_plus(n0: long): FixedArray<long> {
     return primes;
 }
 
-function sieve_primes(n: int): FixedArray<long> {
-    let is_prime: FixedArray<boolean> = new FixedArray<boolean>(n+1);
+function sievePrimes(n: int): FixedArray<long> {
+    let isPrime: FixedArray<boolean> = new FixedArray<boolean>(n + 1);
     let primes: FixedArray<long> = [];
-    fill(is_prime, true);
+    fill(isPrime, true);
     // 0 and 1 are not primes
-    for (let i = 2; i < n+1; i++) {
-        if (is_prime[i]) {
-            for (let j = 2; i * j < n+1; j++) {
-                is_prime[i * j] = false;
+    for (let i = 2; i < n + 1; i++) {
+        if (isPrime[i]) {
+            for (let j = 2; i * j < n + 1; j++) {
+                isPrime[i * j] = false;
             }
         }
     }
-    for (let i = 2; i < n+1; i++) {
-        if (is_prime[i]) {
+    for (let i = 2; i < n + 1; i++) {
+        if (isPrime[i]) {
             primes = concat(primes, [i.toLong()]);
         }
     }
@@ -85,10 +85,12 @@ function sieve_primes(n: int): FixedArray<long> {
 
 function test(result: boolean, name: String): int {
     if (result) {
-        console.println("PASSED: " + name);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('PASSED: ' + name);
         return 0;
     }
-    console.println("FAILED: " + name);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('FAILED: ' + name);
     return 1;
 }
 
@@ -96,19 +98,19 @@ function main(): int {
     let failures: int = 0;
     const empty: FixedArray<long> = [];
     failures += test(
-        cmp(prime_factors_trivial(1234567), [127 as long, 9721]),
-        "Trivial factorisation of 1234567");
+        cmp(primeFactorsTrivial(1234567), [127 as long, 9721]),
+        'Trivial factorisation of 1234567');
     failures += test(
-        cmp(prime_factors_trivial(7), empty),
-        "Trivial factorisation of 7");
+        cmp(primeFactorsTrivial(7), empty),
+        'Trivial factorisation of 7');
     failures += test(
-        cmp(prime_factors_trivial_plus(1234567), [127 as long, 9721]),
-        "Improved factorisation of 1234567");
+        cmp(primeFactorsTrivialPlus(1234567), [127 as long, 9721]),
+        'Improved factorisation of 1234567');
     failures += test(
-        cmp(prime_factors_trivial_plus(7), empty),
-        "Improved factorisation of 7");
+        cmp(primeFactorsTrivialPlus(7), empty),
+        'Improved factorisation of 7');
     failures += test(
-        cmp(sieve_primes(15), [2 as long, 3, 5, 7, 11, 13]),
-        "Prime numbers under 15");
+        cmp(sievePrimes(15), [2 as long, 3, 5, 7, 11, 13]),
+        'Prime numbers under 15');
     return failures;
 }

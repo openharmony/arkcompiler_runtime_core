@@ -234,16 +234,16 @@ int32_t AdvanceIndex(const CharT *data, int32_t size, int32_t pos, bool unicode)
 }
 
 template <typename CharT>
-RegExpExecResult ExecuteOnce(EtsRegExp &re, uint32_t matchFlags, const CharT *input, int32_t inputSize, int32_t lastEnd)
+RegExpExecResult ExecuteOnce(EtsRegExp &re, uint32_t matchFlags, const CharT *input, int32_t inputSz, int32_t lastEnd)
 {
     if constexpr (std::is_same_v<CharT, uint8_t>) {
         auto *compiled = re.GetCompiledRe8();
-        auto result = RegExp8::Execute(compiled, matchFlags, input, inputSize, lastEnd);
+        auto result = RegExp8::Execute(compiled, matchFlags, input, inputSz, lastEnd);
         RegExp8::ApplyGroupMeta(compiled->groupMeta, result);
         return result;
     } else {
         auto *compiled = re.GetCompiledRe16();
-        auto result = RegExp16::Execute(compiled, matchFlags, input, inputSize, lastEnd);
+        auto result = RegExp16::Execute(compiled, matchFlags, input, inputSz, lastEnd);
         RegExp16::ApplyGroupMeta(compiled->groupMeta, result);
         return result;
     }

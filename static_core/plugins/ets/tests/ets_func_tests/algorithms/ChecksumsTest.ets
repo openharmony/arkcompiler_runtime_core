@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,11 @@
 
 // ArkTS implementations of hash functions
 
-const hello16 = "hello world hello world hello world hello world "
-              + "hello world hello world hello world hello world "
-              + "hello world hello world hello world hello world "
-              + "hello world hello world hello world hello world";
-const brefStr = "Short String";
+const hello16 = 'hello world hello world hello world hello world ' +
+              'hello world hello world hello world hello world ' +
+              'hello world hello world hello world hello world ' +
+              'hello world hello world hello world hello world';
+const brefStr = 'Short String';
 
 function crc32(s: String): int {
     // TODO: unsigned types are not ready yet
@@ -43,10 +43,12 @@ function crc32(s: String): int {
 
 function test(result: boolean, name: String): int {
     if (result) {
-        console.println("PASSED: " + name);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('PASSED: ' + name);
         return 0;
     }
-    console.println("FAILED: " + name);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('FAILED: ' + name);
     return 1;
 }
 
@@ -54,14 +56,16 @@ function main(): int {
     let failures: int = 0;
     failures += test(
         -212688166 == crc32(brefStr),
-        "CRC32 short string");
+        'CRC32 short string');
     failures += test(
         -2071273834 == crc32(hello16),
-        "CRC32 long string");
+        'CRC32 long string');
     if (failures == 0) {
-        console.println("PASSED: All tests run");
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('PASSED: All tests run');
     } else {
-        console.println("FAILED: All tests run");
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: All tests run');
     }
     return failures;
 }

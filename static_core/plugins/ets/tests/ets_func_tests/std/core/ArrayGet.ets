@@ -14,20 +14,20 @@
  */
 
 const success : int = 0;
-const fail    : int = 1;
+const fail : int = 1;
 
 const negative : int = -1;
 
 function main(): int {
     let failures: int = 0;
-    failures += check((): int => { return testReadonlyArrayGet() }, "ReadonlyArray $_get");
-    failures += check((): int => { return testReadonlyArrayGetInvalidIndex() }, "ReadonlyArray $_get Negative Index");
-    failures += check((): int => { return testArrayLikeGet() }, "ArrayLike $_get");
-    failures += check((): int => { return testArrayLikeGetInvalidIndex() }, "ArrayLike $_get Negative Index");
-    failures += check((): int => { return testConcatArrayGet() }, "ConcatArray $_get");
-    failures += check((): int => { return testConcatArrayGetInvalidIndex() }, "ConcatArray $_get Negative Index");
+    failures += check((): int => { return testReadonlyArrayGet() }, 'ReadonlyArray $_get');
+    failures += check((): int => { return testReadonlyArrayGetInvalidIndex() }, 'ReadonlyArray $_get Negative Index');
+    failures += check((): int => { return testArrayLikeGet() }, 'ArrayLike $_get');
+    failures += check((): int => { return testArrayLikeGetInvalidIndex() }, 'ArrayLike $_get Negative Index');
+    failures += check((): int => { return testConcatArrayGet() }, 'ConcatArray $_get');
+    failures += check((): int => { return testConcatArrayGetInvalidIndex() }, 'ConcatArray $_get Negative Index');
 
-    return check(failures, "All tests run");
+    return check(failures, 'All tests run');
 }
 
 
@@ -54,7 +54,7 @@ function testReadonlyArrayGetInvalidIndex(): int {
         }
         throw e;
     }
-    const msg = "Expects a RangeError to be thrown for expression 'b[-1] == undefined', " +
+    const msg = 'Expects a RangeError to be thrown for expression \'b[-1] == undefined\', ' +
                 `but value '${compRes}' is got.`;
     throw new Error(msg);
 }
@@ -80,7 +80,7 @@ function testArrayLikeGetInvalidIndex(): int {
         }
         throw e;
     }
-    const msg = "Expects a RangeError to be thrown for expression 'b[-1] == undefined', " +
+    const msg = 'Expects a RangeError to be thrown for expression \'b[-1] == undefined\', ' +
                 `but value '${compRes}' is got.`;
     throw new Error(msg);
 }
@@ -106,16 +106,17 @@ function testConcatArrayGetInvalidIndex(): int {
         }
         throw e;
     }
-    const msg = "Expects a RangeError to be thrown for expression 'b[-1] == undefined', " +
+    const msg = 'Expects a RangeError to be thrown for expression \'b[-1] == undefined\', ' +
                 `but value '${compRes}' is got.`;
     throw new Error(msg);
 }
 
 function check(result: int, message: String): int {
-    if(result == success) {
+    if (result == success) {
         return success;
     }
-    console.println("FAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('FAILED: ' + message);
     return fail;
 }
 
@@ -124,12 +125,14 @@ function check(fn: () => int, message: String): int {
     try {
         result = fn();
     } catch (e) {
-        console.println("FAILED: " + message + " => Error catched: " + e);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: ' + message + ' => Error catched: ' + e);
         return fail;
     }
-    if(result == success) {
+    if (result == success) {
         return success;
     }
-    console.println("FAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('FAILED: ' + message);
     return fail;
 }

@@ -377,8 +377,8 @@ function testDoubleRemoveMessage() {
     let worker = new EAWorker();
     worker.start();
 
-    let awake_waiter: (val: int)=>void = ()=>{};
-    let waiter = new Promise<int>((res, rej)=>{awake_waiter = res;})
+    let awakeWaiter: (val: int)=>void = ()=>{};
+    let waiter = new Promise<int>((res, rej)=>{awakeWaiter = res;})
 
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {
         (async ()=>{await waiter;})().awaitSync()
@@ -389,7 +389,7 @@ function testDoubleRemoveMessage() {
     if (handler.removeMessages(1)){
         arktest.assertEQ(handler.removeMessages(1), false);
     }
-    awake_waiter(0);
+    awakeWaiter(0);
     worker.quit();
 }
 

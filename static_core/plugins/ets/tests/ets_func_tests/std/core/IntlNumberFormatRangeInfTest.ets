@@ -17,14 +17,14 @@ const success: int = 0;
 const fail: int = 1;
 
 function main(): int {
-    arktest.assertEQ( languageCodes.length, countryCodes.length,  'Error! Size of languageCodes should be the same as countryCodes')
+    arktest.assertEQ( languageCodes.length, countryCodes.length, 'Error! Size of languageCodes should be the same as countryCodes')
 
     let failures: int = 0;
-    failures += check(FormatRangeNegInfNumberUnion(), 'Intl NumberFormat.formatRange -Inf +number. Called union-types args');
-    failures += check(FormatRangeNumberNegInfUnion(), 'Intl NumberFormat.formatRange -number -Inf. Called union-types args');
-    failures += check(FormatRangeNegInfBigIntUnion(), 'Intl NumberFormat.formatRange -Inf +BigInt. Called union-types args');
-    failures += check(FormatRangeBigIntNegInfUnion(), 'Intl NumberFormat.formatRange -BigInt -Inf. Called union-types args');
-    failures += check(FormatRangeNegInfNegInfUnion(), 'Intl NumberFormat.formatRange -Inf -Inf. Called union-types args');
+    failures += check(formatRangeNegInfNumberUnion(), 'Intl NumberFormat.formatRange -Inf +number. Called union-types args');
+    failures += check(formatRangeNumberNegInfUnion(), 'Intl NumberFormat.formatRange -number -Inf. Called union-types args');
+    failures += check(formatRangeNegInfBigIntUnion(), 'Intl NumberFormat.formatRange -Inf +BigInt. Called union-types args');
+    failures += check(formatRangeBigIntNegInfUnion(), 'Intl NumberFormat.formatRange -BigInt -Inf. Called union-types args');
+    failures += check(formatRangeNegInfNegInfUnion(), 'Intl NumberFormat.formatRange -Inf -Inf. Called union-types args');
     return failures;
 }
 
@@ -32,12 +32,13 @@ function check(result: number, message: string): int {
     if (result == 0) {
         return success;
     }
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.println('\nFAILED: ' + message);
     return fail;
 }
 
-const languageCodes: string[] = [ 'en', 'fr', 'ca', 'el', 'no', 'it', 'zh', 'ja', 'de', 'ru', 'fa'];
-const countryCodes: string[] = [ 'US', 'FR', 'ES', 'GR', 'NO',  '',   'CN', 'JP', 'GE', 'RU', 'IR'];
+const languageCodes: string[] = ['en', 'fr', 'ca', 'el', 'no', 'it', 'zh', 'ja', 'de', 'ru', 'fa'];
+const countryCodes: string[] = ['US', 'FR', 'ES', 'GR', 'NO', '', 'CN', 'JP', 'GE', 'RU', 'IR'];
 const numberValues: Number[] = [-1234.5, 1234.5, -Infinity];
 const bigIntValues = Array.of<BigInt>(-123456789000123456789000n, 123456789000123456789000n);
 const EN: int = 0;
@@ -81,7 +82,7 @@ function negativeNumbersAsStrings(): Array<string> {
     expected[CH] = expected[EN];
     expected[JP] = expected[CH];
     expected[GE] = expected[ES];
-    expected[RU] = String.fromCharCode(45, 49, 160, 50 ,51 ,52, 44, 53);
+    expected[RU] = String.fromCharCode(45, 49, 160, 50, 51, 52, 44, 53);
     expected[IR] = String.fromCharCode(8206, 8722, 1777, 1644, 1778, 1779, 1780, 1643, 1781);
     return expected;
 }
@@ -122,42 +123,61 @@ function separatorsBetweenNegAndPosAsStrings(): Array<string> {
 function positiveBigIntsAsStrings(): Array<string> {
     // Codes for bigIntValues[1]
     let expected = Array.create<string>(languageCodes.length, '');
-    expected[EN] = String.fromCharCode(49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48, 44, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48);
-    expected[FR] = String.fromCharCode(49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48, 8239, 49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48);
-    expected[ES] = String.fromCharCode(49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48, 46, 49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48);
+    expected[EN] = String.fromCharCode(49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48, 44, 49, 50, 51, 44,
+        52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48);
+    expected[FR] = String.fromCharCode(49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48, 8239, 49, 50,
+        51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48);
+    expected[ES] = String.fromCharCode(49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48, 46, 49, 50, 51, 46,
+        52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48);
     expected[GR] = expected[ES];
-    expected[NO] = String.fromCharCode(49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
+    expected[NO] = String.fromCharCode(49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51,
+        160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
     expected[IT] = expected[GR];
     expected[CH] = expected[EN];
     expected[JP] = expected[CH];
     expected[GE] = expected[ES];
-    expected[RU] = String.fromCharCode(49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
-    expected[IR] = String.fromCharCode(1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776, 1644, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776);
+    expected[RU] = String.fromCharCode(49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51,
+        160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
+    expected[IR] = String.fromCharCode(1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776,
+        1776, 1776, 1644, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776);
     return expected;
 }
 
 function negativeBigIntsAsStrings(): Array<string> {
     // Codes for bigIntValues[0]
     let expected = Array.create<string>(languageCodes.length, '');
-    expected[EN] = String.fromCharCode(45, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48, 44, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48);
-    expected[FR] = String.fromCharCode(45, 49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48, 8239, 49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48);
-    expected[ES] = String.fromCharCode(45, 49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48, 46, 49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48);
+    expected[EN] = String.fromCharCode(45, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48, 44, 49, 50, 51,
+        44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48);
+    expected[FR] = String.fromCharCode(45, 49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48, 8239, 49,
+        50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48);
+    expected[ES] = String.fromCharCode(45, 49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48, 46, 49, 50, 51,
+        46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48);
     expected[GR] = expected[ES];
-    expected[NO] = String.fromCharCode(8722, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
+    expected[NO] = String.fromCharCode(8722, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49,
+        50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
     expected[IT] = expected[GR];
     expected[CH] = expected[EN];
     expected[JP] = expected[CH];
     expected[GE] = expected[ES];
-    expected[RU] = String.fromCharCode(45, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
-    expected[IR] = String.fromCharCode(8206, 8722, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776, 1644, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776);
+    expected[RU] = String.fromCharCode(45, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50,
+        51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
+    expected[IR] = String.fromCharCode(8206, 8722, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785,
+        1644, 1776, 1776, 1776, 1644, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776,
+        1776, 1776);
     return expected;
 }
 
-function CheckFormatRangeUnion(locale: string, funcName: string, negValue: number | bigint, posValue: number | bigint, expected: string): int {
+function checkFormatRangeUnion(
+    locale: string,
+    funcName: string,
+    negValue: number | bigint,
+    posValue: number | bigint,
+    expected: string): int {
     let nf: Intl.NumberFormat;
     try {
         nf = new Intl.NumberFormat(locale);
-    } catch(e) {
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Crashed call \'nf = new Intl.NumberFormat(' + locale + ')\'');
         return fail;
     }
@@ -165,29 +185,39 @@ function CheckFormatRangeUnion(locale: string, funcName: string, negValue: numbe
     let str: string;
     try {
         str = nf.formatRange(negValue, posValue);
-    } catch(e) {
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Crashed call \'nf.formatRange\'. ' + locale );
         return fail;
     }
 
     if (str == '') {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Got empty str result. ' + locale);
         return fail;
     }
 
     if (expected != str) {
-        let arr = new Array<Number>(str.length, (index: int) => str.codePointAt(index)!);
-        console.log(funcName + '. Got: \'' + str + '\' Codes: ' + arr.join(','));
-        arr = new Array<Number>(expected.length, (index: int) => expected.codePointAt(index)!);
+        let arr: int[] = [];
+        for (let index: int = 0; index < str.length; index++) {
+            arr.push(str.codePointAt(index)! as int);
+        }
+        let res = String.fromCharCode(...arr);
+        arr = [];
+        for (let index: int = 0; index < expected.length; index++) {
+            arr.push(expected.codePointAt(index)! as int);
+        }
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Exp: Codes: ' + arr.join(','));
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(funcName + '. Detected on ' + locale);
         return fail;
     }
     return success;
 }
 
-function FormatRangeNegInfNumberUnion(): int {
-    const funcName = 'FormatRangeNegInfNumberUnion';
+function formatRangeNegInfNumberUnion(): int {
+    const funcName = 'formatRangeNegInfNumberUnion';
     const left = negativeInfsAsStrings();
     const right = positiveNumbersAsStrings();
     const sep = separatorsBetweenNegAndPosAsStrings();
@@ -199,15 +229,15 @@ function FormatRangeNegInfNumberUnion(): int {
             locale = locale + '-' + countryCodes[i];
         }
         const expected = left[i] + sep[i] + right[i];
-        if (CheckFormatRangeUnion(locale, funcName, leftValue, righValue, expected) != success) {
+        if (checkFormatRangeUnion(locale, funcName, leftValue, righValue, expected) != success) {
             return fail;
         }
     }
     return success;
 }
 
-function FormatRangeNumberNegInfUnion(): int {
-    const funcName = 'FormatRangeNumberNegInfUnion';
+function formatRangeNumberNegInfUnion(): int {
+    const funcName = 'formatRangeNumberNegInfUnion';
     const left = negativeNumbersAsStrings();
     const right = negativeInfsAsStrings();
     const sep = separatorsBetweenNegAndPosAsStrings();
@@ -223,15 +253,15 @@ function FormatRangeNumberNegInfUnion(): int {
         }
 
         const expected = left[i] + sep[i] + right[i];
-        if (CheckFormatRangeUnion(locale, funcName, leftValue, righValue, expected) != success) {
+        if (checkFormatRangeUnion(locale, funcName, leftValue, righValue, expected) != success) {
             return fail;
         }
     }
     return success;
 }
 
-function FormatRangeNegInfBigIntUnion(): int {
-    const funcName = 'FormatRangeNegInfBigIntUnion';
+function formatRangeNegInfBigIntUnion(): int {
+    const funcName = 'formatRangeNegInfBigIntUnion';
     const left = negativeInfsAsStrings();
     const right = positiveBigIntsAsStrings();
     const sep = separatorsBetweenNegAndPosAsStrings();
@@ -243,15 +273,15 @@ function FormatRangeNegInfBigIntUnion(): int {
             locale = locale + '-' + countryCodes[i];
         }
         const expected = left[i] + sep[i] + right[i];
-        if (CheckFormatRangeUnion(locale, funcName, leftValue, righValue, expected) != success) {
+        if (checkFormatRangeUnion(locale, funcName, leftValue, righValue, expected) != success) {
             return fail;
         }
     }
     return success;
 }
 
-function FormatRangeBigIntNegInfUnion(): int {
-    const funcName = 'FormatRangeBigIntNegInfUnion';
+function formatRangeBigIntNegInfUnion(): int {
+    const funcName = 'formatRangeBigIntNegInfUnion';
     const left = negativeBigIntsAsStrings();
     const right = negativeInfsAsStrings();
     const sep = separatorsBetweenNegAndPosAsStrings();
@@ -266,15 +296,15 @@ function FormatRangeBigIntNegInfUnion(): int {
             locale = locale + '-' + countryCodes[i];
         }
         const expected = left[i] + sep[i] + right[i];
-        if (CheckFormatRangeUnion(locale, funcName, leftValue, righValue, expected) != success) {
+        if (checkFormatRangeUnion(locale, funcName, leftValue, righValue, expected) != success) {
             return fail;
         }
     }
     return success;
 }
 
-function FormatRangeNegInfNegInfUnion(): int {
-    const funcName = 'FormatRangeNegInfNegInfUnion';
+function formatRangeNegInfNegInfUnion(): int {
+    const funcName = 'formatRangeNegInfNegInfUnion';
     let left = Array.create<string>(languageCodes.length, '');
     left[EN] = String.fromCharCode(126);
     left[FR] = String.fromCharCode(8771);
@@ -297,7 +327,7 @@ function FormatRangeNegInfNegInfUnion(): int {
             locale = locale + '-' + countryCodes[i];
         }
         const expected = left[i] + right[i];
-        if (CheckFormatRangeUnion(locale, funcName, leftValue, righValue, expected) != success) {
+        if (checkFormatRangeUnion(locale, funcName, leftValue, righValue, expected) != success) {
             return fail;
         }
     }

@@ -31,8 +31,8 @@ function testMessageWithString() {
     let eaw = new EAWorker();
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {}, eaw);
 
-    let msg = new concurrency.Message(10, "hello world", handler);
-    arktest.assertEQ(msg.getObject() as string, "hello world");
+    let msg = new concurrency.Message(10, 'hello world', handler);
+    arktest.assertEQ(msg.getObject() as string, 'hello world');
 }
 
 function testMessageWithDate() {
@@ -49,10 +49,10 @@ function testMessageWithRegExp() {
     let eaw = new EAWorker();
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {}, eaw);
 
-    let reg = new RegExp("abc", "g");
+    let reg = new RegExp('abc', 'g');
     let msg = new concurrency.Message(30, reg, handler);
     let received = msg.getObject() as RegExp;
-    arktest.assertTrue(received.test("abc123"));
+    arktest.assertTrue(received.test('abc123'));
 }
 
 function testMessageWithArray() {
@@ -65,8 +65,8 @@ function testMessageWithArray() {
 }
 
 class TestObj {
-    name: string = ""
-    value: int = 0
+    public name: string = ''
+    public value: int = 0
     constructor(name: string, value: int) {
         this.name = name
         this.value = value
@@ -77,10 +77,10 @@ function testMessageWithObject() {
     let eaw = new EAWorker();
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {}, eaw);
 
-    let obj = new TestObj("test", 100);
+    let obj = new TestObj('test', 100);
     let msg = new concurrency.Message(50, obj, handler);
     let received = msg.getObject() as TestObj;
-    arktest.assertEQ(received.name, "test");
+    arktest.assertEQ(received.name, 'test');
     arktest.assertEQ(received.value, 100);
 }
 
@@ -89,8 +89,8 @@ function testMessageWithMap() {
     let handler = new concurrency.MessageHandler((msg: concurrency.Message) => {}, eaw);
 
     let map = new Map<string, int>();
-    map.set("a", 1);
-    map.set("b", 2);
+    map.set('a', 1);
+    map.set('b', 2);
     let msg = new concurrency.Message(60, map, handler);
     arktest.assertEQ(msg.getObject(), map);
 }

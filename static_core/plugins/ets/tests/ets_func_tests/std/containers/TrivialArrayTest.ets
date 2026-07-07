@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,7 @@
  */
 
 function main(): void {
-    const arr = new Array<number>()
+    const arr: number[] = []
     arktest.assertEQ( arr.length, 0)
     for (let i = 0; i < 30; i++) {
         arktest.assertEQ( arr.length, i)
@@ -26,7 +26,7 @@ function main(): void {
     try {
         arr.at(50)
     } catch (e) {
-        arktest.assertEQ(e.message, "Invalid index");
+        arktest.assertEQ(e.message, 'Invalid index');
     }
     arktest.assertEQ( arr.length, 30)
     for (let i = 0; i < 30; i++) {
@@ -34,13 +34,13 @@ function main(): void {
     }
     arktest.assertEQ( arr.length, 0)
 
-    test_reverse()
-    test_splice_1()
-    test_unshift()
+    testReverse()
+    testSplice1()
+    testUnshift()
 }
 
-function test_reverse(): void {
-    const arr = new Array<number>()
+function testReverse(): void {
+    const arr: number[] = []
     arktest.assertEQ( arr.length, 0)
     for (let i = 0; i < 30; i++) {
         arktest.assertEQ( arr.length, i)
@@ -52,8 +52,8 @@ function test_reverse(): void {
     }
 }
 
-function test_splice_1(): void {
-    const arr = new Array<number>()
+function testSplice1(): void {
+    const arr: number[] = []
     for (let i = 0; i <= 3; i++) {
         arr.push(i)
     }
@@ -76,8 +76,8 @@ function test_splice_1(): void {
     arktest.assertEQ( other.$_get(5), 3)
 }
 
-function test_unshift(): void {
-    const a = new Array<number>()
+function testUnshift(): void {
+    const a: number[] = []
     a.unshift(1, 2, 3)
     arktest.assertEQ( a.length, 3)
     a.unshift(4, 5, 6)

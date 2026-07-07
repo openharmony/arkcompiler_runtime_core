@@ -14,9 +14,9 @@
  */
 
 class Obj {
-    b: number = 4
-    c: number = 5
-    s: string = 'somestringTest'
+    public b: number = 4
+    public c: number = 5
+    public s: string = 'somestringTest'
 }
 
 function testObjectAssignKeys(): void {
@@ -25,10 +25,10 @@ function testObjectAssignKeys(): void {
 
 	const objKeys = Object.keys(obj)
 	const newObjKeys = Object.keys(newObj)
- 	arktest.assertEQ(objKeys.length,  newObjKeys.length, "unexpected keys number")
+ 	arktest.assertEQ(objKeys.length, newObjKeys.length, 'unexpected keys number')
 
 	for (let i = 0; i < objKeys.length; i++) {
-	 	arktest.assertEQ(objKeys[i],  newObjKeys[i], "unexpected property name: " + newObjKeys[i])
+	 	arktest.assertEQ(objKeys[i], newObjKeys[i], 'unexpected property name: ' + newObjKeys[i])
 
 		const propName = objKeys[i]
 		const newObjVal = reflect.Value.of(newObj) as ClassValue
@@ -58,7 +58,7 @@ function testObjectAssignEntries(): void {
 
 	const objEntries = Object.entries(obj)
 	const newObjEntries = Object.entries(newObj)
- arktest.assertEQ(objEntries.length,  newObjEntries.length, "unexpected number of object entries")
+ arktest.assertEQ(objEntries.length, newObjEntries.length, 'unexpected number of object entries')
 
 	for (let i = 0; i < objEntries.length; i++) {
 		const objEntryName = objEntries[i]![0]
@@ -67,8 +67,8 @@ function testObjectAssignEntries(): void {
 		const newObjEntryName = newObjEntries[i]![0]
 		const newObjEntryVal = newObjEntries[i]![1]
 
-	 arktest.assertEQ(objEntryName,  newObjEntryName, "unexpected entry name: " + newObjEntryName)
-	 arktest.assertEQ(objEntryVal,  newObjEntryVal, `unexpected '${objEntryName}' property value: ${newObjEntryVal}`)
+	 arktest.assertEQ(objEntryName, newObjEntryName, 'unexpected entry name: ' + newObjEntryName)
+	 arktest.assertEQ(objEntryVal, newObjEntryVal, `unexpected '${objEntryName}' property value: ${newObjEntryVal}`)
 	}
 }
 
@@ -78,39 +78,39 @@ function testObjectAssignValues(): void {
 
 	const objVals = Object.values(obj)
 	const newObjVals = Object.values(newObj)
- arktest.assertEQ(objVals.length,  newObjVals.length, "unexpected values number")
+ arktest.assertEQ(objVals.length, newObjVals.length, 'unexpected values number')
 
 	for (let i = 0; i < objVals.length; i++) {
 		const objVal = objVals[i]
 		const newObjVal = newObjVals[i]
 
-	 arktest.assertEQ(objVal,  newObjVal, `unexpected object property value: ${newObjVal} at index [${i}]`)
+	 arktest.assertEQ(objVal, newObjVal, `unexpected object property value: ${newObjVal} at index [${i}]`)
 	}
 }
 
 function testObjectAssignGetOwnPropNames(): void {
 	const obj = new Obj()
-	const  newObj = Object.assign({}, obj)
+	const newObj = Object.assign({}, obj)
 
 	const objProps = Object.getOwnPropertyNames(obj)
 	const newObjProps = Object.getOwnPropertyNames(newObj)
- arktest.assertEQ(objProps.length,  newObjProps.length, "unexpected number of properties")
+ arktest.assertEQ(objProps.length, newObjProps.length, 'unexpected number of properties')
 
 	for (let i = 0; i < objProps.length; i++) {
 		const objProp = objProps[i]
 		const newObjProp = newObjProps[i]
 
-	 arktest.assertEQ(objProp,  newObjProp, "unexpected property name: " + newObjProp)
+	 arktest.assertEQ(objProp, newObjProp, 'unexpected property name: ' + newObjProp)
 	}
 }
 
 function main(): int {
-	const suite = new arktest.ArkTestsuite("Object literal of std.core.Record type tests")
+	const suite = new arktest.ArkTestsuite('Object literal of std.core.Record type tests')
 
-	suite.addTest("Object.assign(Record) result keys", testObjectAssignKeys)
-	suite.addTest("Object.assign(Record) result entries", testObjectAssignEntries)
-	suite.addTest("Object.assign(Record) result values", testObjectAssignValues)
-	suite.addTest("Object.assign(Record) result property names", testObjectAssignGetOwnPropNames)
+	suite.addTest('Object.assign(Record) result keys', testObjectAssignKeys)
+	suite.addTest('Object.assign(Record) result entries', testObjectAssignEntries)
+	suite.addTest('Object.assign(Record) result values', testObjectAssignValues)
+	suite.addTest('Object.assign(Record) result property names', testObjectAssignGetOwnPropNames)
 
 	return suite.run()
 }

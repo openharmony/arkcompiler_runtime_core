@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,9 @@ const testNum: int = 20;
 const stressNum: int = 100;
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueueSizeTest");
+    let linkedBlockingQueueTestsuite = new arktest.ArkTestsuite('LinkedBlockingQueueSizeTest');
 
-    LinkedBlockingQueueTestsuite.addTest("SizeTest001", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('SizeTest001', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
@@ -34,8 +33,7 @@ function main(): int {
         arktest.assertEQ(queueInt.add(testNum), true);
         arktest.assertEQ(queueInt.size, 6);
     });
-    LinkedBlockingQueueTestsuite.addTest("SizeAndPopAndPollTest008", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('SizeAndPopAndPollTest008', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < 10; i++) {
             queueInt.add(i);
@@ -53,8 +51,7 @@ function main(): int {
         }
         arktest.assertEQ(queueInt.size, 0);
     });
-    LinkedBlockingQueueTestsuite.addTest("GetSizeStressTest007", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('GetSizeStressTest007', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             arktest.assertEQ(queueInt.size, i);
@@ -63,5 +60,5 @@ function main(): int {
         arktest.assertEQ(queueInt.size, stressNum);
     });
 
-    return LinkedBlockingQueueTestsuite.run();
+    return linkedBlockingQueueTestsuite.run();
 }

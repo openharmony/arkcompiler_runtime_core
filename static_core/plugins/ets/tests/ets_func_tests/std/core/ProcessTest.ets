@@ -16,6 +16,7 @@
 
 function test(result: int, message: String ): int {
     if (result != 0) {
+      // CC-OFFNXT(G.AOD.03) current test suite code style
       console.log('FAILED: ' + message);
       return 1;
     }
@@ -32,7 +33,7 @@ function getOutput(child: StdProcess.ChildProcess, isStdErr: boolean) {
     let output: String = '';
 
     for (let i: int = 0; i < buffer.length; ++i) {
-        output +=  String.fromCharCode(buffer.$_get(i).toInt());
+        output += String.fromCharCode(buffer.$_get(i).toInt());
     }
 
     return output;
@@ -81,7 +82,7 @@ function getProcAttributes(): Map<String, number> {
         let cmd = 'cat /proc/' + pid + '/status';
         let output = runChildAndGetOutput(cmd, '\n');
         let result = new Map<String, number>();
-        let val: number  = 0;
+        let val: number = 0;
         for (let i:int = 0; i < output.length; ++i) {
             if (output[i].startsWith('Tgid:')) {
                 val = parseInt(output[i].replace('Tgid:', ''));
@@ -170,7 +171,7 @@ function testChildClose(): int {
 function testProcessManagerGetUidForName(): int {
     let pro = new StdProcess.ProcessManager();
     let expected = pro.getUidForName('root');
-    return  expected == 0|| expected == -1 ? 0 : 1;
+    return expected == 0 || expected == -1 ? 0 : 1;
 }
 
 function testProcessManagerGetThreadPriority(): int {
@@ -178,10 +179,10 @@ function testProcessManagerGetThreadPriority(): int {
     let expected = parseInt(output[17]);
     let pro = new StdProcess.ProcessManager();
     let actual = pro.getThreadPriority(StdProcess.pid()) + 20;
-    return  expected == actual ? 0 : 1;
+    return expected == actual ? 0 : 1;
 }
 
-function  testProcessManagerGetSystemConfig(): int {
+function testProcessManagerGetSystemConfig(): int {
     let res: int = 0;
 
     let _SC_ARG_MAX = 0;
@@ -197,7 +198,7 @@ function  testProcessManagerGetSystemConfig(): int {
 }
 
 function testProcessManagerGetEnvironmentVar(): int {
-    let output : String[] = runChildAndGetOutput('printenv','\n');
+    let output : String[] = runChildAndGetOutput('printenv', '\n');
     let entries: Map<String, String> = new Map<String, String>();
     for (let i = 0; i < output.length - 1 && i < 4; ++i) {
         const line = output[i]
@@ -219,37 +220,37 @@ function testProcessManagerKill(): int {
     let pid = childProcess.pid;
     let SIGKILL: int = 9;
     let pro = new StdProcess.ProcessManager();
-    while(!pro.kill(SIGKILL, pid)) {};
+    while (!pro.kill(SIGKILL, pid)) {};
     childProcess.wait();
     return childProcess.exitCode >= 0 ? 0 : 1;
 }
 
 function testGetPid(attributes: Map<String, number> ): int {
-    return  StdProcess.pid() == attributes.get('pid') ? 0 : 1;
+    return StdProcess.pid() == attributes.get('pid') ? 0 : 1;
 }
 
 function testGetTid(attributes: Map<String, number>): int {
-    return  StdProcess.tid() == attributes.get('tid') ? 0 : 1;
+    return StdProcess.tid() == attributes.get('tid') ? 0 : 1;
 }
 
 function testGetPpid(attributes: Map<String, number>): int {
-    return  StdProcess.ppid() == attributes.get('ppid') ? 0 : 1;
+    return StdProcess.ppid() == attributes.get('ppid') ? 0 : 1;
 }
 
 function testGetUid(attributes: Map<String, number>): int {
-    return  StdProcess.uid() == attributes.get('uid') ? 0 : 1;
+    return StdProcess.uid() == attributes.get('uid') ? 0 : 1;
 }
 
 function testGetEuid(attributes: Map<String, number>): int {
-    return  StdProcess.euid() == attributes.get('euid') ? 0 : 1;
+    return StdProcess.euid() == attributes.get('euid') ? 0 : 1;
 }
 
 function testGetGid(attributes: Map<String, number>): int {
-    return  StdProcess.gid() == attributes.get('gid') ? 0 : 1;
+    return StdProcess.gid() == attributes.get('gid') ? 0 : 1;
 }
 
 function testGetEgid(attributes: Map<String, number>): int {
-    return  StdProcess.egid() == attributes.get('egid') ? 0 : 1;
+    return StdProcess.egid() == attributes.get('egid') ? 0 : 1;
 }
 
 function testGetGroups(attributes: Map<String, number>): int {
@@ -297,7 +298,7 @@ function testGetStartRealTime(): int {
 function testGetPastCpuTime(): int {
     let start = StdProcess.getPastCpuTime();
 
-    while (StdProcess.getPastCpuTime()  - start < 1) {};
+    while (StdProcess.getPastCpuTime() - start < 1) {};
 
     let finish = StdProcess.getPastCpuTime();
 
@@ -337,12 +338,12 @@ function testRunCmdWithMaxBuffer(): int {
 
 function testCwd(): int {
     let expected = runChildAndGetOutput('pwd');
-    let actual  = StdProcess.cwd() + '\n';
+    let actual = StdProcess.cwd() + '\n';
     return actual == expected ? 0 : 1;
 }
 
 function testChangeDir(): int {
-    let result: int  = 0;
+    let result: int = 0;
 
     let currentDir = StdProcess.cwd();
     StdProcess.chdir('/');
@@ -356,7 +357,7 @@ function testChangeDir(): int {
 function testUptime(): int {
     let start = StdProcess.uptime();
 
-    while (StdProcess.uptime()  - start < 1) {};
+    while (StdProcess.uptime() - start < 1) {};
 
     let finish = StdProcess.uptime();
 
@@ -364,7 +365,7 @@ function testUptime(): int {
 }
 
 function testProcessManagerIsAppUid(): int {
-    let result: int  = 0;
+    let result: int = 0;
 
     try {
         let mgr = new StdProcess.ProcessManager();
@@ -398,7 +399,7 @@ function testProcessManagerIsAppUid(): int {
 }
 
 function testIsIsolatedProcess(): int {
-    let result: int  = 0;
+    let result: int = 0;
 
     try {
         let isIsolated = StdProcess.isIsolatedProcess();
@@ -471,6 +472,7 @@ function main(): int {
     failures += test(testIsIsolatedProcess(), 'process.isIsolatedProcess() test');
 
     if (failures != 0) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log('FAILED: All tests run');
     }
 

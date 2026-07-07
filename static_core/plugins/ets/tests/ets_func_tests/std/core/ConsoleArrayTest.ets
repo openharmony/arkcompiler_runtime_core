@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,8 @@
  */
 
 class Connection {
-    id: number;
-    user: string;
+    public id: number;
+    public user: string;
 
     constructor(id: number, user: string) {
         this.id = id;
@@ -25,24 +25,32 @@ class Connection {
 
 function main() {
     let d: Connection[] = [
-        new Connection(1, "user1"),
-        new Connection(2, "user2")
+        new Connection(1, 'user1'),
+        new Connection(2, 'user2')
     ]
 
     // Debug arrays
-    console.debug("Active connections:", d);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.debug('Active connections:', d);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.debug([1, 2, 3, 4, 5]);
 
-    console.info("Active connections:", d);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.info('Active connections:', d);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.info([1, 2, 3, 4, 5]);
 
-    console.log("Active connections:", d);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('Active connections:', d);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log([1, 2, 3, 4, 5]);
 
-    console.warn("Active connections:", d);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.warn('Active connections:', d);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.warn([1, 2, 3, 4, 5]);
 
     // Note(ivan-tyulyandin): uncomment and fix .expected file after fix of #25014
-    // console.error("Active connections:", d);
-    // console.error([1, 2, 3, 4, 5]);
+    // FIXME console.error("Active connections:", d);
+    // FIXME console.error([1, 2, 3, 4, 5]);
 }

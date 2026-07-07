@@ -14,15 +14,15 @@
  */
 
 const success : int = 0;
-const fail    : int = 1;
+const fail : int = 1;
 
 function main(): int {
     let failures: int = 0;
-    failures += check((): int => { return length() }, "length");
-    failures += check((): int => { return shiftUnshift() }, "shiftUnshift");
-    failures += check((): int => { return pushPop() }, "pushPop");
-    failures += check((): int => { return at() }, "at");
-    return check(failures, "All tests run");
+    failures += check((): int => { return length() }, 'length');
+    failures += check((): int => { return shiftUnshift() }, 'shiftUnshift');
+    failures += check((): int => { return pushPop() }, 'pushPop');
+    failures += check((): int => { return at() }, 'at');
+    return check(failures, 'All tests run');
 }
 
 function newProxy<T>(a: Array<T>): Array<T> {
@@ -41,7 +41,7 @@ function check<T>(newArrayFn: () => Array<T>, testFn: (a: Array<T>) => int): int
 }
 
 function length(): int {
-    return check(() => new Array<number>, (a: Array<number>) => {
+    return check(() => [], (a: Array<number>) => {
         if (a.length != 0) {
             return fail;
         }
@@ -78,7 +78,7 @@ function length(): int {
 }
 
 function shiftUnshift(): int {
-    return check(() => new Array<number>, (a: Array<number>) => {
+    return check(() => [], (a: Array<number>) => {
         if (a.shift() !== undefined) {
             return fail;
         }
@@ -103,7 +103,7 @@ function shiftUnshift(): int {
 }
 
 function pushPop(): int {
-    return check(() => new Array<number>, (a: Array<number>) => {
+    return check(() => [], (a: Array<number>) => {
         if (a.pop() !== undefined) {
             return fail;
         }
@@ -128,12 +128,12 @@ function pushPop(): int {
 }
 
 function at(): int {
-    return check(() => new Array<number>, (a: Array<number>) => {
+    return check(() => [], (a: Array<number>) => {
         try {
             arr.at(50)
             return fail;
         } catch (e) {
-            arktest.assertEQ(e.message, "Invalid index");
+            arktest.assertEQ(e.message, 'Invalid index');
         }
         a.pushECMA(1, 2, 3, 4, 5)
         if (a.length != 5) {
@@ -148,13 +148,13 @@ function at(): int {
             arr.at(arr.length);
             return fail;
         } catch (e) {
-            arktest.assertEQ(e.message, "Invalid index");
+            arktest.assertEQ(e.message, 'Invalid index');
         }
         try {
             arr.at(-arr.length - 1);
             return fail;
         } catch (e) {
-            arktest.assertEQ(e.message, "Invalid index");
+            arktest.assertEQ(e.message, 'Invalid index');
         }
         if (arr.at(-arr.length)! != arr[0] || arr.at(-arr.length + 1)! != arr[1]) {
             return fail;
@@ -168,7 +168,8 @@ function check(result: int, message: String): int {
     if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }
 
@@ -176,13 +177,15 @@ function check(fn: () => int, message: String): int {
     let result: int = 0;
     try {
         result = fn();
-    } catch(e) {
-        console.println("FAILED: " + message + " => Error catched: " + e);
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: ' + message + ' => Error catched: ' + e);
         return fail;
     }
     if (result == success) {
       return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }

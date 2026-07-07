@@ -14,15 +14,18 @@
  */
 
 class ElementTest {
-    ele: int
-    constructor(e: int) {
+    public ele: int
+    public constructor(e: int) {
         this.ele = e
     }
 }
 
 function testConstructor(): void {
     const len = 5
-    let arr = new Array<ElementTest>(len, (index) => { return new ElementTest(index) })
+    let arr: ElementTest[] = []
+    for (let index = 0; index < len; index++) {
+        arr.push(new ElementTest(index))
+    }
     for (let idx = 0; idx < len; idx++) {
         arktest.assertEQ(arr[idx].ele, idx)
     }
@@ -30,7 +33,10 @@ function testConstructor(): void {
 
 function testArrayWithUndefined(): void {
     const len = 5
-    let arr: Array<ElementTest | undefined> = new Array<ElementTest | undefined>(len, (index) => { return undefined })
+    let arr: (ElementTest | undefined)[] = []
+    for (let index = 0; index < len; index++) {
+        arr.push(undefined)
+    }
     for (let idx = 0; idx < len; idx++) {
         arktest.assertEQ(arr[idx], undefined)
     }
@@ -40,10 +46,10 @@ function testArrayWithUndefined(): void {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Array Null Safe Check")
+    const suite = new arktest.ArkTestsuite('Array Null Safe Check')
 
-    suite.addTest("Array test with constructor", testConstructor)
-    suite.addTest("Array test with ArrayWithUndefined", testArrayWithUndefined)
+    suite.addTest('Array test with constructor', testConstructor)
+    suite.addTest('Array test with ArrayWithUndefined', testArrayWithUndefined)
 
     return suite.run()
 }

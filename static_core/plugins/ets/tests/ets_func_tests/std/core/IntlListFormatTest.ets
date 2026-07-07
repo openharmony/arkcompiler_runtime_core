@@ -24,7 +24,7 @@ function main() {
 function testFormat() {
     {
         const formatter = new Intl.ListFormat('en-US')
-        const arr = new Array<string>()
+        const arr: string[] = []
         arktest.assertEQ(formatter.format(arr), '')
     }
     {
@@ -70,7 +70,7 @@ function testParts(parts: Array<Intl.FormatToPartsResult>, expected: Intl.Format
 function testFormatToParts() {
     {
         const formatter = new Intl.ListFormat('en-US')
-        const arr = new Array<string>()
+        const arr: string[] = []
         testParts(
             formatter.formatToParts(arr),
             [] as Intl.FormatToPartsResult[]

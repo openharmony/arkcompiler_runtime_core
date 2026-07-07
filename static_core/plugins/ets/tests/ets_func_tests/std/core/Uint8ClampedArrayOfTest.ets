@@ -21,25 +21,25 @@ function testOfRoundHalfToEven(): void {
 	// ToUint8Clamp round-half-to-even (banker's rounding)
 	const ta = Uint8ClampedArray.of(127.5, 126.5, 1.5, 2.5, 0.5, 1.2, 1.8);
 	arktest.assertEQ(ta.length, 7);
-	arktest.assertEQ(ta.$_get(0).toDouble(), 128);  // 127.5 → 128 (127 odd → round up)
-	arktest.assertEQ(ta.$_get(1).toDouble(), 126);  // 126.5 → 126 (126 even → keep)
-	arktest.assertEQ(ta.$_get(2).toDouble(), 2);    // 1.5 → 2 (1 odd → round up)
-	arktest.assertEQ(ta.$_get(3).toDouble(), 2);    // 2.5 → 2 (2 even → keep)
-	arktest.assertEQ(ta.$_get(4).toDouble(), 0);    // 0.5 → 0 (0 even → keep)
-	arktest.assertEQ(ta.$_get(5).toDouble(), 1);    // 1.2 → 1 (< 0.5 → down)
-	arktest.assertEQ(ta.$_get(6).toDouble(), 2);    // 1.8 → 2 (> 0.5 → up)
+	arktest.assertEQ(ta.$_get(0).toDouble(), 128); // 127.5 → 128 (127 odd → round up)
+	arktest.assertEQ(ta.$_get(1).toDouble(), 126); // 126.5 → 126 (126 even → keep)
+	arktest.assertEQ(ta.$_get(2).toDouble(), 2); // 1.5 → 2 (1 odd → round up)
+	arktest.assertEQ(ta.$_get(3).toDouble(), 2); // 2.5 → 2 (2 even → keep)
+	arktest.assertEQ(ta.$_get(4).toDouble(), 0); // 0.5 → 0 (0 even → keep)
+	arktest.assertEQ(ta.$_get(5).toDouble(), 1); // 1.2 → 1 (< 0.5 → down)
+	arktest.assertEQ(ta.$_get(6).toDouble(), 2); // 1.8 → 2 (> 0.5 → up)
 }
 
 function testOfClampBoundaries(): void {
 	const ta = Uint8ClampedArray.of(NaN, -10, 0, 255, 300, Infinity, -Infinity);
 	arktest.assertEQ(ta.length, 7);
-	arktest.assertEQ(ta.$_get(0).toDouble(), 0);    // NaN → 0
-	arktest.assertEQ(ta.$_get(1).toDouble(), 0);    // -10 → 0
-	arktest.assertEQ(ta.$_get(2).toDouble(), 0);    // 0 → 0
-	arktest.assertEQ(ta.$_get(3).toDouble(), 255);  // 255 → 255
-	arktest.assertEQ(ta.$_get(4).toDouble(), 255);  // 300 → 255
-	arktest.assertEQ(ta.$_get(5).toDouble(), 255);  // Infinity → 255
-	arktest.assertEQ(ta.$_get(6).toDouble(), 0);    // -Infinity → 0
+	arktest.assertEQ(ta.$_get(0).toDouble(), 0); // NaN → 0
+	arktest.assertEQ(ta.$_get(1).toDouble(), 0); // -10 → 0
+	arktest.assertEQ(ta.$_get(2).toDouble(), 0); // 0 → 0
+	arktest.assertEQ(ta.$_get(3).toDouble(), 255); // 255 → 255
+	arktest.assertEQ(ta.$_get(4).toDouble(), 255); // 300 → 255
+	arktest.assertEQ(ta.$_get(5).toDouble(), 255); // Infinity → 255
+	arktest.assertEQ(ta.$_get(6).toDouble(), 0); // -Infinity → 0
 }
 
 function testOfBasicInts(): void {

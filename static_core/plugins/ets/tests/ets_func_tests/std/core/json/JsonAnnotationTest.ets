@@ -18,12 +18,12 @@ const INT8_MIN: number = Byte.MIN_VALUE; //-128
 
 class TestClass1 {
     @JSONRename('__backing_user')
-    user: string = ''
+    public user: string = ''
     @JSONStringifyIgnore
     @JSONParseIgnore
-    password: number = 0
+    public password: number = 0
     @JSONParseIgnore
-    nickname: string = ''
+    public nickname: string = ''
 
     setPassword(pwd: number) {
         this.password = pwd
@@ -38,94 +38,94 @@ class TestClass1 {
 
 class TestClass2 {
     @JSONRename('nickname')
-    user: string = ''
-    password: number = 0
-    nickname: string = ''
+    public user: string = ''
+    public password: number = 0
+    public nickname: string = ''
 }
 
 class TestClass3 {
     @JSONRename('nickname1')
-    user: string = ''
-    password: number = 0
+    public user: string = ''
+    public password: number = 0
     @JSONRename('nickname1')
-    nickname: string = ''
+    public nickname: string = ''
 }
 
 class TestClass4 {
     @JSONRename('nickname1')
-    user: string = ''
-    password: number = 0
-    nickname: string = ''
+    public user: string = ''
+    public password: number = 0
+    public nickname: string = ''
 }
 
 class TestClass5 {
-    name1: string = 'class5'
+    public name1: string = 'class5'
 }
 
 class TestClass6 extends TestClass5 {
-    name1: string = 'class6'
-    nickname: string = 'class6_nickname'
+    public name1: string = 'class6'
+    public nickname: string = 'class6_nickname'
 }
 
 class TestClass7 extends TestClass5 {
-    name1: string = 'class7'
-    nickname: string = 'class7_nickname'
+    public name1: string = 'class7'
+    public nickname: string = 'class7_nickname'
 }
 
 class TestClass8 {
     @JSONRename('name8')
-    name1: string = 'TestClass8'
-    nickname: string = 'class8_nickname'
+    public name1: string = 'TestClass8'
+    public nickname: string = 'class8_nickname'
 }
 
 class TestClass9 {
-    name1: string = 'TestClass9'
-    nickname: TestClass8 = new TestClass8()
+    public name1: string = 'TestClass9'
+    public nickname: TestClass8 = new TestClass8()
 }
 
 class TestClass10 extends TestClass8 {
     @JSONRename('name8')
-    name10: string = 'TestClass10'
+    public name10: string = 'TestClass10'
 }
 
 class TestClass11 extends TestClass8 {
     @JSONRename('name1')
-    name11: string = 'TestClass11'
+    public name11: string = 'TestClass11'
 }
 
 class TestClass12 extends TestClass8 {
     @JSONRename('name12test')
-    name12: string = 'TestClass12'
+    public name12: string = 'TestClass12'
 }
 
 class TestClass13 {
     @JSONRename('name9')
-    name1: string = 'TestClass13'
+    public name1: string = 'TestClass13'
     @JSONRename('nicknametest')
-    nickname: string = 'class13_nickname'
-    nickname2: string = 'class13_nickname2'
-    nickname3: string = 'class13_nickname3'
+    public nickname: string = 'class13_nickname'
+    public nickname2: string = 'class13_nickname2'
+    public nickname3: string = 'class13_nickname3'
 }
 
 class TestClass14 extends TestClass13 {
     @JSONRename('name14test')
-    name10: string = 'TestClass14'
-    name9: string = 'TestClass14'
-    nicknametest: string = 'class14_nickname'
-    nickname3: string = 'class14_nickname3'
+    public name10: string = 'TestClass14'
+    public name9: string = 'TestClass14'
+    public nicknametest: string = 'class14_nickname'
+    public nickname3: string = 'class14_nickname3'
 }
 
 class TestClass15 {
     @JSONRename('record15')
-    record: Record<string, Any> = new Record<string, Any>()
+    public record: Record<string, Any> = new Record<string, Any>()
     @JSONRename('map15')
-    map: Map<string, string> = new Map<string, string>()
+    public map: Map<string, string> = new Map<string, string>()
     @JSONRename('nestedRecord15')
-    nestedRecord: Record<string, Any> = new Record<string, Any>()
+    public nestedRecord: Record<string, Any> = new Record<string, Any>()
     @JSONStringifyIgnore
-    i8Array: Int8Array = Int8Array.of(INT8_MAX, INT8_MIN, 100, INT8_MIN + 1)
+    public i8Array: Int8Array = Int8Array.of(INT8_MAX, INT8_MIN, 100, INT8_MIN + 1)
     @JSONRename('fixArray15')
-    fixArray: FixedArray<String> = ['\a', '\b']
+    public fixArray: FixedArray<String> = ['\a', '\b']
 }
 
 class TestClass16 {
@@ -257,11 +257,14 @@ function jsonTestWithExtends() {
 
 function jsonTestWithTypes() {
     let obj: TestClass15 = new TestClass15()
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     obj.record['name'] = 'arkts'
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     obj.record['version'] = 1
     obj.map.set('key1', 'value1')
     obj.nestedRecord = { 'name': 'arkts', 'version': 1}
     const nest: Record<string, Any> = { 'desc': 'nested' }
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     obj.nestedRecord['nested'] = nest
     let json = JSON.stringify(obj)
     const targetOutput = '{"record15":{"name":"arkts","version":1},"map15":{},' +

@@ -92,7 +92,7 @@ of the 257 times nested FixedArray of string');
 of the 256 times nested FixedArray of object');
 }
 
-function checkDeepSubtypingNegative () {
+function checkDeepSubtypingNegative() {
     const s254: F254<string> = [];
     const s255: F255<string> = [];
     const s256: F256<string> = [];

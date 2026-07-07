@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-class forTest {
+class ForTest {
     static async asyncStaticMethod() {}
     static notAsyncStaticMethod(): Object { return {} }
 
@@ -41,12 +41,12 @@ function testAsync() {
     arktest.assertFalse(reflect.isFuncObjAsync(notAsyncFunc))
     arktest.assertFalse(testAsyncArg(notAsyncFunc))
 
-    arktest.assertTrue(reflect.isFuncObjAsync(forTest.asyncStaticMethod))
-    arktest.assertTrue(testAsyncArg(forTest.asyncStaticMethod))
-    arktest.assertFalse(reflect.isFuncObjAsync(forTest.notAsyncStaticMethod))
-    arktest.assertFalse(testAsyncArg(forTest.notAsyncStaticMethod))
+    arktest.assertTrue(reflect.isFuncObjAsync(ForTest.asyncStaticMethod))
+    arktest.assertTrue(testAsyncArg(ForTest.asyncStaticMethod))
+    arktest.assertFalse(reflect.isFuncObjAsync(ForTest.notAsyncStaticMethod))
+    arktest.assertFalse(testAsyncArg(ForTest.notAsyncStaticMethod))
 
-    let ft = new forTest()
+    let ft = new ForTest()
     arktest.assertTrue(reflect.isFuncObjAsync(ft.asyncMethod))
     arktest.assertTrue(testAsyncArg(ft.asyncMethod))
     arktest.assertFalse(reflect.isFuncObjAsync(ft.notAsyncMethod))
@@ -54,9 +54,9 @@ function testAsync() {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Reflect isFuncObjAsync API test")
+    const suite = new arktest.ArkTestsuite('Reflect isFuncObjAsync API test')
 
-    suite.addTest("Test isFuncObjAsync API", testAsync)
+    suite.addTest('Test isFuncObjAsync API', testAsync)
 
     return suite.run()
 }

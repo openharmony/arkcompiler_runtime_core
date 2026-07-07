@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,47 +19,43 @@ const stressNum: int = 100;
 const arr: Number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueueConstructorTest");
+    let linkedBlockingQueueTestsuite = new arktest.ArkTestsuite('LinkedBlockingQueueConstructorTest');
 
-    LinkedBlockingQueueTestsuite.addTest("ConstructorTest001", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('ConstructorTest001', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         arktest.assertEQ(queueInt.isEmpty(), true);
         arktest.assertEQ(queueInt.size, 0);
     });
-    LinkedBlockingQueueTestsuite.addTest("ConstructorTest002", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('ConstructorTest002', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(elementsNum);
         arktest.assertEQ(queueInt.isEmpty(), true);
         arktest.assertEQ(queueInt.size, 0);
         arktest.assertEQ(queueInt.capacity, elementsNum);
     });
-    LinkedBlockingQueueTestsuite.addTest("ConstructorTest003", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('ConstructorTest003', () => {
         let array = Array.from<number>(arr);
-        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(array);
-        arktest.assertEQ(ConcurrentSetTest.size, 10);
+        let concurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(array);
+        arktest.assertEQ(concurrentSetTest.size, 10);
         flag = 0;
-        ConcurrentSetTest.forEach((val: number) => {
+        concurrentSetTest.forEach((val: number) => {
             arktest.assertEQ(val, flag++);
         });
-        let iter = ConcurrentSetTest.keys();
+        let iter = concurrentSetTest.keys();
         let queueInt: containers.LinkedBlockingQueue<number> = new containers.LinkedBlockingQueue<number>(iter);
         for (let i = 0; i < 10; i++) {
             arktest.assertEQ(queueInt.pop(), i);
         }
         arktest.assertEQ(queueInt.capacity, Int.MAX_VALUE);
     });
-    LinkedBlockingQueueTestsuite.addTest("ConstructorTest004", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('ConstructorTest004', () => {
         let array = Array.from<number>(arr);
-        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(array);
-        arktest.assertEQ(ConcurrentSetTest.size, 10);
+        let concurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>(array);
+        arktest.assertEQ(concurrentSetTest.size, 10);
         flag = 0;
-        ConcurrentSetTest.forEach((val: number) => {
+        concurrentSetTest.forEach((val: number) => {
             arktest.assertEQ(val, flag++);
         });
-        let iter = ConcurrentSetTest.keys();
+        let iter = concurrentSetTest.keys();
         let queueInt: containers.LinkedBlockingQueue<number> = new containers.LinkedBlockingQueue<number>(10, iter);
         for (let i = 0; i < 10; i++) {
             arktest.assertEQ(queueInt.pop(), i);
@@ -67,5 +63,5 @@ function main(): int {
         arktest.assertEQ(queueInt.capacity, 10);
     });
 
-    return LinkedBlockingQueueTestsuite.run();
+    return linkedBlockingQueueTestsuite.run();
 }

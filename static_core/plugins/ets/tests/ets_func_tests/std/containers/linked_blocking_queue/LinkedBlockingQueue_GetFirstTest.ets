@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,9 @@ const elementsNum: int = 10;
 const stressNum: int = 100;
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueueGetFirstTest");
+    let linkedBlockingQueueTestsuite = new arktest.ArkTestsuite('LinkedBlockingQueueGetFirstTest');
 
-    LinkedBlockingQueueTestsuite.addTest("GetFirstTest001", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('GetFirstTest001', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
@@ -30,8 +29,7 @@ function main(): int {
         arktest.assertEQ(queueInt.isEmpty(), false);
         arktest.assertEQ(queueInt.size, elementsNum);
     });
-    LinkedBlockingQueueTestsuite.addTest("GetFirstTest002", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('GetFirstTest002', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
@@ -42,8 +40,7 @@ function main(): int {
         arktest.assertEQ(queueInt.isEmpty(), false);
         arktest.assertEQ(queueInt.size, elementsNum - 1);
     });
-    LinkedBlockingQueueTestsuite.addTest("GetFirstAndSizeAndPopAndPollTest009", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('GetFirstAndSizeAndPopAndPollTest009', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < 10; i++) {
             queueInt.add(i);
@@ -64,8 +61,7 @@ function main(): int {
         }
         arktest.assertEQ(queueInt.size, 0);
     });
-    LinkedBlockingQueueTestsuite.addTest("GetFirstAndIsEmptyAndPopAndPollTest010", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('GetFirstAndIsEmptyAndPopAndPollTest010', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < 10; i++) {
             queueInt.add(i);
@@ -85,8 +81,7 @@ function main(): int {
         }
         arktest.assertEQ(queueInt.isEmpty(), true);
     });
-    LinkedBlockingQueueTestsuite.addTest("GetFirstStressTest005", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('GetFirstStressTest005', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
@@ -98,5 +93,5 @@ function main(): int {
         arktest.assertEQ(queueInt.size, 0);
     });
 
-    return LinkedBlockingQueueTestsuite.run();
+    return linkedBlockingQueueTestsuite.run();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,8 +46,8 @@ function newWeakSetUsingElementsArray(): void {
 }
 
 function newWeakSetUsingElementsIterable(): void {
-    const elem1 = new Object;
-    const elem2 = new Object;
+    const elem1: Object = {};
+    const elem2: Object = {};
 
     const elems: Iterable<Object> = Array.of<Object>(elem1, elem2)
     const weakSet = new WeakSet<Object>(elems)
@@ -64,7 +64,7 @@ function newWeakSetUsingNullElements(): void {
     arktest.assertTrue(weakSet.has(elem1))
 }
 
-function  newWeakSetUsingUndefinedElements(): void {
+function newWeakSetUsingUndefinedElements(): void {
     const weakSet = new WeakSet<Key>(undefined)
 }
 

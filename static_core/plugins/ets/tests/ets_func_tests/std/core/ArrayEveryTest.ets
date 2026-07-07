@@ -14,14 +14,14 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Array every tests for SDK");
-    suite.addTest("Array.every testBasic ", testBasic);
-    suite.addTest("Array.every testEmptyArray ", testEmptyArray);
-    suite.addTest("Array.every testModifyDuringIteration ", testModifyDuringIteration);
-    suite.addTest("Array.every testObjectArray ", testObjectArray);
-    suite.addTest("Array.every testEarlyTermination ", testEarlyTermination);
-    suite.addTest("Array.every testCallbackError ", testCallbackError);
-    suite.addTest("Array.every testImpureCallback ", testImpureCallback);
+    const suite = new arktest.ArkTestsuite('Array every tests for SDK');
+    suite.addTest('Array.every testBasic ', testBasic);
+    suite.addTest('Array.every testEmptyArray ', testEmptyArray);
+    suite.addTest('Array.every testModifyDuringIteration ', testModifyDuringIteration);
+    suite.addTest('Array.every testObjectArray ', testObjectArray);
+    suite.addTest('Array.every testEarlyTermination ', testEarlyTermination);
+    suite.addTest('Array.every testCallbackError ', testCallbackError);
+    suite.addTest('Array.every testImpureCallback ', testImpureCallback);
     return suite.run();
 }
 
@@ -59,7 +59,7 @@ function testModifyDuringIteration() {
     arktest.assertEQ(arr1[4], 4)
     arktest.assertEQ(arr1[5], 4)
 
-    const arr2: number[] = [1,2,3]
+    const arr2: number[] = [1, 2, 3]
     let iterations2 = 0;
     const result2 = arr2.every(x => {
         iterations2++;
@@ -71,7 +71,7 @@ function testModifyDuringIteration() {
     arktest.assertEQ(iterations2, 1)
     arktest.assertEQ(arr2[0], 3)
 
-    const arr3: number[] = [1,2,3]
+    const arr3: number[] = [1, 2, 3]
     let iterations3 = 0;
     const result3 = arr3.every(x => {
         iterations3++;
@@ -127,7 +127,7 @@ function testEarlyTermination() {
 
 
 function testCallbackError() {
-    const arr: Array<number | string> = [1, 2, 3, 'four', 5];
+    const arr: (number | string)[] = [1, 2, 3, 'four', 5];
     try {
         const result = arr.every(x => {
             if (typeof x !== 'number') {

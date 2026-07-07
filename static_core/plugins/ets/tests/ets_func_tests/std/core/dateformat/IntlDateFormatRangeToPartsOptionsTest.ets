@@ -15,15 +15,20 @@
 
 type FormatToPartsResult = [string | undefined, Intl.DateTimeFormatOptions | undefined, Intl.DateTimeRangeFormatPart[]]
 
-const FORMAT_RESULTS = new Array<FormatToPartsResult>()
+const FORMAT_RESULTS: FormatToPartsResult[] = []
 
-function addFormatRangeToPartsResult(locale: string | undefined, options: Intl.DateTimeFormatOptions | undefined, result: Intl.DateTimeRangeFormatPart[]): void {
-    const res: [string | undefined, Intl.DateTimeFormatOptions | undefined, Intl.DateTimeRangeFormatPart[]] = [locale, options, result]
+function addFormatRangeToPartsResult(
+    locale: string | undefined,
+    options: Intl.DateTimeFormatOptions | undefined,
+    result: Intl.DateTimeRangeFormatPart[]): void {
+    const res:
+        [string | undefined, Intl.DateTimeFormatOptions | undefined, Intl.DateTimeRangeFormatPart[]] =
+        [locale, options, result]
     FORMAT_RESULTS.push(res)
 }
 
-const RANGE_START = new Date("2024-10-11T10:20:30.444Z")
-const RANGE_END = new Date("2024-10-12T20:30:50.444Z")
+const RANGE_START = new Date('2024-10-11T10:20:30.444Z')
+const RANGE_END = new Date('2024-10-12T20:30:50.444Z')
 
 class RPart implements Intl.DateTimeRangeFormatPart {
     private _type: Intl.DateTimeFormatPartTypes
@@ -31,9 +36,9 @@ class RPart implements Intl.DateTimeRangeFormatPart {
     private _source: Intl.DateTimeRangeFormatPartSource
 
     constructor() {
-        this._type = "literal"
-        this._value = ""
-        this._source = "shared"
+        this._type = 'literal'
+        this._value = ''
+        this._source = 'shared'
     }
 
     constructor(type: Intl.DateTimeFormatPartTypes, value: string, source: Intl.DateTimeRangeFormatPartSource) {
@@ -66,7 +71,11 @@ class RPart implements Intl.DateTimeRangeFormatPart {
         this._source = source
     }
 
-    static $_invoke(type: Intl.DateTimeFormatPartTypes, value: string, source: Intl.DateTimeRangeFormatPartSource): RPart {
+    static $_invoke(
+        type: Intl.DateTimeFormatPartTypes,
+        value: string,
+        source: Intl.DateTimeRangeFormatPartSource
+    ): RPart {
         return new RPart(type, value, source)
     }
 }
@@ -77,26 +86,26 @@ function initFormatResults(): void {
     }
 
     const resultUS:Intl.DateTimeRangeFormatPart[] = [
-        RPart("month", "10", "startRange"), RPart("literal", "/", "startRange"), 
-        RPart("day", "11", "startRange"), RPart("literal", "/", "startRange"), 
-        RPart("year", "2024", "startRange"), RPart("literal", " – ", "shared"), 
-        RPart("month", "10", "endRange"), RPart("literal", "/", "endRange"), 
-        RPart("day", "12", "endRange"), RPart("literal", "/", "endRange"), 
-        RPart("year", "2024", "endRange")
+        RPart('month', '10', 'startRange'), RPart('literal', '/', 'startRange'), 
+        RPart('day', '11', 'startRange'), RPart('literal', '/', 'startRange'), 
+        RPart('year', '2024', 'startRange'), RPart('literal', ' – ', 'shared'), 
+        RPart('month', '10', 'endRange'), RPart('literal', '/', 'endRange'), 
+        RPart('day', '12', 'endRange'), RPart('literal', '/', 'endRange'), 
+        RPart('year', '2024', 'endRange')
     ]
 
-    addFormatRangeToPartsResult("en-US", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "UTC" }, resultUS)
+    addFormatRangeToPartsResult('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' }, resultUS)
 
     const resultCN:Intl.DateTimeRangeFormatPart[] = [
-        RPart("year", "2024", "startRange"), RPart("literal", "/", "startRange"), 
-        RPart("month", "10", "startRange"), RPart("literal", "/", "startRange"), 
-        RPart("day", "11", "startRange"), RPart("literal", " – ", "shared"), 
-        RPart("year", "2024", "endRange"), RPart("literal", "/", "endRange"),
-        RPart("month", "10", "endRange"), RPart("literal", "/", "endRange"), 
-        RPart("day", "12", "endRange")
+        RPart('year', '2024', 'startRange'), RPart('literal', '/', 'startRange'), 
+        RPart('month', '10', 'startRange'), RPart('literal', '/', 'startRange'), 
+        RPart('day', '11', 'startRange'), RPart('literal', ' – ', 'shared'), 
+        RPart('year', '2024', 'endRange'), RPart('literal', '/', 'endRange'),
+        RPart('month', '10', 'endRange'), RPart('literal', '/', 'endRange'), 
+        RPart('day', '12', 'endRange')
     ]
 
-    addFormatRangeToPartsResult("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "UTC" }, resultCN)
+    addFormatRangeToPartsResult('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' }, resultCN)
 }
 
 function verifyResults(actual: Intl.DateTimeRangeFormatPart[], expected: Intl.DateTimeRangeFormatPart[]): boolean {
@@ -105,9 +114,9 @@ function verifyResults(actual: Intl.DateTimeRangeFormatPart[], expected: Intl.Da
     }
 
     for (let i = 0; i < actual.length; i++) {
-        const valid = actual[i].type == expected[i].type 
-                && actual[i].value == expected[i].value 
-                && actual[i].source == expected[i].source
+        const valid = actual[i].type == expected[i].type &&
+            actual[i].value == expected[i].value &&
+            actual[i].source == expected[i].source
 
         if (!valid) {
             return false
@@ -137,14 +146,14 @@ function dateFormatToPartsWithOptions(): void {
 
 function formatRangeToPartsTest() {
     let dtf = new Intl.DateTimeFormat('en', {dateStyle: 'medium'})
-    arktest.expectNoThrow(() => {dtf.formatRangeToParts(1,2)})
+    arktest.expectNoThrow(() => {dtf.formatRangeToParts(1, 2)})
 }
 
 function main(): int {
     initFormatResults()
 
-    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat.formatToParts()")
-    suite.addTest("with formatting options", dateFormatToPartsWithOptions)
+    const suite = new arktest.ArkTestsuite('Intl.DateTimeFormat.formatToParts()')
+    suite.addTest('with formatting options', dateFormatToPartsWithOptions)
     suite.addTest('test formatrangetoparts', formatRangeToPartsTest)
     return suite.run()
 }

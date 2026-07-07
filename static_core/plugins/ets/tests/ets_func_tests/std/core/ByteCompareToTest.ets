@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,30 +13,30 @@
  * limitations under the License.
  */
 
-function Byte_compareTo_basic_cases(): void {
+function byteCompareToBasicCases(): void {
   const a = new Byte(1);
   const b = new Byte(1);
   const c = new Byte(2);
   const n = new Byte(-1);
 
-  arktest.assertEQ(a.compareTo(b), 0, "Byte: equal should be 0");
-  arktest.assertEQ(a.compareTo(c), -1, "Byte: 1 < 2 => -1");
-  arktest.assertEQ(c.compareTo(a), 1, "Byte: 2 > 1 => 1");
-  arktest.assertEQ(n.compareTo(a), -1, "Byte: -1 < 1 => -1");
-  arktest.assertEQ(a.compareTo(n), 1, "Byte: 1 > -1 => 1");
+  arktest.assertEQ(a.compareTo(b), 0, 'Byte: equal should be 0');
+  arktest.assertEQ(a.compareTo(c), -1, 'Byte: 1 < 2 => -1');
+  arktest.assertEQ(c.compareTo(a), 1, 'Byte: 2 > 1 => 1');
+  arktest.assertEQ(n.compareTo(a), -1, 'Byte: -1 < 1 => -1');
+  arktest.assertEQ(a.compareTo(n), 1, 'Byte: 1 > -1 => 1');
 }
 
-function Byte_compareTo_extremes_and_sign(): void {
+function byteCompareToExtremesAndSign(): void {
   const minv = new Byte(-128);
   const maxv = new Byte(127);
 
-  arktest.assertEQ(minv.compareTo(maxv), -1, "Byte: MIN < MAX => -1");
-  arktest.assertEQ(maxv.compareTo(minv), 1, "Byte: MAX > MIN => 1");
+  arktest.assertEQ(minv.compareTo(maxv), -1, 'Byte: MIN < MAX => -1');
+  arktest.assertEQ(maxv.compareTo(minv), 1, 'Byte: MAX > MIN => 1');
 }
 
-function Byte_compareTo_antisymmetry(): void {
+function byteCompareToAntisymmetry(): void {
   const x = new Byte(-128);
   const y = new Byte(127);
-  arktest.assertEQ(x.compareTo(y), -1, "Byte antisym: x<y => -1");
-  arktest.assertEQ(y.compareTo(x), 1, "Byte antisym: y>x => 1");
+  arktest.assertEQ(x.compareTo(y), -1, 'Byte antisym: x<y => -1');
+  arktest.assertEQ(y.compareTo(x), 1, 'Byte antisym: y>x => 1');
 }

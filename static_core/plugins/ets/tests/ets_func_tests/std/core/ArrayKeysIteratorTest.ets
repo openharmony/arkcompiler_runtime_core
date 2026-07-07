@@ -14,15 +14,15 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Array.keys() iterator behavior")
+    const suite = new arktest.ArkTestsuite('Array.keys() iterator behavior')
 
-    suite.addTest("Test Array.keys() is not restored after done", testArrayKeysIteratorFinal)
+    suite.addTest('Test Array.keys() is not restored after done', testArrayKeysIteratorFinal)
 
     return suite.run()
 }
 
 function testArrayKeysIteratorFinal() {
-    let array: Array<string> = new Array<string>();
+    let array: string[] = [];
     let iterator = array.keys();
     let result: IteratorResult<int>;
 

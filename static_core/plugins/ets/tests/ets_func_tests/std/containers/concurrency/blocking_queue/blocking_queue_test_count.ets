@@ -18,18 +18,19 @@ type BQConstructorI = (capacity: int)=>BlockingQueueI;
 type TestFunction = (constr: BQConstructorI) => void;
 type BlockingQueue = containers.LinkedBlockingQueue<int> | containers.ArrayBlockingQueue<int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T>(arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+function awaitAll <T>(arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
-	for (let i = 0; i < arr.length; ++ i)
+	for (let i = 0; i < arr.length; ++ i) {
 		res.push(arr[i].Await());
+    }
 	return res;
 }
 
-function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
+function sumArrInto(to: FixedArray<int>, from: FixedArray<int>): void {
 	arktest.assertEQ(to.length, from.length);
 	for (let i = 0; i < to.length; ++ i) {
 		to[i] += from[i];
@@ -44,8 +45,9 @@ function subArrInto(to: FixedArray<int>, from: FixedArray<int>): void {
 }
 
 function assertEQAll(array: FixedArray<int>, value: int): void {
-	for (let i=0; i < array.length; ++ i)
+	for (let i = 0; i < array.length; ++ i) {
 		arktest.assertEQ(array[i], value)
+	}
 }
 
 function testPopAndPushCount(constr: BQConstructorI): void {
@@ -58,8 +60,9 @@ function testPopAndPushCount(constr: BQConstructorI): void {
 	const JOB_COUNT = 10;
 
 	let pushFunction: () => void = () => {
-		for (let i = 0; i < PUSH_COUNT; ++i)
+		for (let i = 0; i < PUSH_COUNT; ++i) {
 			queue.push(i);
+		}
 		queue.push(EXTRA);
 	};
 
@@ -67,7 +70,9 @@ function testPopAndPushCount(constr: BQConstructorI): void {
 		let counter: FixedArray<int> = new FixedArray<int>(PUSH_COUNT);
 		while (true) {
 			let val = queue.pop();
-			if (val == EXTRA) break;
+			if (val == EXTRA) {
+			    break;
+			}
 			++ counter[val];
 			Coroutine.Schedule();
 		}
@@ -83,27 +88,28 @@ function testPopAndPushCount(constr: BQConstructorI): void {
 	let finalCounter: FixedArray<int> = new FixedArray<int>(PUSH_COUNT);
 	let resCounters = awaitAll<FixedArray<int>>(poppers);
 
-	for (let i = 0; i < JOB_COUNT; ++ i)
+	for (let i = 0; i < JOB_COUNT; ++ i) {
 		sumArrInto(finalCounter, resCounters[i]);
+	}
 
 	assertEQAll(finalCounter, JOB_COUNT);
 	arktest.assertTrue(queue.isEmpty());
 }
 
 function main(): int {
-	let tests: Array<[String, TestFunction]> = [
-		["testPopAndPushCount", testPopAndPushCount],
+	let tests: [String, TestFunction][] = [
+		['testPopAndPushCount', testPopAndPushCount],
 	];
 
-    let LBQTestSuitecase = new arktest.ArkTestsuite("LinkedBlockingQueueTest")
-    let ABQTestSuitecase = new arktest.ArkTestsuite("ArrayBlockingQueueTest")
+    let lbqTestSuitecase = new arktest.ArkTestsuite('LinkedBlockingQueueTest')
+    let abqTestSuitecase = new arktest.ArkTestsuite('ArrayBlockingQueueTest')
 
-	let LBQconstr: BQConstructorI = (capacity: int)=>new containers.LinkedBlockingQueue<int>(capacity);
-	let ABQconstr: BQConstructorI = (capacity: int)=>new containers.ArrayBlockingQueue<int>(capacity);
+	let lbqConstr: BQConstructorI = (capacity: int)=>new containers.LinkedBlockingQueue<int>(capacity);
+	let abqConstr: BQConstructorI = (capacity: int)=>new containers.ArrayBlockingQueue<int>(capacity);
 
-	let suites: Array<[arktest.ArkTestsuite, BQConstructorI]> = [
-		[LBQTestSuitecase, LBQconstr],
-		[ABQTestSuitecase, ABQconstr],
+	let suites: [arktest.ArkTestsuite, BQConstructorI][] = [
+		[lbqTestSuitecase, lbqConstr],
+		[abqTestSuitecase, abqConstr],
 	]
 
 	for (let j = 0; j < suites.length; ++ j) {
@@ -116,9 +122,10 @@ function main(): int {
 		}
 	}
 
-	let codeLBQ = LBQTestSuitecase.run();
-	let codeABQ = ABQTestSuitecase.run();
-	if (codeLBQ == 0)
+	let codeLBQ = lbqTestSuitecase.run();
+	let codeABQ = abqTestSuitecase.run();
+	if (codeLBQ == 0) {
 		return codeABQ;
+	}
 	return codeLBQ;
 }

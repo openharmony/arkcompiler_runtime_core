@@ -18,35 +18,35 @@ desc: BigInt array exceptions check
 ---*/
 
  function main(): int {
-    const suite = new arktest.ArkTestsuite("Test exceptions set with bad target offset")
+    const suite = new arktest.ArkTestsuite('Test exceptions set with bad target offset')
 
-    suite.addTest("BigInt64Array 0", () => {
+    suite.addTest('BigInt64Array 0', () => {
         let testee = new BigInt64Array(4)
         arktest.expectThrow(() => {
             testee.set(testee, -1)
           });
     })
-    suite.addTest("BigUint64Array 0", () => {
+    suite.addTest('BigUint64Array 0', () => {
         let testee = new BigUint64Array(4)
         arktest.expectThrow(() => {
             testee.set(testee, -1)
           });
     })
 
-    suite.addTest("BigInt64Array 1", () => {
+    suite.addTest('BigInt64Array 1', () => {
         let testee = new BigInt64Array(4)
         arktest.expectThrow(() => {
             testee.set([1n], -1)
           });
     })
-    suite.addTest("BigUint64Array 1", () => {
+    suite.addTest('BigUint64Array 1', () => {
         let testee = new BigUint64Array(4)
         arktest.expectThrow(() => {
             testee.set([1n], -1)
           });
     })
 
-    suite.addTest("BigUint64Array 2", () => {
+    suite.addTest('BigUint64Array 2', () => {
         let source = new BigUint64Array(2)
         let testee = new BigUint64Array(2)
         arktest.expectThrow(() => {
@@ -54,7 +54,7 @@ desc: BigInt array exceptions check
           });
     })
 
-    suite.addTest("BigUint64Array 3", () => {
+    suite.addTest('BigUint64Array 3', () => {
         let source = new BigUint64Array(2)
         let testee = new BigUint64Array(1)
         arktest.expectThrow(() => {
@@ -62,7 +62,7 @@ desc: BigInt array exceptions check
           });
     })
 
-    suite.addTest("BigUint64Array 4: (2 + 0 > 1)", () => {
+    suite.addTest('BigUint64Array 4: (2 + 0 > 1)', () => {
         let source = new BigUint64Array(0)
         let testee = new BigUint64Array(1)
         arktest.expectThrow(() => {
@@ -70,7 +70,7 @@ desc: BigInt array exceptions check
           });
     })
 
-    suite.addTest("BigInt64Array 2", () => {
+    suite.addTest('BigInt64Array 2', () => {
         let source = new BigInt64Array(2)
         let testee = new BigInt64Array(2)
         arktest.expectThrow(() => {
@@ -78,7 +78,7 @@ desc: BigInt array exceptions check
           });
     })
 
-    suite.addTest("BigInt64Array 3", () => {
+    suite.addTest('BigInt64Array 3', () => {
         let source = new BigInt64Array(2)
         let testee = new BigInt64Array(1)
         arktest.expectThrow(() => {
@@ -86,7 +86,7 @@ desc: BigInt array exceptions check
           });
     })
 
-    suite.addTest("BigInt64Array 4: (2 + 0 > 1)", () => {
+    suite.addTest('BigInt64Array 4: (2 + 0 > 1)', () => {
         let source = new BigInt64Array(0)
         let testee = new BigInt64Array(1)
         arktest.expectThrow(() => {

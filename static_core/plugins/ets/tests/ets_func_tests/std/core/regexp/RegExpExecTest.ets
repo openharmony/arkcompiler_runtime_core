@@ -14,81 +14,81 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("RegExpExec Tests");
-    suite.addTest("test RegExp.exec1", testRegExpExec1);
-    suite.addTest("test RegExp.exec2", testRegExpExec2);
-    suite.addTest("test RegExp.exec3", testRegExpExec3);
-    suite.addTest("test RegExp.exec4", testRegExpExec4);
-    suite.addTest("test RegExp.exec5", testRegExpExec5);
-    suite.addTest("test RegExp.exec6", testRegExpExec6);
-    suite.addTest("test RegExp.exec7", testRegExpExec7);
-    suite.addTest("test RegExp.exec8", testRegExpExec8);
-    suite.addTest("test RegExp.exec9", testRegExpExec9);
-    suite.addTest("test RegExp.exec10", testRegExpExec10);
+    const suite = new arktest.ArkTestsuite('RegExpExec Tests');
+    suite.addTest('test RegExp.exec1', testRegExpExec1);
+    suite.addTest('test RegExp.exec2', testRegExpExec2);
+    suite.addTest('test RegExp.exec3', testRegExpExec3);
+    suite.addTest('test RegExp.exec4', testRegExpExec4);
+    suite.addTest('test RegExp.exec5', testRegExpExec5);
+    suite.addTest('test RegExp.exec6', testRegExpExec6);
+    suite.addTest('test RegExp.exec7', testRegExpExec7);
+    suite.addTest('test RegExp.exec8', testRegExpExec8);
+    suite.addTest('test RegExp.exec9', testRegExpExec9);
+    suite.addTest('test RegExp.exec10', testRegExpExec10);
 
     return suite.run();
 }
 
 function testRegExpExec1(): void {
-    let arr = new RegExp("\x00").exec("\u0000");
+    let arr = new RegExp('\x00').exec('\u0000');
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0]!.codePointAt(0), 0, "testRegExpExec1");
+        arktest.assertEQ(arr[0]!.codePointAt(0), 0, 'testRegExpExec1');
     }
 }
 
 function testRegExpExec2(): void {
-    let arr = new RegExp("ab\x00g").exec("ab\u0000grfd");
+    let arr = new RegExp('ab\x00g').exec('ab\u0000grfd');
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0]!.codePointAt(0), 97, "testRegExpExec2");
-        arktest.assertEQ(arr[0]!.codePointAt(1), 98, "testRegExpExec2");
-        arktest.assertEQ(arr[0]!.codePointAt(2), 0, "testRegExpExec2");
-        arktest.assertEQ(arr[0]!.codePointAt(3), 103, "testRegExpExec2");
+        arktest.assertEQ(arr[0]!.codePointAt(0), 97, 'testRegExpExec2');
+        arktest.assertEQ(arr[0]!.codePointAt(1), 98, 'testRegExpExec2');
+        arktest.assertEQ(arr[0]!.codePointAt(2), 0, 'testRegExpExec2');
+        arktest.assertEQ(arr[0]!.codePointAt(3), 103, 'testRegExpExec2');
     }
 }
 
 function testRegExpExec3(): void {
-    let arr = new RegExp("ab").exec("ab\u0000grfd");
+    let arr = new RegExp('ab').exec('ab\u0000grfd');
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0]!.codePointAt(0), 97, "testRegExpExec3");
-        arktest.assertEQ(arr[0]!.codePointAt(1), 98, "testRegExpExec3");
+        arktest.assertEQ(arr[0]!.codePointAt(0), 97, 'testRegExpExec3');
+        arktest.assertEQ(arr[0]!.codePointAt(1), 98, 'testRegExpExec3');
     }
 }
 
 function testRegExpExec4(): void {
-    let arr = new RegExp("ab\x00g").exec("abgrfddfs");
-    arktest.assertEQ(arr, null, "testRegExpExec4");
+    let arr = new RegExp('ab\x00g').exec('abgrfddfs');
+    arktest.assertEQ(arr, null, 'testRegExpExec4');
 }
 
 function testRegExpExec5(): void {
-    let arr = new RegExp("\x00").exec("");
-    arktest.assertEQ(arr, null, "testRegExpExec5");
+    let arr = new RegExp('\x00').exec('');
+    arktest.assertEQ(arr, null, 'testRegExpExec5');
 }
 
 function testRegExpExec6(): void {
-    let arr = new RegExp("").exec("\u0000");
+    let arr = new RegExp('').exec('\u0000');
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0]!.length, 0, "testRegExpExec6");
+        arktest.assertEQ(arr[0]!.length, 0, 'testRegExpExec6');
     }
 }
 
 function testRegExpExec7(): void {
-    let arr = new RegExp("").exec("");
+    let arr = new RegExp('').exec('');
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0]!.length, 0, "testRegExpExec7");
+        arktest.assertEQ(arr[0]!.length, 0, 'testRegExpExec7');
     }
 }
 
 function testRegExpExec8(): void {
-    let arr = new RegExp("(?<name>)b").exec("test b");
+    let arr = new RegExp('(?<name>)b').exec('test b');
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0]!, "b", "testRegExpExec8");
-        arktest.assertEQ(arr[1]!, "", "testRegExpExec8");
+        arktest.assertEQ(arr[0]!, 'b', 'testRegExpExec8');
+        arktest.assertEQ(arr[1]!, '', 'testRegExpExec8');
     }
 }
 
@@ -96,21 +96,21 @@ function testRegExpExec9(): void {
     // In unicode mode, a lone trailing surrogate (\udf06) as pattern is compiled by PCRE2
     // and matches the surrogate code unit 0xDF06 present in the surrogate pair \ud834\udf06.
     // The matched substring is one code unit long with codePointAt(0) == 0xDF06 (57094).
-    let arr = new RegExp("\udf06", "u").exec("\ud834\udf06");
+    let arr = new RegExp('\udf06', 'u').exec('\ud834\udf06');
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0]!.length, 1, "testRegExpExec9");
-        arktest.assertEQ(arr[0]!.codePointAt(0), 0xDF06, "testRegExpExec9");
+        arktest.assertEQ(arr[0]!.length, 1, 'testRegExpExec9');
+        arktest.assertEQ(arr[0]!.codePointAt(0), 0xDF06, 'testRegExpExec9');
     }
 }
 
 function testRegExpExec10(): void {
     // In unicode mode, a lone leading surrogate (\ud834) as pattern is compiled by PCRE2
     // and matches the surrogate code unit 0xD834 at position 0 of the surrogate pair input.
-    let arr = new RegExp("\ud834", "u").exec("\ud834\udf06");
+    let arr = new RegExp('\ud834', 'u').exec('\ud834\udf06');
     arktest.assertNE(arr, null);
     if (arr != null) {
-        arktest.assertEQ(arr[0]!.length, 1, "testRegExpExec10");
-        arktest.assertEQ(arr[0]!.codePointAt(0), 0xD834, "testRegExpExec10");
+        arktest.assertEQ(arr[0]!.length, 1, 'testRegExpExec10');
+        arktest.assertEQ(arr[0]!.codePointAt(0), 0xD834, 'testRegExpExec10');
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ function isInherited(f: Field, cls: ClassType): boolean {
 
 function testStaticFieldBasics(): void {
     const ct = Type.of(new SF()) as ClassType
-    const f = ct.getFieldByName(new String('foo')) as Field
+    const f = ct.getFieldByName(String('foo')) as Field
 
     arktest.assertTrue(f.getType().equals(IntType.VAL))
     arktest.assertTrue(f.getOwnerType().equals(ct))
@@ -48,7 +48,7 @@ function testStaticFieldBasics(): void {
 
 function testBarStaticField(): void {
     const ct = Type.of(new SF()) as ClassType
-    const f = ct.getFieldByName(new String('bar')) as Field
+    const f = ct.getFieldByName(String('bar')) as Field
 
     arktest.assertTrue((f.getAttributes() & Attributes.STATIC) != 0)
     arktest.assertEQ(AccessModifier.PUBLIC, f.getAccessModifier())
@@ -60,17 +60,17 @@ function testInheritedFields(): void {
     const ctSub = Type.of(new SubFld()) as ClassType
     const baseCt = Type.of(new BaseFld()) as ClassType
 
-    const fa = ctSub.getFieldByName(new String('a')) as Field
+    const fa = ctSub.getFieldByName(String('a')) as Field
     arktest.assertTrue(fa.getOwnerType().equals(baseCt))
     arktest.assertTrue(isInherited(fa, ctSub))
     arktest.assertEQ(AccessModifier.PUBLIC, fa.getAccessModifier())
 
-    const fc = ctSub.getFieldByName(new String('c')) as Field
+    const fc = ctSub.getFieldByName(String('c')) as Field
     arktest.assertTrue(fc.getOwnerType().equals(baseCt))
     arktest.assertTrue(isInherited(fc, ctSub))
     arktest.assertEQ(AccessModifier.PROTECTED, fc.getAccessModifier())
 
-    const fd = ctSub.getFieldByName(new String('d')) as Field
+    const fd = ctSub.getFieldByName(String('d')) as Field
     arktest.assertTrue(fd.getOwnerType().equals(ctSub))
     arktest.assertFalse(isInherited(fd, ctSub))
     arktest.assertEQ(AccessModifier.PUBLIC, fd.getAccessModifier())

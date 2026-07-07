@@ -233,8 +233,10 @@ function testResolvedOptionsCurrency() {
     arktest.assertEQ(getOptions.signDisplay, 'auto');
 }
 
-function equaledResolvedNumberFormatOptions(a: Intl.ResolvedNumberFormatOptions, b: Intl.ResolvedNumberFormatOptions): boolean {
-    arktest.assertEQ(a.compactDisplay,b.compactDisplay);
+function equaledResolvedNumberFormatOptions(
+    a: Intl.ResolvedNumberFormatOptions,
+    b: Intl.ResolvedNumberFormatOptions): boolean {
+    arktest.assertEQ(a.compactDisplay, b.compactDisplay);
     arktest.assertEQ(a.currencySign, b.currencySign);
     arktest.assertEQ(a.currency, b.currency);
     arktest.assertEQ(a.currencyDisplay, b.currencyDisplay);

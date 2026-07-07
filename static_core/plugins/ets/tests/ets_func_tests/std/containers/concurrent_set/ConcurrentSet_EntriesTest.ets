@@ -13,66 +13,65 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
+import { launch } from 'std/concurrency'
 
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
-let strAll: string = "zero,zero,one,one,two,two,three,three,four,four,five,five,six,six,seven,seven,eight,eight,nine,nine";
+let arrValues: string[] = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+let strAll: string = 'zero,zero,one,one,two,two,three,three,four,four,five,five,six,six,seven,seven,eight,eight,nine,nine';
 
-let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
+let concurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
-    let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetEntriesTest");
+    let concurrentSetTestsuite = new arktest.ArkTestsuite('ConcurrentSetEntriesTest');
     // Single Thread Test
-    ConcurrentSetTestsuite.addTest("EntriesTest001", () =>
-    {
-        let ConcurrentSetTestNull: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
-        let res = ConcurrentSetTestNull.size;
+    concurrentSetTestsuite.addTest('EntriesTest001', () => {
+        let concurrentSetTestNull: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
+        let res = concurrentSetTestNull.size;
         arktest.assertEQ(res, 0);
-        let iterValue: IterableIterator<[string, string]> = ConcurrentSetTestNull.entries();
+        let iterValue: IterableIterator<[string, string]> = concurrentSetTestNull.entries();
         arktest.assertEQ(iterValue.next().value, undefined);
     });
     // Multiple Threads Test
     // Unexpected error: ClassCastError: [Lstd/core/Object; cannot be cast to [Double, Double]|undefined
-    /*
-    ConcurrentSetTestsuite.addTest("Entries&AddTest001", () =>
+    /* FIXME:
+    concurrentSetTestsuite.addTest("Entries&AddTest001", () =>
     {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         addFront();
         let p1 = launch(addBack);
         let p2 = launch(entriesAll);
         p1.Await();
         p2.Await();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 10);
+        arktest.assertEQ(concurrentSetTestOne.size, 10);
     });
-    ConcurrentSetTestsuite.addTest("Entries&DeteleTest001", () =>
+    concurrentSetTestsuite.addTest("Entries&DeteleTest001", () =>
     {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         addAll();
         let p1 = launch(deleteAll);
         let p2 = launch(entriesAll);
         p1.Await();
         p2.Await();
-        arktest.assertTrue(ConcurrentSetTestOne.size < 10);
+        arktest.assertTrue(concurrentSetTestOne.size < 10);
     });
-    ConcurrentSetTestsuite.addTest("Entries&ClearTest001", () =>
+    concurrentSetTestsuite.addTest("Entries&ClearTest001", () =>
     {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         addAll();
         let p1 = launch(entriesAll);
         let p2 = launch(clearTest);
         p1.Await();
         p2.Await();
-        arktest.assertTrue(ConcurrentSetTestOne.size < 10);
+        arktest.assertTrue(concurrentSetTestOne.size < 10);
     });
     */
 
     // Unexpected error: ClassCastError: [Lstd/core/Object; cannot be cast to [string, string]|undefined
-    /*
-    ConcurrentSetTestsuite.addTest("EntriesTest001", () =>
+    /* FIXME:
+    concurrentSetTestsuite.addTest("EntriesTest001", () =>
     {
         let ConcurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
         let res = ConcurrentSetTest.size;
@@ -95,11 +94,11 @@ function main(): int {
     });
     */
 
-    return ConcurrentSetTestsuite.run();
+    return concurrentSetTestsuite.run();
 }
 
 function entriesAll() {
-    let iterEntries = ConcurrentSetTestOne.entries();
+    let iterEntries = concurrentSetTestOne.entries();
     let i = 0;
     while (iterEntries.next().value != undefined) {
         i++;
@@ -108,28 +107,28 @@ function entriesAll() {
 
 function addFront() {
     for (let i: int = 0; i < 5; i++) {
-        ConcurrentSetTestOne.add(arrKeys[i]);
+        concurrentSetTestOne.add(arrKeys[i]);
     }
 }
 
 function addBack() {
     for (let i: int = 5; i < 10; i++) {
-        ConcurrentSetTestOne.add(arrKeys[i]);
+        concurrentSetTestOne.add(arrKeys[i]);
     }
 }
 
 function clearTest() {
-    ConcurrentSetTestOne.clear();
+    concurrentSetTestOne.clear();
 }
 
 function deleteAll() {
     for (let i: int = 0; i < 10; i++) {
-        ConcurrentSetTestOne.delete(i);
+        concurrentSetTestOne.delete(i);
     }
 }
 
 function addAll() {
-    for (let i: int = 0; i < 10 ; i++) {
-        ConcurrentSetTestOne.add(arrKeys[i]);
+    for (let i: int = 0; i < 10; i++) {
+        concurrentSetTestOne.add(arrKeys[i]);
     }
 }

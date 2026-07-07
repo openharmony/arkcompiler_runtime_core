@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,61 +14,72 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Console Time API tests")
-    suite.addTest("Test console timeLog with two parameters", TestConsoleTimeLogTwoPara)
-    suite.addTest("Test console time with Null Character", TestConsoleTimeNullCharacter)
-    suite.addTest("Test console timeEnd with Null Character", TestConsoleTimeEndNullCharacter)
-    suite.addTest("Test console timeLog with Null Character", TestConsoleTimeLogNullCharacter)
-    suite.addTest("Test console time with Many Null Characters", TestConsoleTimeManyNullCharacters)
-    suite.addTest("Test console time with Size Zero String", TestConsoleTimeSizeZeroString)
+    const suite = new arktest.ArkTestsuite('Console Time API tests')
+    suite.addTest('Test console timeLog with two parameters', testConsoleTimeLogTwoPara)
+    suite.addTest('Test console time with Null Character', testConsoleTimeNullCharacter)
+    suite.addTest('Test console timeEnd with Null Character', testConsoleTimeEndNullCharacter)
+    suite.addTest('Test console timeLog with Null Character', testConsoleTimeLogNullCharacter)
+    suite.addTest('Test console time with Many Null Characters', testConsoleTimeManyNullCharacters)
+    suite.addTest('Test console time with Size Zero String', testConsoleTimeSizeZeroString)
 
     return suite.run()
 }
 
-function TestConsoleTimeLogTwoPara(): void {
+function testConsoleTimeLogTwoPara(): void {
     arktest.expectNoThrow(() => {
-        let TestLog = new Array<string>();
+        let testLog: Object[] = [];
         const str = '太好了';
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.time(str);
-        console.timeLog(str, TestLog);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.timeLog(str, testLog);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.timeEnd(str);
     })
 }
 
-function TestConsoleTimeNullCharacter(): void {
+function testConsoleTimeNullCharacter(): void {
     arktest.expectError(() => {
         const str = '\0';
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.time(str);
     }, 'Parameter error. The input parameters are invalid, Timer or Counter name must be not null.');
 }
 
-function TestConsoleTimeEndNullCharacter(): void {
+function testConsoleTimeEndNullCharacter(): void {
     arktest.expectError(() => {
         const str = '\0';
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.time(str);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.timeEnd(str);
     }, 'Parameter error. The input parameters are invalid, Timer or Counter name must be not null.');
 }
 
-function TestConsoleTimeLogNullCharacter(): void {
+function testConsoleTimeLogNullCharacter(): void {
     arktest.expectError(() => {
         const str = '\0';
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.time(str);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.timeLog(str)
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.timeEnd(str);
     }, 'Parameter error. The input parameters are invalid, Timer or Counter name must be not null.');
 }
 
-function TestConsoleTimeSizeZeroString(): void {
+function testConsoleTimeSizeZeroString(): void {
     arktest.expectError(() => {
-        let str = "";
+        let str = '';
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.time(str);
     }, 'Parameter error. The input parameters are invalid, Timer or Counter name must be not null.')
 }
 
-function TestConsoleTimeManyNullCharacters(): void {
+function testConsoleTimeManyNullCharacters(): void {
     arktest.expectError(() => {
         let str = '\0\0';
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.time(str);
     }, 'Parameter error. The input parameters are invalid, Timer or Counter name must be not null.')
 }

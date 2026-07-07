@@ -15,20 +15,30 @@
 
 class Arrays {
     static copy<T>(src: Array<T>): Array<T> {
-        const copy = new Array<T>(src.length, (i: int) => src[i]);
+        const copy: T[] = [];
+        for (let i: int = 0; i < src.length; i++) {
+            copy.push(src[i]);
+        }
         return copy;
     }
 
     static copy(src: FixedArray<Number>): Array<Number> {
-        const copy = new Array<Number>(src.length, (i: int) => src[i]);
+        const copy: Number[] = [];
+        for (let i: int = 0; i < src.length; i++) {
+            copy.push(src[i]);
+        }
         return copy;
     }
 
     static equals<T>(left: ReadonlyArray<T>, right: ReadonlyArray<T>): boolean {
-        if (left.length != right.length) return false;
+        if (left.length != right.length) {
+            return false;
+        }
 
         for (let i = 0; i < left.length; i++) {
-            if (left[i] != right[i]) return false;
+            if (left[i] != right[i]) {
+                return false;
+            }
         }
 
         return true;
@@ -40,12 +50,17 @@ class Arrays {
         return Arrays.equals(leftReadOnly, rightReadOnly);
     }
 
-    // NOTE(smirnovandrei) may be left: ArrayLike can help to avoid this code duplication (the same code as equals(ReadonlyArray))
+    // NOTE(smirnovandrei) may be left: ArrayLike can help to avoid this code duplication
+    // (the same code as equals(ReadonlyArray))
     static equals<T>(left: FixedArray<Number>, right: Array<T>): boolean {
-        if (left.length != right.length) return false;
+        if (left.length != right.length) {
+            return false;
+        }
 
         for (let i = 0; i < left.length; i++) {
-            if (left[i] != right[i]) return false;
+            if (left[i] != right[i]) {
+                return false;
+            }
         }
 
         return true;
@@ -108,7 +123,7 @@ function mapFuncArg3ReadonlyArray() {
     let mappingFunc = (v: Number, index: int, arr: ReadonlyArray<Number>): Number =>
         index < 4 && index < arr.length ? arr[index] * arr[index] : 0;
 
-    let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
+    let arrEmpty: ReadonlyArray<Number> = [];
     let res0 = arrEmpty.map<Number>(mappingFunc);
     arktest.assertEQ(res0.length, arrEmpty.length);
     arktest.assertEQ(res0.length, 0);
@@ -123,7 +138,7 @@ function mapFuncArg3ReadonlyArray() {
 }
 
 function everyFuncArg3ReadonlyArray() {
-    const emptyArray: ReadonlyArray<Number> = new Array<Number>;
+    const emptyArray: ReadonlyArray<Number> = [];
     arktest.assertTrue(emptyArray.every(filterPositiveElement));
 
     const testArray: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
@@ -135,7 +150,7 @@ function filterFuncArg3ReadonlyArray() {
     let fnTrue = (v: Number, index: int, arr: ReadonlyArray<Number>): boolean => {
         return arr[index] == v && v > -1000;
     }
-    let arrEmpty = new Array<Number>;
+    let arrEmpty: Number[] = [];
     arktest.assertEQ(arrEmpty.filter(fnTrue).length, 0);
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
@@ -157,7 +172,7 @@ function reduceFunc(a: Number, b: Number, index: int, arr: ReadonlyArray<Number>
 }
 
 function reduceFuncArg4ReadonlyArray() {
-    let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
+    let arrEmpty: ReadonlyArray<Number> = [];
     arktest.expectThrow(() => { arrEmpty.reduce(reduceFunc); }, (e) => { return e instanceof TypeError; });
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
@@ -167,7 +182,7 @@ function reduceFuncArg4ReadonlyArray() {
 
 // NOTE(smirnovandrei) add 'test' prefix to all test functions
 function reduceFuncArg4ReadonlyArrayWithInitialValue() {
-    let arrEmpty = new Array<Number>;
+    let arrEmpty: Number[] = [];
     let initialValue: number = 0;
     let res = arrEmpty.reduce(reduceFunc, initialValue);
     arktest.assertEQ(res, initialValue);
@@ -179,7 +194,7 @@ function reduceFuncArg4ReadonlyArrayWithInitialValue() {
 }
 
 function reduceRightFuncArg4ReadonlyArray() {
-    let arrEmpty: ReadonlyArray<Number> = new Array<Number>;
+    let arrEmpty: ReadonlyArray<Number> = [];
     arktest.expectThrow(() => { arrEmpty.reduceRight(reduceFunc); }, (e) => { return e instanceof TypeError; });
 
     const arr: ReadonlyArray<Number> = Arrays.copy(TEST_ARRAY);
@@ -188,7 +203,7 @@ function reduceRightFuncArg4ReadonlyArray() {
 }
 
 function reduceRightFuncArg4ReadonlyArrayWithInitialValue() {
-    let arrEmpty = new Array<Number>;
+    let arrEmpty: Number[] = [];
     let initialValue: number = 0;
     let res = arrEmpty.reduce(reduceFunc, initialValue);
     arktest.assertEQ(res, initialValue);
@@ -200,7 +215,7 @@ function reduceRightFuncArg4ReadonlyArrayWithInitialValue() {
 }
 
 function forEachFuncArg3ReadonlyArray() {
-    let s = new String;
+    let s: string = '';
     let fn = (a: Number, index: int, arr: ReadonlyArray<Number>): void => {
         if (index < 0 && index >= arr.length) {
             s = '';
@@ -216,14 +231,14 @@ function forEachFuncArg3ReadonlyArray() {
 }
 
 function testIteratorWithEmptyReadonlyArray() {
-    const emptyArray: ReadonlyArray<Number> = new Array<Number>;
+    const emptyArray: ReadonlyArray<Number> = [];
     const iterator = emptyArray.$_iterator();
     const v = iterator.next();
     arktest.assertTrue(v.done);
 }
 
 function testIteratorWithNonEmptyReadonlyArray() {
-    const arr: ReadonlyArray<Number> = new Array<Number>(1, 2, 3);
+    const arr: ReadonlyArray<Number> = [1, 2, 3];
     const iterator = arr.$_iterator();
 
     let v = iterator.next();

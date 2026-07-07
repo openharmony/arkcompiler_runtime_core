@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 class TestObject extends Object {
     public toString(): String {
-        return "abc"
+        return 'abc'
     }
 }
 
@@ -23,19 +23,20 @@ function isNotEqual(a: String, b: String) {
     if (a == b) {
         return 0
     }
-    console.log("Incorrect String constructor!")
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('Incorrect String constructor!')
     return 1
 }
 
 function main(): int {
     let fails: int = 0
-    fails += isNotEqual(new String(new TestObject()), "abc")
-    fails += isNotEqual(new String(null), "null")
-    fails += isNotEqual(new String(undefined), "undefined")
-    fails += isNotEqual(new String(), "")
-    fails += isNotEqual(new String("aaba"), "aaba")
-    fails += isNotEqual(new String("aaba"), new String("aaba"))
-    let e = new RangeError("aaaa")
-    fails += isNotEqual(new String(e), e.toString())
+    fails += isNotEqual(String(new TestObject()), 'abc')
+    fails += isNotEqual(String(null), 'null')
+    fails += isNotEqual(String(undefined), 'undefined')
+    fails += isNotEqual(String(), '')
+    fails += isNotEqual(String('aaba'), 'aaba')
+    fails += isNotEqual(String('aaba'), String('aaba'))
+    let e = new RangeError('aaaa')
+    fails += isNotEqual(String(e), e.toString())
     return fails
 }

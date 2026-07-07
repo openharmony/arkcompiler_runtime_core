@@ -15,18 +15,19 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T>(arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+function awaitAll<T>(arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
-	for (let i = 0; i < arr.length; ++ i)
+	for (let i = 0; i < arr.length; ++ i) {
 		res.push(arr[i].Await());
+	}
 	return res;
 }
 
-function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
+function sumArrInto(to: FixedArray<int>, from: FixedArray<int>): void {
 	arktest.assertEQ(to.length, from.length);
 	for (let i = 0; i < to.length; ++ i) {
 		to[i] += from[i];
@@ -34,8 +35,9 @@ function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
 }
 
 function assertEQAll(array: FixedArray<int>, value: int): void {
-	for (let i=0; i < array.length; ++ i)
+	for (let i = 0; i < array.length; ++ i) {
 		arktest.assertEQ(array[i], value)
+	}
 }
 
 function testConcurrentGet() {
@@ -43,12 +45,14 @@ function testConcurrentGet() {
 	const SET_COUNT = 100;
 
 	let map = new CHMap();
-	for (let i = 0; i < JOB_COUNT * SET_COUNT; ++ i)
+	for (let i = 0; i < JOB_COUNT * SET_COUNT; ++ i) {
 		map.set(i, i);
+	}
 
-	let makeGetF = (start: int,  end: int) => () => {
-		for (let i = start; i < end; ++ i)
+	let makeGetF = (start: int, end: int) => () => {
+		for (let i = start; i < end; ++ i) {
 			arktest.assertEQ(map.get(i), i);
+		}
 	}
 	let getJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
@@ -63,11 +67,14 @@ function testConcurrentGet2() {
 	const SET_COUNT = 100;
 
 	let map = new CHMap();
-	for (let i = 0; i < SET_COUNT; ++ i) map.set(i, i);
+	for (let i = 0; i < SET_COUNT; ++ i) {
+	    map.set(i, i);
+	}
 
 	let getF = () => {
-		for (let i = 0; i < SET_COUNT; ++ i)
+		for (let i = 0; i < SET_COUNT; ++ i) {
 			arktest.assertEQ(map.get(i), i);
+		}
 	}
 	let getJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
@@ -77,9 +84,9 @@ function testConcurrentGet2() {
 }
 
 function main(): int {
-    let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
-	CHMTestSuitecase.addTest("testConcurrentGet", testConcurrentGet);
-	CHMTestSuitecase.addTest("testConcurrentGet2", testConcurrentGet2);
+    let chmTestSuitecase = new arktest.ArkTestsuite('ConcurrentHashMapTest')
+	chmTestSuitecase.addTest('testConcurrentGet', testConcurrentGet);
+	chmTestSuitecase.addTest('testConcurrentGet2', testConcurrentGet2);
 
-    return CHMTestSuitecase.run();
+    return chmTestSuitecase.run();
 }

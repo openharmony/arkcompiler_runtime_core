@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 class Config {
-    port: number;
-    environment: string;
-    database: string;
-    cache: string;
+    public port: number;
+    public environment: string;
+    public database: string;
+    public cache: string;
 
     constructor(port: number, environment: string, database: string, cache: string) {
         this.port = port;
@@ -32,33 +32,39 @@ class Config {
 
 class ApplicationLogger {
     private static features: FixedArray<string> = [
-        "authentication",
-        "authorization",
-        "caching",
-        "logging"
+        'authentication',
+        'authorization',
+        'caching',
+        'logging'
     ];
 
     static logStartup(): void {
-        console.info("Application started");
-        console.info("Version 1.0.0");
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.info('Application started');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.info('Version 1.0.0');
     }
 
     static logServerStatus(port: number): void {
-        console.info("Server status:", "Running", "Port:", port);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.info('Server status:', 'Running', 'Port:', port);
     }
 
     static logConfiguration(config: Config): void {
-        console.info("Server configuration:", config);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.info('Server configuration:', config);
     }
 
     static logActiveFeatures(): void {
-        console.info("Active features:", ApplicationLogger.features);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.info('Active features:', ApplicationLogger.features);
     }
 
     static logSystemInformation(): void {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.info(
-            "%c System Information",
-            "color: green;"
+            '%c System Information',
+            'color: green;'
         );
     }
 
@@ -74,9 +80,9 @@ function main() {
     // Info with objects
     const serverConfig = new Config(
         3000,
-        "production",
-        "mongodb",
-        "redis"
+        'production',
+        'mongodb',
+        'redis'
     );
     ApplicationLogger.logConfiguration(serverConfig);
 
@@ -86,13 +92,19 @@ function main() {
     // Info with styled output
     ApplicationLogger.logSystemInformation();
 
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.info()
 
     // Formatted strings
-    console.info("%d")
-    console.info("%d", 1)
-    console.info("%d", 1, 2)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.info('%d')
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.info('%d', 1)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.info('%d', 1, 2)
 
-    console.info("%s %s", "37", 37)
-    console.info("%s %s", "19.5", 19.5)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.info('%s %s', '37', 37)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.info('%s %s', '19.5', 19.5)
 }

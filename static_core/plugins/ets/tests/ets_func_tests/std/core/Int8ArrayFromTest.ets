@@ -14,7 +14,7 @@
  */
 
 function getTestName(testCase: string): string {
-    return "Int8Array.from - " + testCase;
+    return 'Int8Array.from - ' + testCase;
 }
 
 function testArrayLikeNumber(): void {
@@ -49,7 +49,7 @@ function testIterableNumberWithMap(): void {
 }
 
 function testArrayLikeTWithMap(): void {
-    const strings = ["10", "20", "30"];
+    const strings = ['10', '20', '30'];
     const ta = Int8Array.from(strings, (v: string): number => parseInt(v));
     arktest.assertEQ(ta.length, 3);
     arktest.assertEQ(ta.$_get(0).toDouble(), 10);
@@ -100,17 +100,17 @@ function testBufferIndependence(): void {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Int8ArrayFrom");
-    suite.addTest(getTestName("ArrayLike Number"), testArrayLikeNumber);
-    suite.addTest(getTestName("Iterable Number No Map"), testIterableNumberWithoutMap);
-    suite.addTest(getTestName("Iterable Number With Map"), testIterableNumberWithMap);
-    suite.addTest(getTestName("ArrayLike T With Map"), testArrayLikeTWithMap);
-    suite.addTest(getTestName("Mapfn Infinity"), testMapfnInfinity);
-    suite.addTest(getTestName("Empty"), testEmpty);
-    suite.addTest(getTestName("Dynamic Reallocation"), testDynamicReallocation);
-    suite.addTest(getTestName("Wrap Around"), testWrapAround);
-    suite.addTest(getTestName("Decimal Truncation"), testDecimalTruncation);
-    suite.addTest(getTestName("Buffer Independence"), testBufferIndependence)
+    const suite = new arktest.ArkTestsuite('Int8ArrayFrom');
+    suite.addTest(getTestName('ArrayLike Number'), testArrayLikeNumber);
+    suite.addTest(getTestName('Iterable Number No Map'), testIterableNumberWithoutMap);
+    suite.addTest(getTestName('Iterable Number With Map'), testIterableNumberWithMap);
+    suite.addTest(getTestName('ArrayLike T With Map'), testArrayLikeTWithMap);
+    suite.addTest(getTestName('Mapfn Infinity'), testMapfnInfinity);
+    suite.addTest(getTestName('Empty'), testEmpty);
+    suite.addTest(getTestName('Dynamic Reallocation'), testDynamicReallocation);
+    suite.addTest(getTestName('Wrap Around'), testWrapAround);
+    suite.addTest(getTestName('Decimal Truncation'), testDecimalTruncation);
+    suite.addTest(getTestName('Buffer Independence'), testBufferIndependence)
 
     return suite.run();
 }

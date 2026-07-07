@@ -30,7 +30,7 @@ function messageBasicInterfaceTest() {
 
 
     let emptyMessage = new concurrency.Message(MessageType.EMPTY, handler);
-    let msg1 = new concurrency.Message(MessageType.STRING, "msg1", handler);
+    let msg1 = new concurrency.Message(MessageType.STRING, 'msg1', handler);
     let msg2 = new concurrency.Message(MessageType.NUMBER, 100, handler);
     let msg3 = new concurrency.Message(MessageType.BOOLEAN, true, handler);
     let array = [1, 2, 3, 4, 5];
@@ -55,7 +55,7 @@ function messageBasicInterfaceTest() {
     arktest.assertEQ(msg4.getTarget(), handler);
 
     arktest.assertEQ(emptyMessage.getObject(), undefined);
-    arktest.assertEQ(msg1.getObject(), "msg1");
+    arktest.assertEQ(msg1.getObject(), 'msg1');
     arktest.assertEQ(msg2.getObject(), 100);
     arktest.assertEQ(msg3.getObject(), true);
     arktest.assertEQ(msg4.getObject(), array);

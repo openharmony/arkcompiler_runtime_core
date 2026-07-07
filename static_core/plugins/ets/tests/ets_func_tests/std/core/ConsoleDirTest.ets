@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,9 @@
  */
 
 class User {
-    name: string;
-    age: number;
-    email: string;
+    public name: string;
+    public age: number;
+    public email: string;
 
     constructor(name: string, age: number, email: string) {
         this.name = name;
@@ -26,8 +26,8 @@ class User {
 }
 
 class Employee {
-    id: number;
-    name: string;
+    public id: number;
+    public name: string;
 
     constructor(id: number, name: string) {
         this.id = id;
@@ -36,9 +36,9 @@ class Employee {
 }
 
 class Address {
-    street: string;
-    city: string;
-    country: string;
+    public street: string;
+    public city: string;
+    public country: string;
 
     constructor(street: string, city: string, country: string) {
         this.street = street;
@@ -48,9 +48,9 @@ class Address {
 }
 
 class Company {
-    name: string;
-    employees: Employee[];
-    address: Address;
+    public name: string;
+    public employees: Employee[];
+    public address: Address;
 
     constructor(name: string, employees: Employee[], address: Address) {
         this.name = name;
@@ -75,34 +75,42 @@ class Calculator {
 
 function main() {
     // Simple object
-    const user = new User("John", 30, "john@example.com");
+    const user = new User('John', 30, 'john@example.com');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.dir(user);
 
     // Nested object
     const company = new Company(
-        "Tech Corp",
+        'Tech Corp',
         [
-            new Employee(1, "Alice"),
-            new Employee(2, "Bob")
+            new Employee(1, 'Alice'),
+            new Employee(2, 'Bob')
         ],
-        new Address("123 Main St", "Tech City", "Techland")
+        new Address('123 Main St', 'Tech City', 'Techland')
     );
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.dir(company);
 
     // Object with methods
     const calculator = new Calculator();
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.dir(calculator);
 
     // Array with mixed types
     const mixedArray: Any[] = [
         1,
-        "string",
+        'string',
         [1, 2, 3],
     ];
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.dir(mixedArray);
 
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.dir()
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.dir(1);
-    console.dir("str");
-    console.dir("count: %d")
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.dir('str');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.dir('count: %d')
 }

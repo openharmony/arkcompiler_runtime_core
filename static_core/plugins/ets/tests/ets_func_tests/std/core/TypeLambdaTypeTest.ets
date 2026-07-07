@@ -20,7 +20,7 @@ class Derived extends Base {}
 function testLambdaToString(): int {
     let lambda = () => {};
     let result = lambda.toLocaleString();
-    arktest.assertEQ(result,"Cannot get source code");
+    arktest.assertEQ(result, 'Cannot get source code');
     return 0
 }
 
@@ -28,9 +28,11 @@ function main(): int {
     let failures = 0
     failures += testLambdaToString()
     if (failures == 0) {
-        console.println("PASSED: All tests run")
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('PASSED: All tests run')
     } else {
-        console.println("FAILED: All tests run")
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: All tests run')
     }
     return failures
 }

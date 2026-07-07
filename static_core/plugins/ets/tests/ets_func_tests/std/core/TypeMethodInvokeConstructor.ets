@@ -18,7 +18,7 @@ class C {
         this.a = a
     }
 
-    a: int
+    public a: int
 }
 
 function main(): void {

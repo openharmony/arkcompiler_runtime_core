@@ -168,7 +168,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/entrypoints/ets_async_entrypoints.cpp
     ${ETS_EXT_SOURCES}/entrypoints/ets_proxy_entrypoints.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/RegExp.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_common.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_matchall.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_replace.cpp
@@ -177,28 +177,28 @@ set(ETS_RUNTIME_SOURCES
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_16.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/regexp/regexp_8.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/etsstdlib.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/Intl.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCommon.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlState.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlNumberFormat.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlNumberFormatters.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlFormattersCache.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocaleMatch.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCollator.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlCollatorCache.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocale.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLocaleHelper.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlPluralRules.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlSegmenter.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_common.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_state.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_number_format.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_number_formatters.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_formatters_cache.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_locale_match.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_collator.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_collator_cache.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_locale.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_locale_helper.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_plural_rules.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_segmenter.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/stdlib_ani_helpers.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlDateTimeFormat.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlDateTimeFormatCache.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlListFormat.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlDisplayNames.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlRelativeTimeFormat.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlRelativeTimeFormatCache.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlLanguageTag.cpp
-    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/Process.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_date_time_format.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_date_time_format_cache.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_list_format.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_display_names.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_relative_time_format.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_relative_time_format_cache.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/intl_language_tag.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/process.cpp
 )
 
 get_directory_property(CURRENT_DEFS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS)

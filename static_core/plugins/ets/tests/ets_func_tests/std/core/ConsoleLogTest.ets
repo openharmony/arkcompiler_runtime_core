@@ -14,17 +14,16 @@
  */
 
 class A {
-    name: string
-    age: int
-    constructor(name: string, age: int)
-    {
+    public name: string
+    public age: int
+    constructor(name: string, age: int) {
         this.name = name
         this.age = age
     }
 }
 
 class B {
-    buf: ArrayBuffer
+    public buf: ArrayBuffer
     constructor(b: ArrayBuffer) {
         this.buf = b
     }
@@ -32,43 +31,62 @@ class B {
 
 function main() {
     // Basic values
-    console.log("Simple string message");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('Simple string message');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log(42);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log(true);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log(undefined);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log(null);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log()
 
     // Multiple arguments
-    console.log("User:", "John", "Age:", 30);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('User:', 'John', 'Age:', 30);
 
     // Object
-    console.log(new A("John", 30));
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log(new A('John', 30));
 
     // Template strings
-    const name = "Alice";
+    const name = 'Alice';
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log(`Hello, ${name}!`);
 
     // Styled console output
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log(
-        "%c Styled text",
-        "color: blue;"
+        '%c Styled text',
+        'color: blue;'
     );
 
     // Error objects
-    console.log(new Error("Test error"));
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log(new Error('Test error'));
 
-    console.log(null, undefined, 11, "123", new Object())
+    let obj: Object = {}
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log(null, undefined, 11, '123', obj)
     let arr = Array.create<string | null | undefined>(3, undefined)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log(arr)
 
     // Formatted strings
-    console.log("%d")
-    console.log("%d", 1)
-    console.log("%d", 1, 2)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('%d')
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('%d', 1)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('%d', 1, 2)
 
-    console.log("%s %s", "37", 37)
-    console.log("%s %s", "19.5", 19.5)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('%s %s', '37', 37)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('%s %s', '19.5', 19.5)
     
     // ArrayBuffer tests
     const buf1 = new ArrayBuffer(3);
@@ -82,13 +100,18 @@ function main() {
     view2[0] = 4;
     view2[1] = 5;
     
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log(buf1); 
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log(new ArrayBuffer(0)); 
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log([new B(buf1), new B(buf2)]);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log(new B(buf1), new B(buf2));
 
     const arrayBuffer = new ArrayBuffer(10);
     const arrayBufferValue = reflect.Value.of(arrayBuffer);
     const result = arrayBufferValue.toPrint(0).toString();
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log(result);
 }

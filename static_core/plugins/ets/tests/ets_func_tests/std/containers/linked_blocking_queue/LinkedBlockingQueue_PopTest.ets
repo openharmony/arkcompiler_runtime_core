@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,9 @@ const stressNum: int = 100;
 let sMTQueueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueuePopTest");
+    let linkedBlockingQueueTestsuite = new arktest.ArkTestsuite('LinkedBlockingQueuePopTest');
 
-    LinkedBlockingQueueTestsuite.addTest("PopTest001", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('PopTest001', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>();
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
@@ -37,8 +36,7 @@ function main(): int {
         arktest.assertEQ(queueInt.isEmpty(), true);
         arktest.assertEQ(queueInt.size, 0);
     });
-    LinkedBlockingQueueTestsuite.addTest("PopStressTest003", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('PopStressTest003', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
@@ -49,5 +47,5 @@ function main(): int {
         arktest.assertEQ(queueInt.size, 0);
     });
 
-    return LinkedBlockingQueueTestsuite.run();
+    return linkedBlockingQueueTestsuite.run();
 }

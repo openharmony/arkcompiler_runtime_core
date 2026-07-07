@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const OBJ_JSON =  '{"name":"foo"}'
+const OBJ_JSON = '{"name":"foo"}'
 
 function testJsonParseObjectAsString(): void {
 	arktest.expectError(() => {
@@ -49,7 +49,7 @@ function testJsonParseObjectAsInterface(): void {
 }
 
 class NamedRef {
-	ref: Named | undefined = undefined
+	public ref: Named | undefined = undefined
 }
 
 function testJsonParseObjectAsClassWithInterfaceField(): void {

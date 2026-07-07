@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,12 @@
  */
 
 function testStringIndexOutOfBoundsErrorExtendsRangeError() {
-    let str: string = "123";
+    let str: string = '123';
     try {
         str[-1];
     } catch (e) {
         arktest.assertTrue(e instanceof StringIndexOutOfBoundsError);
-        arktest.assertEQ(e.name, "StringIndexOutOfBoundsError");
+        arktest.assertEQ(e.name, 'StringIndexOutOfBoundsError');
         arktest.assertTrue(e instanceof RangeError);
     }
 
@@ -27,33 +27,33 @@ function testStringIndexOutOfBoundsErrorExtendsRangeError() {
         str[5];
     } catch (e) {
         arktest.assertTrue(e instanceof StringIndexOutOfBoundsError);
-        arktest.assertEQ(e.name, "StringIndexOutOfBoundsError");
+        arktest.assertEQ(e.name, 'StringIndexOutOfBoundsError');
         arktest.assertTrue(e instanceof RangeError);
     }
 }
 
 function testArrayIndexOutOfBoundsErrorExtendsRangeError() {
     try {
-        throw new ArrayIndexOutOfBoundsError("ArrayIndexOutOfBoundsError");
+        throw new ArrayIndexOutOfBoundsError('ArrayIndexOutOfBoundsError');
     } catch (e) {
-        arktest.assertEQ(e.name, "ArrayIndexOutOfBoundsError");
+        arktest.assertEQ(e.name, 'ArrayIndexOutOfBoundsError');
         arktest.assertTrue(e instanceof RangeError);
     }
 }
 
 function testIndexOutOfBoundsErrorExtendsRangeError() {
     try {
-        throw new IndexOutOfBoundsError("IndexOutOfBoundsError");
+        throw new IndexOutOfBoundsError('IndexOutOfBoundsError');
     } catch (e) {
-        arktest.assertEQ(e.name, "IndexOutOfBoundsError");
+        arktest.assertEQ(e.name, 'IndexOutOfBoundsError');
         arktest.assertTrue(e instanceof RangeError);
     }
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Errors.testErrors");
-    suite.addTest("Test StringIndexOutOfBoundsErrorExtendsRangeError", testStringIndexOutOfBoundsErrorExtendsRangeError);
-    suite.addTest("Test ArrayIndexOutOfBoundsErrorExtendsRangeError", testArrayIndexOutOfBoundsErrorExtendsRangeError);
-    suite.addTest("Test IndexOutOfBoundsErrorExtendsRangeError", testIndexOutOfBoundsErrorExtendsRangeError);
+    const suite = new arktest.ArkTestsuite('Errors.testErrors');
+    suite.addTest('Test StringIndexOutOfBoundsErrorExtendsRangeError', testStringIndexOutOfBoundsErrorExtendsRangeError);
+    suite.addTest('Test ArrayIndexOutOfBoundsErrorExtendsRangeError', testArrayIndexOutOfBoundsErrorExtendsRangeError);
+    suite.addTest('Test IndexOutOfBoundsErrorExtendsRangeError', testIndexOutOfBoundsErrorExtendsRangeError);
     return suite.run();
 }

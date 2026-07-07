@@ -214,7 +214,7 @@ function test4() {
     arktest.assertEQ(ubig.toLocaleString(locale), expected1)
 
     const expected2 = 'US$1.00,US$127.00'
-    arktest.assertEQ(u8clamped.toLocaleString (locale, options), expected2)
+    arktest.assertEQ(u8clamped.toLocaleString(locale, options), expected2)
     arktest.assertEQ(u8.toLocaleString(locale, options), expected2)
     arktest.assertEQ(u16.toLocaleString(locale, options), expected2)
     arktest.assertEQ(u32.toLocaleString(locale, options), expected2)

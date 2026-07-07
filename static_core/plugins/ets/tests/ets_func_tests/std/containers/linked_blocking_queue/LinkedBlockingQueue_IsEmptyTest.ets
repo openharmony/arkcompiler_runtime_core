@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,9 @@
 const stressNum: int = 100;
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueueIsEmptyTest");
+    let linkedBlockingQueueTestsuite = new arktest.ArkTestsuite('LinkedBlockingQueueIsEmptyTest');
 
-    LinkedBlockingQueueTestsuite.addTest("IsEmptyStressTest006", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('IsEmptyStressTest006', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
@@ -35,5 +34,5 @@ function main(): int {
         }
     });
 
-    return LinkedBlockingQueueTestsuite.run();
+    return linkedBlockingQueueTestsuite.run();
 }

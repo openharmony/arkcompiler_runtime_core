@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,24 +14,24 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("JSON.parseJsonElement tests")
-    suite.addTest("call parseJsonElement using simple string argument", stringTests)
-    suite.addTest("call parseJsonElement using incorrect string argument", negativeTests)
-    suite.addTest("send parseJsonElement result into stringifyJsonElement and compare", parseToStringifyTests)
-    suite.addTest("call parseJsonElement with reviver", reviverTests)
+    const suite = new arktest.ArkTestsuite('JSON.parseJsonElement tests')
+    suite.addTest('call parseJsonElement using simple string argument', stringTests)
+    suite.addTest('call parseJsonElement using incorrect string argument', negativeTests)
+    suite.addTest('send parseJsonElement result into stringifyJsonElement and compare', parseToStringifyTests)
+    suite.addTest('call parseJsonElement with reviver', reviverTests)
 
-    suite.addTest("handle scientific notation values", scientificNotationTest)
-    suite.addTest("handle unicode keys", unicodeKeysTest)
-    suite.addTest("count depth in deeply nested structures", deeplyNestedTest)
-    suite.addTest("mixed array with various types", mixedArrayTest)
-    suite.addTest("special ASCII characters in keys", specialCharactersTest)
+    suite.addTest('handle scientific notation values', scientificNotationTest)
+    suite.addTest('handle unicode keys', unicodeKeysTest)
+    suite.addTest('count depth in deeply nested structures', deeplyNestedTest)
+    suite.addTest('mixed array with various types', mixedArrayTest)
+    suite.addTest('special ASCII characters in keys', specialCharactersTest)
 
-    suite.addTest("empty objects, arrays and null", emptyValuesTest)
-    suite.addTest("string escape sequences", escapeSequencesTest)
-    suite.addTest("Number special values", numberSpecialValuesTest)
-    suite.addTest("delete property by returning JsonNull", deleteKeywordTest)
-    suite.addTest("array boundary values", arrayBoundaryTest)
-    suite.addTest("verify if original or decoded keys are passed", unicodeKeysTest2)
+    suite.addTest('empty objects, arrays and null', emptyValuesTest)
+    suite.addTest('string escape sequences', escapeSequencesTest)
+    suite.addTest('Number special values', numberSpecialValuesTest)
+    suite.addTest('delete property by returning JsonNull', deleteKeywordTest)
+    suite.addTest('array boundary values', arrayBoundaryTest)
+    suite.addTest('verify if original or decoded keys are passed', unicodeKeysTest2)
 
     return suite.run()
 }
@@ -41,25 +41,28 @@ function stringTests(): void {
         [`[]`, elem => elem.asArray().length == 0],
         [`[null, "a", "b"]`, elem => elem[0].jsonType == jsonx.JsonType.JsonNull],
         [`[-1, -3, -5]`, elem => elem[2].asInteger() == -5],
-        [`[{"id": 1, "name": "A"}, {"id": 2, "name": "B"}]`, elem => elem[1]["name"].asString() == "B"],
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+        [`[{"id": 1, "name": "A"}, {"id": 2, "name": "B"}]`, elem => elem[1]['name'].asString() == 'B'],
         [`[-1.5, -2.5, -3.5]`, elem => elem[2].asDouble() == -3.5],
         [`[0, 0, 0]`, elem => elem[2].asInteger() == 0],
-        [`{"list": []}`, elem => elem["list"].asArray().length == 0],
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+        [`{"list": []}`, elem => elem['list'].asArray().length == 0],
         [`[[[1], [2]], [[3], [4]]]`, elem => elem[1][0][0].asInteger() == 3],
-        [`"\\u263A\\u270C"`, elem => elem.asString() == "☺✌"],
+        [`"\\u263A\\u270C"`, elem => elem.asString() == '☺✌'],
         [`[-0, 0, -0]`, elem => elem[0].asDouble() == -0],
-        [`["function a(){}", "function b(){}"]`, elem => elem[1].asString() == "function b(){}"],
+        [`["function a(){}", "function b(){}"]`, elem => elem[1].asString() == 'function b(){}'],
         [`[1, [], [2, 3]]`, elem => elem[1].asArray().length == 0],
         [`[1, null, 3, null, 5]`, elem => elem[3].jsonType == jsonx.JsonType.JsonNull],
         [`[[[[[10], 20], 30], 40], 50]`, elem => elem[0][0][0][0][0].asInteger() == 10],
-        [`"\\u2603\\u2600"`, elem => elem.asString() == "☃☀"],
-        [`["NaN", "123", "456"]`, elem => elem[0].asString() == "NaN"],
-        [`["-Infinity", "0", "Infinity"]`, elem => elem[0].asString() == "-Infinity"],
+        [`"\\u2603\\u2600"`, elem => elem.asString() == '☃☀'],
+        [`["NaN", "123", "456"]`, elem => elem[0].asString() == 'NaN'],
+        [`["-Infinity", "0", "Infinity"]`, elem => elem[0].asString() == '-Infinity'],
         [`[[1, -0], [2, 3]]`, elem => elem[0][1].asDouble() == -0],
         [`[[], [1, []], [2, [3, []]]]`, elem => elem[1][1].asArray().length == 0],
-        [`"\\u5E26\\u7B26\\u53F7\\u7684\\u5B57\\u7B26\\u4E32：!@#"`, elem => elem.asString() == "带符号的字符串：!@#"],
+        [`"\\u5E26\\u7B26\\u53F7\\u7684\\u5B57\\u7B26\\u4E32：!@#"`, elem => elem.asString() == '带符号的字符串：!@#'],
         [`[1,2,3]`, elem => elem[1].asInteger() == 2],
-        [`[{"k":1}]`, elem => elem[0]["k"].asDouble() == 1],
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+        [`[{"k":1}]`, elem => elem[0]['k'].asDouble() == 1],
         [`{"a":1,"b":"test","c":[1,2,3]}`, elem => Array.from(elem.$_iterator()).length == 3],
         [`true`, elem => elem.jsonType == jsonx.JsonType.JsonTrue],
         [`false`, elem => elem.jsonType == jsonx.JsonType.JsonFalse],
@@ -75,7 +78,7 @@ function stringTests(): void {
             const arr: jsonx.JsonElement[] = elem.asArray()
             return arr.length == 6 &&
                 arr[0].tryAsInteger() == 0 &&
-                arr[1].asString() == "" &&
+                arr[1].asString() == '' &&
                 arr[2].jsonType == jsonx.JsonType.JsonFalse &&
                 arr[3].jsonType == jsonx.JsonType.JsonNull &&
                 arr[4].jsonType == jsonx.JsonType.JsonArray &&
@@ -83,12 +86,13 @@ function stringTests(): void {
         }],
         [`[1e3,2.5e-2,1.5E+10,-3.5e2]`, elem => {
             const arr: jsonx.JsonElement[] = elem.asArray()
-            return arr[0].tryAsDouble() == 1000 &&
-                arr[1].tryAsDouble() == 0.025 &&
-                arr[2].tryAsDouble() == 15000000000 &&
-                arr[3].tryAsDouble() == -350
+            return Math.abs(arr[0].tryAsDouble()! - 1000) < 1e-10 &&
+                Math.abs(arr[1].tryAsDouble()! - 0.025) < 1e-10 &&
+                Math.abs(arr[2].tryAsDouble()! - 15000000000) < 1e-10 &&
+                Math.abs(arr[3].tryAsDouble()! + 350) < 1e-10
         }],
-        [`{"a":1,"a":2,"a":3}`, elem => elem["a"].asDouble() == 3]
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+        [`{"a":1,"a":2,"a":3}`, elem => elem['a'].asDouble() == 3]
     ]
 
     for (const data of testData) {
@@ -127,7 +131,7 @@ function parseToStringifyTests(): void {
         `[42,"text",true,false,null,{"nested":"obj"},[1,2,3]]`,
         `[72,101,108,108,111,0,0,0,-111,114,108,100]`,
         `{"a":1,"b":2}`,
-        `{"data":"${"x".repeat(10000)}"}`,
+        `{"data":"${'x'.repeat(10000)}"}`,
         `{"special":"!#$%&'()*+,-./:;<=>?@[]^_\`{|}~"}`,
         createDeepNested(),
     ]
@@ -140,7 +144,7 @@ function parseToStringifyTests(): void {
 }
 
 function createDeepNested(): string {
-    let str: string = "1"
+    let str: string = '1'
     for (let i = 0; i < 50; i++) {
         str = `{"a":${str}}`
     }
@@ -168,7 +172,7 @@ function reviverTests(): void {
 }
 
 function mul2(key: string, value: jsonx.JsonElement): jsonx.JsonElement {
-    if (key === "") {
+    if (key === '') {
         return value
     }
     if (value.jsonType === jsonx.JsonType.JsonNumber) {
@@ -181,7 +185,7 @@ function mul2(key: string, value: jsonx.JsonElement): jsonx.JsonElement {
 }
 
 function uppercase(key: string, value: jsonx.JsonElement): jsonx.JsonElement {
-    if (key === "") {
+    if (key === '') {
         return value
     }
     if (value.jsonType === jsonx.JsonType.JsonString) {
@@ -192,24 +196,24 @@ function uppercase(key: string, value: jsonx.JsonElement): jsonx.JsonElement {
 }
 
 function num999(key: string, value: jsonx.JsonElement): jsonx.JsonElement {
-    if (key === "value" && value.jsonType === jsonx.JsonType.JsonNumber) {
+    if (key === 'value' && value.jsonType === jsonx.JsonType.JsonNumber) {
         return jsonx.JsonElement.createInteger(999)
     }
     return value
 }
 
 function filterNull(key: string, value: jsonx.JsonElement): jsonx.JsonElement {
-    if (key === "") {
+    if (key === '') {
         return value
     }
     if (value.jsonType === jsonx.JsonType.JsonNull) {
-        return jsonx.JsonElement.createString("filtered")
+        return jsonx.JsonElement.createString('filtered')
     }
     return value
 }
 
 function ifEvenMul10(key: string, value: jsonx.JsonElement): jsonx.JsonElement {
-    if (key === "") {
+    if (key === '') {
         return value
     }
     if (value.jsonType === jsonx.JsonType.JsonNumber) {
@@ -223,7 +227,7 @@ function ifEvenMul10(key: string, value: jsonx.JsonElement): jsonx.JsonElement {
 }
 
 function switchBoolean(key: string, value: jsonx.JsonElement): jsonx.JsonElement {
-    if (key === "") {
+    if (key === '') {
         return value
     }
     if (value.jsonType === jsonx.JsonType.JsonTrue) {
@@ -236,19 +240,19 @@ function switchBoolean(key: string, value: jsonx.JsonElement): jsonx.JsonElement
 }
 
 function scientificNotationTest(): void {
-    const str: string = "[1e-10,1e10]"
+    const str: string = '[1e-10,1e10]'
     let callLog: string[] = []
 
     const reviver = (key: string, value: jsonx.JsonElement): jsonx.JsonElement => {
-        if (key !== "") {
+        if (key !== '') {
             const typeName: string = jsonx.JsonType[value.jsonType]
             const num: double | undefined = value.tryAsDouble()
             callLog.push(`key=${key},type=${typeName},value=${num}`)
 
-            if (key === "0" && value.jsonType === jsonx.JsonType.JsonNumber) {
+            if (key === '0' && value.jsonType === jsonx.JsonType.JsonNumber) {
                 return jsonx.JsonElement.createInteger(999)
             }
-            if (key === "1" && value.jsonType === jsonx.JsonType.JsonNumber) {
+            if (key === '1' && value.jsonType === jsonx.JsonType.JsonNumber) {
                 return jsonx.JsonElement.createInteger(-888)
             }
         }
@@ -257,11 +261,11 @@ function scientificNotationTest(): void {
     const elem: jsonx.JsonElement = JSON.parseJsonElement(str, reviver)
 
     arktest.assertEQ(callLog.length, 2)
-    arktest.assertTrue(callLog[0].includes("key=0"))
-    arktest.assertTrue(callLog[1].includes("key=1"))
+    arktest.assertTrue(callLog[0].includes('key=0'))
+    arktest.assertTrue(callLog[1].includes('key=1'))
 
     const result: string = JSON.stringifyJsonElement(elem)
-    arktest.assertEQ(result, "[999,-888]")
+    arktest.assertEQ(result, '[999,-888]')
 }
 
 function unicodeKeysTest(): void {
@@ -287,7 +291,7 @@ function deeplyNestedTest(): void {
 
     let maxDepth: int = 0
     const reviver = (key: string, value: jsonx.JsonElement): jsonx.JsonElement => {
-        if (key === "a") {
+        if (key === 'a') {
             maxDepth++
         }
         return value
@@ -304,7 +308,7 @@ function mixedArrayTest(): void {
     const typeCount: Map<string, int> = new Map<string, int>()
 
     const reviver = (key: string, value: jsonx.JsonElement): jsonx.JsonElement => {
-        if (key !== "") {
+        if (key !== '') {
             const typeName: string = jsonx.JsonType[value.jsonType]
             const current: int = typeCount.get(typeName) ?? 0
             typeCount.set(typeName, current + 1)
@@ -315,7 +319,7 @@ function mixedArrayTest(): void {
 
     arktest.assertTrue(typeCount.size >= 5)
     const result: string = JSON.stringifyJsonElement(elem)
-    arktest.assertTrue(result.startsWith("["))
+    arktest.assertTrue(result.startsWith('['))
 }
 
 function specialCharactersTest(): void {
@@ -323,7 +327,7 @@ function specialCharactersTest(): void {
     const keys: string[] = []
 
     const reviver = (key: string, value: jsonx.JsonElement): jsonx.JsonElement => {
-        if (key !== "") {
+        if (key !== '') {
             keys.push(key)
         }
         return value
@@ -331,9 +335,9 @@ function specialCharactersTest(): void {
     const elem: jsonx.JsonElement = JSON.parseJsonElement(str, reviver)
 
     arktest.assertEQ(keys.length, 3)
-    arktest.assertEQ(keys[0], "key_with_space")
-    arktest.assertEQ(keys[1], "key-with-dash")
-    arktest.assertEQ(keys[2], "key.with.dot")
+    arktest.assertEQ(keys[0], 'key_with_space')
+    arktest.assertEQ(keys[1], 'key-with-dash')
+    arktest.assertEQ(keys[2], 'key.with.dot')
 }
 
 function emptyValuesTest(): void {
@@ -369,7 +373,7 @@ function escapeSequencesTest(): void {
     const escapeLog: string[] = []
 
     const reviver = (key: string, value: jsonx.JsonElement): jsonx.JsonElement => {
-        if (key !== "" && value.jsonType === jsonx.JsonType.JsonString) {
+        if (key !== '' && value.jsonType === jsonx.JsonType.JsonString) {
             const str: string = value.asString()
             escapeLog.push(`${key}=${str.length}`)
         }
@@ -379,16 +383,16 @@ function escapeSequencesTest(): void {
 
     arktest.assertEQ(escapeLog.length, 4)
     const result: string = JSON.stringifyJsonElement(elem)
-    arktest.assertTrue(result.includes("line1\\nline2"))
-    arktest.assertTrue(result.includes("col1\\tcol2"))
+    arktest.assertTrue(result.includes('line1\\nline2'))
+    arktest.assertTrue(result.includes('col1\\tcol2'))
 }
 
 function numberSpecialValuesTest(): void {
-    const str: string = "[42,null]"
+    const str: string = '[42,null]'
     const typeLog: string[] = []
 
     const reviver = (key: string, value: jsonx.JsonElement): jsonx.JsonElement => {
-        if (key !== "") {
+        if (key !== '') {
             typeLog.push(`${key}:${jsonx.JsonType[value.jsonType]}`)
         }
         return value
@@ -396,15 +400,15 @@ function numberSpecialValuesTest(): void {
     const elem: jsonx.JsonElement = JSON.parseJsonElement(str, reviver)
 
     arktest.assertEQ(typeLog.length, 2)
-    arktest.assertTrue(typeLog[0].includes("Number"))
-    arktest.assertTrue(typeLog[1].includes("Null"))
+    arktest.assertTrue(typeLog[0].includes('Number'))
+    arktest.assertTrue(typeLog[1].includes('Null'))
 }
 
 function deleteKeywordTest(): void {
     const str: string = `{"a":1,"b":2,"c":3}`
 
     const reviver = (key: string, value: jsonx.JsonElement): jsonx.JsonElement => {
-        if (key === "b") {
+        if (key === 'b') {
             return jsonx.JsonElement.createNull()
         }
         return value
@@ -416,15 +420,15 @@ function deleteKeywordTest(): void {
 }
 
 function arrayBoundaryTest(): void {
-    const str: string = "[0, -1, 256, -32769, 1.7976931348623157e+308]"
+    const str: string = '[0, -1, 256, -32769, 1.7976931348623157e+308]'
     const boundaryTypes: string[] = []
 
     const reviver = (key: string, value: jsonx.JsonElement): jsonx.JsonElement => {
-        if (key !== "" && value.jsonType === jsonx.JsonType.JsonNumber) {
+        if (key !== '' && value.jsonType === jsonx.JsonType.JsonNumber) {
             if (value.tryAsInteger() !== undefined) {
-                boundaryTypes.push("integer")
+                boundaryTypes.push('integer')
             } else if (value.tryAsDouble() !== undefined) {
-                boundaryTypes.push("double")
+                boundaryTypes.push('double')
             }
         }
         return value
@@ -433,22 +437,22 @@ function arrayBoundaryTest(): void {
 
     arktest.assertEQ(boundaryTypes.length, 5)
     const result: string = JSON.stringifyJsonElement(elem)
-    arktest.assertTrue(result.startsWith("["))
+    arktest.assertTrue(result.startsWith('['))
 }
 
 function unicodeKeysTest2(): void {
     const str: string = `{"\\u004b\\u0065\\u0079":"value"}`
-    let receivedKey: string = ""
+    let receivedKey: string = ''
 
     const reviver = (key: string, value: jsonx.JsonElement): jsonx.JsonElement => {
-        if (key !== "") {
+        if (key !== '') {
             receivedKey = key
         }
         return value
     }
     const elem: jsonx.JsonElement = JSON.parseJsonElement(str, reviver)
 
-    arktest.assertEQ(receivedKey, "Key")
+    arktest.assertEQ(receivedKey, 'Key')
     const result: string = JSON.stringifyJsonElement(elem)
     arktest.assertEQ(result, `{"Key":"value"}`)
 }

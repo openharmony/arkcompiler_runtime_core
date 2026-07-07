@@ -30,7 +30,7 @@ Debug Information
 API Calls
   GET /users
   Request Details
-    Headers: ConsoleGroupTest.RequestHeaders {Authorization: Bearer token}
+    Headers: ConsoleGroupTest.RequestHeaders {authorization: Bearer token}
   Response
     Status: 200
     Data: [ConsoleGroupTest.User {id: 1, name: John}]

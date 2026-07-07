@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,10 +30,11 @@ function testSetAndGetNC() {
 
 function testSetAndGetNC2() {
 	let map = new CHMap();
-	for (let i = 0; i < 10; i += 2)
+	for (let i = 0; i < 10; i += 2) {
 		map.set(i, i * 3);
+	}
 	for (let i = 0; i < 10; ++ i ) {
-		let val: int|undefined = [i * 3, undefined][i&1];
+		let val: int | undefined = [i * 3, undefined][i & 1];
 		arktest.assertEQ(map.get(i), (val) );
 	}
 }
@@ -81,8 +82,9 @@ function testHasAndDeleteNC2() {
 		arktest.assertFalse(map.has(i));
 		arktest.assertFalse(map.delete(i));
 	}
-	for (let i = 0; i < 10; ++ i)
+	for (let i = 0; i < 10; ++ i) {
 		map.set(i, i);
+	}
 	for (let i = 0; i < 10; ++ i) {
 		arktest.assertTrue(map.has(i));
 		arktest.assertTrue(map.delete(i));
@@ -111,14 +113,18 @@ function testHasAndRemoveNC() {
 
 function testHasAndRemoveNC2() {
 	let map = new CHMap();
-	for (let i = 0; i < 10; ++ i)
+	for (let i = 0; i < 10; ++ i) {
 		arktest.assertEQ(map.remove(i), undefined);
-	for (let i = 0; i < 10; ++ i)
+	}
+	for (let i = 0; i < 10; ++ i) {
 		map.set(i, i);
-	for (let i = 0; i < 10; ++ i)
+	}
+	for (let i = 0; i < 10; ++ i) {
 		arktest.assertEQ(map.remove(i), i);
-	for (let i = 0; i < 10; ++ i)
+	}
+	for (let i = 0; i < 10; ++ i) {
 		arktest.assertFalse(map.has(i));
+	}
 }
 
 function testClearNC() {
@@ -172,7 +178,7 @@ function testSizeNC2() {
 	arktest.assertEQ(0, Double.toInt(map.size));
 }
 
-function testIteratorsNC () {
+function testIteratorsNC() {
 	let map = new CHMap();
 	let arr1 = Array.from(map.keys());
 	let arr2 = Array.from(map.values());
@@ -183,12 +189,14 @@ function testIteratorsNC () {
 	map.forEach(()=>arktest.assertFalse(true));
 }
 
-function testIteratorsNC1 () {
+function testIteratorsNC1() {
 	let map = new CHMap();
-	for (let i = 0; i < 100; ++ i)
+	for (let i = 0; i < 100; ++ i) {
 		map.set(i, i);
-	for (let i = 0; i < 100; ++ i)
+	}
+	for (let i = 0; i < 100; ++ i) {
 		map.remove(i);
+	}
 	let arr1 = Array.from(map.keys());
 	let arr2 = Array.from(map.values());
 	let arr3 = Array.from(map.entries());
@@ -198,7 +206,7 @@ function testIteratorsNC1 () {
 	map.forEach(()=>arktest.assertFalse(true));
 }
 
-function testIteratorsNC2 () {
+function testIteratorsNC2() {
 	let map = new CHMap();
 	map.set(1, 2);
 	map.set(3, 4);
@@ -218,22 +226,22 @@ function testIteratorsNC2 () {
 }
 
 function main(): int {
-    let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
-	CHMTestSuitecase.addTest("testSetAndGetNC", testSetAndGetNC);
-	CHMTestSuitecase.addTest("testSetAndGetNC2", testSetAndGetNC2);
-	CHMTestSuitecase.addTest("testReplaceNC", testReplaceNC);
-	CHMTestSuitecase.addTest("testReplaceNC2", testReplaceNC2);
-	CHMTestSuitecase.addTest("testHasAndDeleteNC", testHasAndDeleteNC);
-	CHMTestSuitecase.addTest("testHasAndDeleteNC2", testHasAndDeleteNC2);
-	CHMTestSuitecase.addTest("testHasAndRemoveNC", testHasAndRemoveNC);
-	CHMTestSuitecase.addTest("testHasAndRemoveNC2", testHasAndRemoveNC2);
-	CHMTestSuitecase.addTest("testClearNC", testClearNC);
-	CHMTestSuitecase.addTest("testClearNC2", testClearNC2);
-	CHMTestSuitecase.addTest("testSizeNC", testSizeNC);
-	CHMTestSuitecase.addTest("testSizeNC2", testSizeNC2);
-	CHMTestSuitecase.addTest("testIteratorsNC", testIteratorsNC);
-	CHMTestSuitecase.addTest("testIteratorsNC1", testIteratorsNC1);
-	CHMTestSuitecase.addTest("testIteratorsNC2", testIteratorsNC2);
-    return CHMTestSuitecase.run();
+    let chmTestSuitecase = new arktest.ArkTestsuite('ConcurrentHashMapTest')
+	chmTestSuitecase.addTest('testSetAndGetNC', testSetAndGetNC);
+	chmTestSuitecase.addTest('testSetAndGetNC2', testSetAndGetNC2);
+	chmTestSuitecase.addTest('testReplaceNC', testReplaceNC);
+	chmTestSuitecase.addTest('testReplaceNC2', testReplaceNC2);
+	chmTestSuitecase.addTest('testHasAndDeleteNC', testHasAndDeleteNC);
+	chmTestSuitecase.addTest('testHasAndDeleteNC2', testHasAndDeleteNC2);
+	chmTestSuitecase.addTest('testHasAndRemoveNC', testHasAndRemoveNC);
+	chmTestSuitecase.addTest('testHasAndRemoveNC2', testHasAndRemoveNC2);
+	chmTestSuitecase.addTest('testClearNC', testClearNC);
+	chmTestSuitecase.addTest('testClearNC2', testClearNC2);
+	chmTestSuitecase.addTest('testSizeNC', testSizeNC);
+	chmTestSuitecase.addTest('testSizeNC2', testSizeNC2);
+	chmTestSuitecase.addTest('testIteratorsNC', testIteratorsNC);
+	chmTestSuitecase.addTest('testIteratorsNC1', testIteratorsNC1);
+	chmTestSuitecase.addTest('testIteratorsNC2', testIteratorsNC2);
+    return chmTestSuitecase.run();
 }
 

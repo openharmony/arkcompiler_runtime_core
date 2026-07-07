@@ -14,7 +14,7 @@
  */
 
 function getTestName(testCase: string): string {
-	return "Uint32Array.from - " + testCase;
+	return 'Uint32Array.from - ' + testCase;
 }
 
 function testArrayLikeNumber(): void {
@@ -69,7 +69,7 @@ function testNaNAndInfinity(): void {
 }
 
 function testArrayLikeTWithMap(): void {
-	const strings = ["1", "4294967300", "-1"];
+	const strings = ['1', '4294967300', '-1'];
 	const ta = Uint32Array.from(strings, (v: string): number => parseInt(v));
 	arktest.assertEQ(ta.length, 3);
 	arktest.assertEQ(ta.$_get(0).toDouble(), 1);
@@ -105,14 +105,14 @@ function testBufferIndependence(): void {
 }
 
 function main(): int {
-	const suite = new arktest.ArkTestsuite("Uint32ArrayFrom");
-	suite.addTest(getTestName("ArrayLike Number"), testArrayLikeNumber);
-	suite.addTest(getTestName("Iterable Number No Map"), testIterableNumberWithoutMap);
-	suite.addTest(getTestName("Iterable Number With Map"), testIterableNumberWithMap);
-	suite.addTest(getTestName("Decimal Truncation"), testDecimalTruncation);
-	suite.addTest(getTestName("NaN and Infinity"), testNaNAndInfinity);
-	suite.addTest(getTestName("ArrayLike T With Map"), testArrayLikeTWithMap);
-	suite.addTest(getTestName("Empty"), testEmpty);
-	suite.addTest(getTestName("Buffer Independence"), testBufferIndependence);
+	const suite = new arktest.ArkTestsuite('Uint32ArrayFrom');
+	suite.addTest(getTestName('ArrayLike Number'), testArrayLikeNumber);
+	suite.addTest(getTestName('Iterable Number No Map'), testIterableNumberWithoutMap);
+	suite.addTest(getTestName('Iterable Number With Map'), testIterableNumberWithMap);
+	suite.addTest(getTestName('Decimal Truncation'), testDecimalTruncation);
+	suite.addTest(getTestName('NaN and Infinity'), testNaNAndInfinity);
+	suite.addTest(getTestName('ArrayLike T With Map'), testArrayLikeTWithMap);
+	suite.addTest(getTestName('Empty'), testEmpty);
+	suite.addTest(getTestName('Buffer Independence'), testBufferIndependence);
 	return suite.run();
 }

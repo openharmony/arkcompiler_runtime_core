@@ -14,10 +14,10 @@
  */
 
 class Point {
-    static s = "s"
+    public static s = 's'
 
-    x: number
-    y: number
+    public x: number
+    public y: number
 
     constructor() {
         this(0, 0)
@@ -34,7 +34,7 @@ class Point {
 }
 
 class Trash {
-    point: Point | null | undefined
+    public point: Point | null | undefined
 
     constructor() {
         this.point = undefined
@@ -64,7 +64,7 @@ function newReplacingReviver(replacements: Map<string, Any>): (k: string, v: Any
 }
 
 function replacingReviver(key: string, val: Any): Any {
-    if (key == "x") {
+    if (key == 'x') {
         return 10.0
     } else {
         return val
@@ -85,7 +85,7 @@ function jsonParseUsingUndefinedReviver(): void {
 function jsonParseUsingRevivierWhichReturnsUndefined(): void {
     const point = new Point(1, 2)
 
-    const parsedPoint = JSON.parse<Point>(JSON.stringify(point), newUndefiningReviver(""), POINT_TYPE)
+    const parsedPoint = JSON.parse<Point>(JSON.stringify(point), newUndefiningReviver(''), POINT_TYPE)
 
     arktest.assertEQ(undefined, parsedPoint)
 }
@@ -93,15 +93,16 @@ function jsonParseUsingRevivierWhichReturnsUndefined(): void {
 const STRING_ARRAY_TYPE = Type.of([] as FixedArray<string>)
 
 function jsonParseArrayUsingReviverWhichReturnsUndefined(): void {
-    const parsedArray = JSON.parse<FixedArray<string | null | undefined>>(`["one","two"]`, newUndefiningReviver("0"), STRING_ARRAY_TYPE)
-    arktest.assertEQ([null, "two"] as FixedArray<string | null | undefined>, parsedArray)
+    const parsedArray = JSON.parse<FixedArray<string | null |
+        undefined>>(`["one","two"]`, newUndefiningReviver('0'), STRING_ARRAY_TYPE)
+    arktest.assertEQ([null, 'two'] as FixedArray<string | null | undefined>, parsedArray)
 }
 
 function jsonParseUsingReplacingReviver(): void {
     const NEW_X = 10.0
 
     const replacements = new Map<string, Any>()
-    replacements.set("x", NEW_X)
+    replacements.set('x', NEW_X)
 
     const point = new Point(3, 4)
     const parsedPoint: Point = JSON.parse<Point>(JSON.stringify(point), newReplacingReviver(replacements), POINT_TYPE)!
@@ -114,26 +115,27 @@ function jsonParseUsingReplacingReviver(): void {
     const trashJson = JSON.stringify(trash)
     const trashType = typeFor([] as FixedArray<Trash>)
 
-    let parsedTrash = JSON.parse<Trash>(trashJson, newUndefiningReviver("point"), trashType)
+    let parsedTrash = JSON.parse<Trash>(trashJson, newUndefiningReviver('point'), trashType)
 
     arktest.assertTrue(parsedTrash != null)
     arktest.assertEQ(undefined, parsedTrash!.point)
 
-    parsedTrash = JSON.parse<Trash>(trashJson, newNullingReviver("point"), trashType)
+    parsedTrash = JSON.parse<Trash>(trashJson, newNullingReviver('point'), trashType)
 
     arktest.assertTrue(parsedTrash != null)
     arktest.assertEQ(undefined, parsedTrash!.point)
 }
 
 function jsonParseArrayWithReplacingReviver(): void {
-    const romans: FixedArray<string | null | undefined> = ["I", "II"]
+    const romans: FixedArray<string | null | undefined> = ['I', 'II']
 
     const replacements = new Map<string, Any>()
 
-    const replacedRomans: FixedArray<string | null | undefined> = ["I"]
-    replacements.set("", replacedRomans)
+    const replacedRomans: FixedArray<string | null | undefined> = ['I']
+    replacements.set('', replacedRomans)
 
-    const parsedRomans = JSON.parse<FixedArray<string | null | undefined>>(JSON.stringify(romans), newReplacingReviver(replacements), STRING_ARRAY_TYPE)
+    const parsedRomans = JSON.parse<FixedArray<string | null |
+        undefined>>(JSON.stringify(romans), newReplacingReviver(replacements), STRING_ARRAY_TYPE)
     arktest.assertEQ(parsedRomans, replacedRomans)
 }
 
@@ -144,13 +146,16 @@ enum Color {
 }
 
 function consolePrint(color: Color, text: string): void {
-    console.print("\x1b[38;5;" + color.toString() + "m")
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.print('\x1b[38;5;' + color.toString() + 'm')
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.print(text)
-    console.print("\x1b[0m")
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.print('\x1b[0m')
 }
 
 class BooleanTestClass {
-    flag: boolean = false;
+    public flag: boolean = false;
 }
 
 function jsonParseWithBoolean(): void {
@@ -168,32 +173,32 @@ class IStateCLASS implements IState {
     change(){}
 }
 
-class classfactory {
+class ClassFactory {
     static getIState(): IState {
         return new IStateCLASS()
     }
 }
 
-class interfaceTest {
-    @JSONParseIgnore() meta: IState = classfactory.getIState()
-    name:string = ""
+class InterfaceTest {
+    @JSONParseIgnore() public meta: IState = ClassFactory.getIState()
+    public name:string = ''
 }
 
 function jsonParseWithInterface(): void {
     let str = '{"name":"tester"}'
-    let type = Type.from<interfaceTest>()
-    let ret = JSON.parse<interfaceTest>(str, type) as interfaceTest
-    arktest.assertEQ(ret.name, "tester")
+    let type = Type.from<InterfaceTest>()
+    let ret = JSON.parse<InterfaceTest>(str, type) as InterfaceTest
+    arktest.assertEQ(ret.name, 'tester')
 }
 
 class BigIntTest {
-    a: bigint = new BigInt(0)
+    public a: bigint = new BigInt(0)
 }
 
 function jsonParseWithBigInt(): void {
-    const integerStr = "{\"a\": 949491916515615615646465644892374983279473243480923840328049823094}"
-    const integerStr2 = "{\"a\": 949491916515615615646465644892374983279473243480923840328049823094.0}"
-    const nonIntergerStr = "{\"a\": 949491916515615615646465644892374983279473243480923840328049823094.1}"
+    const integerStr = '{\"a\": 949491916515615615646465644892374983279473243480923840328049823094}'
+    const integerStr2 = '{\"a\": 949491916515615615646465644892374983279473243480923840328049823094.0}'
+    const nonIntergerStr = '{\"a\": 949491916515615615646465644892374983279473243480923840328049823094.1}'
     const objI = JSON.parse<BigIntTest>(integerStr, undefined, Type.from<BigIntTest>(),
         { bigIntMode: jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT } as jsonx.ParseOptions) as BigIntTest
     const objI2 = JSON.parse<BigIntTest>(integerStr2, undefined, Type.from<BigIntTest>(),
@@ -206,18 +211,18 @@ function jsonParseWithBigInt(): void {
 }
 
 class ElementTest {
-    ele: string = "abc"
+    public ele: string = 'abc'
 }
 
 class TokenTest {
-    property : ElementTest = new ElementTest()
+    public property : ElementTest = new ElementTest()
 }
 
 function jsonParseWithSpecialToken(): void {
     const jsonStr = '\t\r \n{\t\r \n' +
         '"property"\t\r \n:\t\r \n{\t\r"ele": \t "def"}\t\t \n}\t\t \n'
     const obj = JSON.parse<TokenTest>(jsonStr, Type.from<TokenTest>()) as TokenTest
-    arktest.assertEQ(obj.property.ele, "def")
+    arktest.assertEQ(obj.property.ele, 'def')
 }
 
 function jsonParseUnicodeString(): void {
@@ -250,7 +255,7 @@ function jsonParseUnicodeString(): void {
 
 function jsonParseEscapedChar(): void {
     let type = Class.from<String>()
-    let arr: FixedArray<String> = ['"\\""', '"\\\\"', '"\\/"','"\\b"', '"\\f"', '"\\n"', '"\\r"', '"\\t"']
+    let arr: FixedArray<String> = ['"\\""', '"\\\\"', '"\\/"', '"\\b"', '"\\f"', '"\\n"', '"\\r"', '"\\t"']
     let res: FixedArray<String> = ['"', '\\', '/', '\b', '\f', '\n', '\r', '\t']
     for (let i = 0; i < arr.length; i++) {
         arktest.assertEQ(JSON.parse<String>(arr[i], type), res[i]);
@@ -498,19 +503,19 @@ function jsonParseClass(): void {
 // cases from xts
 function jsonParseInvalid(): void {
     arktest.expectThrow(
-        (): void => {JSON.parse<String>('{key name: 1}', Class.of(new String()))},
+        (): void => {JSON.parse<String>('{key name: 1}', Class.of(String()))},
         (e: Error): boolean => {
             return (e instanceof SyntaxError) && (e.message == 'Unterminated string at 13 at 2..13')
         }
     )
     arktest.expectThrow(
-        (): void => {JSON.parse<String>('{"num": a123}', Class.of(new String()))},
+        (): void => {JSON.parse<String>('{"num": a123}', Class.of(String()))},
         (e: Error): boolean => {
             return (e instanceof SyntaxError) && (e.message == 'Unexpected character \'a\' at 8 at 8..8')
         }
     )
     arktest.expectThrow(
-        (): void => {JSON.parse<String>('{"valid": TRUE}', Class.of(new String()))},
+        (): void => {JSON.parse<String>('{"valid": TRUE}', Class.of(String()))},
         (e: Error): boolean => {
             return (e instanceof SyntaxError) && (e.message == 'Unexpected character \'T\' at 10 at 10..10')
         }
@@ -523,10 +528,11 @@ function main(): int {
     suite.addTest('JSON.parse() for invalid string', jsonParseInvalid)
     suite.addTest('JSON.parse() using undefined "reviver"', jsonParseUsingUndefinedReviver)
     suite.addTest('JSON.parse() using "reviver" which returns "undefined"', jsonParseUsingRevivierWhichReturnsUndefined)
-    // #21831: ArrayStoreError: nullvalue cannot be stored in an array of type [Lstd/core/String;
-    // suite.addTest('JSON.parse(array) using "reviver" which returns "undefined"', jsonParseArrayUsingReviverWhichReturnsUndefined)
-    // #27136: Nullish field type is UnionType which is not supported yet
-    // suite.addTest('JSON.parse() using replacing "reviver"', jsonParseUsingReplacingReviver)
+    //#21831: ArrayStoreError: nullvalue cannot be stored in an array of type [Lstd/core/String;
+    //FIXME: suite.addTest('JSON.parse(array) using "reviver" which returns "undefined"',
+    //     jsonParseArrayUsingReviverWhichReturnsUndefined)
+    //#27136: Nullish field type is UnionType which is not supported yet
+    //FIXME: suite.addTest('JSON.parse() using replacing "reviver"', jsonParseUsingReplacingReviver)
     suite.addTest('JSON.parse(array) using replacing "reviver"', jsonParseArrayWithReplacingReviver)
     suite.addTest('JSON.parse boolean in class', jsonParseWithBoolean)
     suite.addTest('JSON.parse interface(ignore) in class', jsonParseWithInterface)

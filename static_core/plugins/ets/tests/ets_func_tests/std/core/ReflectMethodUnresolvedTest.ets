@@ -24,22 +24,22 @@ interface classWithNoImplField {
     bar(tmp: NoImpClass): NoImpClass
 }
 
-class classWithNoImplField1 {
-    a: NoImpClass | undefined = undefined
+class ClassWithNoImplField1 {
+    public a: NoImpClass | undefined = undefined
     public static foo(tmp: NoImpClass | Number): Number { return 1}
 }
 
 function testStaticUnresolvedReturnTypeMethod() {
     const klass = Class.from<classWithNoImplField>()
-    const bar = klass.getInstanceMethod("bar")
+    const bar = klass.getInstanceMethod('bar')
     arktest.expectThrow(() => {
         bar!.getReturnType()
     }, (e: Error) => { return e instanceof LinkerClassNotFoundError; });
 }
 
 function testStaticUnresolvedArgumentMethodGetArgument() {
-    const klass = Class.from<classWithNoImplField1>()
-    const foo = klass.getStaticMethod("foo")
+    const klass = Class.from<ClassWithNoImplField1>()
+    const foo = klass.getStaticMethod('foo')
     arktest.expectThrow(() => {
         foo!.getParameterType(0)
     }, (e: Error) => { return e instanceof LinkerClassNotFoundError; });
@@ -50,8 +50,8 @@ function testStaticUnresolvedArgumentMethodGetArgument() {
 }
 
 function testStaticUnresolvedArgumentMethodInvoke() {
-    const klass = Class.from<classWithNoImplField1>()
-    const foo = klass.getStaticMethod("foo")
+    const klass = Class.from<ClassWithNoImplField1>()
+    const foo = klass.getStaticMethod('foo')
     arktest.expectThrow(() => {
         foo!.invoke([42])
     }, (e: Error) => { return e instanceof LinkerClassNotFoundError; });

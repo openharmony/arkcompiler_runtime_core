@@ -192,9 +192,9 @@ export final class BigInt {
     private static readonly shiftSys: long = 32 as long
     private static readonly baseSys: long = (1 as long) << BigInt.shiftSys
     private static readonly maskSys: long = BigInt.baseSys - (1 as long)
-    private static readonly INVALID_RADIX_MESSAGE: string = "toString() radix argument must be between 2 and 36"
+    private static readonly INVALID_RADIX_MESSAGE: string = 'toString() radix argument must be between 2 and 36'
     private static readonly BITS_PER_1024_DEC = 3402
-    private static readonly BIGINT64_MASK = new BigInt("0xffffffffffffffff")
+    private static readonly BIGINT64_MASK = new BigInt('0xffffffffffffffff')
     private static readonly FAST_TO_STRING_HANDLER_MAP: ToStringHandlerMap = BigInt.createFastToStringHandlerMap()
 
     private static resetBytes(b: ValueArray<int>):void {

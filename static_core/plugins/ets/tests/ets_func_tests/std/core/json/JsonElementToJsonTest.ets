@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,39 +13,39 @@
  * limitations under the License.
  */
 
-import { jsonx } from "std/core"
+import { jsonx } from 'std/core'
 
 function main() {
-	const suite = new arktest.ArkTestsuite("jsonx.toJson")
+	const suite = new arktest.ArkTestsuite('jsonx.toJson')
 
-	suite.addTest("Test toJson", testToJson)
+	suite.addTest('Test toJson', testToJson)
 }
 
 function testToJson() {
 	let t1 = new T1
 	let jsonedT1 = t1.toJSON()
-	arktest.assertEQ(jsonedT1.getString("newBar"), "34")
-	arktest.assertEQ(jsonedT1.getInteger("foo"), 5)
-	let jsonedT2 = jsonedT1.getElement("t2")
-	arktest.assertTrue(jsonedT2.getBoolean("biz"))
+	arktest.assertEQ(jsonedT1.getString('newBar'), '34')
+	arktest.assertEQ(jsonedT1.getInteger('foo'), 5)
+	let jsonedT2 = jsonedT1.getElement('t2')
+	arktest.assertTrue(jsonedT2.getBoolean('biz'))
 }
 
 class T2 implements jsonx.JsonElementSerializable {
-	biz: boolean = true
+	public biz: boolean = true
 
 	toJSON(): jsonx.JsonElement {
 		let val = jsonx.JsonElement.createBoolean(this.biz)
 		let m: Record<string, jsonx.JsonElement> = {
-			"biz": val,
+			'biz': val,
 		}
 		return jsonx.JsonElement.createObject(m)
 	}
 }
 
 class T1 implements jsonx.JsonElementSerializable {
-	foo: int = 5
-	bar: string = "34"
-	t2: T2 = new T2
+	public foo: int = 5
+	public bar: string = '34'
+	public t2: T2 = new T2
 
 	toJSON(): jsonx.JsonElement {
 		let jFoo = jsonx.JsonElement.createInteger(this.foo)
@@ -53,9 +53,9 @@ class T1 implements jsonx.JsonElementSerializable {
 		let jT2 = this.t2.toJSON()
 
 		let m: Record<string, jsonx.JsonElement> = {
-			"foo": jFoo,
-			"newBar": jBar,
-			"t2": jT2,
+			'foo': jFoo,
+			'newBar': jBar,
+			't2': jT2,
 		}
 		return jsonx.JsonElement.createObject(m)
 	}

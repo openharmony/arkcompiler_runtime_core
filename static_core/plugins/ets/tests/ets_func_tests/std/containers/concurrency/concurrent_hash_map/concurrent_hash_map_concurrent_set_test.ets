@@ -15,18 +15,19 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T>(arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+function awaitAll<T>(arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
-	for (let i = 0; i < arr.length; ++ i)
+	for (let i = 0; i < arr.length; ++ i) {
 		res.push(arr[i].Await());
+	}
 	return res;
 }
 
-function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
+function sumArrInto(to: FixedArray<int>, from: FixedArray<int>): void {
 	arktest.assertEQ(to.length, from.length);
 	for (let i = 0; i < to.length; ++ i) {
 		to[i] += from[i];
@@ -34,8 +35,9 @@ function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
 }
 
 function assertEQAll(array: FixedArray<int>, value: int): void {
-	for (let i=0; i < array.length; ++ i)
+	for (let i = 0; i < array.length; ++ i) {
 		arktest.assertEQ(array[i], value)
+	}
 }
 
 function testConcurrentSet() {
@@ -43,9 +45,10 @@ function testConcurrentSet() {
 	const SET_COUNT = 70;
 
 	let map = new CHMap();
-	let makeSetF = (start: int,  end: int) => () => {
-		for (let i = start; i < end; ++ i)
+	let makeSetF = (start: int, end: int) => () => {
+		for (let i = start; i < end; ++ i) {
 			map.set(i, i);
+		}
 	}
 	let setJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
@@ -64,8 +67,9 @@ function testConcurrentSet2() {
 
 	let map = new CHMap();
 	let makeSetF = (seed: int) => () => {
-		for (let i = 0; i < SET_COUNT; ++ i)
+		for (let i = 0; i < SET_COUNT; ++ i) {
 			map.set(i, seed * SET_COUNT + i);
+		}
 	}
 	let setJobs: Job<void>[] = [];
 	for (let i = 0; i < JOB_COUNT; ++ i) {
@@ -80,9 +84,9 @@ function testConcurrentSet2() {
 }
 
 function main(): int {
-    let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
-	CHMTestSuitecase.addTest("testConcurrentSet", testConcurrentSet);
-	CHMTestSuitecase.addTest("testConcurrentSet2", testConcurrentSet2);
+    let chmTestSuitecase = new arktest.ArkTestsuite('ConcurrentHashMapTest')
+	chmTestSuitecase.addTest('testConcurrentSet', testConcurrentSet);
+	chmTestSuitecase.addTest('testConcurrentSet2', testConcurrentSet2);
 
-    return CHMTestSuitecase.run();
+    return chmTestSuitecase.run();
 }

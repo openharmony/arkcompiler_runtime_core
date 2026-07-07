@@ -14,7 +14,7 @@
  */
 
 const success : int = 0;
-const fail    : int = 1;
+const fail : int = 1;
 
 function foo(a: object): int {
     return success;
@@ -26,12 +26,12 @@ function bar(a: Object): int {
 
 function main(): int {
     let failures: int = 0;
-    failures += check((): int => { return testFooPrimitiveObject()}, "test foo with type object");
-    failures += check((): int => { return testFooObject()}, "test foo with type Object");
-    failures += check((): int => { return testBarPrimitiveObject()}, "test bar with type object");
-    failures += check((): int => { return testBarObject()}, "test bar with type Object");
+    failures += check((): int => { return testFooPrimitiveObject()}, 'test foo with type object');
+    failures += check((): int => { return testFooObject()}, 'test foo with type Object');
+    failures += check((): int => { return testBarPrimitiveObject()}, 'test bar with type object');
+    failures += check((): int => { return testBarObject()}, 'test bar with type Object');
 
-    return check(failures, "All tests run");
+    return check(failures, 'All tests run');
 }
 
 function testFooPrimitiveObject(): int {
@@ -39,7 +39,7 @@ function testFooPrimitiveObject(): int {
 }
 
 function testFooObject(): int {
-    return foo(new Object()) == success ? success : fail;
+    return foo({}) == success ? success : fail;
 }
 
 function testBarPrimitiveObject(): int {
@@ -47,14 +47,15 @@ function testBarPrimitiveObject(): int {
 }
 
 function testBarObject(): int {
-    return bar(new Object()) == success ? success : fail;
+    return bar({}) == success ? success : fail;
 }
 
 function check(result: int, message: String): int {
-    if(result == success) {
+    if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }
 
@@ -62,13 +63,15 @@ function check(fn: () => int, message: String): int {
     let result: int = 0;
     try {
         result = fn();
-    } catch(e) {
-        console.println("FAILED: " + message + " => Error catched: " + e);
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: ' + message + ' => Error catched: ' + e);
         return fail;
     }
-    if(result == success) {
+    if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }

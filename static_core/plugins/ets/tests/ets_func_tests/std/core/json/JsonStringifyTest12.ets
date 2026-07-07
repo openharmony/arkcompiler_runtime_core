@@ -138,27 +138,27 @@ interface ErrorFieldHolder {
 class EmptyClass { }
 
 class StringOverrideToJSONClass implements JsonSerializable {
-    foo: string = 'foo';
+    public foo: string = 'foo';
     toJSON(): string {
         return 'bar';
     }
 }
 
 class SinglePropClass {
-    name: string = 'test';
+    public name: string = 'test';
 }
 
 class ConstructorValueClass {
-    value: number;
+    public value: number;
     constructor(value: number) {
         this.value = value;
     }
 }
 
 class PrimitiveFieldsClass {
-    a: number = 1;
-    b: string = 'test';
-    c: boolean = true;
+    public a: number = 1;
+    public b: string = 'test';
+    public c: boolean = true;
 }
 
 class InstanceMethodClass {
@@ -168,7 +168,7 @@ class InstanceMethodClass {
 }
 
 class PropAndMethodClass {
-    prop: string = 'value';
+    public prop: string = 'value';
     method(): string {
         return 'result';
     }
@@ -202,7 +202,7 @@ class GetterSetterClass {
 }
 
 class PublicPropClass {
-    publicProp: string = 'public';
+    public publicProp: string = 'public';
 }
 
 class PublicMethodClass {
@@ -212,8 +212,8 @@ class PublicMethodClass {
 }
 
 class NumberStringClass {
-    a: number = 1;
-    b: string = 'test';
+    public a: number = 1;
+    public b: string = 'test';
 }
 
 class PrivatePropClass {
@@ -227,7 +227,7 @@ class PrivateMethodClass {
 }
 
 class PublicPrivatePropClass {
-    publicProp: string = 'public';
+    public publicProp: string = 'public';
     private privateProp: string = 'private';
 }
 
@@ -242,16 +242,16 @@ class ProtectedMethodClass {
 }
 
 class PublicProtectedPropClass {
-    publicProp: string = 'public';
+    public publicProp: string = 'public';
     protected protectedProp: string = 'protected';
 }
 
 class ReadonlyPropClass {
-    readonly readonlyProp: string = 'readonly';
+    public readonly readonlyProp: string = 'readonly';
 }
 
 class ReadonlyValueClass {
-    readonly prop: string = 'value';
+    public readonly prop: string = 'value';
 }
 
 class PrivateReadonlyClass {
@@ -259,7 +259,7 @@ class PrivateReadonlyClass {
 }
 
 class StaticPropClass {
-    static staticProp: string = 'static';
+    public static staticProp: string = 'static';
 }
 
 class StaticMethodOnlyClass {
@@ -269,108 +269,108 @@ class StaticMethodOnlyClass {
 }
 
 class StaticAndInstanceClass {
-    static staticProp: string = 'static';
-    instanceProp: string = 'instance';
+    public static staticProp: string = 'static';
+    public instanceProp: string = 'instance';
 }
 
 class OptionalPropClass {
-    prop?: string;
+    public prop?: string;
 }
 
 class JsonStringifyNestedInner {
-    innerProp: string = 'inner';
+    public innerProp: string = 'inner';
 }
 
 class JsonStringifyNestedOuter {
-    outerProp: string = 'outer';
-    inner: JsonStringifyNestedInner = new JsonStringifyNestedInner();
+    public outerProp: string = 'outer';
+    public inner: JsonStringifyNestedInner = new JsonStringifyNestedInner();
 }
 
 class ArrayItem {
-    value: number = 0;
+    public value: number = 0;
 }
 
 class ArrayContainer {
-    items: ArrayItem[] = [new ArrayItem(), new ArrayItem()];
+    public items: ArrayItem[] = [new ArrayItem(), new ArrayItem()];
 }
 
 class MapItem {
-    value: number = 0;
+    public value: number = 0;
 }
 
 class MapContainer {
-    itemMap: Record<string, MapItem> = { 'a': new MapItem(), 'b': new MapItem() };
+    public itemMap: Record<string, MapItem> = { 'a': new MapItem(), 'b': new MapItem() };
 }
 
 class NumberValueClass {
-    value: number = 42;
+    public value: number = 42;
 }
 
 class ObjectLiteralTextToJSONClass implements JsonSerializable {
-    a: number = 1;
+    public a: number = 1;
     toJSON(): string {
         return '{ b: 2 }';
     }
 }
 
 class NumericTextToJSONClass implements JsonSerializable {
-    a: number = 1;
+    public a: number = 1;
     toJSON(): string {
         return '42';
     }
 }
 
 class UndefinedTextToJSONClass implements JsonSerializable {
-    a: number = 1;
+    public a: number = 1;
     toJSON(): string {
         return 'undefined';
     }
 }
 
 class FunctionTextToJSONClass implements JsonSerializable {
-    a: number = 1;
+    public a: number = 1;
     toJSON(): string {
         return '() => {}';
     }
 }
 
 class ArrayTextToJSONClass implements JsonSerializable {
-    data: number[] = [1, 2, 3];
+    public data: number[] = [1, 2, 3];
     toJSON(): string {
         return JSON.stringify(this.data);
     }
 }
 
 class TwoLevelChild extends TwoLevelParent {
-    childProp: string = 'child';
+    public childProp: string = 'child';
 }
 
 class ThreeLevelChild extends ThreeLevelParent {
-    childProp: string = 'child';
+    public childProp: string = 'child';
 }
 
 class OverridePropChild extends OverridePropParent {
-    prop: string = 'child';
+    public prop: string = 'child';
 }
 
 class TwoLevelParent {
-    parentProp: string = 'parent';
+    public parentProp: string = 'parent';
 }
 
 class ThreeLevelGrandparent {
-    grandProp: string = 'grand';
+    public grandProp: string = 'grand';
 }
 
 class ThreeLevelParent extends ThreeLevelGrandparent {
-    parentProp: string = 'parent';
+    public parentProp: string = 'parent';
 }
 
 class OverridePropParent {
-    prop: string = 'parent';
+    public prop: string = 'parent';
 }
 
 class PublicPropParent {
-    publicProp: string = 'public';
+    public publicProp: string = 'public';
 }
 
 class PublicPropChild extends PublicPropParent { }
@@ -392,11 +392,11 @@ interface InterfaceWithExtends {
 }
 
 class InterfaceExtendsParent {
-    parentProp: string = 'parent';
+    public parentProp: string = 'parent';
 }
 
 class InterfaceExtendsChild extends InterfaceExtendsParent implements InterfaceWithExtends {
-    interfaceProp: string = 'interface';
+    public interfaceProp: string = 'interface';
 }
 
 interface ImplThenExtendInterface {
@@ -404,11 +404,11 @@ interface ImplThenExtendInterface {
 }
 
 class ImplThenExtendParent implements ImplThenExtendInterface {
-    interfaceProp: string = 'interface';
+    public interfaceProp: string = 'interface';
 }
 
 class ImplThenExtendChild extends ImplThenExtendParent {
-    childProp: string = 'child';
+    public childProp: string = 'child';
 }
 
 interface SingleFieldInterface {
@@ -416,7 +416,7 @@ interface SingleFieldInterface {
 }
 
 class SingleFieldImpl implements SingleFieldInterface {
-    prop: string = 'value';
+    public prop: string = 'value';
 }
 
 interface OptionalFieldInterface {
@@ -425,8 +425,8 @@ interface OptionalFieldInterface {
 }
 
 class OptionalFieldImpl implements OptionalFieldInterface {
-    required: string = 'value';
-    optional?: number = 42;
+    public required: string = 'value';
+    public optional?: number = 42;
 }
 
 interface ReadonlyFieldInterface {
@@ -434,7 +434,7 @@ interface ReadonlyFieldInterface {
 }
 
 class ReadonlyFieldImpl implements ReadonlyFieldInterface {
-    readonlyProp: string = 'value';
+    public readonlyProp: string = 'value';
 }
 
 interface MultiInterfaceA {
@@ -446,8 +446,8 @@ interface MultiInterfaceB {
 }
 
 class MultiInterfaceImpl implements MultiInterfaceA, MultiInterfaceB {
-    prop1: string = 'value1';
-    prop2: number = 42;
+    public prop1: string = 'value1';
+    public prop2: number = 42;
 }
 
 interface OverlapInterfaceA {
@@ -459,26 +459,26 @@ interface OverlapInterfaceB {
 }
 
 class OverlapInterfaceImpl implements OverlapInterfaceA, OverlapInterfaceB {
-    prop: string = 'value';
+    public prop: string = 'value';
 }
 
 abstract class AbstractBase {
-    abstractProp: string = 'abstract';
+    public abstractProp: string = 'abstract';
 }
 
 class ConcreteSub extends AbstractBase {
-    concreteProp: string = 'concrete';
+    public concreteProp: string = 'concrete';
 }
 
 class GenericValueHolder<T> {
-    value: T;
+    public value: T;
     constructor(value: T) {
         this.value = value;
     }
 }
 
 class CustomToJSONClass implements JsonSerializable {
-    prop: string = 'value';
+    public prop: string = 'value';
     toJSON(): string {
         return 'custom';
     }
@@ -506,7 +506,7 @@ class OverriddenToJSONChild extends OverriddenToJSONParent {
 
 function main(): int {
     const suite = new arktest.ArkTestsuite('JSON.stringify primitives, objects, and wrappers')
-    suite.addTest('new Number(10)', number10)
+    suite.addTest('Number(10)', number10)
     suite.addTest('new Map<...>(...)', mapA1)
     suite.addTest('object {num:-15, flag:true, label:hello}', objNumFlagLabel)
     suite.addTest('new Boolean(false)', booleanFalse)
@@ -525,7 +525,7 @@ function main(): int {
     suite.addTest('new WeakMap<...>(...)', weakMapKeyVal)
     suite.addTest('[\'a\\\\b\', \'c\\\'d\']', arrABCD)
     suite.addTest('[\'张三\', \'李四\', 25]', arr25)
-    suite.addTest('new Number(0)', number0)
+    suite.addTest('Number(0)', number0)
     suite.addTest('object {temp:-12.5, status:active}', objTempStatus)
     suite.addTest('new Date(2024-02-29T00:00:00.000Z)', date20240229T000000000Z)
     suite.addTest('[1, [null, 3], 5]', array1)
@@ -565,7 +565,7 @@ function main(): int {
     suite.addTest('new Error(\'error\')', errorError)
     suite.addTest('[new Error(\'error\')]', arrNewErrorError)
     suite.addTest('{ err: new Error(\'erro...', asObjErr)
-    suite.addTest('new Number(3)', number3)
+    suite.addTest('Number(3)', number3)
     suite.addTest('new String(\'false\')', stringFalse)
     suite.addTest('\'foo\'', sFoo)
     suite.addTest('\'text\'', sText)
@@ -632,7 +632,7 @@ function main(): int {
 }
 
 function number10(): void {
-    const result: string = JSON.stringify(new Number(10))
+    const result: string = JSON.stringify(Number(10))
     arktest.assertEQ(result, '10')
 }
 
@@ -647,6 +647,7 @@ function objNumFlagLabel(): void {
 }
 
 function booleanFalse(): void {
+    // CC-OFFNXT(G.DCL.06) testing JSON.stringify with Boolean object
     const result: string = JSON.stringify(new Boolean(false))
     arktest.assertEQ(result, 'false')
 }
@@ -728,7 +729,7 @@ function arr25(): void {
 }
 
 function number0(): void {
-    const result: string = JSON.stringify(new Number(0))
+    const result: string = JSON.stringify(Number(0))
     arktest.assertEQ(result, '0')
 }
 
@@ -763,6 +764,7 @@ function asObjSymbol(): void {
 }
 
 function booleanTrue(): void {
+    // CC-OFFNXT(G.DCL.06) testing JSON.stringify with Boolean object
     const result: string = JSON.stringify(new Boolean(true))
     arktest.assertEQ(result, 'true')
 }
@@ -929,12 +931,12 @@ function asObjErr(): void {
 }
 
 function number3(): void {
-    const result: string = JSON.stringify(new Number(3))
+    const result: string = JSON.stringify(Number(3))
     arktest.assertEQ(result, '3')
 }
 
 function stringFalse(): void {
-    const result: string = JSON.stringify(new String('false'))
+    const result: string = JSON.stringify('false')
     arktest.assertEQ(result, '"false"')
 }
 

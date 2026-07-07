@@ -19,9 +19,9 @@ interface A {}
 class B implements A {}
 class D implements A {}
 
-const AType = Type.resolve("TypeMethodResolveConstructor.A") as InterfaceType
-const BType = Type.of(new B()) as ClassType
-const CType = Type.of(new C()) as ClassType
+const aType = Type.resolve('TypeMethodResolveConstructor.A') as InterfaceType
+const bType = Type.of(new B()) as ClassType
+const cType = Type.of(new C()) as ClassType
 
 class C {
     constructor() {
@@ -46,13 +46,16 @@ class C {
 
 function test(args: FixedArray<Any>, exp: int): int {
     called = -1
-    CType.make(args)
+    cType.make(args)
     if (called != exp) {
-        console.println("FAILED: " + exp + " got " + called)
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: ' + exp + ' got ' + called)
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.println(args)
         return 1
     } else {
-        console.log("ok " + exp)
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('ok ' + exp)
     }
     return 0
 }
@@ -80,13 +83,14 @@ function main(): int {
 
     let threw = false
     try {
-        CType.make(from(new C()))
+        cType.make(from(new C()))
     } catch (e) {
         threw = true
     }
     if (!threw) {
         f += 1
-        console.println("error not thrown")
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('error not thrown')
     }
     return f
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,156 +16,156 @@
 function testJoin() {
     let arr = [-2, Infinity, NaN, -Infinity, 0.6, 9007199254740992] as number[];
     let sample1 = new Float64Array(arr);
-    let separator = ",";
+    let separator = ',';
     let result = sample1.join(separator);
     arktest.assertEQ(result, '-2,Infinity,NaN,-Infinity,0.6,9007199254740992');
     
-    separator = ",,";
+    separator = ',,';
     result = sample1.join(separator);
     arktest.assertEQ(result, '-2,,Infinity,,NaN,,-Infinity,,0.6,,9007199254740992');
 
-    separator = "";
+    separator = '';
     result = sample1.join(separator);
     arktest.assertEQ(result, '-2InfinityNaN-Infinity0.69007199254740992');
 
-    separator = " a b c ";
+    separator = ' a b c ';
     result = sample1.join(separator);
     arktest.assertEQ(result, '-2 a b c Infinity a b c NaN a b c -Infinity a b c 0.6 a b c 9007199254740992');
 
     let sample2 = new Float32Array(arr);
-    separator = ",";
+    separator = ',';
     result = sample2.join(separator);
     arktest.assertEQ(result, '-2,Infinity,NaN,-Infinity,0.6000000238418579,9007199254740992');
-    separator = ",,";
+    separator = ',,';
     result = sample2.join(separator);
     arktest.assertEQ(result, '-2,,Infinity,,NaN,,-Infinity,,0.6000000238418579,,9007199254740992');
 
-    separator = "";
+    separator = '';
     result = sample2.join(separator);
     arktest.assertEQ(result, '-2InfinityNaN-Infinity0.60000002384185799007199254740992');
 
-    separator = " a b c ";
+    separator = ' a b c ';
     result = sample2.join(separator);
     arktest.assertEQ(result, '-2 a b c Infinity a b c NaN a b c -Infinity a b c 0.6000000238418579 a b c 9007199254740992');
 
     let sample3 = new Int32Array(arr);
-    separator = ",";
+    separator = ',';
     result = sample3.join(separator);
-    arktest.assertEQ(result, "-2,0,0,0,0,0");
+    arktest.assertEQ(result, '-2,0,0,0,0,0');
 
-    separator = ",,";
+    separator = ',,';
     result = sample3.join(separator);
-    arktest.assertEQ(result, "-2,,0,,0,,0,,0,,0");
+    arktest.assertEQ(result, '-2,,0,,0,,0,,0,,0');
 
-    separator = "";
+    separator = '';
     result = sample3.join(separator);
-    arktest.assertEQ(result, "-200000");
+    arktest.assertEQ(result, '-200000');
 
-    separator = " a b c ";
+    separator = ' a b c ';
     result = sample3.join(separator);
-    arktest.assertEQ(result, "-2 a b c 0 a b c 0 a b c 0 a b c 0 a b c 0");
+    arktest.assertEQ(result, '-2 a b c 0 a b c 0 a b c 0 a b c 0 a b c 0');
 
     let sample4 = new Int16Array(arr);
-    separator = ",";
+    separator = ',';
     result = sample4.join(separator);
-    arktest.assertEQ(result, "-2,0,0,0,0,0");
+    arktest.assertEQ(result, '-2,0,0,0,0,0');
 
-    separator = ",,";
+    separator = ',,';
     result = sample4.join(separator);
-    arktest.assertEQ(result, "-2,,0,,0,,0,,0,,0");
+    arktest.assertEQ(result, '-2,,0,,0,,0,,0,,0');
 
-    separator = "";
+    separator = '';
     result = sample4.join(separator);
-    arktest.assertEQ(result, "-200000");
+    arktest.assertEQ(result, '-200000');
 
-    separator = " a b c ";
+    separator = ' a b c ';
     result = sample4.join(separator);
-    arktest.assertEQ(result, "-2 a b c 0 a b c 0 a b c 0 a b c 0 a b c 0");
+    arktest.assertEQ(result, '-2 a b c 0 a b c 0 a b c 0 a b c 0 a b c 0');
 
     let sample5 = new Int8Array(arr);
-    separator = ",";
+    separator = ',';
     result = sample5.join(separator);
-    arktest.assertEQ(result, "-2,0,0,0,0,0");
+    arktest.assertEQ(result, '-2,0,0,0,0,0');
 
-    separator = ",,";
+    separator = ',,';
     result = sample5.join(separator);
-    arktest.assertEQ(result, "-2,,0,,0,,0,,0,,0");
+    arktest.assertEQ(result, '-2,,0,,0,,0,,0,,0');
 
-    separator = "";
+    separator = '';
     result = sample5.join(separator);
-    arktest.assertEQ(result, "-200000");
+    arktest.assertEQ(result, '-200000');
 
-    separator = " a b c ";
+    separator = ' a b c ';
     result = sample5.join(separator);
-    arktest.assertEQ(result, "-2 a b c 0 a b c 0 a b c 0 a b c 0 a b c 0");
+    arktest.assertEQ(result, '-2 a b c 0 a b c 0 a b c 0 a b c 0 a b c 0');
 
     let sample6 = new Uint32Array(arr);
-    separator = ",";
+    separator = ',';
     result = sample6.join(separator);
-    arktest.assertEQ(result, "4294967294,0,0,0,0,0");
+    arktest.assertEQ(result, '4294967294,0,0,0,0,0');
 
-    separator = ",,";
+    separator = ',,';
     result = sample6.join(separator);
-    arktest.assertEQ(result, "4294967294,,0,,0,,0,,0,,0");
+    arktest.assertEQ(result, '4294967294,,0,,0,,0,,0,,0');
 
-    separator = "";
+    separator = '';
     result = sample6.join(separator);
-    arktest.assertEQ(result, "429496729400000");
+    arktest.assertEQ(result, '429496729400000');
 
-    separator = " a b c ";
+    separator = ' a b c ';
     result = sample6.join(separator);
-    arktest.assertEQ(result, "4294967294 a b c 0 a b c 0 a b c 0 a b c 0 a b c 0");
+    arktest.assertEQ(result, '4294967294 a b c 0 a b c 0 a b c 0 a b c 0 a b c 0');
 
     let sample7 = new Uint16Array(arr);
-    separator = ",";
+    separator = ',';
     result = sample7.join(separator);
-    arktest.assertEQ(result, "65534,0,0,0,0,0");
+    arktest.assertEQ(result, '65534,0,0,0,0,0');
 
-    separator = ",,";
+    separator = ',,';
     result = sample7.join(separator);
-    arktest.assertEQ(result, "65534,,0,,0,,0,,0,,0");
+    arktest.assertEQ(result, '65534,,0,,0,,0,,0,,0');
 
-    separator = "";
+    separator = '';
     result = sample7.join(separator);
-    arktest.assertEQ(result, "6553400000");
+    arktest.assertEQ(result, '6553400000');
 
-    separator = " a b c ";
+    separator = ' a b c ';
     result = sample7.join(separator);
-    arktest.assertEQ(result, "65534 a b c 0 a b c 0 a b c 0 a b c 0 a b c 0");
+    arktest.assertEQ(result, '65534 a b c 0 a b c 0 a b c 0 a b c 0 a b c 0');
 
     let sample8 = new Uint8Array(arr);
-    separator = ",";
+    separator = ',';
     result = sample8.join(separator);
-    arktest.assertEQ(result, "254,0,0,0,0,0");
+    arktest.assertEQ(result, '254,0,0,0,0,0');
 
-    separator = ",,";
+    separator = ',,';
     result = sample8.join(separator);
-    arktest.assertEQ(result, "254,,0,,0,,0,,0,,0");
+    arktest.assertEQ(result, '254,,0,,0,,0,,0,,0');
 
-    separator = "";
+    separator = '';
     result = sample8.join(separator);
-    arktest.assertEQ(result, "25400000");
+    arktest.assertEQ(result, '25400000');
 
-    separator = " a b c ";
+    separator = ' a b c ';
     result = sample8.join(separator);
-    arktest.assertEQ(result, "254 a b c 0 a b c 0 a b c 0 a b c 0 a b c 0");
+    arktest.assertEQ(result, '254 a b c 0 a b c 0 a b c 0 a b c 0 a b c 0');
 
     let sample9 = new Uint8ClampedArray(arr);
-    separator = ",";
+    separator = ',';
     result = sample9.join(separator);
-    arktest.assertEQ(result, "0,255,0,0,1,255");
+    arktest.assertEQ(result, '0,255,0,0,1,255');
 
-    separator = ",,";
+    separator = ',,';
     result = sample9.join(separator);
-    arktest.assertEQ(result, "0,,255,,0,,0,,1,,255");
+    arktest.assertEQ(result, '0,,255,,0,,0,,1,,255');
 
-    separator = "";
+    separator = '';
     result = sample9.join(separator);
-    arktest.assertEQ(result, "0255001255");
+    arktest.assertEQ(result, '0255001255');
 
-    separator = " a b c ";
+    separator = ' a b c ';
     result = sample9.join(separator);
-    arktest.assertEQ(result, "0 a b c 255 a b c 0 a b c 0 a b c 1 a b c 255");
+    arktest.assertEQ(result, '0 a b c 255 a b c 0 a b c 0 a b c 1 a b c 255');
 }
 
 function testSet() {
@@ -317,17 +317,17 @@ function testTypedArrayInternalTransform() {
 }
 
 function testTypedArrayInternalTransform2() {
-    let arrayOld = new Array<number>();
+    let arrayOld: number[] = [];
     arrayOld.push(2147483648);
     let array = new Int8Array(new Int32Array(arrayOld));
     arktest.assertEQ(String(array[0]), '0');
 
-    arrayOld = new Array<number>();
+    arrayOld = [] as number[];
     arrayOld.push(2147483648);
     array = new Int8Array(new Uint32Array(arrayOld));
     arktest.assertEQ(String(array[0]), '0');
 
-    arrayOld = new Array<number>();
+    arrayOld = [] as number[];
     arrayOld.push(4294967294);
     array = new Int8Array(new Uint32Array(arrayOld));
     arktest.assertEQ(String(array[0]), '-2');
@@ -342,7 +342,7 @@ function testTypedArrayBound() {
 }
 
 function testTypedArrayBound2() {
-    let arrayOld = new Array<number>();
+    let arrayOld: number[] = [];
     arrayOld.push(2147483648);
     let array = new Int8Array(new Int32Array(arrayOld));
     arktest.assertEQ(String(array[0]), '0');
@@ -358,15 +358,15 @@ function testUint8ClampedArray() {
 }
 
 function main() {
-    let myTestsuite = new arktest.ArkTestsuite("TypedArray Trasnform Datas Suite");
-    myTestsuite.addTest("testJoin", testJoin);
-    myTestsuite.addTest("testSet", testSet);
-    myTestsuite.addTest("testSort", testSort);
-    myTestsuite.addTest("testSort2", testSort2);
-    myTestsuite.addTest("testTypedArrayInternalTransform", testTypedArrayInternalTransform);
-    myTestsuite.addTest("testTypedArrayInternalTransform2", testTypedArrayInternalTransform2);
-    myTestsuite.addTest("testTypedArrayBound", testTypedArrayBound);
-    myTestsuite.addTest("testTypedArrayBound2", testTypedArrayBound2);
-    myTestsuite.addTest("testUint8ClampedArray", testUint8ClampedArray);
+    let myTestsuite = new arktest.ArkTestsuite('TypedArray Trasnform Datas Suite');
+    myTestsuite.addTest('testJoin', testJoin);
+    myTestsuite.addTest('testSet', testSet);
+    myTestsuite.addTest('testSort', testSort);
+    myTestsuite.addTest('testSort2', testSort2);
+    myTestsuite.addTest('testTypedArrayInternalTransform', testTypedArrayInternalTransform);
+    myTestsuite.addTest('testTypedArrayInternalTransform2', testTypedArrayInternalTransform2);
+    myTestsuite.addTest('testTypedArrayBound', testTypedArrayBound);
+    myTestsuite.addTest('testTypedArrayBound2', testTypedArrayBound2);
+    myTestsuite.addTest('testUint8ClampedArray', testUint8ClampedArray);
     myTestsuite.run();
 }

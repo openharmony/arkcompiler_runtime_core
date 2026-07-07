@@ -13,46 +13,47 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
+import { launch } from 'std/concurrency'
 
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+let arrValues: string[] = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
 let arrKeysTest: number[] = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
-let arrValuesTest: string[] = ["ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten", "ten"];
+let arrValuesTest: string[] = ['ten', 'ten', 'ten', 'ten', 'ten', 'ten', 'ten', 'ten', 'ten', 'ten'];
 
-let concurrentHashMapOne: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
+let concurrentHashMapOne: 
+    containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
 
 function main(): int {
     let map: Map<number, string> = new Map<number, string>();
-    for (let i: int = 0; i < 10 ; i++) {
+    for (let i: int = 0; i < 10; i++) {
         map.set(arrKeys[i], arrValues[i]);
     }
 
-    let concurrentHashMapTestsuite = new arktest.ArkTestsuite("concurrentHashMapRemoveTest");
+    let concurrentHashMapTestsuite = new arktest.ArkTestsuite('concurrentHashMapRemoveTest');
 
-    concurrentHashMapTestsuite.addTest("removeTest_001", () =>
-    {
-        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
+    concurrentHashMapTestsuite.addTest('removeTest_001', () => {
+        let concurrentHashMap: 
+            containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>();
         arktest.assertEQ(concurrentHashMap.remove(0), undefined);
         arktest.assertEQ(concurrentHashMap.remove(1), undefined);
     });
-    concurrentHashMapTestsuite.addTest("removeTest_002", () =>
-    {
-        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
-        arktest.assertEQ(concurrentHashMap.remove(0), "zero");
+    concurrentHashMapTestsuite.addTest('removeTest_002', () => {
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> =
+            new containers.ConcurrentHashMap<number, string>(map);
+        arktest.assertEQ(concurrentHashMap.remove(0), 'zero');
         arktest.assertEQ(concurrentHashMap.remove(0), undefined);
-        arktest.assertEQ(concurrentHashMap.remove(1), "one");
+        arktest.assertEQ(concurrentHashMap.remove(1), 'one');
         arktest.assertEQ(concurrentHashMap.remove(1), undefined);
     });
-    concurrentHashMapTestsuite.addTest("removeTest_003", () =>
-    {
-        let concurrentHashMap: containers.ConcurrentHashMap<number, string> = new containers.ConcurrentHashMap<number, string>(map);
+    concurrentHashMapTestsuite.addTest('removeTest_003', () => {
+        let concurrentHashMap: containers.ConcurrentHashMap<number, string> =
+            new containers.ConcurrentHashMap<number, string>(map);
         arktest.assertEQ(concurrentHashMap.remove(10), undefined);
         arktest.assertEQ(concurrentHashMap.remove(11), undefined);
     });
-    concurrentHashMapTestsuite.addTest("removeTest_004", () =>
-    {
-        let concurrentHashMap: containers.ConcurrentHashMap<string, number> = new containers.ConcurrentHashMap<string, number>();
+    concurrentHashMapTestsuite.addTest('removeTest_004', () => {
+        let concurrentHashMap: 
+            containers.ConcurrentHashMap<string, number> = new containers.ConcurrentHashMap<string, number>();
         arktest.assertEQ(concurrentHashMap.size, 0);
         for (let i = 0; i < 10; i++) {
             concurrentHashMap.set(arrValues[i], arrKeys[i]);
@@ -63,8 +64,7 @@ function main(): int {
         }
         arktest.assertTrue(concurrentHashMap.isEmpty());
     });
-    concurrentHashMapTestsuite.addTest("twiceTest_006", () =>
-    {
+    concurrentHashMapTestsuite.addTest('twiceTest_006', () => {
         concurrentHashMapOne.clear();
         arktest.assertTrue(concurrentHashMapOne.isEmpty());
         setAll();

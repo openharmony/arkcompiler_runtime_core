@@ -16,13 +16,15 @@
 function main(): int {
   let failures: int = 0;
 
-  failures += test(createArrayBufferOfVariousLengths, "Create ArrayBuffer of Various lengths");
-  failures += test(sliceArrayBufferInt(), "Slice ArrayBuffer with various int parameters");
-  failures += test(sliceArrayBufferNumberNegativeEnd, "Slice ArrayBuffer with negative end number parameters");
-  failures += test(sliceArrayBufferNumberNegativeStart, "Slice ArrayBuffer with negative start number parameters");
-  failures += test(sliceArrayBufferNumberStartExceedsLength(), "Slice ArrayBuffer with start number parameter exceeds length");
-  failures += test(sliceArrayBufferNumberEndExceedsLength(), "Slice ArrayBuffer with end number parameter exceeds length");
-  failures += test(isViewArrayBuffer, "isView ArrayBuffer with various parameters");
+  failures += test(createArrayBufferOfVariousLengths, 'Create ArrayBuffer of Various lengths');
+  failures += test(sliceArrayBufferInt(), 'Slice ArrayBuffer with various int parameters');
+  failures += test(sliceArrayBufferNumberNegativeEnd, 'Slice ArrayBuffer with negative end number parameters');
+  failures += test(sliceArrayBufferNumberNegativeStart, 'Slice ArrayBuffer with negative start number parameters');
+  failures += test(sliceArrayBufferNumberStartExceedsLength(),
+      'Slice ArrayBuffer with start number parameter exceeds length');
+  failures += test(sliceArrayBufferNumberEndExceedsLength(),
+      'Slice ArrayBuffer with end number parameter exceeds length');
+  failures += test(isViewArrayBuffer, 'isView ArrayBuffer with various parameters');
   return failures == 0 ? 0 : 1;
 }
 /**
@@ -44,7 +46,9 @@ function createArrayBufferOfVariousLengths(): int {
     new ArrayBuffer(-1)
     return 1
   } catch (e) {
-    if (!(e instanceof RangeError)) return 1
+    if (!(e instanceof RangeError)) {
+        return 1
+    }
     // expected
   }
 
@@ -58,8 +62,9 @@ function sliceArrayBufferInt(): int {
   let a = new ArrayBuffer(8);
 
   let start = 6;
-  if (a.slice(start).byteLength != 2)
+  if (a.slice(start).byteLength != 2) {
     return 1;
+  }
 
   return 0;
 }
@@ -101,13 +106,15 @@ function sliceArrayBufferNumberStartExceedsLength(): int {
 
   let start = 0x100000000 as number;
   let end = 7 as number;
-  if (a.slice(start, end).byteLength != 0)
+  if (a.slice(start, end).byteLength != 0) {
     return 1;
+  }
 
   start = Number.POSITIVE_INFINITY;
   end = 6 as number;
-  if (a.slice(start, end).byteLength != 0)
+  if (a.slice(start, end).byteLength != 0) {
     return 1;
+  }
 
   return 0;
 }
@@ -120,18 +127,21 @@ function sliceArrayBufferNumberEndExceedsLength(): int {
 
   let start = 1 as number;
   let end = 12 as number;
-  if (a.slice(start, end).byteLength != 7)
+  if (a.slice(start, end).byteLength != 7) {
     return 1;
+  }
 
   start = 2 as number;
   end = 0x100000000 as number;
-  if (a.slice(start, end).byteLength != 6)
+  if (a.slice(start, end).byteLength != 6) {
     return 1;
+  }
 
   start = 3 as number;
   end = Number.POSITIVE_INFINITY;
-  if (a.slice(start, end).byteLength != 5)
+  if (a.slice(start, end).byteLength != 5) {
     return 1;
+  }
 
   return 0;
 }
@@ -142,7 +152,7 @@ function sliceArrayBufferNumberEndExceedsLength(): int {
 function isViewArrayBuffer(): int {
   arktest.assertFalse(ArrayBuffer.isView({}))
   arktest.assertFalse(ArrayBuffer.isView(new ArrayBuffer(0)))
-  arktest.assertFalse(ArrayBuffer.isView(""))
+  arktest.assertFalse(ArrayBuffer.isView(''))
 
   arktest.assertTrue(ArrayBuffer.isView(new Int8Array))
   arktest.assertTrue(ArrayBuffer.isView(new Int16Array))
@@ -161,11 +171,13 @@ function isViewArrayBuffer(): int {
 }
 
 function test(result: int, message: String): int {
-  if(result == 0) {
-    console.println("PASSED: " + message);
+  if (result == 0) {
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('PASSED: ' + message);
     return 0;
   }
-  console.println("FAILED: " + message);
+  // CC-OFFNXT(G.AOD.03) current test suite code style
+  console.println('FAILED: ' + message);
   return 1;
 }
 
@@ -173,15 +185,22 @@ function test(action: () => int, message: String) {
   try {
     const result = action()
 
-    if (result == 0) console.println("PASSED: " + message)
-    else console.println("FAILED: " + message);
+    if (result == 0) {
+      // CC-OFFNXT(G.AOD.03) current test suite code style
+      console.println('PASSED: ' + message)
+    } else {
+      // CC-OFFNXT(G.AOD.03) current test suite code style
+      console.println('FAILED: ' + message)
+    }
 
     return result
   } catch (e) {
     if (e instanceof AssertionError) {
       let error = e as AssertionError
+      // CC-OFFNXT(G.AOD.03) current test suite code style
       console.println(`FAILED: '${message}' with error: ${error.name}(${error.message})`)
     } else {
+      // CC-OFFNXT(G.AOD.03) current test suite code style
       console.println(`FAILED '${message}' with error ` + e)
     }
     return 1

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,44 +15,68 @@
 
 function main() {
     // Basic counter
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.count();
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.count();
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.count();
     
     // Named counter
-    console.count("userClick");
-    console.count("userClick");
-    console.count("userClick");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('userClick');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('userClick');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('userClick');
     
     // Multiple named counters
-    console.count("loop1");
-    console.count("loop2");
-    console.count("loop1");
-    console.count("loop2");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('loop1');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('loop2');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('loop1');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('loop2');
     
     // Reset default counter
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.countReset();
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.count();
     
     // Reset named counter
-    console.count("userAction");
-    console.count("userAction");
-    console.countReset("userAction");
-    console.count("userAction");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('userAction');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('userAction');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.countReset('userAction');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('userAction');
     
     // Counter in loops
     for (let i = 0; i < 3; i++) {
-        console.count("forLoop");
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.count('forLoop');
     }
     
     // Reset and reuse
-    console.count("test");
-    console.countReset("test");
-    console.count("test");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('test');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.countReset('test');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('test');
     
     // Multiple resets
-    console.count("multi");
-    console.countReset("multi");
-    console.count("multi");
-    console.countReset("multi");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('multi');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.countReset('multi');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.count('multi');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.countReset('multi');
 }

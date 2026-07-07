@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,56 +13,80 @@
  * limitations under the License.
  */
 
-function ArrayHasOwnProperty(): void {
-    let arr: Array<number> = [1, 2, 3]
+function arrayHasOwnProperty(): void {
+    let arr: number[] = [1, 2, 3]
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertTrue(arr.hasOwnProperty(1))
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertFalse(arr.hasOwnProperty(4))
 }
 
-function TypedArrayHasOwnProperty(): void {
+function typedArrayHasOwnProperty(): void {
     let arrI8 = new Int8Array(10)
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertTrue(arrI8.hasOwnProperty(9))
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertFalse(arrI8.hasOwnProperty(10))
     let arrI16 = new Int16Array(10)
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertTrue(arrI16.hasOwnProperty(9))
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertFalse(arrI16.hasOwnProperty(10))
     let arrI32 = new Int32Array(10)
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertTrue(arrI32.hasOwnProperty(9))
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertFalse(arrI32.hasOwnProperty(10))
     let arrBig64 = new BigInt64Array(10)
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertTrue(arrBig64.hasOwnProperty(9))
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertFalse(arrBig64.hasOwnProperty(10))
     let arrF32 = new Float32Array(10)
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertTrue(arrF32.hasOwnProperty(9))
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertFalse(arrF32.hasOwnProperty(10))
     let arrF64 = new Float64Array(10)
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertTrue(arrF64.hasOwnProperty(9))
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertFalse(arrF64.hasOwnProperty(10))
 }
 
-function TypedUArrayHasOwnProperty(): void {
+function typedUArrayHasOwnProperty(): void {
     let arrUC8 = new Uint8ClampedArray(10)
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertTrue(arrUC8.hasOwnProperty(9))
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertFalse(arrUC8.hasOwnProperty(10))
     let arrU8 = new Uint8Array(10)
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertTrue(arrU8.hasOwnProperty(9))
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertFalse(arrU8.hasOwnProperty(10))
     let arrU16 = new Uint16Array(10)
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertTrue(arrU16.hasOwnProperty(9))
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertFalse(arrU16.hasOwnProperty(10))
     let arrU32 = new Uint32Array(10)
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertTrue(arrU32.hasOwnProperty(9))
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertFalse(arrU32.hasOwnProperty(10))
     let arrUBig64 = new BigUint64Array(10)
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertTrue(arrUBig64.hasOwnProperty(9))
+    // CC-OFFNXT(G.OBJ.05) testing method hasOwnProperty
     arktest.assertFalse(arrUBig64.hasOwnProperty(10))
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Object hasOwnProperty tests")
-    suite.addTest('Object.hasOwnProperty for Array', ArrayHasOwnProperty);
-    suite.addTest('Object.hasOwnProperty for TypedArray', TypedArrayHasOwnProperty);
-    suite.addTest('Object.hasOwnProperty for TypedUArray', TypedUArrayHasOwnProperty);
+    const suite = new arktest.ArkTestsuite('Object hasOwnProperty tests')
+    suite.addTest('Object.hasOwnProperty for Array', arrayHasOwnProperty);
+    suite.addTest('Object.hasOwnProperty for TypedArray', typedArrayHasOwnProperty);
+    suite.addTest('Object.hasOwnProperty for TypedUArray', typedUArrayHasOwnProperty);
 
     return suite.run()
 }

@@ -18,18 +18,19 @@ type BQConstructorI = (capacity: int)=>BlockingQueueI;
 type TestFunction = (constr: BQConstructorI) => void;
 type BlockingQueue = containers.LinkedBlockingQueue<int> | containers.ArrayBlockingQueue<int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T>(arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+async function awaitAll<T>(arr: Array<Promise<T>>): Promise<Array<T>> {
 	let res: T[] = [];
-	for (let i = 0; i < arr.length; ++ i)
-		res.push(arr[i].Await());
+	for (let i = 0; i < arr.length; ++ i) {
+		res.push((await arr[i]) as T);
+    }
 	return res;
 }
 
-function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
+function sumArrInto(to: FixedArray<int>, from: FixedArray<int>): void {
 	arktest.assertEQ(to.length, from.length);
 	for (let i = 0; i < to.length; ++ i) {
 		to[i] += from[i];
@@ -44,28 +45,34 @@ function subArrInto(to: FixedArray<int>, from: FixedArray<int>): void {
 }
 
 function assertEQAll(array: FixedArray<int>, value: int): void {
-	for (let i=0; i < array.length; ++ i)
+	for (let i = 0; i < array.length; ++ i) {
 		arktest.assertEQ(array[i], value)
+	}
 }
 
 
 function testTooManyAdd(constr: BQConstructorI) {
 	let queue = constr(10);
-	for (let i = 0; i < 20; ++ i)
+	for (let i = 0; i < 20; ++ i) {
 		arktest.assertTrue(queue.add(i) == (i < 10));
-	for (let i = 0; i < 10; ++ i)
+	}
+	for (let i = 0; i < 10; ++ i) {
 		arktest.assertEQ(queue.pop(), i);
+	}
 	arktest.assertTrue(queue.isEmpty());
 }
 
 function testTooManyPoll(constr: BQConstructorI) {
 	let queue = constr(10);
-	for (let i = 0; i < 10; ++ i)
+	for (let i = 0; i < 10; ++ i) {
 		arktest.assertTrue(queue.add(i));
-	for (let i = 0; i < 10; ++ i)
+	}
+	for (let i = 0; i < 10; ++ i) {
 		arktest.assertEQ(queue.poll(), i);
-	for (let i = 0; i < 10; ++ i)
+	}
+	for (let i = 0; i < 10; ++ i) {
 		arktest.assertEQ(queue.poll(), undefined);
+	}
 }
 
 function testGetFirstNoConcurent(constr: BQConstructorI) {
@@ -169,27 +176,27 @@ function testRemainingCapacityNoC(constr: BQConstructorI) {
 }
 
 function main(): int {
-	let tests: Array<[String, TestFunction]> = [
-		["testTooManyAdd", testTooManyAdd],
-		["testTooManyPoll", testTooManyPoll],
-		["testGetFirstNoConcurent", testGetFirstNoConcurent],
-		["testGetEndNoConcurent", testGetEndNoConcurent],
-		["testIsEmptyNoConcurrent", testIsEmptyNoConcurrent],
-		["testSizeNoConcurrent", testSizeNoConcurrent],
-		["testSizeNoConcurrent2", testSizeNoConcurrent2],
-		["testCapacityNoConcurrent", testCapacityNoConcurrent],
-		["testRemainingCapacityNoC", testRemainingCapacityNoC]
+	let tests: [String, TestFunction][] = [
+		['testTooManyAdd', testTooManyAdd],
+		['testTooManyPoll', testTooManyPoll],
+		['testGetFirstNoConcurent', testGetFirstNoConcurent],
+		['testGetEndNoConcurent', testGetEndNoConcurent],
+		['testIsEmptyNoConcurrent', testIsEmptyNoConcurrent],
+		['testSizeNoConcurrent', testSizeNoConcurrent],
+		['testSizeNoConcurrent2', testSizeNoConcurrent2],
+		['testCapacityNoConcurrent', testCapacityNoConcurrent],
+		['testRemainingCapacityNoC', testRemainingCapacityNoC]
 	];
 
-    let LBQTestSuitecase = new arktest.ArkTestsuite("LinkedBlockingQueueTest")
-    let ABQTestSuitecase = new arktest.ArkTestsuite("ArrayBlockingQueueTest")
+    let lbqTestSuitecase = new arktest.ArkTestsuite('LinkedBlockingQueueTest')
+    let abqTestSuitecase = new arktest.ArkTestsuite('ArrayBlockingQueueTest')
 
-	let LBQconstr: BQConstructorI = (capacity: int)=>new containers.LinkedBlockingQueue<int>(capacity);
-	let ABQconstr: BQConstructorI = (capacity: int)=>new containers.ArrayBlockingQueue<int>(capacity);
+	let lbqConstr: BQConstructorI = (capacity: int)=>new containers.LinkedBlockingQueue<int>(capacity);
+	let abqConstr: BQConstructorI = (capacity: int)=>new containers.ArrayBlockingQueue<int>(capacity);
 
-	let suites: Array<[arktest.ArkTestsuite, BQConstructorI]> = [
-		[LBQTestSuitecase, LBQconstr],
-		[ABQTestSuitecase, ABQconstr],
+	let suites: [arktest.ArkTestsuite, BQConstructorI][] = [
+		[lbqTestSuitecase, lbqConstr],
+		[abqTestSuitecase, abqConstr],
 	]
 
 	for (let j = 0; j < suites.length; ++ j) {
@@ -202,9 +209,10 @@ function main(): int {
 		}
 	}
 
-	let codeLBQ = LBQTestSuitecase.run();
-	let codeABQ = ABQTestSuitecase.run();
-	if (codeLBQ == 0)
+	let codeLBQ = lbqTestSuitecase.run();
+	let codeABQ = abqTestSuitecase.run();
+	if (codeLBQ == 0) {
 		return codeABQ;
+	}
 	return codeLBQ;
 }

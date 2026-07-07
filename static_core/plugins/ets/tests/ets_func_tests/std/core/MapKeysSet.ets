@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (C) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ function testMapKeys() {
     let empty = new Map<string, string>()
     let emptyInt = new Map<int, int>()
     let strings = new Map<string, string>([
-        ["a", ""],
-        ["b", ""]
+        ['a', ''],
+        ['b', '']
     ])
     let ints = new Map<int, int>([
         [1, 0],
@@ -34,7 +34,7 @@ function testMapKeys() {
     ])
     check(empty, new Set<string>())
     check(emptyInt, new Set<int>())
-    check(strings, new Set<string>(["a", "b"]))
+    check(strings, new Set<string>(['a', 'b']))
     check(ints, new Set<int>([1, 2]))
 }
 
@@ -42,22 +42,24 @@ function testRecordKeys() {
     let empty = new Record<string, string>()
     let emptyInt = new Record<int, int>()
     let strings = new Record<string, string>()
-    strings["a"] = ""
-    strings["b"] = ""
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    strings['a'] = ''
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    strings['b'] = ''
     let ints = new Record<int, int>()
     ints[1] = 0
     ints[2] = 0
     check(empty, new Set<string>())
     check(emptyInt, new Set<int>())
-    check(strings, new Set<string>(["a", "b"]))
+    check(strings, new Set<string>(['a', 'b']))
     check(ints, new Set<int>([1, 2]))
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Map.keySet")
+    const suite = new arktest.ArkTestsuite('Map.keySet')
 
-    suite.addTest("Test map keys", testMapKeys)
-    suite.addTest("Test record keys", testRecordKeys)
+    suite.addTest('Test map keys', testMapKeys)
+    suite.addTest('Test record keys', testRecordKeys)
 
     return suite.run()
 }

@@ -1,13 +1,13 @@
 /**
  * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -19,9 +19,9 @@ type Matrix = MatrixRow[];
 
 // Basic user class
 class User {
-    id: number;
-    name: string;
-    age: number;
+    public id: number;
+    public name: string;
+    public age: number;
 
     constructor(id: number, name: string, age: number) {
         this.id = id;
@@ -32,10 +32,10 @@ class User {
 
 // Product class
 class Product {
-    id: number;
-    name: string;
-    price: number;
-    stock: number;
+    public id: number;
+    public name: string;
+    public price: number;
+    public stock: number;
 
     constructor(id: number, name: string, price: number, stock: number) {
         this.id = id;
@@ -47,8 +47,8 @@ class Product {
 
 // Mixed data class
 class MixedData {
-    id: number;
-    value: string | number | boolean;
+    public id: number;
+    public value: string | number | boolean;
 
     constructor(id: number, value: string | number | boolean) {
         this.id = id;
@@ -58,7 +58,7 @@ class MixedData {
 
 // Nested data classes
 class Contact {
-    email: string;
+    public email: string;
 
     constructor(email: string) {
         this.email = email;
@@ -66,8 +66,8 @@ class Contact {
 }
 
 class Info {
-    name: string;
-    contact: Contact;
+    public name: string;
+    public contact: Contact;
 
     constructor(name: string, contact: Contact) {
         this.name = name;
@@ -76,8 +76,8 @@ class Info {
 }
 
 class NestedData {
-    id: number;
-    info: Info;
+    public id: number;
+    public info: Info;
 
     constructor(id: number, info: Info) {
         this.id = id;
@@ -87,9 +87,9 @@ class NestedData {
 
 // Object with string/number/boolean scalar fields.
 class Item {
-    name: string;
-    price: number;
-    inStock: boolean;
+    public name: string;
+    public price: number;
+    public inStock: boolean;
 
     constructor(name: string, price: number, inStock: boolean) {
         this.name = name;
@@ -100,8 +100,8 @@ class Item {
 
 // Nested classes to exercise sub-column expansion of a single object
 class Address {
-    city: string;
-    zip: number;
+    public city: string;
+    public zip: number;
 
     constructor(city: string, zip: number) {
         this.city = city;
@@ -110,8 +110,8 @@ class Address {
 }
 
 class Person {
-    id: number;
-    addr: Address;
+    public id: number;
+    public addr: Address;
 
     constructor(id: number, addr: Address) {
         this.id = id;
@@ -136,13 +136,13 @@ enum Direction {
 
 // Class with many fields for wide table testing
 class WideRecord {
-    id: number;
-    name: string;
-    age: number;
-    city: string;
-    active: boolean;
-    score: number;
-    level: number;
+    public id: number;
+    public name: string;
+    public age: number;
+    public city: string;
+    public active: boolean;
+    public score: number;
+    public level: number;
 
     constructor(id: number, name: string, age: number, city: string, active: boolean, score: number, level: number) {
         this.id = id;
@@ -157,170 +157,195 @@ class WideRecord {
 
 // Data display utility class
 class DataDisplay {
-    static displayUsers(): void {
-        const users : Array<Any> = [
+    public static displayUsers(): void {
+        const users : Any[] = [
             new User(1, 'John', 30),
             new User(2, 'Alice', 25),
             new User(3, 'Bob', 35)
         ];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(users);
     }
 
-    static displayMatrix(): void {
+    public static displayMatrix(): void {
         const matrix: Matrix = [
             ['A1', 'B1', 'C1'],
             ['A2', 'B2', 'C2'],
             ['A3', 'B3', 'C3']
         ];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(matrix as Object as Array<Any>);
     }
 
-    static displayProducts(): void {
-        const products : Array<Any> = [
+    public static displayProducts(): void {
+        const products : Any[] = [
             new Product(1, 'Phone', 699, 50),
             new Product(2, 'Laptop', 999, 30),
             new Product(3, 'Tablet', 399, 75)
         ];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(products);
     }
 
-    static displayMixedData(): void {
-        const mixedData : Array<Any> = [
+    public static displayMixedData(): void {
+        const mixedData : Any[] = [
             new MixedData(1, 'string'),
             new MixedData(2, 42),
             new MixedData(3, true)
         ];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(mixedData);
     }
 
     // Single object carrying string/number/boolean scalar fields.
-    static displaySingleObject(): void {
+    public static displaySingleObject(): void {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(new Item('Pen', 12, true));
     }
 
     // Array of mixed primitive element types.
-    static displayMixedPrimitiveArray(): void {
+    public static displayMixedPrimitiveArray(): void {
         const arr: Array<Any> = [true, 1, 'text'];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // Array containing null/undefined elements.
-    static displayArrayWithNulls(): void {
+    public static displayArrayWithNulls(): void {
         const arr: Array<Any> = [1, null, 3];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // Array containing both undefined and null elements.
-    static displayArrayWithUndefinedAndNull(): void {
+    public static displayArrayWithUndefinedAndNull(): void {
         const arr: Array<Any> = [1, 2, undefined, null];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // Single object with a nested class field (sub-column expansion + Values column).
-    static displayNestedObject(): void {
+    public static displayNestedObject(): void {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(new Person(1, new Address('Shanghai', 200000)));
     }
 
     // Nested arrays (2D array of arrays)
-    static displayNestedArray(): void {
+    public static displayNestedArray(): void {
         const nested: Array<Any> = [[1, 2], [3, 4], [5, 6]];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(nested);
     }
 
     // Deeply nested arrays (3 levels)
-    static displayDeeplyNestedArray(): void {
+    public static displayDeeplyNestedArray(): void {
         const deep: Array<Any> = [[[1, 2], [3, 4]], [[5, 6], [7, 8]]];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(deep);
     }
 
     // Numeric enum values in array
-    static displayNumericEnumArray(): void {
+    public static displayNumericEnumArray(): void {
         const arr: Array<Any> = [Priority.Low, Priority.Medium, Priority.High];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // String enum values in array
-    static displayStringEnumArray(): void {
+    public static displayStringEnumArray(): void {
         const arr: Array<Any> = [Direction.North, Direction.South, Direction.East, Direction.West];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // Single numeric enum value
-    static displaySingleEnum(): void {
+    public static displaySingleEnum(): void {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(Priority.High);
     }
 
     // Empty array
-    static displayEmptyArray(): void {
+    public static displayEmptyArray(): void {
         const arr: Array<Any> = [];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // Boolean array
-    static displayBooleanArray(): void {
+    public static displayBooleanArray(): void {
         const arr: Array<Any> = [true, false, true, false];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // String array
-    static displayStringArray(): void {
+    public static displayStringArray(): void {
         const arr: Array<Any> = ['apple', 'banana', 'cherry'];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // Special numeric values: Infinity, -Infinity, NaN, 0, -0
-    static displaySpecialNumbers(): void {
+    public static displaySpecialNumbers(): void {
         const arr: Array<Any> = [Infinity, -Infinity, NaN, 0, -0];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // Array of objects with nested objects (3 levels deep)
-    static displayArrayOfNestedObjects(): void {
+    public static displayArrayOfNestedObjects(): void {
         const arr: Array<Any> = [
             new NestedData(1, new Info('Alice', new Contact('alice@test.com'))),
             new NestedData(2, new Info('Bob', new Contact('bob@test.com')))
         ];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // Single wide object (many fields)
-    static displayWideObject(): void {
+    public static displayWideObject(): void {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(new WideRecord(1, 'Test', 30, 'Shanghai', true, 95.5, 5));
     }
 
     // Array of wide objects
-    static displayWideObjectArray(): void {
+    public static displayWideObjectArray(): void {
         const arr: Array<Any> = [
             new WideRecord(1, 'Alice', 25, 'Beijing', true, 90, 3),
             new WideRecord(2, 'Bob', 30, 'Shanghai', false, 85, 2)
         ];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // Jagged array (rows of different lengths)
-    static displayJaggedArray(): void {
+    public static displayJaggedArray(): void {
         const jagged: Array<Any> = [[1, 2, 3], [4, 5], [6]];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(jagged);
     }
 
     // Single element array
-    static displaySingleElementArray(): void {
+    public static displaySingleElementArray(): void {
         const arr: Array<Any> = [42];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // Large array (stress test)
-    static displayLargeArray(): void {
+    public static displayLargeArray(): void {
         const arr: Array<Any> = [];
         for (let i = 0; i < 15; i++) {
             arr.push(i * 10);
         }
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 
     // Mixed content array (primitives, null, undefined)
-    static displayMixedContentArray(): void {
+    public static displayMixedContentArray(): void {
         const arr: Array<Any> = [1, 'text', true, null, undefined, 3.14];
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.table(arr);
     }
 }
@@ -347,8 +372,11 @@ function main() {
     // Display mixed data types
     DataDisplay.displayMixedData();
 
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.table(42)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.table('str')
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.table('count %d')
 
     let a: A = {
@@ -357,17 +385,25 @@ function main() {
         e: 5
         }
     }
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.table(a);
         
     let number1: number = 1;
     let str = 'str';
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.table(number1);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.table(str);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.table('count: %d');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.table();
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.table([1, 2, 3]);
 
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.table(null);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.table(undefined);
 
     // Single object with string/number/boolean scalar fields.

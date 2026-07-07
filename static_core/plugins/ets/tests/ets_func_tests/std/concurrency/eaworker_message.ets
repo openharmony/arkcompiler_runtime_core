@@ -163,7 +163,7 @@ function testPostTask() {
     let eawNoMain = new EAWorker();
     eawNoMain.start();
     eawNoMain.postTask(() => {
-        checkCount ++ ;
+        checkCount ++;
         waiter2.fire();
     })
 
@@ -203,19 +203,19 @@ function testCommunication() {
         arktest.assertEQ(msg.getWhat(), eaw2Tag);
         if (msg.getObject() != undefined) {
             let obj = msg.getObject() as string;
-            arktest.assertEQ(obj, "message from eaw2");
-            handler2?.sendMessage(new concurrency.Message(eaw1Tag, "message from eaw1", handler2!));
+            arktest.assertEQ(obj, 'message from eaw2');
+            handler2?.sendMessage(new concurrency.Message(eaw1Tag, 'message from eaw1', handler2!));
         }
     }, eaw1);
 
     handler2 = new concurrency.MessageHandler((msg: concurrency.Message) => {
         arktest.assertEQ(msg.getWhat(), eaw1Tag);
-        arktest.assertEQ(msg.getObject(), "message from eaw1");
+        arktest.assertEQ(msg.getObject(), 'message from eaw1');
         messageGot = true;
         waiter.fire();
     }, eaw2);
 
-    handler1?.sendMessage(new concurrency.Message(eaw2Tag, "message from eaw2", handler1!));
+    handler1?.sendMessage(new concurrency.Message(eaw2Tag, 'message from eaw2', handler1!));
 
     waiter.wait();
     arktest.assertEQ(messageGot, true);
@@ -231,7 +231,7 @@ function testMain() {
         arktest.assertEQ(id, workerId);
     }).Await();
 
-    arktest.assertEQ(mainWorker.getName(), "main");
+    arktest.assertEQ(mainWorker.getName(), 'main');
     arktest.assertEQ(mainWorker.getWorkerId(), workerId);
     arktest.assertEQ(mainWorker.getPriority(), WorkerPriority.PRIORITY_HIGH);
     arktest.assertEQ(mainWorker.isAlive(), true);
@@ -334,7 +334,7 @@ function messageSendToTargetConcurrentTest() {
 
     let message = new concurrency.Message(emptyMessage, handler);
     const numCoroutines = 10;
-    let allJobs: Array<Job<void>> = new Array<Job<void>>();
+    let allJobs: Job<void>[] = [];
 
     for (let i = 0; i < numCoroutines; i++) {
         let index = i;

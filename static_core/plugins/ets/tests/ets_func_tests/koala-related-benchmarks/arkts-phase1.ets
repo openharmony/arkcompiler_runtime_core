@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,15 +17,18 @@
 interface CustomComponent {}
 class ArkComponent {
     width(value: string): ArkComponent {
-        console.log("setting width 100%")
+        // CC-OFFNXT(G.AOD.03) for test purposes
+        console.log('setting width 100%')
         return this
     }
     height(value: string): ArkComponent {
-        console.log("setting width 100%")
+        // CC-OFFNXT(G.AOD.03) for test purposes
+        console.log('setting width 100%')
         return this
     }
     color(value: string): ArkComponent {
-        console.log("setting width 100%")
+        // CC-OFFNXT(G.AOD.03) for test purposes
+        console.log('setting width 100%')
         return this
     }
 }
@@ -71,24 +74,27 @@ export abstract class ArkCommonStruct0<T extends ArkCommonStruct0<T>> extends Ar
 
     /** @memo */
     build(builder: ((instance: T) => void) | undefined): void {
-        throw new Error("Called common build()")
+        throw new Error('Called common build()')
     }
 }
 
 // A mock up
 class Column extends ArkCommonStruct0<Column> {
     build() {
-        console.log("Running Column build()")
+        // CC-OFFNXT(G.AOD.03) for test purposes
+        console.log('Running Column build()')
     }
 }
 
 class ArkMyStructComponent extends ArkCommonStruct0<ArkMyStructComponent> {
     __initializeStruct(initializers: ArkMyStructComponent | undefined): void {
-        console.log("initializing MyStruct")
+        // CC-OFFNXT(G.AOD.03) for test purposes
+        console.log('initializing MyStruct')
     }
     /** @memo */
     build(builder: ((instance: ArkMyStructComponent) => void) | undefined) {
-        console.log("Running MyStruct build")
+        // CC-OFFNXT(G.AOD.03) for test purposes
+        console.log('Running MyStruct build')
         Column._instantiate(
             instance => instance
                 .width('100%')

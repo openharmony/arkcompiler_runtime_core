@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,14 @@
 function main(): int {
     let failures: int = 0;
 
-    failures += test(testIteratorWithEmptyMap(),"Test Iterator With Empty Map");
-    failures += test(testIteratorWithNonEmptyMap(), "Test Iterator With Non Empty Map");
-    failures += test(testIteratorBoundaryConditions(), "Test Iterator Boundary Conditions");
+    failures += test(testIteratorWithEmptyMap(), 'Test Iterator With Empty Map');
+    failures += test(testIteratorWithNonEmptyMap(), 'Test Iterator With Non Empty Map');
+    failures += test(testIteratorBoundaryConditions(), 'Test Iterator Boundary Conditions');
 
-    failures += test(testIteratorWithEmptyReadonlyMap(),"Test Iterator With Empty ReadonlyMap");
-    failures += test(testIteratorWithNonEmptyReadonlyMap(), "Test Iterator With Non Empty ReadonlyMap");
+    failures += test(testIteratorWithEmptyReadonlyMap(), 'Test Iterator With Empty ReadonlyMap');
+    failures += test(testIteratorWithNonEmptyReadonlyMap(), 'Test Iterator With Non Empty ReadonlyMap');
 
-    return test(failures, "All tests run");
+    return test(failures, 'All tests run');
 }
 
 const RESULT_FAILURE = 1;
@@ -34,48 +34,48 @@ function testIteratorWithEmptyMap(): int {
     const iterator = map.$_iterator();
     const v = iterator.next();
     if (!v.done) {
-        return RESULT_FAILURE ;
+        return RESULT_FAILURE;
     }
-    return RESULT_SUCCESS ;
+    return RESULT_SUCCESS;
 }
 
 function testIteratorWithNonEmptyMap(): int {
     const map = new Map<String, Number>();
-    map.set("key1", 1);
-    map.set("key2", 2);
+    map.set('key1', 1);
+    map.set('key2', 2);
     const iterator = map.$_iterator();
 
     let v = iterator.next();
-    if (v.done || (v.value as [string, Number])[0] != "key1" || (v.value as [string, Number])[1] != 1) {
-        return RESULT_FAILURE ;
+    if (v.done || (v.value as [string, Number])[0] != 'key1' || (v.value as [string, Number])[1] != 1) {
+        return RESULT_FAILURE;
     }
 
     v = iterator.next();
-    if (v.done || (v.value as [string, Number])[0] != "key2" || (v.value as [string, Number])[1] != 2) {
-        return RESULT_FAILURE ;
+    if (v.done || (v.value as [string, Number])[0] != 'key2' || (v.value as [string, Number])[1] != 2) {
+        return RESULT_FAILURE;
     }
 
     v = iterator.next();
     if (!v.done) {
-        return RESULT_FAILURE ;
+        return RESULT_FAILURE;
     }
 
-    return RESULT_SUCCESS ;
+    return RESULT_SUCCESS;
 }
 
 function testIteratorBoundaryConditions(): int {
     const map = new Map<String, Number>();
-    map.set("key1", 1);
+    map.set('key1', 1);
     const iterator = map.$_iterator();
 
     let v = iterator.next();
-    if (v.done || (v.value as [string, Number])[0] != "key1" || (v.value as [string, Number])[1] != 1) {
-        return RESULT_FAILURE ;
+    if (v.done || (v.value as [string, Number])[0] != 'key1' || (v.value as [string, Number])[1] != 1) {
+        return RESULT_FAILURE;
     }
 
     v = iterator.next();
     if (!v.done) {
-        return RESULT_FAILURE ;
+        return RESULT_FAILURE;
     }
 
     // Calling next() again after iteration is done
@@ -85,7 +85,7 @@ function testIteratorBoundaryConditions(): int {
         return RESULT_FAILURE;
     }*/
 
-    return RESULT_SUCCESS ;
+    return RESULT_SUCCESS;
 }
 
 function testIteratorWithEmptyReadonlyMap(): int {
@@ -100,24 +100,24 @@ function testIteratorWithEmptyReadonlyMap(): int {
 
 function testIteratorWithNonEmptyReadonlyMap(): int {
     const map: ReadonlyMap<string, number> = new Map<string, number>();
-    map.set("one", 1);
-    map.set("two", 2);
-    map.set("three", 3);
+    map.set('one', 1);
+    map.set('two', 2);
+    map.set('three', 3);
 
     const iterator = map.$_iterator();
 
     let v = iterator.next();
-    if (v.done || (v.value as [string, Number])[0]  != 'one' || (v.value as [string, Number])[1]  != 1) {
+    if (v.done || (v.value as [string, Number])[0] != 'one' || (v.value as [string, Number])[1] != 1) {
         return RESULT_FAILURE;
     }
 
     v = iterator.next();
-    if (v.done || (v.value as [string, Number])[0]  != 'two' || (v.value as [string, Number])[1]  != 2) {
+    if (v.done || (v.value as [string, Number])[0] != 'two' || (v.value as [string, Number])[1] != 2) {
         return RESULT_FAILURE;
     }
 
     v = iterator.next();
-    if (v.done || (v.value as [string, Number])[0]  != 'three' || (v.value as [string, Number])[1]  != 3) {
+    if (v.done || (v.value as [string, Number])[0] != 'three' || (v.value as [string, Number])[1] != 3) {
         return RESULT_FAILURE;
     }
 
@@ -130,10 +130,12 @@ function testIteratorWithNonEmptyReadonlyMap(): int {
 }
 
 function test(result: int, message: String ): int {
-    if(result == 0) {
-      console.println("PASSED: " + message);
+    if (result == 0) {
+      // CC-OFFNXT(G.AOD.03) current test suite code style
+      console.println('PASSED: ' + message);
       return 0;
     }
-    console.println("FAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('FAILED: ' + message);
     return 1;
 }

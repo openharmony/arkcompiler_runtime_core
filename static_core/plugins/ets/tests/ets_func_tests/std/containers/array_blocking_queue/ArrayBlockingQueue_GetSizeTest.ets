@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
+import { launch } from 'std/concurrency'
 
 const elementsNum: int = 100;
 let sizeNum: int = 0;
@@ -21,10 +21,9 @@ let sizeNum: int = 0;
 let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueGetSizeTest");
+    let arrayBlockingQueueTestsuite = new arktest.ArkTestsuite('ArrayBlockingQueueGetSizeTest');
 
-    ArrayBlockingQueueTestsuite.addTest("GetSizeTestInt003", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('GetSizeTestInt003', () => {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
         }
@@ -42,7 +41,7 @@ function main(): int {
         arktest.assertEQ(queueInt.size, elementsNum);
     });
 
-    return ArrayBlockingQueueTestsuite.run();
+    return arrayBlockingQueueTestsuite.run();
 }
 
 function queueIntSizedata() {

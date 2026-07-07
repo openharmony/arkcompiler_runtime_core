@@ -24,12 +24,15 @@ async function asyncLockTimeoutTest(){
             }, 200)
         })
     }).then(() => {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log('first long time task')
         count++;
     }).catch((e: Error) => {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log('first long time task catch fail:' + e)
     })
     lock.lockAsync(async () => {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log('second normal task')
     })
     let options = new AsyncLockOptions()
@@ -37,6 +40,7 @@ async function asyncLockTimeoutTest(){
     lock.lockAsync(async () => {
         arktest.assertTrue(false)
     }, AsyncLockMode.EXCLUSIVE, options).catch((e: Error) => {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log('third timeout task: ' + e)
         count++;
     })
@@ -51,6 +55,6 @@ async function asyncLockTimeoutTest(){
 
 async function main(): Promise<int> {
     let asyncLockTestsuite = new arktest.ArkTestsuite('asyncLockTestsuite');
-    asyncLockTestsuite.addAsyncTest('asyncLockTimeoutTest',asyncLockTimeoutTest);
+    asyncLockTestsuite.addAsyncTest('asyncLockTimeoutTest', asyncLockTimeoutTest);
     return await asyncLockTestsuite.runAsync();
 }
