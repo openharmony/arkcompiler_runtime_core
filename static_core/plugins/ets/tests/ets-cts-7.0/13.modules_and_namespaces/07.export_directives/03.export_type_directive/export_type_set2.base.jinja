@@ -35,18 +35,18 @@
         'export_ex': ['type S = D', 'type A = D'],
         'tags': 'compile-only'
     },{
-        'description' : '4. Duplicated export type. Constants. Expect warning.',
-        'data': ['const NUM: int = 11'],
+        'description' : '4. Duplicated export type. Type alias. Expect warning.',
+        'data': ['type NUM = int'],
         'export_ex': ['type {NUM}', 'type {NUM}'],
         'tags': 'compile-only'
     },{
-        'description' : '5. Duplicated export type. Constants. Expect warning.',
-        'data': ['const NUM: int = 786'],
+        'description' : '5. Duplicated export type. Type alias. Expect warning.',
+        'data': ['type NUM = int'],
         'export_ex': ['type {NUM, NUM}'],
         'tags': 'compile-only'
     },{
-        'description' : '6. Duplicated export type. Constants. With AS. Expect warning.',
-        'data': ['const NUM: int = 445'],
+        'description' : '6. Duplicated export type. Type alias. With AS. Expect warning.',
+        'data': ['type NUM = int'],
         'export_ex': ['type {NUM, NUM as V}'],
         'tags': 'compile-only'
     },{
