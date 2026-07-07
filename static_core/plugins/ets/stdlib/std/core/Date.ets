@@ -1759,25 +1759,15 @@ export class Date {
     public toISOString(): string {
         let sb = new StringBuilder();
         let y = this.getUTCFullYear();
+        let yearLength: int = 4;
         if (y > 9999) {
-            sb.append("+");
-            if (y < 100000) {
-                sb.append("0");
-            }
+            sb.append('+');
+            yearLength = 6;
+        } else if (y < 0) {
+            sb.append('-');
+            yearLength = 6;
         }
-        if (y < 0) {
-            sb.append("-");
-        }
-        if (abs(y) < 1000) {
-            sb.append("0");
-        }
-        if (abs(y) < 100) {
-            sb.append("0");
-        }
-        if (abs(y) < 10) {
-            sb.append("0");
-        }
-        sb.append(abs(y).toLong());
+        sb.append(abs(y).toString().padStart(yearLength, c'0'));
         sb.append("-");
         let month = this.getUTCMonth() + 1;
         if (month < 10) {
