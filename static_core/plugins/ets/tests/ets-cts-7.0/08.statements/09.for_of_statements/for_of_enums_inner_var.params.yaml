@@ -58,6 +58,8 @@ cases:
           arktest.assertEQ(res, 24)
 
     - desc: 'Iterating over union Array<Enum1>|FixedArray<Enum2>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0402: Unions of types with iterator and fixed/value arrays are currently unsupported in an iteration: Array<Enum1>|FixedArray<Enum2>."
       main: |-
           for (let v of ((): Enum1[]|FixedArray<Enum2> => [Enum1.Zero, Enum1.Five, Enum1.Six])())
               res += v.valueOf()
@@ -165,6 +167,8 @@ cases:
           arktest.assertEQ(res, 7)
 
     - desc: 'Iterating over FixedArray<Enum1|Enum2>|Array<Enum3|Enum4>'
+      tags: [compile-only, negative]
+      exp_out: "Semantic error ESE0402: Unions of types with iterator and fixed/value arrays are currently unsupported in an iteration: FixedArray<(Enum1|Enum2)>|Array<Enum3|Enum4>."
       decl: |-
           enum Enum3 { Three = 3 }
           enum Enum4 { Four = 4 }

@@ -19,6 +19,8 @@ desc: >-
     An explicit type annotation is allowed for a for variable.
     Enumeration value is implicitly converted to a union type - Int|String.
     {{c.desc}}
+tags: {{c.tags}}
+expected_out: "{{c.exp_out}}"
 ---*/
 
 class EnumIterable<T> implements Iterable<T> {

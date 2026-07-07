@@ -93,18 +93,9 @@
 08.statements/09.for_of_statements/for_of_enums_outer_var_17.ets
 08.statements/09.for_of_statements/for_of_enums_outer_var_8.ets
 
-#34991 es2panda aborts when for-of statement iterates over a union containing Array and FixedArray
-08.statements/09.for_of_statements/for_of_enums_inner_var_14.ets
-08.statements/09.for_of_statements/for_of_enums_inner_var_5.ets
-08.statements/09.for_of_statements/for_of_38.ets
-08.statements/09.for_of_statements/for_of_41.ets
-
 #34999 Verifier error on a union of FixedArray or ValueArray
 08.statements/09.for_of_statements/for_of_36.ets
 08.statements/09.for_of_statements/for_of_37.ets
-
-#35000 Incorrect evaluation of ternary expression in for-of iterations over a union of arrays
-08.statements/09.for_of_statements/for_of_35.ets
 
 #33978
 11.enumerations/01.enumeration_base_type/enum_str_1.ets
@@ -185,48 +176,9 @@
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_17.ets
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_8.ets
 
-#34990 es2panda aborts when for-of statement uses explicit type annotation with implicit conversion from enum value
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_0.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_1.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_10.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_11.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_12.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_13.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_14.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_15.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_16.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_2.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_3.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_4.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_5.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_6.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_7.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_9.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_0.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_1.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_10.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_11.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_12.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_13.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_14.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_15.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_16.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_2.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_3.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_4.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_5.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_6.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_7.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_9.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_34.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_37.ets
-
 #34999 Verifier error on a union of FixedArray or ValueArray
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_32.ets
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_33.ets
-
-#35000 Incorrect evaluation of ternary expression in for-of iterations over a union of arrays
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_31.ets
 
 #28758 new overloaded functions with receiver don't work with numeric types
 17.experimental_features/13.adding_functionality_to_existing_types/01.functions_with_receiver/functions_with_receiver_23.ets
