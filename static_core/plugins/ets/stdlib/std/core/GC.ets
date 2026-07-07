@@ -79,13 +79,13 @@ export namespace GC {
 
     /**
      * The function triggers specific GC
+     * Non-in-place threshold GC requests during postpone period will be rejected and return -1.
      *
      * @param cause cause of requested GC
      * @param inPlaceMode run GC in place mode
      *
      * @throws IllegalArgumentError if current GC does not support requested cause
      * @throws UnsupportedOperationError if current GC does not support requested cause
-     * @throws IllegalStateError if try to run threshold GC collection not in place after calling postponeGCStart
      *
      * @returns id of started GC.
      * - The id can be passed to waitForFinishGC to ensure the GC is finished.
