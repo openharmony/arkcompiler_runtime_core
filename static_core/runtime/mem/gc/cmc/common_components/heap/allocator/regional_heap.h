@@ -267,11 +267,6 @@ public:
         return taskList;
     }
 
-    void MarkAwaitingJitFort()
-    {
-        ForEachAwaitingJitFortUnsafe(MarkObject);
-    }
-
     size_t CollectLargeGarbage()
     {
         return largeSpace_.CollectLargeGarbage();
@@ -429,20 +424,10 @@ private:
     HeapAddress TryAllocateOnce(size_t allocSize, AllocType allocType);
     bool ShouldRetryAllocation(size_t &tryTimes) const;
 
-    void ForEachAwaitingJitFortUnsafe(const std::function<void(BaseObject *)> &visitor) const;
-    void MarkJitFortMemAwaitingInstall(BaseObject *obj);
-
     HeapAddress reservedStart_ = 0;
     HeapAddress reservedEnd_ = 0;
     RegionManager regionManager_;
     MemoryMap *map_ {nullptr};
-
-    // Awaiting JitFort object has no references from other objects,
-    // but we need to keep them as live untill jit compilation has finished installing.
-    PandaSet<BaseObject *> awaitingJitFort_;
-    // Note(d.chikunov) - make it PandaStack in future
-    std::stack<std::pair<void *, BaseObject *>> jitFortPostGCInstallTask_;
-    ark::os::memory::Mutex awaitingJitFortMutex_;
 
     YoungSpace youngSpace_;
     OldSpace oldSpace_;

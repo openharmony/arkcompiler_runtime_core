@@ -54,10 +54,6 @@ size_t LargeSpace::CollectLargeGarbage()
         HeapAddress addr = region->GetRegionStart();
         BaseObject *obj = reinterpret_cast<BaseObject *>(addr);
 
-        if (region->IsJitFortAwaitInstallFlag()) {
-            region = region->GetNextRegion();
-            continue;
-        }
         if (!RegionalHeap::IsSurvivedObject(obj) && !region->IsNewObjectSinceMarking(obj)) {
             LOG_DEBUG_OBJECT_EVENTS << "DELETE LARGE object " << obj;
             LOG(DEBUG, GC) << "reclaim large region " << region << "@0x" << std::hex << region->GetRegionStart() << "+"

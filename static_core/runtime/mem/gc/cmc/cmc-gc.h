@@ -462,7 +462,6 @@ private:
     void UnlockObject(ObjectHeader *object);
     void MarkRememberSetImpl(BaseObject *object, LocalCollectStack &markStack);
     void ConcurrentRemark(GlobalMarkStack &globalMarkStack, bool parallel);
-    void MarkAwaitingJitFort();
 
     template <bool copy>
     bool TryUpdateRefFieldImpl(BaseObject *obj, RefField<> &ref, BaseObject *&oldRef, BaseObject *&newRef) const;

@@ -1611,6 +1611,7 @@ bool CmcGC<LanguageConfig>::PushRootToWorkStack(LocalCollectStack &collectStack,
             ObjectMarker<false> marker(&collectStack, reason);
             if (IsWeakReference(baseObj)) {
                 HandleWeakReference(&marker, baseObj);
+                regionInfo->AddLiveByteCount(baseObj->GetSize());
                 return true;
             }
         }
@@ -1682,9 +1683,8 @@ void CmcGC<LanguageConfig>::Remark(GCTaskCause reason)
     mem::GCScope<mem::TRACE_TIMING> gcScope("STW re-marking", this);
     ConcurrentRemark(globalMarkStack, maxWorkers > 0);  // Mark enqueue
     TracingImpl(globalMarkStack, maxWorkers > 0, true, reason);
-    PreforwardStaticRoots();
-    MarkAwaitingJitFort();  // Mark awaiting
     ProcessWeakReferences(GCPhase::GC_PHASE_REMARK, reason);
+    PreforwardStaticRoots();
     // clear satb buffer when gc finish tracing.
     SatbBuffer::Instance().ClearBuffer();
 
@@ -1759,12 +1759,6 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ConcurrentRemark(GlobalMarkStack &globalMarkStack, bool parallel)
 {
     LOG_IF(UNLIKELY(!MarkSatbBuffer(globalMarkStack)), FATAL, GC) << "not cleared\n";
-}
-
-template <class LanguageConfig>
-void CmcGC<LanguageConfig>::MarkAwaitingJitFort()
-{
-    reinterpret_cast<RegionalHeap &>(theAllocator_).MarkAwaitingJitFort();
 }
 
 template <class LanguageConfig>
