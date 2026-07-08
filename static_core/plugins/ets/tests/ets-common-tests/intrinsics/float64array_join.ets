@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,6 +65,29 @@ function joinUtf16Delim1(): void {
     arktest.assertEQ(a.join('Ω'), UTF16_JOINED_1);
 }
 
+function joinNegativeMaxValue(): void {
+    // Exponential form: -Double.MAX_VALUE = -1.7976931348623157e+308 (24 chars)
+    let a: Float64Array = new Float64Array([-Double.MAX_VALUE, 0, Double.MAX_VALUE]);
+    arktest.assertEQ(a.join(','), '-1.7976931348623157e+308,0,1.7976931348623157e+308');
+    arktest.assertEQ(a.toString(), '-1.7976931348623157e+308,0,1.7976931348623157e+308');
+    arktest.assertEQ(a.join(''), '-1.7976931348623157e+30801.7976931348623157e+308');
+    // Also test with UTF-16 separator to cover the TypedArrayJoinUtf16 path
+    arktest.assertEQ(a.join('Ω'), '-1.7976931348623157e+308Ω0Ω1.7976931348623157e+308');
+}
+
+function joinDecimalFormBoundary(): void {
+    // ECMAScript decimal form (-6 < n <= 0) worst case at n=-5 with 17 sig digits:
+    // "-0.0000012345678901234567" = 25 chars — exceeds the 24-char exponential bound
+    let val: number = -0.0000012345678901234567;
+    let a: Float64Array = new Float64Array([val, 0, -val]);
+    arktest.assertEQ(a.join(','), '-0.0000012345678901234567,0,0.0000012345678901234567');
+    arktest.assertEQ(a.toString(), '-0.0000012345678901234567,0,0.0000012345678901234567');
+    // Empty delimiter (TypedArrayJoinUtf8 without separator path)
+    arktest.assertEQ(a.join(''), '-0.000001234567890123456700.0000012345678901234567');
+    // UTF-16 separator (TypedArrayJoinUtf16 path)
+    arktest.assertEQ(a.join('Ω'), '-0.0000012345678901234567Ω0Ω0.0000012345678901234567');
+}
+
 function main(): int {
     const suite = new arktest.ArkTestsuite('Float64Array.join() tests')
     suite.addTest('join an empty Float64Array', joinEmpty)
@@ -75,5 +98,7 @@ function main(): int {
     suite.addTest('join a normal Float64Array using nsign delimiter', joinNsignDelim)
     suite.addTest('join a normal Float64Array using utf16 delimiter', joinUtf16Delim)
     suite.addTest('join a normal Float64Array using a single utf16 char delimiter', joinUtf16Delim1)
+    suite.addTest('join a Float64Array containing -Double.MAX_VALUE (overflow guard)', joinNegativeMaxValue)
+    suite.addTest('join a Float64Array containing decimal-form boundary values (n=-5, 25 chars)', joinDecimalFormBoundary)
     return suite.run()
 }

@@ -1603,12 +1603,10 @@ constexpr size_t MaxChars()
         return digits;
     } else {
         static_assert(std::is_floating_point_v<T>);
-        // Forced to treat T as double
         auto bits = std::numeric_limits<double>::digits;
         auto digitPerBit = std::log10(std::numeric_limits<double>::radix);
-        auto digits = std::ceil(bits * digitPerBit) + static_cast<int>(std::is_signed_v<double>);
-        // digits + point + "+e308"
-        return digits + 1U + std::char_traits<char>::length("+e308");
+        auto sigDigits = static_cast<size_t>(std::ceil(bits * digitPerBit)) + 1U;
+        return static_cast<size_t>(std::is_signed_v<double>) + 1U + 1U + 5U + sigDigits;
     }
 }
 
