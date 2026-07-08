@@ -823,7 +823,7 @@ export class RegExp extends Object {
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public replace(str: String, replacer: (substr: String, args: Object[]) => String): String {
+    public replace(str: String, replacer: (substr: String, args: (Object | undefined)[]) => String): String {
         if (this.global) {
             this.lastIndex = 0
         }
@@ -836,17 +836,17 @@ export class RegExp extends Object {
             let nCaptures = result.length
             let matched = result.$_get(0)!
             let position = max(min(result.index, str.getLength()), 0)
-            let args = new containers.UndefinableObjectArray(nCaptures)
+            let args: (Object | undefined)[] = []
             for (let n = 1; n < nCaptures; n++) {
-                args.pushBack(result.$_get(n))
+                args.push(result.$_get(n))
             }
+            args.push(position.toDouble())
+            args.push(str)
             let namedCaptures: Object | undefined = result.groups
-            args.pushBack(position.toDouble())
-            args.pushBack(str)
             if (namedCaptures != undefined) {
-                args.pushBack(namedCaptures)
+                args.push(namedCaptures)
             }
-            return replacer(matched, args.toArray())
+            return replacer(matched, args)
         })
     }
 

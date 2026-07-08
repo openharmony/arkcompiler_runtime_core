@@ -1969,7 +1969,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public replace(searchValue: RegExp, replacer: (substr: String, args: Object[]) => String): String {
+    public replace(searchValue: RegExp, replacer: (substr: String, args: (Object | undefined)[]) => String): String {
         return searchValue.replace(this, replacer)
     }
 
@@ -1982,7 +1982,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public replace(searchValue: String, replacer: (substr: String, args: Object[]) => String): String {
+    public replace(searchValue: String, replacer: (substr: String, args: (Object | undefined)[]) => String): String {
         let searchLength = searchValue.getLength()
         let position = this.indexOf(searchValue)
         if (position == -1) {
@@ -2003,7 +2003,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public replace(searchValue: StringOrRegExp, replacer: (substr: String, args: Object[]) => String): String {
+    public replace(searchValue: StringOrRegExp, replacer: (substr: String, args: (Object | undefined)[]) => String): String {
         if (searchValue instanceof RegExp) {
             return searchValue.replace(this, replacer)
         }
@@ -2096,7 +2096,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public replaceAll(searchValue: RegExp, replacer: (substr: String, args: Object[]) => String): String {
+    public replaceAll(searchValue: RegExp, replacer: (substr: String, args: (Object | undefined)[]) => String): String {
         if (!searchValue.global) {
             throw new Error('Global flag expected for regexp')
         }
@@ -2112,13 +2112,17 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public replaceAll(searchValue: String, replacer: (substr: String, args: Object[]) => String): String {
+    public replaceAll(searchValue: String, replacer: (substr: String, args: (Object | undefined)[]) => String): String {
         let searchLength = searchValue.getLength()
         let advanceBy = max(1, searchLength)
         let matchPositions = new containers.ArrayAsListInt();
         let position = this.indexOf(searchValue, 0)
+        let strLength = this.getLength()
         while (position != -1) {
             matchPositions.pushBack(position)
+            if (position == strLength) {
+                break
+            }
             position = this.indexOf(searchValue, position + advanceBy)
         }
         let endOfLastMatch = 0
@@ -2127,10 +2131,7 @@ export final class String extends Object implements Comparable<String>, Iterable
         for (let i = 0; i < arrayMatchPositions.length; ++i) {
             let p = arrayMatchPositions[i]
             let preserved = this.substring(endOfLastMatch, p)
-            let args = new containers.UndefinableObjectArray(2)
-            args.pushBack(new Double(p))
-            args.pushBack(this)
-            let replacement = replacer(searchValue, args.toArray())
+            let replacement = replacer(searchValue, [new Double(p), this])
             result = result + preserved + replacement
             endOfLastMatch = p + searchLength
         }
@@ -2150,7 +2151,7 @@ export final class String extends Object implements Comparable<String>, Iterable
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public replaceAll(searchValue: StringOrRegExp, replacer: (substr: String, args: Object[]) => String): String {
+    public replaceAll(searchValue: StringOrRegExp, replacer: (substr: String, args: (Object | undefined)[]) => String): String {
         if (searchValue instanceof RegExp) {
             if (!searchValue.global) {
                 throw new Error('Global flag expected for regexp')
