@@ -164,7 +164,6 @@ export namespace taskpool {
             this.submissionId = submissionId;
             this.resultPromise = new PromiseWithResolvers<Any>();
             this.promise = this.resultPromise.promise;
-            this.receiveDispatcher = new ReceiveDispatcher(() => this.tryFinalize());
             this.onFinalized = onFinalized;
         }
 
@@ -200,6 +199,28 @@ export namespace taskpool {
             this.tryFinalize();
         }
 
+        completeTaskResult(value: Any): void {
+            if (this.receiveDispatcher !== undefined) {
+                this.markTaskResult(value);
+                return;
+            }
+            this.stateFlags.store(EXECUTION_RECORD_RESULT_READY | EXECUTION_RECORD_FINALIZED);
+            this.resultPromise.resolve(value);
+            this.runOnFinalized();
+        }
+
+        completeTaskError(error: Error): void {
+            if (this.receiveDispatcher !== undefined) {
+                this.markTaskError(error);
+                return;
+            }
+            this.stateFlags.store(
+                EXECUTION_RECORD_RESULT_READY | EXECUTION_RECORD_RESULT_IS_ERROR | EXECUTION_RECORD_FINALIZED
+            );
+            this.resultPromise.reject(error);
+            this.runOnFinalized();
+        }
+
         markTimedOut(): void {
             this.closeDispatchToHost();
         }
@@ -212,12 +233,36 @@ export namespace taskpool {
             return (this.stateFlags.load() & EXECUTION_RECORD_DISPATCH_CLOSED) == 0;
         }
 
+        enqueueReceiveEvent(event: ReceiveEvent): boolean {
+            return this.getReceiveDispatcher().enqueue(event);
+        }
+
+        pollReceiveEvent(): ReceiveEvent | undefined {
+            return this.receiveDispatcher?.poll();
+        }
+
+        prependReceiveEvent(event: ReceiveEvent): void {
+            this.getReceiveDispatcher().prepend(event);
+        }
+
+        completeReceiveEvent(): void {
+            const dispatcher = this.receiveDispatcher;
+            if (dispatcher !== undefined) {
+                dispatcher.complete();
+            }
+        }
+
+        hasPendingReceiveEvents(): boolean {
+            const dispatcher = this.receiveDispatcher;
+            return dispatcher !== undefined && dispatcher.hasPendingAcceptedEvents();
+        }
+
         tryFinalize(): void {
             while (true) {
                 const currentState = this.stateFlags.load();
                 if ((currentState & EXECUTION_RECORD_FINALIZED) != 0 ||
                     (currentState & EXECUTION_RECORD_RESULT_READY) == 0 ||
-                    this.receiveDispatcher.hasPendingAcceptedEvents()) {
+                    this.hasPendingReceiveEvents()) {
                     return;
                 }
                 const nextState = currentState | EXECUTION_RECORD_FINALIZED;
@@ -230,27 +275,38 @@ export namespace taskpool {
                 } else {
                     this.resultPromise.resolve(result);
                 }
-                try {
-                    this.onFinalized?.();
-                } catch (e) {
-                    // Keep finalize path non-throwing.
-                    console.error(`taskpool:: execution record finalize hook failed: ${e}`);
-                }
+                this.runOnFinalized();
                 return;
             }
         }
 
         readonly submissionId: int;
         readonly promise: Promise<Any>;
-        readonly receiveDispatcher: ReceiveDispatcher;
 
         private readonly resultPromise: PromiseWithResolvers<Any>;
         private readonly stateFlags: AtomicInt = new AtomicInt(0);
         private readonly resultSlot: AtomicReference<Any> = new AtomicReference<Any>(undefined);
         private readonly onFinalized?: () => void;
+        private receiveDispatcher: ReceiveDispatcher | undefined = undefined;
 
         private closeDispatchToHost(): void {
             this.stateFlags.fetchOr(EXECUTION_RECORD_DISPATCH_CLOSED);
+        }
+
+        private getReceiveDispatcher(): ReceiveDispatcher {
+            if (this.receiveDispatcher === undefined) {
+                this.receiveDispatcher = new ReceiveDispatcher(() => this.tryFinalize());
+            }
+            return this.receiveDispatcher!;
+        }
+
+        private runOnFinalized(): void {
+            try {
+                this.onFinalized?.();
+            } catch (e) {
+                // Keep finalize path non-throwing.
+                console.error(`taskpool:: execution record finalize hook failed: ${e}`);
+            }
         }
     }
 
@@ -258,12 +314,59 @@ export namespace taskpool {
         constructor(task: Task, executionRecord: ExecutionRecord, priority: Priority) {
             this.task = task;
             this.executionRecord = executionRecord;
+            this.transientExecution = undefined;
             this.priority = priority;
         }
 
-        readonly task: Task;
-        readonly executionRecord: ExecutionRecord;
+        constructor(transientExecution: TransientExecution, priority: Priority) {
+            this.task = undefined;
+            this.executionRecord = undefined;
+            this.transientExecution = transientExecution;
+            this.priority = priority;
+        }
+
+        readonly task?: Task;
+        readonly executionRecord?: ExecutionRecord;
+        readonly transientExecution?: TransientExecution;
         readonly priority: Priority;
+    }
+
+    class TransientExecution {
+        constructor(func: Function, ...args: FixedArray<Any>) {
+            this.resultPromise = new PromiseWithResolvers<Any>();
+            this.promise = this.resultPromise.promise;
+            if (isTaskpoolSupportInterop) {
+                let serializeHelper = new InteropSerializeHelper(args);
+                this.taskFunction = (): Any => {
+                    let deserializedArgs = serializeHelper.deserialize();
+                    return func.unsafeCall(...deserializedArgs);
+                };
+            } else {
+                this.taskFunction = (): Any => {
+                    return func.unsafeCall(...args);
+                };
+            }
+        }
+
+        execute(): Any {
+            return this.taskFunction();
+        }
+
+        resolve(value: Any): void {
+            this.resultPromise.resolve(value);
+        }
+
+        reject(error: Error): void {
+            this.resultPromise.reject(error);
+        }
+
+        reportUnhandledRejection(): void {
+            this.resultPromise.promise.finally(() => {});
+        }
+
+        readonly promise: Promise<Any>;
+        private readonly resultPromise: PromiseWithResolvers<Any>;
+        private readonly taskFunction: () => Any;
     }
 
     function tryScheduleOnReceiveDrain(executionRecord: ExecutionRecord, hostWorkerId: int): void {
@@ -279,9 +382,9 @@ export namespace taskpool {
     function drainOnReceiveEvents(executionRecord: ExecutionRecord): void {
         const currentWorkerId = CoroutineExtras.getWorkerId();
         while (true) {
-            const event = executionRecord.receiveDispatcher.poll();
+            const event = executionRecord.pollReceiveEvent();
             if (event === undefined) {
-                if (executionRecord.receiveDispatcher.hasPendingAcceptedEvents()) {
+                if (executionRecord.hasPendingReceiveEvents()) {
                     Coroutine.Schedule();
                     continue;
                 }
@@ -289,7 +392,7 @@ export namespace taskpool {
                 return;
             }
             if (event.listener.hostWorkerId != currentWorkerId) {
-                executionRecord.receiveDispatcher.prepend(event);
+                executionRecord.prependReceiveEvent(event);
                 tryScheduleOnReceiveDrain(executionRecord, event.listener.hostWorkerId);
                 return;
             }
@@ -301,7 +404,7 @@ export namespace taskpool {
             } catch (e) {
                 console.error(`taskpool:: onReceiveData callback failed: ${e}`);
             } finally {
-                executionRecord.receiveDispatcher.complete();
+                executionRecord.completeReceiveEvent();
             }
         }
     }
@@ -332,40 +435,39 @@ export namespace taskpool {
                 if (queuedExecution === undefined) {
                     continue;
                 }
-                const task = queuedExecution.task;
                 removeFromIdleWorkers(this);
-
-                const internalTask = InternalTask.of(task);
-                const taskPriority = internalTask?.priority;
-                if (taskPriority != undefined && this.currentPriority !== taskPriority) {
-                    this.updateCurrentWorkerPriority(taskPriority);
-                    this.currentPriority = taskPriority;
+                const queuedPriority = queuedExecution.priority;
+                if (this.currentPriority !== queuedPriority) {
+                    this.updateCurrentWorkerPriority(queuedPriority);
+                    this.currentPriority = queuedPriority;
                 }
-                this.currentTasksCount.fetchAdd(1);
+                const transientExecution = queuedExecution.transientExecution;
+                if (transientExecution !== undefined) {
+                    this.executeTransient(transientExecution);
+                    continue;
+                }
+
+                const task = queuedExecution.task!;
+                const internalTask = InternalTask.of(task);
+                this.beginLocalExecution();
                 ConcurrencyHelpers.lockGuard(this.currentTasksMutex, () => {
                     const curCount: int | undefined = this.currentTasks.get(task);
                     this.currentTasks.set(task, curCount == undefined ? 1 : curCount + 1);
                 });
-                let count = getNewTaskTotalCount();
                 this.idleTime = 0;
-
-                // Mark synchronous task body execution start.
-                // Use an atomic millisecond tick to avoid extra locking in the managerWorker monitor.
-                this.executingTaskBodyStartTime.store((Chrono.nanoNow() / Chrono.NS_PER_MS).toInt());
 
                 let execResult: Any;
                 try {
-                    execResult = internalTask!.execute(this, queuedExecution.executionRecord);
+                    execResult = internalTask!.execute(this, queuedExecution.executionRecord!);
                 } catch (e) {
-                    queuedExecution.executionRecord.markTaskError(e as Error);
-                    internalTask!.finishExecutionRecord(queuedExecution.executionRecord);
+                    queuedExecution.executionRecord!.markTaskError(e as Error);
+                    internalTask!.finishExecutionRecord(queuedExecution.executionRecord!);
                     execResult = Promise.reject(e);
                 }
 
                 const finalize = () => {
                     internalTask!.notifyDependencies();
-                    this.executingTaskBodyStartTime.store(0);
-                    this.currentTasksCount.fetchSub(1);
+                    this.endLocalExecution();
                     this.tryAdvanceRetireRequest();
                 };
 
@@ -374,6 +476,39 @@ export namespace taskpool {
                 } else {
                     finalize();
                 }
+            }
+        }
+
+        private executeTransient(transientExecution: TransientExecution): void {
+            this.beginLocalExecution();
+            this.idleTime = 0;
+
+            let result: Any;
+            try {
+                result = transientExecution.execute();
+            } catch (e) {
+                transientExecution.reject(e as Error);
+                transientExecution.reportUnhandledRejection();
+                this.endLocalExecution();
+                this.tryAdvanceRetireRequest();
+                return;
+            }
+
+            if (result instanceof Promise) {
+                (result as Promise<Any>).then((value: Any) => {
+                    transientExecution.resolve(value);
+                    this.endLocalExecution();
+                    this.tryAdvanceRetireRequest();
+                }, (e) => {
+                    transientExecution.reject(e as Error);
+                    transientExecution.reportUnhandledRejection();
+                    this.endLocalExecution();
+                    this.tryAdvanceRetireRequest();
+                });
+            } else {
+                transientExecution.resolve(result);
+                this.endLocalExecution();
+                this.tryAdvanceRetireRequest();
             }
         }
 
@@ -463,7 +598,22 @@ export namespace taskpool {
             return true;
         }
 
+        private beginLocalExecution(): void {
+            this.currentTasksCount.fetchAdd(1);
+            this.executingTaskBodyStartTime.store((Chrono.nanoNow() / Chrono.NS_PER_MS).toInt());
+        }
+
+        private endLocalExecution(): void {
+            const previous = this.currentTasksCount.fetchSub(1);
+            if (previous == 1) {
+                this.executingTaskBodyStartTime.store(0);
+            }
+        }
+
         private hasLocalPendingWork(): boolean {
+            if (this.currentTasksCount.load() != 0) {
+                return true;
+            }
             let currentTasksSize: int = 0;
             ConcurrencyHelpers.lockGuard(this.currentTasksMutex, () => {
                 currentTasksSize = this.currentTasks.size.toInt();
@@ -626,7 +776,7 @@ export namespace taskpool {
                             ConcurrencyHelpers.lockGuard(w.currentTasksMutex, () => {
                                 currentTasksSize = w.currentTasks.size.toInt();
                             });
-                            if (currentTasksSize !== 0) {
+                            if (currentTasksSize !== 0 || w.currentTasksCount.load() != 0) {
                                 runningWorkersNum++;
                             }
                         }
@@ -954,16 +1104,55 @@ export namespace taskpool {
     }
 
     class InternalTask {
-        constructor(task: Task) {
+        constructor(task: Task, lightweight: boolean = false) {
             this.taskMutex = ConcurrencyHelpers.mutexCreate();
             this.condVar = ConcurrencyHelpers.condVarCreate();
-            this.dependentTasks = new containers.ConcurrentSet<Task>();
+            this.isTransientTask = lightweight;
+            if (!lightweight) {
+                this.dependentTasks = new containers.ConcurrentSet<Task>();
+            }
             this.task = task;
             this.creatorWorkerId = CoroutineExtras.getWorkerId();
         }
 
         static of(task: Task): InternalTask {
             return (task.internalTask as InternalTask);
+        }
+
+        getDependentTasks(): containers.ConcurrentSet<Task> {
+            if (this.dependentTasks === undefined) {
+                this.dependentTasks = new containers.ConcurrentSet<Task>();
+            }
+            return this.dependentTasks!;
+        }
+
+        hasDependentTasks(): boolean {
+            return this.dependentTasks !== undefined && this.dependentTasks!.size != 0;
+        }
+
+        addTaskRegistryReference(): void {
+            if (this.isTransientTask) {
+                return;
+            }
+            ConcurrencyHelpers.lockGuard(mutex, () => {
+                let count = allTasks.get(this.task) ?? 0;
+                allTasks.set(this.task, count + 1);
+            });
+        }
+
+        removeTaskRegistryReference(): void {
+            if (this.isTransientTask) {
+                return;
+            }
+            ConcurrencyHelpers.lockGuard(mutex, () => {
+                const count = allTasks.get(this.task) ?? 0;
+                if (count <= 1) {
+                    allTasks.delete(this.task);
+                    taskSet.delete(this.task);
+                } else {
+                    allTasks.set(this.task, count - 1);
+                }
+            });
         }
 
         /**
@@ -982,7 +1171,7 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_EXECUTE_OUTSIDE, "taskpool:: groupTask cannot execute outside");
             } else if (this.seqId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTE_OUTSIDE, "taskpool:: seqRunnerTask cannot execute outside");
-            } else if (this.isSubmitted && (this.isDependent || this.dependentTasks.size != 0)) {
+            } else if (this.isSubmitted && (this.isDependent || this.hasDependentTasks())) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE, "taskpool:: executedTask with dependency cannot execute again");
             } else if (this.isSubmitted && this.task instanceof LongTask) {
                 throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_LONG, "taskpool:: The long task can only be executed once");
@@ -1032,7 +1221,7 @@ export namespace taskpool {
             if (this.asyncId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTE_DELAYED, "taskpool:: asyncRunnerTask cannot executeDelayed outside");
             }
-            if (this.isSubmitted && (this.isDependent || this.dependentTasks.size != 0)) {
+            if (this.isSubmitted && (this.isDependent || this.hasDependentTasks())) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE, "taskpool:: executedTask with dependency cannot execute again");
             }
             if (this.isSubmitted && (this.task instanceof LongTask)) {
@@ -1058,7 +1247,7 @@ export namespace taskpool {
             if (this.isSubmitted || this.isPeriodicTask || this.groupId != 0 || this.seqId.load() != 0 || this.hasTimeout) {
                 throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_PERIODIC, "taskpool:: The concurrent task has been executed and cannot be executed periodically");
             }
-            if (this.isDependent || this.dependentTasks.size != 0) {
+            if (this.isDependent || this.hasDependentTasks()) {
                 throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_EXECUTE_PERIODIC, "taskpool:: the task with dependency cannot executePeriodically");
             }
         }
@@ -1070,7 +1259,7 @@ export namespace taskpool {
          */
         checkExecutionForTimeout(): void {
             this.checkCommonExecutionWithAsync();
-            if (this.isDependent || this.dependentTasks.size != 0) {
+            if (this.isDependent || this.hasDependentTasks()) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_DEPENDENCY_EXECUTE, "taskpool:: timeout task with dependency cannot execute");
             }
             if (this.hasTimeout && this.state.load() !== InternalState.NOT_FOUND.valueOf()) {
@@ -1095,7 +1284,14 @@ export namespace taskpool {
         }
 
         notifyDependencies(): void {
-            for (const dependentTask: Task of this.dependentTasks) {
+            if (this.dependentTasks === undefined) {
+                ConcurrencyHelpers.mutexLock(this.taskMutex);
+                this.isRunning = false;
+                ConcurrencyHelpers.condVarNotifyOne(this.condVar, this.taskMutex);
+                ConcurrencyHelpers.mutexUnlock(this.taskMutex);
+                return;
+            }
+            for (const dependentTask: Task of this.dependentTasks!) {
                 let internalDepTask = InternalTask.of(dependentTask);
                 let shouldActivatePendingTask = false;
                 ConcurrencyHelpers.lockGuard(internalDepTask.taskMutex, () => {
@@ -1137,15 +1333,7 @@ export namespace taskpool {
             this.waitForDependencies();
             if (this.state.compareAndSwap(State.WAITING, State.RUNNING) == State.CANCELED) {
                 this.notifyDependencies();
-                ConcurrencyHelpers.lockGuard(mutex, () => {
-                    const count = allTasks.get(this.task) ?? 0;
-                    if (count <= 1) {
-                        allTasks.delete(this.task);
-                        taskSet.delete(this.task);
-                    } else {
-                        allTasks.set(this.task, count - 1);
-                    }
-                });
+                this.removeTaskRegistryReference();
                 this.tryTriggerAsyncRunnerAndGroup();
                 this.throwCancelTaskError();
             }
@@ -1164,7 +1352,9 @@ export namespace taskpool {
             }
             this.callUserCallback(this.onStartCallback);
             let executionSucceeded: boolean = false;
-            let taskResultPromise: Promise<Any>;
+            let taskResultPromise: Promise<Any> | undefined = undefined;
+            let taskResult: Any = undefined;
+            let taskError: Error | undefined = undefined;
             this.startTime = Chrono.nanoNow();
             const startCpuTime: long = Chrono.getCpuTime();
             const executionRecord = executionRecordArg ?? this.currentExecutionRecord;
@@ -1188,11 +1378,11 @@ export namespace taskpool {
                     });
                 } else {
                     executionSucceeded = true;
-                    taskResultPromise = Promise.resolve(result);
+                    taskResult = result;
                 }
             } catch (e) {
                 this.handleTaskFailure(e as Error);
-                taskResultPromise = Promise.reject(e as Error);
+                taskError = e as Error;
             }
 
             // We cannot reliably calculate ioDuration in 1.2 due to possible coroutine switches.
@@ -1201,67 +1391,34 @@ export namespace taskpool {
             this.task.totalDuration = this.task.cpuDuration;
             this.task.ioDuration = 0;
 
-            let taskFinishedhandle = (): void => {
-                if (isTaskPoolUseLaunch) {
-                    this.notifyDependencies();
-                } else {
-                    totalExecTime.fetchAdd(this.getDuration());
-                    totalExecCount.fetchAdd(1);
-                }
-                ConcurrencyHelpers.lockGuard(mutex, () => {
-                    const count = allTasks.get(this.task) ?? 0;
-                    if (count <= 1) {
-                        allTasks.delete(this.task);
-                        taskSet.delete(this.task);
-                    } else {
-                        allTasks.set(this.task, count - 1);
-                    }
-                });
-                if (currentWorker !== undefined) {
-                    ConcurrencyHelpers.lockGuard(currentWorker!.currentTasksMutex, () => {
-                        const curCount: int | undefined = currentWorker!.currentTasks.get(this.task);
-                        if (curCount == undefined || curCount <= 1) {
-                            currentWorker!.currentTasks.delete(this.task);
-                        } else {
-                            currentWorker!.currentTasks.set(this.task, curCount - 1);
-                        }
-                        currentWorker!.currentPriority = undefined;
-                    });
-                }
-                if (this.isTimeout.load()) {
-                    this.transitionToFinished();
-                    this.tryTriggerAsyncRunnerAndGroup();
-                    return;
-                }
-                this.transitionToFinished();
-                try {
-                    if (executionSucceeded) {
-                        if (this.groupId != 0 && this.onSuccessCallback !== undefined) {
-                            let group: TaskGroup | undefined = allGroups.get(this.groupId);
-                            if (group !== undefined) {
-                                let callback: CallbackFunction = this.onSuccessCallback as CallbackFunction;
-                                GroupState.of(group).successCallbacks.add(callback);
-                            }
-                        } else {
-                            this.callUserCallback(this.onSuccessCallback);
-                        }
-                    }
-                } catch (e) {
-                    try {
-                        this.onFailCallback?.(e as Error);
-                    } catch (callbackError) {}
-                    throw e;
-                } finally {
-                    this.tryTriggerAsyncRunnerAndGroup();
-                }
-            };
-
-            return taskResultPromise.finally(() => {
+            if (taskResultPromise === undefined) {
                 try {
                     this.unregisterRunningExecutionRecord(executionRecord);
                     setSubmissionId(previousSubmissionId);
                     setTaskId(previousTaskId);
-                    taskFinishedhandle();
+                    this.finishTaskExecution(currentWorker, executionSucceeded);
+                    this.finishExecutionRecord(executionRecord);
+                    if (taskError !== undefined) {
+                        executionRecord.completeTaskError(taskError!);
+                    } else {
+                        executionRecord.completeTaskResult(taskResult);
+                    }
+                } catch (e) {
+                    executionRecord.completeTaskError(e as Error);
+                } finally {
+                    if (shouldRestoreAsyncStackId) {
+                        setSubmitterStackId(previousAsyncStackId);
+                    }
+                }
+                return executionRecord.promise;
+            }
+
+            return taskResultPromise!.finally(() => {
+                try {
+                    this.unregisterRunningExecutionRecord(executionRecord);
+                    setSubmissionId(previousSubmissionId);
+                    setTaskId(previousTaskId);
+                    this.finishTaskExecution(currentWorker, executionSucceeded);
                     this.finishExecutionRecord(executionRecord);
                 } finally {
                     if (shouldRestoreAsyncStackId) {
@@ -1286,6 +1443,53 @@ export namespace taskpool {
                 if (this.state.compareAndSwap(curState, InternalState.FINISHED) == curState) {
                     return;
                 }
+            }
+        }
+
+        private finishTaskExecution(currentWorker: GlobalQueueWorker | undefined, executionSucceeded: boolean): void {
+            if (isTaskPoolUseLaunch) {
+                this.notifyDependencies();
+            } else {
+                totalExecTime.fetchAdd(this.getDuration());
+                totalExecCount.fetchAdd(1);
+            }
+            this.removeTaskRegistryReference();
+            if (currentWorker !== undefined) {
+                ConcurrencyHelpers.lockGuard(currentWorker!.currentTasksMutex, () => {
+                    const curCount: int | undefined = currentWorker!.currentTasks.get(this.task);
+                    if (curCount == undefined || curCount <= 1) {
+                        currentWorker!.currentTasks.delete(this.task);
+                    } else {
+                        currentWorker!.currentTasks.set(this.task, curCount - 1);
+                    }
+                    currentWorker!.currentPriority = undefined;
+                });
+            }
+            if (this.isTimeout.load()) {
+                this.transitionToFinished();
+                this.tryTriggerAsyncRunnerAndGroup();
+                return;
+            }
+            this.transitionToFinished();
+            try {
+                if (executionSucceeded) {
+                    if (this.groupId != 0 && this.onSuccessCallback !== undefined) {
+                        let group: TaskGroup | undefined = allGroups.get(this.groupId);
+                        if (group !== undefined) {
+                            let callback: CallbackFunction = this.onSuccessCallback as CallbackFunction;
+                            GroupState.of(group).successCallbacks.add(callback);
+                        }
+                    } else {
+                        this.callUserCallback(this.onSuccessCallback);
+                    }
+                }
+            } catch (e) {
+                try {
+                    this.onFailCallback?.(e as Error);
+                } catch (callbackError) {}
+                throw e;
+            } finally {
+                this.tryTriggerAsyncRunnerAndGroup();
             }
         }
 
@@ -1352,12 +1556,11 @@ export namespace taskpool {
                 )) {
                     Coroutine.Schedule();
                 }
-                ConcurrencyHelpers.lockGuard(mutex, () => {
-                    let count = allTasks.get(this.task) ?? 0;
-                    allTasks.set(this.task, count + 1);
-                });
-                waitingTasksNum.fetchAdd(1);
-                tryTriggerExpand();
+                this.addTaskRegistryReference();
+                const newWaitingTasksNum = waitingTasksNum.fetchAdd(1) + 1;
+                if (newWaitingTasksNum > workers.size * 2) {
+                    tryTriggerExpand();
+                }
                 // Notify waiting workers using condition variable
                 ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
                     ConcurrencyHelpers.condVarNotifyOne(globalTaskCondVar, globalTaskQueuesMutex);
@@ -1367,10 +1570,7 @@ export namespace taskpool {
         }
 
         createExecutionRecord(): ExecutionRecord {
-            const executionRecord = new ExecutionRecord(
-                this.nextSubmissionId.fetchAdd(1),
-                () => this.tryTriggerSequenceRunner()
-            );
+            const executionRecord = this.newExecutionRecord();
             ConcurrencyHelpers.lockGuard(this.taskMutex, () => {
                 if (this.currentExecutionRecord === undefined) {
                     this.currentExecutionRecord = executionRecord;
@@ -1381,13 +1581,39 @@ export namespace taskpool {
             return executionRecord;
         }
 
+        submitPeriodicTick(): void {
+            const executionRecord = this.newExecutionRecord();
+            let shouldEnqueue = false;
+            ConcurrencyHelpers.lockGuard(this.taskMutex, () => {
+                if (this.state.load() == InternalState.CANCELED.valueOf()) {
+                    return;
+                }
+                if (this.currentExecutionRecord === undefined) {
+                    this.currentExecutionRecord = executionRecord;
+                    shouldEnqueue = true;
+                } else {
+                    this.periodicPendingExecutionRecords.push(executionRecord);
+                }
+            });
+            if (shouldEnqueue) {
+                taskSubmitted(this.task);
+                this.enqueue(this.periodicPriority, executionRecord);
+            }
+        }
+
         /// Caller must not hold seqMutex, implInnerMutex, or other outer locks that may nest with taskMutex.
         finishExecutionRecord(executionRecord: ExecutionRecord): void {
+            let nextPeriodicExecutionRecord: ExecutionRecord | undefined = undefined;
             ConcurrencyHelpers.lockGuard(this.taskMutex, () => {
                 if (this.currentExecutionRecord === executionRecord) {
                     this.currentExecutionRecord = undefined;
                     if (this.pendingExecutionRecords.length > 0) {
                         this.currentExecutionRecord = this.pendingExecutionRecords.shift();
+                    } else if (this.isPeriodicTask &&
+                        this.state.load() != InternalState.CANCELED.valueOf() &&
+                        this.periodicPendingExecutionRecords.length > 0) {
+                        nextPeriodicExecutionRecord = this.periodicPendingExecutionRecords.shift();
+                        this.currentExecutionRecord = nextPeriodicExecutionRecord;
                     }
                     return;
                 }
@@ -1396,6 +1622,10 @@ export namespace taskpool {
                     this.pendingExecutionRecords.splice(idx, 1);
                 }
             });
+            if (nextPeriodicExecutionRecord !== undefined) {
+                taskSubmitted(this.task);
+                this.enqueue(this.periodicPriority, nextPeriodicExecutionRecord);
+            }
         }
 
         registerRunningExecutionRecord(executionRecord: ExecutionRecord): void {
@@ -1508,6 +1738,12 @@ export namespace taskpool {
             }
         }
 
+        clearPeriodicPendingExecutionRecordsUnsafe(): void {
+            while (this.periodicPendingExecutionRecords.length > 0) {
+                this.periodicPendingExecutionRecords.shift();
+            }
+        }
+
         /**
          * Try to transition task state to TIMEOUT
          * @returns true if state transition succeeded, false otherwise
@@ -1531,7 +1767,7 @@ export namespace taskpool {
         /// Count of tasks which should be executed before this task
         taskDependenciesCount: AtomicInt = new AtomicInt(0);
         /// Set of tasks which can be executed after this task
-        dependentTasks: containers.ConcurrentSet<Task>;
+        dependentTasks: containers.ConcurrentSet<Task> | undefined;
         /// identifier of worker which starts to execute the task
         workerId: int = -1;
         /// identifier of worker which created the task
@@ -1561,9 +1797,11 @@ export namespace taskpool {
 
         currentExecutionRecord: ExecutionRecord | undefined = undefined;
         pendingExecutionRecords: Array<ExecutionRecord> = new Array<ExecutionRecord>();
+        periodicPendingExecutionRecords: Array<ExecutionRecord> = new Array<ExecutionRecord>();
         executionRecordsBySubmissionId: Map<int, ExecutionRecord> = new Map<int, ExecutionRecord>();
 
         priority: Priority;
+        periodicPriority: Priority = Priority.MEDIUM;
         state: AtomicInt = new AtomicInt(InternalState.NOT_FOUND);
 
         runnerImpl: SeqRunnerImpl;
@@ -1578,7 +1816,15 @@ export namespace taskpool {
         onFailCallback?: CallbackFunctionWithError;
         onSuccessCallback?: CallbackFunction;
         private task: Task;
+        private isTransientTask: boolean = false;
         private static readonly NOT_STARTED_TIME: long = 0;
+
+        private newExecutionRecord(): ExecutionRecord {
+            return new ExecutionRecord(
+                this.nextSubmissionId.fetchAdd(1),
+                () => this.tryTriggerSequenceRunner()
+            );
+        }
     }
 
     /**
@@ -1592,7 +1838,7 @@ export namespace taskpool {
          * @param { Function } func Concurrent function to execute in the taskpool
          * @param { ...Any } args arguments for function to execute with
          */
-        constructor(name: string, func: Function, ...args: FixedArray<Any>) {
+        private constructor(name: string, func: Function, registerInTaskSet: boolean, ...args: FixedArray<Any>) {
             this.name = name;
             this.arguments = Array.from(args);
             if (isTaskpoolSupportInterop) {
@@ -1611,8 +1857,14 @@ export namespace taskpool {
             this.cpuDuration = 0;
             // Each task has unique identifier
             this.taskId = Task.generateId();
-            this.internalTask = new InternalTask(this);
-            taskSet.add(this);
+            this.internalTask = new InternalTask(this, !registerInTaskSet);
+            if (registerInTaskSet) {
+                taskSet.add(this);
+            }
+        }
+
+        constructor(name: string, func: Function, ...args: FixedArray<Any>) {
+            this(name, func, true, ...args);
         }
 
         /**
@@ -1732,10 +1984,10 @@ export namespace taskpool {
                 }
             }
             for (const task: Task of tasks) {
-                if (InternalTask.of(task).dependentTasks.has(this)) {
+                if (InternalTask.of(task).getDependentTasks().has(this)) {
                     continue;
                 }
-                InternalTask.of(task).dependentTasks.add(this);
+                InternalTask.of(task).getDependentTasks().add(this);
                 InternalTask.of(this).taskDependenciesCount.fetchAdd(1);
             }
             InternalTask.of(this).isDependent = (InternalTask.of(this).taskDependenciesCount.load() != 0);
@@ -1761,18 +2013,18 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY, "taskpool:: executedTask cannot removeDependency");
             }
             for (const task: Task of tasks) {
-                if (InternalTask.of(task).dependentTasks.size == 0 && !InternalTask.of(task).isDependent) {
+                if (!InternalTask.of(task).hasDependentTasks() && !InternalTask.of(task).isDependent) {
                     throw new Error(TASKPOOL_ERROR_NO_DEPENDENCY, "taskpool:: task has no dependency");
                 }
                 if (InternalTask.of(task).isSubmitted) {
                     throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY, "taskpool:: cannot removeDependency on a dependent and executed task");
                 }
-                if (!InternalTask.of(task).dependentTasks.has(this)) {
+                if (!InternalTask.of(task).getDependentTasks().has(this)) {
                     throw new Error(TASKPOOL_ERROR_DEPENDENCY_NOT_EXIST, "taskpool:: The dependency does not exist");
                 }
             }
             for (let task: Task of tasks) {
-                InternalTask.of(task).dependentTasks.delete(this);
+                InternalTask.of(task).getDependentTasks().delete(this);
                 InternalTask.of(this).taskDependenciesCount.fetchSub(1);
             }
             InternalTask.of(this).isDependent = (InternalTask.of(this).taskDependenciesCount.load() != 0);
@@ -1815,7 +2067,7 @@ export namespace taskpool {
             }
             const payload = materializeSendDataArgs(args);
             const event = new ReceiveEvent(payload, binding);
-            if (executionRecord.receiveDispatcher.enqueue(event)) {
+            if (executionRecord.enqueueReceiveEvent(event)) {
                 tryScheduleOnReceiveDrain(executionRecord, binding.hostWorkerId);
             }
         }
@@ -1865,7 +2117,7 @@ export namespace taskpool {
          * @see taskpool.Task.addDependency
          */
         private hasTaskDFS(targetTask: Task): boolean {
-            for (const dependentTask: Task of InternalTask.of(this).dependentTasks) {
+            for (const dependentTask: Task of InternalTask.of(this).getDependentTasks()) {
                 if (dependentTask.taskId == targetTask.taskId) {
                     return true;
                 }
@@ -2051,7 +2303,7 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_NOT_SUPPORTED, "taskpool:: The interface does not support the periodicTask");
             } else if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_ADD_SEQ_RUNNER, "taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
-            } else if (InternalTask.of(task).isDependent || InternalTask.of(task).dependentTasks.size != 0) {
+            } else if (InternalTask.of(task).isDependent || InternalTask.of(task).hasDependentTasks()) {
                 throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: dependent task not allowed.");
             } else if (InternalTask.of(task).hasTimeout && InternalTask.of(task).state.load() != InternalState.NOT_FOUND.valueOf()) {
                 throw new Error(TASKPOOL_ERROR_TIMEOUT_TASK_CANNOT_EXECUTED, "taskpool:: timeout task cannot be executed again");
@@ -2176,7 +2428,7 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_GROUP, "taskpool:: sequenceRunner cannot execute groupTask");
             } else if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId.load() != 0 || InternalTask.of(task).hasTimeout) {
                 throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_EXECUTE_EXECUTED, "taskpool:: sequenceRunner cannot execute seqRunnerTask or executedTask");
-            } else if (InternalTask.of(task).isDependent || InternalTask.of(task).dependentTasks.size != 0) {
+            } else if (InternalTask.of(task).isDependent || InternalTask.of(task).hasDependentTasks()) {
                 throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: sequenceRunner dependent task not allowed.");
             } else if (InternalTask.of(task).isPeriodicTask) {
                 throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_SEQUENCE_RUNNER, "taskpool:: sequenceRunner cannot execute the periodicTask");
@@ -2187,8 +2439,8 @@ export namespace taskpool {
 
         private impl: SeqRunnerImpl;
 
-        private static namedRunners: Map<string, SeqRunnerImpl> = new Map<string, SeqRunnerImpl>();
-        private static mutex: Object = ConcurrencyHelpers.mutexCreate();
+        static namedRunners: Map<string, SeqRunnerImpl> = new Map<string, SeqRunnerImpl>();
+        static mutex: Object = ConcurrencyHelpers.mutexCreate();
     }
 
     class AsyncRunnerImpl {
@@ -2406,7 +2658,7 @@ export namespace taskpool {
                 throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_EXECUTE_GROUP, "taskpool:: asyncRunner cannot execute groupTask");
             } else if (InternalTask.of(task).isSubmitted || InternalTask.of(task).asyncId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_EXECUTE_EXECUTED, "taskpool:: asyncRunner cannot execute executedTask");
-            } else if (InternalTask.of(task).isDependent || InternalTask.of(task).dependentTasks.size != 0) {
+            } else if (InternalTask.of(task).isDependent || InternalTask.of(task).hasDependentTasks()) {
                 throw new Error(TASKPOOL_ERROR_DEPENDENT_TASK_NOT_ALLOWED, "taskpool:: asyncRunner dependent task not allowed.");
             } else if (InternalTask.of(task).isPeriodicTask) {
                 throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_ASYNC_RUNNER, "taskpool:: asyncRunner cannot execute the periodicTask");
@@ -2476,8 +2728,10 @@ export namespace taskpool {
      * @returns { Promise<Any> } Promise for result of executed task
      */
     export function execute(func: Function, ...args: FixedArray<Any>): Promise<Any> {
-        let task = new Task(func.name, func, ...args);
-        return execute(task);
+        if (isTaskPoolUseLaunch) {
+            return execute(new Task(func, ...args));
+        }
+        return executeTransient(func, ...args);
     }
 
     /**
@@ -2533,6 +2787,29 @@ export namespace taskpool {
         const executionRecord = internalTask.createExecutionRecord();
         internalTask.enqueue(priority, executionRecord);
         return executionRecord.promise;
+    }
+
+    function executeTransient(func: Function, ...args: FixedArray<Any>): Promise<Any> {
+        initWorkerPoolSync();
+        const transientExecution = new TransientExecution(func, ...args);
+        enqueueTransientExecution(transientExecution, Priority.MEDIUM);
+        return transientExecution.promise;
+    }
+
+    function enqueueTransientExecution(transientExecution: TransientExecution, priority: Priority): void {
+        initGlobalTaskQueues();
+        while (!globalTaskQueue?.get(normalizeTaskQueuePriority(priority))?.add(
+            new QueuedExecution(transientExecution, priority)
+        )) {
+            Coroutine.Schedule();
+        }
+        const newWaitingTasksNum = waitingTasksNum.fetchAdd(1) + 1;
+        if (newWaitingTasksNum > workers.size * 2) {
+            tryTriggerExpand();
+        }
+        ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
+            ConcurrencyHelpers.condVarNotifyOne(globalTaskCondVar, globalTaskQueuesMutex);
+        });
     }
 
     function executeWithTimeout(task: Task, configs: Configs): Promise<Any> {
@@ -2848,16 +3125,16 @@ export namespace taskpool {
         internalTask.captureAsyncStack();
         internalTask.isSubmitted = true;
         internalTask.isPeriodicTask = true;
+        internalTask.periodicPriority = priority === undefined ? Priority.MEDIUM : priority;
         internalTask.timerId = setInterval(() => {
             if (internalTask.timerId == -1) {
                 return;
             }
-            taskSubmitted(task);
             if (isTaskPoolUseLaunch) {
+                taskSubmitted(task);
                 launchImpl(task, priority);
             } else {
-                const executionRecord = InternalTask.of(task).createExecutionRecord();
-                InternalTask.of(task).enqueue(priority, executionRecord);
+                internalTask.submitPeriodicTick();
             }
         }, period);
         periodicTasks.set(task.taskId, task);
@@ -2910,6 +3187,9 @@ export namespace taskpool {
             InternalTask.of(task).timerId = -1;
         }
         if (timerId != -1) {
+            ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
+                InternalTask.of(task).clearPeriodicPendingExecutionRecordsUnsafe();
+            });
             // canceled task set state to canceled, avoid duplicate execution
             InternalTask.of(task).state.store(State.CANCELED.valueOf());
             return;
@@ -3160,14 +3440,7 @@ export namespace taskpool {
 
     function finishCanceledPendingDependencyTask(task: Task): void {
         waitingTasksNum.fetchSub(1);
-        ConcurrencyHelpers.lockGuard(mutex, () => {
-            const count = allTasks.get(task) ?? 0;
-            if (count <= 1) {
-                allTasks.delete(task);
-            } else {
-                allTasks.set(task, count - 1);
-            }
-        });
+        InternalTask.of(task).removeTaskRegistryReference();
 
         let internalTask = InternalTask.of(task);
         let cancelError = getTaskCanceledError(internalTask);
@@ -3204,7 +3477,7 @@ export namespace taskpool {
     }
 
     function tryCancelDependentTasks(task: Task): void {
-        for(const dependentTask: Task of InternalTask.of(task).dependentTasks) {
+        for(const dependentTask: Task of InternalTask.of(task).getDependentTasks()) {
             try {
                 cancel(dependentTask);
             } catch (e) {
@@ -3596,7 +3869,7 @@ export namespace taskpool {
      */
     function moveToPendingDependencyQueue(queuedExecution: QueuedExecution): boolean {
         let moved = false;
-        const task = queuedExecution.task;
+        const task = queuedExecution.task!;
         let internalTask = InternalTask.of(task);
         ConcurrencyHelpers.lockGuard(internalTask.taskMutex, () => {
             if (internalTask.taskDependenciesCount.load() == 0) {
@@ -3654,9 +3927,12 @@ export namespace taskpool {
         if (queuedExecution == undefined) {
             return undefined;
         }
-        const task = queuedExecution.task;
+        if (queuedExecution.transientExecution !== undefined) {
+            return queuedExecution;
+        }
+        const task = queuedExecution.task!;
         // Check if task has dependencies
-        if (InternalTask.of(task!).taskDependenciesCount.load() == 0) {
+        if (InternalTask.of(task).taskDependenciesCount.load() == 0) {
             return queuedExecution;
         } else {
             if (!moveToPendingDependencyQueue(queuedExecution)) {
