@@ -38,6 +38,10 @@ ohos_executable("ark_bin") {
   deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
   configs += [ "//arkcompiler/ets_runtime:ark_jsruntime_public_config" ]
 
+  if (enable_hilog) {
+    external_deps = [ "hilog:libhilog" ]
+  }
+
   output_name = "ark"
   install_enable = true
   part_name = "runtime_core"

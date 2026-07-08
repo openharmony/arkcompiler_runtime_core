@@ -58,6 +58,10 @@ ohos_source_set("abckit_pandasm_wrapper_source_set") {
     ":abckit_pandasm_wrapper_source_set_header_deps",
     "$ark_root_dynamic/assembler:libarkassembler",
   ]
+
+  if (enable_hilog) {
+    external_deps = [ "hilog:libhilog" ]
+  }
 }
 
 ohos_source_set("abckit_abcfile_wrapper_source_set") {
@@ -74,4 +78,8 @@ ohos_source_set("abckit_abcfile_wrapper_source_set") {
   ]
 
   deps = [ "$ark_root_dynamic/assembler:libarkassembler" ]
+
+  if (enable_hilog) {
+    external_deps = [ "hilog:libhilog" ]
+  }
 }

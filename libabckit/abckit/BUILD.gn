@@ -28,6 +28,10 @@ ohos_executable("abckit") {
     "$abckit_root/src:libabckit",
     "$ark_root_dynamic/assembler:libarkassembler",
   ]
+
+  if (enable_hilog) {
+    external_deps = [ "hilog:libhilog" ]
+  }
   install_enable = false
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"

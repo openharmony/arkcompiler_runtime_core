@@ -110,6 +110,9 @@ host_unittest_action("GraphInterfaceTest") {
   deps = compiler_test_deps
 
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
 
   test_abc_dir = rebase_path(target_out_dir)
 
@@ -130,6 +133,9 @@ host_unittest_action("DrawCfgToolTest") {
   deps = compiler_test_deps
 
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
 
   test_abc_dir = rebase_path(target_out_dir)
   tools_dir = rebase_path("$ark_root/compiler/tools")

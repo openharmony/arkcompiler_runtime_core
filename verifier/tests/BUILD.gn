@@ -83,6 +83,9 @@ host_unittest_action("VerifierTest") {
 
   configs = verifier_test_configs
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   deps = verifier_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]

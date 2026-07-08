@@ -214,6 +214,9 @@ host_unittest_action("Abc2ProgScriptTest") {
   include_dirs = abc2prog_include_dirs
   configs = abc2prog_test_configs
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   deps = abc2prog_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   test_abc_dump_dir = rebase_path(test_ts_dir)
@@ -281,6 +284,9 @@ host_unittest_action("Abc2ProgSourceLangTest") {
   include_dirs = abc2prog_include_dirs
   configs = abc2prog_test_configs
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   deps = abc2prog_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   test_abc_dump_dir = rebase_path(test_ts_dir)

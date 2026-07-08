@@ -280,6 +280,9 @@ host_unittest_action("DisasmModuleTest") {
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   deps = disasm_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
@@ -313,6 +316,9 @@ host_unittest_action("DisasmDebugTest") {
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   deps = disasm_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
@@ -332,6 +338,9 @@ host_unittest_action("DisasmReleaseTest") {
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   deps = disasm_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
@@ -349,6 +358,9 @@ host_unittest_action("DisasmUserAnnotationsTest") {
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   deps = disasm_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
@@ -364,6 +376,9 @@ host_unittest_action("DisasmScriptTest") {
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   deps = disasm_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
@@ -383,6 +398,9 @@ host_unittest_action("DisasmImmTest") {
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   deps = disasm_test_deps
 }
 
@@ -392,6 +410,9 @@ host_unittest_action("DisasmSourceLangTest") {
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
   external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
   deps = disasm_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]

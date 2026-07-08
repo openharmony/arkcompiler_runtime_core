@@ -90,6 +90,10 @@ host_unittest_action("AssemblerTest") {
     external_deps += [ "googletest:gtest_main" ]
   }
 
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
+
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
   foreach(file, assembler_test_js_files) {
