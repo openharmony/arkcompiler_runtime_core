@@ -517,7 +517,7 @@ export class Date {
         if (parseResult.month > 0) {
             date.setUTCMonth(parseResult.month - 1)
         }
-        date.setUTCDay(parseResult.day)
+        date.setUTCDate(parseResult.day)
         date.setUTCHours(parseResult.hour)
         date.setUTCMinutes(parseResult.minute)
         date.setUTCSeconds(parseResult.second)
@@ -898,8 +898,8 @@ export class Date {
      * @FaAndStageModel
      */
     public setUTCDate(value: int): long {
-        let day = this.getUTCDate();
-        this.ms -= day * msPerDay;
+        let date = this.getUTCDate();
+        this.ms -= date * msPerDay;
         this.ms += value * msPerDay;
         return this.ms;
     }
@@ -907,13 +907,15 @@ export class Date {
     /**
      * Changes the day of the month of a given Date instance, based on UTC time.
      *
-     * @param { int } value new day.
-     * @returns { long } set UTCDay
+     * @param { int } value new day where 0 represents Sunday.
+     * @returns { long }
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
     public setUTCDay(value: int): long {
-        this.setUTCDate(value);
+        let day = this.getUTCDay()
+        this.ms -= day * msPerDay;
+        this.ms += value * msPerDay;
         return this.ms;
     }
 
