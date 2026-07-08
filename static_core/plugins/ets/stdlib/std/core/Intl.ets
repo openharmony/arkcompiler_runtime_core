@@ -2934,7 +2934,7 @@ export class DateTimeFormat {
         granularity?: SegmenterGranularity;
     }
 
-    interface PickLocaleMatchSegmenterOptions {
+    export interface PickLocaleMatchSegmenterOptions {
         localeMatcher?: 'best fit' | 'lookup'
     }
 
@@ -2951,10 +2951,10 @@ export class DateTimeFormat {
     */
     export class Segments implements IterableIterator<SegmentData> {
         /** Base parent segments array */
-        private parent: SegmentDataImpl[]
+        private parent: SegmentData[]
         private idx: int = 0
 
-        constructor(parent: SegmentDataImpl[]) {
+        constructor(parent: SegmentData[]) {
             this.parent = parent
         }
 
@@ -3016,7 +3016,7 @@ export class DateTimeFormat {
         */
         public segment(doc: string): Segments {
             let result = this.segmentWith(doc, this._granularity)
-            let segments = new SegmentDataImpl[result.length](new SegmentDataImpl());
+            let segments = new SegmentData[result.length](new SegmentDataImpl());
 
             for (let i = 0; i < result.length; ++i) {
                 segments[i] = Segmenter.tryToSegmentData(result[i], this._granularity, doc);

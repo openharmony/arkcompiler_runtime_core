@@ -91,7 +91,7 @@ TEST_F(WeakRefLostTest, WeakRefLostTest)
     [[maybe_unused]] ets::EtsHandleScope scope(execContext);
     ets::EtsHandle<ets::EtsArray> harr(execContext, AllocObjArr(1, vm));
 
-    auto *wrKlass = vm->GetClassLinker()->GetClass("Lstd/core/BaseWeakRef;");
+    auto *wrKlass = vm->GetClassLinker()->GetClass("Lstd/core/WeakRef;");
     ASSERT_NE(wrKlass, nullptr);
     auto *ref = static_cast<ets::EtsWeakReference *>(ets::EtsObject::Create(execContext, wrKlass));
     ets::EtsHandle<ets::EtsObject> hwref(execContext, ref);

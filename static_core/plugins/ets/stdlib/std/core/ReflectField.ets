@@ -34,7 +34,7 @@ export namespace reflect {
  * Represents field of class or interface
  *
  */
-class Field {
+export class Field {
     protected name: string | undefined
     protected ownerType: Class
     protected cachedType: Class | undefined

@@ -32,7 +32,7 @@ export namespace reflect {
 /**
  * Represents a method of a class or interface.
  */
-class Method {
+export class Method {
     protected name: string | undefined
     protected ownerType: Class
     protected methodPtr: long
