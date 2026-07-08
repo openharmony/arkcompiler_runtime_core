@@ -33,6 +33,8 @@ enum ThreadFlag : uint16_t {
     PENDING_FLIP_FUNCTION = 1 << 4,
     RUNNING_FLIP_FUNCTION = 1 << 5,
     PENDING_SHARED_HEAP_OOM = 1 << 6,
+    PENDING_SHARED_CC_STUB_SWITCH = 1 << 7,
+    CC_SUSPEND = 1 << 8,
 };
 
 constexpr uint32_t THREAD_STATE_OFFSET = 16;
