@@ -1,2 +1,0 @@
-#34402
-ets-common-tests/intrinsics/typed_arrays_from.ets
