@@ -94,8 +94,7 @@ TEST_F(WeakReferenceDeleteTest, weak_reference_delete_under_pending_error)
     ani_wref wref {};
     ASSERT_EQ(env_->WeakReference_Create(strRef, &wref), ANI_OK);
 
-    ani_ref anyStringRef {};
-    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+    ThrowError();
 
     ASSERT_EQ(env_->WeakReference_Delete(wref), ANI_OK);
 }

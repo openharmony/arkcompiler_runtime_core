@@ -173,8 +173,7 @@ TEST_F(WeakReferenceGetReferenceTest, weak_reference_get_reference_under_pending
     ani_wref wref {};
     ASSERT_EQ(env_->WeakReference_Create(strRef, &wref), ANI_OK);
 
-    ani_ref anyStringRef {};
-    ASSERT_EQ(env_->Any_New(strRef, 0U, nullptr, &anyStringRef), ANI_PENDING_ERROR);
+    ThrowError();
 
     ani_ref ref;
     ani_boolean wasReleased;
