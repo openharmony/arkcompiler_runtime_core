@@ -10,8 +10,6 @@ ets_func_tests/spec/03.types/References_Types/Bigint/bigint-arithmetic-sub-2-ope
 #33585
 #34645
 ets_func_tests/std/containers/array_blocking_queue/ArrayBlockingQueue_PopTest.ets
-#32636
-ets_func_tests/std/core/dateformat/IntlDateFormatOptionsYearNumericTest.ets
 #34920
 ets_func_tests/std/core/get_hash.ets
 #34681
@@ -123,10 +121,7 @@ ets_func_tests/std/core/ConsoleAssertTest.ets
 ets_func_tests/std/core/ConsoleFormatSpecTest.ets
 ets_func_tests/std/core/ConsoleTableTest.ets
 ets_func_tests/std/core/DataViewBigIntTest.ets
-ets_func_tests/std/core/dateformat/IntlDateFormatCNOptionsYear2DigitTest.ets
-ets_func_tests/std/core/dateformat/IntlDateFormatOptionsYear2DigitTest.ets
 ets_func_tests/std/core/dateformat/IntlDateFormatRangeToParts_TestSimple.ets
-ets_func_tests/std/core/dateformat/IntlDateTimeFormatStyleTest.ets
 ets_func_tests/std/core/DeepSubtypingTest.ets
 ets_func_tests/std/core/EAWorker_out_of_coro_creation.ets
 ets_func_tests/std/core/Float64ArrayFromTest.ets
@@ -137,7 +132,6 @@ ets_func_tests/std/core/json/JsonAnnotationTest.ets
 ets_func_tests/std/core/json/JsonReplacerTest.ets
 ets_func_tests/std/core/json/JsonStringifyParseBigIntTest.ets
 ets_func_tests/std/core/json/JsonStringifyTest.ets
-ets_func_tests/std/core/json/JsonStringifyTest2.ets
 ets_func_tests/std/core/ProxyBasicTests.ets
 ets_func_tests/std/core/ReflectFieldTest.ets
 ets_func_tests/std/core/ReflectMethodUnresolvedTest.ets
