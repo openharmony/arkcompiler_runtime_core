@@ -55,6 +55,7 @@ napi_status __attribute__((weak)) napi_destroy_runtime(napi_env env);
 napi_status __attribute__((weak)) napi_throw_jsvalue(napi_env env, napi_value error);
 napi_status __attribute__((weak)) napi_setup_hybrid_environment(napi_env env);
 napi_status __attribute__((weak)) napi_set_is_hybrid_vm(napi_env env, bool isHybrid);
+napi_status __attribute__((weak)) napi_mark_worker_thread(napi_env env);
 // NOLINTEND(readability-identifier-naming, readability-redundant-declaration)
 #endif
 
@@ -408,6 +409,8 @@ void InteropCtx::InitExternalInterfaces()
         napi_env resultJsEnv = nullptr;
         [[maybe_unused]] auto status = napi_create_runtime(env, &resultJsEnv);
         ASSERT(status == napi_ok);
+        [[maybe_unused]] auto markStatus = napi_mark_worker_thread(resultJsEnv);
+        ASSERT(markStatus == napi_ok);
         napi_value global = nullptr;
         napi_get_global(resultJsEnv, &global);
         ark::ets::interop::js::helper::Init(resultJsEnv, global);

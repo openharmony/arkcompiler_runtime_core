@@ -23,7 +23,7 @@
 
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_vm_api.h"
-#include "native_engine/native_engine.h"
+#include "plugins/ets/runtime/interop_js/interop_context.h"
 
 namespace ark::ets::interop::js {
 
@@ -64,6 +64,11 @@ public:
         return existEnvDetach(env);
     }
 
+    static napi_value CreateJSRuntimeWorkerThreadTest(napi_env env, [[maybe_unused]] napi_callback_info info)
+    {
+        return createJSRuntimeWorkerThreadTest(env);
+    }
+
     static napi_value Init(napi_env env, napi_value exports)
     {
         const std::array desc = {
@@ -75,6 +80,8 @@ public:
             napi_property_descriptor {"callJsAsyncFunctionWithAwaitTest", 0, CallJsAsyncFunctionWithAwaitTest, 0, 0, 0,
                                       napi_enumerable, 0},
             napi_property_descriptor {"existEnvDetachTest", 0, ExistEnvDetachTest, 0, 0, 0, napi_enumerable, 0},
+            napi_property_descriptor {"createJSRuntimeWorkerThreadTest", 0, CreateJSRuntimeWorkerThreadTest, 0, 0, 0,
+                                      napi_enumerable, 0},
         };
 
         napi_define_properties(env, exports, desc.size(), desc.data());
@@ -149,6 +156,38 @@ private:
             auto *ifaceTable = EtsExecutionContext::FromMT(jobMan->GetMainThread())->GetExternalIfaceTable();
             [[maybe_unused]] bool isJsEnvCreatedExternally = ifaceTable->IsJsEnvCreatedExternally();
             ASSERT(isJsEnvCreatedExternally == true);
+            etsVM->DetachCurrentThread();
+        });
+
+        event.Wait();
+        t.join();
+
+        return result;
+    }
+
+    static napi_value createJSRuntimeWorkerThreadTest([[maybe_unused]] napi_env env)
+    {
+        napi_value result;
+        napi_get_undefined(env, &result);
+
+        ani_vm *etsVM = GetEtsVm();
+        auto event = os::memory::Event();
+        auto t = std::thread([&event, etsVM] {
+            // Attach without external JS env — triggers CreateJSRuntime() internally
+            ani_env *etsEnv {nullptr};
+            ani_option interopEnabled {"--interop=enable", nullptr};
+            ani_options aniArgs {1, &interopEnabled};
+            etsVM->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
+            ASSERT(etsEnv != nullptr);
+
+            // Verify: the JS runtime created by CreateJSRuntimeFunction was marked as WorkerThread
+            [[maybe_unused]] napi_env jsEnv = InteropCtx::Current()->GetJSEnv();
+            [[maybe_unused]] bool isWorker = false;
+            ASSERT(napi_is_worker_thread(jsEnv, &isWorker) == napi_ok);
+            ASSERT(isWorker);
+
+            event.Fire();
+
             etsVM->DetachCurrentThread();
         });
 
