@@ -185,12 +185,6 @@ public:
         return GetUsedUnitCount() * RegionDesc::UNIT_SIZE;
     }
 
-    inline size_t GetTargetSize() const
-    {
-        double heapUtilization = Heap::GetHeap().GetHeapParam().heapUtilization;
-        return static_cast<size_t>(GetUsedPageSize() / heapUtilization);
-    }
-
     size_t GetAllocatedBytes() const override
     {
         return fromSpace_.GetAllocatedSize() + toSpace_.GetAllocatedSize() + youngSpace_.GetAllocatedSize() +
@@ -204,21 +198,12 @@ public:
 
     size_t GetFootprintBytes() const override;
 
-    size_t GetObjectSpaceFootprintBytes() const
-    {
-        return toSpace_.CountAllocatedBytes() + youngSpace_.CountAllocatedBytes() + oldSpace_.CountAllocatedBytes();
-    }
-
     // OnAllocate is called for all allocations going through Allocate() / AllocateNoGC(),
     // including readonly, large, nonmovable and movable (young/old) objects.
     // It's not called for TLAB allocations (which bypass these methods).
     // OnAllocate records each non-TL allocation in MemStats.
     void OnAllocate(size_t bytes, AllocType allocType);
 
-    size_t FromSpaceSize() const
-    {
-        return fromSpace_.GetAllocatedSize();
-    }
     // note: it doesn't contain exemptFromRegion
     size_t FromRegionSize() const
     {
@@ -227,11 +212,6 @@ public:
     size_t ToSpaceSize() const
     {
         return toSpace_.GetAllocatedSize();
-    }
-
-    size_t NonMovableSpaceSize() const
-    {
-        return nonMovableSpace_.GetAllocatedSize();
     }
 
 #ifndef NDEBUG

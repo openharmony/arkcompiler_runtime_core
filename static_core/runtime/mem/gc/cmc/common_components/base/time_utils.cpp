@@ -15,14 +15,7 @@
 
 #include "common_components/base/time_utils.h"
 
-#include <array>
 #include <chrono>
-#include <ctime>
-#include <iomanip>
-#include <thread>
-
-#include "libarkbase/os/thread.h"
-#include "securec.h"
 
 namespace ark::common_vm {
 namespace TimeUtil {
@@ -53,60 +46,6 @@ uint64_t MilliSeconds()
 uint64_t MicroSeconds() noexcept
 {
     return ClockTime<Us>(CLOCK_MONOTONIC);
-}
-
-void SleepForNano(uint64_t ns)
-{
-    ark::os::thread::NativeSleepUS(std::chrono::microseconds(ns / NS_PER_US));
-}
-
-#ifndef NDEBUG
-// format: yyyy-mm-dd hh:mm::ss
-static inline CString GetDate(const char *format)
-{
-    std::time_t time = std::time(nullptr);
-    std::tm *now = std::localtime(&time);
-    if (UNLIKELY(now == nullptr)) {
-        return CString();
-    }
-
-    std::array<char, 100> buffer;  // the array length is 100
-    if (std::strftime(buffer.data(), buffer.size(), format, now)) {
-        return CString(buffer.data());
-    }
-    return CString();
-}
-
-// yyymmdd.hhmmss format
-CString GetDigitDate()
-{
-    CString date = GetDate("%Y%m%d_%H%M%S");
-    return !date.IsEmpty() ? date : "19700101.000000";
-}
-#endif
-
-CString GetTimestamp()
-{
-    // yyyy-mm-dd hh:mm::ss.ms format
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    std::chrono::microseconds us = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch());
-    constexpr size_t microSecondsPerSecond = 1000000;
-    auto rem = us.count() % microSecondsPerSecond;
-
-    time_t time = std::chrono::system_clock::to_time_t(now);
-    struct tm tm;
-#ifdef _WIN64
-    (void)localtime_s(&tm, &time);
-#else
-    (void)localtime_r(&time, &tm);
-#endif
-
-    constexpr int epochYears = 1900;
-    constexpr size_t bufSize = 64;
-    char buf[bufSize];
-    (void)sprintf_s(buf, sizeof(buf), "%04d-%02d-%02d %02d:%02d:%02d.%06zu", tm.tm_year + epochYears, tm.tm_mon + 1,
-                    tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, rem);
-    return CString(buf);
 }
 
 PandaString PrettyDigitsFormat(uint64_t number) noexcept

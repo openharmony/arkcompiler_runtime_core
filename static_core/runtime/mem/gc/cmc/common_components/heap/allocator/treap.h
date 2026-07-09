@@ -471,26 +471,6 @@ private:
         return true;
     }
 
-    bool AllocateLowestAddressFromNode(TreapNode *&node, uint32_t count, uint32_t &index)
-    {
-        uint32_t nodeCount = node->GetCount();
-        if (nodeCount < count) {
-            return false;
-        }
-
-        index = node->GetIndex();
-        LOG(DEBUG, GC) << "c-tree " << this << " v-alloc " << count << " units from [" << index << "+" << nodeCount
-                       << ", " << index + nodeCount << ")";
-        node->UpdateNode(index + count, nodeCount - count, false);
-        DecTotalCount(count);
-        if (node->GetCount() == 0) {
-            RemoveZeroNode(node);
-        } else {
-            LowerNonZeroNode(node);
-        }
-        return true;
-    }
-
     // move node n down in the tree to maintain the heap property
     NO_INLINE TreapNode *LowerNode(TreapNode *n)
     {

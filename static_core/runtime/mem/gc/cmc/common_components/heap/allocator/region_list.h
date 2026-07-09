@@ -202,56 +202,6 @@ private:
         }
         return allocCnt;
     }
-
-#ifndef NDEBUG
-    void VerifyRegion(RegionDesc *region)
-    {
-        RegionDesc *prev = region->GetPrevRegion();
-        RegionDesc *next = region->GetNextRegion();
-        if (prev != nullptr && prev->GetNextRegion() != region) {
-            LOG(FATAL, COMMON) << "illegal region node";
-            UNREACHABLE();
-        }
-
-        if (next != nullptr && next->GetPrevRegion() != region) {
-            LOG(FATAL, COMMON) << "illegal region node";
-            UNREACHABLE();
-        }
-    }
-#endif
-};
-
-class RegionCache : public RegionList {
-public:
-    RegionCache(const char *name) : RegionList(name) {}
-
-    bool TryPrependRegion(RegionDesc *region, RegionDesc::RegionType type)
-    {
-        ark::os::memory::LockHolder lock(listMutex_);
-        if (active_) {
-            PrependRegionLocked(region, type);
-            return true;
-        }
-        return false;
-    }
-
-    void ActivateRegionCache()
-    {
-        ark::os::memory::LockHolder lock(listMutex_);
-        active_ = true;
-    }
-
-    void DeactivateRegionCache()
-    {
-        ark::os::memory::LockHolder lock(listMutex_);
-        for (RegionDesc *node = listHead_; node != nullptr; node = node->GetNextRegion()) {
-            node->ClearMarkingCopyLine();
-        }
-        active_ = false;
-    }
-
-private:
-    bool active_ = false;
 };
 }  // namespace ark::common_vm
 #endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_ALLOCATOR_REGION_LIST_H
