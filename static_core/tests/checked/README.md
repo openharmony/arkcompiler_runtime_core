@@ -134,7 +134,7 @@ Example of frontend definition usage with `RUN_FRONTEND`:
 
 // Will be compiled with new default options (no DEFINE_FRONTEND_OPTIONS specified):
 //! CHECKER     Concat loop with length access unoptimized loop AOT
-//! RUN_PAOC    options: "--compiler-regex='.*reuse_concat_loop1' --compiler-optimize-string-concat=true --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
+//! RUN_PAOC    options: "--compiler-regex='.*reuse_concat_loop1' --compiler-inlining=false --compiler-check-final=false --compiler-simplify-string-builder=false"
 //! RUN         options: "--compiler-regex='.*reuse_concat_loop1'",  entry: "ets_stringbuilder_length_part3.ETSGLOBAL::main", result: 0
 
 // Custom compilation options
@@ -144,7 +144,7 @@ Example of frontend definition usage with `RUN_FRONTEND`:
 // Will be compiled with custom options (DEFINE_FRONTEND_OPTIONS specified):
 //! CHECKER      AOT, StringBuilder getStringLength calls optimized
 //! DEFINE_FRONTEND_OPTIONS            BCO compiler-simplify-string-builder=false
-//! RUN_PAOC     options: "--compiler-inlining=false --compiler-optimize-string-concat=false  --compiler-simplify-string-builder=true --compiler-check-final=false"
+//! RUN_PAOC     options: "--compiler-inlining=false --compiler-simplify-string-builder=true --compiler-check-final=false"
 //!
 //! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::getStringLengthCount31"
 //! PASS_AFTER  "BranchElimination"
@@ -161,7 +161,7 @@ Example of frontend definition usage with `RUN_BCO`:
 ```rb
 // Custom compilation options with --bco-compiler --compiler-dump: 
 //! DEFINE_FRONTEND_OPTIONS     RUN_BCO reuse .abc
-//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true --bco-compiler --compiler-optimize-string-concat=true"
+//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true --bco-compiler"
 
 // Will be compiled with custom options, generated dump files will be used for testing (the first checker to call DEFINE_FRONTEND_OPTIONS):
 //! CHECKER     BCO, StringBuilder length field access BCO optimized

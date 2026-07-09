@@ -18,7 +18,7 @@
 
 //! CHECKER     Concat loop with length access unoptimized loop AOT
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*reuseConcatLoop1' --compiler-optimize-string-concat=true \
+//! RUN_PAOC    options: "--compiler-regex='.*reuseConcatLoop1' \
 //!                       --compiler-inlining=false --compiler-check-final=false \
 //!                       --compiler-simplify-string-builder=false"
 //! RUN         options: "--compiler-regex='.*reuseConcatLoop1'",
@@ -26,7 +26,7 @@
 
 //! CHECKER     Concat loop with length access loop AOT CHA inline
 //! SKIP_IF     @architecture == "arm32"
-//! RUN_PAOC    options: "--compiler-regex='.*reuseConcatLoop1' --compiler-optimize-string-concat=true \
+//! RUN_PAOC    options: "--compiler-regex='.*reuseConcatLoop1' \
 //!                       --compiler-inlining=true --paoc-use-cha=true --compiler-check-final=false"
 //!
 //! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::reuseConcatLoop1"
@@ -48,8 +48,7 @@
 //!             entry: "ets_stringbuilder_length_part3.ETSGLOBAL::main", result: 0
 
 //! CHECKER     BCO, StringBuilder getStringLength calls optimized
-//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true \
-//!                       --bco-compiler --compiler-optimize-string-concat=true"
+//! RUN_BCO     options: "--ets-strings-concat=false --bco-compiler --compiler-simplify-string-builder=true"
 //!
 //! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::getStringLengthCount31"
 //! PASS_AFTER  "BranchElimination"
@@ -88,7 +87,7 @@
 //! CHECKER      AOT, StringBuilder getStringLength calls optimized
 //! SKIP_IF      @architecture == "arm32"
 //! DEFINE_FRONTEND_OPTIONS            BCO compiler-simplify-string-builder=false
-//! RUN_PAOC     options: "--compiler-inlining=false --compiler-optimize-string-concat=false \
+//! RUN_PAOC     options: "--compiler-inlining=false \
 //!                        --compiler-simplify-string-builder=true --compiler-check-final=false"
 //!
 //! METHOD      "ets_stringbuilder_length_part3.ETSGLOBAL::getStringLengthCount31"
