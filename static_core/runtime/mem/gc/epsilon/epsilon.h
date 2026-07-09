@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ namespace ark::mem {
 template <MTModeT MT_MODE>
 class AllocConfig<GCType::EPSILON_GC, MT_MODE> {
 public:
-    using ObjectAllocatorType = ObjectAllocatorNoGen<MT_MODE>;
+    using ObjectAllocatorType = ObjectAllocatorNoGen;
     using CodeAllocatorType = CodeAllocator;
 };
 

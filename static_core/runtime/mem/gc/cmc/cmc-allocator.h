@@ -27,8 +27,7 @@ class ObjectAllocConfigWithCrossingMap;
 class ObjectAllocConfig;
 class TLAB;
 
-template <MTModeT MT_MODE>
-class CMCObjectAllocator final : public ObjectAllocatorNoGen<MT_MODE> {
+class CMCObjectAllocator final : public ObjectAllocatorNoGen {
 public:
     NO_MOVE_SEMANTIC(CMCObjectAllocator);
     NO_COPY_SEMANTIC(CMCObjectAllocator);
@@ -61,8 +60,64 @@ public:
 
     size_t GetTLABMaxAllocSize() override;
 
+    double GetCollectionRate() const
+    {
+        return collectionRate_;
+    }
+
+    void SetCollectionRate(double rate)
+    {
+        collectionRate_ = rate;
+    }
+
+    size_t GetHeapThreshold() const
+    {
+        return heapThreshold_;
+    }
+
+    void SetHeapThreshold(size_t threshold)
+    {
+        heapThreshold_ = threshold;
+    }
+
+    size_t GetLiveBytesAfterGC() const
+    {
+        return liveBytesAfterGC_;
+    }
+
+    void SetLiveBytesAfterGC(size_t bytes)
+    {
+        liveBytesAfterGC_ = bytes;
+    }
+
+    bool ShouldRequestYoung() const
+    {
+        return shouldRequestYoung_;
+    }
+
+    void SetShouldRequestYoung(bool value)
+    {
+        shouldRequestYoung_ = value;
+    }
+
+    bool NeedToTrackFreedObjects() const
+    {
+        return cmcTrackFreedObjects_;
+    }
+
+    void SetNeedToTrackFreedObjects(bool value)
+    {
+        cmcTrackFreedObjects_ = value;
+    }
+
 private:
-    common_vm::HeapManager *heapManager_;
+    [[maybe_unused]] common_vm::HeapManager *heapManager_;
+
+    double collectionRate_ {0.0};
+    size_t heapThreshold_ {0};
+    size_t liveBytesAfterGC_ {0};
+    bool shouldRequestYoung_ {false};
+    bool cmcTrackFreedObjects_ {false};
 };
 
 }  // namespace ark::mem

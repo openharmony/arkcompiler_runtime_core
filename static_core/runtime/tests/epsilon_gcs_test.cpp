@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,7 +70,7 @@ public:
     template <typename T>
     T *GetAllocator()
     {
-        static_assert(std::is_same<T, ObjectAllocatorNoGen<>>::value || std::is_same<T, ObjectAllocatorG1<>>::value);
+        static_assert(std::is_same<T, ObjectAllocatorNoGen>::value || std::is_same<T, ObjectAllocatorG1<>>::value);
         Runtime *runtime = Runtime::GetCurrent();
         GC *gc = runtime->GetPandaVM()->GetGC();
         return static_cast<T *>(gc->GetObjectAllocator());
@@ -123,7 +123,7 @@ TEST_F(EpsilonGCTest, TestObjectsAllocation)
     ASSERT_EQ(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetType(), GCType::EPSILON_GC);
 
     // Allocation of objects of different sizes in movable/non-movable spaces and checking that they are accessible
-    std::vector<ObjectHeader *> allocatedObjects = AllocObjectsForTest<ObjectAllocatorNoGen<>>();
+    std::vector<ObjectHeader *> allocatedObjects = AllocObjectsForTest<ObjectAllocatorNoGen>();
     for (size_t i = 0; i < allocatedObjects.size(); ++i) {
         ASSERT_NE(allocatedObjects[i], nullptr);
         if (i < 3U) {  // First 3 elements are coretypes::Array
@@ -149,7 +149,7 @@ TEST_F(EpsilonGCTest, TestOOMAndGCTriggering)
     // First NUM_OF_ELEMS_CHECKED objects are added to nonmovable array to check their addresses after triggered GC
     do {
         objString =
-            ObjectAllocator::AllocString(GetAllocator<ObjectAllocatorNoGen<>>()->GetRegularObjectMaxSize() * 0.8F);
+            ObjectAllocator::AllocString(GetAllocator<ObjectAllocatorNoGen>()->GetRegularObjectMaxSize() * 0.8F);
         if (strings.size() < NUM_OF_ELEMS_CHECKED) {
             strings.emplace_back(thread, objString);
             size_t lastElemIndx = strings.size() - 1;
@@ -157,7 +157,7 @@ TEST_F(EpsilonGCTest, TestOOMAndGCTriggering)
         }
     } while (objString != nullptr);
     VMHandle<coretypes::String> objAfterOom = VMHandle<coretypes::String>(
-        thread, ObjectAllocator::AllocString(GetAllocator<ObjectAllocatorNoGen<>>()->GetRegularObjectMaxSize() * 0.8F));
+        thread, ObjectAllocator::AllocString(GetAllocator<ObjectAllocatorNoGen>()->GetRegularObjectMaxSize() * 0.8F));
     ASSERT_EQ(objAfterOom.GetPtr(), nullptr) << "Expected OOM";
     ASSERT_EQ(strings.size(), NUM_OF_ELEMS_CHECKED);
 
@@ -188,7 +188,7 @@ TEST_F(EpsilonGCTest, TestOOMAndGCTriggering)
 
     // Trying to alloc after triggering GC
     VMHandle<coretypes::String> objAfterTriggeredGc = VMHandle<coretypes::String>(
-        thread, ObjectAllocator::AllocString(GetAllocator<ObjectAllocatorNoGen<>>()->GetRegularObjectMaxSize() * 0.8F));
+        thread, ObjectAllocator::AllocString(GetAllocator<ObjectAllocatorNoGen>()->GetRegularObjectMaxSize() * 0.8F));
     ASSERT_EQ(objAfterOom.GetPtr(), nullptr) << "Expected OOM";
 }
 

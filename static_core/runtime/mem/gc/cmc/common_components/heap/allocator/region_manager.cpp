@@ -596,12 +596,14 @@ void RegionManager::RequestForRegion(size_t size)
     }
 
     Heap &heap = Heap::GetHeap();
-    auto *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
-    size_t liveBytesAfterGC = gc->GetLiveBytesAfterGC();
+    auto *cmcAllocator =
+        static_cast<mem::CMCObjectAllocator *>(Runtime::GetCurrent()->GetPandaVM()->GetGC()->GetObjectAllocator());
+    size_t liveBytesAfterGC = cmcAllocator->GetLiveBytesAfterGC();
     size_t allocatedBytes = heap.GetAllocatedSize() - liveBytesAfterGC;
     constexpr double pi = 3.14;
     size_t availableBytesAfterGC = heap.GetMaxCapacity() - liveBytesAfterGC;
-    double heuAllocRate = std::cos((pi / 2.0) * allocatedBytes / availableBytesAfterGC) * gc->GetCollectionRate();
+    double heuAllocRate =
+        std::cos((pi / 2.0) * allocatedBytes / availableBytesAfterGC) * cmcAllocator->GetCollectionRate();
     // for maximum performance, choose the larger one.
     double allocRate = std::max(
         static_cast<double>(Heap::GetHeap().GetHeapParam().allocationRate) * MB / SECOND_TO_NANO_SECOND, heuAllocRate);

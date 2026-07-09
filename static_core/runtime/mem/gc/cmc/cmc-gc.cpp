@@ -1282,7 +1282,7 @@ void CmcGC<LanguageConfig>::CollectSmallSpace()
     mem::GCScope<mem::TRACE_TIMING> gcScope("CollectFromSpaceGarbage", this);
     size_t youngGarbage = space.FromRegionSize() - space.ToSpaceSize();
     size_t freedObjectCount = 0;
-    if (cmcTrackFreedObjects_) {
+    if (cmcAllocator_->NeedToTrackFreedObjects()) {
         auto countFreedObjects = [&freedObjectCount](BaseObject *obj) {
             if (!RegionalHeap::IsSurvivedObject(obj)) {
                 LOG_DEBUG_OBJECT_EVENTS << "DELETE YOUNG object " << obj;
@@ -1296,7 +1296,7 @@ void CmcGC<LanguageConfig>::CollectSmallSpace()
     space.HandlePromotion();
     this->GetPandaVm()->GetMemStats()->RecordFreeObjects(freedObjectCount, youngGarbage,
                                                          ark::SpaceType::SPACE_TYPE_OBJECT);
-    liveBytesAfterGC_ = space.GetAllocatedBytes();
+    cmcAllocator_->SetLiveBytesAfterGC(space.GetAllocatedBytes());
 }
 
 template <class LanguageConfig>
@@ -1788,7 +1788,7 @@ void CmcGC<LanguageConfig>::UpdateGCStats()
 {
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
 
-    size_t oldThreshold = heapThreshold_;
+    size_t oldThreshold = cmcAllocator_->GetHeapThreshold();
     size_t oldTargetFootprint = targetFootprint_;
     size_t recentBytes = space.GetRecentAllocatedSize();
     size_t survivedBytes = space.GetSurvivedSize();
@@ -1799,14 +1799,15 @@ void CmcGC<LanguageConfig>::UpdateGCStats()
     const HeapParam &heapParam = heap->GetHeapParam();
     GCParam &gcParam = heap->GetGCParam();
     if (!IsYoungGC()) {
-        shouldRequestYoung_ = true;
+        cmcAllocator_->SetShouldRequestYoung(true);
         size_t delta = bytesAllocated * (1.0 / heapParam.heapUtilization - 1.0);
         size_t growBytes = std::min(delta, gcParam.maxGrowBytes);
         growBytes = std::max(growBytes, gcParam.minGrowBytes);
         targetSize = bytesAllocated + growBytes * gcParam.multiplier;
     } else {
-        shouldRequestYoung_ =
-            collectionRate_ * gcParam.ygcRateAdjustment >= fullGCMeanRate_ && bytesAllocated <= oldThreshold;
+        auto shouldRequestYoung = cmcAllocator_->GetCollectionRate() * gcParam.ygcRateAdjustment >= fullGCMeanRate_ &&
+                                  bytesAllocated <= oldThreshold;
+        cmcAllocator_->SetShouldRequestYoung(shouldRequestYoung);
         size_t adjustMaxGrowBytes = gcParam.maxGrowBytes * gcParam.multiplier;
         if (bytesAllocated + adjustMaxGrowBytes < oldTargetFootprint) {
             targetSize = bytesAllocated + adjustMaxGrowBytes;
@@ -1822,9 +1823,10 @@ void CmcGC<LanguageConfig>::UpdateGCStats()
     if (UNLIKELY(remainingBytes > targetFootprint_)) {
         remainingBytes = std::min(gcParam.kMinConcurrentRemainingBytes, targetFootprint_);
     }
-    heapThreshold_ = std::max(targetFootprint_ - remainingBytes, bytesAllocated);
-    heapThreshold_ = std::max(heapThreshold_, 20 * MB);  // 20 MB:set 20 MB as min heapThreshold
-    heapThreshold_ = std::min(heapThreshold_, gcParam.gcThreshold);
+    size_t heapThreshold = std::max(targetFootprint_ - remainingBytes, bytesAllocated);
+    heapThreshold = std::max(heapThreshold, 20 * MB);  // 20 MB:set 20 MB as min heapThreshold
+    heapThreshold = std::min(heapThreshold, gcParam.gcThreshold);
+    cmcAllocator_->SetHeapThreshold(heapThreshold);
 
     UpdateNativeThreshold(gcParam);
     Heap::GetHeap().RecordAliveSizeAfterLastGC(bytesAllocated);
@@ -1835,7 +1837,7 @@ void CmcGC<LanguageConfig>::UpdateGCStats()
     PandaOStringStream oss;
     oss << "allocated bytes " << bytesAllocated << " (survive bytes " << survivedBytes << ", recent-allocated "
         << recentBytes << "), update target footprint " << oldTargetFootprint << " -> " << targetFootprint_
-        << ", update gc threshold " << oldThreshold << " -> " << heapThreshold_ << ", native size "
+        << ", update gc threshold " << oldThreshold << " -> " << heapThreshold << ", native size "
         << Heap::GetHeap().GetNotifiedNativeSize() << ", new native threshold "
         << Heap::GetHeap().GetNativeHeapThreshold();
     LOG(DEBUG, GC) << oss.str();
@@ -1886,7 +1888,7 @@ void CmcGC<LanguageConfig>::RunGarbageCollection(uint64_t gcIndex, ark::GCTask &
     MarkGCStart();
     gcType_ = task.collectionType;
     auto currentAllocatedSize = Heap::GetHeap().GetAllocatedSize();
-    auto currentThreshold = GetThreshold();
+    auto currentThreshold = cmcAllocator_->GetHeapThreshold();
     LOG(DEBUG, GC) << "Begin GC log. GCType: " << task.collectionType << ", Current allocated "
                    << common_vm::TimeUtil::PrettyDigitsFormat(currentAllocatedSize) << ", Current threshold "
                    << common_vm::TimeUtil::PrettyDigitsFormat(currentThreshold) << ", gcIndex=" << gcIndex
@@ -1926,7 +1928,7 @@ void CmcGC<LanguageConfig>::UpdateGCCompletionStats()
         LOG(DEBUG, GC) << oss.str();
     }
 
-    collectionRate_ = rate;
+    cmcAllocator_->SetCollectionRate(rate);
 
     if (!IsYoungGC()) {
         if (fullGCCount_ == 0) {
@@ -1943,7 +1945,7 @@ void CmcGC<LanguageConfig>::UpdateGCCompletionStats()
         // NOTE (shemetov.philip, #34958) Workaround to fix OOM for GC with JIT enabled
         RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
         size_t maxCapacity = space.GetMaxCapacity();
-        if (liveBytesAfterGC_ * 2U > maxCapacity) {
+        if (cmcAllocator_->GetLiveBytesAfterGC() * 2U > maxCapacity) {
             Heap::throwOOM();
         } else {
             Heap::GetHeap().SetForceThrowOOM(false);
@@ -2035,11 +2037,13 @@ CmcGC<LanguageConfig>::CmcGC(ObjectAllocatorBase *objectAllocator, const GCSetti
     this->SetTLABsSupported();
     heap.SetCollector(this);
 
-    cmcTrackFreedObjects_ = settings.G1TrackFreedObjects();
+    cmcAllocator_ = static_cast<CMCObjectAllocator *>(objectAllocator);
+    cmcAllocator_->SetNeedToTrackFreedObjects(settings.G1TrackFreedObjects());
 
-    heapThreshold_ = std::min(heap.GetGCParam().gcThreshold, 20 * MB);  // 20 MB initial threshold
-    heapThreshold_ = std::min(static_cast<size_t>(heap.GetMaxCapacity() * 0.2F), heapThreshold_);
-    targetFootprint_ = heapThreshold_;
+    size_t heapThreshold = std::min(heap.GetGCParam().gcThreshold, 20 * MB);  // 20 MB initial threshold
+    heapThreshold = std::min(static_cast<size_t>(heap.GetMaxCapacity() * 0.2F), heapThreshold);
+    cmcAllocator_->SetHeapThreshold(heapThreshold);
+    targetFootprint_ = heapThreshold;
 }
 
 template <class LanguageConfig>

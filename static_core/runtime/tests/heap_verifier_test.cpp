@@ -293,7 +293,7 @@ TEST_F(HeapVerifierTestStw, AllocatorsVerificationTest)
     constexpr size_t OBJECTS_COUNT = 10;
     constexpr size_t ALLOCATORS_COUNT = 3;
     std::array<ObjectHeader *, OBJECTS_COUNT * ALLOCATORS_COUNT> objects {};
-    auto *objAllocator = static_cast<ObjectAllocatorNoGen<> *>(thread_->GetVM()->GetGC()->GetObjectAllocator());
+    auto *objAllocator = static_cast<ObjectAllocatorNoGen *>(thread_->GetVM()->GetGC()->GetObjectAllocator());
 
     // allocate in RunSlotsAllocator
     for (size_t i = 0; i < OBJECTS_COUNT; ++i) {

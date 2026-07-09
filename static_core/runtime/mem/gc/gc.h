@@ -529,31 +529,6 @@ public:
         return startupLimit;
     }
 
-    virtual double GetCollectionRate() const
-    {
-        UNREACHABLE();
-    }
-
-    virtual size_t GetThreshold() const
-    {
-        UNREACHABLE();
-    }
-
-    virtual size_t GetLiveBytesAfterGC() const
-    {
-        UNREACHABLE();
-    }
-
-    virtual bool ShouldRequestYoung() const
-    {
-        UNREACHABLE();
-    }
-
-    virtual bool NeedToTrackFreedObjects() const
-    {
-        return false;
-    }
-
 protected:
     /// @brief Runs all phases
     void RunPhases(GCTask &task);

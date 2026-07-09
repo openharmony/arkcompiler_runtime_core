@@ -51,7 +51,7 @@ namespace ark::mem {
 template <MTModeT MT_MODE>
 class AllocConfig<GCType::CMC_GC, MT_MODE> {
 public:
-    using ObjectAllocatorType = CMCObjectAllocator<MT_MODE>;
+    using ObjectAllocatorType = CMCObjectAllocator;
     using CodeAllocatorType = CodeAllocator;
 };
 
@@ -277,31 +277,6 @@ public:
             UpdateBarrierEntrypoint(mutator, phase);
         });
         this->FireGCPhaseStarted(phase);
-    }
-
-    double GetCollectionRate() const override
-    {
-        return collectionRate_;
-    }
-
-    size_t GetThreshold() const override
-    {
-        return heapThreshold_;
-    }
-
-    size_t GetLiveBytesAfterGC() const override
-    {
-        return liveBytesAfterGC_;
-    }
-
-    bool ShouldRequestYoung() const override
-    {
-        return shouldRequestYoung_;
-    }
-
-    bool NeedToTrackFreedObjects() const override
-    {
-        return cmcTrackFreedObjects_;
     }
 
     virtual void UpdateGCStats();
@@ -563,16 +538,12 @@ private:
     GCMode gcMode_ = GCMode::CMC;
 
     GCTaskCause gcReason_ {GCTaskCause::INVALID_CAUSE};
-    bool shouldRequestYoung_ {false};
     uint64_t gcStartTime_ {0};
-    size_t liveBytesAfterGC_ {0};
-    size_t heapThreshold_ {0};
     size_t targetFootprint_ {0};
     size_t fullGCCount_ {0};
     size_t collectedBytes_ {0};
-    double collectionRate_ {0.0};
     double fullGCMeanRate_ {0.0};
-    bool cmcTrackFreedObjects_ {false};
+    CMCObjectAllocator *cmcAllocator_ {nullptr};
 };
 }  // namespace ark::mem
 

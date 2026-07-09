@@ -97,8 +97,7 @@ void ObjectAllocatorBase::IterateOverObjectsSafe([[maybe_unused]] const ObjectVi
     IterateOverObjects(objectVisitor);
 }
 
-template <MTModeT MT_MODE>
-ObjectAllocatorNoGen<MT_MODE>::ObjectAllocatorNoGen(MemStatsType *memStats, bool createPygoteSpaceAllocator)
+ObjectAllocatorNoGen::ObjectAllocatorNoGen(MemStatsType *memStats, bool createPygoteSpaceAllocator)
     : ObjectAllocatorBase(memStats, GCCollectMode::GC_ALL, createPygoteSpaceAllocator)
 {
     const auto &options = Runtime::GetOptions();
@@ -116,17 +115,15 @@ ObjectAllocatorNoGen<MT_MODE>::ObjectAllocatorNoGen(MemStatsType *memStats, bool
     ASSERT(humongousObjectAllocator_ != nullptr);
 }
 
-template <MTModeT MT_MODE>
-ObjectAllocatorNoGen<MT_MODE>::~ObjectAllocatorNoGen()
+ObjectAllocatorNoGen::~ObjectAllocatorNoGen()
 {
     delete objectAllocator_;
     delete largeObjectAllocator_;
     delete humongousObjectAllocator_;
 }
 
-template <MTModeT MT_MODE>
-void *ObjectAllocatorNoGen<MT_MODE>::Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
-                                              ObjMemInitPolicy objInit, [[maybe_unused]] bool pinned)
+void *ObjectAllocatorNoGen::Allocate(size_t size, Alignment align, [[maybe_unused]] ark::ManagedThread *thread,
+                                     ObjMemInitPolicy objInit, [[maybe_unused]] bool pinned)
 {
     void *mem = nullptr;
     size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
@@ -147,9 +144,8 @@ void *ObjectAllocatorNoGen<MT_MODE>::Allocate(size_t size, Alignment align, [[ma
     return mem;
 }
 
-template <MTModeT MT_MODE>
-void *ObjectAllocatorNoGen<MT_MODE>::AllocateNonMovable(size_t size, Alignment align, ark::ManagedThread *thread,
-                                                        ObjMemInitPolicy objInit)
+void *ObjectAllocatorNoGen::AllocateNonMovable(size_t size, Alignment align, ark::ManagedThread *thread,
+                                               ObjMemInitPolicy objInit)
 {
     void *mem = nullptr;
     // before pygote fork, allocate small non-movable objects in pygote space
@@ -165,15 +161,13 @@ void *ObjectAllocatorNoGen<MT_MODE>::AllocateNonMovable(size_t size, Alignment a
     return mem;
 }
 
-template <MTModeT MT_MODE>
-Alignment ObjectAllocatorNoGen<MT_MODE>::CalculateAllocatorAlignment(size_t align)
+Alignment ObjectAllocatorNoGen::CalculateAllocatorAlignment(size_t align)
 {
     ASSERT(GetPurpose() == AllocatorPurpose::ALLOCATOR_PURPOSE_OBJECT);
     return GetAlignment(align);
 }
 
-template <MTModeT MT_MODE>
-void ObjectAllocatorNoGen<MT_MODE>::VisitAndRemoveAllPools(const MemVisitor &memVisitor)
+void ObjectAllocatorNoGen::VisitAndRemoveAllPools(const MemVisitor &memVisitor)
 {
     if (pygoteSpaceAllocator_ != nullptr) {
         pygoteSpaceAllocator_->VisitAndRemoveAllPools(memVisitor);
@@ -183,8 +177,7 @@ void ObjectAllocatorNoGen<MT_MODE>::VisitAndRemoveAllPools(const MemVisitor &mem
     humongousObjectAllocator_->VisitAndRemoveAllPools(memVisitor);
 }
 
-template <MTModeT MT_MODE>
-void ObjectAllocatorNoGen<MT_MODE>::VisitAndRemoveFreePools(const MemVisitor &memVisitor)
+void ObjectAllocatorNoGen::VisitAndRemoveFreePools(const MemVisitor &memVisitor)
 {
     if (pygoteSpaceAllocator_ != nullptr) {
         pygoteSpaceAllocator_->VisitAndRemoveFreePools(memVisitor);
@@ -194,8 +187,7 @@ void ObjectAllocatorNoGen<MT_MODE>::VisitAndRemoveFreePools(const MemVisitor &me
     humongousObjectAllocator_->VisitAndRemoveFreePools(memVisitor);
 }
 
-template <MTModeT MT_MODE>
-void ObjectAllocatorNoGen<MT_MODE>::IterateOverObjects(const ObjectVisitor &objectVisitor)
+void ObjectAllocatorNoGen::IterateOverObjects(const ObjectVisitor &objectVisitor)
 {
     if (pygoteSpaceAllocator_ != nullptr) {
         pygoteSpaceAllocator_->IterateOverObjects(objectVisitor);
@@ -205,14 +197,12 @@ void ObjectAllocatorNoGen<MT_MODE>::IterateOverObjects(const ObjectVisitor &obje
     humongousObjectAllocator_->IterateOverObjects(objectVisitor);
 }
 
-template <MTModeT MT_MODE>
-void ObjectAllocatorNoGen<MT_MODE>::IterateRegularSizeObjects(const ObjectVisitor &objectVisitor)
+void ObjectAllocatorNoGen::IterateRegularSizeObjects(const ObjectVisitor &objectVisitor)
 {
     objectAllocator_->IterateOverObjects(objectVisitor);
 }
 
-template <MTModeT MT_MODE>
-void ObjectAllocatorNoGen<MT_MODE>::IterateNonRegularSizeObjects(const ObjectVisitor &objectVisitor)
+void ObjectAllocatorNoGen::IterateNonRegularSizeObjects(const ObjectVisitor &objectVisitor)
 {
     if (pygoteSpaceAllocator_ != nullptr) {
         pygoteSpaceAllocator_->IterateOverObjects(objectVisitor);
@@ -221,8 +211,7 @@ void ObjectAllocatorNoGen<MT_MODE>::IterateNonRegularSizeObjects(const ObjectVis
     humongousObjectAllocator_->IterateOverObjects(objectVisitor);
 }
 
-template <MTModeT MT_MODE>
-void ObjectAllocatorNoGen<MT_MODE>::FreeObjectsMovedToPygoteSpace()
+void ObjectAllocatorNoGen::FreeObjectsMovedToPygoteSpace()
 {
     // clear because we have move all objects in it to pygote space
     objectAllocator_->VisitAndRemoveAllPools(
@@ -232,9 +221,7 @@ void ObjectAllocatorNoGen<MT_MODE>::FreeObjectsMovedToPygoteSpace()
     ASSERT(objectAllocator_ != nullptr);
 }
 
-template <MTModeT MT_MODE>
-void ObjectAllocatorNoGen<MT_MODE>::Collect(const GCObjectVisitor &gcObjectVisitor,
-                                            [[maybe_unused]] GCCollectMode collectMode)
+void ObjectAllocatorNoGen::Collect(const GCObjectVisitor &gcObjectVisitor, [[maybe_unused]] GCCollectMode collectMode)
 {
     if (pygoteSpaceAllocator_ != nullptr) {
         pygoteSpaceAllocator_->Collect(gcObjectVisitor);
@@ -246,8 +233,8 @@ void ObjectAllocatorNoGen<MT_MODE>::Collect(const GCObjectVisitor &gcObjectVisit
 
 // if there is a common base class for these allocators, we could split this func and return the pointer to the
 // allocator containing the object
-template <MTModeT MT_MODE>
-bool ObjectAllocatorNoGen<MT_MODE>::ContainObject(const ObjectHeader *obj) const
+
+bool ObjectAllocatorNoGen::ContainObject(const ObjectHeader *obj) const
 {
     if (objectAllocator_->ContainObject(obj)) {
         return true;
@@ -262,8 +249,7 @@ bool ObjectAllocatorNoGen<MT_MODE>::ContainObject(const ObjectHeader *obj) const
     return false;
 }
 
-template <MTModeT MT_MODE>
-bool ObjectAllocatorNoGen<MT_MODE>::IsLive(const ObjectHeader *obj)
+bool ObjectAllocatorNoGen::IsLive(const ObjectHeader *obj)
 {
     if (pygoteSpaceAllocator_ != nullptr && pygoteSpaceAllocator_->ContainObject(obj)) {
         return pygoteSpaceAllocator_->IsLive(obj);
@@ -280,27 +266,23 @@ bool ObjectAllocatorNoGen<MT_MODE>::IsLive(const ObjectHeader *obj)
     return false;
 }
 
-template <MTModeT MT_MODE>
-size_t ObjectAllocatorNoGen<MT_MODE>::GetRegularObjectMaxSize()
+size_t ObjectAllocatorNoGen::GetRegularObjectMaxSize()
 {
     return ObjectAllocator::GetMaxSize();
 }
 
-template <MTModeT MT_MODE>
-size_t ObjectAllocatorNoGen<MT_MODE>::GetLargeObjectMaxSize()
+size_t ObjectAllocatorNoGen::GetLargeObjectMaxSize()
 {
     return LargeObjectAllocator::GetMaxSize();
 }
 
-template <MTModeT MT_MODE>
-TLAB *ObjectAllocatorNoGen<MT_MODE>::CreateNewTLAB([[maybe_unused]] size_t tlabSize)
+TLAB *ObjectAllocatorNoGen::CreateNewTLAB([[maybe_unused]] size_t tlabSize)
 {
     LOG(FATAL, ALLOC) << "TLAB is not supported for this allocator";
     return nullptr;
 }
 
-template <MTModeT MT_MODE>
-size_t ObjectAllocatorNoGen<MT_MODE>::GetTLABMaxAllocSize()
+size_t ObjectAllocatorNoGen::GetTLABMaxAllocSize()
 {
     // NOTE(aemelenko): TLAB usage is not supported for non-gen GCs.
     return 0;
@@ -326,9 +308,5 @@ void ObjectAllocatorGenBase::InvalidateSpaceData()
     ranges_.clear();
     youngBitmaps_.clear();
 }
-
-template class ObjectAllocatorNoGen<MT_MODE_SINGLE>;
-template class ObjectAllocatorNoGen<MT_MODE_MULTI>;
-template class ObjectAllocatorNoGen<MT_MODE_TASK>;
 
 }  // namespace ark::mem
