@@ -350,13 +350,13 @@ static void RefReverse(EtsExecutionContext *executionCtx, EtsHandle<EtsObjectArr
         }
         swap(aPtr, bPtr);
     };
-    auto putSafepoint = [&usePreBarrier, barrierSet, &arr, executionCtx](size_t dstStart, size_t dstEndMirror,
-                                                                         size_t count) {
+    auto putSafepoint = [&usePreBarrier, barrierSet, &buffer, executionCtx](size_t dstStart, size_t dstEndMirror,
+                                                                            size_t count) {
         if (barrierSet->GetPostType() != ark::mem::BarrierType::POST_WRB_NONE) {
             // CC-OFFNXT(G.NAM.03) project code style
             const uint32_t size = count * sizeof(T);
-            barrierSet->PostBarrier(arr, dstStart * sizeof(T), size);
-            barrierSet->PostBarrier(arr, dstEndMirror * sizeof(T) - size, size);
+            barrierSet->PostBarrier(buffer.GetPtr(), EtsArray::GetDataOffset() + dstStart * sizeof(T), size);
+            barrierSet->PostBarrier(buffer.GetPtr(), EtsArray::GetDataOffset() + dstEndMirror * sizeof(T) - size, size);
         }
         executionCtx->GetMT()->Safepoint();
         usePreBarrier = barrierSet->IsPreBarrierEnabled();
@@ -368,7 +368,7 @@ static void RefReverse(EtsExecutionContext *executionCtx, EtsHandle<EtsObjectArr
         for (size_t j = groupIdx; j < groupIdx + SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD; ++j) {
             swapWithBarriers(&arr[j], &arr[length - 1 - j]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         }
-        putSafepoint(groupIdx, length - 1 - groupIdx, SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD);
+        putSafepoint(groupIdx, length - groupIdx, SWAPPED_BETWEEN_SAFEPOINT_THRESHOLD);
         // If GC suspend worker during RefReverse execution then it may move array pointed by arr to a different memory
         // location - should re-read a new array address
         arr = buffer->GetData<T>();
@@ -378,7 +378,7 @@ static void RefReverse(EtsExecutionContext *executionCtx, EtsHandle<EtsObjectArr
     for (size_t i = finalIdx; i < halfLength; ++i) {
         swapWithBarriers(&arr[i], &arr[length - 1 - i]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     }
-    putSafepoint(finalIdx, length - 1 - finalIdx, halfLength - finalIdx);
+    putSafepoint(finalIdx, length - finalIdx, halfLength - finalIdx);
 }
 
 extern "C" void EtsStdCoreArrayReverse(ObjectHeader *bufferHeader, int32_t length)

@@ -41,11 +41,11 @@ void GCCmcTrigger::TriggerGcIfNeeded([[maybe_unused]] GC *gc)
             if (cmcAllocator->ShouldRequestYoung()) {
                 LOG(DEBUG, GC) << "request heu gc: young " << allocated << ", threshold " << threshold;
                 auto task = MakePandaUnique<ark::GCTask>(GCTaskCause::YOUNG_GC_CAUSE);
-                gc->AddGCTask(false, std::move(task));
+                gc->Trigger(std::move(task));
             } else {
                 LOG(DEBUG, GC) << "request heu gc: allocated " << allocated << ", threshold " << threshold;
                 auto task = MakePandaUnique<ark::GCTask>(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
-                gc->AddGCTask(false, std::move(task));
+                gc->Trigger(std::move(task));
             }
         }
     }
