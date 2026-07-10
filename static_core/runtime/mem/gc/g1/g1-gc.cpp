@@ -2425,9 +2425,9 @@ void G1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, mem::BuffersKeep
     // always either through the mutator or through the remsetworker/
     this->GetPandaVm()->GetMutatorManager()->UnregisterMutator(mutator, [this, keepBuffers](Mutator *mutator) {
         InternalAllocatorPtr allocator = this->GetInternalAllocator();
+        size_t preBuffSize = mutator->GetSatbBuffSize();
         ObjectPointerType *preBuff = mutator->MoveSatbBuff();
         ASSERT(preBuff != nullptr);
-        size_t preBuffSize = mutator->GetSatbBuffSize();
         if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
             mutator->AllocateSatbBuff(allocator);
         }

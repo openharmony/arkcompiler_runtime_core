@@ -58,17 +58,6 @@ public:
 
     void ResetMutator();
 
-    void HandleGCPhase(mem::GCPhase newPhase);
-
-    NO_INLINE void RememberObjectInSatbBuffer(const BaseObject *obj)
-    {
-        RememberObjectImpl(obj);
-    }
-
-    const void *GetSatbBufferNode() const;
-
-    void ClearSatbBufferNode();
-
     void *GetAllocBuffer() const
     {
         DCHECK(allocBuffer_ != nullptr);
@@ -78,10 +67,6 @@ public:
     void ReleaseAllocBuffer();
 
 private:
-    void RememberObjectImpl(const BaseObject *obj);
-
-    void *satbNode_ = nullptr;
-
     // Used for allocation fastpath, it is binded to thread local panda::AllocationBuffer.
     void *allocBuffer_ {nullptr};
 };

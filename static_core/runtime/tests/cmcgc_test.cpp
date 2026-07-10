@@ -24,7 +24,6 @@
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/coretypes/class.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
-#include "runtime/mem/gc/cmc/common_components/mutator/satb_buffer.h"
 
 #include "runtime/tests/test_utils.h"
 #include "runtime/tests/interpreter_test_utils.h"
@@ -364,21 +363,12 @@ public:
         }
         markingDone_ = true;
         array_->Set(0, newObj_.GetPtr());
-        const auto *node = static_cast<const cvm::SatbBuffer::TreapNode *>(thread_->GetSatbBufferNode());
-        EXPECT_NE(nullptr, node);
-        if (node != nullptr) {
-            PandaStack<cvm::BaseObject *> objects;
-            const_cast<cvm::SatbBuffer::TreapNode *>(node)->GetObjects(objects);
-            size_t size = 0;
-            while (!objects.empty()) {
-                if (objects.top() == obj_.GetPtr()) {
-                    return;
-                }
-                ++size;
-                objects.pop();
+        for (size_t i = 0; i < thread_->GetSatbBuffSize(); i++) {
+            if (reinterpret_cast<ObjectHeader *>(thread_->GetSatbBuff()[i]) == obj_.GetPtr()) {
+                return;
             }
-            FAIL() << "Object " << obj_.GetPtr() << " not faound in SATB buffer of size " << size;
         }
+        FAIL() << "Object " << obj_.GetPtr() << " not found in SATB buffer of size " << thread_->GetSatbBuffSize();
     }
 
 protected:

@@ -211,47 +211,6 @@ public:
         return nullptr;
     }
 
-    RegionBitmap *GetEnqueueBitmap()
-    {
-        // Atomic with acquire order reason: data race with enqueueBitmap_ with dependecies on reads after the load
-        RegionBitmap *bitmap = __atomic_load_n(&metadata.liveInfo_.enqueueBitmap_, std::memory_order_acquire);
-        if (reinterpret_cast<HeapAddress>(bitmap) == RegionLiveDesc::TEMPORARY_PTR) {
-            return nullptr;
-        }
-        return bitmap;
-    }
-
-    RegionBitmap *GetOrAllocEnqueueBitmap()
-    {
-        do {
-            // Atomic with acquire order reason: data race with enqueueBitmap_ with dependecies on reads after the load
-            RegionBitmap *bitmap = __atomic_load_n(&metadata.liveInfo_.enqueueBitmap_, std::memory_order_acquire);
-            if (UNLIKELY(reinterpret_cast<uintptr_t>(bitmap) == RegionLiveDesc::TEMPORARY_PTR)) {
-                continue;
-            }
-            if (LIKELY(bitmap != nullptr)) {
-                return bitmap;
-            }
-            RegionBitmap *newValue = reinterpret_cast<RegionBitmap *>(RegionLiveDesc::TEMPORARY_PTR);
-            // Atomic with seq_cst/relaxed order reason: data race with enqueueBitmap_ with requirement for
-            // sequentially consistent order on success and relaxed on failure
-            if (__atomic_compare_exchange_n(&metadata.liveInfo_.enqueueBitmap_, &bitmap, newValue, false,
-                                            std::memory_order_seq_cst, std::memory_order_relaxed)) {
-                RegionBitmap *allocated =
-                    HeapBitmapManager::GetHeapBitmapManager().AllocateRegionBitmap(GetRegionBaseSize());
-                // Atomic with release order reason: data race with enqueueBitmap_ with dependecies on writes before
-                // the store
-                __atomic_store_n(&metadata.liveInfo_.enqueueBitmap_, allocated, std::memory_order_release);
-                LOG(DEBUG, GC) << "region " << this << "(base=" << std::hex << "0x" << GetRegionBase() << ")@ "
-                               << "0x" << GetRegionStart() << " liveinfo " << &metadata.liveInfo_
-                               << " alloc enqueuebitmap " << metadata.liveInfo_.enqueueBitmap_;
-                return allocated;
-            }
-        } while (true);
-
-        return nullptr;
-    }
-
     void ResetMarkBit()
     {
         SetMarkedRegionFlag(0);
@@ -293,21 +252,6 @@ public:
         return marked;
     }
 
-    bool EnqueueObject(const BaseObject *obj)
-    {
-        if (IsLargeRegion()) {
-            if (metadata.regionBits.AtomicGetValue(RegionBitOffset::BIT_OFFSET_ENQUEUED_REGION, 1) != 1) {
-                SetEnqueuedRegionFlag(1);
-                return false;
-            }
-            return true;
-        }
-        size_t offset = GetAddressOffset(reinterpret_cast<HeapAddress>(obj));
-        bool marked = GetOrAllocEnqueueBitmap()->MarkBits(offset);
-        CHECK(IsEnqueuedObject(obj));
-        return marked;
-    }
-
     bool IsResurrectedObject(const BaseObject *obj)
     {
         if (IsLargeRegion()) {
@@ -332,19 +276,6 @@ public:
         }
         size_t offset = GetAddressOffset(reinterpret_cast<HeapAddress>(obj));
         return markBitmap->IsMarked(offset);
-    }
-
-    bool IsEnqueuedObject(const BaseObject *obj)
-    {
-        if (IsLargeRegion()) {
-            return (metadata.regionBits.AtomicGetValue(RegionBitOffset::BIT_OFFSET_ENQUEUED_REGION, 1) == 1);
-        }
-        RegionBitmap *enqueBitmap = GetEnqueueBitmap();
-        if (enqueBitmap == nullptr) {
-            return false;
-        }
-        size_t offset = GetAddressOffset(reinterpret_cast<HeapAddress>(obj));
-        return enqueBitmap->IsMarked(offset);
     }
 
     RegionRSet *GetRSet()
@@ -1050,14 +981,12 @@ private:
         {
             markBitmap_ = nullptr;
             resurrectBitmap_ = nullptr;
-            enqueueBitmap_ = nullptr;
         }
 
     private:
         RegionDesc *relatedRegion_ {nullptr};
         RegionBitmap *markBitmap_ {nullptr};
         RegionBitmap *resurrectBitmap_ {nullptr};
-        RegionBitmap *enqueueBitmap_ {nullptr};
 
         friend class RegionDesc;
     };
