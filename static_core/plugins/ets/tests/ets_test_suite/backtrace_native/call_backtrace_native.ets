@@ -97,6 +97,16 @@ function __noinline__Test_StaticArk_Backtrace_catch_error_native3(): int {
   return throwErrorInNative();
 }
 
+let deepth:number = 0;
+function __noinline__Test_StaticArk_Backtrace_Call_Deepth_256(): int {
+  if (deepth < 255) {
+    deepth = deepth + 1;
+    return __noinline__Test_StaticArk_Backtrace_Call_Deepth_256();
+  } else {
+    return callStepArkByNativeFrame(false);
+  }
+}
+
 function main(): void {
   loadLibrary("call_backtrace_native");
 
@@ -118,12 +128,22 @@ function main(): void {
   if (res2 >= 0) {
     arktest.assertEQ(res2, 2);
   }
-  
+
   // Expected value of the depth of ETS function calls is 2 :
   // #00 __noinline__Test_StaticArk_Backtrace_catch_error_native()
   // #01 main()
   let res3 = __noinline__Test_StaticArk_Backtrace_catch_error_native();
   if (res3 >= 0) {
     arktest.assertEQ(res3, 2);
+  }
+
+  // Expected value of the depth of ETS function calls is 256 :
+  // #256 __noinline__Test_StaticArk_Backtrace_Call_Deepth_256()
+  // ...
+  // #00 __noinline__Test_StaticArk_Backtrace_Call_Deepth_256()
+  // #01 main()
+  let res4 = __noinline__Test_StaticArk_Backtrace_Call_Deepth_256();
+  if (res4 >= 0) {
+    arktest.assertEQ(res4, 257);
   }
 }

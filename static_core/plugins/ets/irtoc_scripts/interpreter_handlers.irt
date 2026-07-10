@@ -164,6 +164,7 @@ end
     If(field, 0).NE.Likely {
       acc_fast := send(:"load_field_#{flavor}", field, klass)
       table_old := table
+      need_more_records_fast := need_more_records
     } Else {
       method := send(:"lookup_getter_by_name_#{flavor}", klass, id)
       If(method, 0).EQ.Unlikely {
@@ -178,6 +179,7 @@ end
       dec_pc := SubI(pc).Imm(size).ptr
     }
     table := Phi(table_old, table).ptr
+    need_more_records := Phi(need_more_records_fast, need_more_records).u8
     if flavor != 'obj'
       set_acc_primitive(Phi(acc_fast.u64, acc.u64).u64)
     else
@@ -230,6 +232,7 @@ end
     If(field, 0).NE.Likely {
       send(:"store_field_#{flavor}", field, klass)
       table_old := table
+      need_more_records_fast := need_more_records
       Goto(:Exit_)
     } Else {
       method := send(:"lookup_setter_by_name_#{flavor}", klass, id)
@@ -244,6 +247,7 @@ end
         copy_acc_to_reg(new_frame, frame_vreg_ptr(new_frame, AddI(num_vregs).Imm(1).word), new_moffset)
       end)
       table_new := table
+      need_more_records_slow := need_more_records
       dec_pc := SubI(pc).Imm(size).ptr
     }
     Label(:Exit_)
@@ -257,6 +261,7 @@ end
     acc_tag := Phi(%acc_tag, %acc_tag, acc_tag).u64
     table := Phi(table_old, table_old, table_new).ptr
     frame := Phi(%frame, %frame, frame).ptr
+    need_more_records := Phi(need_more_records_fast, need_more_records_fast, need_more_records_slow).u8
     if Options.arm64?
       moffset := Phi(%moffset, %moffset, moffset).word
       method_ptr := Phi(%method_ptr, %method_ptr, method_ptr).ptr

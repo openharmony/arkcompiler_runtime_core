@@ -516,10 +516,8 @@ macro(:find_catch_block) do
   If(handler_pc, pc).EQ.Unlikely {
     Intrinsic(:INTERPRETER_RETURN).ptr.Terminator
   }
-  if !@compile_for_llvm
-    unwinding_depth = LoadI(%tr).Imm(Constants::MANAGED_THREAD_UNWINDING_DEPTH_OFFSET).u32
-    Intrinsic(:POP_MULTIPLE_INTERPRETER_CALL_RECORDS, unwinding_depth).void
-  end
+  unwinding_depth = LoadI(%tr).Imm(Constants::MANAGED_THREAD_UNWINDING_DEPTH_OFFSET).u32
+  Intrinsic(:POP_MULTIPLE_INTERPRETER_CALL_RECORDS, unwinding_depth).void
 
   frame_eh := LoadI(%tr).Imm(Constants::THREAD_FRAME_OFFSET).ptr
   if Options.arm64?
@@ -800,9 +798,7 @@ macro(:generic_call) do |id, size, is_initobj, callee, nargs, copy_lambda|
   entrypoint := LoadI(callee).Imm(Constants::METHOD_COMPILED_ENTRY_POINT_OFFSET).ptr
   If(call_runtime("IsCompiled", entrypoint).i32, 0).NE.Unlikely {
     save_acc_var(acc, acc_tag) unless is_initobj
-    if !@compile_for_llvm
     Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-    end
     call_runtime("InterpreterToCompiledCodeBridge", pc, frame, callee, %tr).void
 
     StoreI(%tr, 0).Imm(Constants::GET_FRAME_KIND_OFFSET).u16
@@ -847,10 +843,8 @@ macro(:generic_call) do |id, size, is_initobj, callee, nargs, copy_lambda|
     StoreI(new_frame, pc_int).Imm(Constants::FRAME_INSTRUCTIONS_OFFSET).ptr
     StoreI(%tr, new_frame).Imm(Constants::THREAD_FRAME_OFFSET).ptr
 
-    if !@compile_for_llvm
-      Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-      Intrinsic(:PUSH_INTERPRETER_CALL_RECORD, method_ptr, pc_int).void
-    end
+    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
+    need_more_records_interp := Intrinsic(:PUSH_INTERPRETER_CALL_RECORD, method_ptr, pc_int).u8
   }
   load_to_acc_reg(Phi(acc_native, acc).send(acc.type), Phi(acc_tag_native, acc_tag.i64).i64)
   table := Phi(new_table, table).ptr
@@ -860,6 +854,7 @@ macro(:generic_call) do |id, size, is_initobj, callee, nargs, copy_lambda|
     method_ptr := Phi(%method_ptr, method_ptr).ptr
   end
   pc := Phi(pc_native, pc_int).ptr
+  need_more_records := Phi(need_more_records, need_more_records_interp).u8
 end
 
 macro(:free_frame) do |frame|
@@ -883,9 +878,7 @@ macro(:generic_return) do |copy_lambda|
   frame_flags := LoadI(%frame).Imm(Constants::FRAME_FLAGS_OFFSET).word
   table := load_dispatch_table()
   If(And(frame_flags, "Frame::IS_STACKLESS").word, 0).NE.Likely {
-    if !@compile_for_llvm
-      Intrinsic(:POP_INTERPRETER_CALL_RECORD).void
-    end
+    Intrinsic(:POP_INTERPRETER_CALL_RECORD).void
 
     prev_frame := LoadI(%frame).Imm(Constants::FRAME_PREV_FRAME_OFFSET).ptr
     next_pc := LoadI(prev_frame).Imm(Constants::FRAME_NEXT_INSTRUCTION_OFFSET).ptr
@@ -2199,9 +2192,7 @@ macro(:handle_fake_return) do
       Intrinsic(:INTERPRETER_RETURN).ptr.Terminator
     }
 
-    if !@compile_for_llvm
-      Intrinsic(:POP_INTERPRETER_CALL_RECORD).void
-    end
+    Intrinsic(:POP_INTERPRETER_CALL_RECORD).void
 
     fake_frame := LoadI(%frame).Imm(Constants::FRAME_PREV_FRAME_OFFSET).ptr
     if Options.arm64?
@@ -2245,9 +2236,7 @@ include_plugin 'interpreter_handlers'
 
 # Any type support
 macro(:handle_any_ldbyname_v8_id32_imm8) do |vs, id, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyLdbyname", %tr, %frame, vs, id).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2256,9 +2245,7 @@ macro(:handle_any_ldbyname_v8_id32_imm8) do |vs, id, slot|
 end
 
 macro(:handle_any_ldbyname_v_v8_v8_id32_imm8) do |vd, vs, id, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyLdbyname", %tr, %frame, vs, id).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2267,9 +2254,7 @@ macro(:handle_any_ldbyname_v_v8_v8_id32_imm8) do |vd, vs, id, slot|
 end
 
 macro(:handle_any_stbyname_v8_id32_imm8) do |vs, id, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   call_runtime("AnyStbyname", %tr, %frame, vs, id, acc.ref).void
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2277,9 +2262,7 @@ macro(:handle_any_stbyname_v8_id32_imm8) do |vs, id, slot|
 end
 
 macro(:handle_any_stbyname_v_v8_v8_id32_imm8) do |vs1, vs2, id, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   call_runtime("AnyStbyname", %tr, %frame, vs2, id, vs1).void
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2287,9 +2270,7 @@ macro(:handle_any_stbyname_v_v8_v8_id32_imm8) do |vs1, vs2, id, slot|
 end
 
 macro(:handle_any_ldbyidx_v8_imm8) do |vs, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyLdbyidx", %tr, vs, acc.f64).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2298,9 +2279,7 @@ macro(:handle_any_ldbyidx_v8_imm8) do |vs, slot|
 end
 
 macro(:handle_any_stbyidx_v8_v8_imm8) do |vs1, vs2, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   call_runtime("AnyStbyidx", %tr, vs1, vs2, acc.ref).void
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2308,9 +2287,7 @@ macro(:handle_any_stbyidx_v8_v8_imm8) do |vs1, vs2, slot|
 end
 
 macro(:handle_any_ldbyval_v8_v8_imm8) do |vs1, vs2, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyLdbyval", %tr, vs1, vs2).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2319,9 +2296,7 @@ macro(:handle_any_ldbyval_v8_v8_imm8) do |vs1, vs2, slot|
 end
 
 macro(:handle_any_stbyval_v8_v8_imm8) do |vs1, vs2, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   call_runtime("AnyStbyval", %tr, vs1, vs2, acc.ref).void
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2329,9 +2304,7 @@ macro(:handle_any_stbyval_v8_v8_imm8) do |vs1, vs2, slot|
 end
 
 macro(:handle_any_isinstance_v8_imm8) do |vs, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := btou8(call_runtime("AnyIsinstance", %tr, acc.ref, vs).b)
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2340,9 +2313,7 @@ macro(:handle_any_isinstance_v8_imm8) do |vs, slot|
 end
 
 macro(:handle_any_call_0_v8_imm8) do |vs, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyCall0", %tr, vs).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2351,9 +2322,7 @@ macro(:handle_any_call_0_v8_imm8) do |vs, slot|
 end
 
 macro(:handle_any_call_short_v4_v4_imm8) do |vs1, vs2, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyCallShort", %tr, vs1, vs2).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2362,9 +2331,7 @@ macro(:handle_any_call_short_v4_v4_imm8) do |vs1, vs2, slot|
 end
 
 macro(:handle_any_call_range_v8_v8_imm8_imm8) do |vs1, first_arg, argc, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyCallRange", %tr, %frame, vs1, first_arg, argc).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2373,9 +2340,7 @@ macro(:handle_any_call_range_v8_v8_imm8_imm8) do |vs1, first_arg, argc, slot|
 end
 
 macro(:handle_any_call_this_0_v8_imm8_id32) do |vs, slot, id|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyCallThis0", %tr, %frame, vs, id).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2384,9 +2349,7 @@ macro(:handle_any_call_this_0_v8_imm8_id32) do |vs, slot, id|
 end
 
 macro(:handle_any_call_this_short_v4_v4_imm8_id32) do |vs1, vs2, slot, id|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyCallThisShort", %tr, %frame, vs1, id, vs2).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2395,9 +2358,7 @@ macro(:handle_any_call_this_short_v4_v4_imm8_id32) do |vs1, vs2, slot, id|
 end
 
 macro(:handle_any_call_this_range_v8_v8_imm8_imm8_id32) do |vs1, first_arg, argc, slot, id|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyCallThisRange", %tr, %frame, vs1, id, first_arg, argc).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2406,9 +2367,7 @@ macro(:handle_any_call_this_range_v8_v8_imm8_imm8_id32) do |vs1, first_arg, argc
 end
 
 macro(:handle_any_call_new_0_v8_imm8) do |vs, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyCallNew0", %tr, vs).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2417,9 +2376,7 @@ macro(:handle_any_call_new_0_v8_imm8) do |vs, slot|
 end
 
 macro(:handle_any_call_new_short_v4_v4_imm8) do |vs1, vs2, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyCallNewShort", %tr, vs1, vs2).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2428,9 +2385,7 @@ macro(:handle_any_call_new_short_v4_v4_imm8) do |vs1, vs2, slot|
 end
 
 macro(:handle_any_call_new_range_v8_v8_imm8_imm8) do |vs1, first_arg, argc, slot|
-  if !@compile_for_llvm
-    Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
-  end
+  Intrinsic(:UPDATE_INTERPRETER_CALL_RECORD, pc).void
   ret := call_runtime("AnyCallNewRange", %tr, %frame, vs1, first_arg, argc).ref
   If(exception_val(), 0).NE.Unlikely {
     move_to_exception
@@ -2467,6 +2422,8 @@ function(:ExecuteImplFast,
 
   if !@compile_for_llvm
     Intrinsic(:INIT_INTERPRETER_CALL_RECORD, get_method_ptr_frame(frame), pc).void
+  else
+    Intrinsic(:INIT_INTERPRETER_CALL_RECORD_FOR_LLVM, get_method_ptr_frame(frame), pc).void
   end
 
   LiveOut(acc).DstReg(regmap[:acc]).ptr
@@ -2502,6 +2459,8 @@ function(:ExecuteImplFastEH,
 
   if !@compile_for_llvm
     Intrinsic(:INIT_INTERPRETER_CALL_RECORD, get_method_ptr_frame(frame), pc).void
+  else
+    Intrinsic(:INIT_INTERPRETER_CALL_RECORD_FOR_LLVM, get_method_ptr_frame(frame), pc).void
   end
 
   LiveOut(acc).DstReg(regmap[:acc]).ptr
@@ -2579,6 +2538,8 @@ Panda.instructions.each do |i|
       method_ptr := %method_ptr
     end
     tr := %tr
+    # need_more_records will be overridden by generic_call
+    need_more_records := 0
 
     if defines.DEBUG
       if !i.properties.include?('dynamic')
@@ -3316,6 +3277,13 @@ include_plugin 'interpreter_main_loop'
     elsif acc_type == :f64
       acc := Bitcast(acc.f64).SrcType("DataType::FLOAT64").u64
       acc_type = :u64
+    end
+    # Runtime check: if need_more_records != 0, allocate more interpreter call records
+    # Note: Only emit when PUSH_INTERPRETER_CALL_RECORD makes need_more_records a u8 Phi; constant 0 otherwise.
+    if @compile_for_llvm && need_more_records.IsPhi?
+      If(need_more_records, 0).NE.Unlikely {
+        Intrinsic(:ALLOCATE_INTERPRETER_CALL_RECORDS).void
+      }
     end
     LiveOut(acc).DstReg(regmap[:acc]).send(acc_type)
     LiveOut(acc_tag).DstReg(regmap[:acc_tag]).ptr  # actually u64 but let's correspond to LiveIn's type

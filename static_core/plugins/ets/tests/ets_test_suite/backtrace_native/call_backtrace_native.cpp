@@ -15,14 +15,32 @@
 
 #include <ani.h>
 #include <array>
+#include <cstdint>
+#include <cstdlib>
 #include <iostream>
-#include <filesystem>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <tuple>
+#include <vector>
+
 #include "runtime/tooling/backtrace/backtrace.h"
 #include "runtime/tooling/backtrace/base_defs.h"
 #include "runtime/include/managed_thread.h"
 #include "libarkbase/utils/logger.h"
 
-static bool ReadMemTestFuncStatic([[maybe_unused]] void *ctx, uintptr_t addr, uintptr_t *value)
+namespace {
+
+// Number of FP-chain steps from CallStepArkByNativeFrame's own frame to the
+// interpreter handle frame. Using __builtin_frame_address(0) makes this value
+// identical on x86_64 and ARM64:
+//   #0 CallStepArkByNativeFrame (own frame, via __builtin_frame_address(0))
+//   #1 AniEntryPoint
+//   #2 InterpreterToCompiledCodeBridge
+//   #3 HANDLE_FAST_CALL_SHORT_* (interpreter handle)
+constexpr uint32_t FRAMES_TO_BRIDGE = 3U;
+
+bool ReadMemTestFuncStatic([[maybe_unused]] void *ctx, uintptr_t addr, uintptr_t *value)
 {
     if (addr == 0) {
         return false;
@@ -31,27 +49,22 @@ static bool ReadMemTestFuncStatic([[maybe_unused]] void *ctx, uintptr_t addr, ui
     return true;
 }
 
-__attribute__((noinline)) uintptr_t GetCurrentFP()
-{
-    uintptr_t fp = 0;
-#if defined(PANDA_TARGET_AMD64)
-    __asm__ __volatile__("mov %%rbp, %0\n" : "=r"(fp) : :);
-#elif defined(PANDA_TARGET_ARM64)
-    __asm__ __volatile__("mov %0, x29\n" : "=r"(fp) : :);
-#endif
-    return fp;
-}
+}  // namespace
 
-static ani_int CallStepArkByNativeFrame([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
-                                        [[maybe_unused]] ani_boolean useExtractor)
+ani_int CallStepArkByNativeFrame([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
+                                 [[maybe_unused]] ani_boolean useExtractor)
 {
     uintptr_t fileHeader = 0;
     const char *zipPath = std::getenv("ARK_GTEST_ABC_PATH");
     if (zipPath == nullptr) {
-        LOG(INFO, TOOLING) << "abc file is not find";
+        LOG(INFO, TOOLING) << "abc file is not found";
         return 0;
     }
     std::unique_ptr<const ark::panda_file::File> pf = ark::panda_file::OpenPandaFileOrZip(zipPath);
+    if (pf == nullptr) {
+        LOG(ERROR, TOOLING) << "Open abc file failed: " << zipPath;
+        return 0;
+    }
     uint64_t abcSize = pf->GetHeader()->fileSize;
     std::vector<uint8_t> abcBuffer(abcSize);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -70,19 +83,16 @@ static ani_int CallStepArkByNativeFrame([[maybe_unused]] ani_env *env, [[maybe_u
         }
     }
 
-    // #0  GetCurrentFP <--- frame of currentFp
-    // #1  CallStaticArkBacktrace
-    // #2  AniEntryPoint
-    // #3  InterpreterToCompiledCodeBridge
-    // #4  HANDLE_FAST_CALL_SHORT_V4_V4_ID16
-    uintptr_t currentFp = GetCurrentFP();
+    // Use __builtin_frame_address(0) to get this function's own frame pointer.
+    // This avoids an architecture-dependent extra frame that a separate function
+    // call to get the current fp would introduce (x86_64: +1 vs ARM64: +0).
+    uintptr_t currentFp = reinterpret_cast<uintptr_t>(__builtin_frame_address(0));
     if (!currentFp) {
         LOG(ERROR, TOOLING) << "The current arch is not supported.";
         return -1;
     }
     uintptr_t prevFp = currentFp;
-    uint32_t frameNumToBridge = 4;
-    for (uint32_t i = 0; i < frameNumToBridge; i++) {
+    for (uint32_t i = 0; i < FRAMES_TO_BRIDGE; i++) {
         ReadMemTestFuncStatic(nullptr, currentFp, &prevFp);
         currentFp = prevFp;
     }
@@ -155,7 +165,7 @@ static ani_int CallStepArkByNativeFrame([[maybe_unused]] ani_env *env, [[maybe_u
     return frames.size();
 }
 
-static ani_int ThrowErrorInNative([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object)
+ani_int ThrowErrorInNative([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object)
 {
     ani_class errCls;
     std::string msg = "Throw Error in native";

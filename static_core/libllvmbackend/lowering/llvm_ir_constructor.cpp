@@ -131,6 +131,57 @@ inline void CreateInt32ImmAsm(llvm::IRBuilder<> *builder, const std::string &inl
     builder->CreateCall(oneInt, llvm::InlineAsm::get(oneInt, inlineAsm, "i", true), {builder->getInt32(imm)});
 }
 
+inline void CreateWriteSpAsm(llvm::IRBuilder<> *builder, llvm::Value *value, ark::Arch arch)
+{
+    auto funcType = llvm::FunctionType::get(builder->getVoidTy(), {builder->getInt64Ty()}, false);
+
+    std::string inlineAsm;
+    std::string constraints;
+    if (arch == ark::Arch::AARCH64) {
+        inlineAsm = "add sp, sp, $0";
+        constraints = "r,~{sp}";
+    } else {
+        inlineAsm = "addq $0, %rsp";
+        constraints = "r,~{rsp}";
+    }
+
+    builder->CreateCall(funcType, llvm::InlineAsm::get(funcType, inlineAsm, constraints, true), {value});
+}
+
+inline llvm::Value *CreateReadFpAsm(llvm::IRBuilder<> *builder, ark::Arch arch)
+{
+    auto fpFuncType = llvm::FunctionType::get(builder->getPtrTy(), {}, false);
+
+    std::string inlineAsm;
+    std::string constraints;
+    if (arch == ark::Arch::AARCH64) {
+        inlineAsm = "mov x0, x29";
+        constraints = "={x0}";
+    } else {
+        inlineAsm = "movq %rbp, %rax";
+        constraints = "={rax}";
+    }
+
+    return builder->CreateCall(fpFuncType, llvm::InlineAsm::get(fpFuncType, inlineAsm, constraints, true));
+}
+
+inline llvm::Value *CreateReadSpAsm(llvm::IRBuilder<> *builder, ark::Arch arch)
+{
+    auto spFuncType = llvm::FunctionType::get(builder->getPtrTy(), {}, false);
+
+    std::string inlineAsm;
+    std::string constraints;
+    if (arch == ark::Arch::AARCH64) {
+        inlineAsm = "mov x0, sp";
+        constraints = "={x0}";
+    } else {
+        inlineAsm = "movq %rsp, %rax";
+        constraints = "={rax}";
+    }
+
+    return builder->CreateCall(spFuncType, llvm::InlineAsm::get(spFuncType, inlineAsm, constraints, true));
+}
+
 inline llvm::AtomicOrdering ToAtomicOrdering(bool isVolatile)
 {
     return isVolatile ? LLVMArkInterface::VOLATILE_ORDER : LLVMArkInterface::NOT_ATOMIC_ORDER;
@@ -1079,14 +1130,30 @@ bool LLVMIrConstructor::EmitInterpreterReturn([[maybe_unused]] Inst *inst)
     // We only support it for Irtoc interpreters on AArch64
     ASSERT(GetGraph()->GetMode().IsInterpreter());
 
-    CFrameLayout fl(GetGraph()->GetArch(), IRTOC_NUM_SPILL_SLOTS);
+    auto arch = GetGraph()->GetArch();
+
+    CFrameLayout fl(arch, IRTOC_NUM_SPILL_SLOTS);
     constexpr bool SAVE_UNUSED_CALLEE_REGS = true;
 
     // Restore callee-registers
-    auto calleeRegsMask = GetCalleeRegsMask(GetGraph()->GetArch(), false, SAVE_UNUSED_CALLEE_REGS);
-    auto calleeVregsMask = GetCalleeRegsMask(GetGraph()->GetArch(), true, SAVE_UNUSED_CALLEE_REGS);
-    if (GetGraph()->GetArch() == Arch::AARCH64) {
+    auto calleeRegsMask = GetCalleeRegsMask(arch, false, SAVE_UNUSED_CALLEE_REGS);
+    auto calleeVregsMask = GetCalleeRegsMask(arch, true, SAVE_UNUSED_CALLEE_REGS);
+    if (arch == Arch::AARCH64) {
         constexpr bool SAVE_FRAME_AND_LINK_REGS = true;
+
+        // Adjust SP
+        ssize_t pointerSize = PointerSize(arch);
+        ssize_t recordSize = pointerSize * 2;
+        ssize_t cframeSize = GetIrtocCFrameSizeBytesBelowFP(arch);
+        ssize_t numOffset = -(cframeSize + pointerSize);
+
+        auto fpVal = CreateReadFpAsm(&builder_, arch);
+        auto numAddr = builder_.CreateInBoundsGEP(builder_.getInt8Ty(), fpVal, builder_.getInt64(numOffset));
+        auto numVal = builder_.CreateLoad(builder_.getInt32Ty(), numAddr, "record_num");
+        auto numValExt = builder_.CreateZExt(numVal, builder_.getInt64Ty());
+        auto numValPlusOne = builder_.CreateAdd(numValExt, builder_.getInt64(1));
+        auto recordsSize = builder_.CreateMul(numValPlusOne, builder_.getInt64(recordSize));
+        CreateWriteSpAsm(&builder_, recordsSize, arch);
 
         size_t slotSize = fl.GetSlotSize();
         size_t dslotSize = slotSize * 2U;
@@ -1096,7 +1163,6 @@ bool LLVMIrConstructor::EmitInterpreterReturn([[maybe_unused]] Inst *inst)
         CreateInterpreterReturnRestoreRegs(calleeRegsMask, lastCalleeReg, false);
         CreateInterpreterReturnRestoreRegs(calleeVregsMask, lastCalleeVreg, true);
 
-        // Adjust SP
         auto spToFrameTopSlots = fl.GetRegsSlotsCount() + CFrameRegs::Start() - CFrameReturnAddr::Start();
         if (SAVE_FRAME_AND_LINK_REGS) {
             spToFrameTopSlots -= CFrameLayout::GetFpLrSlotsCount();
@@ -1117,7 +1183,7 @@ bool LLVMIrConstructor::EmitInterpreterReturn([[maybe_unused]] Inst *inst)
         std::string iasmStr =
             std::string("leaq  ${0:c}(%rsp), %rsp").append(LLVMArkInterface::PATCH_STACK_ADJUSTMENT_COMMENT);
         CreateInt32ImmAsm(&builder_, iasmStr, regShift);
-        Target target {GetGraph()->GetArch()};
+        Target target {arch};
         while (calleeRegsMask.count() > 0) {
             auto reg = calleeRegsMask.GetMinRegister();
             calleeRegsMask ^= 1U << reg;
@@ -1137,31 +1203,191 @@ bool LLVMIrConstructor::EmitInterpreterReturn([[maybe_unused]] Inst *inst)
 bool LLVMIrConstructor::EmitInitInterpreterCallRecord([[maybe_unused]] Inst *inst)
 {
     ASSERT(GetGraph()->GetMode().IsInterpreter());
-    UNREACHABLE();  // Embedded call record not supported in irtoc+LLVM currently.
+    UNREACHABLE();
 }
 
+bool LLVMIrConstructor::EmitInitInterpreterCallRecordForLLVM([[maybe_unused]] Inst *inst)
+{
+    ASSERT(GetGraph()->GetMode().IsInterpreter());
+    UNREACHABLE();
+}
+
+// NOTE: LLVM lowering is AArch64-only; no-op on other arches.
 bool LLVMIrConstructor::EmitPushInterpreterCallRecord([[maybe_unused]] Inst *inst)
 {
     ASSERT(GetGraph()->GetMode().IsInterpreter());
-    UNREACHABLE();  // Embedded call record not supported in irtoc+LLVM currently.
+
+    auto pMethod = GetInputValue(inst, 0);
+    auto pPC = GetInputValue(inst, 1);
+    ASSERT(pPC->getType()->isPointerTy());
+    ASSERT(pMethod->getType()->isPointerTy());
+
+    auto arch = GetGraph()->GetArch();
+    if (arch == Arch::AARCH64) {
+        ssize_t pointerSize = PointerSize(arch);
+        ssize_t recordSize = pointerSize * 2;
+        ssize_t cframeSize = GetIrtocCFrameSizeBytesBelowFP(arch);
+        ssize_t numOffset = -(cframeSize + pointerSize);
+        ssize_t counterOffset = -(cframeSize + recordSize);
+
+        // Step 1: Load record_num and counter
+        auto fpVal = CreateReadFpAsm(&builder_, arch);
+        auto numAddr = builder_.CreateInBoundsGEP(builder_.getInt8Ty(), fpVal, builder_.getInt64(numOffset));
+        auto numVal = builder_.CreateLoad(builder_.getInt32Ty(), numAddr, "record_num");
+        auto numValExt = builder_.CreateZExt(numVal, builder_.getInt64Ty());
+        auto counterAddr = builder_.CreateInBoundsGEP(builder_.getInt8Ty(), fpVal, builder_.getInt64(counterOffset));
+        auto counterVal = builder_.CreateLoad(builder_.getInt32Ty(), counterAddr, "counter");
+        auto counterValExt = builder_.CreateZExt(counterVal, builder_.getInt64Ty());
+
+        // Step 2: Store method and pc
+        auto recordOffset = builder_.CreateMul(counterValExt, builder_.getInt64(-recordSize));
+        auto pcOffset = builder_.CreateSub(recordOffset, builder_.getInt64(pointerSize));
+        auto pcAddr = builder_.CreateInBoundsGEP(builder_.getInt8Ty(), counterAddr, pcOffset);
+        auto methodAddr = builder_.CreateInBoundsGEP(builder_.getInt8Ty(), pcAddr, builder_.getInt64(-pointerSize));
+        builder_.CreateStore(pMethod, methodAddr);
+        builder_.CreateStore(pPC, pcAddr);
+
+        // Step 3: Increment counter
+        auto newCounterVal = builder_.CreateAdd(counterValExt, builder_.getInt64(1), "new_counter");
+        builder_.CreateStore(newCounterVal, counterAddr);
+
+        // Step 4:  Check if records is full and return value
+        auto needMoreRecordsBool = builder_.CreateICmpUGE(newCounterVal, numValExt, "need_more_records_bool");
+        auto needMoreRecords = builder_.CreateZExt(needMoreRecordsBool, builder_.getInt8Ty(), "need_more_records");
+        ValueMapAdd(inst, needMoreRecords);
+    } else {
+        ValueMapAdd(inst, builder_.getInt8(0));
+    }
+    return true;
 }
 
+// NOTE: LLVM lowering is AArch64-only; no-op on other arches.
 bool LLVMIrConstructor::EmitPopInterpreterCallRecord([[maybe_unused]] Inst *inst)
 {
     ASSERT(GetGraph()->GetMode().IsInterpreter());
-    UNREACHABLE();  // Embedded call record not supported in irtoc+LLVM currently.
+
+    auto arch = GetGraph()->GetArch();
+    if (arch == Arch::AARCH64) {
+        ssize_t pointerSize = PointerSize(arch);
+        ssize_t recordSize = pointerSize * 2;
+        ssize_t cframeSize = GetIrtocCFrameSizeBytesBelowFP(arch);
+        ssize_t counterOffset = -(cframeSize + recordSize);
+
+        // Step 1: Load counter
+        auto fpVal = CreateReadFpAsm(&builder_, arch);
+        auto counterAddr = builder_.CreateInBoundsGEP(builder_.getInt8Ty(), fpVal, builder_.getInt64(counterOffset));
+        auto counterVal = builder_.CreateLoad(builder_.getInt32Ty(), counterAddr, "counter");
+        auto counterValExt = builder_.CreateZExt(counterVal, builder_.getInt64Ty());
+
+        // Step : Decrement counter
+        auto newCounterVal = builder_.CreateSub(counterValExt, builder_.getInt64(1), "new_counter");
+        builder_.CreateStore(newCounterVal, counterAddr);
+    }
+    return true;
 }
 
+// NOTE: LLVM lowering is AArch64-only; no-op on other arches.
 bool LLVMIrConstructor::EmitPopMultipleInterpreterCallRecords([[maybe_unused]] Inst *inst)
 {
     ASSERT(GetGraph()->GetMode().IsInterpreter());
-    UNREACHABLE();  // Embedded call record not supported in irtoc+LLVM currently.
+
+    auto pDepth = GetInputValue(inst, 0);
+    ASSERT(pDepth->getType()->isIntegerTy());
+
+    auto arch = GetGraph()->GetArch();
+    if (arch == Arch::AARCH64) {
+        ssize_t pointerSize = PointerSize(arch);
+        ssize_t recordSize = pointerSize * 2;
+        ssize_t cframeSize = GetIrtocCFrameSizeBytesBelowFP(arch);
+        ssize_t counterOffset = -(cframeSize + recordSize);
+
+        // Step 1: Load counter
+        auto fpVal = CreateReadFpAsm(&builder_, arch);
+        auto counterAddr = builder_.CreateInBoundsGEP(builder_.getInt8Ty(), fpVal, builder_.getInt64(counterOffset));
+        auto counterVal = builder_.CreateLoad(builder_.getInt32Ty(), counterAddr, "counter");
+        auto counterValExt = builder_.CreateZExt(counterVal, builder_.getInt64Ty());
+
+        // Step 2: Decrement counter
+        auto pDepthExt = builder_.CreateZExt(pDepth, builder_.getInt64Ty());
+        auto newCounterVal = builder_.CreateSub(counterValExt, pDepthExt, "new_counter");
+        builder_.CreateStore(newCounterVal, counterAddr);
+    }
+    return true;
 }
 
+// NOTE: LLVM lowering is AArch64-only; no-op on other arches.
 bool LLVMIrConstructor::EmitUpdateInterpreterCallRecord([[maybe_unused]] Inst *inst)
 {
     ASSERT(GetGraph()->GetMode().IsInterpreter());
-    UNREACHABLE();  // Embedded call record not supported in irtoc+LLVM currently.
+
+    auto pPC = GetInputValue(inst, 0);
+    ASSERT(pPC->getType()->isPointerTy());
+
+    auto arch = GetGraph()->GetArch();
+    if (arch == Arch::AARCH64) {
+        ssize_t pointerSize = PointerSize(arch);
+        ssize_t recordSize = pointerSize * 2;
+        ssize_t cframeSize = GetIrtocCFrameSizeBytesBelowFP(arch);
+        ssize_t counterOffset = -(cframeSize + recordSize);
+
+        // Step 1: Load counter
+        auto fpVal = CreateReadFpAsm(&builder_, arch);
+        auto counterAddr = builder_.CreateInBoundsGEP(builder_.getInt8Ty(), fpVal, builder_.getInt64(counterOffset));
+        auto counterVal = builder_.CreateLoad(builder_.getInt32Ty(), counterAddr, "counter");
+        auto counterValExt = builder_.CreateZExt(counterVal, builder_.getInt64Ty());
+
+        // Step 2: Store pc
+        auto methodOffset = builder_.CreateMul(counterValExt, builder_.getInt64(-recordSize));
+        auto pcOffset = builder_.CreateAdd(methodOffset, builder_.getInt64(pointerSize));
+        auto pcAddr = builder_.CreateInBoundsGEP(builder_.getInt8Ty(), counterAddr, pcOffset);
+        builder_.CreateStore(pPC, pcAddr);
+    }
+    return true;
+}
+
+// NOTE: LLVM lowering is AArch64-only; no-op on other arches.
+bool LLVMIrConstructor::EmitAllocateInterpreterCallRecords([[maybe_unused]] Inst *inst)
+{
+    ASSERT(GetGraph()->GetMode().IsInterpreter());
+
+    auto arch = GetGraph()->GetArch();
+    if (arch == Arch::AARCH64) {
+        constexpr ssize_t ALLOCATE_RECORD_COUNT = 32;
+        ssize_t pointerSize = PointerSize(arch);
+        ssize_t recordSize = pointerSize * 2;
+        ssize_t allocateRecordSize = ALLOCATE_RECORD_COUNT * recordSize;
+        ssize_t cframeSize = GetIrtocCFrameSizeBytesBelowFP(arch);
+        ssize_t numOffset = -(cframeSize + pointerSize);
+        ssize_t spAlignment = Target(arch).GetSpAlignment();
+
+        // Step 1: Increment record_num
+        auto fpVal = CreateReadFpAsm(&builder_, arch);
+        auto numAddr = builder_.CreateInBoundsGEP(builder_.getInt8Ty(), fpVal, builder_.getInt64(numOffset));
+        auto numVal = builder_.CreateLoad(builder_.getInt32Ty(), numAddr, "record_num");
+        auto numValExt = builder_.CreateZExt(numVal, builder_.getInt64Ty());
+        auto newNumVal = builder_.CreateAdd(numValExt, builder_.getInt64(ALLOCATE_RECORD_COUNT), "new_record_num");
+        builder_.CreateStore(newNumVal, numAddr);
+
+        // Step 2: Calculate llvm frame size
+        auto numValPlusOne = builder_.CreateAdd(numValExt, builder_.getInt64(1));
+        auto recordsSize = builder_.CreateMul(numValPlusOne, builder_.getInt64(recordSize));
+        auto llvmFrameOffset = builder_.CreateSub(builder_.getInt64(pointerSize), recordsSize);
+        auto llvmFrameBase = builder_.CreateInBoundsGEP(builder_.getInt8Ty(), numAddr, llvmFrameOffset);
+        auto llvmFrameBaseInt = builder_.CreatePtrToInt(llvmFrameBase, builder_.getInt64Ty());
+        auto oldSpVal = CreateReadSpAsm(&builder_, arch);
+        auto oldSpValInt = builder_.CreatePtrToInt(oldSpVal, builder_.getInt64Ty());
+        auto llvmFrameSize = builder_.CreateSub(llvmFrameBaseInt, oldSpValInt, "llvm_frame_size");
+
+        // Step 3: Allocate stack for records (SP changes here)
+        auto funcType = llvm::FunctionType::get(builder_.getVoidTy(), {builder_.getInt32Ty()}, false);
+        builder_.CreateCall(funcType, llvm::InlineAsm::get(funcType, "sub sp, sp, $0", "i,~{sp}", true),
+                            {builder_.getInt32(allocateRecordSize)});
+
+        // Step 4: Copy frame
+        auto newSpVal = CreateReadSpAsm(&builder_, arch);
+        builder_.CreateMemMove(newSpVal, llvm::Align(spAlignment), oldSpVal, llvm::Align(spAlignment), llvmFrameSize);
+    }
+    return true;
 }
 
 bool LLVMIrConstructor::EmitTailCall(Inst *inst)
