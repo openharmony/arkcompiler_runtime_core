@@ -18,6 +18,7 @@
 // For CMC GC (common_runtime) implementations see std_core_common_gc.cpp
 
 #include "libarkbase/utils/utils.h"
+#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -83,8 +84,7 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean is
     }
     // Run GC in GC-thread
     if ((reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) && gc->IsPostponeEnabled()) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreIllegalStateError,
-                          "Calling GC threshold not in place after calling postponeGCStart");
+        LOG(ERROR, GC) << "Threshold GC request rejected during postpone period";
         return -1;
     }
     gcTaskTracker.AddTaskId(id);

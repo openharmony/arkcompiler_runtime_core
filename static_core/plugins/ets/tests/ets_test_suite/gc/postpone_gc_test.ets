@@ -35,18 +35,10 @@ function check_errors(): void {
     arktest.assertTrue(error_catched, "Didn't catch the error");
     GC.postponeGCEnd();
     error_catched = false;
-    try {
-        GC.postponeGCStart();
-        let gc_id = GC.startGC(GC.Cause.THRESHOLD);
-        GC.waitForFinishGC(gc_id);
-    } catch(error) {
-        if (error instanceof IllegalStateError) {
-            error_catched = true;
-        } else {
-            arktest.assertTrue(false, "Unexpected error during GC");
-        }
-    }
-    arktest.assertTrue(error_catched, "Didn't catch the error");
+    GC.postponeGCStart();
+    let gc_id = GC.startGC(GC.Cause.THRESHOLD);
+    arktest.assertEQ(gc_id, -1, "Should return -1 when trying threshold GC during postpone");
+    GC.waitForFinishGC(gc_id);
     GC.postponeGCEnd();
 }
 
