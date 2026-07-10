@@ -97,7 +97,7 @@ bool CmcGC<LanguageConfig>::IsUnmovableFromObject(BaseObject *obj) const
     }
 
     RegionDesc *regionInfo = nullptr;
-    regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<uintptr_t>(obj));
+    regionInfo = RegionDesc::GetAliveRegionDescAt(obj);
     return regionInfo->IsUnmovableFromRegion();
 }
 
@@ -189,7 +189,7 @@ private:
         // field is tagged object, should be in heap
         DCHECK(Heap::IsHeapAddress(targetObj));
 
-        auto targetRegion = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<MAddress>((void *)targetObj));
+        auto *targetRegion = RegionDesc::GetAliveRegionDescAt(targetObj);
         // cannot skip objects in EXEMPTED_FROM_REGION, because its rset is incomplete
         if (gcReason_ == GCTaskCause::YOUNG_GC_CAUSE && !targetRegion->IsInYoungSpace()) {
             LOG(DEBUG, GC) << "marking: skip non-young object " << obj << "@" << &field
@@ -262,13 +262,11 @@ void CmcGC<LanguageConfig>::FixRefField(BaseObject *obj, RefField<> &field) cons
         return;
     }
 
-    RegionDesc::InlinedRegionMetaData *refRegion =
-        RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(targetObj));
+    auto *refRegion = RegionDesc::GetRegionDescAt(targetObj);
     bool isFrom = refRegion->IsFromRegion();
     bool isInRcent = refRegion->IsInRecentSpace();
     if (isInRcent) {
-        RegionDesc::InlinedRegionMetaData *objRegion =
-            RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(obj));
+        auto *objRegion = RegionDesc::GetRegionDescAt(obj);
         if (!objRegion->IsInRecentSpace() && objRegion->MarkRSetCardTable(obj)) {
             LOG(DEBUG, GC) << "fix phase update point-out remember set of region " << objRegion << ", obj " << obj
                            << ", ref: <" << targetObj->GetTypeInfo() << ">";
@@ -313,9 +311,7 @@ public:
         ObjectHeader *oldObj = root.GetObjectHeader();
         LOG(DEBUG, GC) << "visit raw-ref @" << root.GetObjectPointer() << ": " << oldObj;
 
-        auto regionType =
-            RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(oldObj))
-                ->GetRegionType();
+        auto regionType = RegionDesc::GetRegionDescAt(oldObj)->GetRegionType();
         if (regionType != RegionDesc::RegionType::FROM_REGION) {
             return;
         }
@@ -825,7 +821,7 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::PreforwardNonHeapRoot(GCRoot root, PandaVector<ObjectHeader *> &forwardedRoots)
 {
     auto *obj = root.GetObjectHeader();
-    auto *region = RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(obj);
+    auto *region = RegionDesc::GetRegionDescAt(obj);
 
     if (!InYoungCollectionSpace(region)) {
         // we do not trace from such root
@@ -868,7 +864,7 @@ PandaVector<ObjectHeader *> CmcGC<LanguageConfig>::PreforwardNonHeapRootsFlip()
 
     VisitConcurrentRoots([&forwardedRoots](GCRoot root) {
         auto *obj = root.GetObjectHeader();
-        auto *region = RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(obj);
+        auto *region = RegionDesc::GetRegionDescAt(obj);
         if (InYoungCollectionSpace(region)) {
             CHECK(!region->IsFromRegion());
             forwardedRoots.push_back(obj);
@@ -901,7 +897,7 @@ void CmcGC<LanguageConfig>::RemarkYoungCollectionSpace()
     auto weakVisitor = [this](RefField<> &refField) -> bool {
         RefField<> oldField(refField);
         auto *oldObj = oldField.GetTargetObject();
-        auto *region = RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(oldObj);
+        auto *region = RegionDesc::GetRegionDescAt(oldObj);
         if (!region->IsFromRegion()) {
             return true;
         }
@@ -1129,12 +1125,6 @@ void CmcGC<LanguageConfig>::EnqueueRefsToYoungCollectionSpace(ObjectHeader *obj,
 }
 
 template <class LanguageConfig>
-bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const RegionDesc::InlinedRegionMetaData *region)
-{
-    return InYoungCollectionSpace(region->GetRegionType());
-}
-
-template <class LanguageConfig>
 bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const RegionDesc *region)
 {
     return InYoungCollectionSpace(region->GetRegionType());
@@ -1143,8 +1133,7 @@ bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const RegionDesc *region)
 template <class LanguageConfig>
 bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const BaseObject *obj)
 {
-    return Heap::IsHeapAddress(obj) &&
-           InYoungCollectionSpace(RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(obj));
+    return Heap::IsHeapAddress(obj) && InYoungCollectionSpace(RegionDesc::GetRegionDescAt(obj));
 }
 
 template <class LanguageConfig>
@@ -1466,7 +1455,7 @@ void CmcGC<LanguageConfig>::ProcessMarkStack([[maybe_unused]] uint32_t threadInd
         BaseObject *object;
         while (markStack.Pop(&object)) {
             ++nNewlyMarked;
-            auto region = RegionDesc::GetAliveRegionDescAt(static_cast<MAddress>(reinterpret_cast<uintptr_t>(object)));
+            auto *region = RegionDesc::GetAliveRegionDescAt(object);
             auto objSize = object->GetSize();
             if (IsFullCollection(reason)) {
                 HandleMarkedObject<true>(&marker, object);
@@ -1592,7 +1581,7 @@ template <bool HANDLE_WEAK_REFS>
 bool CmcGC<LanguageConfig>::PushRootToWorkStack(LocalCollectStack &collectStack, ObjectHeader *obj, GCTaskCause reason)
 {
     BaseObject *baseObj = static_cast<BaseObject *>(obj);
-    RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+    RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(obj);
     if (reason == GCTaskCause::YOUNG_GC_CAUSE && !regionInfo->IsInYoungSpace()) {
         LOG(DEBUG, GC) << "enum: skip old object " << obj << "<" << baseObj->GetTypeInfo() << ">(" << baseObj->GetSize()
                        << ")";
@@ -1744,7 +1733,7 @@ void CmcGC<LanguageConfig>::MarkRememberSetImpl(BaseObject *object, LocalCollect
         (void)object;
         BaseObject *targetObj = field.GetTargetObject();
         if (Heap::IsHeapAddress(targetObj)) {
-            RegionDesc *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(targetObj));
+            RegionDesc *region = RegionDesc::GetAliveRegionDescAt(targetObj);
             if (region->IsInYoungSpace() && !region->IsNewObjectSinceMarking(targetObj) &&
                 this->MarkObjectIfNotMarked(targetObj)) {
                 collectStack.Push(targetObj);
@@ -1983,7 +1972,7 @@ bool CmcGC<LanguageConfig>::IsMarkedObject(const BaseObject *obj) const
 template <class LanguageConfig>
 bool CmcGC<LanguageConfig>::IsToObject(const BaseObject *obj) const
 {
-    return RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj))->IsToRegion();
+    return RegionDesc::GetAliveRegionDescAt(obj)->IsToRegion();
 }
 
 template <class LanguageConfig>
@@ -2116,9 +2105,10 @@ void CmcGC<LanguageConfig>::MarkObject(ObjectHeader *object)
 template <class LanguageConfig>
 bool CmcGC<LanguageConfig>::MarkObjectIfNotMarked(ObjectHeader *object)
 {
-    bool marked = RegionalHeap::MarkObject(reinterpret_cast<BaseObject *>(object));
+    auto *obj = reinterpret_cast<BaseObject *>(object);
+    bool marked = RegionalHeap::MarkObject(obj);
     if (!marked) {
-        [[maybe_unused]] RegionDesc *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(object));
+        [[maybe_unused]] RegionDesc *region = RegionDesc::GetAliveRegionDescAt(obj);
         DCHECK(!region->IsGarbageRegion());
         LOG(DEBUG, GC) << "mark obj " << GetDebugInfoAboutObject(object);
     }

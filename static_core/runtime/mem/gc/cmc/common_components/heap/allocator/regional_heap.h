@@ -339,18 +339,18 @@ public:
     // markObj
     static bool MarkObject(const BaseObject *obj)
     {
-        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(obj);
         return regionInfo->MarkObject(obj);
     }
     static bool ResurrentObject(const BaseObject *obj)
     {
-        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(obj);
         return regionInfo->ResurrentObject(obj);
     }
 
     static bool EnqueueObject(const BaseObject *obj)
     {
-        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(obj);
         return regionInfo->EnqueueObject(obj);
     }
 
@@ -361,32 +361,32 @@ public:
 
     static bool IsMarkedObject(const BaseObject *obj)
     {
-        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(obj);
         return regionInfo->IsMarkedObject(obj);
     }
 
     static bool IsResurrectedObject(const BaseObject *obj)
     {
-        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(obj);
         return regionInfo->IsResurrectedObject(obj);
     }
 
     static bool IsEnqueuedObject(const BaseObject *obj)
     {
-        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(obj);
         return regionInfo->IsEnqueuedObject(obj);
     }
 
     static bool IsNewObjectSinceMarking(const BaseObject *object)
     {
-        RegionDesc *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<uintptr_t>(object));
+        RegionDesc *region = RegionDesc::GetAliveRegionDescAt(object);
         ASSERT_PRINT(region != nullptr, "region is nullptr");
         return region->IsNewObjectSinceMarking(object);
     }
 
     static bool IsYoungSpaceObject(const BaseObject *object)
     {
-        RegionDesc *region = RegionDesc::GetAliveRegionDescAt(reinterpret_cast<uintptr_t>(object));
+        RegionDesc *region = RegionDesc::GetAliveRegionDescAt(object);
         ASSERT_PRINT(region != nullptr, "region is nullptr");
         return region->IsInYoungSpace();
     }

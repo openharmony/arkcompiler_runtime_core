@@ -267,10 +267,10 @@ module Constants
 
 module CommonRuntimeConstants
     INV_DEFAULT_REGION_UNIT_MASK = "~common_vm::RegionDesc::DEFAULT_REGION_UNIT_MASK"
-    INLINED_REGION_METADATA_REGION_TYPE_OFFSET = "cross_values::GetInlinedRegionMetadataRegionTypeOffset(GetArch())"
+    REGION_TYPE_OFFSET = "cross_values::GetRegionTypeOffset(GetArch())"
     REGION_TYPE_FROM_REGION = "static_cast<uint64_t>(common_vm::RegionDesc::RegionType::FROM_REGION)"
     REGION_SIZE_BIT = "ark::helpers::math::GetIntLog2(ark::mem::RegionDesc::UNIT_SIZE)"
-    REGION_IS_COLLECTION_SET_OFFSET = "cross_values::GetRegionIsCollectionSetOffset(GetArch())"
+    REGION_COLLECTION_SET_OFFSET = "cross_values::GetRegionCollectionSetOffset(GetArch())"
     REGION_TYPE_THREAD_LOCAL = "static_cast<uint64_t>(ark::mem::RegionDesc::RegionType::THREAD_LOCAL_REGION)"
     REGION_RSET_OFFSET = "cross_values::GetRegionRsetOffset(GetArch())"
     RSET_CARD_TABLE_OFFSET = "cross_values::GetRsetCardTableOffset(GetArch())"

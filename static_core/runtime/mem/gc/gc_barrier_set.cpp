@@ -392,18 +392,17 @@ void GCCMCBarrierSet::UpdateRememberSet([[maybe_unused]] void *object, [[maybe_u
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     ASSERT(object != nullptr);
-    RegionDesc::InlinedRegionMetaData *objMetaRegion =
-        RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(object));
+    auto *obj = reinterpret_cast<ark::common_vm::BaseObject *>(object);
+    auto *objMetaRegion = RegionDesc::GetRegionDescAt(obj);
     if (objMetaRegion->IsInCollectionSet()) {
         return;
     }
-    RegionDesc::InlinedRegionMetaData *refMetaRegion =
-        RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(ref));
+    auto *refObj = reinterpret_cast<ark::common_vm::BaseObject *>(ref);
+    auto *refMetaRegion = RegionDesc::GetRegionDescAt(refObj);
     if (refMetaRegion->IsInYoungSpaceForWB()) {
-        if (objMetaRegion->MarkRSetCardTable(reinterpret_cast<ark::common_vm::BaseObject *>(object))) {
-            LOG(DEBUG, GC) << "update point-out remember set of region " << objMetaRegion->GetRegionDesc() << ", obj "
-                           << object << ", ref: " << ref << "<"
-                           << reinterpret_cast<ark::common_vm::BaseObject *>(ref)->GetTypeInfo() << ">";
+        if (objMetaRegion->MarkRSetCardTable(obj)) {
+            LOG(DEBUG, GC) << "update point-out remember set of region " << objMetaRegion << ", obj " << object
+                           << ", ref: " << ref << "<" << refObj->GetTypeInfo() << ">";
         }
     }
 #endif  // ARK_USE_COMMON_RUNTIME

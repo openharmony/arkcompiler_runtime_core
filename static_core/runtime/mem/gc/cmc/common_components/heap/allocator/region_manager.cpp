@@ -51,7 +51,6 @@
 
 namespace ark::mem {
 uintptr_t RegionDesc::UnitInfo::totalUnitCount = 0;
-uintptr_t RegionDesc::UnitInfo::unitInfoStart = 0;
 uintptr_t RegionDesc::UnitInfo::heapStartAddress = 0;
 }  // namespace ark::mem
 
@@ -393,40 +392,23 @@ size_t FreeRegionManager::ReleaseGarbageRegions(size_t targetCachedSize)
     return releasedBytes;
 }
 
-void RegionManager::Initialize(size_t nRegion, uintptr_t regionInfoAddr)
+void RegionManager::Initialize(size_t nRegion, uintptr_t heapStart)
 {
-    size_t metadataSize = GetMetadataSize(nRegion);
-    size_t alignedHeapStart = RoundUp<size_t>(regionInfoAddr + metadataSize, RegionDesc::UNIT_SIZE);
-    /**
-     * Align the start of region to 256KB
-     * |***********|<-metadataSize->|**********************|
-     * |**padding**|***RegionUnit***|*******Region*********|
-     *  ^           ^                ^
-     *  |           |                |
-     *  |    reginInfoStart    alignedHeapStart
-     * regionInfoAddr
-     */
-    regionInfoStart_ = alignedHeapStart - metadataSize;
-    regionHeapStart_ = alignedHeapStart;
-#ifdef _WIN64
-    MemoryMap::CommitMemory(reinterpret_cast<void *>(regionInfoStart_), metadataSize);
-#endif
+    regionHeapStart_ = RoundUp<size_t>(heapStart, RegionDesc::UNIT_SIZE);
     regionHeapEnd_ = regionHeapStart_ + nRegion * RegionDesc::UNIT_SIZE;
     // Atomic with seq_cst order reason: initialization of inactiveZone_ with requirement for sequentially consistent
     // order where threads observe all modifications in the same order
     inactiveZone_.store(regionHeapStart_, std::memory_order_seq_cst);
     // propagate region heap layout
-    RegionDesc::Initialize(nRegion, regionInfoStart_, regionHeapStart_);
+    RegionDesc::Initialize(nRegion, regionHeapStart_);
     freeRegionManager_.Initialize(nRegion);
 
-    LOG(DEBUG, GC) << "region info @0x" << std::hex << regionInfoAddr << "+" << std::dec << metadataSize << ", heap [0x"
-                   << std::hex << regionHeapStart_ << ", 0x" << std::hex << regionHeapEnd_ << "), unit count "
-                   << std::dec << nRegion;
+    LOG(DEBUG, GC) << "region info heap [0x" << std::hex << regionHeapStart_ << ", 0x" << std::hex << regionHeapEnd_
+                   << "), unit count " << std::dec << nRegion;
 #ifdef USE_HWASAN
-    ASAN_UNPOISON_MEMORY_REGION(reinterpret_cast<const volatile void *>(regionInfoAddr),
-                                metadataSize + nRegion * RegionDesc::UNIT_SIZE);
-    const uintptr_t p_addr = regionInfoAddr;
-    const uintptr_t p_size = metadataSize + nRegion * RegionDesc::UNIT_SIZE;
+    ASAN_UNPOISON_MEMORY_REGION(reinterpret_cast<const volatile void *>(heapStart), nRegion * RegionDesc::UNIT_SIZE);
+    const uintptr_t p_addr = heapStart;
+    const uintptr_t p_size = nRegion * RegionDesc::UNIT_SIZE;
     LOG(DEBUG, COMMON) << std::hex << "set [" << p_addr << std::hex << ", " << p_addr + p_size << ") unpoisoned\n";
 #endif
 }
@@ -464,14 +446,14 @@ size_t RegionManager::ReleaseRegion(RegionDesc *region)
 
 void RegionManager::CountLiveObject(const BaseObject *obj)
 {
-    RegionDesc *region = RegionDesc::GetRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+    RegionDesc *region = RegionDesc::GetRegionDescAt(obj);
     region->AddLiveByteCount(obj->GetSize());
 }
 
 void RegionManager::ForEachObjectUnsafe(const std::function<void(BaseObject *)> &visitor) const
 {
     for (uintptr_t regionAddr = regionHeapStart_; regionAddr < inactiveZone_;) {
-        RegionDesc *region = RegionDesc::GetRegionDescAt(regionAddr);
+        RegionDesc *region = reinterpret_cast<RegionDesc *>(regionAddr);
         uintptr_t next = region->GetRegionEnd();
         regionAddr = next;
         if (!region->IsValidRegion() || region->IsFreeRegion() || region->IsGarbageRegion()) {

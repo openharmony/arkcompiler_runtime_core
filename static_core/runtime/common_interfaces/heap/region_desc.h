@@ -119,7 +119,7 @@ public:
         metadata.regionBase = reinterpret_cast<uintptr_t>(nullptr);
         metadata.regionStart = reinterpret_cast<uintptr_t>(nullptr);
         metadata.regionEnd = reinterpret_cast<uintptr_t>(nullptr);
-        metadata.regionRSet = nullptr;
+        metadata.regionRSet_ = nullptr;
         metadata.tlab = nullptr;
     }
     static inline RegionDesc *NullRegion()
@@ -349,12 +349,12 @@ public:
 
     RegionRSet *GetRSet()
     {
-        return metadata.regionRSet;
+        return metadata.regionRSet_;
     }
 
     void ClearRSet()
     {
-        metadata.regionRSet->ClearCardTable();
+        metadata.regionRSet_->ClearCardTable();
     }
 
     bool MarkRSetCardTable(BaseObject *obj)
@@ -447,49 +447,22 @@ public:
         return type == RegionType::OLD_REGION;
     }
 
-    static void Initialize(size_t nUnit, uintptr_t regionInfoAddr, uintptr_t heapAddress)
+    static void Initialize(size_t nUnit, uintptr_t heapAddress)
     {
         UnitInfo::totalUnitCount = nUnit;
-        UnitInfo::unitInfoStart = regionInfoAddr;
         UnitInfo::heapStartAddress = heapAddress;
     }
 
-    static RegionDesc *GetRegionDesc(uint32_t idx)
+    static RegionDesc *GetRegionDescAt(const ObjectHeader *obj)
     {
-        UnitInfo *unit = RegionDesc::UnitInfo::GetUnitInfo(idx);
-        DCHECK((reinterpret_cast<uintptr_t>(unit) % 8) == 0);  // 8: Align with 8
-        DCHECK(static_cast<UnitRole>(unit->GetMetadata().unitRole) != UnitRole::SUBORDINATE_UNIT);
-        return reinterpret_cast<RegionDesc *>(unit);
-    }
-
-    static RegionDesc *GetRegionDescAt(uintptr_t allocAddr)
-    {
-        ASSERT_PRINT(Heap::IsHeapAddress(allocAddr), "Cannot get region info of a non-heap object");
-        UnitInfo *unit = reinterpret_cast<UnitInfo *>(UnitInfo::heapStartAddress -
-                                                      (((allocAddr - UnitInfo::heapStartAddress) / UNIT_SIZE) + 1) *
-                                                          sizeof(RegionDesc));
-        DCHECK((reinterpret_cast<uintptr_t>(unit) % 8) == 0);  // 8: Align with 8
-        DCHECK(static_cast<UnitRole>(unit->GetMetadata().unitRole) != UnitRole::SUBORDINATE_UNIT);
-        return reinterpret_cast<RegionDesc *>(unit);
-    }
-
-    // This could only used for surely alive region, such as from interpreter,
-    // because ONLY alive region have `InlinedRegionMetaData`
-    static RegionDesc *GetAliveRegionDescAt(uintptr_t allocAddr)
-    {
-        // only alive region have `InlinedRegionMetaData`.
-        DCHECK(IsAliveRegionType(GetRegionDescAt(allocAddr)->GetRegionType()));
-        InlinedRegionMetaData *metaData = InlinedRegionMetaData::GetInlinedRegionMetaData(allocAddr);
-        UnitInfo *unit = reinterpret_cast<UnitInfo *>(metaData->regionDesc_);
-        DCHECK(reinterpret_cast<RegionDesc *>(unit) == GetRegionDescAt(allocAddr));
-        DCHECK((reinterpret_cast<uintptr_t>(unit) % 8) == 0);  // 8: Align with 8
-        DCHECK(static_cast<UnitRole>(unit->GetMetadata().unitRole) != UnitRole::SUBORDINATE_UNIT);
-        return reinterpret_cast<RegionDesc *>(unit);
+        return reinterpret_cast<RegionDesc *>(((ToUintPtr(obj)) & ~(UNIT_SIZE - 1)));
     }
 
     static RegionDesc *GetAliveRegionDescAt(const ObjectHeader *obj)
     {
-        return GetAliveRegionDescAt(reinterpret_cast<HeapAddress>(obj));
+        auto *region = GetRegionDescAt(obj);
+        DCHECK(IsAliveRegionType(region->GetRegionType()));
+        return region;
     }
 
     static void InitFreeRegion(size_t unitIdx, size_t nUnit)
@@ -525,8 +498,8 @@ public:
 
     static void ClearUnits(size_t idx, size_t cnt)
     {
-        uintptr_t unitAddress = RegionDesc::GetUnitAddress(idx);
-        size_t size = cnt * RegionDesc::UNIT_SIZE;
+        uintptr_t unitAddress = RegionDesc::GetUnitAddress(idx) + RegionDesc::GetUnitHeaderSize();
+        size_t size = cnt * RegionDesc::UNIT_SIZE - RegionDesc::GetUnitHeaderSize();
         LOG(DEBUG, GC) << "clear dirty units[" << idx << "+" << cnt << ", " << idx + cnt << ") @["
                        << "0x" << std::hex << unitAddress << "+" << std::dec << size << ", "
                        << "0x" << std::hex << RegionDesc::GetUnitAddress(idx + cnt) << ")";
@@ -600,14 +573,16 @@ public:
     // reset so that this region can be reused for allocation
     void InitFreeUnits()
     {
-        if (metadata.regionRSet != nullptr) {
-            RegionRSet::DestroyRegionRSet(metadata.regionRSet);
-            metadata.regionRSet = nullptr;
+        if (metadata.regionRSet_ != nullptr) {
+            RegionRSet::DestroyRegionRSet(metadata.regionRSet_);
+            metadata.regionRSet_ = nullptr;
         }
         size_t nUnit = GetUnitCount();
-        UnitInfo *unit = reinterpret_cast<UnitInfo *>(this) - (nUnit - 1);
+        size_t idx = GetUnitIdx();
         for (size_t i = 0; i < nUnit; ++i) {
-            unit[i].ToFreeRegion();
+            auto *region = reinterpret_cast<RegionDesc *>(RegionDesc::UnitInfo::GetUnitInfo(idx + i));
+            region->InitRegionDesc(1, UnitRole::FREE_UNITS);
+            region->metadata.regionRSet_ = nullptr;
         }
     }
 
@@ -629,10 +604,7 @@ public:
     }
     void SetRegionType(RegionType type)
     {
-        metadata.regionBits.AtomicSetValue(RegionBitOffset::BIT_OFFSET_REGION_TYPE, BITS_5, static_cast<uint8_t>(type));
-        if (IsAliveRegionType(type)) {
-            InlinedRegionMetaData::GetInlinedRegionMetaData(this)->SetRegionType(type);
-        }
+        metadata.regionType_ = type;
     }
 
     void SetMarkedRegionFlag(uint8_t flag)
@@ -662,16 +634,17 @@ public:
 
     RegionType GetRegionType() const
     {
-        return static_cast<RegionType>(
-            metadata.regionBits.AtomicGetValue(RegionBitOffset::BIT_OFFSET_REGION_TYPE, BITS_5));
+        return metadata.regionType_;
     }
 
-    static RegionType GetAliveRegionType(uintptr_t allocAddr)
+    bool IsInCollectionSet() const
     {
-        // only alive region have `InlinedRegionMetaData`.
-        DCHECK(IsAliveRegionType(GetRegionDescAt(allocAddr)->GetRegionType()));
-        InlinedRegionMetaData *metaData = InlinedRegionMetaData::GetInlinedRegionMetaData(allocAddr);
-        return metaData->GetRegionType();
+        return metadata.isCollectionSet_;
+    }
+
+    void SetCollectionSetRegionFlag(bool flag)
+    {
+        metadata.isCollectionSet_ = flag;
     }
 
     UnitRole GetUnitRole() const
@@ -681,7 +654,7 @@ public:
 
     size_t GetUnitIdx() const
     {
-        return RegionDesc::UnitInfo::GetUnitIdx(reinterpret_cast<const UnitInfo *>(this));
+        return RegionDesc::UnitInfo::GetUnitIdxAt(reinterpret_cast<uintptr_t>(this));
     }
 
     HeapAddress GetRegionBase() const
@@ -977,6 +950,12 @@ public:
         return GetRegionType() == RegionType::FROM_REGION;
     }
 
+    bool IsInYoungSpaceForWB() const
+    {
+        RegionType type = GetRegionType();
+        return RegionDesc::IsInYoungSpaceForWB(type);
+    }
+
     bool IsUnmovableFromRegion() const
     {
         return GetRegionType() == RegionType::EXEMPTED_FROM_REGION;
@@ -1052,7 +1031,6 @@ private:
     static constexpr int32_t BITS_5 = 5;
 
     enum RegionBitOffset : uint8_t {
-        BIT_OFFSET_REGION_TYPE = 0,
         // use mark-bitmap pointer instead
         BIT_OFFSET_MARKED_REGION = BITS_5,
         BIT_OFFSET_ENQUEUED_REGION = 6,
@@ -1125,7 +1103,7 @@ private:
             // `regionStart` is the header of the data, and `regionBase` is the header of the total region
             /**
              * | *********************************Region*******************************|
-             * | InlinedRegionMetaData | *****************Region data******************|
+             * | RegionDesc            | *****************Region data******************|
              *   ^                       ^
              *   |                       |
              * regionBase            regionStart
@@ -1142,7 +1120,9 @@ private:
 
         RegionLiveDesc liveInfo_ {};
 
-        RegionRSet *regionRSet = nullptr;
+        RegionRSet *regionRSet_ = nullptr;
+        RegionType regionType_;
+        bool isCollectionSet_ = false;
 
         // the writing operation in C++ Bit-Field feature is not atomic, the we wants to
         // change the value, we must use specific interface implenmented by BitFields.
@@ -1157,8 +1137,6 @@ private:
         // change the value, we must use specific interface implenmented by BitFields.
         union {
             struct {
-                RegionType regionType : BITS_5;
-
                 // true if this unit belongs to a ghost region, which is an unreal region for keeping reclaimed
                 // from-region. ghost region is set up to memorize a from-region before from-space is forwarded. this
                 // flag is cleared when ghost-from-space is cleared. Note this flag is essentially important for
@@ -1180,7 +1158,6 @@ private:
         // propgated from RegionManager
         static uintptr_t heapStartAddress;  // the address of the first region space to allocate objects
         static size_t totalUnitCount;
-        static uintptr_t unitInfoStart;  // the address of the first UnitInfo
 
         constexpr static uint32_t INVALID_IDX = std::numeric_limits<uint32_t>::max();
         static size_t GetUnitIdxAt(uintptr_t allocAddr)
@@ -1208,14 +1185,7 @@ private:
         static UnitInfo *GetUnitInfo(size_t idx)
         {
             CHECK(idx < totalUnitCount);
-            return reinterpret_cast<UnitInfo *>(heapStartAddress - (idx + 1) * sizeof(UnitInfo));
-        }
-
-        static size_t GetUnitIdx(const UnitInfo *unit)
-        {
-            uintptr_t ptr = reinterpret_cast<uintptr_t>(unit);
-            DCHECK(unitInfoStart <= ptr && ptr < heapStartAddress);
-            return ((heapStartAddress - ptr) / sizeof(UnitInfo)) - 1;
+            return reinterpret_cast<UnitInfo *>(GetUnitAddress(idx));
         }
 
         UnitInfo() = delete;
@@ -1244,19 +1214,14 @@ private:
             metadata_.regionBits.AtomicSetValue(RegionBitOffset::BIT_OFFSET_RESURRECTED_REGION, 1, flag);
         }
 
-        void ToFreeRegion()
-        {
-            InitFreeRegion(GetUnitIdx(this), 1);
-        }
-
         void ClearUnit()
         {
-            ClearUnits(GetUnitIdx(this), 1);
+            ClearUnits(GetUnitIdxAt(reinterpret_cast<uintptr_t>(this)), 1);
         }
 
         void ReleaseUnit()
         {
-            ReleaseUnits(GetUnitIdx(this), 1);
+            ReleaseUnits(GetUnitIdxAt(reinterpret_cast<uintptr_t>(this)), 1);
         }
 
         UnitMetadata &GetMetadata()
@@ -1276,152 +1241,16 @@ private:
     };
 
 public:
-    // inline copy some data at the begin of the region data, to support fast-path in barrier or smth else.
-    // NOTE the data consistency between data in header and that in `RegionDesc`.
-    // this could ONLY used in region that is ALIVE.
-    class InlinedRegionMetaData {
-    public:
-        static InlinedRegionMetaData *GetInlinedRegionMetaData(RegionDesc *region)
-        {
-            InlinedRegionMetaData *data = GetInlinedRegionMetaData(region->GetRegionStart());
-            DCHECK(data->regionDesc_ == region);
-            return data;
-        }
-        static InlinedRegionMetaData *GetInlinedRegionMetaData(uintptr_t allocAddr)
-        {
-            return reinterpret_cast<InlinedRegionMetaData *>(allocAddr & ~DEFAULT_REGION_UNIT_MASK);
-        }
-
-        static InlinedRegionMetaData *GetInlinedRegionMetaData(const ObjectHeader *obj)
-        {
-            return GetInlinedRegionMetaData(reinterpret_cast<HeapAddress>(obj));
-        }
-
-        explicit InlinedRegionMetaData(RegionDesc *regionDesc)
-            : regionDesc_(regionDesc),
-              regionRSet_(regionDesc->GetRSet()),
-              regionType_(regionDesc->GetRegionType()),
-              isCollectionSet_(false)
-        {
-            // Since this is a backup copy of `RegionDesc`, create rset at first to guarantee data consistency
-            DCHECK(regionRSet_ != nullptr);
-            // Not insert to regionList and reset regionType yet
-            DCHECK(regionType_ == RegionType::FREE_REGION);
-            DCHECK(regionType_ == regionDesc_->GetRegionType());
-        }
-        ~InlinedRegionMetaData() = default;
-
-        void SetRegionType(RegionType type)
-        {
-            DCHECK(RegionDesc::IsAliveRegionType(type));
-            DCHECK(type == regionDesc_->GetRegionType());
-            regionType_ = type;
-        }
-
-        RegionDesc *GetRegionDesc() const
-        {
-            return regionDesc_;
-        }
-
-        RegionRSet *GetRegionRSet() const
-        {
-            return regionRSet_;
-        }
-
-        RegionType GetRegionType() const
-        {
-            DCHECK(RegionDesc::IsAliveRegionType(regionType_));
-            return regionType_;
-        }
-
-        bool IsInCollectionSet() const
-        {
-            return isCollectionSet_;
-        }
-
-        void SetCollectionSetRegionFlag(bool flag)
-        {
-            isCollectionSet_ = flag;
-        }
-
-        bool IsInRecentSpace() const
-        {
-            RegionType type = GetRegionType();
-            return RegionDesc::IsInRecentSpace(type);
-        }
-
-        bool IsInYoungSpace() const
-        {
-            RegionType type = GetRegionType();
-            return RegionDesc::IsInYoungSpace(type);
-        }
-
-        bool IsInFromSpace() const
-        {
-            RegionType type = GetRegionType();
-            return RegionDesc::IsInFromSpace(type);
-        }
-
-        bool IsInToSpace() const
-        {
-            RegionType type = GetRegionType();
-            return RegionDesc::IsInToSpace(type);
-        }
-
-        bool IsInOldSpace() const
-        {
-            RegionType type = GetRegionType();
-            return RegionDesc::IsInOldSpace(type);
-        }
-
-        bool IsFromRegion() const
-        {
-            RegionType type = GetRegionType();
-            return type == RegionType::FROM_REGION;
-        }
-
-        bool IsInYoungSpaceForWB() const
-        {
-            RegionType type = GetRegionType();
-            return RegionDesc::IsInYoungSpaceForWB(type);
-        }
-
-        inline HeapAddress GetRegionStart() const;
-
-        HeapAddress GetRegionBase() const
-        {
-            uintptr_t base = reinterpret_cast<uintptr_t>(this);
-            ASSERT_PRINT(base == regionDesc_->GetRegionBaseFast(), "");
-            return static_cast<HeapAddress>(base);
-        }
-
-        size_t GetAddressOffset(HeapAddress address) const
-        {
-            DCHECK(GetRegionBase() <= address);
-            return (address - GetRegionBase());
-        }
-
-        bool MarkRSetCardTable(BaseObject *obj)
-        {
-            size_t offset = GetAddressOffset(static_cast<HeapAddress>(reinterpret_cast<uintptr_t>(obj)));
-            return GetRegionRSet()->MarkCardTable(offset);
-        }
-
-    private:
-        RegionDesc *regionDesc_ {nullptr};
-        RegionRSet *regionRSet_ {nullptr};
-        RegionType regionType_ {};
-        bool isCollectionSet_;
-
-        friend class RegionDesc;
-    };
     // should keep as same as the align of BaseObject
     static constexpr size_t UNIT_BEGIN_ALIGN = 8;
-    // default common region unit header size.
-    static constexpr size_t UNIT_HEADER_SIZE =
-        ark::common_vm::AlignUp<size_t>(sizeof(InlinedRegionMetaData), UNIT_BEGIN_ALIGN);
-    // default common region unit available size.
-    static constexpr size_t UNIT_AVAILABLE_SIZE = UNIT_SIZE - UNIT_HEADER_SIZE;
+    static constexpr size_t GetUnitHeaderSize()
+    {
+        return ark::common_vm::AlignUp<size_t>(sizeof(RegionDesc), UNIT_BEGIN_ALIGN);
+    }
+    static constexpr size_t GetUnitAvailableSize()
+    {
+        return UNIT_SIZE - RegionDesc::GetUnitHeaderSize();
+    }
 
 private:
     void InitRegionDesc(size_t nUnit, UnitRole uClass)
@@ -1429,7 +1258,7 @@ private:
         DCHECK(uClass != UnitRole::SUBORDINATE_UNIT);
         size_t base = GetRegionBase();
         metadata.regionBase = base;
-        metadata.regionStart = base + RegionDesc::UNIT_HEADER_SIZE;
+        metadata.regionStart = base + RegionDesc::GetUnitHeaderSize();
         ASSERT_PRINT(metadata.regionStart % UNIT_BEGIN_ALIGN == 0, "");
         metadata.allocPtr = GetRegionStart();
         metadata.regionEnd = base + nUnit * RegionDesc::UNIT_SIZE;
@@ -1445,6 +1274,7 @@ private:
         SetMarkedRegionFlag(0);
         SetEnqueuedRegionFlag(0);
         SetResurrectedRegionFlag(0);
+        SetCollectionSetRegionFlag(false);
 #ifdef USE_HWASAN
         ASAN_UNPOISON_MEMORY_REGION(reinterpret_cast<const volatile void *>(metadata.regionBase),
                                     nUnit * RegionDesc::UNIT_SIZE);
@@ -1456,7 +1286,7 @@ private:
 
     void ResetRegion(size_t nUnit, UnitRole uClass)
     {
-        DCHECK(metadata.regionRSet != nullptr);
+        DCHECK(metadata.regionRSet_ != nullptr);
         ClearRSet();
         InitRegionDesc(nUnit, uClass);
         InitMetaData(nUnit, uClass);
@@ -1469,8 +1299,8 @@ private:
         DCHECK(uClass != UnitRole::FREE_UNITS);        // NOTE: remove `UnitRole::SUBORDINATE_UNIT`
         DCHECK(uClass != UnitRole::SUBORDINATE_UNIT);  // NOTE: remove `UnitRole::SUBORDINATE_UNIT`
         InitRegionDesc(nUnit, uClass);
-        DCHECK(metadata.regionRSet == nullptr);
-        metadata.regionRSet = RegionRSet::CreateRegionRSet(GetRegionBaseSize());
+        DCHECK(metadata.regionRSet_ == nullptr);
+        metadata.regionRSet_ = RegionRSet::CreateRegionRSet(GetRegionBaseSize());
         InitMetaData(nUnit, uClass);
         // Atomic with seq_cst order reason: ensure all region initialization is visible to other threads before use
         std::atomic_thread_fence(std::memory_order_seq_cst);
@@ -1479,35 +1309,28 @@ private:
     void InitMetaData(size_t nUnit, UnitRole uClass)
     {
         metadata.liveInfo_.Init(this);
-        HeapAddress header = GetRegionBase();
-        void *ptr = reinterpret_cast<void *>(static_cast<uintptr_t>(header));
-        new (ptr) InlinedRegionMetaData(this);
-
-        // initialize region's subordinate units.
-        UnitInfo *unit = reinterpret_cast<UnitInfo *>(this) - (nUnit - 1);
-        for (size_t i = 0; i < nUnit - 1; i++) {
-            DCHECK(uClass == UnitRole::LARGE_SIZED_UNITS);
-            unit[i].metadata_.liveInfo_.Fini();
-        }
     }
 
     static constexpr uint32_t NULLPTR_IDX = UnitInfo::INVALID_IDX;
     UnitMetadata metadata;
 
 public:
-    friend constexpr size_t GetMetaDataInRegionOffset();
-    static constexpr size_t REGION_RSET_IN_INLINED_METADATA_OFFSET = MEMBER_OFFSET(InlinedRegionMetaData, regionRSet_);
-    static constexpr size_t REGION_TYPE_IN_INLINED_METADATA_OFFSET = MEMBER_OFFSET(InlinedRegionMetaData, regionType_);
-    static constexpr size_t REGION_CS_IN_INLINED_METADATA_OFFSET =
-        MEMBER_OFFSET(InlinedRegionMetaData, isCollectionSet_);
+    static constexpr size_t GetRegionRemsetOffset()
+    {
+        static_assert(MEMBER_OFFSET(RegionDesc, metadata) == 0);
+        return MEMBER_OFFSET(UnitMetadata, regionRSet_);
+    }
+    static constexpr size_t GetRegionTypeOffset()
+    {
+        static_assert(MEMBER_OFFSET(RegionDesc, metadata) == 0);
+        return MEMBER_OFFSET(UnitMetadata, regionType_);
+    }
+    static constexpr size_t GetRegionCollectionSetFlagOffset()
+    {
+        static_assert(MEMBER_OFFSET(RegionDesc, metadata) == 0);
+        return MEMBER_OFFSET(UnitMetadata, isCollectionSet_);
+    }
 };
-
-HeapAddress RegionDesc::InlinedRegionMetaData::GetRegionStart() const
-{
-    HeapAddress addr = static_cast<HeapAddress>(reinterpret_cast<uintptr_t>(this) + RegionDesc::UNIT_HEADER_SIZE);
-    DCHECK(addr == regionDesc_->GetRegionStart());
-    return addr;
-}
 }  // namespace ark::mem
 
 #endif  // COMMON_RUNTIME_COMMON_INTERFACES_HEAP_REGION_DESC_H

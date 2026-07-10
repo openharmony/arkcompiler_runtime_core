@@ -285,7 +285,7 @@ void RegionalHeap::CopyRegion(RegionDesc *region)
         fromSpace_.DeleteFromRegion(region);
         // since this region is possibly partially-forwarded, treat it as to-region.
         toSpace_.AddFullRegion(region);
-        RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(region)->SetCollectionSetRegionFlag(false);
+        region->SetCollectionSetRegionFlag(false);
     }
 }
 
@@ -312,19 +312,15 @@ void RegionalHeap::Init(const RuntimeParam &param)
     // this must succeed otherwise it won't return
     map_ = MemoryMap::MapMemoryAlignInner4G(totalSize, totalSize, opt);
 
-    size_t metadataSize = RegionManager::GetMetadataSize(regionNum);
     uintptr_t baseAddr = reinterpret_cast<uintptr_t>(map_->GetBaseAddr());
-    os::mem::TagAnonymousMemory(reinterpret_cast<void *>(baseAddr), metadataSize, "ArkTS Heap CMCGC Metadata");
-    os::mem::TagAnonymousMemory(reinterpret_cast<void *>(baseAddr + metadataSize), totalSize - metadataSize,
-                                "ArkTS Heap CMCGC RegionHeap");
+    os::mem::TagAnonymousMemory(reinterpret_cast<void *>(baseAddr), totalSize, "ArkTS Heap CMCGC RegionHeap");
 
 #if defined(COMMON_SANITIZER_SUPPORT)
     Sanitizer::OnHeapAllocated(map->GetBaseAddr(), map->GetMappedSize());
 #endif
 
-    HeapAddress metadata = reinterpret_cast<HeapAddress>(map_->GetBaseAddr());
     fromSpace_.SetExemptedRegionThreshold(param.heapParam.exemptionThreshold);
-    regionManager_.Initialize(regionNum, metadata);
+    regionManager_.Initialize(regionNum, baseAddr);
     reservedStart_ = regionManager_.GetRegionHeapStart();
     reservedEnd_ = reinterpret_cast<HeapAddress>(map_->GetMappedEndAddr());
 #if defined(COMMON_DUMP_ADDRESS)

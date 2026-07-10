@@ -45,11 +45,7 @@ public:
     */
     static size_t GetHeapMemorySize(size_t heapSize)
     {
-        size_t regionNum = GetHeapUnitCount(heapSize);
-        size_t metadataSize = GetMetadataSize(regionNum);
-        // Add one more `RegionDesc::UNIT_SIZE` totalSize, because we need the region address is aligned to
-        // `RegionDesc::UNIT_SIZE`, this need some paddings
-        size_t totalSize = metadataSize + RoundUp<size_t>(heapSize, RegionDesc::UNIT_SIZE) + RegionDesc::UNIT_SIZE;
+        size_t totalSize = RoundUp<size_t>(heapSize, RegionDesc::UNIT_SIZE);
         return totalSize;
     }
 
@@ -60,13 +56,7 @@ public:
         return regionNum;
     }
 
-    static size_t GetMetadataSize(size_t regionNum)
-    {
-        size_t metadataSize = regionNum * sizeof(RegionDesc);
-        return RoundUp<size_t>(metadataSize, COMMON_PAGE_SIZE);
-    }
-
-    void Initialize(size_t regionNum, uintptr_t regionInfoStart);
+    void Initialize(size_t regionNum, uintptr_t heapStart);
 
     RegionManager() : garbageRegionList_("garbage regions") {}
 
@@ -89,7 +79,7 @@ public:
     RegionDesc *GetFirstRegion() const
     {
         if (regionHeapStart_ < inactiveZone_) {
-            return RegionDesc::GetRegionDescAt(regionHeapStart_);
+            return reinterpret_cast<RegionDesc *>(regionHeapStart_);
         }
         return nullptr;
     }
@@ -173,7 +163,7 @@ public:
         HeapAddress address = region->GetRegionEnd();
         // Atomic with acquire order reason: data race with inactiveZone_ with dependecies on reads after the load
         if (address < inactiveZone_.load(std::memory_order_acquire)) {
-            return RegionDesc::GetRegionDescAt(address);
+            return reinterpret_cast<RegionDesc *>(address);
         }
         return nullptr;
     }
@@ -201,8 +191,6 @@ private:
 
     // cache for fromRegionList after forwarding.
     RegionList garbageRegionList_;
-
-    uintptr_t regionInfoStart_ = 0;  // the address of first RegionDesc
 
     uintptr_t regionHeapStart_ = 0;  // the address of first region to allocate object
     uintptr_t regionHeapEnd_ = 0;

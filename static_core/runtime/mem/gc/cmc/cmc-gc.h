@@ -238,9 +238,7 @@ public:
     {
         // filter const string object.
         if (Heap::IsHeapAddress(obj)) {
-            RegionDesc::InlinedRegionMetaData *objMetaRegion =
-                RegionDesc::InlinedRegionMetaData::GetInlinedRegionMetaData(reinterpret_cast<uintptr_t>(obj));
-            return objMetaRegion->IsFromRegion();
+            return RegionDesc::GetRegionDescAt(obj)->IsFromRegion();
         }
 
         return false;
@@ -481,7 +479,6 @@ private:
     void EnqueueRememberedSetRefs(CMCGCAdaptiveStack &stack);
     void MarkSatbBuffer(CMCGCAdaptiveStack &stack);
     void EnqueueRefsToYoungCollectionSpace(ObjectHeader *obj, CMCGCAdaptiveStack &stack);
-    static bool InYoungCollectionSpace(const RegionDesc::InlinedRegionMetaData *region);
     static bool InYoungCollectionSpace(const RegionDesc *region);
     static bool InYoungCollectionSpace(const BaseObject *obj);
     static bool InYoungCollectionSpace(RegionDesc::RegionType type);
