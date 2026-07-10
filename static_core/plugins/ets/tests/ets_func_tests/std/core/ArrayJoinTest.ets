@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,6 +113,27 @@ function doubleTest() {
     arktest.assertEQ(arr3.join('_'), res);
 }
 
+function doubleDecimalFormBoundary() {
+    // ECMAScript §7.1.12.1 Case 3 (-6 < n <= 0): decimal form.
+    // At n = -5, k = 17, negative: "-0.0000012345678901234567" = 25 chars.
+    // MaxChars<double> must cover this to avoid Array.join() heap overflow.
+    let val: number = -0.0000012345678901234567;
+    let arr: number[] = [val, 0, -val];
+    let expected: string = '-0.0000012345678901234567,0,0.0000012345678901234567';
+    arktest.assertEQ(arr.join(','), expected);
+    arktest.assertEQ(arr.toString(), expected);
+    arktest.assertEQ(arr.join(''), '-0.000001234567890123456700.0000012345678901234567');
+    arktest.assertEQ(arr.join('Ω'), '-0.0000012345678901234567Ω0Ω0.0000012345678901234567');
+
+    // Exponential form boundary: 24 chars (covered by original MaxChars=24,
+    // included here to guard both forms together).
+    let negMax: number = -1.7976931348623157e+308;
+    let arr2: number[] = [negMax, 0, -negMax];
+    let expected2: string = '-1.7976931348623157e+308,0,1.7976931348623157e+308';
+    arktest.assertEQ(arr2.join(','), expected2);
+    arktest.assertEQ(arr2.toString(), expected2);
+}
+
 function bigIntTest() {
     let arr = [-1n, 1n, new BigInt(Long.MIN_VALUE), new BigInt(Long.MAX_VALUE), BigInt(-3.4028235e+38)];
     let res = '-1,1,-9223372036854775808,9223372036854775807,-340282349999999991754788743781432688640';
@@ -192,6 +213,7 @@ function main(): int {
     suite.addTest('for long test', longTest);
     suite.addTest('for float test', floatTest);
     suite.addTest('for double test', doubleTest);
+    suite.addTest('for double decimal-form boundary', doubleDecimalFormBoundary);
     suite.addTest('for BigInt test', bigIntTest);
     suite.addTest('for String test', stringTest);
     suite.addTest('for recursive array test 1', recursiveArrayTest1);
