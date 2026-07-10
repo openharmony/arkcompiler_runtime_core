@@ -113,7 +113,7 @@ function main(): int {
 
     suite.addTest("Bridge method expects String", () => {
         tmp = new SiblingString();
-        let a: SiblingBase<Object> = tmp as SiblingBase<Object>;
+        let a: SiblingBase<Any> = tmp as SiblingBase<Any>;
         arktest.expectError(
             () => { a.process(1) },
             "std.core.Int cannot be cast to std.core.String"

@@ -2118,7 +2118,7 @@ llvm::Value *LLVMIrConstructor::CreateIsInstanceEntrypointCall(Inst *inst)
     return CreateEntrypointCall(RuntimeInterface::EntrypointId::IS_INSTANCE, inst, {object, klass});
 }
 
-llvm::Value *LLVMIrConstructor::CreateIsInstanceAny(llvm::Value *klassObj)
+llvm::Value *LLVMIrConstructor::CreateIsInstanceObject(llvm::Value *klassObj)
 {
     auto typeOffset = GetGraph()->GetRuntime()->GetClassTypeOffset(GetGraph()->GetArch());
     auto typeMask = GetGraph()->GetRuntime()->GetReferenceTypeMask();
@@ -2194,7 +2194,7 @@ llvm::Value *LLVMIrConstructor::CreateIsInstanceArray(Inst *inst, llvm::Value *k
     return outPhi;
 }
 
-llvm::Value *LLVMIrConstructor::CreateIsInstanceArrayAny(Inst *inst, llvm::Value *klassObj)
+llvm::Value *LLVMIrConstructor::CreateIsInstanceArrayObject(Inst *inst, llvm::Value *klassObj)
 {
     auto &ctx = func_->getContext();
     auto initialBb = GetCurrentBasicBlock();
@@ -2228,14 +2228,14 @@ llvm::Value *LLVMIrConstructor::CreateIsInstanceInnerBlock(Inst *inst, llvm::Val
 {
     auto klassType = inst->CastToIsInstance()->GetClassType();
     switch (klassType) {
-        case ClassType::ANY_CLASS:
-            return CreateIsInstanceAny(klassObj);
+        case ClassType::OBJECT_CLASS:
+            return CreateIsInstanceObject(klassObj);
         case ClassType::OTHER_CLASS:
             return CreateIsInstanceOther(inst, klassObj, klassId);
         case ClassType::ARRAY_CLASS:
             return CreateIsInstanceArray(inst, klassObj, klassId);
-        case ClassType::ARRAY_ANY_CLASS:
-            return CreateIsInstanceArrayAny(inst, klassObj);
+        case ClassType::ARRAY_OBJECT_CLASS:
+            return CreateIsInstanceArrayObject(inst, klassObj);
         case ClassType::INTERFACE_CLASS:
             return CreateIsInstanceEntrypointCall(inst);
         default:
@@ -2259,7 +2259,7 @@ void LLVMIrConstructor::CreateCheckCastEntrypointCall(Inst *inst)
     }
 }
 
-void LLVMIrConstructor::CreateCheckCastAny(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
+void LLVMIrConstructor::CreateCheckCastObject(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
 {
     auto typeOffset = GetGraph()->GetRuntime()->GetClassTypeOffset(GetGraph()->GetArch());
     auto typeMask = GetGraph()->GetRuntime()->GetReferenceTypeMask();
@@ -2335,7 +2335,7 @@ void LLVMIrConstructor::CreateCheckCastArray(Inst *inst, llvm::Value *klassObj, 
     SetCurrentBasicBlock(outBb);
 }
 
-void LLVMIrConstructor::CreateCheckCastArrayAny(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
+void LLVMIrConstructor::CreateCheckCastArrayObject(Inst *inst, llvm::Value *klassObj, llvm::Value *klassId)
 {
     auto src = GetInputValue(inst, 0);
 
@@ -2360,8 +2360,8 @@ void LLVMIrConstructor::CreateCheckCastInner(Inst *inst, llvm::Value *klassObj, 
 {
     auto klassType = inst->CastToCheckCast()->GetClassType();
     switch (klassType) {
-        case ClassType::ANY_CLASS:
-            CreateCheckCastAny(inst, klassObj, klassId);
+        case ClassType::OBJECT_CLASS:
+            CreateCheckCastObject(inst, klassObj, klassId);
             break;
         case ClassType::OTHER_CLASS:
             CreateCheckCastOther(inst, klassObj, klassId);
@@ -2369,8 +2369,8 @@ void LLVMIrConstructor::CreateCheckCastInner(Inst *inst, llvm::Value *klassObj, 
         case ClassType::ARRAY_CLASS:
             CreateCheckCastArray(inst, klassObj, klassId);
             break;
-        case ClassType::ARRAY_ANY_CLASS:
-            CreateCheckCastArrayAny(inst, klassObj, klassId);
+        case ClassType::ARRAY_OBJECT_CLASS:
+            CreateCheckCastArrayObject(inst, klassObj, klassId);
             break;
         case ClassType::INTERFACE_CLASS:
         default:

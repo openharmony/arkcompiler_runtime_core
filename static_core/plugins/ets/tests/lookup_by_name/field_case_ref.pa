@@ -15,8 +15,7 @@
 
 .record std.core.Object
 .record std.core.String <external>
-.record Y <external>
-.function u1 std.core.String.equals(std.core.String a0, Y a1) <external>
+.function u1 std.core.String.equals(std.core.String a0, std.core.Object a1) <external>
 .record A {
     std.core.String baz
 }

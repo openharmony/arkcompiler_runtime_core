@@ -214,17 +214,14 @@ export class Dog extends Animal {}
 export class Cat extends Animal {}
 
 export class ObjectOverloadHandler {
-    handlePet(obj: Dog): string {
-        return 'dog';
-    }
-    handlePet(obj: Cat): string {
-        return 'cat';
+    handlePet(obj: Object): string {
+        return 'pet';
     }
 
     handleSpecific(obj: Dog): string {
         return 'dog';
     }
-    handleSpecific(obj: Any): string {
+    handleSpecific(obj: Object): string {
         return 'object';
     }
 

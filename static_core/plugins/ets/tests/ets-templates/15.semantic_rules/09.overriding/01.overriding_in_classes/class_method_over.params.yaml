@@ -365,8 +365,8 @@ cases:
       arktest.assertEQ(bar(new Derived()), 2)
 
   - doc: |-
-      Overriding is possible when derived method parameter is contravariant.
-      Any is a supertype of Object, so bar(a: Object) in Base is overridden by bar(a: Any) in Derived.
+      No overriding when Any and Object have the same runtime signature.
+      After reverting Any bytecode support, bar(a: Any) and bar(a: Object) both use Object signature.
     decl: |-
       class Base {
         bar(a: Object): int { return 1 }
@@ -379,7 +379,7 @@ cases:
       function bar(a: Base) { return a.bar(new Object()) }
     use: |-
       arktest.assertEQ(bar(new Base()), 1)
-      arktest.assertEQ(bar(new Derived()), 2)
+      arktest.assertEQ(bar(new Derived()), 1)
 
   - doc: |-
       Overriding is possible when derived method return type is covariant.
@@ -416,9 +416,8 @@ cases:
       arktest.assertEQ(foo(new Derived()), 1)
 
   - doc: |-
-      Overriding is possible when FixedArray element types are contravariant.
-      FixedArray<Any> is a supertype of FixedArray<Object>, so FixedArray<Object> in Base
-      is overridden by FixedArray<Any> in Derived.
+      No overriding when FixedArray<Any> and FixedArray<Object> have the same runtime signature.
+      After reverting Any bytecode support, FixedArray<Any> uses Object element signature.
     decl: |-
       class Base {
         foo(a: FixedArray<Object>): int { return 1 }
@@ -431,7 +430,7 @@ cases:
       function foo(a: Base) { return a.foo([new Object()]) }
     use: |-
       arktest.assertEQ(foo(new Base()), 1)
-      arktest.assertEQ(foo(new Derived()), 2)
+      arktest.assertEQ(foo(new Derived()), 1)
 
   - doc: |-
       No overriding of instance methods when mixing Any and Object in multi-parameter methods.

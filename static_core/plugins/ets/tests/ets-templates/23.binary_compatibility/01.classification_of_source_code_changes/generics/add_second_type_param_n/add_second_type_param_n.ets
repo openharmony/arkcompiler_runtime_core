@@ -20,12 +20,12 @@ tags: [negative]
 negative_steps: [verify-new-libs, runtime-with-new-libs.ark]
 expected_error:
     verify-new-libs:
-    - "E/verifier: Cannot link class: Cannot find method 'map (LY;)Lstd/core/String;' in class 'add_second_type_param_n.libr.Mapper'"
+    - "E/verifier: Cannot link class: Cannot find method 'map (Lstd/core/Object;)Lstd/core/String;' in class 'add_second_type_param_n.libr.Mapper'"
     - "E/verifier: Verifier error 54: Cache miss for method at offset"
     - "E/verifier: Verifier error 62: Cannot resolve method id"
     - "E/verifier: Error: method void add_second_type_param_n.ETSGLOBAL::main() failed to verify"
     runtime-with-new-libs.ark:
-    - "E/verifier: Cannot link class: Cannot find method 'map (LY;)Lstd/core/String;' in class 'add_second_type_param_n.libr.Mapper'"
+    - "E/verifier: Cannot link class: Cannot find method 'map (Lstd/core/Object;)Lstd/core/String;' in class 'add_second_type_param_n.libr.Mapper'"
     - "E/verifier: Verifier error 54: Cache miss for method at offset"
     - "E/verifier: Verifier error 62: Cannot resolve method id"
     - "E/verifier: Method verification failed: void add_second_type_param_n.ETSGLOBAL::main()"

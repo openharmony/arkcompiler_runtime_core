@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-export declare class Foo {
+export declare class Foo
+{
     bar: number;
     baz: string;
     public zhcn: string;
@@ -41,7 +42,8 @@ export declare class Qux {
 
 export declare let quxInstance: Qux;
 
-export declare class TestNew0 {
+export declare class TestNew0
+{
     bar: number;
     constructor();
 }
@@ -60,7 +62,7 @@ export declare class TestNew2 {
 
 export declare class Foobar {
     receivedUndefined: boolean;
-    constructor(arg: Any, arg2: Any);
+    constructor(arg: Object | undefined, arg2: Object);
 }
 
 export declare let arrNum: es.Array<number>;
@@ -91,7 +93,7 @@ export declare class TestTypeChecks {
     num: number;
     str: string;
     bool: boolean;
-    obj: Any;
+    obj: Object;
 }
 export declare let testTypeChecksInstance: TestTypeChecks;
 

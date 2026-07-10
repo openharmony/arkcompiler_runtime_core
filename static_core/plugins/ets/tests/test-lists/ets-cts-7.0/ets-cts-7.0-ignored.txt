@@ -208,3 +208,50 @@
 #34034
 23.binary_compatibility/01.classification_of_source_code_changes/enums/change_enum_constants_base_type/change_enum_constants_base_type.ets
 
+#11012 LinkerMethodConflictError after reverting Any bytecode support
+20.implementation_details/07.bridge_methods_for_generic_overrides/interface_bridge1.ets
+
+
+#11012 Tests expect failure but pass after reverting Any bytecode support
+23.binary_compatibility/01.classification_of_source_code_changes/effective_type/effective_type_function_n/effective_type_function_n.ets
+23.binary_compatibility/01.classification_of_source_code_changes/generics/add_method_type_param_n/add_method_type_param_n.ets
+23.binary_compatibility/01.classification_of_source_code_changes/generics/add_type_param_constraint_1_n/add_type_param_constraint_1_n.ets
+23.binary_compatibility/01.classification_of_source_code_changes/generics/add_type_param_constraint_2_n/add_type_param_constraint_2_n.ets
+23.binary_compatibility/01.classification_of_source_code_changes/generics/remove_method_type_parameter_n/remove_method_type_parameter_n.ets
+23.binary_compatibility/01.classification_of_source_code_changes/generics/remove_type_parameter_n/remove_type_parameter_n.ets
+
+#11012 Any/Object have same signature after revert, causing duplicate method errors
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_11.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_12.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_13.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_14.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_15.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_16.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_17.ets
+
+#11012 class_method_over_14/16: Any/Object same signature
+15.semantic_rules/08.overriding/01.overriding_in_classes/class_method_over_14.ets
+15.semantic_rules/08.overriding/01.overriding_in_classes/class_method_over_16.ets
+#11012 overriding_8: duplicate method error
+15.semantic_rules/08.overriding/02.overriding_in_interfaces/overriding_8.ets
+
+#11012 fixed_array_type_erasure_union_num_str: Any cast loses element type info
+17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_union_num_str.ets
+
+#11012 class_method_over_11: Any/Object same signature
+15.semantic_rules/08.overriding/01.overriding_in_classes/class_method_over_11.ets
+#11012 fixed_array_type_erasure_object: cast to superclass type fails
+17.experimental_features/02.fixed_array_types/fixed_array_type_erasure_object.ets
+
+#11012 interface_bridge1: Bridge method expects Object
+20.implementation_details/07.bridge_methods_for_generic_overrides/interface_bridge1.ets
+#11012 implicit_overload_function_4: Function signature duplication
+15.semantic_rules/10.overload_resolution/02.overload_set_for_functions/implicit_overload_function_4.ets
+
+#11012 class_bridge4: Bridge method expects Object
+20.implementation_details/07.bridge_methods_for_generic_overrides/class_bridge4.ets
+#11012 class_method_over_12/15: Any/Object same signature
+15.semantic_rules/08.overriding/01.overriding_in_classes/class_method_over_12.ets
+15.semantic_rules/08.overriding/01.overriding_in_classes/class_method_over_15.ets
+#11012 interface_bridge4: Bridge method expects Object
+20.implementation_details/07.bridge_methods_for_generic_overrides/interface_bridge4.ets

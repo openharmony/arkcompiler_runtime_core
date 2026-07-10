@@ -15,7 +15,7 @@
 
 export declare class Foo {
     constructor();
-    objectProperty: Any;
+    objectProperty: Object;
     stringProperty: string;
     string50: string;
     string100: string;
@@ -27,7 +27,7 @@ export declare class Foo {
     numberProperty: number;
 }
 
-export declare let testObject: Any;
+export declare let testObject: Object;
 
 export declare let testStr: string;
 export declare let testStr50: string;

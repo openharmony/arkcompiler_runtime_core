@@ -50,21 +50,6 @@ TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_object)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDyndeclInstanceofObject"));
 }
 
-TEST_F(EtsInteropInstanceOf, Test_jsvalue_instanceof_any)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestJsvalueInstanceofAny"));
-}
-
-TEST_F(EtsInteropInstanceOf, Test_dynvalue_instanceof_any)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDynvalueInstanceofAny"));
-}
-
-TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_any)
-{
-    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "TestDyndeclInstanceofAny"));
-}
-
 /*
  * ==============================================
  * === Tests <object type>_instanceof_etstype ===

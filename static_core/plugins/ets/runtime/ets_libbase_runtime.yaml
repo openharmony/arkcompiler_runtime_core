@@ -15,9 +15,6 @@ coretypes:
 - managed_class: std.core.Object
   mirror_class: ark::ets::EtsObject
 
-- managed_class: Y
-  mirror_class: ark::ets::EtsObject
-
 - managed_class: std.core.Class
   mirror_class: ark::ets::EtsClass
 
@@ -957,7 +954,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.String
-      args: [ Y ]
+      args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreJSONStringifyFast
 
 ###################
@@ -1054,7 +1051,7 @@ intrinsics:
     static: false
     signature:
       ret: u1
-      args: [ Y ]
+      args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreStringEquals
     irtoc_impl: EtsStringEqualsNativePlus
     codegen_func: CreateEtsStringEquals
@@ -1885,7 +1882,7 @@ intrinsics:
     method_name: $_get
     static: false
     signature:
-      ret: Y
+      ret: std.core.Object
       args: [ i32 ]
     impl: ark::ets::intrinsics::EtsStdCoreArrayGet
 
@@ -1896,7 +1893,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [ i32, Y ]
+      args: [ i32, std.core.Object ]
     impl: ark::ets::intrinsics::EtsStdCoreArraySet
 
   - name: StdCoreArrayJoin
@@ -1907,7 +1904,7 @@ intrinsics:
     signature:
       ret: std.core.String
       args:
-        - Y[]
+        - std.core.Object[]
         - i32
         - std.core.String
     impl: ark::ets::intrinsics::EtsStdCoreArrayJoinInternal
@@ -1920,9 +1917,9 @@ intrinsics:
     signature:
       ret: i32
       args:
-        - Y[]
+        - std.core.Object[]
         - i32
-        - Y
+        - std.core.Object
         - i32
     impl: ark::ets::intrinsics::EtsStdCoreArrayInternalIndexOf
 
@@ -1934,9 +1931,9 @@ intrinsics:
     signature:
       ret: i32
       args:
-        - Y[]
+        - std.core.Object[]
         - i32
-        - Y
+        - std.core.Object
         - i32
     impl: ark::ets::intrinsics::EtsStdCoreArrayInternalLastIndexOf
 
@@ -1948,9 +1945,9 @@ intrinsics:
     signature:
       ret: void
       args:
-        - Y[]
+        - std.core.Object[]
         - i32
-        - Y
+        - std.core.Object
         - i32
         - i32
     impl: ark::ets::intrinsics::EtsStdCoreArrayFillImpl
@@ -1961,7 +1958,7 @@ intrinsics:
     method_name: $_get_unsafe
     static: false
     signature:
-      ret: Y
+      ret: std.core.Object
       args: [ i32 ]
     impl: ark::ets::intrinsics::EtsStdCoreArrayGetUnsafe
 
@@ -1972,7 +1969,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [ i32, Y ]
+      args: [ i32, std.core.Object ]
     impl: ark::ets::intrinsics::EtsStdCoreArraySetUnsafe
 
   - name: StdCoreArrayUnshiftInternal
@@ -1983,9 +1980,9 @@ intrinsics:
     signature:
       ret: void
       args:
-        - Y[]
+        - std.core.Object[]
         - i32
-        - Y[]
+        - std.core.Object[]
         - std.core.Array
     impl: ark::ets::intrinsics::EtsStdCoreArrayUnshiftInternal
 
@@ -1997,7 +1994,7 @@ intrinsics:
     signature:
       ret: void
       args:
-        - Y[]
+        - std.core.Object[]
         - i32
     impl: ark::ets::intrinsics::EtsStdCoreArrayReverse
     codegen_arch: [ arm64, amd64 ]
@@ -2025,7 +2022,7 @@ intrinsics:
     method_name: getBuffer
     static: true
     signature:
-      ret: Y[]
+      ret: std.core.Object[]
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsStdCoreArrayGetBuffer
     safe_intrinsic: true
@@ -2040,7 +2037,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ Y, Y ]
+      args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::StdRuntimeSameValueZero
     codegen_arch: [arm64, amd64]
     codegen_func: CreateSameValueZero
@@ -2053,7 +2050,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ Y, Y ]
+      args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreRuntimeIsSameReference
 
 ##########################
@@ -5401,13 +5398,13 @@ intrinsics:
     method_name: __alloc_array
     static: true
     signature:
-      ret: Y[]
+      ret: std.core.Object[]
       args:
         - i32
         - U{std.core.Null,std.core.Object}
       impl_args:
         - i32
-        - Y
+        - std.core.Object
     impl: ark::ets::intrinsics::StdCoreAllocGenericArray
 
   - name: StdCoreBoolCopyTo
@@ -5538,8 +5535,8 @@ intrinsics:
     signature:
       ret: void
       args:
-        - Y\[
-        - Y\[
+        - std.core.Object\[
+        - std.core.Object\[
         - i32
         - i32
         - i32
@@ -5553,8 +5550,8 @@ intrinsics:
     signature:
       ret: void
       args:
-        - Y\[
-        - Y\[
+        - std.core.Object\[
+        - std.core.Object\[
         - i32
         - i32
         - i32
@@ -5572,8 +5569,8 @@ intrinsics:
     signature:
       ret: void
       args:
-        - Y\[
-        - Y\[
+        - std.core.Object\[
+        - std.core.Object\[
         - i32
         - i32
         - i32
@@ -5953,7 +5950,7 @@ intrinsics:
     method_name: deref
     static: false
     signature:
-      ret: Y
+      ret: std.core.Object
       args: [ ]
     impl: ark::ets::intrinsics::StdWeakReferenceDeref
 
@@ -6009,7 +6006,7 @@ intrinsics:
     method_name: Await
     static: false
     signature:
-      ret: Y
+      ret: std.core.Object
       args: []
     impl: ark::ets::intrinsics::EtsAwaitJob
 
@@ -6020,7 +6017,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [ Y ]
+      args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsFinishJob
 
   - name: StdJobFail
@@ -6030,7 +6027,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [ Y ]
+      args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsFailJob
 
 ######################
@@ -6043,7 +6040,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [Y, u1]
+      args: [std.core.Object, u1]
     impl: ark::ets::intrinsics::EtsPromiseResolve
 
   - name: StdPromiseReject
@@ -6072,7 +6069,7 @@ intrinsics:
     method_name: awaitResolution
     static: false
     signature:
-      ret: Y
+      ret: std.core.Object
       args: []
     impl: ark::ets::intrinsics::EtsAwaitPromise
     codegen_arch: [amd64, arm64]
@@ -6084,7 +6081,7 @@ intrinsics:
     method_name: awaitSync
     static: false
     signature:
-      ret: Y
+      ret: std.core.Object
       args: []
     impl: ark::ets::intrinsics::EtsAwaitPromiseSync
 
@@ -7250,7 +7247,7 @@ intrinsics:
     static: true
     signature:
       ret: i64
-      args: [ Y ]
+      args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdRuntimeGetHashCodeByValue
     #irtoc_impl: getHashCodeByValueNativePlus
     codegen_arch: [arm64, amd64]
@@ -7264,21 +7261,32 @@ intrinsics:
     method_name: allocSameTypeArray
     static: true
     signature:
-      ret: Y[]
+      ret: std.core.Object[]
       args: [ std.core.Class, i32 ]
     impl: ark::ets::intrinsics::StdCoreRuntimeAllocSameTypeArray
     clear_flags: [ ]
 
-  - name: JStdCoreRuntimeAnyToString
+  - name: StdCoreRuntimeFailedTypeCastExclUndefinedStub
     space: ets
     class_name: std.core.Runtime
-    method_name: anyToString
+    method_name: failedTypeCastExclUndefinedStub
     static: true
     signature:
-      ret: std.core.String
-      args: [ Y ]
-    impl: ark::ets::intrinsics::StdCoreRuntimeAnyToString
-    clear_flags: []
+      ret: std.core.ClassCastError
+      args: [ std.core.Object, std.core.Class ]
+    impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastExclUndefinedStub
+    clear_flags: [ ]
+
+  - name: StdCoreRuntimeFailedTypeCastInclUndefinedStub
+    space: ets
+    class_name: std.core.Runtime
+    method_name: failedTypeCastInclUndefinedStub
+    static: true
+    signature:
+      ret: std.core.ClassCastError
+      args: [ std.core.Object, std.core.Class ]
+    impl: ark::ets::intrinsics::StdCoreRuntimeFailedTypeCastInclUndefinedStub
+    clear_flags: [ ]
 
 ###########################
 # std.core.reflect.Method #
@@ -7339,10 +7347,10 @@ intrinsics:
     method_name: invokeInternal
     static: false
     signature:
-      ret: Y
+      ret: std.core.Object
       args:
         - std.core.Object
-        - Y[]
+        - std.core.Object[]
     impl: ark::ets::intrinsics::ReflectMethodInvokeInternal
 
   - name: StdCoreReflectMethodCreateInstanceInternal
@@ -7353,7 +7361,7 @@ intrinsics:
     signature:
       ret: std.core.Object
       args:
-        - Y[]
+        - std.core.Object[]
     impl: ark::ets::intrinsics::ReflectMethodCreateInstanceInternal
 
 ##########################
@@ -7388,7 +7396,7 @@ intrinsics:
       ret: void
       args:
         - std.core.Object
-        - Y
+        - std.core.Object
     impl: ark::ets::intrinsics::ReflectFieldSetValueInternal
 
   - name: StdCoreReflectFieldGetValueInternal
@@ -7397,7 +7405,7 @@ intrinsics:
     method_name: getValueInternal
     static: false
     signature:
-      ret: Y
+      ret: std.core.Object
       args:
         - std.core.Object
     impl: ark::ets::intrinsics::ReflectFieldGetValueInternal
@@ -8114,7 +8122,7 @@ intrinsics:
     method_name: TypeAPIGetStaticFieldValue
     static: true
     signature:
-      ret: Y
+      ret: std.core.Object
       args: [ std.core.Type, std.core.String ]
     impl: ark::ets::intrinsics::TypeAPIGetStaticFieldValue
 
@@ -8125,7 +8133,7 @@ intrinsics:
     static: true
     signature:
       ret: void
-      args: [ std.core.Type, std.core.String, Y ]
+      args: [ std.core.Type, std.core.String, std.core.Object ]
     impl: ark::ets::intrinsics::TypeAPISetStaticFieldValue
 
   - name: StdMethodInvoke
@@ -8134,11 +8142,11 @@ intrinsics:
     method_name: TypeAPIMethodInvoke
     static: true
     signature:
-      ret: Y
+      ret: std.core.Object
       args:
         - std.core.MethodType
-        - Y
-        - Y[]
+        - std.core.Object
+        - std.core.Object[]
     impl: ark::ets::intrinsics::TypeAPIMethodInvoke
 
   - name: StdMethodInvokeConstructor
@@ -8150,7 +8158,7 @@ intrinsics:
       ret: std.core.Object
       args:
         - std.core.MethodType
-        - Y[]
+        - std.core.Object[]
     impl: ark::ets::intrinsics::TypeAPIMethodInvokeConstructor
 
   - name: TypeAPIGetFunctionObjectNameFromAnnotation
@@ -9051,7 +9059,7 @@ intrinsics:
     method_name: load
     static: false
     signature:
-      ret: Y
+      ret: std.core.Object
       args: [ ]
     impl: ark::ets::intrinsics::EtsAtomicReferenceLoadValue
 
@@ -9062,7 +9070,7 @@ intrinsics:
     static: false
     signature:
       ret: void
-      args: [ Y ]
+      args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsAtomicReferenceStoreValue
 
   - name: AtomicsRefExchangeObject
@@ -9071,8 +9079,8 @@ intrinsics:
     method_name: exchange
     static: false
     signature:
-      ret: Y
-      args: [ Y ]
+      ret: std.core.Object
+      args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsAtomicReferenceExchangeValue
 
   - name: AtomicsRefCompareAndSwapObject
@@ -9081,8 +9089,8 @@ intrinsics:
     method_name: compareAndSwap
     static: false
     signature:
-      ret: Y
-      args: [ Y, Y ]
+      ret: std.core.Object 
+      args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsAtomicReferenceCompareAndSwapValue
 
   - name: AtomicsRefIsLockFreeCheck
@@ -10663,7 +10671,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ Y, Y ]
+      args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::StdRuntimeSameValueZero
     codegen_arch: [arm64, amd64]
     codegen_func: CreateSameValueZero

@@ -24,7 +24,7 @@ expected_error:
     verify-new-libs:
         - "E/verifier: Cannot link class: Cannot find class Linterface_removing_n/libr/N/I;"
         - "E/verifier: Verifier error 49: Undefined register"
-        - "E/verifier: Error: method Y interface_removing_n.%%lambda-lambda_invoke-0::invoke0(interface_removing_n.%%lambda-lambda_invoke-0) failed to verify"
+        - "E/verifier: Error: method std.core.Object interface_removing_n.%%lambda-lambda_invoke-0::invoke0(interface_removing_n.%%lambda-lambda_invoke-0) failed to verify"
         - "E/verifier: Verifier error 53: Cache miss for class at offset"
         - "E/verifier: Verifier error 63: Cannot resolve class id"
         - "E/verifier: Cannot link class: Cannot find class Linterface_removing_n/libr/N/I;"
