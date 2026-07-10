@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <climits>
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
@@ -27,13 +26,14 @@
 namespace ark::ets::intrinsics {
 
 namespace {
-constexpr int INT_MAX_SIZE = 63;
 constexpr double ROUND_BIAS = 0.5;
 constexpr uint32_t RIGHT_12 = 12;
 constexpr uint32_t LEFT_25 = 25;
 constexpr uint32_t RIGHT_27 = 27;
 constexpr uint64_t RANDOM_MULTIPLY = 0x2545F4914F6CDD1D;
 constexpr uint64_t DOUBLE_MASK = 0x3FF0000000000000;
+constexpr double UINT32_MODULO = 4294967296.0;
+constexpr double INT32_SIGN_BIT = 2147483648.0;
 
 union Uint64ToDouble {
     double to;
@@ -42,19 +42,18 @@ union Uint64ToDouble {
 
 int32_t ToInt32(double x)
 {
-    if (std::isinf(x)) {
+    if (!std::isfinite(x)) {
         return 0;
     }
 
-    if ((std::isfinite(x)) && (x <= INT_MAX) && (x >= INT_MIN)) {
-        return static_cast<int32_t>(x);
+    auto modulo = std::fmod(std::trunc(x), UINT32_MODULO);
+    if (modulo < 0) {
+        modulo += UINT32_MODULO;
     }
-
-    double intPart = 0.0;
-    std::modf(x, &intPart);
-    double int64Max = std::pow(2, INT_MAX_SIZE);
-    intPart = std::fmod(intPart, int64Max);
-    return static_cast<int32_t>(static_cast<int64_t>(intPart));
+    if (modulo >= INT32_SIGN_BIT) {
+        modulo -= UINT32_MODULO;
+    }
+    return static_cast<int32_t>(modulo);
 }
 
 uint64_t XorShift64(uint64_t *ptr)
@@ -327,10 +326,7 @@ extern "C" bool StdMathSignbit(double val)
 
 extern "C" int StdMathImul(double val, double val2)
 {
-    if (!std::isfinite(val) || !std::isfinite(val2)) {
-        return 0;
-    }
-    return static_cast<int32_t>(static_cast<int64_t>(val) * static_cast<int64_t>(val2));
+    return bit_cast<int32_t>(ToUint32(val) * ToUint32(val2));
 }
 
 extern "C" double StdMathFround(double val)

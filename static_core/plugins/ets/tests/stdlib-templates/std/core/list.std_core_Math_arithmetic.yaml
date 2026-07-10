@@ -455,6 +455,7 @@
         test31:  {a: 1e18, b: -1.0},
         test32:  {a: -5.0, b: 1e18},
         test33:  {a: -1.0, b: 1e18},
+        test40:  {a: Double.MAX_VALUE, b: 1.0},
       },
     method_expected_data:
       {
@@ -466,7 +467,8 @@
         test30: -1156841472,
         test31:  1486618624,
         test32: -1156841472,
-        test33:  1486618624
+        test33:  1486618624,
+        test40:  0
       },
   }
 - {
