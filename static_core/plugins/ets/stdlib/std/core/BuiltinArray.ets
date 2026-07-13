@@ -480,7 +480,7 @@ export function join(self: FixedArray<boolean>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -1381,7 +1381,7 @@ export function join(self: FixedArray<byte>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -2282,7 +2282,7 @@ export function join(self: FixedArray<short>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -3183,7 +3183,7 @@ export function join(self: FixedArray<int>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -4084,7 +4084,7 @@ export function join(self: FixedArray<long>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -4985,7 +4985,7 @@ export function join(self: FixedArray<float>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -5894,7 +5894,7 @@ export function join(self: FixedArray<double>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -6803,7 +6803,7 @@ export function join(self: FixedArray<char>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -7300,7 +7300,7 @@ export function join(self: ValueArray<boolean>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -7315,7 +7315,7 @@ export function join(self: ValueArray<byte>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -7330,7 +7330,7 @@ export function join(self: ValueArray<short>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -7345,7 +7345,7 @@ export function join(self: ValueArray<int>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -7360,7 +7360,7 @@ export function join(self: ValueArray<long>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -7375,7 +7375,7 @@ export function join(self: ValueArray<float>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -7390,7 +7390,7 @@ export function join(self: ValueArray<double>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
@@ -7405,7 +7405,7 @@ export function join(self: ValueArray<char>, sep?: String): string {
     if (self.length == 0) {
         return ""
     }
-    const sepReal = sep === undefined ? "," : sep!
+    const sepReal = sep === undefined ? ',' : sep
     let sb = new StringBuilder(new String(self[0]))
     for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]

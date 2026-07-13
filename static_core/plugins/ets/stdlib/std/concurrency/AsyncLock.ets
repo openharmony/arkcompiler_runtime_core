@@ -184,8 +184,7 @@ export class AsyncLock {
                 let v = f.unsafeCall(...args) as T
                 resolver!(v)
             } catch (e) {
-                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
-                rejecter!(e as Error)
+                rejecter!(e)
             }
         }
         launchSameWorker(cb)

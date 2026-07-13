@@ -81,7 +81,7 @@ export namespace Intl {
             return [locales]
         } else if (locales instanceof Intl.Locale) {
             return [locales.toString()]
-        } else if (locales instanceof ReadonlyArray) {
+        } else {
             if (locales.length == 0) {
                 return []
             }
@@ -97,8 +97,6 @@ export namespace Intl {
                 }
             }
             return langTags
-        } else {
-            throw new TypeError('\'locales\' parameter has invalid type')
         }
     }
 
@@ -2208,7 +2206,7 @@ export class DateTimeFormat {
                 if (locales instanceof string) {
                     loc = Array.of<string>(locales)
                 } else {
-                    loc = Array.from<string>(locales as string[])
+                    loc = Array.from<string>(locales)
                 }
                 if (loc.includes('') && options != undefined) {
                     throw new Error('Incorrect locale information provided')

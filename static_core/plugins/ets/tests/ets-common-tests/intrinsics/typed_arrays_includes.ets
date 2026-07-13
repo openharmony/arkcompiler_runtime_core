@@ -24,8 +24,8 @@ function checkArray(data: Float32Array, elem: number, expected: boolean, fromInd
 }
 
 function checkArrayForFloat(data: Float32Array, elem: float): void {
-    arktest.assertEQ(data.includes(elem), data.indexOf(elem.toInt()) > 0, 'data.includes(elem: float) must check ' +
-        'whether data.indexOf(elem.toInt()) > -1, so whether the truncated float exists within the array.');
+    arktest.assertEQ(data.includes(elem), data.includes(elem.toDouble()),
+        'data.includes(elem: float) must agree with data.includes(elem as double) (SameValueZero).');
 }
 
 function checkArray(data: Uint32Array, elem: long, expected: boolean, fromIndex?: int): void {
@@ -84,11 +84,11 @@ function testF32ArrayNoNaN() {
         1.060001e+09, 2.8e+24, 3.4e+38);
     checkArray(dataNoInf, Infinity, false);
     checkArray(dataNoInf, -3.4e+38, true);
-    checkArrayForFloat(dataNoInf, -3.4e+38f); // -3 exists, indexOf(-3) returns smth > -1
+    checkArrayForFloat(dataNoInf, -3.4e+38f);
     checkArray(dataNoInf, (-3.4e+38 + 1e32), false);
     checkArrayForFloat(dataNoInf, (-3.4e+38f + 1e32f));
     checkArray(dataNoInf, -2.02e+16, true);
-    checkArrayForFloat(dataNoInf, -2.02e+16f); // -2 doesn't exist, indexOf(-2) returns -1
+    checkArrayForFloat(dataNoInf, -2.02e+16f);
     checkArray(dataNoInf, -2.020101e+16, false);
     checkArrayForFloat(dataNoInf, -2.020101e+16f);
     checkArray(dataNoInf, -1.061e+09, true);
@@ -305,7 +305,7 @@ function testF32ArrayNaN() {
         checkArray(arr, NaN, positionOfNaN == arr.length - 1, arr.length - 1);
         checkArray(arr, NaN, true, -(arr.length + 1));
         checkArray(arr, NaN, true, -(arr.length - positionOfNaN));
-        checkArrayForFloat(arr, NaN.toFloat()); // No special case for NaN in Float32Array.includes(float)
+        checkArrayForFloat(arr, NaN.toFloat());
     }
     const checkNoNaN = (arr: Float32Array, positionOfNaN: int) => {
         arktest.assertLT(1, arr.length);

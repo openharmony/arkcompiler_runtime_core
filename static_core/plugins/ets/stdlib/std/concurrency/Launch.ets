@@ -111,7 +111,7 @@ export function launch<R>(coroFun: () => R, launchParams: LaunchParams): Job<R> 
  * @internal
  */
 export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams, ...args: FixedArray<Any>): Job<R> {
-  return launchWithArgs<R>(coroFun as Function, args as FixedArray<Any>, launchParams);
+  return launchWithArgs<R>(coroFun, args, launchParams);
 }
 
 /**
@@ -125,7 +125,7 @@ export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams
  * @internal
  */
 export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: FixedArray<Any>): Job<R> {
-  return launchWithArgs<R>(coroFun as Function, args as FixedArray<Any>);
+  return launchWithArgs<R>(coroFun, args);
 }
 
 /**

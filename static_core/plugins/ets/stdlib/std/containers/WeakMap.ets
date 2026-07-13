@@ -64,7 +64,7 @@ export final class WeakMap<K extends Object, V> {
 
         if (entries != null) {
             for (const entry of entries) {
-                this.set(entry[0] as K, entry[1] as V)
+                this.set(entry[0], entry[1])
             }
         }
     }
@@ -79,7 +79,7 @@ export final class WeakMap<K extends Object, V> {
         this(null)
 
         iteratorForEach<[K, V]>(entries.$_iterator(), (entry: [K, V]) => {
-            this.set(entry[0] as K, entry[1] as V)
+            this.set(entry[0], entry[1])
         })
     }
 

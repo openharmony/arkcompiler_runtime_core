@@ -113,13 +113,13 @@ export namespace StdProcess {
         kill(signal: int | string): void {
             let killSignal: int;
             if (signal instanceof string) {
-                if (SIGNAL_MAP.has(signal as string)) {
-                    killSignal = SIGNAL_MAP.get(signal as string)! as int;
+                if (SIGNAL_MAP.has(signal)) {
+                    killSignal = SIGNAL_MAP.get(signal)!;
                 } else {
-                    killSignal = SIGNAL_MAP.get("SIGTERM")! as int;
+                    killSignal = SIGNAL_MAP.get('SIGTERM')!;
                 }
             } else {
-                if ((signal as int) < 1 || (signal as int) > 31) {
+                if (signal < 1 || signal > 31) {
                     throw new RangeError("Process:: Invalid signal value");
                 }
                 killSignal = signal;
@@ -366,7 +366,7 @@ export namespace StdProcess {
         let args: int[] = getCmdOptions(options);
         let childProcess = new ChildProcessHelper(args[2]);
         childProcess.spawn(command, args[0], args[1]);
-        return childProcess as ChildProcess;
+        return childProcess
     }
 
     /**
@@ -383,12 +383,10 @@ export namespace StdProcess {
     */
     export function on(type: "unhandledPromiseRejection" | "uncaughtError", listener: EventListener): void {
         if (type == string("unhandledJobRejection")) {
-            listener = listener as RejectedObjectListener;
             setFailedJobHandler(listener);
             return;
         }
         if (type == "unhandledPromiseRejection") {
-            listener = listener as RejectedObjectListener;
             setRejectedPromiseHandler(listener);
             return;
         }
@@ -456,7 +454,7 @@ export namespace StdProcess {
 
     function getCmdOptions(options?: ConditionType): int[] {
         let timeout: int = 0;
-        let killSignal: int = SIGNAL_MAP.get("SIGTERM")! as int;
+        let killSignal: int = SIGNAL_MAP.get('SIGTERM')!;
         let maxBuffer: int = MAX_BUFFER_SIZE;
 
             if (options == undefined) {
@@ -471,7 +469,7 @@ export namespace StdProcess {
             if (options.killSignal instanceof string) {
                 let key: string = options.killSignal as string;
                 if (SIGNAL_MAP.has(key)) {
-                    killSignal = SIGNAL_MAP.get(options.killSignal as string)! as int;
+                    killSignal = SIGNAL_MAP.get(options.killSignal as string)!;
                 }
             } else {
                 if ((options.killSignal as int) < 1 || (options.killSignal as int) > 31) {
@@ -551,22 +549,18 @@ export namespace StdProcess {
         let out = new String();
         let toStr = new String();
         let stack = new String();
-        if (error instanceof Error) {
-            try {
-                toStr = error.toString() as string;
-            } catch (e) {
-                toStr = 'invoke toString failed';
-            }
-            out += toStr;
-            try {
-                stack = error.stack as string;
-            } catch (e) {
-                stack = 'exception dump failed';
-            }
-            out += '\n' + stack;
-        } else {
-            throw new Error('Process:: Unknown error type');
+        try {
+            toStr = error.toString();
+        } catch (e) {
+            toStr = 'invoke toString failed';
         }
+        out += toStr;
+        try {
+            stack = error.stack as string;
+        } catch (e) {
+            stack = 'exception dump failed';
+        }
+        out += '\n' + stack;
         console.error(out);
         let procManager = new StdProcess.ProcessManager();
         procManager.exit(1);

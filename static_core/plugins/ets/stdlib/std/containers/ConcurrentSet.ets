@@ -41,16 +41,6 @@ export namespace containers {
         }
 
         /**
-        * Constructs a ConcurrentSet from iterator
-        * @param { Iterable<T> } iterable initial iterable
-        */
-        constructor(iterable: Iterable<T>) {
-            const it = (iterable as Iterable<T>).$_iterator();
-            const entriesIter = new MappingIterator<T, [T, T]>(it, (element: T): [T, T] => [element, element]);
-            this.elements = new ConcurrentHashMap<T, T>(entriesIter);
-        }
-
-        /**
         * Constructs a ConcurrentSet from a Set
         * @param { Set<T> } set another Set
         */
@@ -59,6 +49,16 @@ export namespace containers {
             set.forEach((value: T) => {
                 this.add(value);
             });
+        }
+
+        /**
+        * Constructs a ConcurrentSet from iterator
+        * @param { Iterable<T> } iterable initial iterable
+        */
+        constructor(iterable: Iterable<T>) {
+            const it = iterable.$_iterator();
+            const entriesIter = new MappingIterator<T, [T, T]>(it, (element: T): [T, T] => [element, element]);
+            this.elements = new ConcurrentHashMap<T, T>(entriesIter);
         }
 
         private toStringVals(): String {

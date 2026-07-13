@@ -1132,7 +1132,14 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @FaAndStageModel
      */
     public includes(searchElement: {{T}}, fromIndex: int): boolean {
+    {%- if (N == 'Float32') %}
+        if (isNaN(searchElement)) {
+            return this.containsNaN(fromIndex)
+        }
+        return this.indexOf(searchElement.toDouble(), fromIndex) != -1
+    {%- else %}
         return this.indexOf(searchElement.toInt(), fromIndex) != -1
+    {%- endif %}
     }
 
     /**

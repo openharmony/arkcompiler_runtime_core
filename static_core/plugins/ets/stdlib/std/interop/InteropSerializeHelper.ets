@@ -68,7 +68,7 @@ export class InteropSerializeHelper {
             return new InteropArgRecord(InteropArgType.DIRECT, arg);
         }
         if (arg instanceof ESValue && !arg.isUndefined() && !arg.isNull()) {
-            let unwrapped = (arg as ESValue).unwrap();
+            let unwrapped = arg.unwrap();
             if (unwrapped != undefined && !arg.isUndefined() && InteropSerializeHelper.isJSInteropRef(unwrapped)) {
                 let ser = InteropSerializeHelper.serializeHandle(unwrapped as JSValue);
                 return new InteropArgRecord(InteropArgType.UNWRAP, ser);

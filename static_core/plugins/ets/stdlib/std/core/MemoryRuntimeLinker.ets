@@ -28,7 +28,7 @@ export class MemoryRuntimeLinker extends AbcRuntimeLinker {
             if (rawFile instanceof ValueArray<byte>) {
                 abcFiles[i] = AbcFile.loadFromMemory(this, rawFile)
             } else {
-                abcFiles[i] = AbcFile.loadFromMemory(this, rawFile as FixedArray<byte>)
+                abcFiles[i] = AbcFile.loadFromMemory(this, rawFile)
             }
             i++
         }

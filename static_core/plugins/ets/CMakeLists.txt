@@ -177,6 +177,19 @@ if(TARGET es2panda)
     compile_ets_code(GEN_STD_LIB "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc" etsstdlib)
 
     set_target_properties(etsstdlib PROPERTIES FILE "${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc")
+
+    add_custom_target(ets-check-stdlib-warnings
+        COMMENT "Checking ETS stdlib warnings"
+        COMMAND ${CMAKE_SOURCE_DIR}/scripts/check_stdlib/check_stdlib_warnings.sh
+            --stdlib-compiler ${es2panda_bin_stdlib}
+            --output ${CMAKE_CURRENT_BINARY_DIR}/check_stdlib/etsstdlib.abc
+            --arktsconfig ${STDLIB}/stdconfig.json
+            --whitelist ${CMAKE_SOURCE_DIR}/scripts/check_stdlib/whitelist.txt
+        DEPENDS ${es2panda_target_stdlib}
+        USES_TERMINAL
+        VERBATIM
+    )
+
     add_dependencies(ark etsstdlib)
     add_subdirectory(sdk)
 

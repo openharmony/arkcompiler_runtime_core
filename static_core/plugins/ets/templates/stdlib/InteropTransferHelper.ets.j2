@@ -27,7 +27,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
         let dynamicESValue = ESValue.wrap(dynamicObject as object);
-        return InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicESValue) as Object;
+        return InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicESValue);
     }
 
     private static native transferArrayBufferToDynamicImpl(staticObject: ArrayBuffer): Any;
@@ -66,22 +66,19 @@ export final class InteropTransferHelper {
         let length = dynamicESValue.getProperty("length").toNumber();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new {{ typed_array.type_name }}(staticBuffer, byteOffset, length) as Object;
+        return new {{ typed_array.type_name }}(staticBuffer, byteOffset, length);
     }
 
     public static transfer{{ typed_array.type_name }}ToDynamic(staticObject: Object): Any {
         let staticTypedArray = staticObject as {{ typed_array.type_name }};
 
         let staticBuffer = staticTypedArray.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticTypedArray.byteOffset;
         let length = staticTypedArray.length;
 
         let dynamicTypedArray = InteropTransferHelper.createDynamicTypedArray(
-            staticBuffer as ArrayBuffer,
+            staticBuffer,
             {{ loop.index0 }},
             length,
             byteOffset
@@ -101,21 +98,18 @@ export final class InteropTransferHelper {
         let byteLength = dynamicESValue.getProperty("byteLength").toNumber().toInt();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new DataView(staticBuffer, byteOffset, byteLength) as Object;
+        return new DataView(staticBuffer, byteOffset, byteLength);
     }
 
     public static transferDataViewToDynamic(staticObject: Object): Any {
         let staticDataView = staticObject as DataView;
 
         let staticBuffer = staticDataView.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticDataView.byteOffset;
         let byteLength = staticDataView.byteLength;
 
-        let dynamicDataView = InteropTransferHelper.createDynamicDataView(staticBuffer as ArrayBuffer, byteLength, byteOffset);
+        let dynamicDataView = InteropTransferHelper.createDynamicDataView(staticBuffer, byteLength, byteOffset);
         return dynamicDataView;
     }
 }

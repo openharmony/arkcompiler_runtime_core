@@ -184,7 +184,7 @@ export namespace containers {
                 this.buckets[idx] = newBucket;
                 return newBucket;
             } else {
-                return bucket!;
+                return bucket;
             }
         }
 
@@ -293,7 +293,7 @@ export namespace containers {
         * @param { Iterable<[K, V]> } iterable The iterable object
         */
         constructor(iterable: Iterable<[K, V]>) {
-            const entriesIter = (iterable as Iterable<[K, V]>).$_iterator();
+            const entriesIter = iterable.$_iterator();
             const entriesBuf = new Array<[K, V]>();
             for (let iterRes = entriesIter.next();!iterRes.done;iterRes = entriesIter.next()) {
                 const entry = iterRes.value;
@@ -561,7 +561,7 @@ export namespace containers {
                     }
                     let key = v.value;
                     if (key != undefined) {
-                        this.delete(key as K);
+                        this.delete(key);
                     }
                 }
                 ConcurrencyHelpers.mutexLock(this.bucketsMutex);

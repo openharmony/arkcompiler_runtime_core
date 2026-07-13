@@ -43,7 +43,7 @@ class EventLoop {
     }
 
     public init() {
-        launchSameWorker(() => { this.pollLoop(); } as Object);
+        launchSameWorker(() => { this.pollLoop(); });
     }
 
     public registerTimer(timer: Timer) {
@@ -147,7 +147,7 @@ class Timer {
     }
 
     public invoke() {
-        launchSameWorker(this.callback as Object);
+        launchSameWorker(this.callback);
     }
 
     public getId(): TimerId {
@@ -212,7 +212,7 @@ class TimerTable {
             if (timer === undefined) {
                 return;
             }
-            if (timer!.hasLinkedTimer() && !CoroutineExtras.workerHasExternalScheduler()) {
+            if (timer.hasLinkedTimer() && !CoroutineExtras.workerHasExternalScheduler()) {
                 throw new Error('EventLoop:: Cannot clear interop timer from non-interop worker');
             }
             this.timers.delete(id);

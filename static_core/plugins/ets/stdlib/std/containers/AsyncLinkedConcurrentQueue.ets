@@ -110,7 +110,7 @@ export namespace containers.stackless {
          */
         public constructor(capacity: int, iterable: Iterable<T>) {
             this(capacity);
-            this.appendIterable(iterable as Iterable<T>);
+            this.appendIterable(iterable);
         }
 
         /**
@@ -209,7 +209,7 @@ export namespace containers.stackless {
                 if (this.atomicsGetSize() > 0) {
                     const first = this.dequeueElementLocked();
                     previousSize = this.completeDequeueLocked();
-                    return first as T;
+                    return first;
                 } else {
                     return undefined;
                 }
@@ -438,7 +438,7 @@ export namespace containers.stackless {
                 const val = iterRes.value;
                 if (val !== undefined) {
                     // The undefined guard above proves the iterated value is present for the non-null assertion.
-                    if (!this.add(val!)) {
+                    if (!this.add(val)) {
                         throw new RangeError("LinkedConcurrentQueue:: iterable exceeds capacity");
                     }
                 }

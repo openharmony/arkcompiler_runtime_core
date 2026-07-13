@@ -207,7 +207,7 @@ class DeepCloner {
 
 		if (obj instanceof Cloneable) {
 			if (this.hasOverrideClone(objType)) {
-				let objClone = obj as Cloneable
+				let objClone = obj
 				return objClone.clone()
 			}
 			throw new Error(`class ${objType.getName()} doesn't override clone`)
@@ -220,7 +220,7 @@ class DeepCloner {
 
 		// this won't work for strings due to string special constructor mechanics
 		// but string instance cloning is not handled here
-		const objCopy = emptyCtor.createInstance() as object
+		const objCopy = emptyCtor.createInstance()
 		this.copies.set(obj, objCopy)
 
 		const objEntries = this.getObjectEntries(obj)

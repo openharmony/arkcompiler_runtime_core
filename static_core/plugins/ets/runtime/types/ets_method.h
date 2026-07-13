@@ -241,16 +241,16 @@ public:
         return GetClass() == klass;
     }
 
-    bool IsGetter()
+    bool IsGetter() const
     {
-        auto name = GetNameString();
-        return name->GetMutf8().rfind(GETTER_BEGIN, 0) == 0;
+        static constexpr std::string_view GET_BEGIN(GETTER_BEGIN);
+        return std::strncmp(GetName(), GETTER_BEGIN, GET_BEGIN.size()) == 0;
     }
 
-    bool IsSetter()
+    bool IsSetter() const
     {
-        auto name = GetNameString();
-        return name->GetMutf8().rfind(SETTER_BEGIN, 0) == 0;
+        static constexpr std::string_view SET_BEGIN(SETTER_BEGIN);
+        return std::strncmp(GetName(), SETTER_BEGIN, SET_BEGIN.size()) == 0;
     }
 
     void RegisterNative(const void *ptr)

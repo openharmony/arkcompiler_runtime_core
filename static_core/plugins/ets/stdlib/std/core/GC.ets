@@ -74,7 +74,7 @@ export namespace GC {
      * - -1 in case the task is canceled
      */
     export function startGC(cause: Cause, callback: () => void, inPlaceMode: boolean = GC.NOT_IN_PLACE_MODE): long {
-        return startGCImpl(cause, callback as Object, inPlaceMode);
+        return startGCImpl(cause, callback, inPlaceMode);
     }
 
     /**

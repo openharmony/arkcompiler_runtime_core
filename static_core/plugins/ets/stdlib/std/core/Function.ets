@@ -32,7 +32,7 @@ export interface FunctionN<R> extends Function {
 
 export abstract class LambdaN implements FunctionN<Any> {
     get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object);
+        return getFunctionObjectNameFromAnnotation(this);
     }
 }
 
@@ -212,7 +212,7 @@ export abstract class LambdaR0<in PR, out R>
         return this.invokeR0(
             ...Runtime.addFrontElementsStub(r, [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda0<out R>
     implements Function0<R> {
@@ -320,7 +320,7 @@ export abstract class Lambda0<out R>
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke0()
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR1<in P1, in PR, out R>
@@ -402,7 +402,7 @@ export abstract class LambdaR1<in P1, in PR, out R>
         return this.invokeR1(p1, 
             ...Runtime.addFrontElementsStub(r, [p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda1<in P1, out R>
     implements Function1<P1, R> {
@@ -504,7 +504,7 @@ export abstract class Lambda1<in P1, out R>
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke1(p1)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR2<in P1, in P2, in PR, out R>
@@ -582,7 +582,7 @@ export abstract class LambdaR2<in P1, in P2, in PR, out R>
         return this.invokeR2(p1, p2, 
             ...Runtime.addFrontElementsStub(r, [p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda2<in P1, in P2, out R>
     implements Function2<P1, P2, R> {
@@ -678,7 +678,7 @@ export abstract class Lambda2<in P1, in P2, out R>
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke2(p1, p2)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR3<in P1, in P2, in P3, in PR, out R>
@@ -752,7 +752,7 @@ export abstract class LambdaR3<in P1, in P2, in P3, in PR, out R>
         return this.invokeR3(p1, p2, p3, 
             ...Runtime.addFrontElementsStub(r, [p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda3<in P1, in P2, in P3, out R>
     implements Function3<P1, P2, P3, R> {
@@ -842,7 +842,7 @@ export abstract class Lambda3<in P1, in P2, in P3, out R>
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke3(p1, p2, p3)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR4<in P1, in P2, in P3, in P4, in PR, out R>
@@ -912,7 +912,7 @@ export abstract class LambdaR4<in P1, in P2, in P3, in P4, in PR, out R>
         return this.invokeR4(p1, p2, p3, p4, 
             ...Runtime.addFrontElementsStub(r, [p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda4<in P1, in P2, in P3, in P4, out R>
     implements Function4<P1, P2, P3, P4, R> {
@@ -996,7 +996,7 @@ export abstract class Lambda4<in P1, in P2, in P3, in P4, out R>
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke4(p1, p2, p3, p4)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR5<in P1, in P2, in P3, in P4, in P5, in PR, out R>
@@ -1062,7 +1062,7 @@ export abstract class LambdaR5<in P1, in P2, in P3, in P4, in P5, in PR, out R>
         return this.invokeR5(p1, p2, p3, p4, p5, 
             ...Runtime.addFrontElementsStub(r, [p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda5<in P1, in P2, in P3, in P4, in P5, out R>
     implements Function5<P1, P2, P3, P4, P5, R> {
@@ -1140,7 +1140,7 @@ export abstract class Lambda5<in P1, in P2, in P3, in P4, in P5, out R>
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke5(p1, p2, p3, p4, p5)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR6<in P1, in P2, in P3, in P4, in P5, in P6, in PR, out R>
@@ -1202,7 +1202,7 @@ export abstract class LambdaR6<in P1, in P2, in P3, in P4, in P5, in P6, in PR, 
         return this.invokeR6(p1, p2, p3, p4, p5, p6, 
             ...Runtime.addFrontElementsStub(r, [p7, p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda6<in P1, in P2, in P3, in P4, in P5, in P6, out R>
     implements Function6<P1, P2, P3, P4, P5, P6, R> {
@@ -1274,7 +1274,7 @@ export abstract class Lambda6<in P1, in P2, in P3, in P4, in P5, in P6, out R>
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke6(p1, p2, p3, p4, p5, p6)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in PR, out R>
@@ -1332,7 +1332,7 @@ export abstract class LambdaR7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
         return this.invokeR7(p1, p2, p3, p4, p5, p6, p7, 
             ...Runtime.addFrontElementsStub(r, [p8, p9, p10, p11, p12, p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, out R>
     implements Function7<P1, P2, P3, P4, P5, P6, P7, R> {
@@ -1398,7 +1398,7 @@ export abstract class Lambda7<in P1, in P2, in P3, in P4, in P5, in P6, in P7, o
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke7(p1, p2, p3, p4, p5, p6, p7)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in PR, out R>
@@ -1452,7 +1452,7 @@ export abstract class LambdaR8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
         return this.invokeR8(p1, p2, p3, p4, p5, p6, p7, p8, 
             ...Runtime.addFrontElementsStub(r, [p9, p10, p11, p12, p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, out R>
     implements Function8<P1, P2, P3, P4, P5, P6, P7, P8, R> {
@@ -1512,7 +1512,7 @@ export abstract class Lambda8<in P1, in P2, in P3, in P4, in P5, in P6, in P7, i
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke8(p1, p2, p3, p4, p5, p6, p7, p8)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in PR, out R>
@@ -1562,7 +1562,7 @@ export abstract class LambdaR9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
         return this.invokeR9(p1, p2, p3, p4, p5, p6, p7, p8, p9, 
             ...Runtime.addFrontElementsStub(r, [p10, p11, p12, p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, out R>
     implements Function9<P1, P2, P3, P4, P5, P6, P7, P8, P9, R> {
@@ -1616,7 +1616,7 @@ export abstract class Lambda9<in P1, in P2, in P3, in P4, in P5, in P6, in P7, i
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke9(p1, p2, p3, p4, p5, p6, p7, p8, p9)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in PR, out R>
@@ -1662,7 +1662,7 @@ export abstract class LambdaR10<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
         return this.invokeR10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, 
             ...Runtime.addFrontElementsStub(r, [p11, p12, p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, out R>
     implements Function10<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, R> {
@@ -1710,7 +1710,7 @@ export abstract class Lambda10<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke10(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in PR, out R>
@@ -1752,7 +1752,7 @@ export abstract class LambdaR11<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
         return this.invokeR11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, 
             ...Runtime.addFrontElementsStub(r, [p12, p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, out R>
     implements Function11<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, R> {
@@ -1794,7 +1794,7 @@ export abstract class Lambda11<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke11(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in PR, out R>
@@ -1832,7 +1832,7 @@ export abstract class LambdaR12<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
         return this.invokeR12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, 
             ...Runtime.addFrontElementsStub(r, [p13, p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, out R>
     implements Function12<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, R> {
@@ -1868,7 +1868,7 @@ export abstract class Lambda12<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke12(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in PR, out R>
@@ -1902,7 +1902,7 @@ export abstract class LambdaR13<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
         return this.invokeR13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, 
             ...Runtime.addFrontElementsStub(r, [p14, p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, out R>
     implements Function13<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, R> {
@@ -1932,7 +1932,7 @@ export abstract class Lambda13<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke13(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in PR, out R>
@@ -1962,7 +1962,7 @@ export abstract class LambdaR14<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
         return this.invokeR14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, 
             ...Runtime.addFrontElementsStub(r, [p15, p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, out R>
     implements Function14<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, R> {
@@ -1986,7 +1986,7 @@ export abstract class Lambda14<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke14(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in PR, out R>
@@ -2012,7 +2012,7 @@ export abstract class LambdaR15<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
         return this.invokeR15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, 
             ...Runtime.addFrontElementsStub(r, [p16]))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, out R>
     implements Function15<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, R> {
@@ -2030,7 +2030,7 @@ export abstract class Lambda15<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke15(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 
 export interface FunctionR16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, in PR, out R>
@@ -2052,7 +2052,7 @@ export abstract class LambdaR16<in P1, in P2, in P3, in P4, in P5, in P6, in P7,
         return this.invokeR16(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15], 
             ...Runtime.removeFrontElementsStub(r, 16))
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, in P8, in P9, in P10, in P11, in P12, in P13, in P14, in P15, in P16, out R>
     implements Function16<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, R> {
@@ -2064,6 +2064,6 @@ export abstract class Lambda16<in P1, in P2, in P3, in P4, in P5, in P6, in P7, 
     final invokeR16(p1: Any, p2: Any, p3: Any, p4: Any, p5: Any, p6: Any, p7: Any, p8: Any, p9: Any, p10: Any, p11: Any, p12: Any, p13: Any, p14: Any, p15: Any, p16: Any, ...r: FixedArray<Any>): R {
         return this.invoke16(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16)
     }
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 

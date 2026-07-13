@@ -80,7 +80,7 @@ export class WorkerLocal<T> {
                 throw new Error('WorkerLocal:: Value not initialized. Call set() first or provide an init function');
             }
         } else {
-            return wrapped!.get();
+            return wrapped.get();
         }
     }
 
