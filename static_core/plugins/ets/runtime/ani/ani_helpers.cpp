@@ -524,11 +524,9 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
     auto *job = jobMan->CreateJob(impl->GetFullName(), std::move(epInfo), EtsCoroutine::ASYNC_CALL);
     LaunchResult launchResult = jobMan->Launch(job, LaunchParams {true});
     if (UNLIKELY(launchResult != LaunchResult::OK)) {
+        jobMan->HandleLaunchResultManaged(launchResult);
         ASSERT(currentCoro->HasPendingException());
-        // OOM is thrown by Launch
-        if (launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED) {
-            jobMan->DestroyJob(job);
-        }
+        jobMan->DestroyJob(job);
         vm->GetGlobalObjectStorage()->Remove(promiseRef);
         return 0;
     }

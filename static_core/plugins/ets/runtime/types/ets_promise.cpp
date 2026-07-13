@@ -110,7 +110,8 @@ void EtsPromise::LaunchCallback(EtsExecutionContext *executionCtx, EtsHandle<Ets
     auto epInfo = Job::ManagedEntrypointInfo {event, method, std::move(args)};
     auto job = jobMan->CreateJob(method->GetFullName(), std::move(epInfo), EtsCoroutine::PROMISE_CALLBACK);
     auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId});
-    if (UNLIKELY(launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED)) {
+    if UNLIKELY (launchResult != LaunchResult::OK) {
+        jobMan->HandleLaunchResultManaged(launchResult);
         jobMan->DestroyJob(job);
     }
 }

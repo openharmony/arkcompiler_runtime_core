@@ -113,12 +113,11 @@ CoroResult *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id gro
                                   abortFlag);
     auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId});
     if (UNLIKELY(launchResult != LaunchResult::OK)) {
-        // Launch failed. The exception in the current coro should be already set by Launch(),
+        jobMan->HandleLaunchResultManaged(launchResult);
+        // Launch failed. The exception in the current coro should be already set by HandleLaunchResultManaged(),
         // just return null as the result and clean up the allocated resources.
         ASSERT(executionCtx->GetMT()->HasPendingException());
-        if (launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED) {
-            jobMan->DestroyJob(job);
-        }
+        jobMan->DestroyJob(job);
         storage->Remove(ref);
         return nullptr;
     }
@@ -156,7 +155,8 @@ void EtsLaunchSameWorker(EtsObject *callback)
     auto *job = jobMan->CreateJob(method->GetFullName(), std::move(epInfo), EtsCoroutine::TIMER_CALLBACK,
                                   Job::Type::MUTATOR, true);
     auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId});
-    if (UNLIKELY(launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED)) {
+    if UNLIKELY (launchResult != LaunchResult::OK) {
+        jobMan->HandleLaunchResultManaged(launchResult);
         ASSERT(executionCtx->GetMT()->HasPendingException());
         jobMan->DestroyJob(job);
     }

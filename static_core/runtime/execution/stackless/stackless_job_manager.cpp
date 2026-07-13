@@ -138,14 +138,28 @@ bool StacklessJobManager::TerminateExecutionContext(JobExecutionContext *executi
     return false;
 }
 
+void StacklessJobManager::HandleLaunchResultManaged(LaunchResult result)
+{
+    ASSERT_MANAGED_CODE();
+    switch (result) {
+        case LaunchResult::OK:
+            break;
+        case LaunchResult::NO_SUITABLE_WORKER:
+            ThrowRuntimeException("Unable to launch job: no suitable worker was found");
+            break;
+        case LaunchResult::RESOURCE_LIMIT_EXCEED:
+            [[fallthrough]];
+        default:
+            UNREACHABLE();
+    }
+}
+
 LaunchResult StacklessJobManager::Launch(Job *job, const LaunchParams &params)
 {
     os::memory::LockHolder lh(workersLock_);
     LOG(DEBUG, EXECUTION) << "Choosing worker for job " << job->GetName();
     auto [w, affinityMask] = ChooseWorkerForJob(params);
     if UNLIKELY (w == nullptr) {
-        DestroyJob(job);
-        ThrowRuntimeException("Unable to launch job: no suitable worker was found");
         return LaunchResult::NO_SUITABLE_WORKER;
     }
     job->SetAffinityMask(affinityMask);

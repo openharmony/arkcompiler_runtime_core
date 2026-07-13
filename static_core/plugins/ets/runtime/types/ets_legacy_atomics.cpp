@@ -264,6 +264,7 @@ static bool LaunchTimerJob(ManagedThread *mt, ContentionList &bucket, std::list<
     auto wGroup = ark::JobWorkerThreadGroup::GenerateExactWorkerId(ctx->GetWorker()->GetId());
     auto launchRes = jobMan->Launch(job, ark::LaunchParams {job->GetPriority(), wGroup, &params->timerEvent});
     if UNLIKELY (launchRes != LaunchResult::OK) {
+        jobMan->HandleLaunchResultManaged(launchRes);
         ASSERT(mt->HasPendingException());
         ASSERT(launchRes != LaunchResult::NO_SUITABLE_WORKER);
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(params);

@@ -207,7 +207,8 @@ void FinalizationRegistryManager::LaunchCleanupJobIfNeeded(EtsExecutionContext *
         auto epInfo = Job::ManagedEntrypointInfo {event, cleanup, std::move(args)};
         auto *job = jobMan->CreateJob("FinReg cleanup", std::move(epInfo));
         auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority(), groupId});
-        if (UNLIKELY(launchResult == LaunchResult::RESOURCE_LIMIT_EXCEED)) {
+        if UNLIKELY (launchResult != LaunchResult::OK) {
+            jobMan->HandleLaunchResultManaged(launchResult);
             jobMan->DestroyJob(job);
             // Atomic with acq_rel order reason: sync context dependes
             finRegCleanupJobsCount_.fetch_sub(1, std::memory_order_acq_rel);
