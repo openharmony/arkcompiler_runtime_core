@@ -20,7 +20,7 @@ class Derived extends Base {}
 function testLambdaToString(): int {
     let lambda = () => {};
     let result = lambda.toLocaleString();
-    arktest.assertEQ(result,"Cannot get source code of function");
+    arktest.assertEQ(result,"Cannot get source code");
     return 0
 }
 

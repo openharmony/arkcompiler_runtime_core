@@ -679,6 +679,25 @@ function testReflectMethod(): void {
     arktest.assertEQ(setter.getOwner(), typeHWriter)
 }
 
+function testGetParameterTypeInvalidIndex(): void {
+    let typePoint = Class.of(new Point())
+    let addMethod = typePoint.getInstanceMethod("add")!
+    arktest.expectThrow(() => { addMethod.getParameterType(-1) }, (e) => e instanceof TypeError)
+    arktest.expectThrow(() => { addMethod.getParameterType(1) }, (e) => e instanceof TypeError)
+
+    let constructorOfClass = Class.of(new HTMLWriter(10)).getConstructors()[0]
+    arktest.assertEQ(constructorOfClass.getParametersNum(), 1)
+    arktest.assertEQ(constructorOfClass.getParameterType(0)!, Class.PRIMITIVE_INT)
+    arktest.expectThrow(() => { constructorOfClass.getParameterType(10) }, (e) => e instanceof TypeError)
+
+    let writerType = Class.of(new HTMLWriter(10))
+    let createFileExtMethod = writerType.getStaticMethod("createFileExt")!
+    arktest.assertEQ(createFileExtMethod.getParametersNum(), 1)
+    arktest.assertEQ(createFileExtMethod.getParameterType(0)!, Class.of("html"))
+    arktest.expectThrow(() => { createFileExtMethod.getParameterType(-1) }, (e) => e instanceof TypeError)
+    arktest.expectThrow(() => { createFileExtMethod.getParameterType(1) }, (e) => e instanceof TypeError)
+}
+
 function testMethodAttributes(): void {
     let typePoint = Class.of(new Point())
     let typeHWriter = Class.of(new HTMLWriter(10))
@@ -910,6 +929,7 @@ function main() {
     suite.addTest('Test Reflect Method base APIs', testReflectMethod)
     suite.addTest('Test Reflect Method attributes APIs', testMethodAttributes)
     suite.addTest('Test Reflect Method Parameters APIs', testParameters)
+    suite.addTest('Test Reflect Method.getParameterType() invalid index', testGetParameterTypeInvalidIndex)
     suite.addTest('Test Reflect Method Return APIs', testReturn)
     suite.addTest('Test Reflect InstanceMethod.equals()', testInstanceMethodEquals)
     suite.addTest('Test Reflect Constructor.equals()', testConstructorEquals)

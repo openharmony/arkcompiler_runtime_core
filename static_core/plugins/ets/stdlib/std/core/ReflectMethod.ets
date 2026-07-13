@@ -129,8 +129,8 @@ class Method {
      * Gets the type of the parameter at the specified index by index.
      *
      * @param { int } idx Index position of the parameter.
-     * @returns { Class | undefined } Returns the Class object of the parameter type at the specified index,
-     * returns undefined if the index is invalid.
+     * @returns { Class | undefined } Returns the Class object of the parameter type at the specified index.
+     * @throws { TypeError } Throws if the index is invalid.
      *
      */
     public getParameterType(idx: int): Class | undefined {
