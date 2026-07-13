@@ -15,10 +15,10 @@
 
 /*---
 desc: A compile-time error occurs if more than one top-level declaration is marked as default.
-tags:
-- compile-only
-- negative
+tags: [compile-only, negative]
+expected_out:
+    - "Semantic error ESE0374: Only one default export is allowed in a module"
 ---*/
 
-export declare default let i: int
-export declare default class TestClass {}
+export default declare let i: int
+export default declare let j: int

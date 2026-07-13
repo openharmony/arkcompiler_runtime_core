@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,21 @@
  */
 
 /*---
-desc: Not exported item could still be used inside the module.
+desc: >-
+    If a module has at least one top-level ambient declaration (see Ambient Declarations),
+    then all other declarations must be ambient, and no top-level statement must be present
+    (see Top-Level Statements). Otherwise, a compile-time error occurs.
 tags: [compile-only, negative]
-files:
-- ./modules/partial_export.ets
+expected_out:
+    - "TODO: No top-level statements can be present in an ambient module"
 ---*/
 
-import * as A from "./modules/partial_export.d"
+// ambient indexer declaration
+export declare class Indexer {
+    [index: number]: number
+}
 
-function main() {
-  arktest.assertEQ(A.goo(), 2)
+// top-level class declaration
+export class B {
+    a: string = 'abc'
 }

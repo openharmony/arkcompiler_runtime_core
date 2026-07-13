@@ -27,7 +27,7 @@ function foo(): int {
 }
 
 export function goo(): int {
-  return 3
+  return foo() + 1
 }
 
 function noo(): int {

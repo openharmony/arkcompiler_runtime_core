@@ -26,6 +26,12 @@ cases:
               export function main(): void {}
               export function main1(): void {}
           }
+      expected_data: |-
+          expected_error: { runtime: [
+              "Unhandled exception: std.core.AssertionError",
+              "AssertionError: OK, main function is called as expected",
+              "expected true but was false"
+          ]}
 
     - desc: Explicit, exported, 'main' function is used as entry point
       entry_point: main
@@ -40,6 +46,12 @@ cases:
               export function main(): void {}
               export function main1(): void {}
           }
+      expected_data: |-
+          expected_error: { runtime: [
+              "Unhandled exception: std.core.AssertionError",
+              "AssertionError: OK, exported main function is called as expected",
+              "expected true but was false"
+          ]}
 
     - desc: Explicit, exported, 'main1' function is used as entry point
       entry_point: main1
@@ -52,6 +64,12 @@ cases:
               export function main(): void {}
               export function main1(): void {}
           }
+      expected_data: |-
+          expected_error: { runtime: [
+              "Unhandled exception: std.core.AssertionError",
+              "AssertionError: OK, exported main1 function is called as expected",
+              "expected true but was false"
+          ]}
 
     - desc: Explicit, exported, 'main1' function is used as entry point
       entry_point: main1
@@ -66,6 +84,12 @@ cases:
               export function main(): void {}
               export function main1(): void {}
           }
+      expected_data: |-
+          expected_error: { runtime: [
+              "Unhandled exception: std.core.AssertionError",
+              "AssertionError: OK, exported main1 function is called as expected",
+              "expected true but was false"
+          ]}
 
     - desc: Only a top-level function can be used as entry point
       entry_point: NS.main
@@ -78,3 +102,7 @@ cases:
               export function main(): void {}
               export function main1(): void {}
           }
+      expected_data: |-
+          expected_error: { runtime: [
+              "[TID 025bea] E/runtime: Cannot find method 'multiple_entrypoints_n_4.ETSGLOBAL::NS.main'"
+          ]}

@@ -17,8 +17,14 @@ cases:
     - use: |-
           // top-level statements, negative
           arktest.assertTrue(false)
+      expected_data: |-
+          expected_error: { runtime: [
+              "[TID 0257cd] E/runtime: Cannot initialize class 'top-level_n_0.ETSGLOBAL'",
+              "Unhandled exception: std.core.AssertionError",
+              "AssertionError: expected true but was false"
+          ]}
 
-    # top-level statements and function main
+    # top-level statements and function main, no error output
     - use: |-
           // top-level statements and function main, negative
           let res = 'X'

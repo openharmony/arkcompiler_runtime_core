@@ -16,8 +16,6 @@
 /*---
 desc: ES2PANDA_FAIL - SyntaxError Imported element not exported 'NS1'
 tags: [compile-only, negative]
-files:
-    - ./namespace_storage.ets
 expected_out: |-
     Semantic error ESE0355: Imported element not exported 'NS1'
     Semantic error ESE0143: Unresolved reference NS1

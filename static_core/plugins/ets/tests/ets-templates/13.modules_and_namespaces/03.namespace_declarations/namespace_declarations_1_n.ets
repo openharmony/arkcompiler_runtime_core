@@ -16,8 +16,6 @@
 /*---
 desc: ES2PANDA_FAIL - TypeError Property 'nsConst' does not exist on type 'Space2'
 tags: [compile-only, negative]
-files:
-    - ./namespace_storage.ets
 expected_out: |-
     Semantic error ESE0087: Property 'nsConst' does not exist on type 'Space2'
     Semantic error ESE0124: Expected 1 arguments, got 0.

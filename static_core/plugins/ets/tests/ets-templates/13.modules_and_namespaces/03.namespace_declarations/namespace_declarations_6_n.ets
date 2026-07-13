@@ -16,8 +16,6 @@
 /*---
 desc: CTE - there is no function 'sayHello' for local MyClass obj
 tags: [negative, compile-only]
-files:
-    - ./namespace_storage.ets
 expected_out: |-
     Semantic error ESE0127: No matching call signature for assertEQ(..., "Test should fail")
     Semantic error ESE0087: Property 'sayHello' does not exist on type 'myClass'

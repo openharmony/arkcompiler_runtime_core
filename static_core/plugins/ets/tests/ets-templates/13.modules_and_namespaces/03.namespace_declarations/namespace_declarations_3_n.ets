@@ -16,8 +16,6 @@
 /*---
 desc: ES2PANDA_FAIL - TypeError Expected 1 arguments, got 0. No matching call signature
 tags: [compile-only, negative]
-files:
-    - ./namespace_storage.ets
 expected_out: |-
     Semantic error ESE0124: Expected 1 arguments, got 0.
     Semantic error ESE0127: No matching call signature for foo()

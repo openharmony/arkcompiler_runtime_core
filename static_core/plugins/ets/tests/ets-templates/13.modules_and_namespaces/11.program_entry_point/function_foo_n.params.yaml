@@ -26,6 +26,8 @@ cases:
           export function main(): void {
               arktest.assertTrue(true)
           }
+      expected_data: |-
+          expected_error: { runtime: "[TID 39a225] E/runtime: Cannot find method 'function_foo_n_0.ETSGLOBAL::foo'" }
 
     - entry_point: foo
       tags: negative
@@ -40,6 +42,8 @@ cases:
           function main(): void  {
               arktest.assertTrue(true)
           }
+      expected_data: |-
+          expected_error: { runtime: "[TID 01f4ea] E/runtime: Cannot find method 'function_foo_n_1.ETSGLOBAL::foo'" }
 
     - entry_point: main
       tags: 'compile-only, negative'
@@ -54,6 +58,13 @@ cases:
           function main(): void  {
               arktest.assertTrue(true)
           }
+      expected_data: |-
+          expected_out: [
+              "Semantic error ESE0330: Identifier 'main' is used in wrong context.",
+              "Semantic error ESE0384: overloaded name must refer to an accessible method.",
+              "Semantic error ESE0369: Identifier 'main' has already been declared.",
+              "Semantic error ESE0351: Variable 'main' has already been declared.",
+          ]
 
     # entry point function cannot have overloading, int return type
     - entry_point: foo
@@ -68,6 +79,8 @@ cases:
           export function main(): int {
               return 0
           }
+      expected_data: |-
+          expected_error: { runtime: "[TID 39e0dc] E/runtime: Cannot find method 'function_foo_n_3.ETSGLOBAL::foo'" }
 
     - entry_point: main
       tags: 'compile-only, negative'
@@ -81,6 +94,13 @@ cases:
           export function main(): int {
               return 0
           }
+      expected_data: |-
+          expected_out: [
+              "Semantic error ESE0330: Identifier 'main' is used in wrong context.",
+              "Semantic error ESE0384: overloaded name must refer to an accessible method.",
+              "Semantic error ESE0369: Identifier 'main' has already been declared.",
+              "Semantic error ESE0351: Variable 'main' has already been declared.",
+          ]
 
     - entry_point: foo
       tags: negative
@@ -96,6 +116,8 @@ cases:
           }
 
           export { main, foo, foo1 }
+      expected_data: |-
+          expected_error: { runtime: "[TID 3a65cf] E/runtime: Cannot find method 'function_foo_n_5.ETSGLOBAL::foo'" }
 
     - entry_point: main
       tags: 'compile-only, negative'
@@ -111,6 +133,13 @@ cases:
           }
 
           export { main, foo1 }
+      expected_data: |-
+          expected_out: [
+              "Semantic error ESE0330: Identifier 'main' is used in wrong context.",
+              "Semantic error ESE0384: overloaded name must refer to an accessible method.",
+              "Semantic error ESE0369: Identifier 'main' has already been declared.",
+              "Semantic error ESE0351: Variable 'main' has already been declared.",
+          ]
 
     # call main from another entry point
     - entry_point: foo
@@ -120,6 +149,12 @@ cases:
               main()
               arktest.assertTrue(false)
           }
+      expected_data: |-
+          expected_error: { runtime: [
+              "expected true but was false",
+              "Unhandled exception: std.core.AssertionError",
+              "AssertionError: expected true but was false"              
+          ]}
 
     # return value from namespace
     - entry_point: foo
@@ -140,7 +175,13 @@ cases:
           export function main(): int {
               return 0
           }
-    
+      expected_data: |-
+          expected_error: { runtime: [
+              "expected equality failed: '42' === '0'",
+              "Unhandled exception: std.core.AssertionError",
+              "AssertionError: expected equality failed: '42' === '0'"
+          ]}
+
     # entry point function cannot have overloading, void return type
     - entry_point: main
       tags: 'compile-only, negative'
@@ -150,3 +191,8 @@ cases:
           export function foo1(): void { // should not be called
               arktest.assertTrue(false)
           }
+      expected_data: |-
+          expected_out: [
+              "Warning W2323: The order of entities in an overload set implies that the overloaded entity with the signature '() => undefined' will never be selected for a call, as the preceding entity with the signature '() => undefined' prevails.",
+              "Semantic error ESE0456: The overload function must be exported along because the overload alias is exported."
+          ]

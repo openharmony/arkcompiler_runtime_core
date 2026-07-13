@@ -15,11 +15,9 @@
 
 /*---
 desc: The declarations not marked as exported can be used only inside the compilation unit they are declared in.
-tags: [compile-only, not-a-test, negative]
+tags: [compile-only, not-a-test]
 ---*/
 
 declare function boo(): int
 
-export declare function goo(): int {
-  return boo()
-}
+export declare function goo(): int

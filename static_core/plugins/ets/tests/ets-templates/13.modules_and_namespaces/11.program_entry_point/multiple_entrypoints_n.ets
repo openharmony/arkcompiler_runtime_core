@@ -17,6 +17,7 @@
 desc: {{c.desc}}
 tags: [no-warmup, negative]
 entry_point: {{c.entry_point}}
+{{c.expected_data}}
 ---*/
 
 {{c.use}}
