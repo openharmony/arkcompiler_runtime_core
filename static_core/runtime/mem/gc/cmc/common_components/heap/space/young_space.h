@@ -50,8 +50,8 @@ public:
     void CollectFixTasks(FixHeapTaskList &taskList)
     {
         ark::os::memory::LockHolder lock(lock_);
-        FixHeapWorker::CollectFixHeapTasks(taskList, tlRegionList_, FIX_RECENT_REGION);
-        FixHeapWorker::CollectFixHeapTasks(taskList, recentFullRegionList_, FIX_RECENT_REGION);
+        FixHeap::CollectFixHeapTasks(taskList, tlRegionList_, FixRegionType::FIX_RECENT_REGION);
+        FixHeap::CollectFixHeapTasks(taskList, recentFullRegionList_, FixRegionType::FIX_RECENT_REGION);
     }
 
     RegionDesc *AllocateThreadLocalRegion(bool expectPhysicalMem);

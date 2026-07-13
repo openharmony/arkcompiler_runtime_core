@@ -44,7 +44,7 @@ public:
     }
 
     template <typename T>
-    bool ProcessObjectPointer(ObjectHeader *fromObject, T *ref) const
+    bool operator()(ObjectHeader *fromObject, T *ref) const
     {
         ProcessObjectPointerInternal(fromObject, ref);
         // Atomic with relaxed order reason: memory order is not required
@@ -58,7 +58,7 @@ private:
         // fromRemset_ is not changed while handling one card
         ASSERT(AddrToRegion(ref)->GetRemSet() == fromRemset_);
 
-        auto o = ObjectAccessor::LoadAtomic(ref);
+        auto o = AtomicLoad(ref, std::memory_order_relaxed);
         if (!ObjectAccessor::IsHeapObject<LanguageConfig::LANG_TYPE>(o)) {
             return;
         }
@@ -92,7 +92,7 @@ public:
     {
     }
 
-    bool ProcessObjectPointer(ObjectHeader *fromObject, Ref ref) const
+    bool operator()(ObjectHeader *fromObject, Ref ref) const
     {
         ProcessObjectPointerHelper(fromObject, ref);
         return true;

@@ -411,21 +411,6 @@ void Mutator::HandleReferencesCleanupRequest()
     GetVM()->HandleGCRoutineInMutator();
 }
 
-#if defined(ARK_USE_COMMON_RUNTIME)
-void Mutator::VisitMutatorRoots(const ark::mem::RefFieldVisitor &visitor)
-{
-    trace::ScopedTrace scopedTrace(__FUNCTION__);
-    auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
-    mem::RootManager<EtsLanguageConfig> rootManager(vm);
-    auto *managedThread = ManagedThread::CastFromMutator(this);
-    rootManager.VisitRootsForThread(managedThread, [&visitor](mem::GCRoot root) {
-        static_assert(sizeof(ObjectPointerType) == sizeof(uintptr_t));
-        visitor(reinterpret_cast<ark::mem::RefField<> &>(*root.GetObjectPointer()));
-    });
-}
-
-#endif
-
 void Mutator::MakeTSANHappyForThreadState()
 {
     TSAN_ANNOTATE_HAPPENS_AFTER(&fms_);

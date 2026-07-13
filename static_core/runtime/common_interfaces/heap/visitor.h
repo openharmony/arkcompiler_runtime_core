@@ -19,14 +19,13 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include "common_interfaces/objects/ref_field.h"
 #include "libarkbase/mem/mem.h"
 
 namespace ark::mem {
 // For ArkTS1.2，It is just example.
 // using GCRootVisitor = std::function<void(BaseObject *object)>;
-using RefFieldVisitor = std::function<void(RefField<> &)>;
-using WeakRefFieldVisitor = std::function<bool(RefField<> &)>;
+using RefFieldVisitor = std::function<void(ObjectPointerType *)>;
+using WeakRefFieldVisitor = std::function<bool(ObjectPointerType *)>;
 using CommonRefVisitor = std::function<void(ObjectPointerType *root)>;
 
 // For ArkTS1.1

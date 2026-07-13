@@ -53,30 +53,12 @@ public:
     virtual void Fini() {}
     const char *GetCollectorName() const;
 
-    virtual void FixObjectRefFields(BaseObject *) const {}
-
     virtual void RunGarbageCollection(uint64_t, ark::GCTask &) = 0;
 
     virtual ObjectHeader *ForwardObject(ObjectHeader *) = 0;
 
     virtual bool IsFromObject(ObjectHeader *) const = 0;
     virtual bool IsUnmovableFromObject(BaseObject *) const = 0;
-    virtual BaseObject *FindToVersion(BaseObject *obj) const = 0;
-
-    virtual bool TryForwardRefField(BaseObject *, RefField<> &, BaseObject *&) const = 0;
-
-    BaseObject *FindLatestVersion(BaseObject *obj) const
-    {
-        if (obj == nullptr) {
-            return nullptr;
-        }
-
-        auto to = FindToVersion(obj);
-        if (to != nullptr) {
-            return to;
-        }
-        return obj;
-    };
 
 protected:
     CollectorType collectorType_ = CollectorType::NO_COLLECTOR;

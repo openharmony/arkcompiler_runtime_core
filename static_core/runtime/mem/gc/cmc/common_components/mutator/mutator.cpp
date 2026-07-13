@@ -93,8 +93,6 @@ void Mutator::ClearSatbBufferNode()
     CastSatbNode(satbNode_)->Clear();
 }
 
-void Mutator::VisitMutatorRoots(const RefFieldVisitor &visitor) {}
-
 void Mutator::HandleGCPhase(mem::GCPhase newPhase)
 {
     if (newPhase == mem::GCPhase::GC_PHASE_REMARK) {

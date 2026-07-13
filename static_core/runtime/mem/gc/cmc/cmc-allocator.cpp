@@ -36,10 +36,6 @@ CMCObjectAllocator::CMCObjectAllocator(MemStatsType *memStats, bool createPygote
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
     auto param = cvm::BaseRuntimeParam::DefaultRuntimeParam();
-    // Single pass compaction should be enabled explicitly
-    auto &runtimeOptions = Runtime::GetCurrent()->GetOptions();
-    param.gcParam.singlePassCompactionEnabled =
-        runtimeOptions.WasSetG1SinglePassCompactionEnabled() && runtimeOptions.IsG1SinglePassCompactionEnabled();
 
     size_t pagePoolSize = param.heapParam.heapSize;
 #if defined(PANDA_TARGET_32)

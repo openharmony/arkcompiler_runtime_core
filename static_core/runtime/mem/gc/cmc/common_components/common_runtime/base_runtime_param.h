@@ -51,7 +51,6 @@ private:
     V(heapParam, allocationRate, double, 0.0, INT64_MAX, 10240);                                          \
     V(heapParam, allocationWaitTime, uint64_t, 0, INT64_MAX, 1000);                                       \
     V(gcParam, enableGC, bool, 0, 1, 1);                                                                  \
-    V(gcParam, enableStwGC, bool, 0, 1, 0);                                                               \
     V(gcParam, gcThreads, uint32_t, 1, 32, 5);                                                            \
     V(gcParam, garbageThreshold, double, 0.1, 1.0, 0.5);                                                  \
     ;                                                                                                     \
@@ -75,7 +74,6 @@ private:
     V(heapParam, allocationRate, double, 0.0, INT64_MAX, 10240);                                          \
     V(heapParam, allocationWaitTime, uint64_t, 0, INT64_MAX, 1000);                                       \
     V(gcParam, enableGC, bool, 0, 1, 1);                                                                  \
-    V(gcParam, enableStwGC, bool, 0, 1, 0);                                                               \
     V(gcParam, gcThreads, uint32_t, 1, 64, 5);                                                            \
     V(gcParam, garbageThreshold, double, 0.1, 1.0, 0.5);                                                  \
     V(gcParam, gcThreshold, size_t, 0, INT64_MAX, BaseRuntimeParam::InitHeapSize() * KB);                 \

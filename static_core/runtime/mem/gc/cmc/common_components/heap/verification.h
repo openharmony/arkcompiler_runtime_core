@@ -29,15 +29,11 @@ public:
     static void VerifyAfterMark(mem::GCPhase phase, bool isWorldStopped);
     static void VerifyAfterForward(mem::GCPhase phase, bool isWorldStopped);
     static void VerifyAfterFix(mem::GCPhase phase, bool isWorldStopped);
-    static void EnableReadBarrierDFX(bool isWorldStopped);
-    static void DisableReadBarrierDFX(bool isWorldStopped);
 
 private:
     static void VerifyAfterMarkInternal(RegionalHeap &space, mem::GCPhase phase);
     static void VerifyAfterForwardInternal(RegionalHeap &space, mem::GCPhase phase);
     static void VerifyAfterFixInternal(RegionalHeap &space, mem::GCPhase phase);
-    static void EnableReadBarrierDFXInternal(RegionalHeap &space);
-    static void DisableReadBarrierDFXInternal(RegionalHeap &space);
 };
 
 }  // namespace ark::common_vm

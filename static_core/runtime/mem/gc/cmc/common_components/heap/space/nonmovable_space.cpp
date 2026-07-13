@@ -52,11 +52,11 @@ void CollectFixHeapTaskForFullRegion(RegionList &list, FixHeapTaskList &taskList
     while (region != nullptr) {
         auto liveBytes = region->GetLiveByteCount();
         if (liveBytes == 0) {
-            PostFixHeapWorker::AddEmptyRegionToCollectDuringPostFix(&list, region);
+            PostFixHeap::AddEmptyRegionToCollectDuringPostFix(&list, region);
             region = region->GetNextRegion();
             continue;
         }
-        taskList.push_back({region, FIX_REGION});
+        taskList.push_back({region, FixRegionType::FIX_REGION});
         region = region->GetNextRegion();
     }
 }
@@ -65,18 +65,18 @@ void NonMovableSpace::CollectFixTasks(FixHeapTaskList &taskList)
 {
     // fix all objects.
     if (Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE) {
-        FixHeapWorker::CollectFixHeapTasks(taskList, recentPolySizeRegionList_, FIX_RECENT_OLD_REGION);
-        FixHeapWorker::CollectFixHeapTasks(taskList, polySizeRegionList_, FIX_OLD_REGION);
+        FixHeap::CollectFixHeapTasks(taskList, recentPolySizeRegionList_, FixRegionType::FIX_RECENT_OLD_REGION);
+        FixHeap::CollectFixHeapTasks(taskList, polySizeRegionList_, FixRegionType::FIX_OLD_REGION);
 
         for (size_t i = 0; i < NONMOVABLE_OBJECT_SIZE_COUNT; i++) {
-            FixHeapWorker::CollectFixHeapTasks(taskList, *recentMonoSizeRegionList_[i], FIX_RECENT_OLD_REGION);
-            FixHeapWorker::CollectFixHeapTasks(taskList, *monoSizeRegionList_[i], FIX_OLD_REGION);
+            FixHeap::CollectFixHeapTasks(taskList, *recentMonoSizeRegionList_[i], FixRegionType::FIX_RECENT_OLD_REGION);
+            FixHeap::CollectFixHeapTasks(taskList, *monoSizeRegionList_[i], FixRegionType::FIX_OLD_REGION);
         }
     } else {
-        FixHeapWorker::CollectFixHeapTasks(taskList, recentPolySizeRegionList_, FIX_RECENT_REGION);
+        FixHeap::CollectFixHeapTasks(taskList, recentPolySizeRegionList_, FixRegionType::FIX_RECENT_REGION);
         CollectFixHeapTaskForFullRegion(polySizeRegionList_, taskList);
         for (size_t i = 0; i < NONMOVABLE_OBJECT_SIZE_COUNT; i++) {
-            FixHeapWorker::CollectFixHeapTasks(taskList, *recentMonoSizeRegionList_[i], FIX_RECENT_REGION);
+            FixHeap::CollectFixHeapTasks(taskList, *recentMonoSizeRegionList_[i], FixRegionType::FIX_RECENT_REGION);
             CollectFixHeapTaskForFullRegion(*monoSizeRegionList_[i], taskList);
         }
     }

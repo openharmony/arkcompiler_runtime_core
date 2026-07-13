@@ -25,171 +25,19 @@
 
 namespace ark::common_vm {
 
-void FixHeapWorker::CollectFixHeapTasks(FixHeapTaskList &taskList, RegionList &list, FixRegionType type)
+void FixHeap::CollectFixHeapTasks(FixHeapTaskList &taskList, RegionList &list, FixRegionType type)
 {
     list.VisitAllRegions([&taskList, type](RegionDesc *region) { taskList.emplace_back(region, type); });
 }
 
-void FixHeapWorker::FixOldRegion(RegionDesc *region)
-{
-    auto visitFunc = [this](BaseObject *object) {
-        LOG(DEBUG, GC) << "fix: old obj " << object << "<" << object->GetTypeInfo() << ">(" << object->GetSize() << ")";
-        collector_->FixObjectRefFields(object);
-    };
-    region->VisitRememberSet(visitFunc);
-}
+std::stack<std::pair<RegionList *, RegionDesc *>> PostFixHeap::emptyRegionsToCollect;
 
-void FixHeapWorker::FixRecentOldRegion(RegionDesc *region)
-{
-    auto visitFunc = [this](BaseObject *object) {
-        LOG(DEBUG, GC) << "fix: old obj " << object << "<" << object->GetTypeInfo() << ">(" << object->GetSize() << ")";
-        collector_->FixObjectRefFields(object);
-    };
-    region->VisitRememberSetBeforeCopy(visitFunc);
-}
-
-void FixHeapWorker::FixToRegion(RegionDesc *region)
-{
-    region->VisitAllObjects([this](BaseObject *object) { collector_->FixObjectRefFields(object); });
-}
-
-template <FixHeapWorker::DeadObjectHandlerType type>
-void FixHeapWorker::FixRegion(RegionDesc *region)
-{
-    size_t cellCount = 0;
-    if constexpr (type == FixHeapWorker::COLLECT_MONOSIZE_NONMOVABLE) {
-        cellCount = region->GetRegionCellCount();
-    }
-
-    region->VisitAllObjects([this, region, cellCount](BaseObject *object) {
-        (void)region;
-        (void)cellCount;
-        if (RegionalHeap::IsSurvivedObject(object)) {
-            collector_->FixObjectRefFields(object);
-        } else {
-            if constexpr (type == FixHeapWorker::COLLECT_MONOSIZE_NONMOVABLE) {
-                result_.monoSizeNonMovableGarbages.emplace_back(region, object, cellCount);
-            } else if constexpr (type == FixHeapWorker::COLLECT_POLYSIZE_NONMOVABLE) {
-                result_.polySizeNonMovableGarbages.emplace_back(object, RegionalHeap::GetAllocSize(*object));
-            } else if constexpr (type == FixHeapWorker::IGNORED) {
-                /* Ignore */
-            }
-            LOG(DEBUG, GC) << "fix: skip dead obj " << object << "<" << object->GetTypeInfo() << ">("
-                           << object->GetSize() << ")";
-        }
-    });
-}
-
-template <FixHeapWorker::DeadObjectHandlerType type>
-void FixHeapWorker::FixRecentRegion(RegionDesc *region)
-{
-    size_t cellCount = 0;
-    if constexpr (type == FixHeapWorker::COLLECT_MONOSIZE_NONMOVABLE) {
-        cellCount = region->GetRegionCellCount();
-    }
-
-    region->VisitAllObjectsBeforeCopy([this, region, cellCount](BaseObject *object) {
-        (void)cellCount;
-        if (region->IsNewObjectSinceMarking(object) || RegionalHeap::IsSurvivedObject(object)) {
-            collector_->FixObjectRefFields(object);
-        } else {  // handle dead objects in tl-regions for concurrent gc.
-            if constexpr (type == FixHeapWorker::COLLECT_MONOSIZE_NONMOVABLE) {
-                result_.monoSizeNonMovableGarbages.emplace_back(region, object, cellCount);
-            } else if constexpr (type == FixHeapWorker::COLLECT_POLYSIZE_NONMOVABLE) {
-                result_.polySizeNonMovableGarbages.emplace_back(object, RegionalHeap::GetAllocSize(*object));
-            } else if constexpr (type == FixHeapWorker::IGNORED) {
-                /* Ignore */
-            }
-            LOG(DEBUG, GC) << "skip dead obj " << object << "<" << object->GetTypeInfo() << ">(" << object->GetSize()
-                           << ")";
-        }
-    });
-}
-
-bool FixHeapWorker::Run([[maybe_unused]] uint32_t threadIndex)
-{
-    ThreadLocal::SetThreadType(ThreadType::GC_THREAD);
-    auto *task = getNextTask_();
-    while (task != nullptr) {
-        DispatchRegionFixTask(task);
-        task = getNextTask_();
-    }
-    ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
-    monitor_.NotifyFinishOne();
-    return true;
-}
-
-void FixHeapWorker::DispatchRegionFixTask(FixHeapTask *task)
-{
-    result_.numProcessedRegions += 1;
-    RegionDesc *region = task->region;
-    switch (task->type) {
-        case FIX_OLD_REGION:
-            FixOldRegion(region);
-            break;
-        case FIX_RECENT_OLD_REGION:
-            FixRecentOldRegion(region);
-            break;
-        case FIX_RECENT_REGION:
-            if (region->IsMonoSizeNonMovableRegion()) {
-                FixRecentRegion<COLLECT_MONOSIZE_NONMOVABLE>(region);
-            } else if (region->IsPolySizeNonMovableRegion()) {
-                FixRecentRegion<COLLECT_POLYSIZE_NONMOVABLE>(region);
-            } else if (region->IsLargeRegion()) {
-                FixRecentRegion<IGNORED>(region);
-            } else {
-                FixRecentRegion<FILL_FREE>(region);
-            }
-            break;
-        case FIX_REGION:
-            if (region->IsMonoSizeNonMovableRegion()) {
-                FixRegion<COLLECT_MONOSIZE_NONMOVABLE>(region);
-            } else if (region->IsPolySizeNonMovableRegion()) {
-                FixRegion<COLLECT_POLYSIZE_NONMOVABLE>(region);
-            } else if (region->IsLargeRegion()) {
-                FixRegion<IGNORED>(region);
-            } else if (region->IsUnmovableFromRegion()) {
-                region->ClearRSet();
-                FixRegion<FILL_FREE>(region);
-            } else {
-                FixRegion<FILL_FREE>(region);
-            }
-            break;
-        case FIX_TO_REGION:
-            FixToRegion(region);
-            break;
-        default:
-            UNREACHABLE();
-    }
-}
-
-std::stack<std::pair<RegionList *, RegionDesc *>> PostFixHeapWorker::emptyRegionsToCollect;
-
-void PostFixHeapWorker::PostClearTask()
-{
-    for (auto [region, object, cellCount] : result_.monoSizeNonMovableGarbages) {
-        region->CollectNonMovableGarbage(object, cellCount);
-    }
-    LOG(DEBUG, GC) << "Fix heap worker processed " << result_.numProcessedRegions << " Regions, "
-                   << result_.monoSizeNonMovableGarbages.size() << " monoSizeNonMovableGarbages, "
-                   << result_.polySizeNonMovableGarbages.size() << " polySizeNonMovableGarbages";
-}
-
-bool PostFixHeapWorker::Run([[maybe_unused]] uint32_t threadIndex)
-{
-    ThreadLocal::SetThreadType(ThreadType::GC_THREAD);
-    PostClearTask();
-    ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
-    monitor_.NotifyFinishOne();
-    return true;
-}
-
-void PostFixHeapWorker::AddEmptyRegionToCollectDuringPostFix(RegionList *list, RegionDesc *region)
+void PostFixHeap::AddEmptyRegionToCollectDuringPostFix(RegionList *list, RegionDesc *region)
 {
     emptyRegionsToCollect.emplace(list, region);
 }
 
-size_t PostFixHeapWorker::CollectEmptyRegions()
+size_t PostFixHeap::CollectEmptyRegions()
 {
     RegionalHeap &theAllocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
     RegionManager &regionManager = theAllocator.GetRegionManager();

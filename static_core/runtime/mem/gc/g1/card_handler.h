@@ -61,7 +61,7 @@ public:
         if (obj->ClassAddr<BaseClass>() != nullptr) {
             // Class may be null when we are visiting a card and at the same time a new non-movable
             // object is allocated in the memory region covered by the card.
-            *result_ = ObjectIterator<LanguageConfig::LANG_TYPE>::template Iterate<true>(obj, &objectPointerHandler_,
+            *result_ = ObjectIterator<LanguageConfig::LANG_TYPE>::template Iterate<true>(obj, objectPointerHandler_,
                                                                                          startAddress_, endAddress_);
             return *result_;
         }

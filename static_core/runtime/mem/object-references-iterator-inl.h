@@ -24,14 +24,14 @@ namespace ark::mem {
 class ObjectArrayIterator {
 public:
     template <typename T, bool INTERRUPTIBLE, typename Handler>
-    static bool Iterate(coretypes::Array *array, Handler *handler);
+    static bool Iterate(coretypes::Array *array, Handler &handler);
 
     template <typename T, bool INTERRUPTIBLE, typename Handler>
-    static bool Iterate(coretypes::Array *array, Handler *handler, void *begin, void *end);
+    static bool Iterate(coretypes::Array *array, Handler &handler, void *begin, void *end);
 };
 
 template <typename T, bool INTERRUPTIBLE, typename Handler>
-bool ObjectArrayIterator::Iterate(coretypes::Array *array, Handler *handler)
+bool ObjectArrayIterator::Iterate(coretypes::Array *array, Handler &handler)
 {
     auto *arrayStart = array->GetBase<T *>();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -39,7 +39,7 @@ bool ObjectArrayIterator::Iterate(coretypes::Array *array, Handler *handler)
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (auto *p = arrayStart; p < arrayEnd; ++p) {
-        [[maybe_unused]] auto cont = handler->ProcessObjectPointer(array, p);
+        [[maybe_unused]] auto cont = handler(array, p);
         if constexpr (INTERRUPTIBLE) {
             if (!cont) {
                 return false;
@@ -51,7 +51,7 @@ bool ObjectArrayIterator::Iterate(coretypes::Array *array, Handler *handler)
 }
 
 template <typename T, bool INTERRUPTIBLE, typename Handler>
-bool ObjectArrayIterator::Iterate(coretypes::Array *array, Handler *handler, void *begin, void *end)
+bool ObjectArrayIterator::Iterate(coretypes::Array *array, Handler &handler, void *begin, void *end)
 {
     ASSERT(IsAligned(ToUintPtr(begin), DEFAULT_ALIGNMENT_IN_BYTES));
 
@@ -66,7 +66,7 @@ bool ObjectArrayIterator::Iterate(coretypes::Array *array, Handler *handler, voi
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (; p < end; ++p) {
-        [[maybe_unused]] auto cont = handler->ProcessObjectPointer(array, p);
+        [[maybe_unused]] auto cont = handler(array, p);
         if constexpr (INTERRUPTIBLE) {
             if (!cont) {
                 return false;
@@ -78,7 +78,7 @@ bool ObjectArrayIterator::Iterate(coretypes::Array *array, Handler *handler, voi
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::Iterate(ObjectHeader *obj, Handler *handler, void *begin, void *end)
+bool ObjectIterator<LANG_TYPE_STATIC>::Iterate(ObjectHeader *obj, Handler &handler, void *begin, void *end)
 {
     auto *cls = obj->ClassAddr<Class>();
     ASSERT(cls != nullptr);
@@ -86,15 +86,14 @@ bool ObjectIterator<LANG_TYPE_STATIC>::Iterate(ObjectHeader *obj, Handler *handl
 }
 
 template <typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler)
+bool ObjectIterator<LANG_TYPE_STATIC>::IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler &handler)
 {
     auto *cls = obj->ClassAddr<Class>();
     ASSERT(cls != nullptr);
 
     if (gc->IsReference(cls, obj, [gc](auto *o) { return gc->InGCSweepRange(o); })) {
-        gc->ProcessReferenceForSinglePassCompaction(cls, obj, [obj, handler](void *o) {
-            handler->ProcessObjectPointer(obj, reinterpret_cast<ObjectPointerType *>(o));
-        });
+        gc->ProcessReferenceForSinglePassCompaction(
+            cls, obj, [obj, &handler](void *o) { handler(obj, reinterpret_cast<ObjectPointerType *>(o)); });
         return true;
     }
 
@@ -102,16 +101,15 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateAndDiscoverReferences(GC *gc, Obje
 }
 
 template <typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler,
+bool ObjectIterator<LANG_TYPE_STATIC>::IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler &handler,
                                                                     void *begin, void *end)
 {
     auto *cls = obj->ClassAddr<Class>();
     ASSERT(cls != nullptr);
 
     if (gc->IsReference(cls, obj, [gc](auto *o) { return gc->InGCSweepRange(o); })) {
-        gc->ProcessReferenceForSinglePassCompaction(cls, obj, [obj, handler](void *o) {
-            handler->ProcessObjectPointer(obj, reinterpret_cast<ObjectPointerType *>(o));
-        });
+        gc->ProcessReferenceForSinglePassCompaction(
+            cls, obj, [obj, &handler](void *o) { handler(obj, reinterpret_cast<ObjectPointerType *>(o)); });
         return true;
     }
 
@@ -119,7 +117,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateAndDiscoverReferences(GC *gc, Obje
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::Iterate(const Class *cls, ObjectHeader *obj, Handler *handler)
+bool ObjectIterator<LANG_TYPE_STATIC>::Iterate(const Class *cls, ObjectHeader *obj, Handler &handler)
 {
     if (cls->IsObjectArrayClass()) {
         return ObjectArrayIterator::Iterate<ObjectPointerType, INTERRUPTIBLE>(static_cast<coretypes::Array *>(obj),
@@ -138,7 +136,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::Iterate(const Class *cls, ObjectHeader *o
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::Iterate(Class *cls, ObjectHeader *obj, Handler *handler, void *begin, void *end)
+bool ObjectIterator<LANG_TYPE_STATIC>::Iterate(Class *cls, ObjectHeader *obj, Handler &handler, void *begin, void *end)
 {
     if (cls->IsObjectArrayClass()) {
         return ObjectArrayIterator::Iterate<ObjectPointerType, INTERRUPTIBLE>(static_cast<coretypes::Array *>(obj),
@@ -161,7 +159,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::Iterate(Class *cls, ObjectHeader *obj, Ha
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::IterateClassReferences(Class *cls, Handler *handler)
+bool ObjectIterator<LANG_TYPE_STATIC>::IterateClassReferences(Class *cls, Handler &handler)
 {
     auto refNum = cls->GetRefFieldsNum<true>();
     if (refNum > 0) {
@@ -176,7 +174,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateClassReferences(Class *cls, Handle
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::IterateClassReferences(Class *cls, Handler *handler, void *begin, void *end)
+bool ObjectIterator<LANG_TYPE_STATIC>::IterateClassReferences(Class *cls, Handler &handler, void *begin, void *end)
 {
     auto refNum = cls->GetRefFieldsNum<true>();
     if (refNum > 0) {
@@ -192,7 +190,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateClassReferences(Class *cls, Handle
 
 template <bool INTERRUPTIBLE, typename Handler>
 bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *object, const Class *objClass,
-                                                               Handler *handler)
+                                                               Handler &handler)
 {
     ASSERT(objClass != nullptr);
     ASSERT(!objClass->IsDynamicClass());
@@ -232,7 +230,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *obj
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *object, const Class *cls, Handler *handler,
+bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *object, const Class *cls, Handler &handler,
                                                                void *begin, void *end)
 {
     ASSERT(cls != nullptr);
@@ -270,11 +268,11 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateObjectReferences(ObjectHeader *obj
 
 template <bool INTERRUPTIBLE, typename Handler>
 bool ObjectIterator<LANG_TYPE_STATIC>::IterateRange(ObjectHeader *fromObject, ObjectPointerType *refStart,
-                                                    const ObjectPointerType *refEnd, Handler *handler)
+                                                    const ObjectPointerType *refEnd, Handler &handler)
 {
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (auto *p = refStart; p < refEnd; p++) {
-        [[maybe_unused]] auto cont = handler->ProcessObjectPointer(fromObject, p);
+        [[maybe_unused]] auto cont = handler(fromObject, p);
         if constexpr (INTERRUPTIBLE) {
             if (!cont) {
                 return false;
@@ -286,7 +284,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateRange(ObjectHeader *fromObject, Ob
 
 template <bool INTERRUPTIBLE, typename Handler>
 bool ObjectIterator<LANG_TYPE_STATIC>::IterateRange(ObjectHeader *fromObject, ObjectPointerType *refStart,
-                                                    ObjectPointerType *refEnd, Handler *handler, void *begin, void *end)
+                                                    ObjectPointerType *refEnd, Handler &handler, void *begin, void *end)
 {
     auto *p = begin < refStart ? refStart : reinterpret_cast<ObjectPointerType *>(begin);
     if (end > refEnd) {
@@ -294,7 +292,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateRange(ObjectHeader *fromObject, Ob
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (; p < end; p++) {
-        [[maybe_unused]] auto cont = handler->ProcessObjectPointer(fromObject, p);
+        [[maybe_unused]] auto cont = handler(fromObject, p);
         if constexpr (INTERRUPTIBLE) {
             if (!cont) {
                 return false;
@@ -305,7 +303,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateRange(ObjectHeader *fromObject, Ob
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_DYNAMIC>::Iterate(ObjectHeader *obj, Handler *handler, void *begin, void *end)
+bool ObjectIterator<LANG_TYPE_DYNAMIC>::Iterate(ObjectHeader *obj, Handler &handler, void *begin, void *end)
 {
     auto *cls = obj->ClassAddr<HClass>();
     ASSERT(cls != nullptr && cls->IsDynamicClass());
@@ -313,15 +311,14 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::Iterate(ObjectHeader *obj, Handler *hand
 }
 
 template <typename Handler>
-bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler)
+bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler &handler)
 {
     auto *cls = obj->ClassAddr<HClass>();
     ASSERT(cls != nullptr && cls->IsDynamicClass());
 
     if (gc->IsReference(cls, obj, [gc](auto *o) { return gc->InGCSweepRange(o); })) {
-        gc->ProcessReferenceForSinglePassCompaction(cls, obj, [obj, handler](void *o) {
-            handler->ProcessObjectPointer(obj, reinterpret_cast<TaggedType *>(o));
-        });
+        gc->ProcessReferenceForSinglePassCompaction(
+            cls, obj, [obj, &handler](void *o) { handler(obj, reinterpret_cast<TaggedType *>(o)); });
         return true;
     }
 
@@ -329,16 +326,15 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateAndDiscoverReferences(GC *gc, Obj
 }
 
 template <typename Handler>
-bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler *handler,
+bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateAndDiscoverReferences(GC *gc, ObjectHeader *obj, Handler &handler,
                                                                      void *begin, void *end)
 {
     auto *cls = obj->ClassAddr<HClass>();
     ASSERT(cls != nullptr && cls->IsDynamicClass());
 
     if (gc->IsReference(cls, obj, [gc](auto *o) { return gc->InGCSweepRange(o); })) {
-        gc->ProcessReferenceForSinglePassCompaction(cls, obj, [obj, handler](void *o) {
-            handler->ProcessObjectPointer(obj, reinterpret_cast<TaggedType *>(o));
-        });
+        gc->ProcessReferenceForSinglePassCompaction(
+            cls, obj, [obj, &handler](void *o) { handler(obj, reinterpret_cast<TaggedType *>(o)); });
         return true;
     }
 
@@ -346,7 +342,7 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateAndDiscoverReferences(GC *gc, Obj
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_DYNAMIC>::Iterate(HClass *cls, ObjectHeader *obj, Handler *handler)
+bool ObjectIterator<LANG_TYPE_DYNAMIC>::Iterate(HClass *cls, ObjectHeader *obj, Handler &handler)
 {
     if (cls->IsString() || cls->IsNativePointer()) {
         return true;
@@ -362,7 +358,7 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::Iterate(HClass *cls, ObjectHeader *obj, 
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_DYNAMIC>::Iterate(HClass *cls, ObjectHeader *obj, Handler *handler, void *begin,
+bool ObjectIterator<LANG_TYPE_DYNAMIC>::Iterate(HClass *cls, ObjectHeader *obj, Handler &handler, void *begin,
                                                 void *end)
 {
     if (cls->IsString() || cls->IsNativePointer()) {
@@ -380,7 +376,7 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::Iterate(HClass *cls, ObjectHeader *obj, 
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateClassReferences(coretypes::DynClass *dynClass, Handler *handler)
+bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateClassReferences(coretypes::DynClass *dynClass, Handler &handler)
 {
     auto hklassSize = dynClass->ClassAddr<HClass>()->GetObjectSize() - sizeof(coretypes::DynClass);
     auto bodySize = hklassSize - sizeof(HClass);
@@ -392,7 +388,7 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateClassReferences(coretypes::DynCla
     auto *fieldEnd = fieldStart + numOfFields;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (auto *p = fieldStart; p < fieldEnd; p++) {
-        [[maybe_unused]] auto cont = handler->ProcessObjectPointer(dynClass, p);
+        [[maybe_unused]] auto cont = handler(dynClass, p);
         if constexpr (INTERRUPTIBLE) {
             if (!cont) {
                 return false;
@@ -403,7 +399,7 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateClassReferences(coretypes::DynCla
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateClassReferences(coretypes::DynClass *dynClass, Handler *handler,
+bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateClassReferences(coretypes::DynClass *dynClass, Handler &handler,
                                                                void *begin, void *end)
 {
     auto hklassSize = dynClass->ClassAddr<HClass>()->GetObjectSize() - sizeof(coretypes::DynClass);
@@ -420,7 +416,7 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateClassReferences(coretypes::DynCla
     }
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     for (; p < end; p++) {
-        [[maybe_unused]] auto cont = handler->ProcessObjectPointer(dynClass, p);
+        [[maybe_unused]] auto cont = handler(dynClass, p);
         if constexpr (INTERRUPTIBLE) {
             if (!cont) {
                 return false;
@@ -431,7 +427,7 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateClassReferences(coretypes::DynCla
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler *handler)
+bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler &handler)
 {
     ASSERT(cls->IsDynamicClass());
     LOG(DEBUG, GC) << "TraverseObject Current object: " << GetDebugInfoAboutObject(object);
@@ -448,7 +444,7 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateObjectReferences(ObjectHeader *ob
         if (cls->IsNativeField(ToUintPtr(p) - ToUintPtr(object))) {
             continue;
         }
-        [[maybe_unused]] auto cont = handler->ProcessObjectPointer(object, p);
+        [[maybe_unused]] auto cont = handler(object, p);
         if constexpr (INTERRUPTIBLE) {
             if (!cont) {
                 return false;
@@ -459,7 +455,7 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateObjectReferences(ObjectHeader *ob
 }
 
 template <bool INTERRUPTIBLE, typename Handler>
-bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler *handler,
+bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateObjectReferences(ObjectHeader *object, HClass *cls, Handler &handler,
                                                                 void *begin, void *end)
 {
     ASSERT(cls->IsDynamicClass());
@@ -481,7 +477,7 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateObjectReferences(ObjectHeader *ob
         if (cls->IsNativeField(ToUintPtr(p) - ToUintPtr(object))) {
             continue;
         }
-        [[maybe_unused]] auto cont = handler->ProcessObjectPointer(object, p);
+        [[maybe_unused]] auto cont = handler(object, p);
         if constexpr (INTERRUPTIBLE) {
             if (!cont) {
                 return false;

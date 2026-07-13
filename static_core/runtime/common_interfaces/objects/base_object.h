@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <cstdio>
 
-#include "common_interfaces/objects/ref_field.h"
 #include "runtime/include/object_header.h"
 #include "common_interfaces/objects/base_class.h"
 #include "common_interfaces/objects/base_state_word.h"
@@ -29,7 +28,6 @@ namespace ark::common_vm {
 
 using MemoryOrder = std::memory_order;
 using ::ark::mem::MAddress;
-using ::ark::mem::RefField;
 using ::ark::mem::RefFieldVisitor;
 using ::ark::mem::TypeInfo;
 
@@ -50,10 +48,6 @@ public:
     {
         return true;
     }
-
-    void ForEachRefField(const ark::mem::CommonRefVisitor &fieldHandler,
-                         const ark::mem::CommonRefVisitor &weakFieldHandler);
-    void ForEachRefField(const RefFieldVisitor &fieldHandler, const RefFieldVisitor &weakFieldHandler);
 
     inline BaseObject *GetForwardingPointer() const
     {

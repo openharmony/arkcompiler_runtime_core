@@ -47,8 +47,8 @@ public:
 
     void CollectFixTasks(FixHeapTaskList &taskList)
     {
-        FixHeapWorker::CollectFixHeapTasks(taskList, tlToRegionList_, FIX_TO_REGION);
-        FixHeapWorker::CollectFixHeapTasks(taskList, fullToRegionList_, FIX_TO_REGION);
+        FixHeap::CollectFixHeapTasks(taskList, tlToRegionList_, FixRegionType::FIX_TO_REGION);
+        FixHeap::CollectFixHeapTasks(taskList, fullToRegionList_, FixRegionType::FIX_TO_REGION);
     }
 
     void AddFullRegion(RegionDesc *region)
