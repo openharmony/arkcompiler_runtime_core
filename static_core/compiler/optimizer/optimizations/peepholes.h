@@ -200,7 +200,7 @@ private:
         INPUT_UNDEF   // Result of compare is undefined
     };
     // clang-format off
-    static constexpr std::array<std::array<InputCode, 4>, CC_LAST + 1> VALUES = {{
+    static constexpr std::array<std::array<InputCode, 4>, CC_AE + 1> VALUES = {{
         /* CONST < 0  CONST == 0   CONST == 1   CONST > 1        CC    */
         {INPUT_FALSE, INPUT_INV,   INPUT_ORIG,  INPUT_FALSE}, /* CC_EQ */
         {INPUT_TRUE,  INPUT_ORIG,  INPUT_INV,   INPUT_TRUE},  /* CC_NE */
@@ -215,8 +215,22 @@ private:
         {INPUT_FALSE, INPUT_TRUE,  INPUT_ORIG,  INPUT_FALSE}  /* CC_AE */
     }};
     // clang-format on
+    static InputCode GetTestInputCode(const ConstantInst *inst, ConditionCode cc)
+    {
+        ASSERT(cc == ConditionCode::CC_TST_EQ || cc == ConditionCode::CC_TST_NE);
+        bool lowBitIsSet = (inst->GetRawValue() & 1U) != 0;
+        if (cc == ConditionCode::CC_TST_EQ) {
+            return lowBitIsSet ? INPUT_INV : INPUT_TRUE;
+        }
+        return lowBitIsSet ? INPUT_ORIG : INPUT_FALSE;
+    }
+
     static InputCode GetInputCode(const ConstantInst *inst, ConditionCode cc)
     {
+        if (cc == ConditionCode::CC_TST_EQ || cc == ConditionCode::CC_TST_NE) {
+            return GetTestInputCode(inst, cc);
+        }
+        ASSERT(cc <= ConditionCode::CC_AE);
         if (inst->GetType() == DataType::INT32) {
             auto i = std::min<int32_t>(std::max<int32_t>(-1, static_cast<int32_t>(inst->GetInt32Value())), 2U) + 1;
             return VALUES[cc][i];

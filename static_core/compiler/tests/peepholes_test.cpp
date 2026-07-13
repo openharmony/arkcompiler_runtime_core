@@ -4060,6 +4060,18 @@ TEST_F(PeepholesTest, CompareTest4)
     }
 }
 
+TEST_F(PeepholesTest, CompareBoolWithTestCc)
+{
+    for (auto cst : {-2L, 0L, 2L}) {
+        CheckCompare(CC_TST_EQ, cst, {1U}, false);
+        CheckCompare(CC_TST_NE, cst, {0U}, false);
+    }
+    for (auto cst : {-1L, 1L, 3L}) {
+        CheckCompare(CC_TST_EQ, cst, std::nullopt, true);
+        CheckCompare(CC_TST_NE, cst, std::nullopt, false);
+    }
+}
+
 TEST_F(PeepholesTest, CompareTestCmpWithZero1)
 {
     GRAPH(GetGraph())
