@@ -50,7 +50,7 @@ void EtsPromise::OnPromiseCompletion(EtsExecutionContext *executionCtx, EtsPromi
     ASSERT(queueSize == 0 || cbQueue != nullptr);
     ASSERT(queueSize == 0 || workerDomainQueue != nullptr);
 
-    if (promise->GetState() == STATE_REJECTED && queueSize == 0) {
+    if (promise->GetState() == STATE_REJECTED && queueSize == 0 && !promise->IsHandled()) {
         executionCtx->GetPandaVM()->GetUnhandledObjectManager()->AddRejectedPromise(promise, executionCtx);
     }
 

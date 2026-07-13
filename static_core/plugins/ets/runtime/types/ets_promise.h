@@ -25,6 +25,7 @@
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "runtime/execution/job_events.h"
+#include "runtime/include/object_accessor-inl.h"
 
 namespace ark::ets {
 
@@ -41,6 +42,7 @@ public:
     static constexpr EtsInt STATE_LINKED = 1;
     static constexpr EtsInt STATE_RESOLVED = 2;
     static constexpr EtsInt STATE_REJECTED = 3;
+    static constexpr EtsBoolean PROMISE_HANDLED = 1;
 
     EtsPromise() = delete;
     ~EtsPromise() = delete;
@@ -107,6 +109,17 @@ public:
     bool IsRejected() const
     {
         return (state_ == STATE_REJECTED);
+    }
+
+    bool IsHandled() const
+    {
+        return ObjectAccessor::GetPrimitive<EtsBoolean, true>(this, MEMBER_OFFSET(EtsPromise, handled_)) ==
+               PROMISE_HANDLED;
+    }
+
+    void SetHandled()
+    {
+        ObjectAccessor::SetPrimitive<EtsBoolean, true>(this, MEMBER_OFFSET(EtsPromise, handled_), PROMISE_HANDLED);
     }
 
     bool IsPending() const
@@ -290,6 +303,7 @@ private:
     ObjectPointer<EtsObject> linkedPromise_;        // linked JS promise as JSValue (if exists)
     EtsInt queueSize_;
     std::atomic<uint32_t> state_;  // the Promise's state
+    EtsBoolean handled_;
 
     friend class test::EtsPromiseTest;
 };

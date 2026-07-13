@@ -739,6 +739,7 @@ export final class Promise<out T> implements PromiseLike<T> {
     private linkedPromise?: Object;
     private queueSize: int = 0;
     private state: int = Promise.STATE_PENDING;
+    private handled: boolean = false;
 }
 
 export type NullablePromise<out T> = Promise<T> | undefined;

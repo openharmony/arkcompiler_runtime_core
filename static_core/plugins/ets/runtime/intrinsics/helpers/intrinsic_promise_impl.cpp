@@ -62,6 +62,14 @@ static PandaVector<Value> FillEntrypointArgs(Method *method)
     return args;
 }
 
+static void MarkPromiseHandled(EtsHandle<EtsPromise> &promiseHandle)
+{
+    EtsMutex::LockHolder lh(promiseHandle);
+    promiseHandle->SetHandled();
+    EtsExecutionContext::GetCurrent()->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(
+        promiseHandle.GetPtr(), EtsExecutionContext::GetCurrent());
+}
+
 static EtsObject *HandleAwaitStackful(EtsPromise *promise)
 {
     auto *etsCtx = EtsExecutionContext::GetCurrent();
@@ -119,22 +127,25 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t pr
         return nullptr;
     }
 
+    [[maybe_unused]] EtsHandleScope scope(etsCtx);
+    EtsHandle<EtsPromise> promiseHandle(etsCtx, promise);
+
+    MarkPromiseHandled(promiseHandle);
+
     if (Runtime::GetCurrent()->GetOptions().GetCoroutineImpl() == "stackful") {
-        return HandleAwaitStackful(promise);
+        return HandleAwaitStackful(promiseHandle.GetPtr());
     }
 
     auto *asyncCtx = EtsAsyncContext::GetCurrent(etsCtx);
     if (asyncCtx != nullptr) {
         auto *stacklessJobMan = static_cast<StacklessJobManager *>(jobMan);
         auto *dependency = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(stacklessJobMan);
-        asyncCtx->SetAwaitee(etsCtx, promise);
+        asyncCtx->SetAwaitee(etsCtx, promiseHandle.GetPtr());
         stacklessJobMan->AwaitAsynchronous(dependency);
-        promise->GetEvent<CoroutineMode::STACKLESS>(etsCtx)->AddDependency(dependency);
+        promiseHandle->GetEvent<CoroutineMode::STACKLESS>(etsCtx)->AddDependency(dependency);
         return asyncCtx;
     }
 
-    [[maybe_unused]] EtsHandleScope scope(etsCtx);
-    EtsHandle<EtsPromise> promiseHandle(etsCtx, promise);
     asyncCtx = EtsAsyncContext::Create(etsCtx, refCount, primCount, pc);
     EtsHandle<EtsAsyncContext> asyncCtxHandle(etsCtx, asyncCtx);
     if UNLIKELY (asyncCtxHandle.GetPtr() == nullptr) {
@@ -183,13 +194,13 @@ EtsObject *EtsAwaitPromiseSyncImpl(EtsPromise *promise)
                           "Cannot await in the current context!");
         return nullptr;
     }
-
-    if (Runtime::GetCurrent()->GetOptions().GetCoroutineImpl() == "stackful") {
-        return HandleAwaitStackful(promise);
-    }
-
     [[maybe_unused]] EtsHandleScope scope(etsCtx);
     EtsHandle<EtsPromise> promiseHandle(etsCtx, promise);
+    MarkPromiseHandled(promiseHandle);
+
+    if (Runtime::GetCurrent()->GetOptions().GetCoroutineImpl() == "stackful") {
+        return HandleAwaitStackful(promiseHandle.GetPtr());
+    }
 
     LOG(DEBUG, COROUTINES) << "Promise::awaitSync: starting blocking await for a promise...";
 
