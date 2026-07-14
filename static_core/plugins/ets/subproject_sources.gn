@@ -409,6 +409,9 @@ if (!(ark_standalone_build || ark_static_standalone_build)) {
     "pcre2:libpcre2_static_8",
     "pcre2:libpcre2_static_16",
   ]
+  if (ark_ets_interop_js) {
+    runtime_external_deps += [ "libuv:uv" ]
+  }
 } else if (ark_standalone_build) {
   # ark_standalone build: use deps (third_party dependency)
   arkruntime_deps += [
