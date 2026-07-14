@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ MemoryManager *MemoryManager::Create(const LanguageContext &ctx, InternalAllocat
     }
 
     InternalAllocatorPtr allocator = heapManager->GetInternalAllocator();
-    GCStats *gcStats = allocator->New<GCStats>(memStats.get(), gcType, allocator);
+    GCStats *gcStats = allocator->New<GCStats>(memStats.get(), gcType);
     GC *gc = ctx.CreateGC(gcType, heapManager->GetObjectAllocator().AsObjectAllocator(), gcSettings);
     GCTrigger *gcTrigger =
         CreateGCTrigger(memStats.get(), heapManager->GetObjectAllocator().AsObjectAllocator()->GetHeapSpace(),

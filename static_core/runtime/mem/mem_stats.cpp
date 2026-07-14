@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,22 +95,6 @@ void MemStats<T>::RecordFreeObjects(size_t totalObjectNum, size_t totalObjectSiz
         // on writes before the store
         objectsFreed_.fetch_add(totalObjectNum, std::memory_order_acq_rel);
     }
-}
-
-template <typename T>
-PandaString MemStats<T>::GetStatistics()
-{
-    PandaStringStream statistic;
-    statistic << "memory statistics:" << std::endl;
-    statistic << "heap: allocated - " << GetAllocatedHeap() << ", freed - " << GetFreedHeap() << std::endl;
-    statistic << "raw memory: allocated - " << GetAllocated(SpaceType::SPACE_TYPE_INTERNAL) << ", freed - "
-              << GetFreed(SpaceType::SPACE_TYPE_INTERNAL) << std::endl;
-    statistic << "compiler: allocated - " << GetAllocated(SpaceType::SPACE_TYPE_CODE) << std::endl;
-    statistic << "ArenaAllocator: allocated - " << GetAllocated(SpaceType::SPACE_TYPE_COMPILER) << std::endl;
-    statistic << "total footprint now - " << GetTotalFootprint() << std::endl;
-    statistic << "total allocated object - " << GetTotalObjectsAllocated() << std::endl;
-    auto additionalStatistics = static_cast<T *>(this)->GetAdditionalStatistics();
-    return statistic.str() + additionalStatistics;
 }
 
 template <typename T>

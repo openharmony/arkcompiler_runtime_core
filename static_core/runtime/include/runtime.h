@@ -445,7 +445,6 @@ public:
     }
 
     PandaString GetMemoryStatistics();
-    PandaString GetFinalStatistics();
 
     Expected<LanguageContext, Error> ExtractLanguageContext(const panda_file::File *pf, std::string_view entryPoint);
 

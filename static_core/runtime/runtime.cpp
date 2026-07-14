@@ -1233,12 +1233,7 @@ Expected<Method *, Runtime::Error> Runtime::ResolveEntryPoint(std::string_view e
 
 PandaString Runtime::GetMemoryStatistics()
 {
-    return pandaVm_->GetMemStats()->GetStatistics();
-}
-
-PandaString Runtime::GetFinalStatistics()
-{
-    return pandaVm_->GetGCStats()->GetFinalStatistics(pandaVm_->GetHeapManager());
+    return pandaVm_->GetClassesFootprint();
 }
 
 void Runtime::NotifyAboutLoadedModules()
@@ -1673,11 +1668,6 @@ void Runtime::DumpForSigQuit(std::ostream &os)
             return ctx->FindClassLoaderParent(parent);
         },
         os);
-    os << "\n";
-
-    // dump GC
-    os << "-> Dump GC\n";
-    os << GetFinalStatistics();
     os << "\n";
 
     // dump memory management

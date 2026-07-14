@@ -103,7 +103,6 @@ set(SOURCES
     mem/runslots.cpp
     mem/region_space.cpp
     mem/object_helpers.cpp
-    mem/mem_stats_additional_info.cpp
     mem/mem_stats_default.cpp
     mem/mem_stats.cpp
     mem/internal_allocator.cpp

@@ -259,7 +259,6 @@ _libarkruntime_calculated_sources = [
   "mem/internal_allocator.cpp",
   "mem/internal_arena_allocator.cpp",
   "mem/mem_stats.cpp",
-  "mem/mem_stats_additional_info.cpp",
   "mem/mem_stats_default.cpp",
   "mem/memory_manager.cpp",
   "mem/object_helpers.cpp",

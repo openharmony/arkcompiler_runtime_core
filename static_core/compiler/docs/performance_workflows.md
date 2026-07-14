@@ -50,7 +50,6 @@ Current runtime knobs include:
 - `--gc-type=epsilon-g1`
 - `--gc-trigger-type=trigger-heap-occupancy`
 - `--max-trigger-percent=<n>`
-- `--print-gc-statistics=true`
 - `--print-memory-statistics=true`
 - `--log-level=info --log-components=gc`
 - `--log-detailed-gc-info-enabled=true`

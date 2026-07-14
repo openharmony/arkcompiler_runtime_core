@@ -118,7 +118,6 @@ Use the same repro discipline for GC bugs, then add GC-specific visibility:
 
 - `--log-level=debug --log-components=gc:mm-obj-events`
 - `--log-detailed-gc-info-enabled=true`
-- `--print-gc-statistics=true`
 - `--print-memory-statistics=true`
 
 For ETS-specific experiments, the current stdlib exposes:

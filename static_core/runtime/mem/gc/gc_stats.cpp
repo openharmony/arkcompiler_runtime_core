@@ -56,67 +56,6 @@ PandaString GCStats::GetStatistics()
     return statistic.str();
 }
 
-PandaString GCStats::GetFinalStatistics(HeapManager *heapManager)
-{
-    auto totalTime = ConvertTimeToPeriod(time::GetCurrentTimeInNanos() - startTime_, true);
-    auto totalTimeGc = helpers::TimeConverter(totalDuration_);
-    auto totalAllocated = memStats_->GetAllocatedHeap();
-    auto totalFreed = memStats_->GetFreedHeap();
-    auto totalObjects = memStats_->GetTotalObjectsAllocated();
-
-    auto currentMemory = memStats_->GetFootprintHeap();
-    auto consumedMemory = heapManager->GetConsumedHeapMemory();
-    auto maxMemory = heapManager->GetMaxMemory();
-
-    Histogram<uint64_t> durationInfo(allNumberDurations_->begin(), allNumberDurations_->end());
-
-    if (countGcPeriod_ != 0U) {
-        durationInfo.AddValue(countGcPeriod_);
-    }
-    if (totalTime > durationInfo.GetCountDifferent()) {
-        durationInfo.AddValue(0, totalTime - durationInfo.GetCountDifferent());
-    }
-    PandaStringStream statistic;
-
-    statistic << heapManager->GetGC()->DumpStatistics() << "\n";
-
-    statistic << "Total time spent in GC: " << totalTimeGc << "\n";
-
-    statistic << "Mean GC size throughput " << helpers::MemoryConverter(totalAllocated / totalTimeGc.GetDoubleValue())
-              << "/" << totalTimeGc.GetLiteral() << "\n";
-    statistic << "Mean GC object throughput: " << std::scientific << totalObjects / totalTimeGc.GetDoubleValue()
-              << " objects/" << totalTimeGc.GetLiteral() << "\n";
-    statistic << "Total number of allocations " << totalObjects << "\n";
-    statistic << "Total bytes allocated " << helpers::MemoryConverter(totalAllocated) << "\n";
-    statistic << "Total bytes freed " << helpers::MemoryConverter(totalFreed) << "\n\n";
-
-    // Calculate manually to do less work
-    auto freeMemBeforeHeapGrow = helpers::UnsignedDifference(consumedMemory, currentMemory);
-    ASSERT(freeMemBeforeHeapGrow == heapManager->GetFreeMemoryBeforeHeapGrow());
-    statistic << "Free memory before heap grow " << helpers::MemoryConverter(freeMemBeforeHeapGrow) << "\n";
-    statistic << "Free memory until OOME "
-              << helpers::MemoryConverter(helpers::UnsignedDifference(maxMemory, currentMemory)) << "\n";
-    statistic << "Consumed memory " << helpers::MemoryConverter(consumedMemory) << "\n";
-
-    {
-        os::memory::LockHolder lock(mutatorStatsLock_);
-        statistic << "Total mutator paused time: " << helpers::TimeConverter(totalMutatorPause_) << "\n";
-    }
-    statistic << "Total time waiting for GC to complete: " << helpers::TimeConverter(totalPause_) << "\n";
-    statistic << "Total GC count: " << durationInfo.GetSum() << "\n";
-    statistic << "Total GC time: " << totalTimeGc << "\n";
-    statistic << "Total blocking GC count: " << durationInfo.GetSum() << "\n";
-    statistic << "Total blocking GC time: " << totalTimeGc << "\n";
-    statistic << "Histogram of GC count per 10000 ms: " << durationInfo.GetTopDump() << "\n";
-    statistic << "Histogram of blocking GC count per 10000 ms: " << durationInfo.GetTopDump() << "\n";
-
-    statistic << "Native bytes registered: " << heapManager->GetGC()->GetNativeBytesRegistered() << "\n\n";
-
-    statistic << "Max memory " << helpers::MemoryConverter(maxMemory) << "\n";
-
-    return statistic.str();
-}
-
 PandaString GCStats::GetPhasePauseStat(PauseTypeStats pauseType)
 {
     PandaStringStream statistic;
@@ -130,44 +69,14 @@ uint64_t GCStats::GetPhasePause(PauseTypeStats pauseType)
     return lastPause_[ToIndex(pauseType)];
 }
 
-GCStats::GCStats(MemStatsType *memStats, GCType gcTypeFromRuntime, InternalAllocatorPtr allocator)
-    : memStats_(memStats), allocator_(allocator)
+GCStats::GCStats(MemStatsType *memStats, GCType gcTypeFromRuntime) : memStats_(memStats)
 {
-    startTime_ = time::GetCurrentTimeInNanos();
-    allNumberDurations_ = allocator_->New<PandaVector<uint64_t>>(allocator_->Adapter());
     gcType_ = gcTypeFromRuntime;
 }
 
 GCStats::~GCStats()
 {
     gcType_ = GCType::INVALID_GC;
-
-    if (allNumberDurations_ != nullptr) {
-        allocator_->Delete(allNumberDurations_);
-    }
-    allNumberDurations_ = nullptr;
-}
-
-void GCStats::StartMutatorLock()
-{
-    os::memory::LockHolder lock(mutatorStatsLock_);
-    if (countMutator_ == 0) {
-        mutatorStartTime_ = time::GetCurrentTimeInNanos();
-    }
-    ++countMutator_;
-}
-
-void GCStats::StopMutatorLock()
-{
-    os::memory::LockHolder lock(mutatorStatsLock_);
-    if (countMutator_ == 0) {
-        return;
-    }
-    if (countMutator_ == 1) {
-        totalMutatorPause_ += time::GetCurrentTimeInNanos() - mutatorStartTime_;
-        mutatorStartTime_ = 0;
-    }
-    --countMutator_;
 }
 
 void GCStats::StartCollectStats()
@@ -204,17 +113,6 @@ void GCStats::StopCollectStats(GCInstanceStats *instanceStats)
     }
 }
 
-uint64_t GCStats::ConvertTimeToPeriod(uint64_t timeInNanos, bool ceil)
-{
-    std::chrono::nanoseconds nanos(timeInNanos);
-    if (ceil) {
-        using ResultDuration = std::chrono::duration<double, PERIOD>;
-        return std::ceil(std::chrono::duration_cast<ResultDuration>(nanos).count());
-    }
-    using ResultDuration = std::chrono::duration<uint64_t, PERIOD>;
-    return std::chrono::duration_cast<ResultDuration>(nanos).count();
-}
-
 void GCStats::AddPause(uint64_t pause, GCInstanceStats *instanceStats, PauseTypeStats pauseType)
 {
     // COMMON_PAUSE can be accounted in different methods but it cannot be interleaved with other pause types
@@ -226,7 +124,6 @@ void GCStats::AddPause(uint64_t pause, GCInstanceStats *instanceStats, PauseType
     // allow accounting in different methods for COMMON_PAUSE only
     ASSERT(lastPause == 0 || pauseType == PauseTypeStats::COMMON_PAUSE);
     lastPause += pause;
-    totalPause_ += pause;
 #ifndef NDEBUG
     prevPauseType_ = pauseType;
 #endif
@@ -245,14 +142,6 @@ void GCStats::ResetLastPause()
 
 void GCStats::RecordDuration(uint64_t duration, GCInstanceStats *instanceStats)
 {
-    uint64_t startTimeDuration = ConvertTimeToPeriod(time::GetCurrentTimeInNanos() - startTime_ - duration);
-    // every PERIOD
-    if ((countGcPeriod_ != 0U) && (lastStartDuration_ != startTimeDuration)) {
-        allNumberDurations_->push_back(countGcPeriod_);
-        countGcPeriod_ = 0U;
-    }
-    lastStartDuration_ = startTimeDuration;
-    ++countGcPeriod_;
     if ((instanceStats != nullptr) && (duration > 0)) {
         instanceStats->AddTimeValue(duration, TimeTypeStats::ALL_TOTAL_TIME);
     }

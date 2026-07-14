@@ -161,9 +161,6 @@ static void PrintStatistics(RuntimeOptions &runtimeOptions, Runtime &runtime)
     if (runtimeOptions.IsPrintMemoryStatistics()) {
         std::cout << runtime.GetMemoryStatistics();
     }
-    if (runtimeOptions.IsPrintGcStatistics()) {
-        std::cout << runtime.GetFinalStatistics();
-    }
 }
 
 // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
