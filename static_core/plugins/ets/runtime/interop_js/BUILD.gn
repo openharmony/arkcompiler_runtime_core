@@ -25,6 +25,7 @@ if (is_ohos && is_standard_system) {
     stdlib_dir =
         get_label_info("$ark_root/plugins/ets:etsstdlib", "target_gen_dir")
     source = "$stdlib_dir/etsstdlib.abc"
+    symlink_path = "../framework/etsstdlib_bootabc.abc"
     part_name = ark_part_name
     subsystem_name = ark_subsystem_name
   }
