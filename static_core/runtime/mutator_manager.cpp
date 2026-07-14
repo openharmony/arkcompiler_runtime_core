@@ -61,11 +61,14 @@ void MutatorManager::RegisterMutator(Mutator *mutator, const MutatorCallback &ca
     }
 }
 
-void MutatorManager::UnregisterMutator(Mutator *mutator)
+void MutatorManager::UnregisterMutator(Mutator *mutator, const MutatorCallback &callback)
 {
     os::memory::LockHolder unregisterMutatorLock(mutatorsLock_);
     LOG(DEBUG, RUNTIME) << "Unregister mutator " << mutator << ", type: " << mutator->GetMutatorType();
     mutatorsSet_.erase(mutator);
+    if (callback != nullptr) {
+        callback(mutator);
+    }
 }
 
 void MutatorManager::NotifyToSuspendDaemonMutators()

@@ -113,11 +113,6 @@ enum BuffersKeepingFlag : bool {
     DELETE = false,
 };
 
-enum class MutatorUnregistrationMode : bool {
-    UNREGISTER = true,
-    KEEP = false,
-};
-
 class GCListener {
 public:
     GCListener() = default;
@@ -356,13 +351,10 @@ public:
      * Processes mutator's remaining pre and post barrier buffer entries on its termination.
      *
      * @param mutator specifies the terminating mutator
-     * @param mode specifies whether to unregister (=MutatorUnregistrationMode::UNREGISTER) or
-     * keep (=MutatorUnregistrationMode::KEEP) the passed mutator in MutatorManager
      * @param keepBuffers specifies whether to clear (=BuffersKeepingFlag::KEEP) or deallocate
      * (=BuffersKeepingFlag::DELETE) pre and post barrier buffers upon OnMutatorTerminate() completion
      */
-    virtual void OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
-                                    [[maybe_unused]] mem::BuffersKeepingFlag keepBuffers);
+    virtual void OnMutatorTerminate(Mutator *mutator, [[maybe_unused]] mem::BuffersKeepingFlag keepBuffers);
 
     /// Performs the actions that are required upon mutator creation (if any)
     virtual void OnMutatorCreate(Mutator *mutator);

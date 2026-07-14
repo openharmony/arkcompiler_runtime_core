@@ -115,12 +115,9 @@ void GC::OnMutatorCreate(Mutator *mutator)
     vm_->GetMutatorManager()->RegisterMutator(mutator, nullptr);
 }
 
-void GC::OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
-                            [[maybe_unused]] mem::BuffersKeepingFlag keepBuffers)
+void GC::OnMutatorTerminate(Mutator *mutator, [[maybe_unused]] mem::BuffersKeepingFlag keepBuffers)
 {
-    if (mode == MutatorUnregistrationMode::UNREGISTER) {
-        vm_->GetMutatorManager()->UnregisterMutator(mutator);
-    }
+    vm_->GetMutatorManager()->UnregisterMutator(mutator, nullptr);
 }
 
 void GC::SetPandaVM(PandaVM *vm)

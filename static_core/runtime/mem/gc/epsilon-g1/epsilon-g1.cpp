@@ -57,23 +57,34 @@ void EpsilonG1GC<LanguageConfig>::InitializeImpl()
 }
 
 template <class LanguageConfig>
-void EpsilonG1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
-                                                     mem::BuffersKeepingFlag keepBuffers)
+void EpsilonG1GC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, mem::BuffersKeepingFlag keepBuffers)
 {
     LOG(DEBUG, GC) << "Call OnMutatorTerminate";
-    // Clearing buffers to remove memory leaks in internal allocator
-    GC::OnMutatorTerminate(mutator, mode, keepBuffers);
-    auto satbBuff = mutator->MoveSatbBuff();
-    ASSERT(satbBuff != nullptr);
-    auto allocator = this->GetInternalAllocator();
-    allocator->DeleteArray(satbBuff);
-    if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
-        mutator->AllocateSatbBuff(allocator);
-    }
-    auto *localBuffer = mutator->GetG1PostBarrierBuffer();
-    mutator->ResetG1PostBarrierBuffer();
-    ASSERT(localBuffer != nullptr);
-    allocator->Delete(localBuffer);
+    // We have to handle buffers under the mutators manager lock taken because of next situation
+    // 1) Mutator starting to get deregistered
+    // 2) GC started
+    // 3) Mutator was already removed from manager, but its barriers were not handled yet
+    // 4) GC dont see mutator through manager (it was deregistered). GC dont see mutator's barriers - they were
+    // not handled yet => GC loses barriers.
+    // 5) Even though next GC will see lost barriers current GC could already delete alive objects
+    //
+    // So we need to synchronize barrier handling with GC and mutator deregistration: for GC barriers must be seen
+    // always either through the mutator or through the remsetworker/
+    this->GetPandaVm()->GetMutatorManager()->UnregisterMutator(mutator, [this, keepBuffers](Mutator *mutator) {
+        // Clearing buffers to remove memory leaks in internal allocator
+        auto satbBuff = mutator->MoveSatbBuff();
+        ASSERT(satbBuff != nullptr);
+        auto allocator = this->GetInternalAllocator();
+        allocator->DeleteArray(satbBuff);
+        if (keepBuffers == mem::BuffersKeepingFlag::KEEP) {
+            mutator->AllocateSatbBuff(allocator);
+        }
+        auto *localBuffer = mutator->GetG1PostBarrierBuffer();
+        mutator->ResetG1PostBarrierBuffer();
+        ASSERT(localBuffer != nullptr);
+        allocator->Delete(localBuffer);
+        return true;
+    });
 }
 
 template <class LanguageConfig>

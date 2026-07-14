@@ -86,8 +86,7 @@ void CompilerProcessor::InPlaceCompileMethod(CompilerTask &&ctx)
     if (compilerCtx.GetMethod()->AtomicSetCompilationStatus(Method::WAITING, Method::COMPILATION)) {
         compiler_->CompileMethodLocked<compiler::INPLACE_MODE>(std::move(taskRunner));
     }
-    compilerThread.GetVM()->GetGC()->OnMutatorTerminate(&compilerThread, mem::MutatorUnregistrationMode::UNREGISTER,
-                                                        mem::BuffersKeepingFlag::DELETE);
+    compilerThread.GetVM()->GetGC()->OnMutatorTerminate(&compilerThread, mem::BuffersKeepingFlag::DELETE);
 }
 
 }  // namespace ark

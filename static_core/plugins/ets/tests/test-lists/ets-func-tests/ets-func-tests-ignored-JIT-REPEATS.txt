@@ -1,3 +1,0 @@
-#31896 #31106
-ets_func_tests/std/concurrency/eaworker_message.ets
-ets_func_tests/std/concurrency/messageHandler_basic_interface.ets

@@ -60,8 +60,7 @@ void CompilerTaskManagerWorker::AddTask(CompilerTask &&task)
 compiler::BackgroundCompilerContext::CompilerMutator CompilerTaskManagerWorker::CreateCompilerMutator(PandaVM *vm)
 {
     auto mutatorDeleter = [this](Mutator *mutator) {
-        mutator->GetVM()->GetGC()->OnMutatorTerminate(mutator, mem::MutatorUnregistrationMode::UNREGISTER,
-                                                      mem::BuffersKeepingFlag::DELETE);
+        mutator->GetVM()->GetGC()->OnMutatorTerminate(mutator, mem::BuffersKeepingFlag::DELETE);
         internalAllocator_->Delete(mutator);
     };
     compiler::BackgroundCompilerContext::CompilerMutator compilerMutator(

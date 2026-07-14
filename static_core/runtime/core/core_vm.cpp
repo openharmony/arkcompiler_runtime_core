@@ -67,14 +67,10 @@ Expected<PandaCoreVM *, PandaString> PandaCoreVM::Create(Runtime *runtime, const
     coreVm->InitializeGC();
 
     // Create Main Thread
-    coreVm->mainThread_ = MTManagedThread::Create(runtime, coreVm);
-    ASSERT_PRINT(coreVm->mainThread_ == ManagedThread::GetCurrent(),
-                 coreVm->mainThread_ << " " << ManagedThread::GetCurrent());
-    coreVm->mainThread_->InitForStackOverflowCheck(ManagedThread::STACK_OVERFLOW_RESERVED_SIZE,
-                                                   ManagedThread::STACK_OVERFLOW_PROTECTED_SIZE);
-
-    coreVm->threadManager_->SetMainThread(coreVm->mainThread_);
-
+    auto *mainThread = MTManagedThread::Create(runtime, coreVm);
+    ASSERT_PRINT(mainThread == ManagedThread::GetCurrent(), mainThread << " " << ManagedThread::GetCurrent());
+    mainThread->InitForStackOverflowCheck(ManagedThread::STACK_OVERFLOW_RESERVED_SIZE,
+                                          ManagedThread::STACK_OVERFLOW_PROTECTED_SIZE);
     return coreVm;
 }
 
@@ -95,12 +91,6 @@ PandaCoreVM::PandaCoreVM(Runtime *runtime, const RuntimeOptions &options, mem::M
 
 PandaCoreVM::~PandaCoreVM()
 {
-    // Main mutator must be kept after unregistration of other mutators, and hence must
-    // be derigestered here before deletion
-    GetGC()->OnMutatorTerminate(mainThread_, mem::MutatorUnregistrationMode::UNREGISTER,
-                                mem::BuffersKeepingFlag::DELETE);
-    delete mainThread_;
-
     mem::InternalAllocatorPtr allocator = mm_->GetHeapManager()->GetInternalAllocator();
     allocator->Delete(rendezvous_);
     allocator->Delete(runtimeIface_);
@@ -158,8 +148,8 @@ bool PandaCoreVM::InitializeFinish()
 void PandaCoreVM::UninitializeThreads()
 {
     // Wait until all threads finish the work
+    MTManagedThread::GetCurrent()->Destroy();
     threadManager_->WaitForDeregistration();
-    mainThread_->Destroy();
 }
 
 void PandaCoreVM::PreStartup()

@@ -72,19 +72,12 @@ MTManagedThread *MTThreadManager::GetThreadByInternalThreadIdWithLockHeld(uint32
 
 bool MTThreadManager::DeregisterSuspendedThreads()
 {
-    auto current = MTManagedThread::GetCurrent();
     auto i = threads_.begin();
     bool isPotentiallyBlockedThreadPresent = false;
     bool isNonblockedThreadPresent = false;
     while (i != threads_.end()) {
         MTManagedThread *thread = *i;
         auto status = thread->GetStatus();
-        // Do not deregister current thread (which should be in status NATIVE) as HasNoActiveThreads
-        // assumes it stays registered.
-        if (thread == current) {
-            i++;
-            continue;
-        }
         // Only threads in IS_TERMINATED_LOOP status can be deregistered.
         if (CanDeregister(status)) {
             DecreaseCountersForThread(thread);
@@ -103,13 +96,12 @@ bool MTThreadManager::DeregisterSuspendedThreads()
         i++;
     }
     if (isPotentiallyBlockedThreadPresent && !isNonblockedThreadPresent) {
-        // All threads except current are blocked (have BLOCKED or NATIVE status)
+        // All threads are blocked (have BLOCKED or NATIVE status)
         LOG(DEBUG, RUNTIME) << "Potential termination loop with daemon threads is detected";
-        return StopThreadsOnTerminationLoops(current);
+        return StopThreadsOnTerminationLoops();
     }
-    // Sanity check, we should get at least current thread in that list.
-    ASSERT(!threads_.empty());
-    return threads_.size() == 1;
+    // All threads (including main) should be deleted cassually
+    return threads_.size() == 0;
 }
 
 void MTThreadManager::DecreaseCountersForThread(MTManagedThread *thread)
@@ -122,9 +114,9 @@ void MTThreadManager::DecreaseCountersForThread(MTManagedThread *thread)
     threadsCount_--;
 }
 
-bool MTThreadManager::StopThreadsOnTerminationLoops(MTManagedThread *current)
+bool MTThreadManager::StopThreadsOnTerminationLoops()
 {
-    if (!LockOrderGraph::CheckForTerminationLoops(threads_, daemonThreads_, current)) {
+    if (!LockOrderGraph::CheckForTerminationLoops(threads_, daemonThreads_)) {
         LOG(DEBUG, RUNTIME) << "Termination loop with daemon threads was not confirmed";
         return false;
     }
@@ -133,12 +125,8 @@ bool MTThreadManager::StopThreadsOnTerminationLoops(MTManagedThread *current)
     auto i = threads_.begin();
     while (i != threads_.end()) {
         MTManagedThread *thread = *i;
-        if (thread != current) {
-            DecreaseCountersForThread(thread);
-            i = threads_.erase(i);
-            continue;
-        }
-        i++;
+        DecreaseCountersForThread(thread);
+        i = threads_.erase(i);
     }
     return true;
 }
@@ -251,23 +239,14 @@ bool MTThreadManager::UnregisterExitedThread(MTManagedThread *thread)
             thread->SafepointPoll();
             threadLock_.Lock();
         }
+        thread->UpdateStatus(MutatorStatus::TERMINATING);
 
         thread->CollectTLABMetrics();
         thread->ClearTLAB();
-        bool isCurrentThreadMain = (thread == GetMainThread());
-        if (isCurrentThreadMain) {
-            thread->DestroyInternalResources(mem::MutatorUnregistrationMode::KEEP);
-        } else {
-            thread->DestroyInternalResources(mem::MutatorUnregistrationMode::UNREGISTER);
-        }
+        thread->DestroyInternalResources();
 
         LOG(DEBUG, RUNTIME) << "Stopping thread " << thread->GetId();
         thread->UpdateStatus(MutatorStatus::FINISHED);
-        // Do not delete main thread, Runtime::GetMainThread is expected to always return valid object
-        if (isCurrentThreadMain) {
-            return false;
-        }
-
         // This code should happen after thread has been resumed: Both WaitSuspension and ResumeImps requires locking
         // suspendLock_, so it acts as a memory barrier; flag clean should be visible in this thread after exit from
         // WaitSuspenion

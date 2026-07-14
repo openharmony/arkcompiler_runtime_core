@@ -42,8 +42,7 @@ public:
     bool WaitForGC(GCTask task) override;
     void InitGCBits(ark::ObjectHeader *objHeader) override;
     bool Trigger(PandaUniquePtr<GCTask> task) override;
-    void OnMutatorTerminate(Mutator *mutator, MutatorUnregistrationMode mode,
-                            mem::BuffersKeepingFlag keepBuffers) override;
+    void OnMutatorTerminate(Mutator *mutator, mem::BuffersKeepingFlag keepBuffers) override;
 
 private:
     void InitializeImpl() override;

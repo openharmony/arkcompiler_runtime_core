@@ -32,18 +32,13 @@ void UpdateMonitorsForThread(PandaMap<ManagedThread::ThreadId, Monitor::MonitorI
 }
 
 bool LockOrderGraph::CheckForTerminationLoops(const PandaList<MTManagedThread *> &threads,
-                                              const PandaList<MTManagedThread *> &daemonThreads,
-                                              MTManagedThread *current)
+                                              const PandaList<MTManagedThread *> &daemonThreads)
 {
     PandaMap<ThreadId, bool> nodes;
     PandaMap<ThreadId, ThreadId> edges;
     PandaMap<ThreadId, MonitorId> enteringMonitors;
     PandaMap<MonitorId, PandaSet<ThreadId>> enteredMonitors;
     for (auto thread : threads) {
-        if (thread == current) {
-            continue;
-        }
-
         auto threadId = thread->GetId();
         auto status = thread->GetStatus();
         if (status == MutatorStatus::NATIVE) {
