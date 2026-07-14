@@ -342,6 +342,7 @@
         test30:  {a: doubleNaN, b:  1},
         test40:  {a: doubleInf, b:  1},
         test50:  {a: doubleNegInf, b:  1},
+        test60:  {a: Double.MAX_VALUE, b:  1},
 
       },
     method_expected_data:
@@ -353,7 +354,8 @@
         test23:  25,
         test30:  0,
         test40:  0,
-        test50:  0
+        test50:  0,
+        test60:  0
       },
   }
 - {
