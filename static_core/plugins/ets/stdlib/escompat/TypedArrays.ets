@@ -855,24 +855,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
-        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
-        //  we can make one pass through the iterator without the need for memory reallocation.
-        const maybeLength = tryGetIteratorLength(arrayLike)
-        if (maybeLength) {
-            const result = new Int8Array(maybeLength)
-            for (let i = 0; i < maybeLength; ++i) {
-                const x = iter.next()
-                if (x.done) {
-                    return new Int8Array(result.buffer, 0, i)
-                }
-                const mapped = (mapfn)!(x.value!, i)
-                result.setUnsafe(i, Int8Array.doubleToInt(mapped))
-            }
-            return result
-        }
-
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Int8Array(6)
         let index : FixedArray<int> = new FixedArray<int>(1)
@@ -2516,24 +2498,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
-        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
-        //  we can make one pass through the iterator without the need for memory reallocation.
-        const maybeLength = tryGetIteratorLength(arrayLike)
-        if (maybeLength) {
-            const result = new Int16Array(maybeLength)
-            for (let i = 0; i < maybeLength; ++i) {
-                const x = iter.next()
-                if (x.done) {
-                    return new Int16Array(result.buffer, 0, i)
-                }
-                const mapped = (mapfn)!(x.value!, i)
-                result.setUnsafe(i, Int16Array.doubleToInt(mapped))
-            }
-            return result
-        }
-
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Int16Array(6)
         let index : FixedArray<int> = new FixedArray<int>(1)
@@ -4148,24 +4112,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
-        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
-        //  we can make one pass through the iterator without the need for memory reallocation.
-        const maybeLength = tryGetIteratorLength(arrayLike)
-        if (maybeLength) {
-            const result = new Int32Array(maybeLength)
-            for (let i = 0; i < maybeLength; ++i) {
-                const x = iter.next()
-                if (x.done) {
-                    return new Int32Array(result.buffer, 0, i)
-                }
-                const mapped = (mapfn)!(x.value!, i)
-                result.setUnsafe(i, Int32Array.doubleToInt(mapped))
-            }
-            return result
-        }
-
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Int32Array(6)
         let index : FixedArray<int> = new FixedArray<int>(1)
@@ -5815,24 +5761,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
-        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
-        //  we can make one pass through the iterator without the need for memory reallocation.
-        const maybeLength = tryGetIteratorLength(arrayLike)
-        if (maybeLength) {
-            const result = new BigInt64Array(maybeLength)
-            for (let i = 0; i < maybeLength; ++i) {
-                const x = iter.next()
-                if (x.done) {
-                    return new BigInt64Array(result.buffer, 0, i)
-                }
-                const mapped = (mapfn)!(x.value!, i)
-                result.setUnsafe(i, mapped.getLong())
-            }
-            return result
-        }
-
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new BigInt64Array(6)
         let index : FixedArray<int> = new FixedArray<int>(1)
@@ -7449,24 +7377,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
-        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
-        //  we can make one pass through the iterator without the need for memory reallocation.
-        const maybeLength = tryGetIteratorLength(arrayLike)
-        if (maybeLength) {
-            const result = new Float32Array(maybeLength)
-            for (let i = 0; i < maybeLength; ++i) {
-                const x = iter.next()
-                if (x.done) {
-                    return new Float32Array(result.buffer, 0, i)
-                }
-                const mapped = (mapfn)!(x.value!, i)
-                result.setUnsafe(i, mapped.toFloat())
-            }
-            return result
-        }
-
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Float32Array(6)
         let index : FixedArray<int> = new FixedArray<int>(1)
@@ -9011,24 +8921,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
-        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
-        //  we can make one pass through the iterator without the need for memory reallocation.
-        const maybeLength = tryGetIteratorLength(arrayLike)
-        if (maybeLength) {
-            const result = new Float64Array(maybeLength)
-            for (let i = 0; i < maybeLength; ++i) {
-                const x = iter.next()
-                if (x.done) {
-                    return new Float64Array(result.buffer, 0, i)
-                }
-                const mapped = (mapfn)!(x.value!, i)
-                result.setUnsafe(i, mapped)
-            }
-            return result
-        }
-
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Float64Array(6)
         let index : FixedArray<int> = new FixedArray<int>(1)

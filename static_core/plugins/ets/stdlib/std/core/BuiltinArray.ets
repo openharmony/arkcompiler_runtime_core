@@ -946,9 +946,6 @@ class ArrayValuesIterator_boolean_FixedArray implements IterableIterator<boolean
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 class ArrayEntriesIterator_boolean_FixedArray implements IterableIterator<[int, boolean]> {
@@ -974,9 +971,6 @@ class ArrayEntriesIterator_boolean_FixedArray implements IterableIterator<[int, 
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 function cloneArray(self: FixedArray<byte>): FixedArray<byte> {
@@ -1853,9 +1847,6 @@ class ArrayValuesIterator_byte_FixedArray implements IterableIterator<byte> {
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 class ArrayEntriesIterator_byte_FixedArray implements IterableIterator<[int, byte]> {
@@ -1881,9 +1872,6 @@ class ArrayEntriesIterator_byte_FixedArray implements IterableIterator<[int, byt
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 function cloneArray(self: FixedArray<short>): FixedArray<short> {
@@ -2760,9 +2748,6 @@ class ArrayValuesIterator_short_FixedArray implements IterableIterator<short> {
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 class ArrayEntriesIterator_short_FixedArray implements IterableIterator<[int, short]> {
@@ -2788,9 +2773,6 @@ class ArrayEntriesIterator_short_FixedArray implements IterableIterator<[int, sh
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 function cloneArray(self: FixedArray<int>): FixedArray<int> {
@@ -3667,9 +3649,6 @@ class ArrayValuesIterator_int_FixedArray implements IterableIterator<int> {
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 class ArrayEntriesIterator_int_FixedArray implements IterableIterator<[int, int]> {
@@ -3695,9 +3674,6 @@ class ArrayEntriesIterator_int_FixedArray implements IterableIterator<[int, int]
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 function cloneArray(self: FixedArray<long>): FixedArray<long> {
@@ -4574,9 +4550,6 @@ class ArrayValuesIterator_long_FixedArray implements IterableIterator<long> {
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 class ArrayEntriesIterator_long_FixedArray implements IterableIterator<[int, long]> {
@@ -4602,9 +4575,6 @@ class ArrayEntriesIterator_long_FixedArray implements IterableIterator<[int, lon
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 function cloneArray(self: FixedArray<float>): FixedArray<float> {
@@ -5489,9 +5459,6 @@ class ArrayValuesIterator_float_FixedArray implements IterableIterator<float> {
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 class ArrayEntriesIterator_float_FixedArray implements IterableIterator<[int, float]> {
@@ -5517,9 +5484,6 @@ class ArrayEntriesIterator_float_FixedArray implements IterableIterator<[int, fl
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 function cloneArray(self: FixedArray<double>): FixedArray<double> {
@@ -6404,9 +6368,6 @@ class ArrayValuesIterator_double_FixedArray implements IterableIterator<double> 
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 class ArrayEntriesIterator_double_FixedArray implements IterableIterator<[int, double]> {
@@ -6432,9 +6393,6 @@ class ArrayEntriesIterator_double_FixedArray implements IterableIterator<[int, d
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 function cloneArray(self: FixedArray<char>): FixedArray<char> {
@@ -7311,9 +7269,6 @@ class ArrayValuesIterator_char_FixedArray implements IterableIterator<char> {
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 class ArrayEntriesIterator_char_FixedArray implements IterableIterator<[int, char]> {
@@ -7339,9 +7294,6 @@ class ArrayEntriesIterator_char_FixedArray implements IterableIterator<[int, cha
         return this;
     }
 
-    public __Iterator_getLength(): int {
-        return this.parent.length
-    }
 }
 
 export function join(self: ValueArray<boolean>, sep?: String): string {

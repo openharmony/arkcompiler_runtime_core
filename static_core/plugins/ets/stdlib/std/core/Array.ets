@@ -1846,24 +1846,6 @@ native function copyToFast(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart:
  */
 native function copyToFastWithBarriers(src: FixedArray<Any>, dst: FixedArray<Any>, dstStart: int, srcStart: int, srcEnd: int): void;
 
-/**
- * Tries to get the length of the iterator from an object.
- *
- * @param { Object } obj The object to check for an iterator length.
- * @returns { int | undefined } The length of the iterator if found; otherwise, undefined.
- * @syscap SystemCapability.Utils.Lang
- * @FaAndStageModel
- */
-export function tryGetIteratorLength(obj: Object): int | undefined {
-    const objCls = Class.of(obj)
-    for (const method of objCls.getInstanceMethods()) {
-        if (method.getName() == "__Iterator_getLength" && method.getParametersNum() == 0) {
-            return method.invoke(obj, []) as int
-        }
-    }
-    return undefined
-}
-
 class ArrayValuesIterator_T<T> implements IterableIterator<T> {
     private parent: Array<T>
     private idx: int = 0
@@ -1883,10 +1865,6 @@ class ArrayValuesIterator_T<T> implements IterableIterator<T> {
 
     override $_iterator(): IterableIterator<T> {
         return this;
-    }
-
-    public __Iterator_getLength(): int {
-        return this.parent.length
     }
 }
 
@@ -1911,9 +1889,5 @@ class ArrayEntriesIterator_T<T> implements IterableIterator<[int, T]> {
 
     override $_iterator(): IterableIterator<[int, T]> {
         return this;
-    }
-
-    public __Iterator_getLength(): int {
-        return this.parent.length
     }
 }

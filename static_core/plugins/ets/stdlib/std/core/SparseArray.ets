@@ -372,7 +372,7 @@ export final class SparseArray<T> implements Iterable<T> {
         const ret: SparseArray<T> = new SparseArray<T>()
         for (let i: int = 0; i < delete; i++) {
             const idx: int = start + i
-            if (idx < this.maxLength) {
+            if (idx < this.maxLength && this.buffer.has(idx)) {
                 ret.buffer.set(i, this.buffer.get(idx) as T)
             }
         }
