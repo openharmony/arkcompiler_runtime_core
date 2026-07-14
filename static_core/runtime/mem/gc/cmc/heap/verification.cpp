@@ -1,0 +1,457 @@
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "verification.h"
+
+#include "runtime/mem/gc/cmc/heap/region_desc.h"
+#include "runtime/mem/gc/cmc/heap/collector/collector.h"
+#include "allocator/regional_heap.h"
+#include "common/mark_work_stack.h"
+#include "common/type_def.h"
+
+#include "common_interfaces/objects/base_object.h"
+#include "common_interfaces/objects/base_state_word.h"
+#include "runtime/include/mem/panda_string.h"
+#include "runtime/include/object_accessor.h"
+#include "runtime/mem/gc/cmc/cmc-gc.h"
+#include "runtime/mem/gc/gc_phase.h"
+#include "runtime/mem/object-references-iterator-inl.h"
+#include "securec.h"
+#include <iomanip>
+
+/**
+ * Heap Verify:
+ * Checks heap invariants after each GC mark, copy and fix phase. During the check, the world is stopped.
+ * Enabled by default for debug mode. Controlled by gn option `ets_runtime_enable_heap_verify`.
+ *
+ * RB DFX:
+ * Force to use STW GC. Force to use read barrier out of GC.
+ * Disabled by defualt. Controlled by gn-option `ets_runtime_enable_rb_dfx`.
+ *
+ * Example:
+ * standalone:
+ * python ark.py x64.release --gn-args="ets_runtime_enable_heap_verify=true ets_runtime_enable_rb_dfx=true"
+ * openharmony:
+ * ./build_system.sh --gn-args="ets_runtime_enable_heap_verify=true ets_runtime_enable_rb_dfx=true" ...
+ */
+
+namespace ark::common_vm {
+
+#define CONTEXT " at " << __FILE__ << ":" << __LINE__ << std::endl
+
+PandaString HexDump(const void *address, size_t length)
+{
+    static constexpr size_t hexDigitsPerByte = 2;
+    static constexpr size_t wordSize = sizeof(uint64_t);
+    static constexpr size_t addressWidth = sizeof(void *) * hexDigitsPerByte;
+
+    PandaOStringStream oss;
+    oss << std::hex << std::setfill('0');
+
+    const uint8_t *ptr = reinterpret_cast<const uint8_t *>(address);
+
+    for (size_t i = 0; i < length; i += wordSize) {
+        // Print address
+        oss << "0x" << std::setw(addressWidth) << reinterpret_cast<uintptr_t>(ptr + i) << ": ";
+
+        // Print content
+        uint64_t word = 0;
+        size_t bytesToRead = std::min(wordSize, length - i);
+        auto ret = memcpy_s(&word, sizeof(uint64_t), ptr + i, bytesToRead);
+        if (ret != EOK) {
+            LOG(FATAL, COMMON) << "memcpy_s failed: ret = " << ret;
+            break;
+        }
+        oss << "0x" << std::setw(wordSize * hexDigitsPerByte) << word << std::endl;
+    }
+
+    return oss.str();
+}
+
+PandaString GetObjectInfo(const BaseObject *obj)
+{
+    constexpr size_t defaultInfoLength = 64;
+
+    PandaOStringStream s;
+    s << std::endl << ">>> address: " << obj << std::endl;
+
+    s << "> Raw memory:" << std::endl;
+    if (obj == nullptr) {
+        s << "Skip: nullptr(Ref of nullptr might be a root, or Ref is iterated in region)" << std::endl;
+    } else {
+        s << std::hex << HexDump((void *)obj, defaultInfoLength);
+    }
+
+    s << "> Region Info:" << std::endl;
+    if (!Heap::IsHeapAddress(obj)) {
+        s << "Skip: Object is not in heap range" << std::endl;
+    } else {
+        auto region = RegionDesc::GetRegionDescAt(obj);
+        s << std::hex << "Type: 0x" << (int)region->GetRegionType() << ", "
+          << "Base: 0x" << region->GetRegionBase() << ", "
+          << "Start: 0x" << region->GetRegionStart() << ", "
+          << "End: 0x" << region->GetRegionEnd() << ", "
+          << "AllocPtr: 0x" << region->GetRegionAllocPtr() << ", "
+          << "MarkingLine: 0x" << region->GetMarkingLine() << ", "
+          << "CopyLine: 0x" << region->GetCopyLine() << std::endl;
+    }
+
+    return s.str();
+}
+
+static BaseObject *ReadRefSlot(ObjectPointerType *ref)
+{
+    auto value = ObjectAccessor::Load(ref);
+    return reinterpret_cast<BaseObject *>(static_cast<uintptr_t>(value));
+}
+
+PandaString GetRefInfo(ObjectPointerType *ref)
+{
+    PandaOStringStream s;
+    s << std::hex << std::endl << ">>> Ref value: 0x" << ReadRefSlot(ref);
+    s << GetObjectInfo(ReadRefSlot(ref)) << std::endl;
+    return s.str();
+}
+
+void IsValidRef(const BaseObject *obj, ObjectPointerType *ref)
+{
+    // Maybe we need to check ref later
+    // ...
+
+    // check referenee
+    auto refObj = ReadRefSlot(ref);
+
+    LOG_IF(!(Heap::IsHeapAddress(refObj)), FATAL, COMMON)
+        << "Check failed: Heap::IsHeapAddress(refObj)" << CONTEXT << std::hex << "Object address: 0x"
+        << reinterpret_cast<MAddress>(refObj) << ","
+        << "Heap range: [0x" << Heap::heapStartAddr_ << ", 0x" << Heap::heapCurrentEnd_ << "]";
+
+    auto region = RegionDesc::GetRegionDescAt(refObj);
+    LOG_IF(!(region->GetRegionType() != RegionDesc::RegionType::GARBAGE_REGION), FATAL, COMMON)
+        << "Check failed: region->GetRegionType() != RegionDesc::RegionType::GARBAGE_REGION" << CONTEXT
+        << "Object: " << GetObjectInfo(obj) << std::endl
+        << "Ref: " << GetRefInfo(ref) << std::endl;
+    LOG_IF(!(region->GetRegionType() != RegionDesc::RegionType::FREE_REGION), FATAL, COMMON)
+        << "Check failed: region->GetRegionType() != RegionDesc::RegionType::FREE_REGION" << CONTEXT
+        << "Object: " << GetObjectInfo(obj) << std::endl
+        << "Ref: " << GetRefInfo(ref) << std::endl;
+
+    LOG_IF(!(!refObj->IsForwarding() && !refObj->IsForwarded()), FATAL, COMMON)
+        << "Check failed: !refObj->IsForwarding() && !refObj->IsForwarded()" << CONTEXT
+        << "Object: " << GetObjectInfo(obj) << std::endl
+        << "Ref: " << GetRefInfo(ref) << std::endl;
+
+    LOG_IF(!(refObj->IsValidObject() != 0), FATAL, COMMON)
+        << "Check failed: refObj->IsValidObject() != 0" << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
+        << "Ref: " << GetRefInfo(ref) << std::endl;
+
+    LOG_IF(!(refObj->GetSize() != 0), FATAL, COMMON)
+        << "Check failed: refObj->GetSize() != 0" << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
+        << "Ref: " << GetRefInfo(ref) << std::endl;
+}
+
+class VerifyVisitor {
+public:
+    void VerifyRef(const BaseObject *obj, ObjectPointerType *ref)
+    {
+        VerifyRefImpl(obj, ref);
+        count_++;
+    }
+
+    size_t VerifyRefCount() const
+    {
+        return count_;
+    }
+
+protected:
+    virtual void VerifyRefImpl(const BaseObject *obj, ObjectPointerType *ref)
+    {
+        UNREACHABLE();
+    }
+
+private:
+    size_t count_ = 0;
+};
+
+template <bool IsSTWRootVerify = true>
+class AfterMarkVisitor : public VerifyVisitor {
+public:
+    void VerifyRefImpl(const BaseObject *obj, ObjectPointerType *ref) override
+    {
+        IsValidRef(obj, ref);
+
+        // check remarked objects, so they must be in one of the states below
+        auto refObj = ReadRefSlot(ref);
+        RegionDesc *region = RegionDesc::GetRegionDescAt(refObj);
+
+        // if obj is nullptr, this means it is a root object
+        // We expect root objects to be already forwarded: assert(!region->isFromRegion())
+        if (obj == nullptr) {
+            if constexpr (IsSTWRootVerify) {
+                LOG_IF(!(!region->IsFromRegion()), FATAL, COMMON) << "Check failed: !region->IsFromRegion()" << CONTEXT
+                                                                  << "Object: " << GetObjectInfo(obj) << std::endl
+                                                                  << "Ref: " << GetRefInfo(ref) << std::endl;
+
+                return;
+            } else {
+                LOG_IF(!(!region->IsInToSpace()), FATAL, COMMON) << "Check failed: !region->IsInToSpace()" << CONTEXT
+                                                                 << "Object: " << GetObjectInfo(obj) << std::endl
+                                                                 << "Ref: " << GetRefInfo(ref) << std::endl;
+
+                return;
+            }
+        }
+
+        if (Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE) {
+            LOG_IF(!(RegionalHeap::IsResurrectedObject(refObj) || RegionalHeap::IsMarkedObject(refObj) ||
+                     RegionalHeap::IsNewObjectSinceMarking(refObj) || !RegionalHeap::IsYoungSpaceObject(refObj)),
+                   FATAL, COMMON)
+                << "Check failed: RegionalHeap::IsResurrectedObject(refObj) || RegionalHeap::IsMarkedObject(refObj) || "
+                << "RegionalHeap::IsNewObjectSinceMarking(refObj) || !RegionalHeap::IsYoungSpaceObject(refObj)"
+                << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
+                << "Ref: " << GetRefInfo(ref) << std::endl;
+        } else {
+            LOG_IF(!(RegionalHeap::IsResurrectedObject(refObj) || RegionalHeap::IsMarkedObject(refObj) ||
+                     RegionalHeap::IsNewObjectSinceMarking(refObj)),
+                   FATAL, COMMON)
+                << "Check failed: RegionalHeap::IsResurrectedObject(refObj) || RegionalHeap::IsMarkedObject(refObj) || "
+                << "RegionalHeap::IsNewObjectSinceMarking(refObj)" << CONTEXT << "Object: " << GetObjectInfo(obj)
+                << std::endl
+                << "Ref: " << GetRefInfo(ref) << std::endl;
+        }
+    }
+};
+
+class AfterForwardVisitor : public VerifyVisitor {
+public:
+    void VerifyRefImpl(const BaseObject *obj, ObjectPointerType *ref) override
+    {
+        // check objects in from-space, only alive objects are forwarded
+        auto refObj = ReadRefSlot(ref);
+        if (RegionalHeap::IsMarkedObject(refObj) || RegionalHeap::IsResurrectedObject(refObj)) {
+            LOG_IF(!(refObj->IsForwarded()), FATAL, COMMON)
+                << "Check failed: refObj->IsForwarded()" << CONTEXT << "Object: " << GetObjectInfo(obj) << std::endl
+                << "Ref: " << GetRefInfo(ref) << std::endl;
+
+            auto toObj = refObj->GetForwardingPointer();
+            ObjectPointerType toSlot = ToObjPtrType(toObj);
+            IsValidRef(obj, &toSlot);
+        }
+    }
+};
+
+class AfterFixVisitor : public VerifyVisitor {
+public:
+    void VerifyRefImpl(const BaseObject *obj, ObjectPointerType *ref) override
+    {
+        IsValidRef(obj, ref);
+
+        auto refRegion = RegionDesc::GetRegionDescAt(ReadRefSlot(ref));
+        LOG_IF(!(refRegion->GetRegionType() != RegionDesc::RegionType::FROM_REGION), FATAL, COMMON)
+            << "Check failed: refRegion->GetRegionType() != RegionDesc::RegionType::FROM_REGION" << CONTEXT
+            << "Object: " << GetObjectInfo(obj) << std::endl
+            << "Ref: " << GetRefInfo(ref) << std::endl;
+    }
+};
+
+class VerifyIterator {
+public:
+    explicit VerifyIterator(RegionalHeap &space) : space_(space) {}
+
+    void IterateFromSpace(VerifyVisitor &visitor)
+    {
+        IterateRegionList(space_.GetFromSpace().GetFromRegionList(), visitor);
+    }
+
+    void IterateRoot(VerifyVisitor &visitor)
+    {
+        MarkStack<BaseObject *> roots;
+
+        RefFieldVisitor refVisitor = [&](ObjectPointerType *ref) { visitor.VerifyRef(nullptr, ref); };
+        Heap::GetHeap().GetCollector().VisitRootsI(refVisitor);
+    }
+
+    void IterateWeakRoot(VerifyVisitor &visitor)
+    {
+        MarkStack<BaseObject *> roots;
+
+        WeakRefFieldVisitor refVisitor = [&](ObjectPointerType *ref) {
+            visitor.VerifyRef(nullptr, ref);
+            return true;
+        };
+        Heap::GetHeap().GetCollector().VisitWeakRootsI(refVisitor);
+    }
+
+    static void IterateRemarkedDefaultVisitor(const RefFieldVisitor &visitor)
+    {
+        Heap::GetHeap().GetCollector().VisitRootsI(visitor);
+    }
+
+    static void IterateRemarkedSTWVisitor(const RefFieldVisitor &visitor)
+    {
+        Heap::GetHeap().GetCollector().VisitSTWRootsI(visitor);
+    }
+
+    static void IterateRemarkedConcurrentVisitor(const RefFieldVisitor &visitor)
+    {
+        Heap::GetHeap().GetCollector().VisitConcurrentRootsI(visitor);
+    }
+
+    // By default, IterateRemarked uses the VisitRoots method to traverse GC roots
+    template <void (*VisitRoot)(const RefFieldVisitor &) = IterateRemarkedDefaultVisitor>
+    void IterateRemarked(VerifyVisitor &visitor, PandaUnorderedSet<BaseObject *> &markSet)
+    {
+        MarkStack<BaseObject *> markStack;
+        BaseObject *obj = nullptr;
+
+        auto markFunc = [&visitor, &markStack, &markSet, &obj]([[maybe_unused]] ObjectHeader *fromObject,
+                                                               ObjectPointerType *field) {
+            if (*field == 0) {
+                return true;
+            }
+            BaseObject *refObj = ReadRefSlot(field);
+            // If it is forwarded, its toVersion must have been traversed during
+            // EnumRoot or created during Remark, so it must have been marked. There is no need for me to
+            // check it, nor to push it into the mark stack.
+            if (refObj->IsForwarded()) {
+                return true;
+            }
+
+            visitor.VerifyRef(obj, field);
+
+            if (markSet.find(refObj) != markSet.end()) {
+                return true;
+            }
+            markSet.insert(refObj);
+            markStack.push_back(refObj);
+            return true;
+        };
+
+        VisitRoot([&markFunc](ObjectPointerType *field) { markFunc(nullptr, field); });
+        while (!markStack.empty()) {
+            obj = markStack.back();
+            markStack.pop_back();
+
+            auto *cls = obj->template ClassAddr<Class>();
+            mem::ObjectIterator<LangTypeT::LANG_TYPE_STATIC>::template Iterate<false>(cls, obj, markFunc);
+        }
+    }
+
+private:
+    void IterateRegionList(RegionList &list, VerifyVisitor &visitor)
+    {
+        list.VisitAllRegions([&](RegionDesc *region) {
+            region->VisitAllObjects([&](BaseObject *obj) {
+                ObjectPointerType ref = ToObjPtrType(obj);
+                visitor.VerifyRef(nullptr, &ref);
+            });
+        });
+    }
+
+    void Marking(MarkStack<BaseObject *> &markStack) {}
+
+    RegionalHeap &space_;
+};
+
+void WVerify::VerifyAfterMarkInternal(RegionalHeap &space, mem::GCPhase phase)
+{
+    LOG_IF(!(phase == mem::GCPhase::GC_PHASE_REMARK), FATAL, COMMON)
+        << "Check failed: phase == mem::GCPhase::GC_PHASE_REMARK" << CONTEXT
+        << "Mark verification should be called after Remark";
+
+    auto iter = VerifyIterator(space);
+    auto verifySTWRoots = AfterMarkVisitor();
+    PandaUnorderedSet<BaseObject *> markSet;
+    iter.IterateRemarked<VerifyIterator::IterateRemarkedSTWVisitor>(verifySTWRoots, markSet);
+    auto verifyConcurrentRoots = AfterMarkVisitor<false>();
+    iter.IterateRemarked<VerifyIterator::IterateRemarkedConcurrentVisitor>(verifyConcurrentRoots, markSet);
+
+    LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterMark (STWRoots) verified ref count: "
+                       << verifySTWRoots.VerifyRefCount();
+    LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterMark (ConcurrentRoots) verified ref count: "
+                       << verifyConcurrentRoots.VerifyRefCount();
+}
+
+void WVerify::VerifyAfterMark(mem::GCPhase phase, bool isWorldStopped)
+{
+#if !defined(ENABLE_CMC_VERIFY) && defined(NDEBUG)
+    return;
+#endif
+    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
+    if (!isWorldStopped) {
+        ark::ScopedStopTheWorld stw;
+        VerifyAfterMarkInternal(space, phase);
+    } else {
+        VerifyAfterMarkInternal(space, phase);
+    }
+}
+
+void WVerify::VerifyAfterForwardInternal(RegionalHeap &space, mem::GCPhase phase)
+{
+    LOG_IF(!(phase == mem::GCPhase::GC_PHASE_COPY), FATAL, COMMON)
+        << "Check failed: phase == mem::GCPhase::GC_PHASE_COPY" << CONTEXT
+        << "Forward verification should be called after ForwardFromSpace()";
+
+    auto iter = VerifyIterator(space);
+    auto visitor = AfterForwardVisitor();
+    iter.IterateFromSpace(visitor);
+
+    LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterForward verified ref count: " << visitor.VerifyRefCount();
+}
+
+void WVerify::VerifyAfterForward(mem::GCPhase phase, bool isWorldStopped)
+{
+#if !defined(ENABLE_CMC_VERIFY) && defined(NDEBUG)
+    return;
+#endif
+    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
+    if (!isWorldStopped) {
+        ark::ScopedStopTheWorld stw;
+        VerifyAfterForwardInternal(space, phase);
+    } else {
+        VerifyAfterForwardInternal(space, phase);
+    }
+}
+
+void WVerify::VerifyAfterFixInternal(RegionalHeap &space, mem::GCPhase phase)
+{
+    LOG_IF(!(phase == mem::GCPhase::GC_PHASE_FIX), FATAL, COMMON)
+        << "Check failed: phase == mem::GCPhase::GC_PHASE_FIX" << CONTEXT
+        << "Fix verification should be called after Fix()";
+
+    auto iter = VerifyIterator(space);
+    auto visitor = AfterFixVisitor();
+
+    PandaUnorderedSet<BaseObject *> markSet;
+    iter.IterateRemarked(visitor, markSet);
+
+    LOG(DEBUG, COMMON) << "[WVerify]: VerifyAfterFix verified ref count: " << visitor.VerifyRefCount();
+}
+
+void WVerify::VerifyAfterFix(mem::GCPhase phase, bool isWorldStopped)
+{
+#if !defined(ENABLE_CMC_VERIFY) && defined(NDEBUG)
+    return;
+#endif
+    RegionalHeap &space = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
+    if (!isWorldStopped) {
+        ark::ScopedStopTheWorld stw;
+        VerifyAfterFixInternal(space, phase);
+    } else {
+        VerifyAfterFixInternal(space, phase);
+    }
+}
+
+}  // namespace ark::common_vm

@@ -16,8 +16,8 @@
 // CMC GC (common_runtime) implementations of ETS GC intrinsics
 // For shared intrinsics see std_core_gc.cpp
 // For default GC (static_core) implementations see std_core_default_gc.cpp
-#include "common_components/heap/heap_manager.h"
-#include "common_components/heap/heap.h"
+#include "runtime/mem/gc/cmc/heap/heap_manager.h"
+#include "runtime/mem/gc/cmc/heap/heap.h"
 #include "libarkbase/utils/utils.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"

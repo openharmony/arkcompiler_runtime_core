@@ -15,9 +15,9 @@
 
 #include "runtime/mem/gc/cmc/cmc-gc-trigger.h"
 #if defined(ARK_USE_COMMON_RUNTIME)
-#include "common_components/heap/allocator/allocator.h"
-#include "common_components/heap/allocator/regional_heap.h"
-#include "common_components/heap/heap.h"
+#include "runtime/mem/gc/cmc/heap/allocator/allocator.h"
+#include "runtime/mem/gc/cmc/heap/allocator/regional_heap.h"
+#include "runtime/mem/gc/cmc/heap/heap.h"
 #include "runtime/mem/gc/cmc/cmc-allocator.h"
 #endif  // ARK_USE_COMMON_RUNTIME
 

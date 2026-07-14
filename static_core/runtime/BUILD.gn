@@ -416,6 +416,28 @@ _libarkruntime_calculated_sources += plugin_runtime_sources
 
 if (ark_use_common_runtime) {
   _libarkruntime_calculated_sources += cmc_sources
+  _libarkruntime_calculated_sources += [
+    "mem/gc/cmc/heap/allocator/allocator.cpp",
+    "mem/gc/cmc/heap/allocator/fix_heap.cpp",
+    "mem/gc/cmc/heap/allocator/memory_map.cpp",
+    "mem/gc/cmc/heap/allocator/region_manager.cpp",
+    "mem/gc/cmc/heap/allocator/regional_heap.cpp",
+    "mem/gc/cmc/heap/allocator/treap.cpp",
+    "mem/gc/cmc/heap/collector/collector_resources.cpp",
+    "mem/gc/cmc/heap/collector/copy_data_manager.cpp",
+    "mem/gc/cmc/heap/collector/heuristic_gc_policy.cpp",
+    "mem/gc/cmc/heap/collector/task_queue.cpp",
+    "mem/gc/cmc/heap/heap.cpp",
+    "mem/gc/cmc/heap/heap_allocator.cpp",
+    "mem/gc/cmc/heap/heap_manager.cpp",
+    "mem/gc/cmc/heap/space/from_space.cpp",
+    "mem/gc/cmc/heap/space/large_space.cpp",
+    "mem/gc/cmc/heap/space/nonmovable_space.cpp",
+    "mem/gc/cmc/heap/space/old_space.cpp",
+    "mem/gc/cmc/heap/space/to_space.cpp",
+    "mem/gc/cmc/heap/space/young_space.cpp",
+    "mem/gc/cmc/heap/verification.cpp",
+  ]
 }
 
 _libarkruntime_calculated_configs = [

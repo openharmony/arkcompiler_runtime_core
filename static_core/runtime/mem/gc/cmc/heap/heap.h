@@ -1,0 +1,212 @@
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_H
+
+#include <cstdlib>
+#include <functional>
+
+#include "common_components/base/immortal_wrapper.h"
+#include "common_components/common/type_def.h"
+#include "runtime/mem/gc/cmc/heap/collector/collector.h"
+#include "runtime/mem/gc/cmc/heap/collector/heuristic_gc_policy.h"
+#include "common_interfaces/base/runtime_param.h"
+#include "common_interfaces/objects/base_object.h"
+#include "runtime/include/gc_task.h"
+
+namespace ark::common_vm {
+class Allocator;
+class AllocationBuffer;
+class CollectorResources;
+class HeuristicGCPolicy;
+using AppSensitiveStatus = ark::common_vm::AppSensitiveStatus;
+using StartupStatus = ark::common_vm::StartupStatus;
+
+class Heap {
+public:
+    // These need to keep same with that in `RegionDesc`
+    static constexpr size_t NORMAL_UNIT_SIZE = 256 * 1024;
+
+    static constexpr size_t GetNormalRegionSize()
+    {
+        return NORMAL_UNIT_SIZE;
+    }
+
+    static void throwOOM()
+    {
+        // Maybe we need to add heapdump logic here
+        LOG(FATAL, COMMON) << "Out of Memory, abort.";
+        UNREACHABLE();
+    }
+    static Heap &GetHeap();
+
+    // should be removed after HeapParam is supported
+    virtual void Init(const RuntimeParam &param) = 0;
+    virtual void Fini() = 0;
+
+    virtual void StartRuntimeThreads() = 0;
+    virtual void StopRuntimeThreads() = 0;
+
+    virtual bool IsSurvivedObject(const BaseObject *) const = 0;
+    bool IsGarbage(const BaseObject *obj) const
+    {
+        return !IsSurvivedObject(obj);
+    }
+
+    virtual bool IsGcStarted() const = 0;
+    virtual void WaitForGCFinish() = 0;
+    virtual uint64_t GetGcCompletedCount() const = 0;
+    virtual void MarkGCStart() = 0;
+    virtual void MarkGCFinish() = 0;
+
+    virtual bool IsGCEnabled() const = 0;
+    virtual void EnableGC(bool val) = 0;
+
+    virtual HeapAddress Allocate(size_t size, AllocType allocType, bool allowGC) = 0;
+
+    virtual Collector &GetCollector() = 0;
+    virtual Allocator &GetAllocator() = 0;
+    virtual HeuristicGCPolicy &GetHeuristicGCPolicy() = 0;
+    virtual void NotifyNativeAllocation(size_t bytes) = 0;
+    virtual void NotifyNativeFree(size_t bytes) = 0;
+    virtual void NotifyNativeReset(size_t oldBytes, size_t newBytes) = 0;
+    virtual size_t GetNotifiedNativeSize() const = 0;
+    virtual void SetNativeHeapThreshold(size_t newThreshold) = 0;
+    virtual size_t GetNativeHeapThreshold() const = 0;
+    virtual void ChangeGCParams(bool isBackground) = 0;
+    virtual void RecordAliveSizeAfterLastGC(size_t aliveBytes) = 0;
+    virtual void NotifyHighSensitive(bool isStart) = 0;
+    virtual void SetRecordHeapObjectSizeBeforeSensitive(size_t objSize) = 0;
+    virtual AppSensitiveStatus GetSensitiveStatus() = 0;
+    virtual StartupStatus GetStartupStatus() = 0;
+    virtual bool OnStartupEvent() const = 0;
+    /* to avoid misunderstanding, variant types of heap size are defined as followed:
+     * |------------------------------ max capacity ---------------------------------|
+     * |------------------------------ current capacity ------------------------|
+     * |------------------------------ committed size -----------------------|
+     * |------------------------------ used size -------------------------|
+     * |------------------------------ allocated size -------------|
+     * |------------------------------ net size ------------|
+     * so that inequality size <= capacity <= max capacity always holds.
+     */
+    virtual size_t GetMaxCapacity() const = 0;
+
+    // or current capacity: a continuous address space to help heap management such as GC.
+    virtual size_t GetCurrentCapacity() const = 0;
+
+    // already used by allocator, including memory block cached for speeding up allocation.
+    // we measure it in OS page granularity because physical memory is occupied by page.
+    virtual size_t GetUsedPageSize() const = 0;
+
+    // total memory allocated for each allocation request, including memory fragment for alignment or padding.
+    virtual size_t GetAllocatedSize() const = 0;
+
+    virtual size_t GetSurvivedSize() const = 0;
+
+    virtual size_t GetRemainHeapSize() const = 0;
+
+    // Byte-level heap footprint: sum of (allocPtr - regionStart) across all regions in all spaces.
+    // more precise than GetAllocatedSize() which uses page-level (256KB) granularity for full regions
+    virtual size_t GetFootprintBytes() const = 0;
+
+    // Returns the amount of free heap memory (in bytes)
+    size_t GetFreeHeapSize() const
+    {
+        return GetMaxCapacity() - GetFootprintBytes();
+    }
+
+    // Returns the amount of heap memory currently in use (in bytes)
+    size_t GetUsedHeapSize() const
+    {
+        return GetFootprintBytes();
+    }
+
+    // Returns the maximum heap size (in bytes) reserved by the runtime
+    size_t GetReservedHeapSize() const
+    {
+        return GetMaxCapacity();
+    }
+
+    virtual HeapAddress GetStartAddress() const = 0;
+    virtual HeapAddress GetSpaceEndAddress() const = 0;
+
+    // IsHeapAddress is a range-based check, used to quickly identify heap address,
+    // assuming non-heap address never falls into this address range.
+    static bool IsHeapAddress(HeapAddress addr)
+    {
+        return (addr >= heapStartAddr_) && (addr < heapCurrentEnd_);
+    }
+
+    static bool IsTaggedObject(HeapAddress addr)
+    {
+        // relies on the definition of ArkTs
+        static constexpr uint64_t TAG_BITS_SHIFT = 48;
+        static constexpr uint64_t TAG_MARK = 0xFFFFULL << TAG_BITS_SHIFT;
+        static constexpr uint64_t TAG_SPECIAL = 0x02ULL;
+        static constexpr uint64_t TAG_BOOLEAN = 0x04ULL;
+        static constexpr uint64_t TAG_HEAP_OBJECT_MASK = TAG_MARK | TAG_SPECIAL | TAG_BOOLEAN;
+
+        if ((addr & TAG_HEAP_OBJECT_MASK) == 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    static bool IsHeapAddress(const void *addr)
+    {
+        return IsHeapAddress(reinterpret_cast<HeapAddress>(addr));
+    }
+
+    virtual bool ForEachObject(const std::function<void(BaseObject *)> &, bool safe) = 0;
+
+    virtual CollectorResources &GetCollectorResources() = 0;
+
+    virtual void RegisterAllocBuffer(AllocationBuffer &buffer) = 0;
+
+    virtual void UnregisterAllocBuffer(AllocationBuffer &buffer) = 0;
+
+    virtual void StopGCWork() = 0;
+
+    virtual GCTaskCause GetGCReason() = 0;
+
+    virtual void SetGCReason(GCTaskCause reason) = 0;
+
+    virtual bool GetForceThrowOOM() const = 0;
+    virtual void SetForceThrowOOM(bool val) = 0;
+    virtual void SetCollector(Collector *collector) = 0;
+
+    virtual const HeapParam &GetHeapParam() const = 0;
+    virtual GCParam &GetGCParam() = 0;
+
+    static void OnHeapCreated(HeapAddress startAddr)
+    {
+        heapStartAddr_ = startAddr;
+        heapCurrentEnd_ = 0;
+    }
+
+    static void OnHeapExtended(HeapAddress newEnd)
+    {
+        heapCurrentEnd_ = newEnd;
+    }
+
+    virtual ~Heap() {}
+
+    static HeapAddress heapStartAddr_;
+    static HeapAddress heapCurrentEnd_;
+};  // class Heap
+}  // namespace ark::common_vm
+#endif

@@ -22,7 +22,7 @@
 #include "runtime/include/object_header.h"
 #include "common_interfaces/objects/base_class.h"
 #include "common_interfaces/objects/base_state_word.h"
-#include "common_interfaces/heap/visitor.h"
+#include "runtime/mem/gc/cmc/heap/visitor.h"
 
 namespace ark::common_vm {
 

@@ -13,24 +13,13 @@
  * limitations under the License.
  */
 
-#include "common_components/mutator/thread_local.h"
+#ifndef COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_ALLOCATOR_INL_H
+#define COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_ALLOCATOR_INL_H
 
-#include "runtime/mem/gc/cmc/heap/allocator/alloc_buffer.h"
-#include "common_components/base/globals.h"
+#include "runtime/mem/gc/cmc/heap/heap_allocator.h"
 
 namespace ark::common_vm {
-
-thread_local ThreadLocalData threadLocalData;
-ThreadLocalData *ThreadLocal::GetThreadLocalData()
-{
-    return &threadLocalData;
-}
-
-void ThreadLocal::ClearAllocBufferRegion()
-{
-    auto buffer = GetAllocBuffer();
-    if (buffer != nullptr) {
-        buffer->ClearRegions();
-    }
-}
+Address AllocateYoungInAllocBuffer(uintptr_t buffer, size_t size);
+Address AllocateOldInAllocBuffer(uintptr_t buffer, size_t size);
 }  // namespace ark::common_vm
+#endif  // COMMON_RUNTIME_COMMON_COMPONENTS_HEAP_HEAP_ALLOCATOR_INL_H

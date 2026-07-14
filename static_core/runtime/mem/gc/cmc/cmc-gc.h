@@ -23,12 +23,12 @@
 #include <cstdint>
 
 #include "common_interfaces/objects/base_object.h"
-#include "common_interfaces/heap/region_desc.h"
-#include "common_components/heap/collector/collector.h"
+#include "runtime/mem/gc/cmc/heap/region_desc.h"
+#include "runtime/mem/gc/cmc/heap/collector/collector.h"
 #include "common_components/taskpool/runner.h"
 #include "common_components/taskpool/taskpool.h"
-#include "common_components/heap/allocator/fix_heap.h"
-#include "common_components/heap/allocator/regional_heap.h"
+#include "runtime/mem/gc/cmc/heap/allocator/fix_heap.h"
+#include "runtime/mem/gc/cmc/heap/allocator/regional_heap.h"
 
 #include "runtime/mem/gc/lang/gc_lang.h"
 #include "runtime/mem/gc/cmc/cmc-allocator.h"

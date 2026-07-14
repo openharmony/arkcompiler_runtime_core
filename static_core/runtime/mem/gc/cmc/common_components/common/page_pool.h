@@ -28,7 +28,7 @@
 #include "libarkbase/os/mem.h"
 #include "common_components/base/globals.h"
 #include "common_components/base/sys_call.h"
-#include "common_components/heap/allocator/treap.h"
+#include "runtime/mem/gc/cmc/heap/allocator/treap.h"
 #include "securec.h"
 #if defined(_WIN64) || defined(__APPLE__)
 #include "common_components/base/mem_utils.h"

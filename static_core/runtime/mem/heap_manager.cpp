@@ -32,7 +32,7 @@
 #include "runtime/mem/gc/stw-gc/stw-gc.h"
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "runtime/mem/gc/cmc/cmc-gc.h"
-#include "common_components/heap/heap.h"
+#include "runtime/mem/gc/cmc/heap/heap.h"
 #endif
 
 namespace ark::mem {
