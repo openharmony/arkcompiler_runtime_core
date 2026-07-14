@@ -103,7 +103,7 @@ static_core/runtime/include/*object*                     ^dmitriitr @artemu @ipe
 static_core/runtime/include/*thread*                     ^dmitriitr @artemu @konstanting ^molotkovmikhail ^ipetrov
 static_core/runtime/interpreter/                         @igelhaus @chernykhsergey
 static_core/runtime/jit/                                 @Prof @zijiancogito @K0u1hw @wanzixuan330 ^chernykhsergey @zhuheng27 @zhangrunze13 @LeechyLiang
-static_core/runtime/mem/                                 ^dmitriitr @artemu ^ipetrov ^gitee-dakeQI @lizheng89
+static_core/runtime/mem/                                 ^dmitriitr @artemu ^ipetrov ^gitee-dakeQI @lizheng89 ^shemetovphilip
 static_core/runtime/profilesaver/                        @chernykhsergey @zhuheng27 @zhangrunze13 @wanzixuan330 @LeechyLiang
 static_core/runtime/profiling/                           @chernykhsergey @zhangrunze13 @wanzixuan330 @LeechyLiang
 static_core/runtime/tooling/                             @slynkodenis ^kurnevichstanislav
