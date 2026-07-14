@@ -18,22 +18,38 @@ desc: Push and assign to empty array for both T[] and Array<T> forms.
 ---*/
 
 function main(): int {
-  let suite = new arktest.ArkTestsuite("Put To Empty Array");
+  let suite = new arktest.ArkTestsuite('Put To Empty Array');
 
-  suite.addTest("Push and assign to empty T[] form", () => {
+  suite.addTest('Push and assign to empty T[] form', () => {
     let arr: String[] = []
-    arr.push("")
-    arr[0] = "Hello"
+    arr.push('')
+    arr[0] = 'Hello'
     arktest.assertEQ(arr.length, 1)
-    arktest.assertEQ(arr[0], "Hello")
+    arktest.assertEQ(arr[0], 'Hello')
   });
 
-  suite.addTest("Push and assign to empty Array<T> form", () => {
+  suite.addTest('Push and assign to empty Array<T> form', () => {
     let arr: Array<String> = []
-    arr.push("")
-    arr[0] = "Hello"
+    arr.push('')
+    arr[0] = 'Hello'
     arktest.assertEQ(arr.length, 1)
-    arktest.assertEQ(arr[0], "Hello")
+    arktest.assertEQ(arr[0], 'Hello')
+  });
+
+  suite.addTest('Assign to empty T[] form', () => {
+    let arr: String[] = []
+    arktest.expectThrow(
+        () => { arr[0] = 'Hello' },
+        (e: Error): boolean => e instanceof RangeError && e.message == 'Out of bounds'
+    )
+  });
+
+  suite.addTest('Assign to empty Array<T> form', () => {
+    let arr: Array<String> = []
+    arktest.expectThrow(
+        () => { arr[0] = 'Hello' },
+        (e: Error): boolean => e instanceof RangeError && e.message == 'Out of bounds'
+    )
   });
 
   return suite.run()

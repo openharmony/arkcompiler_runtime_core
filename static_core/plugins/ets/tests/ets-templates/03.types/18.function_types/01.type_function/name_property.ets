@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,19 @@
 {%- for c in cases %}
 
 /*---
-desc: >-
-    Function type can be used to express the expected signature of a function. A function type consists
-    of the following: Optional type parameters... A type alias can set a name for a function type...
-    The actual type of the parameter is... a union of the parameter type and type undefined.
+desc: |-
+    Another important property of type Function is name. It is a string that contains
+    the name associated with the function object in the following way:
+    - If a function or a method is assigned to a function object, then the associated name
+      is that of the function or of the method;
+    - If a lambda is assigned to a variable of Function type, then the associated name
+      is that of the variable;
+    - Otherwise, the string is empty.
 ---*/
 
 {{c.decl}}
 
 function main() {
-    {{c.use|indent}}
+    {{c.main|indent}}
 }
-
 {%- endfor %}

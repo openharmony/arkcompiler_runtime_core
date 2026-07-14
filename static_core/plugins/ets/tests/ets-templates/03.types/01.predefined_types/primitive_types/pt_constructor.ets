@@ -23,10 +23,10 @@ function main(): int {
 
     let testSuite = new arktest.ArkTestsuite("Primitive_types_constructors");
 
-    {% for p in primitives %}
-        testSuite.addTest("constructor_{{loop.index}}", () => {
-            new {{p.stype}}
-            new {{p.stype}}()
+    {% for p in cases %}
+        testSuite.addTest('constructor_{{loop.index}}', () => {
+            let v = new {{p.stype}};
+            v = new {{p.stype}}()
         });
     {%- endfor %}
 

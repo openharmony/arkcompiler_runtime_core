@@ -13,14 +13,19 @@
 
 ---
 cases:
-    - |-
-        function foo(n: number) {}
-        const f: Function = foo
-        f(4.4)
-    - |-
-        const foo = (n: number) => {}
-        const f: Function = foo
-        f(4.4)
-    - |-
-        const f: Function = (n: number) => {}
-        f(4.4)
+    - code: |-
+          function foo(n: number) {}
+          const f: Function = foo
+          f(4.4)
+      expected_out: "Semantic error ESE0002: Type 'Function' has no call signatures."
+
+    - code: |-
+          const foo = (n: number) => {}
+          const f: Function = foo
+          f(4.4)
+      expected_out: "Semantic error ESE0002: Type 'Function' has no call signatures."
+
+    - code: |-
+          const f: Function = (n: number) => {}
+          f(4.4)
+      expected_out: "Semantic error ESE0002: Type 'Function' has no call signatures."

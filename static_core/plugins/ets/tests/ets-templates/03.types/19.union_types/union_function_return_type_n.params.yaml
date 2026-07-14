@@ -12,32 +12,51 @@
 # limitations under the License.
 
 cases2:
-  - desc: Parse UT as a function returning boolean, string, int
-    dec1: |-
-      type UT = () => boolean | String | Int
-    check: |-
-      let value: UT = 7; // CTE
-      arktest.assertEQ(value, 7);
+    - desc: Parse UT as a function returning boolean, string, int
+      decl: |-
+          type UT = () => boolean | String | Int
+      check: |-
+          let value: UT = 7
+      expected_out: "Semantic error ESE0318: Type 'Int' cannot be assigned to type '(() => Boolean|String|Int)'"
 
-  - desc: Parse UT as a union of int, () => boolean | string
-    dec1: |-
-      type UT =  Int | (() => boolean | String)
-    check: |-
-      let value: UT = true; // CTE
-      arktest.assertEQ(value, true);
+    - desc: Parse UT as a union of int, () => boolean | string
+      decl: |-
+          type UT =  Int | (() => boolean | String)
+      check: |-
+          let value: UT = true
+      expected_out: "Semantic error ESE0318: Type 'Boolean' cannot be assigned to type 'Int|((() => Boolean|String))'"
 
-  - desc: Parse UT as a union of (() => boolean | int), string
-    dec1: |-
-      type UT = (() => boolean | Int) | String
-    check: |-
-      let value: UT = 42; // CTE
-      arktest.assertEQ(value, 42);
+    - desc: Parse UT as a union of (() => boolean | int), string
+      decl: |-
+          type UT = (() => boolean | Int) | String
+      check: |-
+          let value: UT = 42
+      expected_out: "Semantic error ESE0318: Type 'Int' cannot be assigned to type '((() => Boolean|Int))|String'"
 
-  - desc: Parenthesised and unparenthesized function combined
-          number shouldn't be appended to the second function's return type
-    dec1: |-
-      type UT = () => Int | undefined | ((() => boolean | string) | number)
-      function foo() { return () => { return 2.5 }}
-    check: |-
-      let value: UT = foo; // CTE
-      arktest.assertEQ(value()(), 2.5);
+    - desc:
+          Parenthesised and unparenthesized function combined number shouldn't be appended to the second function's
+          return type
+      decl: |-
+          type UT = () => Int | undefined | ((() => boolean | string) | number)
+          function foo() { return () => { return 2.5 }}
+      check: |-
+          let value: UT = foo
+      expected_out: "Semantic error ESE0318: Type '(() => (() => Double))' cannot be assigned to type '(() => Int|undefined|((() => Boolean|String))|Double)'"
+
+    - desc: Compile-time error if a function type is used in union without parenthesizing
+      decl: |-
+          type UT = string | () => string | number
+      check: |-
+          let value: UT = 42.0
+      expected_out: "Syntax error ESY113981: Using '() => string | number' function type notation in a union causes ambiguity. Parenthesize the function type or its return type to make the meaning explicit."
+
+    - desc: Compile-time error if a function type is used in union without parenthesizing
+      decl: |-
+          class A {
+              m(): undefined | () => string | undefined {
+                  return
+              }
+          }
+      check: |-
+          let value = new A().m()
+      expected_out: "Syntax error ESY113981: Using '() => string | undefined' function type notation in a union causes ambiguity. Parenthesize the function type or its return type to make the meaning explicit."

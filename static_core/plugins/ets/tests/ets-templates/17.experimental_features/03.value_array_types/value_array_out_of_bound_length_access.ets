@@ -25,17 +25,16 @@ desc: |-
 function main(): void {
     let arr: ValueArray<number> = [1, 2, 3];
     let x = -1
-    
+
     arktest.expectThrow(() => {
         arr[x] //expect ArrayIndexOutOfBoundsError
     }, (e: Error) => {
         return e instanceof ArrayIndexOutOfBoundsError;
-    }); 
-    
+    });
+
     arktest.expectThrow(() => {
         arr[arr.length] //expect ArrayIndexOutOfBoundsError
     }, (e: Error) => {
         return e instanceof ArrayIndexOutOfBoundsError;
-    }); 
-    
+    });
 }

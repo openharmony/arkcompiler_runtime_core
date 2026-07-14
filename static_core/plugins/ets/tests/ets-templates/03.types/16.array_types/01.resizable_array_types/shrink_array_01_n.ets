@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,19 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
-
 /*---
 desc: >-
-    A value of type Function cannot be called directly. A developer must use the unsafeCall method instead.
+    Array length is a non-negative integer number.
+    Shrinking array by setting length for T[] array.
 tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type 'Double|Int' cannot be assigned to type 'Int'"
 ---*/
 
-{{c}}
+function newSize(): double|int {
+    return 2
+}
 
-{%- endfor %}
+function main() {
+    let arr: String[] = ['Hello', 'World', 'Of', 'ArkTS']
+    arr.length = newSize()
+}

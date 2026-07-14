@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
-{% for p in primitives %}
+{%- for c in cases %}
+
 /*---
 desc: >-
-    The predefined value types are called primitive types. Primitive type names are reserved, i.e., they cannot be used for
-    user-defined type names.
-tags: [negative, compile-only]
-expected_out: "{{p.expected}}"
+    A value of type Function cannot be called directly. A developer must use the unsafeCall method instead.
+    This method checks the arguments of type Function, and calls the underlying function value
+    if the number and types of the arguments are valid.
 ---*/
 
-type {{p.type}} = Object;
+{{c.decl}}
 
-function main() {}
+function main() {
+    {{c.main|indent}}
+}
 {%- endfor %}
