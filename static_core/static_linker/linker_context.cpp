@@ -39,6 +39,13 @@ auto DerefPtrRef(T &&v) -> std::conditional_t<std::is_pointer_v<T>, std::remove_
 }
 }  // namespace
 
+namespace {
+uint32_t FieldStaticAccessFlag(uint32_t accessFlags)
+{
+    return accessFlags & ark::ACC_STATIC;
+}
+}  // namespace
+
 namespace ark::static_linker {
 
 void Context::AddItemToKnown(panda_file::BaseItem *item, const std::map<std::string, panda_file::BaseClassItem *> &cm,
@@ -536,7 +543,8 @@ void Context::MergeForeignField(const panda_file::FileReader *reader, panda_file
 
     ASSERT(clz->GetItemType() == panda_file::ItemTypes::CLASS_ITEM);
     auto *rclz = static_cast<panda_file::ClassItem *>(clz);
-    auto resolutionKey = ForeignFieldKey {rclz, name, type};
+    auto staticAccessFlag = FieldStaticAccessFlag(ff->GetAccessFlags());
+    auto resolutionKey = ForeignFieldKey {rclz, name, type, staticAccessFlag};
     auto resolutionData = FieldResolutionData {reader, ff, resolutionKey, name, type};
     if (auto cached = resolvedFields_.find(resolutionKey); cached != resolvedFields_.end()) {
         ApplyResolvedField(resolutionData, cached->second, false);
@@ -583,7 +591,8 @@ void Context::MergeForeignFieldCreate(const panda_file::FileReader *reader, pand
                                       panda_file::TypeItem *typ)
 {
     auto *fc = static_cast<panda_file::ForeignClassItem *>(clz);
-    auto [iter, was_inserted] = foreignFields_.emplace(ForeignFieldKey {fc, name, typ}, nullptr);
+    auto [iter, was_inserted] =
+        foreignFields_.emplace(ForeignFieldKey {fc, name, typ, FieldStaticAccessFlag(ff->GetAccessFlags())}, nullptr);
     if (was_inserted) {
         iter->second = cont_.CreateItem<panda_file::ForeignFieldItem>(fc, name, typ, ff->GetAccessFlags());
     } else {

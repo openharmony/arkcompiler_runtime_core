@@ -355,6 +355,11 @@ TEST(linkertests, DeduplicatedField)
     TestMultiple("dedup_field", {"1", "2"}, true, DefaultConfig(), &res, false);
 }
 
+TEST(linkertests, ForeignFieldStaticInstance)
+{
+    TestMultiple("ffield_static_instance", {"1", "2"}, true, DefaultConfig(), nullptr, false);
+}
+
 TEST(linkertests, DeduplicatedMethod)
 {
     auto res = Result {};
