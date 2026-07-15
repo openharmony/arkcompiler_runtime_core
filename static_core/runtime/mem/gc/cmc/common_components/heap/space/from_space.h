@@ -74,9 +74,9 @@ public:
         return fromRegionList_.GetAllocatedSize() + exemptedFromRegionList_.GetAllocatedSize();
     }
 
-    size_t GetFromRegionAllocatedSize() const
+    size_t GetFromRegionAllocatedSize(bool usedPageSize = true) const
     {
-        return fromRegionList_.GetAllocatedSize();
+        return fromRegionList_.GetAllocatedSize(usedPageSize);
     }
 
     RegionList &GetFromRegionList()

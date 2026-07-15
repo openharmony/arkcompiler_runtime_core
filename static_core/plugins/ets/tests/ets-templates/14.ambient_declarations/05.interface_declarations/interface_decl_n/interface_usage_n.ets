@@ -18,7 +18,7 @@
 desc: Ambient Interface implementations
 files: ['./impl/interface_declarations.ets']
 tags: [negative]
-negative_steps: [compile.verifier, runtime.ark, ark-after-aot.ark, ark-with-jit-repeats.ark]
+negative_steps: [compile.verifier, runtime.ark, ark-after-aot.ark, ark-with-jit-repeats.ark, hybrid-es2panda-verifier.verifier, hybrid-ark.ark]
 {{c.expected_data or ''}}
 ---*/
 
