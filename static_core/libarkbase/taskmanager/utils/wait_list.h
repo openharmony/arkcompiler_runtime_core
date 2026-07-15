@@ -30,7 +30,7 @@ inline constexpr WaiterId INVALID_WAITER_ID = 0U;
 
 template <class T>
 class WaitList {
-    static constexpr size_t PER_PROCESSING_NANOSECOND_TIME_DELAY = 50'000U;
+    static constexpr size_t PER_PROCESSING_MILISECOND_TIME_DELAY = 1U;
 
     class WaitValue {
     public:
@@ -111,7 +111,7 @@ inline void WaitList<T>::RunProcessingInLoop(Callback callback)
     os::memory::LockHolder lh(loopMutex_);
     while (!finish_) {
         ProcessWaitList<Callback>(callback);
-        loopCondVar_.TimedWait(&loopMutex_, 0U, PER_PROCESSING_NANOSECOND_TIME_DELAY);
+        loopCondVar_.TimedWait(&loopMutex_, PER_PROCESSING_MILISECOND_TIME_DELAY);
     }
 }
 
