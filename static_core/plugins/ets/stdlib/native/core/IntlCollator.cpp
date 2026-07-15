@@ -90,9 +90,9 @@ ani_string StdCoreIntlCollatorRemovePunctuation(ani_env *env, [[maybe_unused]] a
     return StdStrToAni(env, text);
 }
 
-ani_int StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class klass, ani_string collationIn,
-                                     ani_string langIn, ani_string firstStr, ani_string secondStr,
-                                     ani_string caseFirstIn, ani_boolean numeric)
+ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class klass, ani_string collationIn,
+                                        ani_string langIn, ani_string firstStr, ani_string secondStr,
+                                        ani_string caseFirstIn, ani_boolean numeric)
 {
     auto collation = ConvertFromAniString(env, collationIn);
     auto lang = ConvertFromAniString(env, langIn);
@@ -127,7 +127,7 @@ ani_status RegisterIntlCollator(ani_env *env)
                                          reinterpret_cast<void *>(StdCoreIntlCollatorRemoveAccents)},
                     ani_native_function {
                         "compareByCollation",
-                        "C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}z:i",
+                        "C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}C{std.core.String}z:d",
                         reinterpret_cast<void *>(StdCoreIntlCollatorLocaleCmp)}};
 
     ani_class collatorClass;

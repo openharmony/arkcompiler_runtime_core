@@ -67,8 +67,8 @@ function testCollatorCompare(): void {
 
 function testArraySortCompare(): void {
     let arr = ['a', 'c', 'b'];
-    let col = new Intl.Collator('de', {sensitivity: 'base'});
-    arr.sort(col.compare);
+    let col = new Intl.Collator('de', { sensitivity: 'base' });
+    arr.sort((a: String, b: String): int => col.compare(a, b).toInt());
     arktest.assertEQ(arr.join(), 'a,b,c');
 }
 
