@@ -20,10 +20,47 @@ function expectError(action: () => void) {
     throw new Error('Error expected, but nothing was thrown')
 }
 
+function expectErrorMessage(action: () => void, msg: String) {
+    try { action() }
+    catch (e) {
+        if (e.message.includes(msg)) {
+            return
+        }
+        throw new Error('Error message "' + e.message +
+                        '" does not include expected substring "' + msg + '"')
+    }
+    throw new Error('Error expected, but nothing was thrown')
+}
+
 class X {
     public prop: String = 'ooooooo'
     foo() { return this.prop }
     bar(a: String) { return this.prop + a }
+    public baz(a: String) { return a }
+    public baz(a: number) { return a }
+
+    private privateMethod() { return this.prop }
+    fnWithTwoParams(a: Int, b: String) { return a }
+
+    public qux(a: Date) { return a; }
+    public xyz(a: String) { return a + 'X'; }
+    public abc(a: number) { return a; }
+    public inherit(p1: Y) { return "XY"; }
+}
+
+class Y extends X {
+    public qux(a: String) { return a; }
+    public override xyz(a: String) { return a + 'Y'; }
+    public abc(a: String) { return a + 'Y'; }
+    public inherit(p1: X) { return "YX"; }
+}
+
+class Z extends Y {
+    public override abc(a: String) { return a + 'z';  }
+}
+
+class F {
+    public prop: String = 'test'
 }
 
 function testldstname() {
@@ -58,9 +95,46 @@ function testldstidx() {
 
 function testcallthis() {
     let x = new X();
+    let y = new Y();
+    let z = new Z();
     ((a: any) => a['prop'] = 'ya')(x);
     xassert(((a: any) => a.foo())(x) == 'ya');
     xassert(((a: any) => a.bar('ee'))(x) == 'yaee');
+
+    // Error: Method does not exist on type X
+    expectError(() => { ((a: any) => a.missingMethod('ee'))(x) });
+    // Error: Method is private in type X
+    expectErrorMessage(() => { ((a: any) => a.privateMethod())(x) }, "not found");
+    // Error: Missing required arguments for method
+    expectError(() => { ((a: any) => a.fnWithTwoParams())(x) });
+
+    // Error: Argument types do not match parameter types
+    expectError(() => { ((a: any) => a.fnWithTwoParams('test', 100))(x) });
+
+    // Verify boxed primitives are unboxed before call
+    xassert(((a: any) => { return a.fnWithTwoParams(100, 'test') })(x) == 100);
+
+    // Error: Second argument type is incompatible (Z instead of String type)
+    expectError(() => {
+        let f = new F();
+        ((a: any) => a.fnWithTwoParams(100, f))(x);
+    });
+
+    // Error: Cannot resolve method overload (defined and overloaded in base class)
+    expectError(() => { ((a: any) => a.baz('baz'))(y) });
+    // Error: Cannot resolve method overload (defined and overloaded in base and derived classes)
+    expectError(() => { ((a: any) => a.qux('qux'))(y) });
+
+    // Verify overridden method without overloads resolves correctly
+    xassert(((a: any) => a.xyz('xyz'))(y) == 'xyzY');
+
+    // Error: Cannot resolve overridden method with overload in base class
+    expectError(() => { ((a: any) => a.abc('abc'))(z) == 'abc'; });
+
+    xassert(((a: any) => a.inherit(y))(x) == 'XY');
+    expectError(() => { ((a: any) => a.inherit(x))(x) == 'XY'; });
+    xassert(((a: any) => a.inherit(x))(y) == 'YX');
+    xassert(((a: any) => a.inherit(y))(y) == 'YX');
 }
 
 function testcall() {
@@ -83,7 +157,7 @@ function test() {
     testldstidx();
     testldstname();
     testcall();
-    // testcallthis(); // does not work
+    testcallthis();
     testcasts();
 }
 test()
