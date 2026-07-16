@@ -283,19 +283,12 @@ void CmcGC<LanguageConfig>::MarkingHeap(const CArrayList<ObjectHeader *> &collec
 }
 
 template <class LanguageConfig>
-WeakRefFieldVisitor CmcGC<LanguageConfig>::GetWeakRefFieldVisitor(GCTaskCause reason)
+WeakRefFieldVisitor CmcGC<LanguageConfig>::GetWeakRefFieldVisitor()
 {
-    return [this, reason](ObjectPointerType *refField) -> bool {
+    return [this](ObjectPointerType *refField) -> bool {
         BaseObject *oldObj = ReadRefSlot(refField);
-        if (reason == GCTaskCause::YOUNG_GC_CAUSE) {
-            if (RegionalHeap::IsYoungSpaceObject(oldObj) && !IsMarkedObject(oldObj) &&
-                !RegionalHeap::IsNewObjectSinceMarking(oldObj)) {
-                return false;
-            }
-        } else {
-            if (!IsMarkedObject(oldObj) && !RegionalHeap::IsNewObjectSinceMarking(oldObj)) {
-                return false;
-            }
+        if (!IsMarkedObject(oldObj) && !RegionalHeap::IsNewObjectSinceMarking(oldObj) && !IsToObject(oldObj)) {
+            return false;
         }
 
         LOG(DEBUG, GC) << "visit weak raw-ref @" << refField << ": " << oldObj;
@@ -322,6 +315,7 @@ void CmcGC<LanguageConfig>::PreforwardFlip(GCTaskCause reason)
         GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats(), nullptr, PauseTypeStats::REMARK_PAUSE);
 
         ScopedTrace tracer("PreforwardFlip[STW]", ark::common_vm::ENABLE_GC_TRACING);
+        ASSERT(reason != GCTaskCause::YOUNG_GC_CAUSE);
         SetGCThreadQosPriority(ark::common_vm::PriorityMode::STW);
         ASSERT_PRINT(GetThreadPool() != nullptr, "thread pool is null");
         TransitionToGCPhase(GCPhase::GC_PHASE_REMARK);
@@ -329,10 +323,10 @@ void CmcGC<LanguageConfig>::PreforwardFlip(GCTaskCause reason)
         reinterpret_cast<RegionalHeap &>(theAllocator_).PrepareForward();
 
         TransitionToGCPhase(GCPhase::GC_PHASE_PRECOPY);
-        WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor(reason);
+        WeakRefFieldVisitor weakVisitor = GetWeakRefFieldVisitor();
         SetGCThreadQosPriority(ark::common_vm::PriorityMode::FOREGROUND);
 
-        VisitWeakGlobalRoots(weakVisitor, reason == GCTaskCause::YOUNG_GC_CAUSE);
+        VisitWeakGlobalRoots(weakVisitor);
 
         ForEachManagedMutator([](Mutator *mutator) {
             // Request finalize callback in each vm-thread when gc finished.
@@ -755,7 +749,7 @@ void CmcGC<LanguageConfig>::RemarkYoungCollectionSpace()
         CompareExchangeRefSlot(refField, oldObj, toVersion);
         return true;
     };
-    VisitWeakGlobalRoots(weakVisitor, true);
+    VisitWeakGlobalRoots(weakVisitor);
 
     SatbBuffer::Instance().ClearBuffer();
 }
@@ -1881,7 +1875,7 @@ void CmcGC<LanguageConfig>::VisitGlobalRoots(const GCRootVisitor &visitor)
 }
 
 template <class LanguageConfig>
-void CmcGC<LanguageConfig>::VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitor, bool isYoung)
+void CmcGC<LanguageConfig>::VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitor)
 {
     auto *vm = PandaVM::GetCurrent();
     ASSERT(vm != nullptr);

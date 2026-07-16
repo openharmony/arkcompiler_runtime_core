@@ -25,3 +25,13 @@ ark_runtime_unittest("weak_ref_satb_lost_test") {
   sources = [ "weak_ref_satb_lost_test.cpp" ]
   module_out_path = module_ets_tests_out_path
 }
+
+ark_runtime_unittest("array_reverse_gc_test") {
+  deps = [ "${ark_root}/plugins/ets:etsstdlib" ]
+
+  env = [ "PANDA_STD_LIB=" + rebase_path(
+              "${root_gen_dir}/arkcompiler/runtime_core/static_core/plugins/ets/etsstdlib.abc") ]
+  no_cores = true
+  sources = [ "array_reverse_gc_test.cpp" ]
+  module_out_path = module_ets_tests_out_path
+}

@@ -82,7 +82,7 @@ async function cleanupCMCGCInMainTest() {
     });
     register(mainFinReg!);
     register(workerFinReg!);
-    GC.waitForFinishGC(GC.startGC(GC.Cause.THRESHOLD));
+    GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
 
     await cleanupFinished;
     arktest.assertEQ(cleanupInMainHappened.get(), true);
@@ -117,7 +117,7 @@ async function cleanupCMCGCInWorkerTest() {
     });
     register(mainFinReg!);
     register(workerFinReg!);
-    GC.waitForFinishGC(GC.startGC(GC.Cause.THRESHOLD));
+    GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
 
     await cleanupFinished;
     arktest.assertEQ(cleanupInMainHappened.get(), true);
@@ -167,7 +167,7 @@ async function cleanupCMCGCInEAWorkerTest() {
     register(mainFinReg!);
     register(workerFinReg!);
     register(eaFinReg!);
-    GC.waitForFinishGC(GC.startGC(GC.Cause.THRESHOLD));
+    GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
     eaWorker1.run<void>((): void => {
         Coroutine.Schedule();
     }).Await();
@@ -218,7 +218,7 @@ async function cleanupInSameEAWorkerCMCGCTest() {
     });
     register(eaFinReg!);
     register(eaFinReg2!);
-    GC.waitForFinishGC(GC.startGC(GC.Cause.THRESHOLD));
+    GC.waitForFinishGC(GC.startGC(GC.Cause.FULL));
     eaWorker1.run<void>((): void => {
         Coroutine.Schedule();
     }).Await();

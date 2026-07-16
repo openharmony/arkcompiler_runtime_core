@@ -444,7 +444,7 @@ private:
 
     void PostClearTask(common_vm::FixRegionResult *result);
 
-    WeakRefFieldVisitor GetWeakRefFieldVisitor(GCTaskCause reason);
+    WeakRefFieldVisitor GetWeakRefFieldVisitor();
     void PreforwardFlip(GCTaskCause reason);
 
     void PreforwardNonHeapRoots(CmcGCEvacuationStack &stack);
@@ -476,7 +476,7 @@ private:
     static void VisitConcurrentRoots(const GCRootVisitor &visitor);
     static void VisitWeakRoots(const WeakRefFieldVisitor &visitor);
     static void VisitGlobalRoots(const GCRootVisitor &visitor);
-    static void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitor, bool isYoung);
+    static void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitor);
 
     void VisitRootsI(const RefFieldVisitor &visitor) override
     {

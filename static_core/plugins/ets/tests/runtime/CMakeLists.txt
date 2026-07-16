@@ -149,6 +149,17 @@ panda_ets_add_gtest(
     DEPS_TARGETS etsstdlib
 )
 
+panda_ets_add_gtest(
+    NO_CORES
+    NAME array_reverse_gc_test
+    SOURCES array_reverse_gc_test.cpp
+    LIBRARIES arkruntime
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    SANITIZERS ${PANDA_SANITIZERS_LIST}
+    PANDA_STD_LIB "${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
+    DEPS_TARGETS etsstdlib
+)
+
 add_dependencies(ets_tests_runtime_gtests
     ets_vm_runtime_test_gtests
     static_object_accessor_runtime_test_gtests

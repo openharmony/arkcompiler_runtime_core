@@ -397,10 +397,16 @@ if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64") {
 
 # Tests list
 unittests_list = [
-  "tests/runtime/types:ets_internal_objects_mock_tests",
-  "tests/runtime/types:ets_internal_objects_tests",
-  "tests/runtime/:weak_ref_satb_lost_test",
+  "tests/runtime/:array_reverse_gc_test",
 ]
+
+if (!ark_use_common_runtime) {
+  unittests_list += [
+    "tests/runtime/types:ets_internal_objects_mock_tests",
+    "tests/runtime/types:ets_internal_objects_tests",
+    "tests/runtime/:weak_ref_satb_lost_test",
+  ]
+}
 
 # pcre2 dependencies for different build modes
 if (!(ark_standalone_build || ark_static_standalone_build)) {
