@@ -85,10 +85,10 @@ coretypes:
 - managed_class: arkruntime.StackTraceElement
   mirror_class: ark::ets::EtsStackTraceElement
 
-- managed_class: std.core.Error
+- managed_class: escompat.Error
   mirror_class: ark::ets::EtsError
 
-- managed_class: std.core.ErrorOptions
+- managed_class: escompat.ErrorOptions
   mirror_class: ark::ets::EtsErrorOptions
 
 - managed_class: std.core.Mutex
@@ -5679,7 +5679,7 @@ intrinsics:
 
   - name: StdCoreRegisterTimer
     space: ets
-    class_name: std.core.ETSGLOBAL
+    class_name: escompat.ETSGLOBAL
     method_name: registerTimer
     static: true
     signature:
@@ -5689,7 +5689,7 @@ intrinsics:
 
   - name: StdCoreClearTimer
     space: ets
-    class_name: std.core.ETSGLOBAL
+    class_name: escompat.ETSGLOBAL
     method_name: clearTimer
     static: true
     signature:

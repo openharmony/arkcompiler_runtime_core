@@ -20,7 +20,7 @@ desc: >-
 tags: [negative, no-warmup]
 expected_error:
   runtime:
-  - 'Unhandled exception: std.core.Error'
+  - 'Unhandled exception: escompat.Error'
   - 'Error: main job uncaught error'
 ---*/
 

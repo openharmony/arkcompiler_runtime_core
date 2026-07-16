@@ -4,6 +4,9 @@
         "paths": {
             "std": [
                 "ets/stdlib/std"
+            ],
+            "escompat": [
+                "ets/stdlib/escompat"
             ]
         },
         "outDir": "../cache"

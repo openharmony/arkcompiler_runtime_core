@@ -90,7 +90,7 @@ public:
             return false;
         }
         EtsClass *klass = s.ToInternalType(ref)->GetClass();
-        EtsClass *errorKlass = PlatformTypes()->coreError;
+        EtsClass *errorKlass = PlatformTypes()->escompatError;
 
         return errorKlass->IsAssignableFrom(klass);
     }

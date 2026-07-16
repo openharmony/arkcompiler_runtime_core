@@ -663,7 +663,7 @@ EtsObject *EtsClass::CreateInstance()
 {
     EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     const auto throwCreateInstanceErr = [executionCtx, this](std::string_view msg) {
-        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreError,
+        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError,
                                PandaString(msg) + " " + GetDescriptor());
     };
 

@@ -596,7 +596,7 @@ void RegisterProcessNativeMethods(ani_env *env)
         ani_native_function {"uptime", ":l", reinterpret_cast<void *>(GetSystemUptime)},
         ani_native_function {"isIsolatedProcess", ":z", reinterpret_cast<void *>(IsIsolatedProcImpl)},
         ani_native_function {"reportUncaughtError",
-                             "C{std.core.Error}:", reinterpret_cast<void *>(ReportUncaughtErrorImpl)},
+                             "C{escompat.Error}:", reinterpret_cast<void *>(ReportUncaughtErrorImpl)},
     };
 
     ani_class childProcessKlass;

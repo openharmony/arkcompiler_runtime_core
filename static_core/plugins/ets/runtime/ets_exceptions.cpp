@@ -48,7 +48,7 @@ static EtsObject *CreateErrorInstance(EtsExecutionContext *executionCtx, EtsClas
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE),
                                                      panda_file::Type(panda_file::Type::TypeId::REFERENCE)},
                         Method::Proto::RefTypeVector {PlatformTypes()->coreString->GetDescriptor(),
-                                                      PlatformTypes()->coreErrorOptions->GetDescriptor()});
+                                                      PlatformTypes()->escompatErrorOptions->GetDescriptor()});
 
     EtsMethod *ctor = cls->GetDirectMethod(panda_file_items::CTOR.data(), proto);
     if (ctor == nullptr) {
@@ -68,7 +68,7 @@ static EtsObject *CreateErrorInstance(EtsExecutionContext *executionCtx, EtsClas
 
 EtsObject *SetupEtsException(EtsExecutionContext *executionCtx, EtsClass *cls, const char *msg)
 {
-    ASSERT(PlatformTypes(executionCtx)->coreError->IsAssignableFrom(cls));
+    ASSERT(PlatformTypes(executionCtx)->escompatError->IsAssignableFrom(cls));
 
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
     EtsHandle<EtsObject> pending(executionCtx, EtsObject::FromCoreType(executionCtx->GetMT()->GetException()));

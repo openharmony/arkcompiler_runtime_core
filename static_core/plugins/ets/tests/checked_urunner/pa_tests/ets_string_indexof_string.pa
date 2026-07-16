@@ -49,7 +49,7 @@
 
 .record std.core.String <external>
 
-.record std.core.Error <external>
+.record escompat.Error <external>
 
 .record std.core.NullPointerError <external>
 
@@ -72,7 +72,7 @@ jump_label_2:
         ldai 0x2
         return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 .function i32 testIndexOfNullKey() <static, access.function=public> {
@@ -95,7 +95,7 @@ jump_label_2:
         ldai 0x2
         return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 .function i32 testLastIndexOfNullThis() <static, access.function=public> {
@@ -117,7 +117,7 @@ jump_label_2:
         ldai 0x2
         return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 .function i32 testLastIndexOfNullKey() <static, access.function=public> {
@@ -140,7 +140,7 @@ jump_label_2:
         ldai 0x2
         return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 .function i32 main() <static, access.function=public> {

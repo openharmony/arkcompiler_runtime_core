@@ -25,9 +25,9 @@ TEST_F(ThrowErrorTest, wrong_env)
     ASSERT_EQ(env_->GetUndefined(&undef), ANI_OK);
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("std.core.Error", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("escompat.Error", &cls), ANI_OK);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &ctor), ANI_OK);
     ani_object err {};
     ASSERT_EQ(env_->Object_New(cls, ctor, &err, undef, undef), ANI_OK);  // NOLINT(cppcoreguidelines-pro-type-vararg)
 
@@ -84,9 +84,9 @@ TEST_F(ThrowErrorTest, throw_error)
     ASSERT_EQ(env_->GetUndefined(&undef), ANI_OK);
 
     ani_class cls {};
-    ASSERT_EQ(env_->FindClass("std.core.Error", &cls), ANI_OK);
+    ASSERT_EQ(env_->FindClass("escompat.Error", &cls), ANI_OK);
     ani_method ctor {};
-    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &ctor), ANI_OK);
+    ASSERT_EQ(env_->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &ctor), ANI_OK);
     ani_object errObj {};
     ASSERT_EQ(env_->Object_New(cls, ctor, &errObj, undef, undef), ANI_OK);  // NOLINT(cppcoreguidelines-pro-type-vararg)
     auto err = static_cast<ani_error>(errObj);

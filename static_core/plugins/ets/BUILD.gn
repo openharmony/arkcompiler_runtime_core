@@ -349,6 +349,7 @@ if (with_stdlib) {
         "      \"std/concurrency\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
         "      \"std/annotations\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
         "      \"std/interop\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
+        "      \"escompat\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
         "      \"arkruntime\": { \"path\": \"${etsgen_relative_path}/etsstdlib.abc\" },",
         "      \"dynamic_import_tests\": {\"language\": \"js\", \"ohmUrl\": \"dynamic_import_tests\"},",
         "      \"dynamic_import_tests/modules/instanceof\": {",
@@ -375,6 +376,7 @@ if (with_stdlib) {
         "    \"baseUrl\": \"$abs_ark_root\",",
         "    \"paths\": {",
         "      \"std\": [\"$abs_ark_root" + "/plugins/ets/stdlib/std\"],",
+        "      \"escompat\": [\"$abs_ark_root" + "/plugins/ets/stdlib/escompat\"],",
         "      \"api\": [\"$abs_ark_root" + "/plugins/ets/sdk/api\"],",
         "      \"arkts\": [\"$abs_ark_root" + "/plugins/ets/sdk/arkts\"],",
         "      \"import_tests\": [\"$abs_ark_root" +

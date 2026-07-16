@@ -24,8 +24,6 @@ static {
     console = Console.getInstance();
     coroutine = new Coroutine();
     mainEAWorker = new MainEAWorker();
-    NaN = Double.NaN;
-    Infinity = Double.POSITIVE_INFINITY;
 
     MAX_REGULAR_INTEGER = new BigInt(Number.MAX_SAFE_INTEGER)
 

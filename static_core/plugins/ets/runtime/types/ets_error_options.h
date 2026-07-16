@@ -62,7 +62,7 @@ public:
 
     inline static EtsErrorOptions *Create(EtsExecutionContext *executionCtx)
     {
-        EtsClass *klass = PlatformTypes(executionCtx)->coreErrorOptionsImpl;
+        EtsClass *klass = PlatformTypes(executionCtx)->escompatErrorOptionsImpl;
         EtsObject *etsObject = EtsObject::Create(executionCtx, klass);
         return reinterpret_cast<EtsErrorOptions *>(etsObject);
     }

@@ -89,9 +89,9 @@ __attribute__((weak)) void uv_walk([[maybe_unused]] uv_loop_t *loop, [[maybe_unu
 bool TimerModule::Init(ani_env *env)
 {
     ani_module module {};
-    auto status = env->FindModule("std.core", &module);
+    auto status = env->FindModule("escompat", &module);
     if (status != ANI_OK) {
-        INTEROP_LOG(ERROR) << "Cannot find std.core module";
+        INTEROP_LOG(ERROR) << "Cannot find escompat module";
         return false;
     }
 

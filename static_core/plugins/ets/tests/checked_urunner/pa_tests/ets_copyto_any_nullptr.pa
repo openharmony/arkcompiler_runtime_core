@@ -22,7 +22,7 @@
 .record std.core.Int <external>
 .record std.core.Long <external>
 .record std.core.String <external>
-.record std.core.Error <external>
+.record escompat.Error <external>
 .record std.core.NullPointerError <external>
 .record std.core.ETSGLOBAL <external>
 
@@ -48,7 +48,7 @@ jump_label_2:
         ldai 0x2
         return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 .function i32 testCopyToShortNullFirst() <static, access.function=public> {
@@ -73,7 +73,7 @@ jump_label_2:
         ldai 0x2
         return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 .function i32 testCopyToIntNullFirst() <static, access.function=public> {
@@ -98,7 +98,7 @@ jump_label_2:
         ldai 0x2
         return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 .function i32 testCopyToLongNullFirst() <static, access.function=public> {
@@ -123,7 +123,7 @@ jump_label_2:
         ldai 0x2
         return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 .function i32 testCopyToByteNullSecond() <static, access.function=public> {
@@ -148,7 +148,7 @@ jump_label_2:
         ldai 0x2
         return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 .function i32 testCopyToShortNullSecond() <static, access.function=public> {
@@ -173,7 +173,7 @@ jump_label_2:
         ldai 0x2
         return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 
@@ -199,7 +199,7 @@ jump_label_2:
         ldai 0x2
         return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 
@@ -225,7 +225,7 @@ jump_label_2:
         ldai 0x2
         return
 
-.catch std.core.Error, try_begin_label_0, try_end_label_0, try_end_label_0
+.catch escompat.Error, try_begin_label_0, try_end_label_0, try_end_label_0
 }
 
 .function i32 main() <static, access.function=public> {

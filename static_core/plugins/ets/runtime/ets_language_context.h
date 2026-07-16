@@ -249,7 +249,7 @@ public:
 
     const uint8_t *GetErrorClassDescriptor() const override
     {
-        return utf::CStringAsMutf8("Lstd/core/Error;");
+        return utf::CStringAsMutf8("Lescompat/Error;");
     }
 
     const uint8_t *GetIncompatibleClassChangeErrorDescriptor() const override

@@ -234,7 +234,7 @@ TEST_F(EtsWeakMapTest, ValidateKeyAcceptsArray)
 // Test multiple valid reference types
 TEST_F(EtsWeakMapTest, ValidateKeyAcceptsMultipleReferenceTypes)
 {
-    EtsClass *errorClass = PlatformTypes()->coreError;
+    EtsClass *errorClass = PlatformTypes()->escompatError;
     ASSERT_NE(errorClass, nullptr);
 
     EtsObject *error = EtsObject::Create(EtsExecutionContext::FromMT(coro_), errorClass);
