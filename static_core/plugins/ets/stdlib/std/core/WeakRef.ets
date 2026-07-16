@@ -19,7 +19,10 @@
 
 package std.core;
 
-class BaseWeakRef<T> {
+/**
+ * Usage of this class will provide perf degradation and not recommended 
+*/
+export abstract class BaseWeakRef<T> {
     // Reference to target object
     private referent: T | undefined;
 

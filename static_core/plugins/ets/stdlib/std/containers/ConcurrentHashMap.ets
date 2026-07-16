@@ -620,7 +620,7 @@ export namespace containers {
             return false;
         }
 
-        protected mappedIterator<R>(fn: (e: MapNode<K, V>) => R): IterableIterator<R> {
+        private mappedIterator<R>(fn: (e: MapNode<K, V>) => R): IterableIterator<R> {
             ConcurrencyHelpers.mutexLock(this.mutex);
             try {
                 const headNode = this.headNode;

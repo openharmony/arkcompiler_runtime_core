@@ -2187,8 +2187,8 @@ export namespace taskpool {
 
         private impl: SeqRunnerImpl;
 
-        static namedRunners: Map<string, SeqRunnerImpl> = new Map<string, SeqRunnerImpl>();
-        static mutex: Object = ConcurrencyHelpers.mutexCreate();
+        private static namedRunners: Map<string, SeqRunnerImpl> = new Map<string, SeqRunnerImpl>();
+        private static mutex: Object = ConcurrencyHelpers.mutexCreate();
     }
 
     class AsyncRunnerImpl {
