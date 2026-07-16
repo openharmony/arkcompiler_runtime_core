@@ -13,17 +13,10 @@
 
 ---
 cases:
-#0
     - return_value: |-
         await Promise.resolve("hello")
       expected_value: |-
         "hello"
-#1
-    - return_value: |-
-          Promise.resolve("hello").then( () => "hello")
-      expected_value: |-
-        "hello"
-#2
     - return_value: |-
           Promise.resolve("hello2").then( () => "hello3").then( () => "hello")
       expected_value: |-

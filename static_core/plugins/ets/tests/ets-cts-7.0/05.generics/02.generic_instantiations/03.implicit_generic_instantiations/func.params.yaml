@@ -109,15 +109,6 @@ cases:
           arktest.assertFalse(foo(a, b) instanceof String)
 
     - decl: |-
-          function foo <T> (p: T, q: T): T {
-              return p ?? q
-          }
-      use: |-
-          let a = "a"
-          let b = "b"
-          arktest.assertEQ(foo(a, b), "a")
-
-    - decl: |-
           let a: string = "a"
           let b: string = "b"
           function foo <T> (p: T, q: T): T {

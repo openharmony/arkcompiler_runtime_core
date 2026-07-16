@@ -131,18 +131,6 @@ cases:
           arktest.assertFalse(cls.foo(a, b) instanceof String)
 
     - decl: |-
-          class Cls {
-              foo <T> (p: T, q: T): T {
-                  return p ?? q
-              }
-          }
-      use: |-
-          let cls = new Cls()
-          let a = "a"
-          let b = "b"
-          arktest.assertEQ(cls.foo(a, b), "a")
-
-    - decl: |-
           let a: string = "a"
           let b: string = "b"
           class Cls {

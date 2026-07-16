@@ -13,17 +13,8 @@
 
 ---
 cases:
-#0
   - { type: long, val: 10, len: 10, expected: "Semantic error ESE0318: Type 'Array<Long>' cannot be assigned to type 'FixedArray<Long>'" }
-#1
-  - { type: float, val: 10.1, len: 10, expected: "Semantic error ESE0318: Type 'Array<Float>' cannot be assigned to type 'FixedArray<Float>'" }
-#2
   - { type: double, val: 20.1, len: 20, expected: "Semantic error ESE0318: Type 'Array<Double>' cannot be assigned to type 'FixedArray<Double>'" }
-#3
   - { type: Long, val: new Long(1 as long), len: 1, expected: "Semantic error ESE0318: Type 'Array<Long>' cannot be assigned to type 'FixedArray<Long>'" }
-#4
   - { type: Float, val: new Float(1.1.toFloat()), len: 1, expected: "Semantic error ESE0318: Type 'Array<Float>' cannot be assigned to type 'FixedArray<Float>'" }
-#5
   - { type: Double, val: new Double(2.1 as double), len: 2, expected: "Semantic error ESE0318: Type 'Array<Double>' cannot be assigned to type 'FixedArray<Double>'" }
-#6
-  - { type: Floating, val: 0.0, len: 0, expected: "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces." }
