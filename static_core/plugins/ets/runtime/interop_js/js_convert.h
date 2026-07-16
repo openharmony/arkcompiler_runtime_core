@@ -576,6 +576,13 @@ ALWAYS_INLINE inline bool CheckArgMatchObject(napi_env env, EtsClass *cls, napi_
     if (cls == PlatformTypes()->coreBigInt) {
         return JSConvertBigInt::MatchType(env, jsArg);
     }
+
+    napi_valuetype type = GetValueType<true>(env, jsArg);
+
+    if (type == napi_null) {
+        return cls == PlatformTypes()->coreNull || cls == PlatformTypes()->interopJSValue;
+    }
+
     if (cls->GetRuntimeClass()->IsObjectClass() || cls == PlatformTypes()->interopJSValue) {
         return true;
     }
@@ -583,8 +590,6 @@ ALWAYS_INLINE inline bool CheckArgMatchObject(napi_env env, EtsClass *cls, napi_
         InteropCtx::ThrowJSTypeError(env, "Overload resolution for Array, Map and Set is not supported");
         return false;
     }
-
-    napi_valuetype type = GetValueType<true>(env, jsArg);
 
     if (type == napi_object || type == napi_function) {
         auto *ctx = InteropCtx::Current();
@@ -599,6 +604,7 @@ ALWAYS_INLINE inline bool CheckArgMatchObject(napi_env env, EtsClass *cls, napi_
                 return cls->IsAssignableFrom(etsObj->GetClass());
             }
         }
+        return false;
     }
     return JSConvertEtsObject::MatchType(env, jsArg);
 }
