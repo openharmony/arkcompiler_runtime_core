@@ -636,9 +636,9 @@ export final class String extends Object implements Comparable<String>, Iterable
                     return fastResult;
                 }
             }
-            return String.defaultCollator.compare(this, that)
+            return String.defaultCollator.compare(this, that).toInt()
         }
-        return new Intl.Collator(locale, options).compare(this, that)
+        return new Intl.Collator(locale, options).compare(this, that).toInt()
     }
 
     /**
