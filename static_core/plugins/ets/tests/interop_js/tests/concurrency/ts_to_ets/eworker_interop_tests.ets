@@ -200,6 +200,7 @@ const ErrMsg: string = 'This is a Error';
 const ErrorMessage: string = 'Panda: throw new error in ets!';
 const CustomErrorMessage: string = 'Panda: Something went wrong!';
 const CustomErrorCode: number = 1001;
+const InteropCtxErrorMessage: string = 'Interop object must be used in the same InteropCtx as it was created';
 
 function testError() {
     let callback = () => {
@@ -449,6 +450,31 @@ function testEAWorkerCommmunicateWithMessage()
     eaw2.join();
 }
 
+function createMainThreadInteropObject(): string {
+    let module = ESValue.load('concurrency_helpers');
+    mainThreadInteropObject = module.getProperty('mainThreadInteropObject');
+    return getMainThreadInteropObjectValue();
+}
+
+function getMainThreadInteropObjectValue(): string {
+    return mainThreadInteropObject.getProperty('value').toString();
+}
+
+async function testEAWorkerUseMainInteropObject(): Promise<void> {
+    arktest.assertEQ(createMainThreadInteropObject(), MainThreadInteropObjectValue);
+    let callback = () => {
+        getMainThreadInteropObjectValue();
+    }
+
+    try {
+        await eaw.run<void>(callback);
+        arktest.assertTrue(false);
+    } catch (error) {
+        let res = (error instanceof Error) && (error.message.indexOf(InteropCtxErrorMessage) !== -1);
+        arktest.assertTrue(res);
+    }
+}
+
 function eworkerInteropTest() {
     eaw.start();
     let eworkerInteropSuite = new arktest.ArkTestsuite('eworker.InteropTest');
@@ -475,6 +501,7 @@ function eworkerInteropTest() {
     eworkerInteropSuite.addTest('testEAWorkerSerializeClassInstantiate', testEAWorkerSerializeClassInstantiate);
     eworkerInteropSuite.addTest('testEAWorkerSerializeUndefined', testEAWorkerSerializeUndefined);
     eworkerInteropSuite.addTest('testEAWorkerSerializeNull', testEAWorkerSerializeNull);
+    eworkerInteropSuite.addAsyncTest('testEAWorkerUseMainInteropObject', testEAWorkerUseMainInteropObject);
     eworkerInteropSuite.addTest('testEAWorkerMessageCancellation', testEAWorkerMessageCancellation);
     eworkerInteropSuite.addTest('testRemoveMessageHandlerTest', removeMessageHandlerTest);
     eworkerInteropSuite.addTest('testEAWorkerCommmunicateWithMessage', testEAWorkerCommmunicateWithMessage);

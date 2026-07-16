@@ -26,6 +26,7 @@
 #include "runtime/include/coretypes/class.h"
 #include "libarkbase/utils/small_vector.h"
 #include <node_api.h>
+#include <optional>
 
 namespace ark::ets::interop::js {
 
@@ -161,8 +162,11 @@ public:
     {
         napi_value value;
         auto napiRef = jsObject->GetNapiRef(env);
+        if (UNLIKELY(!napiRef.has_value())) {
+            return nullptr;
+        }
         ScopedNativeCodeThread nativeScope(ManagedThread::GetCurrent());
-        NAPI_ASSERT_OK(napi_get_reference_value(env, napiRef, &value));
+        NAPI_ASSERT_OK(napi_get_reference_value(env, napiRef.value(), &value));
         return value;
     }
 
@@ -298,7 +302,7 @@ private:
     // Returns moved jsValue
     [[nodiscard]] static JSValue *AttachFinalizer(EtsExecutionContext *executionCtx, JSValue *jsValue);
 
-    napi_ref GetNapiRef(napi_env env) const
+    std::optional<napi_ref> GetNapiRef(napi_env env) const
     {
         ASSERT(IsRefType(GetType()));
 
@@ -306,9 +310,10 @@ private:
 
         // Interop ctx check:
         // check if the ctx is the same as the one that created the reference
-        if (sharedRef == nullptr || sharedRef->GetCtx()->GetJSEnv() != env) {
-            // NOTE(MockMockBlack, #24062): to be replaced with a runtime exception
-            InteropFatal("InteropFatal, interop object must be used in the same interopCtx as it was created.");
+        if (sharedRef == nullptr || sharedRef->GetCtx() == nullptr || sharedRef->GetCtx()->GetJSEnv() != env) {
+            InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(),
+                                      "Interop: Interop object must be used in the same InteropCtx as it was created.");
+            return std::nullopt;
         }
 
         return sharedRef->GetJsRef();
@@ -320,13 +325,19 @@ private:
         auto executionCtx = EtsExecutionContext::GetCurrent();
         auto env = InteropCtx::Current()->GetJSEnv();
         auto leftRef = left->GetNapiRef(env);
+        if (UNLIKELY(!leftRef.has_value())) {
+            return false;
+        }
         auto rightRef = right->GetNapiRef(env);
+        if (UNLIKELY(!rightRef.has_value())) {
+            return false;
+        }
         napi_value leftValue;
         napi_value rightvalue;
 
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
-        NAPI_ASSERT_OK(napi_get_reference_value(env, leftRef, &leftValue));
-        NAPI_ASSERT_OK(napi_get_reference_value(env, rightRef, &rightvalue));
+        NAPI_ASSERT_OK(napi_get_reference_value(env, leftRef.value(), &leftValue));
+        NAPI_ASSERT_OK(napi_get_reference_value(env, rightRef.value(), &rightvalue));
         bool isEquals = false;
         napi_strict_equals(env, leftValue, rightvalue, &isEquals);
         return isEquals;

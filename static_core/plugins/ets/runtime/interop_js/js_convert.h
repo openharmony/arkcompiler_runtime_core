@@ -490,6 +490,10 @@ JSCONVERT_WRAP(Promise)
         } else {
             auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
             completionValue = refconv->Wrap(ctx, value.GetPtr());
+            if (UNLIKELY(completionValue == nullptr)) {
+                hpromise->Unlock();
+                return nullptr;
+            }
         }
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
         if (hpromise->IsResolved()) {
@@ -634,6 +638,9 @@ ALWAYS_INLINE inline std::optional<typename T::cpptype> JSValueGetByName(Interop
     [[maybe_unused]] EtsHandleScope s(executionCtx);
     EtsHandle<JSValue> jsvalueHandle(executionCtx, jsvalue);
     auto jsVal = JSValue::GetNapiValue(executionCtx, ctx, jsvalueHandle);
+    if (UNLIKELY(jsVal == nullptr)) {
+        return {};
+    }
     napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
@@ -660,6 +667,9 @@ ALWAYS_INLINE inline void JSValueSetByName(InteropCtx *ctx, JSValue *jsvalue, co
         return;
     }
     auto jsVal = JSValue::GetNapiValue(executionCtx, ctx, jsvalueHandle);
+    if (UNLIKELY(jsVal == nullptr)) {
+        return;
+    }
     napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(executionCtx->GetMT());

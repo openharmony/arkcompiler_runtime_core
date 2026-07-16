@@ -122,7 +122,7 @@ struct JSConvertBase {
             ASSERT(etsVal != nullptr);
         }
         auto res = Impl::WrapImpl(env, etsVal);
-        ASSERT(res != nullptr || InteropCtx::SanityJSExceptionPending());
+        ASSERT(res != nullptr || InteropCtx::SanityJSExceptionPending() || InteropCtx::SanityETSExceptionPending());
         return res;
     }
 
@@ -146,7 +146,7 @@ struct JSConvertBase {
             }
         }
         auto res = Impl::WrapImpl(env, etsVal);
-        ASSERT(res != nullptr || InteropCtx::SanityJSExceptionPending());
+        ASSERT(res != nullptr || InteropCtx::SanityJSExceptionPending() || InteropCtx::SanityETSExceptionPending());
         return res;
     }
 
