@@ -18,13 +18,13 @@
 #include "runtime/mem/gc/cmc/cmc-allocator.h"
 #include "runtime/mem/runslots_allocator-inl.h"
 #if defined(ARK_USE_COMMON_RUNTIME)
-#include "common_interfaces/heap/heap_allocator.h"
+#include "runtime/mem/gc/cmc/heap/heap_allocator.h"
 #include "common_interfaces/objects/base_object.h"
 #include "common_interfaces/objects/base_state_word.h"
-#include "common_components/heap/heap.h"
+#include "runtime/mem/gc/cmc/heap/heap.h"
 #include "common_components/common/page_pool.h"
 #include "common_components/common_runtime/base_runtime_param.h"
-#include "common_components/heap/heap_manager.h"
+#include "runtime/mem/gc/cmc/heap/heap_manager.h"
 #endif
 
 namespace ark::mem {

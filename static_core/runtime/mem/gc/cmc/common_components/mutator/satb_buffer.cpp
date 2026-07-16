@@ -14,7 +14,7 @@
  */
 
 #include "common_components/mutator/satb_buffer.h"
-#include "common_components/heap/allocator/regional_heap.h"
+#include "runtime/mem/gc/cmc/heap/allocator/regional_heap.h"
 
 #include "common_components/base/immortal_wrapper.h"
 

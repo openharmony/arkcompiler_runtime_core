@@ -18,18 +18,18 @@
 #include <iomanip>
 
 #include "runtime/mem/gc/cmc/cmc-gc.h"
-#include "runtime/mem/gc/cmc/common_components/heap/heap_manager.h"
+#include "runtime/mem/gc/cmc/heap/heap_manager.h"
 #include "runtime/mem/gc/gc_adaptive_stack_inl.h"
 #include "runtime/mem/gc/gc_stats.h"
 
 #include "common_components/base/globals.h"
-#include "common_components/heap/verification.h"
-#include "common_components/heap/allocator/fix_heap.h"
-#include "common_components/heap/allocator/regional_heap.h"
-#include "common_components/heap/allocator/alloc_buffer.h"
-#include "common_components/heap/collector/heuristic_gc_policy.h"
+#include "runtime/mem/gc/cmc/heap/verification.h"
+#include "runtime/mem/gc/cmc/heap/allocator/fix_heap.h"
+#include "runtime/mem/gc/cmc/heap/allocator/regional_heap.h"
+#include "runtime/mem/gc/cmc/heap/allocator/alloc_buffer.h"
+#include "runtime/mem/gc/cmc/heap/collector/heuristic_gc_policy.h"
 #include "common_interfaces/base/runtime_param.h"
-#include "common_components/heap/collector/collector_resources.h"
+#include "runtime/mem/gc/cmc/heap/collector/collector_resources.h"
 #include "common_components/mutator/satb_buffer.h"
 
 #include "libarkbase/utils/logger.h"
@@ -40,7 +40,7 @@
 #include "runtime/mem/gc/reference-processor/reference_processor.h"
 #include "runtime/mem/object-references-iterator-inl.h"
 
-#include "common_interfaces/heap/region_desc.h"
+#include "runtime/mem/gc/cmc/heap/region_desc.h"
 
 #ifdef ENABLE_QOS
 #include "qos.h"

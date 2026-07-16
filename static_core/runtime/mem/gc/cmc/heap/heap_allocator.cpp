@@ -1,0 +1,126 @@
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "runtime/mem/gc/cmc/heap/heap_allocator.h"
+
+#include "runtime/mem/gc/cmc/heap/heap_allocator-inl.h"
+#include "common_components/common/type_def.h"
+#include "runtime/mem/gc/cmc/heap/heap_manager.h"
+#include "runtime/mem/gc/cmc/heap/allocator/region_manager.h"
+#include "runtime/mem/gc/cmc/heap/allocator/regional_heap.h"
+
+namespace ark::common_vm {
+Address AllocateYoungInAllocBuffer(uintptr_t buffer, size_t size)
+{
+    if (buffer == 0) {
+        LOG(FATAL, COMMON) << "Check failed: "
+                           << "buffer != 0";
+    }
+    AllocationBuffer *allocBuffer = reinterpret_cast<AllocationBuffer *>(buffer);
+    return allocBuffer->FastAllocateInTlab<AllocBufferType::YOUNG>(size);
+}
+
+Address AllocateOldInAllocBuffer(uintptr_t buffer, size_t size)
+{
+    if (buffer == 0) {
+        LOG(FATAL, COMMON) << "Check failed: "
+                           << "buffer != 0";
+    }
+    AllocationBuffer *allocBuffer = reinterpret_cast<AllocationBuffer *>(buffer);
+    return allocBuffer->FastAllocateInTlab<AllocBufferType::OLD>(size);
+}
+
+Address HeapAllocator::AllocateInYoungOrHuge(size_t size)
+{
+    auto address = HeapManager::Allocate(size);
+    return address;
+}
+
+Address HeapAllocator::AllocateInNonmoveOrHuge(size_t size)
+{
+    auto address = HeapManager::Allocate(size, AllocType::NONMOVABLE_OBJECT);
+    return address;
+}
+
+Address HeapAllocator::AllocateInOldOrHuge(size_t size)
+{
+    auto address = HeapManager::Allocate(size, AllocType::MOVEABLE_OLD_OBJECT);
+    return address;
+}
+
+Address HeapAllocator::AllocateInHuge(size_t size)
+{
+    auto address = HeapManager::Allocate(size);
+    if (address != 0) {
+    }
+    return address;
+}
+
+uintptr_t HeapAllocator::AllocateLargeJitFortRegion(size_t size)
+{
+    RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
+    auto address = allocator.AllocJitFortRegion(size);
+    return address;
+}
+
+// below are interfaces used for serialize
+Address HeapAllocator::AllocateNoGC(size_t size)
+{
+    return HeapManager::Allocate(size, AllocType::MOVEABLE_OBJECT, false);
+}
+
+Address HeapAllocator::AllocateOldOrLargeNoGC(size_t size)
+{
+    if (size >= RegionDesc::LARGE_OBJECT_DEFAULT_THRESHOLD) {
+        return AllocateLargeRegion(size);
+    }
+    return HeapManager::Allocate(size, AllocType::MOVEABLE_OLD_OBJECT, false);
+}
+
+Address HeapAllocator::AllocateNonmoveNoGC(size_t size)
+{
+    return HeapManager::Allocate(size, AllocType::NONMOVABLE_OBJECT, false);
+}
+
+Address HeapAllocator::AllocateOldRegion()
+{
+    RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
+    return allocator.AllocOldRegion();
+}
+
+mem::TLAB *HeapAllocator::CreateTLAB()
+{
+    RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
+    return allocator.CreateTLAB();
+}
+
+Address HeapAllocator::AllocateNonMovableRegion()
+{
+    RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
+    return allocator.AllocateNonMovableRegion();
+}
+
+Address HeapAllocator::AllocateLargeRegion(size_t size)
+{
+    RegionalHeap &allocator = reinterpret_cast<RegionalHeap &>(Heap::GetHeap().GetAllocator());
+    return allocator.AllocLargeRegion(size);
+}
+
+size_t HeapAllocator::GetTLABMaxAllocSize()
+{
+    return RegionDesc::GetUnitAvailableSize();
+}
+
+}  // namespace ark::common_vm

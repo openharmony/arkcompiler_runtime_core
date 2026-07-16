@@ -27,7 +27,7 @@
 #include "runtime/entrypoints/entrypoints.h"
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-#include "common_interfaces/heap/region_desc.h"
+#include "runtime/mem/gc/cmc/heap/region_desc.h"
 #include "runtime/mem/gc/cmc/cmc-gc.h"
 #endif  // ARK_USE_COMMON_RUNTIME
 

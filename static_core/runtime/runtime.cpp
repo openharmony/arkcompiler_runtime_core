@@ -84,7 +84,7 @@
 #endif
 
 #if defined(ARK_USE_COMMON_RUNTIME)
-#include "common_components/heap/heap.h"
+#include "runtime/mem/gc/cmc/heap/heap.h"
 #endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark {

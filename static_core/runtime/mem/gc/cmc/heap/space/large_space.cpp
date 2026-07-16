@@ -1,0 +1,111 @@
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "runtime/mem/gc/cmc/heap/space/large_space.h"
+#include "runtime/mem/gc/cmc/heap/allocator/region_manager.h"
+#include "runtime/mem/gc/cmc/heap/collector/collector.h"
+#include "runtime/mem/gc/cmc/heap/allocator/regional_heap.h"
+#if defined(COMMON_SANITIZER_SUPPORT)
+#include "common_components/base/asan_interface.h"
+#endif
+
+#include "runtime/trace.h"
+#include "runtime/include/panda_vm.h"
+#include "runtime/include/runtime.h"
+
+namespace ark::common_vm {
+
+void LargeSpace::AssembleGarbageCandidates()
+{
+    largeRegionList_.MergeRegionList(recentLargeRegionList_, RegionDesc::RegionType::LARGE_REGION);
+}
+
+void LargeSpace::CollectFixTasks(FixHeapTaskList &taskList)
+{
+    if (Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE) {
+        FixHeap::CollectFixHeapTasks(taskList, largeRegionList_, FixRegionType::FIX_OLD_REGION);
+        FixHeap::CollectFixHeapTasks(taskList, recentLargeRegionList_, FixRegionType::FIX_RECENT_OLD_REGION);
+    } else {
+        FixHeap::CollectFixHeapTasks(taskList, largeRegionList_, FixRegionType::FIX_REGION);
+        FixHeap::CollectFixHeapTasks(taskList, recentLargeRegionList_, FixRegionType::FIX_RECENT_REGION);
+    }
+}
+
+size_t LargeSpace::CollectLargeGarbage()
+{
+    ScopedTrace tracer("CollectLargeGarbage", ENABLE_GC_TRACING);
+    size_t freedObjectCount = 0;
+    size_t freedObjectBytes = 0;
+    size_t garbageSize = 0;
+    RegionDesc *region = largeRegionList_.GetHeadRegion();
+    while (region != nullptr) {
+        HeapAddress addr = region->GetRegionStart();
+        BaseObject *obj = reinterpret_cast<BaseObject *>(addr);
+
+        if (!RegionalHeap::IsSurvivedObject(obj) && !region->IsNewObjectSinceMarking(obj)) {
+            LOG_DEBUG_OBJECT_EVENTS << "DELETE LARGE object " << obj;
+            LOG(DEBUG, GC) << "reclaim large region " << region << "@0x" << std::hex << region->GetRegionStart() << "+"
+                           << std::dec << region->GetRegionAllocatedSize() << " type "
+                           << static_cast<size_t>(region->GetRegionType());
+            RegionDesc *del = region;
+            region = region->GetNextRegion();
+            largeRegionList_.DeleteRegion(del);
+            freedObjectCount++;
+            freedObjectBytes += del->GetRegionAllocatedSize();
+            if (del->GetRegionSize() > RegionDesc::LARGE_OBJECT_RELEASE_THRESHOLD) {
+                garbageSize += regionManager_.ReleaseRegion(del);
+            } else {
+                garbageSize += regionManager_.CollectRegion(del);
+            }
+        } else {
+            LOG(DEBUG, GC) << "clear mark-bit for large region " << region << "@0x" << std::hex
+                           << region->GetRegionStart() << "+" << std::dec << region->GetRegionAllocatedSize()
+                           << " type " << static_cast<size_t>(region->GetRegionType());
+            region = region->GetNextRegion();
+        }
+    }
+
+    region = recentLargeRegionList_.GetHeadRegion();
+    while (region != nullptr) {
+        region = region->GetNextRegion();
+    }
+
+    if (freedObjectBytes > 0) {
+        Runtime::GetCurrent()->GetPandaVM()->GetMemStats()->RecordFreeObjects(
+            freedObjectCount, freedObjectBytes, ark::SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT);
+    }
+
+    return garbageSize;
+}
+
+uintptr_t LargeSpace::Alloc(size_t size, bool allowGC)
+{
+    size_t alignedSize = AlignUp<size_t>(size + RegionDesc::GetUnitHeaderSize(), RegionDesc::UNIT_SIZE);
+    size_t regionCount = alignedSize / RegionDesc::UNIT_SIZE;
+    RegionDesc *region =
+        regionManager_.TakeRegion(regionCount, RegionDesc::UnitRole::LARGE_SIZED_UNITS, false, allowGC);
+    if (region == nullptr) {
+        return 0;
+    }
+    InitRegionPhaseLine(region);
+    LOG(DEBUG, GC) << "alloc large region @0x" << std::hex << region->GetRegionStart() << "+" << std::dec
+                   << region->GetRegionSize() << " type " << static_cast<size_t>(region->GetRegionType());
+    uintptr_t addr = region->Alloc(size);
+    DCHECK(addr > 0);
+    recentLargeRegionList_.PrependRegion(region, RegionDesc::RegionType::RECENT_LARGE_REGION);
+    return addr;
+}
+
+}  // namespace ark::common_vm
