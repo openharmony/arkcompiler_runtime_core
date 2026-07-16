@@ -71,7 +71,7 @@ export class Object {
     public toString(): String {
         const thisObj = this
         if (thisObj instanceof Function) {
-            return "Cannot get source code of function"
+            return "Cannot get source code"
         }
 
         const thisType = Class.of(thisObj)

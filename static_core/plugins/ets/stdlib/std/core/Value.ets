@@ -774,7 +774,7 @@ export final class LambdaValue extends reflect.Value {
     }
 
     public override toString(): string {
-        return "Cannot get source code of function";
+        return "Cannot get source code";
     }
 }
 

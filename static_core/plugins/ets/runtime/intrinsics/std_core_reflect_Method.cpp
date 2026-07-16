@@ -53,14 +53,24 @@ extern "C" EtsClass *ReflectMethodGetReturnTypeImpl(EtsLong etsMethodPtr)
 
 extern "C" EtsClass *ReflectMethodGetParameterTypeByIdxImpl(EtsLong etsFunctionPtr, EtsInt i)
 {
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+
     auto *function = reinterpret_cast<EtsMethod *>(etsFunctionPtr);
     ASSERT(function != nullptr);
-    ASSERT(i >= 0 && static_cast<uint32_t>(i) < function->GetNumArgs());
-    // 0 is recevier type
-    i = function->IsStatic() ? i : i + 1;
-    auto *argType = function->ResolveArgType(i);
+
+    auto parametersNum = function->GetParametersNum();
+    if (UNLIKELY(i < 0 || static_cast<uint32_t>(i) >= parametersNum)) {
+        PandaStringStream pss;
+        pss << "Parameter index " << i << " is out of bounds for " << parametersNum << " parameters.";
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, pss.str());
+        return nullptr;
+    }
+
+    auto argIndex = function->IsStatic() ? static_cast<uint32_t>(i) : static_cast<uint32_t>(i) + 1U;
+    auto *argType = function->ResolveArgType(argIndex);
     if (UNLIKELY(argType == nullptr)) {
-        ASSERT(EtsExecutionContext::GetCurrent()->GetMT()->HasPendingException());
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 
