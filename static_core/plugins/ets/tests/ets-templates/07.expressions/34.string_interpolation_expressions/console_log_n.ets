@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-{% for operand in operands %}
-
+{%- for c in cases %}
 /*---
-desc: Type of a numeric conditional expression
+desc: >-
+    An embedded expression can be used in console.log call
+tags: [compile-only, negative]
+expected_out:
+    {{c.expected_out|indent}}
 ---*/
+{{c.defs}}
 
-function main(): void {
-  let x = {{operand.first}} ? {{operand.second}} : {{operand.third}};
-  arktest.assertTrue( {{operand.check}} )
+function main() {
+    {{(c.main or '')|indent}}
 }
-
-{% endfor %}
+{%- endfor %}

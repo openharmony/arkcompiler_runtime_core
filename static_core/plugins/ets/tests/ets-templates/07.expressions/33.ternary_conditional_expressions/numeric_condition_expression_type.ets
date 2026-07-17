@@ -13,15 +13,29 @@
  * limitations under the License.
  */
 
-{% for operand in operands %}
-
 /*---
-desc: Type of a numeric conditional expression
+desc: >-
+    Type of a numeric conditional expression. If the value of condition
+    is unknown at compile time, then the expression type is a union of types
+    whenTrue and whenFalse further normalized in accordance with
+    the process discussed in Union Types Normalization.
 ---*/
 
-function main(): void {
-  let x{{operand.type}} = {{operand.first}} ? {{operand.second}} : {{operand.third}};
-  arktest.assertTrue( {{operand.check}} )
-}
+let trueVar = true
 
+function main(): int {
+    let suite = new arktest.ArkTestsuite('Numeric types in condition expression')
+{%- for c in cases %}
+    suite.addTest('Explicit type: {{c.type}}', () => {
+        let x: {{c.type}} = {{c.not_op}} trueVar ? {{c.whenTrue}} : {{c.whenFalse}};
+        {{c.check|indent|indent}}
+    })
+
+    suite.addTest('Inferred type: {{c.type}}', () => {
+        let x = {{c.not_op}} trueVar ? {{c.whenTrue}} : {{c.whenFalse}};
+        {{c.check|indent|indent}}
+    })
 {% endfor %}
+
+    return suite.run()
+}

@@ -15,6 +15,12 @@
 03.types/21.utility_types/09.nesting_utility_type/nested_utility_generic_3.ets
 03.types/21.utility_types/09.nesting_utility_type/nested_utility_generic_4.ets
 
+#35686 Parser bug with string literal
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_47.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_48.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_49.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_46.ets
+
 #17300 No CTE on using predefined types as generic parameters
 05.generics/generic_declarations/generic_functions/generic_params_n_0.ets
 05.generics/generic_declarations/generic_functions/generic_params_n_1.ets
@@ -166,6 +172,14 @@
 07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_12.ets
 07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_13.ets
 07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_14.ets
+
+#35799 Incorrect type of a ternary expression is inferred when both expressions are of numeric type
+07.expressions/33.ternary_conditional_expressions/numeric_condition_expression_type.ets
+
+#35685 es2panda aborts on invalid interpolation expression
+07.expressions/34.string_interpolation_expressions/console_log_n_2.ets
+07.expressions/34.string_interpolation_expressions/console_log_n_3.ets
+07.expressions/34.string_interpolation_expressions/console_log_n_4.ets
 
 #34393 es2panda aborts on bigint expression in string interpolation expression
 07.expressions/34.string_interpolation_expressions/bigint_interpolation_conditional.ets

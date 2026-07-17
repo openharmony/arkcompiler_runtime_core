@@ -1,6 +1,7 @@
 #FailKind.SEGFAULT_FAIL - 31 tests:
 03.types/19.union_types/03.keyof_types/keyof_unsupported_neg_5.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_n_6.ets
+04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/alias_26.ets
 04.names_declarations_and_scopes/05.type_declarations/01.type_alias_declaration/spec2_n.ets
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/rest_parameter_n_13.ets
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/rest_parameter_n_3.ets
