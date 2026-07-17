@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,6 @@ function main() {
     let arrObj: FixedArray<Object> = arrA
     arktest.assertTrue(arrObj[0] instanceof A)
     arktest.assertTrue(arrObj[0] instanceof Object)
-    arktest.assertTrue(arrObj instanceof FixedArray<A>)
-    arktest.assertTrue(arrObj instanceof FixedArray<Object>)
+    arktest.assertTrue(arrObj instanceof FixedArray<A | undefined>)
+    arktest.assertTrue(arrObj instanceof FixedArray<Object | undefined>)
 }

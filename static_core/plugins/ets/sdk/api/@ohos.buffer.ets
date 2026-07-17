@@ -2324,33 +2324,37 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
          * handle Parameters, and retrun ArrSrcType.
          */
         private handleParameters(sources: FixedArrayUnionType) {
-            if (sources instanceof FixedArray<string>) {
+            this.handleObjectParameters(sources)
+        }
+
+        private handleObjectParameters(sources: Object) {
+            if (sources instanceof FixedArray<string | undefined>) {
                 this.arr = Array.from(sources as FixedArray<string>)
-            } else if (sources instanceof FixedArray<ArrayBuffer>) {
+            } else if (sources instanceof FixedArray<ArrayBuffer | undefined>) {
                 this.arr = Array.from(sources as FixedArray<ArrayBuffer>);
-            } else if (sources instanceof FixedArray<DataView>) {
+            } else if (sources instanceof FixedArray<DataView | undefined>) {
                 this.arr = Array.from(sources as FixedArray<DataView>);
-            } else if (sources instanceof FixedArray<Int8Array>) {
+            } else if (sources instanceof FixedArray<Int8Array | undefined>) {
                 this.arr = Array.from(sources as FixedArray<Int8Array>);
-            } else if (sources instanceof FixedArray<Uint8Array>) {
+            } else if (sources instanceof FixedArray<Uint8Array | undefined>) {
                 this.arr = Array.from(sources as FixedArray<Uint8Array>);
-            } else if (sources instanceof FixedArray<Uint8ClampedArray>) {
+            } else if (sources instanceof FixedArray<Uint8ClampedArray | undefined>) {
                 this.arr = Array.from(sources as FixedArray<Uint8ClampedArray>);
-            } else if (sources instanceof FixedArray<Int16Array>) {
+            } else if (sources instanceof FixedArray<Int16Array | undefined>) {
                 this.arr = Array.from(sources as FixedArray<Int16Array>);
-            } else if (sources instanceof FixedArray<Uint16Array>) {
+            } else if (sources instanceof FixedArray<Uint16Array | undefined>) {
                 this.arr = Array.from(sources as FixedArray<Uint16Array>);
-            } else if (sources instanceof FixedArray<Int32Array>) {
+            } else if (sources instanceof FixedArray<Int32Array | undefined>) {
                 this.arr = Array.from(sources as FixedArray<Int32Array>);
-            } else if (sources instanceof FixedArray<Uint32Array>) {
+            } else if (sources instanceof FixedArray<Uint32Array | undefined>) {
                 this.arr = Array.from(sources as FixedArray<Uint32Array>);
-            } else if (sources instanceof FixedArray<Float32Array>) {
+            } else if (sources instanceof FixedArray<Float32Array | undefined>) {
                 this.arr = Array.from(sources as FixedArray<Float32Array>);
-            } else if (sources instanceof FixedArray<Float64Array>) {
+            } else if (sources instanceof FixedArray<Float64Array | undefined>) {
                 this.arr = Array.from(sources as FixedArray<Float64Array>);
-            } else if (sources instanceof FixedArray<BigInt64Array>) {
+            } else if (sources instanceof FixedArray<BigInt64Array | undefined>) {
                 this.arr = Array.from(sources as FixedArray<BigInt64Array>);
-            } else if (sources instanceof FixedArray<BigUint64Array>) {
+            } else if (sources instanceof FixedArray<BigUint64Array | undefined>) {
                 this.arr = Array.from(sources as FixedArray<BigUint64Array>);
             } else {
                 this.arr = Array.from(sources as FixedArray<Blob>);

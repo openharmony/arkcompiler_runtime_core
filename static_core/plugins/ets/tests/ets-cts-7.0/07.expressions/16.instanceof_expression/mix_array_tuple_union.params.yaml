@@ -33,7 +33,7 @@ cases:
 
   # tuple of arrays
   - type: '([bigint[], boolean[]])'
-    effective_type: '[Array, Array]'
+    effective_type: 'Tuple2'
     init1: '[[0n], [true]]'
     init2: '[[1n], [false]]'
 
@@ -44,13 +44,13 @@ cases:
       let a_tuple1: my_tuple1 = [0n, true]
       type my_tuple2 = [null, undefined]
       let a_tuple2: my_tuple2 = [null, undefined]
-    effective_type: 'my_type'
+    effective_type: 'Tuple2'
     init1: 'a_tuple1'
     init2: 'a_tuple2'
 
   # tuple of unions
   - type: '[bigint|boolean, null|undefined]'
-    effective_type: 'my_type'
+    effective_type: 'Tuple2'
     init1: '[0n, null]'
     init2: '[false, undefined]'
 
@@ -83,13 +83,13 @@ cases:
       let a_tuple1: my_tuple1 = [[0n], true]
       type my_tuple2 = [null[], undefined]
       let a_tuple2: my_tuple2 = [[null], undefined]
-    effective_type: '[Array, boolean|undefined]|[Array, boolean]|[Array, undefined]'
+    effective_type: 'Tuple2'
     init1: 'a_tuple1'
     init2: 'a_tuple2'
 
   # tuple with unions of arrays
   - type: '[bigint[]|null[], undefined]'
-    effective_type: '[Array, undefined]'
+    effective_type: 'Tuple2'
     init1: '[[0n], undefined]'
     init2: '[[null], undefined]'
 
@@ -101,6 +101,6 @@ cases:
 
   # tuple with arrays of unions
   - type: '[(bigint|boolean)[], undefined]'
-    effective_type: '[Array, undefined]'
+    effective_type: 'Tuple2'
     init1: '[[1n, true], undefined]'
     init2: '[[false, 0n], undefined]'

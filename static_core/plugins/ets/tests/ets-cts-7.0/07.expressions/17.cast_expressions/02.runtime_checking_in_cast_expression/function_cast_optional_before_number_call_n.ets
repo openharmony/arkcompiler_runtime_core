@@ -28,13 +28,16 @@ function cast(a: Any) {
 
 function main(): void {
     let reachedInnerCall: boolean = false
-    let res = ((p: Any) => {
-        ((p: {{c.target_incompat}}) => {
-            ((p: {{c.target_upcast}}) => {
-                reachedInnerCall = true
-            })(p)
-        })(cast(p))
-    })({{c.expr}})
-    arktest.assertTrue(reachedInnerCall)
+    arktest.expectNoThrow(() => {
+        let res = ((p: Any) => {
+            ((p: {{c.target_incompat}}) => {
+                ((p: {{c.target_upcast}}) => {
+                    reachedInnerCall = true
+                })(p)
+            })(cast(p))
+        })({{c.expr}})
+        arktest.assertFalse(res instanceof object, "this assert uses function type")
+    })
+    arktest.assertTrue(reachedInnerCall, "expected to reach inner call")
 }
 {% endfor %}

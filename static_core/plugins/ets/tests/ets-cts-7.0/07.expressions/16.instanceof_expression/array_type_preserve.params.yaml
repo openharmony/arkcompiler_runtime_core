@@ -16,26 +16,21 @@ cases:
     # G1 Array<Any> preserved in instanceof
     - expr: |-
         let a: Array<Any> = [1, "1"]
-        let t = pass(a) instanceof Array<Any>
+        let t = pass(a) instanceof Array
     - expr: |-
         let a: Array<Any> = []
-        let t = pass(a) instanceof Array<Any>
+        let t = pass(a) instanceof Array
     - expr: |-
         let a: Array<String> = ["String"]
-        let t = pass(a) instanceof Array<Any>
+        let t = pass(a) instanceof Array
 
     # G2 Array<Any> | undefined preserved in instanceof
     - expr: |-
         let a: Array<Any> | undefined = [1]
-        let t = pass(a) instanceof Array<Any> | undefined
+        let t = pass(a) instanceof Array | undefined
     - expr: |-
         let a: Array<Any> | undefined = undefined
-        let t = pass(a) instanceof Array<Any> | undefined
-
-    # G6 Fixed Array with nested non-preserved type
-    - expr: |-
-          let a: FixedArray<Array<Int>> = [[1]]
-          let t = pass(a) instanceof FixedArray<Array<Any>>
+        let t = pass(a) instanceof Array | undefined
 
     # G7 Fixed Array with union type
     - expr: |-

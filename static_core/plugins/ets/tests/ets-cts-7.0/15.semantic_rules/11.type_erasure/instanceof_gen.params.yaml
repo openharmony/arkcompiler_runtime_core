@@ -98,21 +98,6 @@ cases:
               }
           }
 
-    # generic tuple
-    - decl: |-
-          class A<T, U> {
-              test(p: Object) {
-                  p instanceof [T, U]
-              }
-          }
-
-    - decl: |-
-          class A<T> {
-              test(p: Object) {
-                  p instanceof [T, string]
-              }
-          }
-
     - decl: |-
           class A<out T> {
               test(p: Object) {

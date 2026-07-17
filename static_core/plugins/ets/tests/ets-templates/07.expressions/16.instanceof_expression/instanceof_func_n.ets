@@ -15,14 +15,14 @@
 
 {% for c in cases %}
 {% for t in c['rhs_types'] %}
-{% set rt = c.func_type %}
+{% set rt = t.type %}
 {% set
-response = "Syntax error ESY18871: Type parameter is erased from type '" ~ rt ~ "' when used in instanceof expression."
+response = "Semantic error ESE38251: Type '" ~ rt ~ "' cannot be used on the right hand side of an 'instanceof' expression" if t.response == null else t.response
 %}
 
 /*---
 desc: >-
-    Check instanceof behaviour for function types with type erasure (15.12).
+    Check instanceof behavior for function types with type erasure (15.12).
     Parameter types are erased to Any, return type to never.
     Signature structure (mandatory/optional/rest pattern) allows subtype to
     have less or equal number of required parameters and less or equal number of

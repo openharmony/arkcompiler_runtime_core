@@ -22,7 +22,7 @@ cases:
       use: >-
           ((): Object => x)() instanceof [int, string]
       expected_out: |-
-            Type parameter is erased
+            Semantic error ESE38251: Type '[int, string]' cannot be used on the right hand side of an 'instanceof' expression
 
     # [number]: single element without undefined → CTE
     - decl: |-
@@ -30,4 +30,4 @@ cases:
       use: >-
           ((): Object => x)() instanceof [number]
       expected_out: |-
-            Type parameter is erased
+            Semantic error ESE38251: Type '[number]' cannot be used on the right hand side of an 'instanceof' expression

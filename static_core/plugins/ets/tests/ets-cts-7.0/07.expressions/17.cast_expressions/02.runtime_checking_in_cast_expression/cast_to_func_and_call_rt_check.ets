@@ -48,12 +48,10 @@ function check_bigint_as_type_B(a: TypeB) {
 function check_func(v: Any, v_type: ValueType, v_check_func: CheckValueFunc): void {
   if (v_type == ValueType.A) {
     arktest.assertTrue(v instanceof TypeA);
-    arktest.assertTrue(v_check_func instanceof CheckValueFuncTypeA);
     (v_check_func as CheckValueFuncTypeA)(v as TypeA);
   }
   else if (v_type == ValueType.B) {
     arktest.assertTrue(v instanceof TypeB);
-    arktest.assertTrue(v_check_func instanceof CheckValueFuncTypeB);
     (v_check_func as CheckValueFuncTypeB)(v as TypeB);
   }
 }

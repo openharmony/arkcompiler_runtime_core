@@ -62,11 +62,15 @@ function get_field(a: Base): {{c.check_type}} {
 function main(): void {
   let a: A = new A()
   let b: Base = new Base()
+{%- if c.check_type != "Any" and c.check_type != "FT" %}
   arktest.assertTrue(a.field instanceof {{c.check_type}})
+{%- endif %}
   arktest.assertEQ(a.field, {{c.override_value}})
   arktest.assertEQ(a.get_field(), {{c.override_value}})
   arktest.assertEQ(get_field(a), {{c.override_value}})
+{%- if c.check_type != "Any" and c.check_type != "FT" %}
   arktest.assertTrue(b.field instanceof {{c.check_type}})
+{%- endif %}
   arktest.assertEQ(b.field, {{c.base_value}})
   arktest.assertEQ(b.get_field(), {{c.base_value}})
   arktest.assertEQ(get_field(b), {{c.base_value}})

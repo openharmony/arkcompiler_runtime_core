@@ -25,5 +25,3 @@ cases:
   # other non-nullable types
   - { type: "Cls", init_t: "new Cls", init_f: "new Cls", always_true: "true" }
   - { type: "array_example", init_t: "[0, 0]", init_f: "[0, 0]", always_true: "true" }
-  - { type: "func_example", init_t: "foo", init_f: "foo", always_true: "true" }
-  - { type: "tuple_example", init_t: "[false, 0]", init_f: "[false, 0]", always_true: "true" }

@@ -20,7 +20,6 @@
 #
 # Implementation bug: IsTypeRetainedAfterErasure in arithmetic.cpp returns
 # true for function types when params/return are not type parameters.
-# NOTE #30480 acknowledges "many checks are missing".
 
 ---
 cases:
@@ -31,7 +30,7 @@ cases:
       use: >-
           ((): Object => f)() instanceof (() => int)
       expected_out: |-
-            Type parameter is erased
+            Semantic error ESE38251: Type '(()=> int)' cannot be used on the right hand side of an 'instanceof' expression
 
     # Function type () => void: EffectiveType = () => never != () => void
     - decl: |-
@@ -40,16 +39,7 @@ cases:
       use: >-
           ((): Object => f)() instanceof (() => void)
       expected_out: |-
-            Type parameter is erased
-
-    # Function type with concrete params: (int) => string
-    # EffectiveType = (Any) => never != (int) => string
-    - decl: |-
-          function foo(x: int): string { return "s" }
-      use: >-
-          ((): Object => foo)() instanceof ((p: Any) => never)
-      expected_out: |-
-            Type parameter is erased
+            Semantic error ESE38251: Type '(()=> void)' cannot be used on the right hand side of an 'instanceof' expression
 
     # Union containing function type: not preserved since function is not preserved
     - decl: |-
@@ -57,4 +47,4 @@ cases:
       use: >-
           x instanceof (() => void) | Object
       expected_out: |-
-            Type parameter is erased
+            Semantic error ESE38251: Type '((()=> void) | Object)' cannot be used on the right hand side of an 'instanceof' expression

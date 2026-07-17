@@ -384,9 +384,9 @@ export final class Console {
         if (vals.length == 0) {
             return
         }
-        
+
         let shouldAssert = vals[0] instanceof boolean && vals[0] == true
-        
+
         if (!shouldAssert) {
             if (vals.length == 1) {
                 vals[0] = "Assertion failed"
@@ -1185,64 +1185,64 @@ class DataFrame {
     }
 
     private static addArrayInfoToTableMapping(arrObj: object, mapping: Map<string, string>): void {
-        if (arrObj instanceof FixedArray<boolean>) {
-            forEach(arrObj, (v: boolean, i: int) => {
+        if (arrObj instanceof FixedArray<boolean | undefined>) {
+            forEach(arrObj as FixedArray<boolean>, (v: boolean, i: int) => {
                 mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
             })
         } else if (arrObj instanceof ValueArray<boolean>) {
             for (let i = 0; i < arrObj.length; i++) {
                 mapping.set(`${i}`, DataFrame.toPrint(arrObj[i], MAX_CONSOLE_PRINT_DEPTH));
             }
-        } else         if (arrObj instanceof FixedArray<byte>) {
-            forEach(arrObj, (v: byte, i: int) => {
+        } else         if (arrObj instanceof FixedArray<byte | undefined>) {
+            forEach(arrObj as FixedArray<byte>, (v: byte, i: int) => {
                 mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
             })
         } else if (arrObj instanceof ValueArray<byte>) {
             for (let i = 0; i < arrObj.length; i++) {
                 mapping.set(`${i}`, DataFrame.toPrint(arrObj[i], MAX_CONSOLE_PRINT_DEPTH));
             }
-        } else         if (arrObj instanceof FixedArray<char>) {
-            forEach(arrObj, (v: char, i: int) => {
+        } else         if (arrObj instanceof FixedArray<char | undefined>) {
+            forEach(arrObj as FixedArray<char>, (v: char, i: int) => {
                 mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
             })
         } else if (arrObj instanceof ValueArray<char>) {
             for (let i = 0; i < arrObj.length; i++) {
                 mapping.set(`${i}`, DataFrame.toPrint(arrObj[i], MAX_CONSOLE_PRINT_DEPTH));
             }
-        } else         if (arrObj instanceof FixedArray<short>) {
-            forEach(arrObj, (v: short, i: int) => {
+        } else         if (arrObj instanceof FixedArray<short | undefined>) {
+            forEach(arrObj as FixedArray<short>, (v: short, i: int) => {
                 mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
             })
         } else if (arrObj instanceof ValueArray<short>) {
             for (let i = 0; i < arrObj.length; i++) {
                 mapping.set(`${i}`, DataFrame.toPrint(arrObj[i], MAX_CONSOLE_PRINT_DEPTH));
             }
-        } else         if (arrObj instanceof FixedArray<int>) {
-            forEach(arrObj, (v: int, i: int) => {
+        } else         if (arrObj instanceof FixedArray<int | undefined>) {
+            forEach(arrObj as FixedArray<int>, (v: int, i: int) => {
                 mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
             })
         } else if (arrObj instanceof ValueArray<int>) {
             for (let i = 0; i < arrObj.length; i++) {
                 mapping.set(`${i}`, DataFrame.toPrint(arrObj[i], MAX_CONSOLE_PRINT_DEPTH));
             }
-        } else         if (arrObj instanceof FixedArray<long>) {
-            forEach(arrObj, (v: long, i: int) => {
+        } else         if (arrObj instanceof FixedArray<long | undefined>) {
+            forEach(arrObj as FixedArray<long>, (v: long, i: int) => {
                 mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
             })
         } else if (arrObj instanceof ValueArray<long>) {
             for (let i = 0; i < arrObj.length; i++) {
                 mapping.set(`${i}`, DataFrame.toPrint(arrObj[i], MAX_CONSOLE_PRINT_DEPTH));
             }
-        } else         if (arrObj instanceof FixedArray<float>) {
-            forEach(arrObj, (v: float, i: int) => {
+        } else         if (arrObj instanceof FixedArray<float | undefined>) {
+            forEach(arrObj as FixedArray<float>, (v: float, i: int) => {
                 mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
             })
         } else if (arrObj instanceof ValueArray<float>) {
             for (let i = 0; i < arrObj.length; i++) {
                 mapping.set(`${i}`, DataFrame.toPrint(arrObj[i], MAX_CONSOLE_PRINT_DEPTH));
             }
-        } else         if (arrObj instanceof FixedArray<double>) {
-            forEach(arrObj, (v: double, i: int) => {
+        } else         if (arrObj instanceof FixedArray<double | undefined>) {
+            forEach(arrObj as FixedArray<double>, (v: double, i: int) => {
                 mapping.set(`${i}`, DataFrame.toPrint(v, MAX_CONSOLE_PRINT_DEPTH));
             })
         } else if (arrObj instanceof ValueArray<double>) {
@@ -1363,7 +1363,7 @@ class DataFrame {
             return "[...]"
         }
 
-        if (arrObj instanceof FixedArray<Any>) {
+        if (arrObj instanceof FixedArray<Any | undefined>) {
             const arrLen = arrObj.length
             if (arrLen == 0) {
                 return "[]"
@@ -1379,36 +1379,36 @@ class DataFrame {
         }
 
         const res = new StringBuilder("[")
-        if (arrObj instanceof FixedArray<boolean>) {
-            res.append(join(arrObj, ", "))
+        if (arrObj instanceof FixedArray<boolean | undefined>) {
+            res.append(join(arrObj as FixedArray<boolean>, ", "))
         } else if (arrObj instanceof ValueArray<boolean>) {
             res.append(join(arrObj, ", "))
-        } else         if (arrObj instanceof FixedArray<byte>) {
-            res.append(join(arrObj, ", "))
+        } else         if (arrObj instanceof FixedArray<byte | undefined>) {
+            res.append(join(arrObj as FixedArray<byte>, ", "))
         } else if (arrObj instanceof ValueArray<byte>) {
             res.append(join(arrObj, ", "))
-        } else         if (arrObj instanceof FixedArray<char>) {
-            res.append(join(arrObj, ", "))
+        } else         if (arrObj instanceof FixedArray<char | undefined>) {
+            res.append(join(arrObj as FixedArray<char>, ", "))
         } else if (arrObj instanceof ValueArray<char>) {
             res.append(join(arrObj, ", "))
-        } else         if (arrObj instanceof FixedArray<short>) {
-            res.append(join(arrObj, ", "))
+        } else         if (arrObj instanceof FixedArray<short | undefined>) {
+            res.append(join(arrObj as FixedArray<short>, ", "))
         } else if (arrObj instanceof ValueArray<short>) {
             res.append(join(arrObj, ", "))
-        } else         if (arrObj instanceof FixedArray<int>) {
-            res.append(join(arrObj, ", "))
+        } else         if (arrObj instanceof FixedArray<int | undefined>) {
+            res.append(join(arrObj as FixedArray<int>, ", "))
         } else if (arrObj instanceof ValueArray<int>) {
             res.append(join(arrObj, ", "))
-        } else         if (arrObj instanceof FixedArray<long>) {
-            res.append(join(arrObj, ", "))
+        } else         if (arrObj instanceof FixedArray<long | undefined>) {
+            res.append(join(arrObj as FixedArray<long>, ", "))
         } else if (arrObj instanceof ValueArray<long>) {
             res.append(join(arrObj, ", "))
-        } else         if (arrObj instanceof FixedArray<float>) {
-            res.append(join(arrObj, ", "))
+        } else         if (arrObj instanceof FixedArray<float | undefined>) {
+            res.append(join(arrObj as FixedArray<float>, ", "))
         } else if (arrObj instanceof ValueArray<float>) {
             res.append(join(arrObj, ", "))
-        } else         if (arrObj instanceof FixedArray<double>) {
-            res.append(join(arrObj, ", "))
+        } else         if (arrObj instanceof FixedArray<double | undefined>) {
+            res.append(join(arrObj as FixedArray<double>, ", "))
         } else if (arrObj instanceof ValueArray<double>) {
             res.append(join(arrObj, ", "))
         }

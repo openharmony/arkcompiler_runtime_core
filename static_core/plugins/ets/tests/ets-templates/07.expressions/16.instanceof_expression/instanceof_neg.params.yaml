@@ -119,7 +119,6 @@ cases:
             type: Array<int>
 
           - expected_out: |-
-                Warning W1001506: the value of the instanceof expression is known at compile-time as true
                 Semantic error ESE0277: FixedArray<T> must have only one type parameter.
                 Semantic error ESE0127: No matching call signature for (Boolean)
             type: FixedArray

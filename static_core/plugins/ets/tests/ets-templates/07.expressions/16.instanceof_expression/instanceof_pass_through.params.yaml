@@ -55,16 +55,7 @@ cases:
   - type: string | IName
     init: "{name: 'Bob'}"
 
-  - type: '[string, number]'
-    init: "['Hello', 42]"
-
-  - type: 'readonly [string, number]'
-    init: "['Hello', 42]"
-
-  - type: '() => [string, number]'
-    init: "() => ['Hello', 42]"
-
-  - type: FixedArray<string>
+  - type: FixedArray<string | undefined>
     init: '["a", "b", "c"]'
 
   - type: Readonly<IName>

@@ -58,7 +58,7 @@ function test_param() {
 
 function test_return() {
     let foo_res = foo1_caller()
-    arktest.assertTrue(foo_res instanceof FixedArray<{{t.type}}>,
+    arktest.assertTrue(foo_res instanceof FixedArray<{{t.type}} | undefined>,
       "expect instanceof FixedArray<{{t.type}}>")
     arktest.assertEQ(foo_res.length, 1)
     arktest.assertTrue(foo_res[0] instanceof {{t.type}}, "expect instanceof {{t.type}}")
@@ -67,7 +67,7 @@ function test_return() {
 
 function test_return_from_function_with_rest_parameter() {
     let foo_res = foo2_caller()
-    arktest.assertTrue(foo_res instanceof FixedArray<{{t.type}}>,
+    arktest.assertTrue(foo_res instanceof FixedArray<{{t.type}} | undefined>,
       "expect instanceof FixedArray<{{t.type}}>")
     arktest.assertEQ(foo_res.length, 1)
     arktest.assertTrue(foo_res[0] instanceof {{t.type}}, "expect instanceof {{t.type}}")

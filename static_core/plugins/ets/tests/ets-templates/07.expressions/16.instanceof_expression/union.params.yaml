@@ -146,20 +146,3 @@ cases:
       enum Color { Red, Green, Blue }
     init1: 'elem1'
     init2: 'Color.Red'
-
-  - type: 'Color|foo_type'
-    effective_type: 'Color|foo_type'
-    decl: |-
-      type foo_type = (a: string) => string
-      let elem: foo_type = (a: string) => a
-      enum Color { Red, Green, Blue }
-    init1: 'elem'
-    init2: 'Color.Red'
-
-  - type: 'foo_type|int'
-    effective_type: 'foo_type|int'
-    decl: |-
-      type foo_type = (a: string) => string
-      let elem: foo_type = (a: string) => a
-    init1: 'elem'
-    init2: '1'

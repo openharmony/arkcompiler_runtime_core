@@ -110,7 +110,7 @@ cases:
     asserts: |
       arktest.assertTrue(dst instanceof boolean)
       arktest.assertEQ(dst, false)
-#9
+#17
   - defs: |-
       class A {}
       class B extends A {}
@@ -121,7 +121,7 @@ cases:
     error: {runtime: "Unhandled exception: std.core.ClassCastError"}
     asserts: |
       arktest.assertTrue(dst instanceof C)
-#10
+#18
   - defs: |-
       interface I {}
       interface J extends I {}
@@ -134,7 +134,7 @@ cases:
     error: {runtime: "Unhandled exception: std.core.ClassCastError"}
     asserts: |
       arktest.assertTrue(dst instanceof C)
-#11
+#19
   - defs: |-
       class A {}
       class B {}
@@ -144,19 +144,7 @@ cases:
     error: {runtime: "Unhandled exception: std.core.ClassCastError"}
     asserts: |
       arktest.assertTrue(dst[0] instanceof A)
-#12
-  - defs: |-
-      type func = (a: int, b: int) => Int;
-      function foo(a: int, b: int): Int {
-        return new Int(a + b);
-      }
-    stype: Int
-    sval: foo(1, 2)
-    dtype: as func
-    error: {runtime: "Unhandled exception: std.core.ClassCastError"}
-    asserts: |
-      arktest.assertTrue(dst instanceof func)
-#13
+#20
   - defs: |-
       type func = (a: int, b: int) => int;
     tags: compile-only
@@ -164,7 +152,7 @@ cases:
     sval: '(a: int, b: int): int => { return a + b; }'
     dtype2: .toInt()
     expected: "Semantic error ESE0087: Property 'toInt' does not exist on type 'Function'"
-#14
+#21
   - defs: |-
       class A {}
     tags: compile-only
@@ -172,7 +160,7 @@ cases:
     sval: new A()
     dtype2: .toDouble()
     expected: "Semantic error ESE0087: Property 'toDouble' does not exist on type 'A'"
-#15
+#22
   - defs: |-
       interface I {}
       class A implements I {}
@@ -183,7 +171,7 @@ cases:
     error: {runtime: "Unhandled exception: std.core.ClassCastError"}
     asserts: |
       arktest.assertTrue(dst instanceof B)
-#16
+#23
   - defs: |-
       class A {}
     stype: Object
@@ -192,7 +180,7 @@ cases:
     error: {runtime: "Unhandled exception: std.core.ClassCastError"}
     asserts: |
       arktest.assertTrue(dst[0] instanceof A)
-#17
+#24
   - defs: |-
       type func = (a: int, b: int) => Int;
       function foo(a: int, b: int): Int {

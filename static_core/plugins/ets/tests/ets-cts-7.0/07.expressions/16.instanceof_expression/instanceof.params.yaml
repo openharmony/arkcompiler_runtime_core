@@ -65,7 +65,6 @@ cases:
       - { type: 'null', res: 0 }
       - { type: 'undefined', res: 0 }
       - { type: 'Object', res: 1 }
-      - { type: 'FF', res: 1 }
       - { type: 'string', res: 0 }
       - { type: 'never', res: 0 }
 
@@ -254,7 +253,6 @@ cases:
       - { type: 'int', res: 0 }
       - { type: 'Array', res: 0 }
       - { type: 'Tuple2', res: 1 }
-      - { type: 'TT', res: 1 }
 
   - decl: |-
       class A<T> {}

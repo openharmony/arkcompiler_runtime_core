@@ -244,4 +244,3 @@ cases:
       let p: RecPromise = new Promise<RecPromise>((resolve: (value: RecPromise) => void) => { resolve(arr) })
       arktest.assertTrue(p instanceof Promise)
       arktest.assertTrue(arr instanceof Array)
-

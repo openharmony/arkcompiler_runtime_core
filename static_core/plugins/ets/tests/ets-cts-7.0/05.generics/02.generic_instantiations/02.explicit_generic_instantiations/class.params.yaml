@@ -182,7 +182,7 @@ cases:
         }
       use: |-
         let cls = new Cls<Any>(null)
-        arktest.assertTrue(cls.a instanceof Any)
+        arktest.assertTrue(cls.a instanceof null)
     - decl: |-
         class Cls<T> {
             a: T

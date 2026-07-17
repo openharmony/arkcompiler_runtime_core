@@ -17,60 +17,6 @@
 07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_7.ets
 07.expressions/06.object_literal/02.object_literal_of_interface_type/generic_method_in_interface_8.ets
 
-#33798: Proper CTE for type-erased instanceof
-07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_0.ets
-07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_1.ets
-07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_2.ets
-07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_3.ets
-07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_4.ets
-07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_5.ets
-07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_6.ets
-07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_7.ets
-07.expressions/16.instanceof_expression/tuple_explicit_implicit_n_8.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_0.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_1.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_2.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_3.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_4.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_5.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_6.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_7.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_8.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_9.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_10.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_11.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_12.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_13.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_14.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_15.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_16.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_17.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_18.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_19.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_20.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_21.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_22.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_23.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_24.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_25.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_26.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_27.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_28.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_29.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_30.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_31.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_32.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_33.ets
-07.expressions/16.instanceof_expression/instanceof_func_n_34.ets
-07.expressions/16.instanceof_expression/array_type_preserve_0.ets
-07.expressions/16.instanceof_expression/array_type_preserve_1.ets
-07.expressions/16.instanceof_expression/array_type_preserve_2.ets
-07.expressions/16.instanceof_expression/array_type_preserve_3.ets
-07.expressions/16.instanceof_expression/array_type_preserve_4.ets
-07.expressions/16.instanceof_expression/array_type_preserve_5.ets
-07.expressions/16.instanceof_expression/array_type_preserve_n_2.ets
-07.expressions/16.instanceof_expression/array_type_preserve_n_3.ets
-
 #34392 CTE on implicit char to string conversion
 07.expressions/34.string_interpolation_expressions/char_interpolation.ets
 
@@ -133,19 +79,6 @@
 15.semantic_rules/09.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_5.ets
 
 15.semantic_rules/10.overload_resolution/03.overload_set_for_interface_methods/combination_overloaded_methods_negative_1.ets
-
-#34495 Incorrect behavior of instanceof with type erasure
-15.semantic_rules/11.type_erasure/instanceof_func_not_preserved_0.ets
-15.semantic_rules/11.type_erasure/instanceof_func_not_preserved_1.ets
-15.semantic_rules/11.type_erasure/instanceof_func_not_preserved_2.ets
-15.semantic_rules/11.type_erasure/instanceof_func_not_preserved_3.ets
-15.semantic_rules/11.type_erasure/instanceof_fixedarray_not_preserved_0.ets
-15.semantic_rules/11.type_erasure/instanceof_fixedarray_not_preserved_1.ets
-15.semantic_rules/11.type_erasure/instanceof_fixedarray_not_preserved_2.ets
-15.semantic_rules/11.type_erasure/instanceof_fixedarray_not_preserved_3.ets
-15.semantic_rules/11.type_erasure/instanceof_fixedarray_not_preserved_4.ets
-15.semantic_rules/11.type_erasure/instanceof_tuple_not_preserved_0.ets
-15.semantic_rules/11.type_erasure/instanceof_tuple_not_preserved_1.ets
 
 #34907 No warning message on type unsafe casting
 15.semantic_rules/11.type_erasure/cast_erasure_warning_w_2.ets

@@ -23,9 +23,6 @@ test_suffix: "{{case1.type}}"
 // type aliases for test suffix support
 type union_example = boolean|string
 type array_example = int[]
-type func_example = () => void
-function foo() {}
-type tuple_example = [boolean, int]
 
 let alwaysFalse1: boolean = false
 let alwaysTrue1: boolean = false
