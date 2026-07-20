@@ -444,6 +444,30 @@ TEST(linkertests, StripUnusedKeepsLiveBytecodePatchRanges)
     EXPECT_EQ(patcher.GetBytecodePatchRangeCount(), 1U);
 }
 
+TEST(linkertests, FinalizeForWriteDeduplicatesCodeItems)
+{
+    ark::static_linker::Context context(DefaultConfig());
+    auto &container = context.GetContainer();
+    auto *klass = container.GetOrCreateClassItem("FinalizeForWrite");
+    auto *voidType = container.GetOrCreatePrimitiveTypeItem(ark::panda_file::Type::TypeId::VOID);
+    auto *proto = container.GetOrCreateProtoItem(voidType, {});
+    auto *first = klass->AddMethod(container.GetOrCreateStringItem("first"), proto, ark::ACC_PUBLIC,
+                                   std::vector<ark::panda_file::MethodParamItem> {});
+    auto *second = klass->AddMethod(container.GetOrCreateStringItem("second"), proto, ark::ACC_PUBLIC,
+                                    std::vector<ark::panda_file::MethodParamItem> {});
+    const std::vector<uint8_t> code {static_cast<uint8_t>(ark::BytecodeInstruction::Opcode::RETURN_VOID)};
+    auto *firstCode = container.CreateItem<ark::panda_file::CodeItem>(0, 0, code);
+    auto *secondCode = container.CreateItem<ark::panda_file::CodeItem>(0, 0, code);
+    first->SetCode(firstCode);
+    second->SetCode(secondCode);
+
+    context.ComputeLayout();
+    context.FinalizeForWrite();
+
+    EXPECT_TRUE(firstCode->NeedsEmit());
+    EXPECT_FALSE(secondCode->NeedsEmit());
+}
+
 std::string JoinLinkErrors(const Result &res)
 {
     std::string errs;

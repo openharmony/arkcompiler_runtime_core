@@ -43,6 +43,47 @@
 
 namespace ark::panda_file::test {
 
+class FailingLargeItem final : public BaseItem {
+public:
+    static constexpr size_t SIZE = 64U * 1024U;
+
+    size_t CalculateSize() const override
+    {
+        return SIZE;
+    }
+
+    bool Write([[maybe_unused]] Writer *writer) override
+    {
+        return false;
+    }
+
+    ItemTypes GetItemType() const override
+    {
+        return ItemTypes::METADATA_ITEM;
+    }
+};
+
+TEST(ItemContainer, OffsetWriterRejectsWritesPastCapacity)
+{
+    constexpr size_t OFFSET_WRITER_START = 16U;
+    std::array<uint8_t, 4> data {};
+    OffsetWriter writer(data.data(), OFFSET_WRITER_START, data.size());
+
+    ASSERT_TRUE(writer.WriteBytes(data.data(), data.size()));
+    EXPECT_FALSE(writer.WriteByte(0));
+    EXPECT_EQ(writer.GetOffset(), OFFSET_WRITER_START + data.size());
+}
+
+TEST(ItemContainer, ParallelItemWriteFailureIsPropagated)
+{
+    ItemContainer container;
+    container.CreateItem<FailingLargeItem>();
+    container.CreateItem<FailingLargeItem>();
+
+    MemoryWriter writer;
+    EXPECT_FALSE(container.Write(&writer));
+}
+
 TEST(ItemContainer, DeduplicationTest)
 {
     ItemContainer container;
