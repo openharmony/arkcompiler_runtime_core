@@ -207,11 +207,11 @@ public:
     // note: it doesn't contain exemptFromRegion
     size_t FromRegionSize() const
     {
-        return fromSpace_.GetFromRegionAllocatedSize();
+        return fromSpace_.GetFromRegionAllocatedSize(false);
     }
     size_t ToSpaceSize() const
     {
-        return toSpace_.GetAllocatedSize();
+        return toSpace_.CountAllocatedBytes();
     }
 
 #ifndef NDEBUG

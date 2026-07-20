@@ -28,7 +28,9 @@ cases:
               compile.verifier: [ "[TID 03a7ac] E/verifier: Cannot link class: Cannot find method '%%get-a ()Lstd/core/String;' in class 'interface_declarations.A'" ],
               runtime.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
               ark-with-jit-repeats.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
-              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
+              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
+              hybrid-es2panda-verifier.verifier: [ "[TID 03a7ac] E/verifier: Cannot link class: Cannot find method '%%get-a ()Lstd/core/String;' in class 'interface_declarations.A'" ],
+              hybrid-ark.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
           }
 
 
@@ -51,7 +53,9 @@ cases:
               compile.verifier: [ "[TID 042920] E/verifier: Cannot link class: Cannot find method '%%get-c ()[Lstd/core/String;' in class 'interface_declarations.B'" ],
               runtime.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
               ark-with-jit-repeats.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
-              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
+              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
+              hybrid-es2panda-verifier.verifier: [ "[TID 042920] E/verifier: Cannot link class: Cannot find method '%%get-c ()[Lstd/core/String;' in class 'interface_declarations.B'" ],
+              hybrid-ark.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
           }
 
 
@@ -71,7 +75,9 @@ cases:
               compile.verifier: [ "[TID 04292b] E/verifier: Cannot link class: Cannot find method 'foo (DLstd/core/String;Lstd/core/Array;)Lstd/core/String;' in class 'interface_declarations.C'" ],
               runtime.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
               ark-with-jit-repeats.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
-              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
+              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
+              hybrid-es2panda-verifier.verifier: [ "[TID 04292b] E/verifier: Cannot link class: Cannot find method 'foo (DLstd/core/String;Lstd/core/Array;)Lstd/core/String;' in class 'interface_declarations.C'" ],
+              hybrid-ark.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
           }
 
 
@@ -92,7 +98,9 @@ cases:
               compile.verifier: [ "E/verifier: Cannot link class: Cannot find method '%%get-b ()Lstd/core/Object;' in class 'interface_declarations.D'" ],
               runtime.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
               ark-with-jit-repeats.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
-              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
+              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
+              hybrid-es2panda-verifier.verifier: [ "E/verifier: Cannot link class: Cannot find method '%%get-b ()Lstd/core/Object;' in class 'interface_declarations.D'" ],
+              hybrid-ark.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
           }
 
 
@@ -112,7 +120,9 @@ cases:
               compile.verifier: [ "E/verifier: Cannot link class: Cannot find method 'foo (Lstd/core/Object;Lstd/core/Object;)Lstd/core/Object;' in class 'interface_declarations.E'" ],
               runtime.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
               ark-with-jit-repeats.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
-              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
+              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
+              hybrid-es2panda-verifier.verifier: [ "E/verifier: Cannot link class: Cannot find method 'foo (Lstd/core/Object;Lstd/core/Object;)Lstd/core/Object;' in class 'interface_declarations.E'" ],
+              hybrid-ark.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
           }
 
 
@@ -131,7 +141,9 @@ cases:
               compile.verifier: [ "[TID 042926] E/verifier: Cannot link class: Cannot find method '%%get-f ()Lstd/core/String;' in class 'interface_declarations.F'" ],
               runtime.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
               ark-with-jit-repeats.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
-              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
+              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
+              hybrid-es2panda-verifier.verifier: [ "[TID 042926] E/verifier: Cannot link class: Cannot find method '%%get-f ()Lstd/core/String;' in class 'interface_declarations.F'" ],
+              hybrid-ark.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
           }
 
 
@@ -154,7 +166,9 @@ cases:
               compile.verifier: [ "[TID 042924] E/verifier: Cannot link class: Cannot find method '%%get-a ()I' in class 'interface_declarations.K'" ],
               runtime.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
               ark-with-jit-repeats.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
-              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
+              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
+              hybrid-es2panda-verifier.verifier: [ "[TID 042924] E/verifier: Cannot link class: Cannot find method '%%get-a ()I' in class 'interface_declarations.K'" ],
+              hybrid-ark.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
           }
 
 
@@ -170,5 +184,7 @@ cases:
               compile.verifier: [ "[TID 042915] E/verifier: Cannot link class: Cannot find method 'foo (D)Lstd/core/String;' in class 'interface_declarations.J'" ],
               runtime.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
               ark-with-jit-repeats.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
-              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
+              ark-after-aot.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ],
+              hybrid-es2panda-verifier.verifier: [ "[TID 042915] E/verifier: Cannot link class: Cannot find method 'foo (D)Lstd/core/String;' in class 'interface_declarations.J'" ],
+              hybrid-ark.ark: [ "Unhandled exception: std.core.LinkerVerificationError" ]
           }
