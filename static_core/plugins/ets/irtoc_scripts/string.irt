@@ -40,6 +40,7 @@ module Constants
   STRING_KMP_MIN_SUBJECT_LEN = "128"
   STRING_MAX_SUBJECT_LEN_BETWEEN_SAFEPOINTS = "40000"
   CHAR_FLIP_CASE_BIT = "1 << 5"
+  ASCII_LOWER_2BYTE_MASK = "0x2020"
 end
 
 # It is assumed that _begin_index is safe and does not check/normalize them.
@@ -3530,9 +3531,12 @@ end  # locale_disallows_fast_case
 #
 # The list of the disallowed locales must be in align with the 'ark::ets::intrinsics::LocaleAllowsFastLatinConversion'
 # method from the 'plugins/ets/runtime/intrinsics/helpers/ets_string_case_conversion.cpp' file.
+# The fast-path guard is a conservative approximation of C++/ICU locale parsing. If the guard cannot prove that fast
+# latin conversion is safe, it must jump to the slow path.
 #
 scoped_macro(:check_locale_supports_fast_latin_conversion) do |locale, slowpath|
-  code := LoadI(locale).Imm(Constants::STRING_DATA_OFFSET).u16
+  # Fold the two-byte ASCII language subtag to lower case before matching, e.g., "TR" -> "tr".
+  code := OrI(LoadI(locale).Imm(Constants::STRING_DATA_OFFSET).u16).Imm(Constants::ASCII_LOWER_2BYTE_MASK).u16
   ['az', 'tr'].each do |lang|
     locale_disallows_fast_case(code, lang, slowpath)
   end

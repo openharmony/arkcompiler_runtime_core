@@ -39,8 +39,7 @@ def GenerateTypedArrayFillInternal(name, prefix, type, outType, scale, cgmode)
           Goto(:SlowPathEntrypoint)
         }
         if signed
-          byteOffsetF64 := LoadI(arr).Imm(EtsConstants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).f64
-          byteOffset := Cast(byteOffsetF64).i32
+          byteOffset := LoadI(arr).Imm(EtsConstants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).i32
         else
           byteOffset := LoadI(arr).Imm(EtsConstants::TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET).i32
         end
@@ -333,8 +332,7 @@ def GenerateArrayCopyWithin(name, uname, type, scale)
         }
 
         if signed
-          byteOffsetF64 := LoadI(arr).Imm(EtsConstants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).f64
-          byteOffset := Cast(byteOffsetF64).u32
+          byteOffset := LoadI(arr).Imm(EtsConstants::TYPED_ARRAY_BYTE_OFFSET_OFFSET).u32
         else
           byteOffset := LoadI(arr).Imm(EtsConstants::TYPED_UNSIGNED_ARRAY_BYTE_OFFSET_OFFSET).u32
         end

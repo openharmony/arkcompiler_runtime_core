@@ -54,25 +54,42 @@
 
 //! CHECKER       AOT: copyWithin()
 //! SKIP_IF       @architecture == "arm32"
-//! RUN_PAOC      options: "--compiler-regex=.*::test.*array.*",
-//!               entry: "ets_escompat_typed_arrays_copy_within.ETSGLOBAL::main"
+//! RUN_PAOC      options: "--compiler-regex=.*::test.*array.*"
 //! METHOD        "testInt8arrayCopyWithin"
+//! PASS_AFTER    "IrBuilder"
+//! INST          /Call.* escompat.Int8Array::copyWithin/
+//! METHOD        "testInt8arrayCopyWithinWithByteOffset"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Int8Array::copyWithin/
 //! METHOD        "testInt16arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Int16Array::copyWithin/
+//! METHOD        "testInt16arrayCopyWithinWithByteOffset"
+//! PASS_AFTER    "IrBuilder"
+//! INST          /Call.* escompat.Int16Array::copyWithin/
 //! METHOD        "testInt32arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Int32Array::copyWithin/
+//! METHOD        "testInt32arrayCopyWithinWithByteOffset"
+//! PASS_AFTER    "IrBuilder"
+//! INST          /Call.* escompat.Int32Array::copyWithin/
 //! METHOD        "testBigint64arrayCopyWithin"
+//! PASS_AFTER    "IrBuilder"
+//! INST          /Call.* escompat.BigInt64Array::copyWithin/
+//! METHOD        "testBigint64arrayCopyWithinWithByteOffset"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.BigInt64Array::copyWithin/
 //!
 //! METHOD        "testFloat32arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Float32Array::copyWithin/
+//! METHOD        "testFloat32arrayCopyWithinWithByteOffset"
+//! PASS_AFTER    "IrBuilder"
+//! INST          /Call.* escompat.Float32Array::copyWithin/
 //! METHOD        "testFloat64arrayCopyWithin"
+//! PASS_AFTER    "IrBuilder"
+//! INST          /Call.* escompat.Float64Array::copyWithin/
+//! METHOD        "testFloat64arrayCopyWithinWithByteOffset"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.Float64Array::copyWithin/
 //!
@@ -91,6 +108,7 @@
 //! METHOD        "testBiguint64arrayCopyWithin"
 //! PASS_AFTER    "IrBuilder"
 //! INST          /Call.* escompat.BigUint64Array::copyWithin/
+//! RUN           entry: "ets_escompat_typed_arrays_copy_within.ETSGLOBAL::main"
 
 
 function checkArray(arr: ArrayLike<number>, expected: ArrayLike<number>) {
@@ -143,6 +161,15 @@ function testInt8arrayCopyWithin() {
     checkArray(new Int8Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Int8Array.of(1, 1, 2, 3, 4))
 }
 
+function testInt8arrayCopyWithinWithByteOffset() {
+    let buffer = new ArrayBuffer(6)
+    let whole = new Int8Array(buffer)
+    whole.set(Int8Array.of(10, 20, 1, 2, 3, 4))
+    let view = new Int8Array(buffer, 2, 4)
+    checkArray(view.copyWithin(1, 0, 2), Int8Array.of(1, 1, 2, 4))
+    checkArray(whole, Int8Array.of(10, 20, 1, 1, 2, 4))
+}
+
 function testInt16arrayCopyWithin() {
     checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Int16Array.of(1, 1, 2, 3, 5))
     checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Int16Array.of(1, 2, 3, 4, 5))
@@ -158,6 +185,15 @@ function testInt16arrayCopyWithin() {
     checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Int16Array.of(1, 2, 3, 4, 5))
     checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Int16Array.of(1, 1, 2, 3, 4))
     checkArray(new Int16Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Int16Array.of(1, 1, 2, 3, 4))
+}
+
+function testInt16arrayCopyWithinWithByteOffset() {
+    let buffer = new ArrayBuffer(12)
+    let whole = new Int16Array(buffer)
+    whole.set(Int16Array.of(10, 20, 1, 2, 3, 4))
+    let view = new Int16Array(buffer, 4, 4)
+    checkArray(view.copyWithin(1, 0, 2), Int16Array.of(1, 1, 2, 4))
+    checkArray(whole, Int16Array.of(10, 20, 1, 1, 2, 4))
 }
 
 function testInt32arrayCopyWithin() {
@@ -177,6 +213,15 @@ function testInt32arrayCopyWithin() {
     checkArray(new Int32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Int32Array.of(1, 1, 2, 3, 4))
 }
 
+function testInt32arrayCopyWithinWithByteOffset() {
+    let buffer = new ArrayBuffer(24)
+    let whole = new Int32Array(buffer)
+    whole.set(Int32Array.of(10, 20, 1, 2, 3, 4))
+    let view = new Int32Array(buffer, 8, 4)
+    checkArray(view.copyWithin(1, 0, 2), Int32Array.of(1, 1, 2, 4))
+    checkArray(whole, Int32Array.of(10, 20, 1, 1, 2, 4))
+}
+
 function testBigint64arrayCopyWithin() {
     checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), BigInt64Array.of(1, 1, 2, 3, 5))
     checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), BigInt64Array.of(1, 2, 3, 4, 5))
@@ -192,6 +237,15 @@ function testBigint64arrayCopyWithin() {
     checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), BigInt64Array.of(1, 2, 3, 4, 5))
     checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), BigInt64Array.of(1, 1, 2, 3, 4))
     checkArray(new BigInt64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), BigInt64Array.of(1, 1, 2, 3, 4))
+}
+
+function testBigint64arrayCopyWithinWithByteOffset() {
+    let buffer = new ArrayBuffer(48)
+    let whole = new BigInt64Array(buffer)
+    whole.set(BigInt64Array.of(10, 20, 1, 2, 3, 4))
+    let view = new BigInt64Array(buffer, 16, 4)
+    checkArray(view.copyWithin(1, 0, 2), BigInt64Array.of(1, 1, 2, 4))
+    checkArray(whole, BigInt64Array.of(10, 20, 1, 1, 2, 4))
 }
 
 
@@ -212,6 +266,15 @@ function testFloat32arrayCopyWithin() {
     checkArray(new Float32Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Float32Array.of(1, 1, 2, 3, 4))
 }
 
+function testFloat32arrayCopyWithinWithByteOffset() {
+    let buffer = new ArrayBuffer(24)
+    let whole = new Float32Array(buffer)
+    whole.set(Float32Array.of(10.0, 20.0, 1.0, 2.0, 3.0, 4.0))
+    let view = new Float32Array(buffer, 8, 4)
+    checkArray(view.copyWithin(1, 0, 2), Float32Array.of(1.0, 1.0, 2.0, 4.0))
+    checkArray(whole, Float32Array.of(10.0, 20.0, 1.0, 1.0, 2.0, 4.0))
+}
+
 function testFloat64arrayCopyWithin() {
     checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 3), Float64Array.of(1, 1, 2, 3, 5))
     checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(-5, 0, 3), Float64Array.of(1, 2, 3, 4, 5))
@@ -227,6 +290,15 @@ function testFloat64arrayCopyWithin() {
     checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, -6), Float64Array.of(1, 2, 3, 4, 5))
     checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 5), Float64Array.of(1, 1, 2, 3, 4))
     checkArray(new Float64Array([1, 2, 3, 4, 5]).copyWithin(1, 0, 9), Float64Array.of(1, 1, 2, 3, 4))
+}
+
+function testFloat64arrayCopyWithinWithByteOffset() {
+    let buffer = new ArrayBuffer(48)
+    let whole = new Float64Array(buffer)
+    whole.set(Float64Array.of(10.0, 20.0, 1.0, 2.0, 3.0, 4.0))
+    let view = new Float64Array(buffer, 16, 4)
+    checkArray(view.copyWithin(1, 0, 2), Float64Array.of(1.0, 1.0, 2.0, 4.0))
+    checkArray(whole, Float64Array.of(10.0, 20.0, 1.0, 1.0, 2.0, 4.0))
 }
 
 
@@ -318,12 +390,18 @@ function testBiguint64arrayCopyWithin() {
 
 function main(): void {
     testInt8arrayCopyWithin()
+    testInt8arrayCopyWithinWithByteOffset()
     testInt16arrayCopyWithin()
+    testInt16arrayCopyWithinWithByteOffset()
     testInt32arrayCopyWithin()
+    testInt32arrayCopyWithinWithByteOffset()
     testBigint64arrayCopyWithin()
+    testBigint64arrayCopyWithinWithByteOffset()
 
     testFloat32arrayCopyWithin()
+    testFloat32arrayCopyWithinWithByteOffset()
     testFloat64arrayCopyWithin()
+    testFloat64arrayCopyWithinWithByteOffset()
 
     testUint8arrayCopyWithin()
     testUint8clampedarrayCopyWithin()
