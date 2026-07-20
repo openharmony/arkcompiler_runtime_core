@@ -116,67 +116,67 @@ public:
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, Int8ArrayLayout)
 {
-    auto *klass = GetClass("Lstd/core/Int8Array;");
+    auto *klass = GetClass("Lescompat/Int8Array;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetTypedArrayMembers(), false);
 }
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, Int16ArrayLayout)
 {
-    auto *klass = GetClass("Lstd/core/Int16Array;");
+    auto *klass = GetClass("Lescompat/Int16Array;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetTypedArrayMembers(), false);
 }
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, Int32ArrayLayout)
 {
-    auto *klass = GetClass("Lstd/core/Int32Array;");
+    auto *klass = GetClass("Lescompat/Int32Array;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetTypedArrayMembers(), false);
 }
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, BigInt64ArrayLayout)
 {
-    auto *klass = GetClass("Lstd/core/BigInt64Array;");
+    auto *klass = GetClass("Lescompat/BigInt64Array;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetTypedArrayMembers(), false);
 }
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, Float32ArrayLayout)
 {
-    auto *klass = GetClass("Lstd/core/Float32Array;");
+    auto *klass = GetClass("Lescompat/Float32Array;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetTypedArrayMembers(), false);
 }
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, Float64ArrayLayout)
 {
-    auto *klass = GetClass("Lstd/core/Float64Array;");
+    auto *klass = GetClass("Lescompat/Float64Array;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetTypedArrayMembers(), false);
 }
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, UInt8ClampedArrayLayout)
 {
-    auto *klass = GetClass("Lstd/core/Uint8ClampedArray;");
+    auto *klass = GetClass("Lescompat/Uint8ClampedArray;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetUArrayMembers(), false);
 }
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, UInt8ArrayLayout)
 {
-    auto *klass = GetClass("Lstd/core/Uint8Array;");
+    auto *klass = GetClass("Lescompat/Uint8Array;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetUArrayMembers(), false);
 }
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, UInt16ArrayLayout)
 {
-    auto *klass = GetClass("Lstd/core/Uint16Array;");
+    auto *klass = GetClass("Lescompat/Uint16Array;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetUArrayMembers(), false);
 }
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, UInt32ArrayLayout)
 {
-    auto *klass = GetClass("Lstd/core/Uint32Array;");
+    auto *klass = GetClass("Lescompat/Uint32Array;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetUArrayMembers(), false);
 }
 
 TEST_F(TypedArrayRelatedMemberOffsetTest, UBigUInt64ArrayLayout)
 {
-    auto *klass = GetClass("Lstd/core/BigUint64Array;");
+    auto *klass = GetClass("Lescompat/BigUint64Array;");
     MirrorFieldInfo::CompareMemberOffsets(klass, GetUArrayMembers(), false);
 }
 
@@ -194,16 +194,18 @@ constexpr auto GetContainsNaNFunction();
 template <>
 constexpr auto GetContainsNaNFunction<EtsDouble>()
 {
-    return [](EtsStdCoreTypedArray<EtsDouble> *arr, EtsInt pos) {
-        return intrinsics::EtsStdCoreFloat64ArrayContainsNaN(static_cast<ark::ets::EtsStdCoreFloat64Array *>(arr), pos);
+    return [](EtsEscompatTypedArray<EtsDouble> *arr, EtsInt pos) {
+        auto *typedArray = static_cast<ark::ets::EtsEscompatFloat64Array *>(arr);
+        return intrinsics::EtsEscompatFloat64ArrayContainsNaN(typedArray, pos);
     };
 }
 
 template <>
 constexpr auto GetContainsNaNFunction<EtsFloat>()
 {
-    return [](EtsStdCoreTypedArray<EtsFloat> *arr, EtsInt pos) {
-        return intrinsics::EtsStdCoreFloat32ArrayContainsNaN(static_cast<ark::ets::EtsStdCoreFloat32Array *>(arr), pos);
+    return [](EtsEscompatTypedArray<EtsFloat> *arr, EtsInt pos) {
+        auto *typedArray = static_cast<ark::ets::EtsEscompatFloat32Array *>(arr);
+        return intrinsics::EtsEscompatFloat32ArrayContainsNaN(typedArray, pos);
     };
 }
 
@@ -213,13 +215,13 @@ constexpr const char *GetTypedArrayClassName();
 template <>
 constexpr const char *GetTypedArrayClassName<EtsDouble>()
 {
-    return "Lstd/core/Float64Array;";
+    return "Lescompat/Float64Array;";
 }
 
 template <>
 constexpr const char *GetTypedArrayClassName<EtsFloat>()
 {
-    return "Lstd/core/Float32Array;";
+    return "Lescompat/Float32Array;";
 }
 
 template <typename E>
@@ -261,9 +263,9 @@ protected:
     }
 
     template <typename Elem>
-    [[nodiscard]] EtsStdCoreTypedArray<Elem> *CreateTypedArray(std::initializer_list<Elem> values) const
+    [[nodiscard]] EtsEscompatTypedArray<Elem> *CreateTypedArray(std::initializer_list<Elem> values) const
     {
-        using TypedArray = EtsStdCoreTypedArray<Elem>;
+        using TypedArray = EtsEscompatTypedArray<Elem>;
         auto *arrayKlass = GetClassInManagedCode(GetTypedArrayClassName<Elem>());
         ASSERT(arrayKlass != nullptr);
         auto *array =

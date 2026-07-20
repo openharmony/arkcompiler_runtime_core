@@ -58,5 +58,5 @@ The `copies` Map registers the object immediately after creating the empty shell
 
 ## Code and Tests
 
-- ETS source: `std/core/deepcopy.ets`
+- ETS source: `escompat/deepcopy.ets`
 - Tests: `../tests/ets_func_tests/std/core/DeepCopyTest.ets`, `DeepCopyTest2.ets`

@@ -143,7 +143,7 @@ srcs_runtime = [
   "runtime/intrinsics/std_core_Array.cpp",
   "runtime/intrinsics/std_core_ArrayBuffer.cpp",
   "runtime/intrinsics/std_core_RegExp.cpp",
-  "runtime/intrinsics/std_core_TypedArrays.cpp",
+  "runtime/intrinsics/escompat_TypedArrays.cpp",
   "runtime/intrinsics/std_core_Map.cpp",
   "runtime/intrinsics/std_containers_WeakMap.cpp",
   "runtime/intrinsics/std_core_Set.cpp",

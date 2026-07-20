@@ -489,62 +489,62 @@ public:
         return false;
     }
 
-    virtual bool IsClassStdCoreInt8Array([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassEscompatInt8Array([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
 
-    virtual bool IsClassStdCoreUint8Array([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassEscompatUint8Array([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
 
-    virtual bool IsClassStdCoreUint8ClampedArray([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassEscompatUint8ClampedArray([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
 
-    virtual bool IsClassStdCoreInt16Array([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassEscompatInt16Array([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
 
-    virtual bool IsClassStdCoreUint16Array([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassEscompatUint16Array([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
 
-    virtual bool IsClassStdCoreInt32Array([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassEscompatInt32Array([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
 
-    virtual bool IsClassStdCoreUint32Array([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassEscompatUint32Array([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
 
-    virtual bool IsClassStdCoreFloat32Array([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassEscompatFloat32Array([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
 
-    virtual bool IsClassStdCoreFloat64Array([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassEscompatFloat64Array([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
 
-    virtual bool IsClassStdCoreBigInt64Array([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassEscompatBigInt64Array([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
 
-    virtual bool IsClassStdCoreBigUint64Array([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassEscompatBigUint64Array([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }
 
-    virtual bool IsClassStdCoreTypedArray([[maybe_unused]] ClassPtr klass) const
+    virtual bool IsClassEscompatTypedArray([[maybe_unused]] ClassPtr klass) const
     {
         return false;
     }

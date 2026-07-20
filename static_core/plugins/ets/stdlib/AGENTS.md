@@ -62,7 +62,7 @@ Before making changes, locate the relevant code paths by scenario and read the c
 | Proxy, ReflectProxy, InvocationHandler, dynamic proxy, assembly bridge | `std/core/ReflectProxy.ets` | `docs/knowledge/proxy.md` |
 | Map, Set, Record, hash table, double array, tombstone, resizing | `std/core/Map.ets`, `std/core/Set.ets` | `docs/knowledge/map_set_record.md` |
 | Reflection, Class, Method, Field, Constructor | `std/core/Reflect*.ets` | `docs/knowledge/reflection.md` |
-| Deep copy, DeepCloner, Cloneable, circular references, deep cloning | `std/core/deepcopy.ets` | `docs/knowledge/deepcopy.md` |
+| Deep copy, DeepCloner, Cloneable, circular references, deep cloning | `escompat/deepcopy.ets` | `docs/knowledge/deepcopy.md` |
 | JsonElement, JsonType, jsonx, JSON deserialization, BigIntMode | `std/core/Jsonx.ets`, `std/core/json.ets` | `docs/knowledge/json_element.md` |
 
 ## Project Constraints

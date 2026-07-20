@@ -325,11 +325,11 @@ std::tuple<Inst *, Inst *> InstBuilder::BuildTypedArrayLoadDataAndOffset(const B
 
     // TypedArray helpers
     auto *typedArrayClass = runtime->GetClass(calleeMethod);
-    auto *bufferField = runtime->GetStdCoreTypedArrayBuffer(typedArrayClass);
-    auto *byteOffsetField = UNSIGNED ? runtime->GetStdCoreUnsignedTypedArrayByteOffsetInt(typedArrayClass)
-                                     : runtime->GetStdCoreTypedArrayByteOffset(typedArrayClass);
+    auto *bufferField = runtime->GetEscompatTypedArrayBuffer(typedArrayClass);
+    auto *byteOffsetField = UNSIGNED ? runtime->GetEscompatUnsignedTypedArrayByteOffsetInt(typedArrayClass)
+                                     : runtime->GetEscompatTypedArrayByteOffset(typedArrayClass);
     if (needBoundCheck) {
-        auto *lengthIntField = runtime->GetStdCoreTypedArrayLengthInt(typedArrayClass);
+        auto *lengthIntField = runtime->GetEscompatTypedArrayLengthInt(typedArrayClass);
         auto *loadLengthInst = graph->CreateInstLoadObject(
             DataType::INT32, bcAddr, nullCheck, TypeIdMixin {runtime->GetFieldId(lengthIntField), calleeMethod},
             lengthIntField, runtime->IsFieldVolatile(lengthIntField));

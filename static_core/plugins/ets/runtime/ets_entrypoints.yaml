@@ -1644,7 +1644,7 @@
     - int32_t
 
 - name: Int8ArrayFillInternalUsual
-  entrypoint: EtsStdCoreInt8ArrayFillInternal
+  entrypoint: EtsEscompatInt8ArrayFillInternal
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1666,7 +1666,7 @@
     - int32_t
 
 - name: Int16ArrayFillInternalUsual
-  entrypoint: EtsStdCoreInt16ArrayFillInternal
+  entrypoint: EtsEscompatInt16ArrayFillInternal
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1688,7 +1688,7 @@
     - int32_t
 
 - name: Int32ArrayFillInternalUsual
-  entrypoint: EtsStdCoreInt32ArrayFillInternal
+  entrypoint: EtsEscompatInt32ArrayFillInternal
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1710,7 +1710,7 @@
     - int32_t
 
 - name: BigInt64ArrayFillInternalUsual
-  entrypoint: EtsStdCoreBigInt64ArrayFillInternal
+  entrypoint: EtsEscompatBigInt64ArrayFillInternal
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1732,7 +1732,7 @@
     - int32_t
 
 - name: Float32ArrayFillInternalUsual
-  entrypoint: EtsStdCoreFloat32ArrayFillInternalInt
+  entrypoint: EtsEscompatFloat32ArrayFillInternalInt
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1754,7 +1754,7 @@
     - int32_t
 
 - name: Float64ArrayFillInternalUsual
-  entrypoint: EtsStdCoreFloat64ArrayFillInternalInt
+  entrypoint: EtsEscompatFloat64ArrayFillInternalInt
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1776,7 +1776,7 @@
     - int32_t
 
 - name: UInt8ClampedArrayFillInternalUsual
-  entrypoint: EtsStdCoreUInt8ClampedArrayFillInternal
+  entrypoint: EtsEscompatUInt8ClampedArrayFillInternal
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1798,7 +1798,7 @@
     - int32_t
 
 - name: UInt8ArrayFillInternalUsual
-  entrypoint: EtsStdCoreUInt8ArrayFillInternal
+  entrypoint: EtsEscompatUInt8ArrayFillInternal
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1820,7 +1820,7 @@
     - int32_t
 
 - name: UInt16ArrayFillInternalUsual
-  entrypoint: EtsStdCoreUInt16ArrayFillInternal
+  entrypoint: EtsEscompatUInt16ArrayFillInternal
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1842,7 +1842,7 @@
     - int32_t
 
 - name: UInt32ArrayFillInternalUsual
-  entrypoint: EtsStdCoreUInt32ArrayFillInternal
+  entrypoint: EtsEscompatUInt32ArrayFillInternal
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1864,7 +1864,7 @@
     - int32_t
 
 - name: BigUInt64ArrayFillInternalUsual
-  entrypoint: EtsStdCoreBigUInt64ArrayFillInternal
+  entrypoint: EtsEscompatBigUInt64ArrayFillInternal
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1910,7 +1910,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Int8ArraySetValuesFromArrayUsual
-  entrypoint: EtsStdCoreInt8ArraySetValuesFromArray
+  entrypoint: EtsEscompatInt8ArraySetValuesFromArray
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -1919,7 +1919,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Int8ArraySetValuesFromArraySlowPath
-  entrypoint: EtsStdCoreInt8ArraySetValuesFromArray
+  entrypoint: EtsEscompatInt8ArraySetValuesFromArray
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1937,7 +1937,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Int16ArraySetValuesFromArrayUsual
-  entrypoint: EtsStdCoreInt16ArraySetValuesFromArray
+  entrypoint: EtsEscompatInt16ArraySetValuesFromArray
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -1946,7 +1946,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Int16ArraySetValuesFromArraySlowPath
-  entrypoint: EtsStdCoreInt16ArraySetValuesFromArray
+  entrypoint: EtsEscompatInt16ArraySetValuesFromArray
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1964,7 +1964,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Int32ArraySetValuesFromArrayUsual
-  entrypoint: EtsStdCoreInt32ArraySetValuesFromArray
+  entrypoint: EtsEscompatInt32ArraySetValuesFromArray
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -1973,7 +1973,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Int32ArraySetValuesFromArraySlowPath
-  entrypoint: EtsStdCoreInt32ArraySetValuesFromArray
+  entrypoint: EtsEscompatInt32ArraySetValuesFromArray
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -1991,7 +1991,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: BigInt64ArraySetValuesFromArrayUsual
-  entrypoint: EtsStdCoreBigInt64ArraySetValuesFromArray
+  entrypoint: EtsEscompatBigInt64ArraySetValuesFromArray
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -2000,7 +2000,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: BigInt64ArraySetValuesFromArraySlowPath
-  entrypoint: EtsStdCoreBigInt64ArraySetValuesFromArray
+  entrypoint: EtsEscompatBigInt64ArraySetValuesFromArray
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2018,7 +2018,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Float32ArraySetValuesFromArrayUsual
-  entrypoint: EtsStdCoreFloat32ArraySetValuesFromArray
+  entrypoint: EtsEscompatFloat32ArraySetValuesFromArray
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -2027,7 +2027,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Float32ArraySetValuesFromArraySlowPath
-  entrypoint: EtsStdCoreFloat32ArraySetValuesFromArray
+  entrypoint: EtsEscompatFloat32ArraySetValuesFromArray
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2045,7 +2045,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Float64ArraySetValuesFromArrayUsual
-  entrypoint: EtsStdCoreFloat64ArraySetValuesFromArray
+  entrypoint: EtsEscompatFloat64ArraySetValuesFromArray
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -2054,7 +2054,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Float64ArraySetValuesFromArraySlowPath
-  entrypoint: EtsStdCoreFloat64ArraySetValuesFromArray
+  entrypoint: EtsEscompatFloat64ArraySetValuesFromArray
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2072,7 +2072,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Uint8ArraySetValuesFromArrayUsual
-  entrypoint: EtsStdCoreUint8ArraySetValuesFromArray
+  entrypoint: EtsEscompatUint8ArraySetValuesFromArray
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -2081,7 +2081,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Uint8ArraySetValuesFromArraySlowPath
-  entrypoint: EtsStdCoreUint8ArraySetValuesFromArray
+  entrypoint: EtsEscompatUint8ArraySetValuesFromArray
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2099,7 +2099,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Uint8ClampedArraySetValuesFromArrayUsual
-  entrypoint: EtsStdCoreUint8ClampedArraySetValuesFromArray
+  entrypoint: EtsEscompatUint8ClampedArraySetValuesFromArray
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -2108,7 +2108,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Uint8ClampedArraySetValuesFromArraySlowPath
-  entrypoint: EtsStdCoreUint8ClampedArraySetValuesFromArray
+  entrypoint: EtsEscompatUint8ClampedArraySetValuesFromArray
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2126,7 +2126,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Uint16ArraySetValuesFromArrayUsual
-  entrypoint: EtsStdCoreUint16ArraySetValuesFromArray
+  entrypoint: EtsEscompatUint16ArraySetValuesFromArray
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -2135,7 +2135,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Uint16ArraySetValuesFromArraySlowPath
-  entrypoint: EtsStdCoreUint16ArraySetValuesFromArray
+  entrypoint: EtsEscompatUint16ArraySetValuesFromArray
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2153,7 +2153,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Uint32ArraySetValuesFromArrayUsual
-  entrypoint: EtsStdCoreUint32ArraySetValuesFromArray
+  entrypoint: EtsEscompatUint32ArraySetValuesFromArray
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -2162,7 +2162,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: Uint32ArraySetValuesFromArraySlowPath
-  entrypoint: EtsStdCoreUint32ArraySetValuesFromArray
+  entrypoint: EtsEscompatUint32ArraySetValuesFromArray
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2180,7 +2180,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: BigUint64ArraySetValuesFromArrayUsual
-  entrypoint: EtsStdCoreBigUint64ArraySetValuesFromArray
+  entrypoint: EtsEscompatBigUint64ArraySetValuesFromArray
   bridge: entrypoint
   properties: [intrinsic]
   signature:
@@ -2189,7 +2189,7 @@
     - ark::ObjectHeader*       # src array
 
 - name: BigUint64ArraySetValuesFromArraySlowPath
-  entrypoint: EtsStdCoreBigUint64ArraySetValuesFromArray
+  entrypoint: EtsEscompatBigUint64ArraySetValuesFromArray
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2782,8 +2782,8 @@
     - int32_t
 
 
-- name: EtsStdCoreInt8ArrayCopyWithinImplUsual
-  entrypoint: EtsStdCoreInt8ArrayCopyWithinImpl
+- name: EtsEscompatInt8ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatInt8ArrayCopyWithinImpl
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2793,8 +2793,8 @@
     - int32_t
     - int32_t
 
-- name: EtsStdCoreInt16ArrayCopyWithinImplUsual
-  entrypoint: EtsStdCoreInt16ArrayCopyWithinImpl
+- name: EtsEscompatInt16ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatInt16ArrayCopyWithinImpl
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2804,8 +2804,8 @@
     - int32_t
     - int32_t
 
-- name: EtsStdCoreInt32ArrayCopyWithinImplUsual
-  entrypoint: EtsStdCoreInt32ArrayCopyWithinImpl
+- name: EtsEscompatInt32ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatInt32ArrayCopyWithinImpl
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2815,8 +2815,8 @@
     - int32_t
     - int32_t
 
-- name: EtsStdCoreBigInt64ArrayCopyWithinImplUsual
-  entrypoint: EtsStdCoreBigInt64ArrayCopyWithinImpl
+- name: EtsEscompatBigInt64ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatBigInt64ArrayCopyWithinImpl
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2826,8 +2826,8 @@
     - int32_t
     - int32_t
 
-- name: EtsStdCoreUInt8ArrayCopyWithinImplUsual
-  entrypoint: EtsStdCoreUInt8ArrayCopyWithinImpl
+- name: EtsEscompatUInt8ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatUInt8ArrayCopyWithinImpl
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2837,8 +2837,8 @@
     - int32_t
     - int32_t
 
-- name: EtsStdCoreUInt16ArrayCopyWithinImplUsual
-  entrypoint: EtsStdCoreUInt16ArrayCopyWithinImpl
+- name: EtsEscompatUInt16ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatUInt16ArrayCopyWithinImpl
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2848,8 +2848,8 @@
     - int32_t
     - int32_t
 
-- name: EtsStdCoreUInt32ArrayCopyWithinImplUsual
-  entrypoint: EtsStdCoreUInt32ArrayCopyWithinImpl
+- name: EtsEscompatUInt32ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatUInt32ArrayCopyWithinImpl
   bridge: slow_path
   properties: [intrinsic]
   signature:
@@ -2859,8 +2859,8 @@
     - int32_t
     - int32_t
 
-- name: EtsStdCoreBigUInt64ArrayCopyWithinImplUsual
-  entrypoint: EtsStdCoreBigUInt64ArrayCopyWithinImpl
+- name: EtsEscompatBigUInt64ArrayCopyWithinImplUsual
+  entrypoint: EtsEscompatBigUInt64ArrayCopyWithinImpl
   bridge: slow_path
   properties: [intrinsic]
   signature:

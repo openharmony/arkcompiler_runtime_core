@@ -30,22 +30,22 @@ virtual FieldPtr GetStdCoreArrayActualLength([[maybe_unused]] ClassPtr klass) co
     return nullptr;
 }
 
-virtual FieldPtr GetStdCoreTypedArrayBuffer([[maybe_unused]] ClassPtr klass) const
+virtual FieldPtr GetEscompatTypedArrayBuffer([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;
 }
 
-virtual FieldPtr GetStdCoreTypedArrayByteOffset([[maybe_unused]] ClassPtr klass) const
+virtual FieldPtr GetEscompatTypedArrayByteOffset([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;
 }
 
-virtual FieldPtr GetStdCoreUnsignedTypedArrayByteOffsetInt([[maybe_unused]] ClassPtr klass) const
+virtual FieldPtr GetEscompatUnsignedTypedArrayByteOffsetInt([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;
 }
 
-virtual FieldPtr GetStdCoreTypedArrayLengthInt([[maybe_unused]] ClassPtr klass) const
+virtual FieldPtr GetEscompatTypedArrayLengthInt([[maybe_unused]] ClassPtr klass) const
 {
     return nullptr;
 }

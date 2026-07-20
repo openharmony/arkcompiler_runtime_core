@@ -315,10 +315,10 @@ std/core/std_core_array_forEach_long_array_func_long.ets
 std/core/std_core_array_forEach_short_array_func_short.ets
 
 #23988
-std/core/std_core_typedarrays_bignum__BigInt64Array.ets
+escompat/escompat_typedarrays_bignum__BigInt64Array.ets
 
 #23989
-std/core/std_core_typedarrays_bignum__BigUint64Array.ets
+escompat/escompat_typedarrays_bignum__BigUint64Array.ets
 
 ### Negative tests (Import-export)
 spec/import_export/05.export_directives/02.export_type_directives/to_export_negative.ets
