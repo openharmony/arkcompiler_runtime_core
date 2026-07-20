@@ -660,6 +660,13 @@ std::vector<napi_property_descriptor> EtsClassWrapper::BuildJSProperties(napi_en
         if (field->IsStatic()) {
             EtsClassWrapper *fieldWclass = LookupBaseWrapper(EtsClass::FromRuntimeClass(field->GetClass()));
             ASSERT(fieldWclass != nullptr);
+            const char *fieldName = utf::Mutf8AsCString(field->GetName().data);
+            if (IsReservedJSBuiltin(fieldName)) {
+                INTEROP_LOG(ERROR) << "Static field '" << fieldName << "' of class " << etsClass_->GetDescriptor()
+                                   << " conflicts with JS Function built-in property '" << fieldName << "'";
+                hasReservedConflict_ = true;
+                continue;
+            }
             jsProps.emplace_back(wfield->MakeStaticProperty(fieldWclass, field));
         } else {
             jsProps.emplace_back(wfield->MakeInstanceProperty(this, field));
@@ -694,6 +701,12 @@ void EtsClassWrapper::ProcessMethods(napi_env &env, Span<EtsMethodSet *> methods
         if (strcmp(method->GetName(), "toJSON") == 0) {
             continue;
         }
+        if (method->IsStatic() && IsReservedJSBuiltin(method->GetName())) {
+            INTEROP_LOG(ERROR) << "Static method '" << method->GetName() << "' of class " << etsClass_->GetDescriptor()
+                               << " conflicts with JS Function built-in property '" << method->GetName() << "'";
+            hasReservedConflict_ = true;
+            continue;
+        }
         jsProps.emplace_back(EtsMethodWrapper::MakeNapiProperty(method, lazyLink));
         if (strcmp(method->GetName(), ITERATOR_METHOD) == 0) {
             auto iterator = EtsClassWrapper::GetGlobalSymbolIterator(env);
@@ -717,7 +730,8 @@ void EtsClassWrapper::BuildGetterSetterFieldProperties(GetterSetterPropsMap &pro
         napi_property_descriptor prop {};
         auto fieldWrapper = std::make_unique<EtsFieldWrapper>(this);
         prop.utf8name = fieldName;
-        prop.attributes = method->IsStatic() ? EtsClassWrapper::STATIC_FIELD_ATTR : EtsClassWrapper::FIELD_ATTR;
+        prop.attributes =
+            method->IsStatic() ? EtsClassWrapper::STATIC_FIELD_ACCESSOR_ATTR : EtsClassWrapper::FIELD_ACCESSOR_ATTR;
         prop.data = fieldWrapper.get();
         EtsMethodWrapper::AttachGetterSetterToProperty(method, prop);
         propMap.insert({key, prop});
@@ -838,6 +852,14 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
     _this->SetBaseWrapperMethods(env, methods);
 
     auto jsProps = _this->BuildJSProperties(env, {fields.data(), fields.size()}, {methods.data(), methods.size()});
+    if (_this->hasReservedConflict_) {
+        auto *execCtx = EtsExecutionContext::GetCurrent();
+        ctx->ThrowETSError(execCtx,
+                           std::string("Class ") + etsClass->GetDescriptor() +
+                               " has static properties that conflict with JS Function built-in properties"
+                               " ('name'/'length'/'prototype'). Rename the ETS properties to resolve this conflict.");
+        return nullptr;
+    }
 
     // NOTE(vpukhov): fatal no-public-fields check when std adopt accessors
     if (_this->HasBuiltin() && !fields.empty()) {

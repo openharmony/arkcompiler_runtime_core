@@ -32,6 +32,26 @@ export class ClassWithOnlyStaticFields {
     public static z: int = 3;
 }
 
+export class ClassWithReservedStaticName {
+    public static name: string = 'ets_name_value';
+    public static normalField: string = 'normal';
+    public instanceValue: int = 42;
+}
+
+export class ClassWithReservedStaticLength {
+    public static length: int = 999;
+    public static description: string = 'test';
+}
+
+export class ClassWithReservedStaticMethodName {
+    public static name(): string {
+        return 'ets_method_name_value';
+    }
+    public static normalMethod(): string {
+        return 'normal_method';
+    }
+}
+
 export function createClassWithStaticFields(): ClassWithStaticFields {
     return new ClassWithStaticFields();
 }

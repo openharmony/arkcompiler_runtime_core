@@ -93,6 +93,47 @@ function testJsonStringifyMixedFields(): void {
     ASSERT_TRUE(json.includes('"value"'));
 }
 
+function testReservedStaticNameRejected(): void {
+    let cls;
+    let threw = false;
+    try {
+        cls = etsVm.getClass('Lstatic_field_accessor/ClassWithReservedStaticName;');
+    } catch (e) {
+        threw = true;
+    }
+    ASSERT_TRUE(threw || cls === undefined);
+}
+
+function testReservedStaticLengthRejected(): void {
+    let cls;
+    let threw = false;
+    try {
+        cls = etsVm.getClass('Lstatic_field_accessor/ClassWithReservedStaticLength;');
+    } catch (e) {
+        threw = true;
+    }
+    ASSERT_TRUE(threw || cls === undefined);
+}
+
+function testReservedStaticMethodNameRejected(): void {
+    let cls;
+    let threw = false;
+    try {
+        cls = etsVm.getClass('Lstatic_field_accessor/ClassWithReservedStaticMethodName;');
+    } catch (e) {
+        threw = true;
+    }
+    ASSERT_TRUE(threw || cls === undefined);
+}
+
+function testNormalClassesStillWorkAfterReservedRejection(): void {
+    let cls = etsVm.getClass('Lstatic_field_accessor/ClassWithStaticFields;');
+    ASSERT_TRUE(cls !== undefined);
+    ASSERT_TRUE(typeof cls === 'function');
+    ASSERT_TRUE(typeof cls.counter === 'number');
+    ASSERT_TRUE(typeof cls.label === 'string');
+}
+
 function main(): void {
     testClassCtorIsValid();
     testStaticFieldRead();
@@ -102,6 +143,10 @@ function main(): void {
     testOnlyStaticFields();
     testJsonStringifyWithStaticFields();
     testJsonStringifyMixedFields();
+    testReservedStaticNameRejected();
+    testReservedStaticLengthRejected();
+    testReservedStaticMethodNameRejected();
+    testNormalClassesStillWorkAfterReservedRejection();
 }
 
 main();
