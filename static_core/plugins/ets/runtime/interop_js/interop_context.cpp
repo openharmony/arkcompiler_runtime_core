@@ -155,6 +155,8 @@ static void RegisterEventLoopModule(EtsExecutionContext *executionCtx)
     executionCtx->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
     executionCtx->GetPandaVM()->SetRunEventLoopFunction(
         [](EventLoopRunMode mode) { return EventLoop::RunEventLoop(static_cast<EventLoopRunMode>(mode)); });
+    executionCtx->GetPandaVM()->SetGetEventLoopBackendTimeoutFunction(
+        []() { return EventLoop::GetEventLoopBackendTimeout(); });
     executionCtx->GetPandaVM()->SetWalkEventLoopFunction(
         [](WalkEventLoopCallback &cb, void *args) { EventLoop::WalkEventLoop(cb, args); });
 }

@@ -72,6 +72,39 @@ function RunTasksWithJsAsyncCallTest(): void {
     CoroutineExtras.stopTaskpool();
 }
 
+function runTasksWithJsTimerAsyncCallTest(): void {
+    let callback = ():int => {
+        let module = JSRuntime.loadModule('./taskpool_interop_tests_helpers_js');
+        let modified = false;
+        let method = JSRuntime.getPropertyJSValue(module, 'asyncWithTimerAwait');
+        let callRes = JSRuntime.invoke(module, method);
+        let linker = Class.ofCaller()!.getLinker();
+        let clsName = 'std.core.Promise';
+        let promise = JSRuntime.getValueObject(callRes, linker.loadClass(clsName, false)) as Promise<Object>;
+        let promise1 = promise.then((x:Object): void => {
+            modified = true;
+        });
+
+        promise1.awaitSync();
+
+        try {
+            let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'timerValue');
+            arktest.assertEQ(value, 11);
+            arktest.assertEQ(modified, true);
+        } catch(error) {
+            console.log('Timer value modifications failed');
+            return 1;
+        }
+
+        return 0;
+    };
+
+    let p = taskpool.execute(callback);
+    let result = p.awaitSync();
+    arktest.assertEQ(result, 0);
+    arktest.assertEQ(CoroutineExtras.isTaskpoolSupportingInterop(), true);
+}
+
 // This is a pure CPU task without IO request
 function additionDelay(delay: number): void {
     let start: number = new Date().getTime();

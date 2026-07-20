@@ -51,6 +51,7 @@ public:
     enum class DataIdx {
         INTEROP_CTX_PTR,
         EXTERNAL_IFACES,
+        INTEROP_PUMP_EVENT,
         FLATTENED_STRING_CACHE,
         DOUBLE_TO_STRING_CACHE,
         FLOAT_TO_STRING_CACHE,

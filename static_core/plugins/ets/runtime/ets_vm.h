@@ -374,6 +374,23 @@ public:
         return runEventLoop_(mode);
     }
 
+    using GetEventLoopBackendTimeoutFunction = std::function<int64_t()>;
+
+    void SetGetEventLoopBackendTimeoutFunction(GetEventLoopBackendTimeoutFunction &&cb)
+    {
+        ASSERT(!getEventLoopBackendTimeout_);
+        getEventLoopBackendTimeout_ = std::move(cb);
+    }
+
+    int64_t GetEventLoopBackendTimeout()
+    {
+        if (!getEventLoopBackendTimeout_) {
+            return EVENT_LOOP_TIMEOUT_PROVIDER_MISSING;
+        }
+
+        return getEventLoopBackendTimeout_();
+    }
+
     using WalkEventLoopFunction = std::function<void(WalkEventLoopCallback &, void *)>;
     void SetWalkEventLoopFunction(WalkEventLoopFunction &&cb)
     {
@@ -473,6 +490,9 @@ private:
 
     PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
     RunEventLoopFunction runEventLoop_ = nullptr;
+    // No backend-timeout provider is installed for this VM.
+    static constexpr int64_t EVENT_LOOP_TIMEOUT_PROVIDER_MISSING = -1;
+    GetEventLoopBackendTimeoutFunction getEventLoopBackendTimeout_ = nullptr;
     WalkEventLoopFunction walkEventLoop_ = nullptr;
     PandaUniquePtr<StdlibCache> stdLibCache_ {nullptr};
 

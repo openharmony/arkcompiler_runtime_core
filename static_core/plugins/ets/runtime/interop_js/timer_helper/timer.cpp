@@ -19,7 +19,13 @@
 #include <unordered_map>
 #include <iostream>
 
+#include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/interop_js/event_loop_module.h"
+#include "plugins/ets/runtime/interop_js/interop_context.h"
+#include "plugins/ets/runtime/interop_js/logger.h"
+#include "runtime/execution/job_execution_context.h"
+#include "runtime/execution/job_events.h"
+#include "runtime/execution/job_worker_thread-inl.h"
 
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -43,6 +49,26 @@ namespace ark::ets::interop::js::helper {
 static uint32_t g_nextTimerId = 0;
 static std::unordered_map<uint32_t, TimerInfo *> g_timers;
 // NOLINTEND(fuchsia-statically-constructed-objects)
+
+static void NotifyInteropPump()
+{
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    if (executionCtx == nullptr) {
+        INTEROP_LOG(DEBUG) << "NotifyInteropPump skipped: no current execution context";
+        return;
+    }
+    if (executionCtx->GetWorker() == nullptr) {
+        INTEROP_LOG(DEBUG) << "NotifyInteropPump skipped: no current worker";
+        return;
+    }
+    auto *event =
+        executionCtx->GetWorker()->GetLocalStorage().Get<JobWorkerThread::DataIdx::INTEROP_PUMP_EVENT, JobEvent *>();
+    if (event != nullptr) {
+        event->Happen();
+        return;
+    }
+    INTEROP_LOG(DEBUG) << "NotifyInteropPump skipped: no waiting interop pump event";
+}
 
 TimerInfo::TimerInfo(napi_env env, napi_ref cb, std::vector<napi_ref> cbArgs, bool repeat)
     : env(env), cb(cb), cbArgs(std::move(cbArgs)), repeat(repeat), timer(EventLoop::CreateTimer())
@@ -81,6 +107,11 @@ static napi_value RegisterTimer(napi_env env, napi_ref cb, std::vector<napi_ref>
         napi_value undefined = nullptr;
         napi_get_undefined(env, &undefined);
 
+        auto *interopCtx = InteropCtx::Current(EtsExecutionContext::GetCurrent());
+        if (interopCtx != nullptr) {
+            interopCtx->UpdateInteropStackInfoIfNeeded();
+        }
+
         napi_value result = nullptr;
         napi_call_function(env, undefined, callback, callbackArgs.size(), callbackArgs.data(), &result);
 
@@ -111,6 +142,7 @@ static napi_value RegisterTimer(napi_env env, napi_ref cb, std::vector<napi_ref>
     uv_update_time(loop);
     uv_timer_start(timerInfo->timer, timerCallback, timeout, timeout > 0 ? timeout : 1);
     uv_async_send(&loop->wq_async);
+    NotifyInteropPump();
 
     napi_value timerId = nullptr;
     napi_create_uint32(env, timerInfo->timerId, &timerId);
