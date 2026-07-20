@@ -611,7 +611,7 @@ void CmcGC<LanguageConfig>::DoGarbageCollection(ark::GCTask &task)
 
     {
         ScopedStopTheWorld stw;
-        TransitionToGCPhase(GCPhase::GC_PHASE_IDLE);
+        TransitionToGCPhase(GCPhase::GC_PHASE_RUNNING);
     }
     ClearAllGCInfo();
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
@@ -1065,16 +1065,9 @@ BaseObject *CmcGC<LanguageConfig>::TryForwardObject(ObjectHeader *obj)
 template <class LanguageConfig>
 ObjectHeader *CmcGC<LanguageConfig>::CopyObjectImpl(ObjectHeader *object)
 {
-    // reconsider phase difference between mutator and GC thread during transition.
-    if (ark::common_vm::IsGcThread()) {
-        CHECK(this->GetGCPhase() == GCPhase::GC_PHASE_PRECOPY || this->GetGCPhase() == GCPhase::GC_PHASE_COPY ||
-              this->GetGCPhase() == GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE ||
-              this->GetGCPhase() == GCPhase::GC_PHASE_FIX || this->GetGCPhase() == GCPhase::GC_PHASE_REMARK);
-    } else {
-        auto phase = ark::Mutator::GetCurrent()->GetMutatorPhase();
-        CHECK(phase == GCPhase::GC_PHASE_PRECOPY || phase == GCPhase::GC_PHASE_COPY ||
-              phase == GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE || phase == GCPhase::GC_PHASE_FIX);
-    }
+    CHECK(this->GetGCPhase() == GCPhase::GC_PHASE_PRECOPY || this->GetGCPhase() == GCPhase::GC_PHASE_COPY ||
+          this->GetGCPhase() == GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE ||
+          this->GetGCPhase() == GCPhase::GC_PHASE_FIX || this->GetGCPhase() == GCPhase::GC_PHASE_REMARK);
 
     do {
         MarkWord oldWord = object->GetMark();
@@ -1208,7 +1201,7 @@ void CmcGC<LanguageConfig>::UpdateBarrierEntrypoint(ark::common_vm::Mutator *mut
     } else if (phase == GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE) {
         EnableReadBarrier(static_cast<ark::Mutator *>(mutator));
         EnablePreWriteBarrier(static_cast<ark::Mutator *>(mutator));
-    } else if (phase == GCPhase::GC_PHASE_IDLE) {
+    } else if (phase == GCPhase::GC_PHASE_RUNNING || phase == GCPhase::GC_PHASE_IDLE) {
         DisableReadBarrier(static_cast<ark::Mutator *>(mutator));
         DisablePreWriteBarrier(static_cast<ark::Mutator *>(mutator));
     }
@@ -1216,7 +1209,7 @@ void CmcGC<LanguageConfig>::UpdateBarrierEntrypoint(ark::common_vm::Mutator *mut
     ASSERT(phase == GCPhase::GC_PHASE_INITIAL_MARK || phase == GCPhase::GC_PHASE_MARK ||
            phase == GCPhase::GC_PHASE_PRECOPY || phase == GCPhase::GC_PHASE_COPY || phase == GCPhase::GC_PHASE_FIX ||
            phase == GCPhase::GC_PHASE_IDLE || phase == GCPhase::GC_PHASE_REMARK ||
-           phase == GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE);
+           phase == GCPhase::GC_PHASE_COLLECT_YOUNG_AND_MOVE || phase == GCPhase::GC_PHASE_RUNNING);
 }
 
 template <class LanguageConfig>
@@ -1227,7 +1220,6 @@ void CmcGC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, [[maybe_unused]
         mutator->ReleaseAllocBuffer();
 
         UpdateBarrierEntrypoint(mutator, GCPhase::GC_PHASE_IDLE);
-        mutator->SetMutatorPhase(GCPhase::GC_PHASE_IDLE);
         mutator->ResetMutator();
         return true;
     });
@@ -1237,7 +1229,6 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::OnMutatorCreate(Mutator *mutator)
 {
     GCPhase phase = this->GetGCPhase();
-    mutator->SetMutatorPhase(phase);
     // Enable pre write barrier for mutators created during concurrent marking and enable read barrier for mutators
     // created during concurrent copy/fix.
     if (phase >= GCPhase::GC_PHASE_INITIAL_MARK) {

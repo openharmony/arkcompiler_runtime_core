@@ -449,4 +449,78 @@ TEST_P(ReadBarrierCMCGCTest, TestReadBarrier)
 INSTANTIATE_TEST_SUITE_P(ReadBarrierCMCGCTestSuite, ReadBarrierCMCGCTest,
                          testing::Values(GCTaskCause::YOUNG_GC_CAUSE, GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE));
 
+class NonOverlappingCMCGCTest : public CMCGCTest, public GCListener {
+    enum class GCState {
+        IDLE,
+        RUNNING,
+    };
+
+public:
+    void SetUp() override
+    {
+        Runtime::Create(CreateRuntimeOptions());
+        thread_ = MTManagedThread::GetCurrent();
+        gc_ = static_cast<CmcGC<PandaAssemblyLanguageConfig> *>(Runtime::GetCurrent()->GetPandaVM()->GetGC());
+    }
+
+    void GCStarted([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSize) override
+    {
+        // Atomic with seq_cst order reason: don't care about perf in test
+        auto old = counter_.fetch_add(1, std::memory_order_seq_cst);
+        auto oldState = (old % 2U == 0) ? GCState::IDLE : GCState::RUNNING;
+
+        ASSERT_EQ(oldState, GCState::IDLE);
+    }
+
+    void GCFinished([[maybe_unused]] const GCTask &task, [[maybe_unused]] size_t heapSizeBeforeGc,
+                    [[maybe_unused]] size_t heapSize)
+    {
+        // Atomic with seq_cst order reason: don't care about perf in test
+        auto old = counter_.fetch_add(1, std::memory_order_seq_cst);
+        auto oldState = (old % 2U == 0) ? GCState::IDLE : GCState::RUNNING;
+
+        ASSERT_EQ(oldState, GCState::RUNNING);
+    }
+
+private:
+    static RuntimeOptions CreateRuntimeOptions()
+    {
+        RuntimeOptions options;
+        options.SetInterpreterType("cpp");
+        options.SetShouldLoadBootPandaFiles(true);
+        options.SetShouldInitializeIntrinsics(true);
+        options.SetCompilerEnableJit(false);
+        options.SetGcType("cmc-gc");
+        options.SetLoadRuntimes({"core"});
+        options.SetGcTriggerType("debug-never");
+        options.SetRunGcInPlace(false);
+
+        auto stdlib = std::getenv("PANDA_STD_LIB");
+        if (stdlib == nullptr) {
+            std::cerr << "Error: PANDA_STD_LIB env variable is empty\n";
+            std::abort();
+        }
+        options.SetBootPandaFiles({stdlib});
+
+        return options;
+    }
+
+protected:
+    std::atomic_uint32_t counter_ {0};
+};
+
+TEST_F(NonOverlappingCMCGCTest, TestOOMInterrupt)
+{
+    ASSERT_FALSE(gc_->GetSettings()->RunGCInPlace());
+    gc_->AddListener(this);
+
+    ScopedManagedCodeThread msc(thread_);
+    FillCurrentRegion();
+    gc_->Trigger(MakePandaUnique<ark::GCTask>(GCTaskCause::YOUNG_GC_CAUSE));
+    // Atomic with seq_cst order reason: don't care about perf in test
+    while (counter_.load(std::memory_order_seq_cst) < 2U) {
+        FillCurrentRegion();
+    }
+}
+
 }  // namespace ark::mem
