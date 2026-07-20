@@ -41,6 +41,7 @@ cases:
       }
     tested_type: foo_tested
     effective_type: foo_effective
+    instanceof_type: '() => never'
     init: |-
       = foo
     test_suffix: never
@@ -91,6 +92,7 @@ cases:
       type foo_effective = foo_with_constraint<Object>
     tested_type: foo_with_constraint<int>
     effective_type: foo_effective
+    instanceof_type: '(param: Any) => never'
     init: |-
       = foo
     test_suffix: type_parameter_constraint
@@ -116,6 +118,7 @@ cases:
       class A {}
     tested_type: FixedArray<A>
     effective_type: FixedArray<Object> | undefined
+    instanceof_type: 'FixedArray<Object | undefined> | undefined'
     init: |-
       = new FixedArray<A>(0)
     test_suffix: fixed_array
@@ -126,6 +129,7 @@ cases:
       type foo_effective = foo_tested<Any, Any, never>
     tested_type: foo_tested<int, boolean, string>
     effective_type: foo_effective
+    instanceof_type: '(p1: Any, p2: Any) => never'
     init: |-
       = foo_inst
     test_suffix: type_function
@@ -136,6 +140,7 @@ cases:
       type foo_effective = foo_tested<Any, Any, never>
     tested_type: foo_tested<int, boolean, string>
     effective_type: foo_effective
+    instanceof_type: '(p1: Any, ...p2: FixedArray<Any | undefined>) => never'
     init: |-
       = foo_inst
     test_suffix: type_function_rest
@@ -147,6 +152,7 @@ cases:
       type effective = [Object, Any]
     tested_type: my_tuple<A, B>
     effective_type: effective | undefined
+    instanceof_type: 'Tuple2 | undefined'
     init: |-
       = [new A, new B]
     test_suffix: tuple

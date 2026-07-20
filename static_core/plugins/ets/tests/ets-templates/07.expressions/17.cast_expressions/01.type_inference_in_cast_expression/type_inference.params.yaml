@@ -36,7 +36,7 @@ cases:
     assert: arktest.assertTrue(a instanceof Object)
   - type: Any
     val: "1"
-    assert: arktest.assertTrue(a instanceof Any)
+    assert: arktest.assertTrue(a instanceof int)
   - type: byte[]
     val: "[1, 2]"
     assert: |-

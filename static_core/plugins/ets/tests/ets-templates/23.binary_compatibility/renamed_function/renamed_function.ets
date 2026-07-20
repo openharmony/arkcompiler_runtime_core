@@ -37,5 +37,5 @@ files: ['./renamed_function.libr.ets']
 import { a } from './renamed_function.libr.ets';
 
 function main(): void {
-    arktest.assertTrue(a() instanceof Any, "a is expected to be invoked") // before renaming this should run
+    arktest.assertTrue(a() instanceof number, "a is expected to be invoked") // before renaming this should run
 }

@@ -34,7 +34,7 @@ cases:
       decl: |-
           class Base {}
           class Derived extends Base {}
-          
+
           let x: Base | string = new Base
           const y: Derived | string = 'just a test'
       check: |-
@@ -79,7 +79,7 @@ cases:
           const a: FixedArray<'a'> = ['a', 'a']
       check: |-
           ab = a
-          arktest.assertTrue(ab instanceof FixedArray<String>)
+          arktest.assertTrue(ab instanceof FixedArray<String | undefined>)
 
     - doc: |-
           unions of fixed arrays subtyping
@@ -90,9 +90,9 @@ cases:
           let ac: FixedArray<A>|FixedArray<C> = [new A, new B]
           let b: FixedArray<B> = [new B, new B]
       check: |-
-          arktest.assertTrue(b instanceof FixedArray<A>)
+          arktest.assertTrue(b instanceof FixedArray<A | undefined>)
           ac = b
-          arktest.assertTrue(ac instanceof FixedArray<A>)
+          arktest.assertTrue(ac instanceof FixedArray<A | undefined>)
 
     - doc: |-
           unions of functions subtyping

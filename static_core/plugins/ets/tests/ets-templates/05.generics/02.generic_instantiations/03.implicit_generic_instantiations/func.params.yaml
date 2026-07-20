@@ -151,7 +151,7 @@ cases:
       use: |-
         let arg: Any = null
         let z = foo(arg)
-        arktest.assertTrue(z instanceof Any)
+        arktest.assertTrue(z instanceof null)
     - decl: |-
         function foo<T>(p: T): T {
             return p

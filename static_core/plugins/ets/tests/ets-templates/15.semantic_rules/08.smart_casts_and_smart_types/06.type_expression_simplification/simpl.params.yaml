@@ -108,8 +108,8 @@ cases:
           class A {}
 
           function foo_a(a: A) {
-              if (a instanceof Any) {
-                  // A & Any = A
+              if (a instanceof A) {
+                  // A & A = A
                   va = a
                   return
               }
@@ -177,11 +177,11 @@ cases:
           class A {}
 
           function foo(a: A) {
-              if (a instanceof Any) {
-                  // A & Any = A
+              if (a instanceof A) {
+                  // A & A = A
                   va = a
               } else {
-                  // A - Any = never
+                  // A - A = never
                   arktest.assertTrue(false, 'wrong type intersection')
               }
           }

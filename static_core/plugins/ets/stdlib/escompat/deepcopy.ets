@@ -121,22 +121,30 @@ class DeepCloner {
 			} else if (src instanceof Object) {
 				const srcType = Class.of(src)
 				if (srcType.isFixedArray()) {
-					if (src instanceof FixedArray<boolean>) {
-						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
-					} else if (src instanceof FixedArray<byte>) {
-						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
-					} else if (src instanceof FixedArray<char>) {
-						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
-					} else if (src instanceof FixedArray<short>) {
-						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
-					} else if (src instanceof FixedArray<int>) {
-						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
-					} else if (src instanceof FixedArray<long>) {
-						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
-					} else if (src instanceof FixedArray<float>) {
-						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
-					} else if (src instanceof FixedArray<double>) {
-						return ((this.currentDepth + 1 > this.maxDepth) ? src : copyOf(src)) as T
+					if (src instanceof FixedArray<boolean | undefined>) {
+						let dst = src as FixedArray<boolean>;
+						return ((this.currentDepth + 1 > this.maxDepth) ? dst : copyOf(dst)) as T
+					} else if (src instanceof FixedArray<byte | undefined>) {
+						let dst = src as FixedArray<byte>;
+						return ((this.currentDepth + 1 > this.maxDepth) ? dst : copyOf(dst)) as T
+					} else if (src instanceof FixedArray<char | undefined>) {
+						let dst = src as FixedArray<char>;
+						return ((this.currentDepth + 1 > this.maxDepth) ? dst : copyOf(dst)) as T
+					} else if (src instanceof FixedArray<short | undefined>) {
+						let dst = src as FixedArray<short>;
+						return ((this.currentDepth + 1 > this.maxDepth) ? dst : copyOf(dst)) as T
+					} else if (src instanceof FixedArray<int | undefined>) {
+						let dst = src as FixedArray<int>;
+						return ((this.currentDepth + 1 > this.maxDepth) ? dst : copyOf(dst)) as T
+					} else if (src instanceof FixedArray<long | undefined>) {
+						let dst = src as FixedArray<long>;
+						return ((this.currentDepth + 1 > this.maxDepth) ? dst : copyOf(dst)) as T
+					} else if (src instanceof FixedArray<float | undefined>) {
+						let dst = src as FixedArray<float>;
+						return ((this.currentDepth + 1 > this.maxDepth) ? dst : copyOf(dst)) as T
+					} else if (src instanceof FixedArray<double | undefined>) {
+						let dst = src as FixedArray<double>;
+						return ((this.currentDepth + 1 > this.maxDepth) ? dst : copyOf(dst)) as T
 					} else {
 						const componentType = srcType.getFixedArrayComponentType()!
 						return this.cloneFixedArray(Types.asFixedArray<Any>(src), componentType) as T

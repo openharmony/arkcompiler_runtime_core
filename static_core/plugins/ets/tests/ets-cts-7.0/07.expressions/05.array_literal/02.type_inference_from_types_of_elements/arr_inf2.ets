@@ -24,10 +24,6 @@ class ClassACallable {}
 
 type MyType8 = Long|Double|null|Short|undefined
 
-type F9 = () => number
-
-type MyType19 = (p: string) => number
-
 class ClassA21 {}
 class ClassB21 {}
 class ClassC21 {}
@@ -90,13 +86,6 @@ function main(): int {
         arktest.assertTrue( d[2] instanceof (String|Int|Double), "instanceof d[2] failed" )
     })
 
-    suite.addTest("lambda and class instance union", () => {
-        let e = [(): void => {}, new ClassACallable]
-        arktest.assertTrue( e instanceof Array )
-        arktest.assertTrue( e[0] instanceof ((() => void) | ClassACallable) )
-        arktest.assertTrue( e[1] instanceof ((() => void) | ClassACallable) )
-    })
-
     suite.addTest("Long Double Short boxed numerics", () => {
         let y = [new Long(), new Number(), new Short()]
         let f = (p: (Long|Double|Short)[]) => p
@@ -114,20 +103,6 @@ function main(): int {
         arktest.assertTrue( x instanceof Array )
         for(let idx = 0; idx < x.length; idx++) {
             arktest.assertTrue(x[idx] instanceof MyType8)
-        }
-    })
-
-    suite.addTest("function references and null union", () => {
-        let cnt: number = 0
-        let foo = (): number => cnt++
-        let bar = (): number => ++cnt
-        let baz = (): number => cnt--
-        let y = [bar, null, baz, foo]
-        let f = (p: (F9|null)[]) => p
-        let x = f(y)
-        arktest.assertTrue( x instanceof Array )
-        for(let idx = 0; idx < x.length; idx++) {
-            arktest.assertTrue(x[idx] instanceof (F9|null))
         }
     })
 
@@ -204,15 +179,6 @@ function main(): int {
         arktest.assertTrue( x instanceof Array )
         for(let idx = 0; idx < x.length; idx++) {
             arktest.assertTrue(x[idx] instanceof (null|undefined))
-        }
-    })
-
-    suite.addTest("functional type alias element", () => {
-        let x0: MyType19 = (p: string) => { return p.length }
-        let x = [x0]
-        arktest.assertTrue( x instanceof Array )
-        for(let idx = 0; idx < x.length; idx++) {
-            arktest.assertTrue(x[idx] instanceof MyType19)
         }
     })
 

@@ -1265,12 +1265,10 @@ export class DateTimeFormat {
         * @returns An array of supported locales from the input
         */
         public static supportedLocalesOf(locales: string | Locale | FixedArray<string | Locale>): string[] {
-            const supportedLocales = new Array<string>()
-
-            if (locales instanceof FixedArray<string>) {
-                return DisplayNames.bestFitLocales(Array.from(locales))
-            } else if (locales instanceof FixedArray<Locale>) {
-                return DisplayNames.bestFitLocales(Array.from(locales, (loc: Locale) => loc.toString()))
+            if (DisplayNames.isStringFixedArray(locales)) {
+                return DisplayNames.bestFitLocales(DisplayNames.stringFixedArrayToArray(locales))
+            } else if (DisplayNames.isLocaleFixedArray(locales)) {
+                return DisplayNames.bestFitLocales(DisplayNames.localeFixedArrayToArray(locales))
             } else if (locales instanceof string) {
                 return DisplayNames.bestFitLocales(Array.of(locales))
             } else if (locales instanceof Locale) {
@@ -1278,6 +1276,22 @@ export class DateTimeFormat {
             } else {
                 throw new TypeError('"locales" parameter has invalid type')
             }
+        }
+
+        private static isStringFixedArray(value: Object): boolean {
+            return value instanceof FixedArray<string | undefined>
+        }
+
+        private static isLocaleFixedArray(value: Object): boolean {
+            return value instanceof FixedArray<Locale | undefined>
+        }
+
+        private static stringFixedArrayToArray(value: Object): string[] {
+            return Array.from(value as FixedArray<string>)
+        }
+
+        private static localeFixedArrayToArray(value: Object): string[] {
+            return Array.from(value as FixedArray<Locale>, (loc: Locale) => loc.toString())
         }
 
         private static bestFitLocales(locales: Array<string>): string[] {
@@ -2687,7 +2701,9 @@ export class DateTimeFormat {
             if (locales === undefined) {
                 return Locale.defaultTag()
             }
-            const arr = locales instanceof FixedArray<string> ? Array.from(locales) : [locales]
+            const arr = PluralRules.isStringFixedArray(locales)
+                ? PluralRules.stringFixedArrayToArray(locales)
+                : [locales as string]
             return localeMatcher === 'lookup' ? intlLookUpLocale(arr) : intlBestFitLocale(arr)
         }
 
@@ -2714,13 +2730,21 @@ export class DateTimeFormat {
         }
 
         private static toArray(locales: string | FixedArray<string> | Array<string>): string[] {
-            if (locales instanceof FixedArray<string>) {
-                return Array.from(locales)
+            if (PluralRules.isStringFixedArray(locales)) {
+                return PluralRules.stringFixedArrayToArray(locales)
             } else if (locales instanceof string) {
                 return [locales]
             } else {
-                return locales
+                return locales as Array<string>
             }
+        }
+
+        private static isStringFixedArray(value: Object): boolean {
+            return value instanceof FixedArray<string | undefined>
+        }
+
+        private static stringFixedArrayToArray(value: Object): string[] {
+            return Array.from(value as FixedArray<string>)
         }
 
         private static native selectDouble(value: double, options: Object): string

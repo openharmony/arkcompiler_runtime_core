@@ -235,7 +235,7 @@ cases:
           }
       use: |-
           let x = new A<X>(new X)
-          console.log(x.fld instanceof Any)
+          console.log(x.fld instanceof X)
       expected_out: "Semantic error ESE38251: Type 'T' cannot be used on the right hand side of an 'instanceof' expression"
 
     - decl: |-

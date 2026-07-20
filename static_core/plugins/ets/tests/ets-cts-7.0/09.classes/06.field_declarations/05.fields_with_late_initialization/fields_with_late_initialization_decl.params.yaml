@@ -393,65 +393,6 @@ cases:
         arktest.assertEQ(d.field.name, "dog")
         arktest.assertTrue(c.field instanceof Cat)
         arktest.assertEQ(c.field.name, "cat")
-#11
-  - desc: |-
-      >-
-        Checking for initialization from outside of constructor
-        with different covariant function subtype values usage.
-    decl_variants:
-      - |-
-        class A {
-          v: int
-          constructor(v: int = 0) {
-            this.v = v
-          }
-        }
-        class B extends A {
-          constructor(v: int = 0) {
-            super(-v)
-          }
-          field(): int {
-            return 13
-          }
-        }
-        type HandlerBInt = (a: B, b: int) => A
-        type HandlerAInt = (a: A, b: int) => B
-        const handlerAInt: HandlerAInt = (a: A, b: int): B => {
-          if (a instanceof B){
-            return new B(a.field() + b)
-          } else {
-            return new B(b)
-          }
-        }
-        type HandlerA = (a: A) => A
-        const handlerA: HandlerA = (a: A): A => {
-          if (a instanceof B){
-            return new A(a.field())
-          } else {
-            return new A
-          }
-        }
-        type HandlerNothing = () => B
-        const handlerNothing: HandlerNothing = (): B => {
-          return new B(567)
-        }
-        class C {
-          field!: HandlerBInt
-        }
-    sub_cases_logic:
-      - |-
-        let a: C = new C()
-        let b: C = new C()
-        let c: C = new C()
-        a.field = handlerNothing
-        b.field = handlerA
-        c.field = handlerAInt
-        arktest.assertTrue(a.field instanceof HandlerNothing)
-        arktest.assertEQ(a.field(new B, 7).v, -567)
-        arktest.assertTrue(b.field instanceof HandlerA)
-        arktest.assertEQ(b.field(new B, 7).v, 13)
-        arktest.assertTrue(c.field instanceof HandlerAInt)
-        arktest.assertEQ(c.field(new B, 7).v, -20)
 #12
   - desc: |-
       Checking for initialization from function call.
@@ -482,7 +423,7 @@ cases:
         foo(a)
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#13
+#12
   - desc: |-
       Checking for initialization from function call.
     check_variants:
@@ -504,7 +445,7 @@ cases:
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
-#14
+#13
   - desc: |-
       >-
         Checking for initialization from function call
@@ -539,7 +480,7 @@ cases:
         foo(lambda)
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#15
+#14
   - desc: |-
       >-
         Checking for initialization from function call
@@ -566,7 +507,7 @@ cases:
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
-#16
+#15
   - desc: |-
       Checking for initialization with asynchronous API usage.
     async: true
@@ -602,7 +543,7 @@ cases:
         let res = await a.field
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
-#17
+#16
   - desc: |-
       Checking for initialization with asynchronous API usage.
     async: true
@@ -630,7 +571,7 @@ cases:
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
-#18
+#17
   - desc: |-
       Checking for initialization with asynchronous API usage.
     async: true
@@ -664,7 +605,7 @@ cases:
         let res = await a.field
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
-#19
+#18
   - desc: |-
       Checking for initialization with asynchronous API usage.
     async: true
@@ -690,7 +631,7 @@ cases:
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
-#20
+#19
   - desc: |-
       Checking for initialization with asynchronous API usage.
     async: true
@@ -728,7 +669,7 @@ cases:
         arktest.assertEQ(res, [check_value])
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#21
+#20
   - desc: |-
       Checking for initialization with asynchronous API usage.
     async: true
@@ -760,7 +701,7 @@ cases:
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
-#22
+#21
   - desc: |-
         Checking for initialization with asynchronous API usage.
     async: true
@@ -805,7 +746,7 @@ cases:
         arktest.assertEQ(res, [check_value])
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#23
+#22
   - desc: |-
       Checking for initialization with asynchronous API usage.
     async: true
@@ -844,7 +785,7 @@ cases:
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
-#24
+#23
   - desc: |-
       Checking for initialization with overriding usage.
     check_variants:
@@ -886,7 +827,7 @@ cases:
         a.field = [check_value]
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#25
+#24
   - desc: |-
       Checking for initialization with overriding usage.
     check_variants:
@@ -923,7 +864,7 @@ cases:
         arktest.assertEQ(a.field, [base_value])
         a.field = [check_value]
         arktest.assertEQ(a.field, [check_value])
-#26
+#25
   - desc: |-
       Checking for initialization with overriding usage.
     check_variants:
@@ -956,7 +897,7 @@ cases:
         let a: Base = new A()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#27
+#26
   - desc: |-
       Checking for initialization with interface usage.
     check_variants:
@@ -991,7 +932,7 @@ cases:
         a.field = [check_value]
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#28
+#27
   - desc: |-
       >-
         Checking for initialization from constructor
@@ -1055,7 +996,7 @@ cases:
         let b: Base = new A()
         arktest.assertTrue(b.field instanceof [check_type])
         arktest.assertEQ(b.field, [check_value])
-#29
+#28
   - desc: |-
       >-
         Checking for initialization from outside of constructor
@@ -1090,7 +1031,7 @@ cases:
         b.field = [check_value]
         arktest.assertTrue(b.field instanceof [check_type])
         arktest.assertEQ(b.field, [check_value])
-#30
+#29
   - desc: |-
       >-
         Checking for initialization from constructor
@@ -1142,7 +1083,7 @@ cases:
         let a: A = new A()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#31
+#30
   - desc: |-
       >-
         Checking for initialization from outside of constructor

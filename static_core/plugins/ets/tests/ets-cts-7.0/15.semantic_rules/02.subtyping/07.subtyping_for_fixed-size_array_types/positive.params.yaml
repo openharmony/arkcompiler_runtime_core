@@ -20,7 +20,7 @@ cases:
       dtype: |-
           Object
       check: |-
-          FixedArray<Number>
+          FixedArray<Number|undefined>
     - stype: |-
           boolean
       value: |-
@@ -28,7 +28,7 @@ cases:
       dtype: |-
           Object
       check: |-
-          FixedArray<Boolean>
+          FixedArray<Boolean|undefined>
     - stype: |-
           J
       value: |-
@@ -36,7 +36,7 @@ cases:
       dtype: |-
           I
       check: |-
-          FixedArray<J>
+          FixedArray<J|undefined>
     - stype: |-
           bigint
       value: |-
@@ -44,7 +44,7 @@ cases:
       dtype: |-
           Object
       check: |-
-          FixedArray<BigInt>
+          FixedArray<BigInt|undefined>
     - stype: |-
           null
       value: |-
@@ -52,7 +52,7 @@ cases:
       dtype: |-
           Any
       check: |-
-          FixedArray<null>
+          FixedArray<null|undefined>
     - stype: |-
           undefined
       value: |-
@@ -68,7 +68,7 @@ cases:
       dtype: |-
           Base
       check: |-
-          FixedArray<Base>
+          FixedArray<Base|undefined>
     - stype: |-
           String
       value: |-
@@ -76,7 +76,7 @@ cases:
       dtype: |-
           Object
       check: |-
-          FixedArray<String>
+          FixedArray<String|undefined>
     - stype: |-
           'a'
       value: |-
@@ -84,7 +84,7 @@ cases:
       dtype: |-
           Object
       check: |-
-          FixedArray<String>
+          FixedArray<String|undefined>
     - stype: |-
           '1'|'2'|'3'
       value: |-
@@ -92,7 +92,7 @@ cases:
       dtype: |-
           '1'|'2'|'3'|'4'
       check: |-
-          FixedArray<'1'|'2'|'3'>
+          FixedArray<'1'|'2'|'3'|undefined>
     - stype: |-
           Base | Derived
       value: |-
@@ -100,7 +100,7 @@ cases:
       dtype: |-
           Object
       check: |-
-          FixedArray<Base>
+          FixedArray<Base|undefined>
     - stype: |-
           String|Number
       value: |-
@@ -108,7 +108,7 @@ cases:
       dtype: |-
           Object
       check: |-
-          FixedArray<Object>
+          FixedArray<Object|undefined>
     - stype: |-
           Derived
       value: |-
@@ -118,4 +118,4 @@ cases:
       customtype: |-
           yes
       check: |-
-          FixedArray<Derived>
+          FixedArray<Derived|undefined>

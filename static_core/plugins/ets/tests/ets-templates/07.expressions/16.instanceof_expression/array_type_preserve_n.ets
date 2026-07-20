@@ -18,7 +18,7 @@
 /*---
 desc: Array effective type check
 tags: [compile-only, negative]
-expected_out: "Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression."
+expected_out: {{c.expected}}
 ---*/
 
 function pass(value: Any): Any { return value }

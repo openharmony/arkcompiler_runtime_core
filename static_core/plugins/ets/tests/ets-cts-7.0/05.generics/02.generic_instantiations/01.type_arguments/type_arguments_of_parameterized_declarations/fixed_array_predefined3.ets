@@ -53,12 +53,12 @@ function test_double() {
     let v1 = new A<double>
     let fa: FixedArray<double> = [1.5]
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<double>, "expect instanceof FixedArray<double>")
+    arktest.assertTrue(res1 instanceof FixedArray<double | undefined>, "expect instanceof FixedArray<double>")
     arktest.assertEQ(res1.length, 1)
     arktest.assertTrue(res1[0] instanceof double, "expect instanceof double")
     arktest.assertEQ(res1[0], 1.5)
     let res2 = v1.foo_b(2.5)
-    arktest.assertTrue(res2 instanceof FixedArray<double>, "expect instanceof FixedArray<double>")
+    arktest.assertTrue(res2 instanceof FixedArray<double | undefined>, "expect instanceof FixedArray<double>")
     arktest.assertEQ(res2.length, 1)
     arktest.assertTrue(res2[0] instanceof double, "expect instanceof double")
     arktest.assertEQ(res2[0], 2.5)
@@ -74,12 +74,12 @@ function test_float() {
     let v1 = new A<float>
     let fa: FixedArray<float> = [1.5f]
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<float>, "expect instanceof FixedArray<float>")
+    arktest.assertTrue(res1 instanceof FixedArray<float | undefined>, "expect instanceof FixedArray<float>")
     arktest.assertEQ(res1.length, 1)
     arktest.assertTrue(res1[0] instanceof float, "expect instanceof float")
     arktest.assertEQ(res1[0], 1.5f)
     let res2 = v1.foo_b(2.5f)
-    arktest.assertTrue(res2 instanceof FixedArray<float>, "expect instanceof FixedArray<float>")
+    arktest.assertTrue(res2 instanceof FixedArray<float | undefined>, "expect instanceof FixedArray<float>")
     arktest.assertEQ(res2.length, 1)
     arktest.assertTrue(res2[0] instanceof float, "expect instanceof float")
     arktest.assertEQ(res2[0], 2.5f)
@@ -95,12 +95,12 @@ function test_long() {
     let v1 = new A<long>
     let fa: FixedArray<long> = [9223372036854775807]
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<long>, "expect instanceof FixedArray<long>")
+    arktest.assertTrue(res1 instanceof FixedArray<long | undefined>, "expect instanceof FixedArray<long>")
     arktest.assertEQ(res1.length, 1)
     arktest.assertTrue(res1[0] instanceof long, "expect instanceof long")
     arktest.assertEQ(res1[0], 9223372036854775807)
     let res2 = v1.foo_b(123)
-    arktest.assertTrue(res2 instanceof FixedArray<long>, "expect instanceof FixedArray<long>")
+    arktest.assertTrue(res2 instanceof FixedArray<long | undefined>, "expect instanceof FixedArray<long>")
     arktest.assertEQ(res2.length, 1)
     arktest.assertTrue(res2[0] instanceof long, "expect instanceof long")
     arktest.assertEQ(res2[0], 123)
@@ -116,12 +116,12 @@ function test_int() {
     let v1 = new A<int>
     let fa: FixedArray<int> = [2147483647]
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<int>, "expect instanceof FixedArray<int>")
+    arktest.assertTrue(res1 instanceof FixedArray<int | undefined>, "expect instanceof FixedArray<int>")
     arktest.assertEQ(res1.length, 1)
     arktest.assertTrue(res1[0] instanceof int, "expect instanceof int")
     arktest.assertEQ(res1[0], 2147483647)
     let res2 = v1.foo_b(123)
-    arktest.assertTrue(res2 instanceof FixedArray<int>, "expect instanceof FixedArray<int>")
+    arktest.assertTrue(res2 instanceof FixedArray<int | undefined>, "expect instanceof FixedArray<int>")
     arktest.assertEQ(res2.length, 1)
     arktest.assertTrue(res2[0] instanceof int, "expect instanceof int")
     arktest.assertEQ(res2[0], 123)
@@ -137,12 +137,12 @@ function test_short() {
     let v1 = new A<short>
     let fa: FixedArray<short> = [32767]
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<short>, "expect instanceof FixedArray<short>")
+    arktest.assertTrue(res1 instanceof FixedArray<short | undefined>, "expect instanceof FixedArray<short>")
     arktest.assertEQ(res1.length, 1)
     arktest.assertTrue(res1[0] instanceof short, "expect instanceof short")
     arktest.assertEQ(res1[0], 32767)
     let res2 = v1.foo_b(123)
-    arktest.assertTrue(res2 instanceof FixedArray<short>, "expect instanceof FixedArray<short>")
+    arktest.assertTrue(res2 instanceof FixedArray<short | undefined>, "expect instanceof FixedArray<short>")
     arktest.assertEQ(res2.length, 1)
     arktest.assertTrue(res2[0] instanceof short, "expect instanceof short")
     arktest.assertEQ(res2[0], 123)
@@ -158,12 +158,12 @@ function test_byte() {
     let v1 = new A<byte>
     let fa: FixedArray<byte> = [127]
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<byte>, "expect instanceof FixedArray<byte>")
+    arktest.assertTrue(res1 instanceof FixedArray<byte | undefined>, "expect instanceof FixedArray<byte>")
     arktest.assertEQ(res1.length, 1)
     arktest.assertTrue(res1[0] instanceof byte, "expect instanceof byte")
     arktest.assertEQ(res1[0], 127)
     let res2 = v1.foo_b(123)
-    arktest.assertTrue(res2 instanceof FixedArray<byte>, "expect instanceof FixedArray<byte>")
+    arktest.assertTrue(res2 instanceof FixedArray<byte | undefined>, "expect instanceof FixedArray<byte>")
     arktest.assertEQ(res2.length, 1)
     arktest.assertTrue(res2[0] instanceof byte, "expect instanceof byte")
     arktest.assertEQ(res2[0], 123)
@@ -179,12 +179,12 @@ function test_boolean() {
     let v1 = new A<boolean>
     let fa: FixedArray<boolean> = [true]
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<boolean>, "expect instanceof FixedArray<boolean>")
+    arktest.assertTrue(res1 instanceof FixedArray<boolean | undefined>, "expect instanceof FixedArray<boolean>")
     arktest.assertEQ(res1.length, 1)
     arktest.assertTrue(res1[0] instanceof boolean, "expect instanceof boolean")
     arktest.assertEQ(res1[0], true)
     let res2 = v1.foo_b(false)
-    arktest.assertTrue(res2 instanceof FixedArray<boolean>, "expect instanceof FixedArray<boolean>")
+    arktest.assertTrue(res2 instanceof FixedArray<boolean | undefined>, "expect instanceof FixedArray<boolean>")
     arktest.assertEQ(res2.length, 1)
     arktest.assertTrue(res2[0] instanceof boolean, "expect instanceof boolean")
     arktest.assertEQ(res2[0], false)
@@ -200,12 +200,12 @@ function test_char() {
     let v1 = new A<char>
     let fa: FixedArray<char> = [c'x']
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<char>, "expect instanceof FixedArray<char>")
+    arktest.assertTrue(res1 instanceof FixedArray<char | undefined>, "expect instanceof FixedArray<char>")
     arktest.assertEQ(res1.length, 1)
     arktest.assertTrue(res1[0] instanceof char, "expect instanceof char")
     arktest.assertEQ(res1[0], c'x')
     let res2 = v1.foo_b(c'y')
-    arktest.assertTrue(res2 instanceof FixedArray<char>, "expect instanceof FixedArray<char>")
+    arktest.assertTrue(res2 instanceof FixedArray<char | undefined>, "expect instanceof FixedArray<char>")
     arktest.assertEQ(res2.length, 1)
     arktest.assertTrue(res2[0] instanceof char, "expect instanceof char")
     arktest.assertEQ(res2[0], c'y')
@@ -221,12 +221,12 @@ function test_string() {
     let v1 = new A<string>
     let fa: FixedArray<string> = ["abc"]
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<string>, "expect instanceof FixedArray<string>")
+    arktest.assertTrue(res1 instanceof FixedArray<string | undefined>, "expect instanceof FixedArray<string>")
     arktest.assertEQ(res1.length, 1)
     arktest.assertTrue(res1[0] instanceof string, "expect instanceof string")
     arktest.assertEQ(res1[0], "abc")
     let res2 = v1.foo_b("efg")
-    arktest.assertTrue(res2 instanceof FixedArray<string>, "expect instanceof FixedArray<string>")
+    arktest.assertTrue(res2 instanceof FixedArray<string | undefined>, "expect instanceof FixedArray<string>")
     arktest.assertEQ(res2.length, 1)
     arktest.assertTrue(res2[0] instanceof string, "expect instanceof string")
     arktest.assertEQ(res2[0], "efg")
@@ -242,12 +242,12 @@ function test_bigint() {
     let v1 = new A<bigint>
     let fa: FixedArray<bigint> = [5n]
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<bigint>, "expect instanceof FixedArray<bigint>")
+    arktest.assertTrue(res1 instanceof FixedArray<bigint | undefined>, "expect instanceof FixedArray<bigint>")
     arktest.assertEQ(res1.length, 1)
     arktest.assertTrue(res1[0] instanceof bigint, "expect instanceof bigint")
     arktest.assertEQ(res1[0], 5n)
     let res2 = v1.foo_b(123n)
-    arktest.assertTrue(res2 instanceof FixedArray<bigint>, "expect instanceof FixedArray<bigint>")
+    arktest.assertTrue(res2 instanceof FixedArray<bigint | undefined>, "expect instanceof FixedArray<bigint>")
     arktest.assertEQ(res2.length, 1)
     arktest.assertTrue(res2[0] instanceof bigint, "expect instanceof bigint")
     arktest.assertEQ(res2[0], 123n)
@@ -263,12 +263,12 @@ function test_object() {
     let v1 = new A<Object>
     let fa: FixedArray<Object> = ["abc"]
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<Object>, "expect instanceof FixedArray<Object>")
+    arktest.assertTrue(res1 instanceof FixedArray<Object | undefined>, "expect instanceof FixedArray<Object>")
     arktest.assertEQ(res1.length, 1)
     arktest.assertTrue(res1[0] instanceof Object, "expect instanceof Object")
     arktest.assertEQ(res1[0], "abc")
     let res2 = v1.foo_b(5n)
-    arktest.assertTrue(res2 instanceof FixedArray<Object>, "expect instanceof FixedArray<Object>")
+    arktest.assertTrue(res2 instanceof FixedArray<Object | undefined>, "expect instanceof FixedArray<Object>")
     arktest.assertEQ(res2.length, 1)
     arktest.assertTrue(res2[0] instanceof Object, "expect instanceof Object")
     arktest.assertEQ(res2[0], 5n)
@@ -284,19 +284,19 @@ function test_any() {
     let v1 = new A<Any>
     let fa: FixedArray<Any> = ["abc"]
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<Any>, "expect instanceof FixedArray<Any>")
+    arktest.assertTrue(res1 instanceof FixedArray<Any | undefined>, "expect instanceof FixedArray<Any | undefined>")
     arktest.assertEQ(res1.length, 1)
-    arktest.assertTrue(res1[0] instanceof Any, "expect instanceof Any")
+    arktest.assertTrue(res1[0] instanceof string, "expect instanceof string")
     arktest.assertEQ(res1[0], "abc")
     let res2 = v1.foo_b(5n)
-    arktest.assertTrue(res2 instanceof FixedArray<Any>, "expect instanceof FixedArray<Any>")
+    arktest.assertTrue(res2 instanceof FixedArray<Any | undefined>, "expect instanceof FixedArray<Any | undefined>")
     arktest.assertEQ(res2.length, 1)
-    arktest.assertTrue(res2[0] instanceof Any, "expect instanceof Any")
+    arktest.assertTrue(res2[0] instanceof bigint, "expect instanceof bigint")
     arktest.assertEQ(res2[0], 5n)
     let res3 = v1.change(null, 0, fa)
-    arktest.assertTrue(fa[0] instanceof Any, "expect instanceof Any")
+    arktest.assertTrue(fa[0] instanceof null, "expect instanceof null")
     arktest.assertEQ(fa[0], null)
-    arktest.assertTrue(res3 instanceof Any, "expect instanceof Any")
+    arktest.assertTrue(res3 instanceof null, "expect instanceof null")
     arktest.assertEQ(res3, null)
 }
 
@@ -305,12 +305,12 @@ function test_null() {
     let v1 = new A<null>
     let fa: FixedArray<null> = [null]
     let res1 = v1.foo_a(fa)
-    arktest.assertTrue(res1 instanceof FixedArray<null>, "expect instanceof FixedArray<null>")
+    arktest.assertTrue(res1 instanceof FixedArray<null | undefined>, "expect instanceof FixedArray<null>")
     arktest.assertEQ(res1.length, 1)
     arktest.assertTrue(res1[0] instanceof null, "expect instanceof null")
     arktest.assertEQ(res1[0], null)
     let res2 = v1.foo_b(null)
-    arktest.assertTrue(res2 instanceof FixedArray<null>, "expect instanceof FixedArray<null>")
+    arktest.assertTrue(res2 instanceof FixedArray<null | undefined>, "expect instanceof FixedArray<null>")
     arktest.assertEQ(res2.length, 1)
     arktest.assertTrue(res2[0] instanceof null, "expect instanceof null")
     arktest.assertEQ(res2[0], null)

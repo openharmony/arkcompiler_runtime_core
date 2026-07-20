@@ -33,7 +33,7 @@ cases:
       use: >-
           ((): Object => x)() instanceof FixedArray<number>
       expected_out: |-
-            Type parameter is erased
+            Semantic error ESE38251: Type 'FixedArray<number>' cannot be used on the right hand side of an 'instanceof' expression
 
     # FixedArray<int>: same issue
     - decl: |-
@@ -41,7 +41,7 @@ cases:
       use: >-
           ((): Object => x)() instanceof FixedArray<int>
       expected_out: |-
-            Type parameter is erased
+            Semantic error ESE38251: Type 'FixedArray<int>' cannot be used on the right hand side of an 'instanceof' expression
 
     # FixedArray<string>: same issue
     - decl: |-
@@ -49,7 +49,7 @@ cases:
       use: >-
           ((): Object => x)() instanceof FixedArray<string>
       expected_out: |-
-            Type parameter is erased
+            Semantic error ESE38251: Type 'FixedArray<string>' cannot be used on the right hand side of an 'instanceof' expression
 
     # Union of FixedArray with non-undefined element types: all constituents not preserved → CTE
     - decl: |-
@@ -57,7 +57,7 @@ cases:
       use: >-
           x instanceof FixedArray<number> | FixedArray<string>
       expected_out: |-
-            Type parameter is erased
+            Semantic error ESE38251: Type '(FixedArray<number> | FixedArray<string>)' cannot be used on the right hand side of an 'instanceof' expression
 
     # Nested FixedArray: inner FixedArray<int> not preserved up to undefined
     - decl: |-
@@ -65,4 +65,4 @@ cases:
       use: >-
           ((): Object => x)() instanceof FixedArray<FixedArray<int>>
       expected_out: |-
-            Type parameter is erased
+            Semantic error ESE38251: Type 'FixedArray<FixedArray<int>>' cannot be used on the right hand side of an 'instanceof' expression

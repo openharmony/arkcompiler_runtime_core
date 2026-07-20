@@ -129,7 +129,7 @@ cases:
         }
       use: |-
         let z = new Cls().foo<Any>(null)
-        arktest.assertTrue(z instanceof Any)
+        arktest.assertTrue(z instanceof null)
     - decl: |-
         class Cls {
             foo<T>(p: T): T {

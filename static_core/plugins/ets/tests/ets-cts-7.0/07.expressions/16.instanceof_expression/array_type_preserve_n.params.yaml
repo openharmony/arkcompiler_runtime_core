@@ -19,14 +19,23 @@ cases:
     - expr: |-
           let a: FixedArray<Array<Int>> = [[1, 2], [3, 4], [5,6]]
           let t = pass(a) instanceof FixedArray<Array<Int>>
+      expected: |-
+           "Semantic error ESE38251: Type 'FixedArray<Array<Int>>' cannot be used on the right hand side of an 'instanceof' expression"
+
     - expr: |-
           let a: FixedArray<Array<string>> = [["one", "two"]]
           let t = pass(a) instanceof FixedArray<Array<string>>
+      expected: |-
+           "Semantic error ESE38251: Type 'FixedArray<Array<string>>' cannot be used on the right hand side of an 'instanceof' expression"
+
     - expr: |-
           let a: FixedArray<(p: number) => void> = [(p: number) => {}, (p: number) => {}]
           let t = pass(a) instanceof FixedArray<(p: number) => void>
+      expected: |-
+           "Semantic error ESE38251: Type 'FixedArray<((p: number)=> void)>' cannot be used on the right hand side of an 'instanceof' expression"
+
     - expr: |-
           let a: FixedArray<[int, string, boolean]> = [[0, "0", false], [1, "1", true]]
           let t = pass(a) instanceof FixedArray<[int, string, boolean]>
-
-
+      expected: |-
+          "Semantic error ESE38251: Type 'FixedArray<[int, string, boolean]>' cannot be used on the right hand side of an 'instanceof' expression"

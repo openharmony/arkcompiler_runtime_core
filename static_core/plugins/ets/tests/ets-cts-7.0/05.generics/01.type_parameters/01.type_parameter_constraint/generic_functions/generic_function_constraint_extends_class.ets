@@ -29,9 +29,9 @@ function foo<T extends A>() {}
 function bar<T extends A | C>() {}
 
 function main(): void {
-    arktest.assertTrue(foo<A>() instanceof Any, "instanceof foo<A>()")
-    arktest.assertTrue(foo<B>() instanceof Any, "instanceof foo<B>()")
-    arktest.assertTrue(bar<A>() instanceof Any, "instanceof bar<A>()")
-    arktest.assertTrue(bar<B>() instanceof Any, "instanceof bar<B>()")
-    arktest.assertTrue(bar<C>() instanceof Any, "instanceof bar<C>()")
+    arktest.assertTrue(foo<A>() instanceof undefined, "instanceof foo<A>()")
+    arktest.assertTrue(foo<B>() instanceof undefined, "instanceof foo<B>()")
+    arktest.assertTrue(bar<A>() instanceof undefined, "instanceof bar<A>()")
+    arktest.assertTrue(bar<B>() instanceof undefined, "instanceof bar<B>()")
+    arktest.assertTrue(bar<C>() instanceof undefined, "instanceof bar<C>()")
 }

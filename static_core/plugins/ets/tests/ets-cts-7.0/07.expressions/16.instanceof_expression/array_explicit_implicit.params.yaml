@@ -112,13 +112,6 @@ cases:
     decl: 'enum Color { Red, Green, Blue }'
     init: '[Color.Red, Color.Green]'
 
-  - type: 'foo_type[]'
-    effective_elem_type: 'foo_type'
-    decl: |-
-      type foo_type = (a: string) => string
-      let elem: foo_type = (a: string) => a
-    init: '[elem, elem]'
-
 syntax:
   - 'explicit'
   - 'implicit'

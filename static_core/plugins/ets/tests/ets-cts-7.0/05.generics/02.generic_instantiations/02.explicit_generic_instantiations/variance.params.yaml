@@ -18,12 +18,8 @@ cases:
         let cls = new Cls<Base>(new Derived())
         arktest.assertTrue(cls.a instanceof Derived)
     - use: |-
-        let cls = new Cls<fooBaseType>(fooSubtype)
-        arktest.assertTrue(cls.a instanceof fooBaseType)
-    - use: |-
         let cls = new Cls<[Base, fooBaseType]>([new Derived(), fooSubtype])
         arktest.assertTrue(cls.a[0] instanceof Derived)
-        arktest.assertTrue(cls.a[1] instanceof fooBaseType)
     - use: |-
         let cls = new Cls<FixedArray<Base>>([new Derived()])
         arktest.assertTrue(cls.a[0] instanceof Derived)
@@ -31,17 +27,8 @@ cases:
           let cls = new Cls<Base | fooBaseType>(new Derived())
           arktest.assertTrue(cls.a instanceof Derived)
     - use: |-
-          let cls = new Cls<Base | fooBaseType>(fooSubtype)
-          arktest.assertTrue(cls.a instanceof fooBaseType)
-    - use: |-
           let cls = new Cls<Array<Base>>([new Derived()])
           arktest.assertTrue(cls.a[0] instanceof Derived)
     - use: |-
-          let cls = new Cls<Array<fooBaseType>>([fooSubtype])
-          arktest.assertTrue(cls.a[0] instanceof fooBaseType)
-    - use: |-
           let cls = new Cls<Base[]>([new Derived()])
           arktest.assertTrue(cls.a[0] instanceof Derived)
-    - use: |-
-          let cls = new Cls<fooBaseType[]>([fooSubtype])
-          arktest.assertTrue(cls.a[0] instanceof fooBaseType)

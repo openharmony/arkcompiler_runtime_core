@@ -26,7 +26,7 @@ function main() {
     let t: Tuple = tuple;
     arktest.assertTrue(tuple instanceof Tuple)
     arktest.assertTrue(obj instanceof Object)
-    arktest.assertTrue(a instanceof Any)
+    arktest.assertTrue(a instanceof Tuple)
     arktest.assertTrue(t instanceof Tuple)
     arktest.assertEQ(tuple[0], {{c.expected_value}})
     arktest.assertEQ(obj[0], {{c.expected_value}})

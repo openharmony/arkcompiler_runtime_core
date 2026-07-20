@@ -25,6 +25,6 @@ function main() {
     let arrObj: FixedArray<Object> = arrA
     arktest.assertTrue(arrObj[0] instanceof A)
     arktest.assertTrue(arrObj[0] instanceof Object)
-    arktest.assertTrue(arrObj instanceof FixedArray<A>)
-    arktest.assertTrue(arrObj instanceof FixedArray<Object>)
+    arktest.assertTrue(arrObj instanceof FixedArray<A | undefined>)
+    arktest.assertTrue(arrObj instanceof FixedArray<Object | undefined>)
 }

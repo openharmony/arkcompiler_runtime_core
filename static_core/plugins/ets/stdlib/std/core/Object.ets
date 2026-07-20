@@ -76,7 +76,7 @@ export class Object {
 
         const thisType = Class.of(thisObj)
         if (thisType.isFixedArray()) {
-            if (thisObj instanceof FixedArray<Any>) {
+            if (thisObj instanceof FixedArray<Any | undefined>) {
                 const len = thisObj.length
                 if (len == 0) {
                     return ""

@@ -27,6 +27,6 @@ function main() {
     arrA = arrB
     arktest.assertTrue(arrA[0] instanceof B)
     arktest.assertTrue(arrA[0] instanceof A)
-    arktest.assertTrue(arrA instanceof FixedArray<A>)
-    arktest.assertTrue(arrA instanceof FixedArray<B>)
+    arktest.assertTrue(arrA instanceof FixedArray<A | undefined>)
+    arktest.assertTrue(arrA instanceof FixedArray<B | undefined>)
 }

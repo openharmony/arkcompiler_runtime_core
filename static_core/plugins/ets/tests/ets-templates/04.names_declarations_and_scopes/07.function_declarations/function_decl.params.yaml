@@ -38,16 +38,6 @@ function_decls:
         let arr: int[] = foo();
         arktest.assertTrue( arr instanceof Array && arr.length == 1 )
 
-    # no params, return function
-    - decl: |-
-        function bar() {}
-        function foo(): () => void {
-            return bar;
-        }
-      call: |-
-        let f: () => void = foo();
-        arktest.assertTrue( f instanceof (() => void) )
-
     # no params, return reference type
     - decl: |-
         function foo(): Long { return new Long(); }

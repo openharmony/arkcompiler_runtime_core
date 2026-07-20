@@ -27,6 +27,9 @@ function cast(a: Any) {
 }
 
 function main(): void {
-    arktest.assertTrue(cast({{c.expr}}) instanceof object, "this assert uses return value")
+    arktest.expectNoThrow(() => {
+        // below assert prevents optimising unused return value
+        arktest.assertTrue(cast({{c.expr}}) instanceof object, "this assert uses return value")
+    })
 }
 {% endfor %}

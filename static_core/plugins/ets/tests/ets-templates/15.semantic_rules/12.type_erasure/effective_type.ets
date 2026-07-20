@@ -19,8 +19,9 @@ test_suffix: "{{c.test_suffix}}_{{loop.index}}"
 ---*/
 {{c.decl}}
 
+{%- set instanceof_type = c.instanceof_type if c.instanceof_type is defined else c.effective_type %}
 function verify_effective_type(value: Any, kind:string) {
-  arktest.assertTrue(value instanceof ({{c.effective_type}}), "expect instance of {{c.effective_type}} " + kind)
+  arktest.assertTrue(value instanceof ({{instanceof_type}}), "expect instance of {{c.effective_type}} " + kind)
 }
 
 function main() {

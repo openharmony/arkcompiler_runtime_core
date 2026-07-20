@@ -26,7 +26,7 @@ cases:
           let x: FixedArray<string> = ['']
       use: |-
           arktest.assertTrue(
-              ((): Object => x)() instanceof FixedArray<string> // OK
+              ((): Object => x)() instanceof FixedArray<string|undefined> // OK
           )
 
     #02 union with Array
@@ -42,7 +42,7 @@ cases:
           let x: FixedArray<int>|Promise<long>|Array<string> = ['']
       use: |-
           arktest.assertTrue(
-              ((): Object => x)() instanceof FixedArray<int>|Promise|Array // OK
+              ((): Object => x)() instanceof FixedArray<int|undefined>|Promise|Array // OK
           )
 
     #04 union with various elements

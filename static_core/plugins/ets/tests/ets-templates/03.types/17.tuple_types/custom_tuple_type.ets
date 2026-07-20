@@ -17,7 +17,6 @@
 desc: Custom tuple type declaration and possibility to use in instanceof expression.
 ---*/
 
-type OtherTuple = [char, int, null]
 {% for c in cases %}
 type MyTuple{{loop.index0}} = {{c.type}}
 {% endfor %}
@@ -29,10 +28,10 @@ function main(): int {
     myTestsuite.addTest("custom_tuple_type_test_{{loop.index0}}", () => {
         let tuple: MyTuple{{loop.index0}} = {{c.value}};
         let arrTuple: Array<MyTuple{{loop.index0}}> = [{{c.value}}];
-        arktest.assertTrue(tuple instanceof MyTuple{{loop.index0}})
-        arktest.assertTrue(arrTuple[0] instanceof MyTuple{{loop.index0}})
-        arktest.assertFalse(tuple instanceof OtherTuple)
-        arktest.assertFalse(arrTuple[0] instanceof OtherTuple)
+        arktest.assertTrue(tuple instanceof Tuple2)
+        arktest.assertTrue(arrTuple[0] instanceof Tuple2)
+        arktest.assertFalse(tuple instanceof Tuple3)
+        arktest.assertFalse(arrTuple[0] instanceof Tuple3)
     });
     {% endfor %}
     return myTestsuite.run();
