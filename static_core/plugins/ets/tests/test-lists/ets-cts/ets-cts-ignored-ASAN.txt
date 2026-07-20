@@ -1,2 +1,0 @@
-#33212
-07.expressions/15.new_expressions/class_instance_creation_expressions_8.ets
