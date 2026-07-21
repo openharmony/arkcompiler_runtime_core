@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,29 @@
 
 #include "inspector.h"
 
+#include <algorithm>
+#include <array>
+#include <chrono>
 #include <functional>
 #include <string>
+#include <thread>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 #include "debugger/breakpoint.h"
 #include "libarkbase/macros.h"
 #include "libarkbase/os/mutex.h"
+#include "libarkbase/os/thread.h"
 #include "runtime.h"
 #include "libarkbase/utils/logger.h"
+#include "mem/heap_manager.h"
+#include "mem/gc/gc.h"
+#include "mem/gc/gc_root.h"
+#include "mem/rendezvous.h"
+#include "include/mutator.h"
+#include "include/tooling/pt_lang_extension.h"
+#include "hprof/heap_dump.h"
 
 #include "error.h"
 #include "evaluation/base64.h"
@@ -786,6 +799,104 @@ Expected<Profile, std::string> Inspector::ProfilerStop()
     return Profile(std::move(profileInfoPtr));
 }
 
+static RootCategory MapRootCategory(mem::RootType type)
+{
+    switch (type) {
+        case mem::RootType::ROOT_CLASS:
+        case mem::RootType::ROOT_CLASS_LINKER:
+            return RootCategory::CLASS;
+        case mem::RootType::ROOT_FRAME:
+        case mem::RootType::ROOT_THREAD:
+        case mem::RootType::ROOT_NATIVE_LOCAL:
+        case mem::RootType::ROOT_PT_LOCAL:
+            return RootCategory::FRAME;
+        case mem::RootType::ROOT_NATIVE_GLOBAL:
+            return RootCategory::GLOBAL;
+        case mem::RootType::ROOT_VM:
+            return RootCategory::VM;
+        case mem::RootType::STRING_TABLE:
+        case mem::RootType::ROOT_AOT_STRING_SLOT:
+            return RootCategory::STRING;
+        default:
+            return RootCategory::OTHER;
+    }
+}
+
+static bool TryExecRequest(DebuggableThread &dbgThread, const std::function<void(ObjectRepository &)> &request)
+{
+    if (dbgThread.IsPaused()) {
+        return dbgThread.RequestToObjectRepository(request);
+    }
+    dbgThread.Pause();
+    constexpr auto SUSPEND_TIMEOUT = std::chrono::seconds(3);
+    const auto timeout = std::chrono::steady_clock::now() + SUSPEND_TIMEOUT;
+    while (!dbgThread.IsPaused()) {
+        if (std::chrono::steady_clock::now() >= timeout) {
+            dbgThread.Continue();
+            LOG(INFO, DEBUGGER) << "HeapProfiler.takeHeapSnapshot: thread did not suspend in time";
+            return false;
+        }
+        os::thread::NativeSleep(1U);
+    }
+    bool done = dbgThread.RequestToObjectRepository(request);
+    dbgThread.Continue();
+    return done;
+}
+
+HeapSnapshotModel Inspector::HeapProfilerTakeSnapshot()
+{
+    os::memory::ReadLockHolder lock(vmDeathLock_);
+    if (UNLIKELY(CheckVmDead())) {
+        return {};
+    }
+
+    auto *vm = Runtime::GetCurrent()->GetPandaVM();
+    std::vector<arkplatform::NodeInfo> nodes;
+    std::vector<arkplatform::EdgeInfo> edges;
+    std::vector<RootInfo> roots;
+
+    auto collectSnapshot = [vm, &nodes, &edges, &roots](ObjectRepository &objectRepository) {
+        auto *thread = ManagedThread::GetCurrent();
+        ScopedChangeMutatorStatus scms(thread, MutatorStatus::RUNNING);
+        ScopedSuspendAllThreadsRunning ssatr(thread->GetVM()->GetRendezvous());
+        auto *gc = vm->GetGC();
+        if (gc != nullptr) {
+            GCTask task(GCTaskCause::OOM_CAUSE);
+            gc->WaitForGCInManaged(task);
+        }
+        auto *langExt = objectRepository.GetPtLangExt();
+        hprof::HeapDump::WeakEdgeChecker weakChecker = [langExt](ObjectHeader *object, const Field &field) {
+            return langExt->IsWeakReferentField(object, field);
+        };
+        vm->GetHeapManager()->IterateOverObjects([&nodes, &edges, &weakChecker](ObjectHeader *obj) {
+            nodes.push_back(hprof::HeapDump::ObjectToNodeInfo(obj));
+            hprof::HeapDump::DumpReferences(reinterpret_cast<uint64_t>(obj), edges, weakChecker);
+        });
+        GCRootVisitor collectRoot = [&roots](mem::GCRoot root) {
+            auto *obj = root.GetObjectHeader();
+            if (obj != nullptr) {
+                roots.push_back({reinterpret_cast<uint64_t>(obj), MapRootCategory(root.GetType())});
+            }
+        };
+        if (gc != nullptr) {
+            gc->VisitRoots(collectRoot, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+        }
+        vm->VisitStringTable(collectRoot, mem::VisitGCRootFlags::ACCESS_ROOT_ALL);
+    };
+
+    bool collected = std::any_of(threads_.begin(), threads_.end(), [&](auto &threadEntry) {
+        return TryExecRequest(threadEntry.second, collectSnapshot);
+    });
+    if (!collected) {
+        LOG(INFO, DEBUGGER) << "HeapProfiler.takeHeapSnapshot: could not collect snapshot, returning empty one";
+    } else {
+        LOG(INFO, DEBUGGER) << "HeapProfiler.takeHeapSnapshot: " << nodes.size() << " nodes, " << edges.size()
+                            << " edges, " << roots.size() << " roots";
+    }
+
+    return HeapSnapshotModel {std::move(nodes), std::move(edges), std::move(roots)};
+}
+
 void Inspector::DebuggerEnable()
 {
     os::memory::WriteLockHolder lock(debuggerEventsLock_);
@@ -844,6 +955,9 @@ void Inspector::RegisterMethodHandlers()
     inspectorServer_.OnCallProfilerSetSamplingInterval(std::bind(&Inspector::ProfilerSetSamplingInterval, this, _1));
     inspectorServer_.OnCallProfilerStart(std::bind(&Inspector::ProfilerStart, this));
     inspectorServer_.OnCallProfilerStop(std::bind(&Inspector::ProfilerStop, this));
+    inspectorServer_.OnCallHeapProfilerEnable();
+    inspectorServer_.OnCallHeapProfilerDisable();
+    inspectorServer_.OnCallHeapProfilerTakeHeapSnapshot(std::bind(&Inspector::HeapProfilerTakeSnapshot, this));
     // NOLINTEND(modernize-avoid-bind)
 }
 }  // namespace ark::tooling::inspector

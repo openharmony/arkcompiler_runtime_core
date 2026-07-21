@@ -30,6 +30,7 @@ set(ARKINSPECTOR_ROOTS
     init.cpp
     inspector.cpp
     inspector_server.cpp
+    hprof/heap_snapshot_serializer.cpp
     json_serialization/jrpc_error.cpp
     session_manager.cpp
     source_manager.cpp

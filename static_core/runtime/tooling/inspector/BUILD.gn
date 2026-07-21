@@ -27,6 +27,7 @@ libarkinspector_sources = [
   "debugger/thread_state.cpp",
   "error.cpp",
   "evaluation/evaluation_engine.cpp",
+  "hprof/heap_snapshot_serializer.cpp",
   "init.cpp",
   "inspector.cpp",
   "inspector_server.cpp",
@@ -74,6 +75,7 @@ ohos_shared_library("libarkinspector") {
     ":libarkinspector_config",
   ]
   external_deps = [
+    "toolchain:libark_toolchain_log",
     "toolchain:libwebsocket_server",
     sdk_libc_secshared_ext_dep,
   ]
@@ -87,6 +89,8 @@ ohos_shared_library("libarkinspector") {
   ]
   sources = libarkinspector_sources
   include_dirs = [
+    "$arkplatform_root",
+    "$ark_root/runtime",
     "$ark_root/runtime/include",
     "$ark_root/runtime/tooling",
     "$ark_root/runtime/tooling/inspector",

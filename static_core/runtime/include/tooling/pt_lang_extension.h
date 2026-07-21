@@ -24,6 +24,10 @@
 #include <functional>
 #include <string>
 
+namespace ark {
+class Field;
+}  // namespace ark
+
 namespace ark::tooling {
 class PtLangExt {
 public:
@@ -42,6 +46,10 @@ public:
     virtual std::optional<size_t> GetLengthIfArray(const ObjectHeader *object) = 0;
     virtual void EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler) = 0;
     virtual void EnumerateGlobals(const PropertyHandler &handler) = 0;
+    virtual bool IsWeakReferentField([[maybe_unused]] ObjectHeader *object, [[maybe_unused]] const Field &field)
+    {
+        return false;
+    }
     virtual std::string_view GetThisParameterName() const
     {
         return "this";

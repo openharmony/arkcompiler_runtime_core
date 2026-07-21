@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <string>
+
 #include "runtime/tooling/hprof/heap_dump.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/panda_vm.h"
@@ -49,10 +51,14 @@ std::string HeapDump::GetNodeName(ObjectHeader *object)
     }
     if (cls->IsStringClass()) {
         auto *strObject = coretypes::String::Cast(object);
-        if (strObject->GetLength() > 0 && !strObject->IsUtf16()) {
-            return std::string(reinterpret_cast<const char *>(strObject->GetDataMUtf8()), strObject->GetUtf8Length());
+        size_t len = strObject->GetUtf8Length();
+        if (len == 0) {
+            return "";
         }
-        return "";
+        std::string out(len, '\0');
+        size_t copied = strObject->CopyDataRegionUtf8(reinterpret_cast<uint8_t *>(out.data()), 0, len, len);
+        out.resize(copied);
+        return out;
     }
     if (cls->IsClassClass()) {
         auto *runtimeCls = Class::FromClassObject(object);
@@ -102,27 +108,52 @@ void HeapDump::IterateAllObjects(PandaVM *vm, const std::function<void(uint64_t)
     heapManager->IterateOverObjects(visitor);
 }
 
+static const Field *FindInstanceFieldByOffset(Class *cls, uint32_t offset)
+{
+    for (auto &field : cls->GetInstanceFields()) {
+        if (field.GetOffset() == offset) {
+            return &field;
+        }
+    }
+    return nullptr;
+}
+
+static const Field *FindStaticFieldByOffset(Class *cls, uint32_t offset)
+{
+    for (auto &field : cls->GetStaticFields()) {
+        if (field.GetOffset() == offset) {
+            return &field;
+        }
+    }
+    return nullptr;
+}
+
 void HeapDump::DumpObjectFields(ObjectHeader *object, std::vector<arkplatform::EdgeInfo> &edges,
                                 const WeakEdgeChecker &checker)
 {
-    auto *cls = object->ClassAddr<Class>();
     auto addr = reinterpret_cast<uint64_t>(object);
-    do {
-        for (auto &field : cls->GetInstanceFields()) {
-            if (field.GetTypeId() != panda_file::Type::TypeId::REFERENCE) {
-                continue;
-            }
-            ObjectHeader *toObject = object->GetFieldObject(field.GetOffset());
-            if (toObject == nullptr) {
-                continue;
-            }
-            auto edgeType = IsWeakReferentEdge(object, field, checker) ? arkplatform::StaticEdgeType::WEAK
-                                                                       : arkplatform::StaticEdgeType::PROPERTY;
-            edges.push_back(arkplatform::EdgeInfo {edgeType, addr, reinterpret_cast<uint64_t>(toObject),
-                                                   mem::GetFieldName(field), 0});
+    for (auto *cls = object->ClassAddr<Class>(); cls != nullptr; cls = cls->GetBase()) {
+        uint32_t refNum = cls->GetRefFieldsNum<false>();
+        if (refNum == 0) {
+            continue;
         }
-        cls = cls->GetBase();
-    } while (cls != nullptr);
+        uint32_t offset = cls->GetRefFieldsOffset<false>();
+        uint32_t refVolatileNum = cls->GetVolatileRefFieldsNum<false>();
+        for (uint32_t i = 0; i < refNum; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
+            bool isVolatile = (i < refVolatileNum);
+            ObjectHeader *targetObject =
+                isVolatile ? object->GetFieldObject<true>(offset) : object->GetFieldObject<false>(offset);
+            if (targetObject == nullptr) {
+                continue;
+            }
+            const Field *field = FindInstanceFieldByOffset(cls, offset);
+            auto edgeType = (field != nullptr && IsWeakReferentEdge(object, *field, checker))
+                                ? arkplatform::StaticEdgeType::WEAK
+                                : arkplatform::StaticEdgeType::PROPERTY;
+            edges.push_back(arkplatform::EdgeInfo {edgeType, addr, reinterpret_cast<uint64_t>(targetObject),
+                                                   field != nullptr ? mem::GetFieldName(*field) : std::string(), 0});
+        }
+    }
 }
 
 void HeapDump::DumpArrayElements(ObjectHeader *object, Class *cls, std::vector<arkplatform::EdgeInfo> &edges)
@@ -134,10 +165,10 @@ void HeapDump::DumpArrayElements(ObjectHeader *object, Class *cls, std::vector<a
     auto *array = coretypes::Array::Cast(object);
     for (ArraySizeT arrIndex = 0; arrIndex < array->GetLength(); ++arrIndex) {
         auto offset = arrIndex * cls->GetComponentSize();
-        ObjectHeader *toObject = array->GetObject(offset);
-        if (toObject != nullptr) {
+        ObjectHeader *targetObject = array->GetObject(offset);
+        if (targetObject != nullptr) {
             edges.push_back(arkplatform::EdgeInfo {arkplatform::StaticEdgeType::ELEMENT, addr,
-                                                   reinterpret_cast<uint64_t>(toObject), "",
+                                                   reinterpret_cast<uint64_t>(targetObject), "",
                                                    static_cast<uint32_t>(arrIndex)});
         }
     }
@@ -154,20 +185,25 @@ void HeapDump::DumpClassStaticFields(ObjectHeader *object, std::vector<arkplatfo
         return;
     }
     auto addr = reinterpret_cast<uint64_t>(object);
-    for (auto &field : runtimeCls->GetStaticFields()) {
-        if (field.GetTypeId() != panda_file::Type::TypeId::REFERENCE) {
+    uint32_t refNum = runtimeCls->GetRefFieldsNum<true>();
+    if (refNum == 0) {
+        return;
+    }
+    uint32_t offset = runtimeCls->GetRefFieldsOffset<true>();
+    uint32_t refVolatileNum = runtimeCls->GetVolatileRefFieldsNum<true>();
+    for (uint32_t i = 0; i < refNum; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
+        bool isVolatile = (i < refVolatileNum);
+        ObjectHeader *targetObject =
+            isVolatile ? runtimeCls->GetFieldObject<true>(offset) : runtimeCls->GetFieldObject<false>(offset);
+        if (targetObject == nullptr) {
             continue;
         }
-
-        ObjectHeader *toObject = runtimeCls->GetFieldObject(field.GetOffset());
-        if (toObject == nullptr) {
-            continue;
-        }
-
-        auto edgeType = IsWeakReferentEdge(object, field, checker) ? arkplatform::StaticEdgeType::WEAK
-                                                                   : arkplatform::StaticEdgeType::PROPERTY;
-        edges.push_back(
-            arkplatform::EdgeInfo {edgeType, addr, reinterpret_cast<uint64_t>(toObject), mem::GetFieldName(field), 0});
+        const Field *field = FindStaticFieldByOffset(runtimeCls, offset);
+        auto edgeType = (field != nullptr && IsWeakReferentEdge(object, *field, checker))
+                            ? arkplatform::StaticEdgeType::WEAK
+                            : arkplatform::StaticEdgeType::PROPERTY;
+        edges.push_back(arkplatform::EdgeInfo {edgeType, addr, reinterpret_cast<uint64_t>(targetObject),
+                                               field != nullptr ? mem::GetFieldName(*field) : std::string(), 0});
     }
 }
 

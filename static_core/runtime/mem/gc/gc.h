@@ -521,6 +521,14 @@ public:
         return startupLimit;
     }
 
+    /**
+     * @brief Visit all non-heap GC roots (thread stacks/frames, loaded classes, VM roots, string
+     *        table, etc.)
+     * @param gcRootVisitor callback invoked for every visited GC root
+     * @param flags bit set selecting which root categories to visit (see VisitGCRootFlags)
+     */
+    virtual void VisitRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) = 0;
+
 protected:
     /// @brief Runs all phases
     void RunPhases(GCTask &task);
@@ -548,7 +556,6 @@ protected:
         }
     }
 
-    virtual void VisitRoots(const GCRootVisitor &gcRootVisitor, VisitGCRootFlags flags) = 0;
     virtual void VisitClassRoots(const GCRootVisitor &gcRootVisitor) = 0;
     virtual void VisitCardTableRoots(CardTable *cardTable, const GCRootVisitor &gcRootVisitor,
                                      const MemRangeChecker &rangeChecker, const ObjectChecker &rangeObjectChecker,

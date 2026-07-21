@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@
 
 #include "common.h"
 #include "inspector_server.h"
+#include "hprof/heap_snapshot_serializer.h"
 #include "runtime/tooling/tools.h"
 #include "libarkbase/os/mutex.h"
 #include "types/evaluation_result.h"
@@ -123,6 +124,7 @@ private:
     void ProfilerSetSamplingInterval(uint32_t interval);
     Expected<bool, std::string> ProfilerStart();
     Expected<Profile, std::string> ProfilerStop();
+    HeapSnapshotModel HeapProfilerTakeSnapshot();
 
     ALWAYS_INLINE bool CheckVmDead() REQUIRES_SHARED(vmDeathLock_)
     {
