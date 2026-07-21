@@ -17,7 +17,7 @@ Key areas:
 
 | Scenario / Keywords | Read first |
 |---|---|
-| `.ap` / profile save-load / inline cache / branch profile / throw profile / class context | `docs/knowledge/profile-data.md` |
+| `.ap` / profile / inline cache / branch profile or cost / throw / class context | `docs/knowledge/profile-data.md` |
 | AOT PGO / `--paoc-use-profile` / profile mismatch | `../../compiler/docs/knowledge/aot-workflow.md`, `../../compiler/docs/aot_pgo.md`, `docs/knowledge/profile-data.md` |
 | JIT hotness / JIT runtime orchestration / code install | `../../compiler/docs/knowledge/jit-workflow.md`, `../compiler*.h`, `../compiler_*.h` |
 | OSR trigger / OSR execution | `../../compiler/docs/knowledge/osr-workflow.md`, `../osr.*`, `../arch/*/osr_*` |
