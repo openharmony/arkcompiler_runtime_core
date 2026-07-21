@@ -86,7 +86,8 @@ function testI32Array() {
 function testI32ArrayRangeerror() {
     let src = new Int32Array([1, 1, 1])
     let val: int = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r3 = src.with(-1 as int, val);
+    arktest.assertEQ(r3.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -102,7 +103,8 @@ function testU32Array() {
 function testU32ArrayRangeerror() {
     let src = new Uint32Array([1, 1, 1])
     let val: long = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r3 = src.with(-1 as int, val);
+    arktest.assertEQ(r3.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -118,7 +120,8 @@ function testI64Array() {
 function testI64ArrayRangeerror() {
     let src = new BigInt64Array([1, 1, 1])
     let val: long = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r3 = src.with(-1 as int, val);
+    arktest.assertEQ(r3.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -134,7 +137,8 @@ function testU64Array() {
 function testU64ArrayRangeerror() {
     let src = new BigUint64Array([1, 1, 1])
     let val: long = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r3 = src.with(-1 as int, val);
+    arktest.assertEQ(r3.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -150,7 +154,8 @@ function testF32Array() {
 function testF32ArrayRangeerror() {
     let src = new Float32Array([1, 1, 1])
     let val: float = 0.0f;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r3 = src.with(-1 as int, val);
+    arktest.assertEQ(r3.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -167,7 +172,8 @@ function testF64Array() {
 function testF64ArrayRangeerror() {
     let src = new Float64Array([1, 1, 1])
     let val: double = 0.0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r3 = src.with(-1 as int, val);
+    arktest.assertEQ(r3.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 

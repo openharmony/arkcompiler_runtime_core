@@ -1243,8 +1243,12 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: byte): Int8Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Int8Array(this)
-        res.set(index, value)
+        res.set(idx, value)
         return res
     }
 
@@ -1259,8 +1263,12 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: number): Int8Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Int8Array(this)
-        res.set(index, value.toByte())
+        res.set(idx, value.toByte())
         return res
     }
 
@@ -2896,8 +2904,12 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: short): Int16Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Int16Array(this)
-        res.set(index, value)
+        res.set(idx, value)
         return res
     }
 
@@ -2912,8 +2924,12 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: number): Int16Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Int16Array(this)
-        res.set(index, value.toShort())
+        res.set(idx, value.toShort())
         return res
     }
 
@@ -4520,8 +4536,12 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: int): Int32Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Int32Array(this)
-        res.set(index, value)
+        res.set(idx, value)
         return res
     }
 
@@ -4536,8 +4556,12 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: number): Int32Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Int32Array(this)
-        res.set(index, value.toInt())
+        res.set(idx, value.toInt())
         return res
     }
 
@@ -6176,8 +6200,12 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @FaAndStageModel
      */
     public with(index: int, value: long): BigInt64Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new BigInt64Array(this)
-        res.set(index, value)
+        res.set(idx, value)
         return res
     }
 
@@ -6192,8 +6220,12 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @FaAndStageModel
      */
     public with(index: int, value: BigInt): BigInt64Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new BigInt64Array(this)
-        res.set(index, value.getLong())
+        res.set(idx, value.getLong())
         return res
     }
 
@@ -7806,8 +7838,12 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: float): Float32Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Float32Array(this)
-        res.set(index, value)
+        res.set(idx, value)
         return res
     }
 
@@ -7822,8 +7858,12 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: number): Float32Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Float32Array(this)
-        res.set(index, value.toFloat())
+        res.set(idx, value.toFloat())
         return res
     }
 
@@ -9335,8 +9375,12 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: number): Float64Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Float64Array(this)
-        res.set(index, value)
+        res.set(idx, value)
         return res
     }
 

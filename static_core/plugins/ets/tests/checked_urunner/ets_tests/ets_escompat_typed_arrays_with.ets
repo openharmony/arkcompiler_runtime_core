@@ -81,9 +81,8 @@ function testU8ClampedArray() {
 function testU8ClampedArrayRangeerror() {
     let src = new Uint8ClampedArray([1, 1, 1])
     let val: int = 0;
-    arktest.expectThrow(() => {
- src.with(-1 as int, val)
-}, expectedRangeErrors)
+    let r3 = src.with(-1 as int, val);
+    arktest.assertEQ(r3.toString(), '1,1,0')
     arktest.expectThrow(() => {
  src.with(src.length.toInt(), val)
 }, expectedRangeErrors)
@@ -101,9 +100,8 @@ function testI8Array() {
 function testI8ArrayRangeerror() {
     let src = new Int8Array([1, 1, 1])
     let val: byte = 0;
-    arktest.expectThrow(() => {
- src.with(-1 as int, val)
-}, expectedRangeErrors)
+    let r3 = src.with(-1 as int, val);
+    arktest.assertEQ(r3.toString(), '1,1,0')
     arktest.expectThrow(() => {
  src.with(src.length.toInt(), val)
 }, expectedRangeErrors)
@@ -121,9 +119,8 @@ function testU8Array() {
 function testU8ArrayRangeerror() {
     let src = new Uint8Array([1, 1, 1])
     let val: int = 0;
-    arktest.expectThrow(() => {
- src.with(-1 as int, val)
-}, expectedRangeErrors)
+    let r3 = src.with(-1 as int, val);
+    arktest.assertEQ(r3.toString(), '1,1,0')
     arktest.expectThrow(() => {
  src.with(src.length.toInt(), val)
 }, expectedRangeErrors)
@@ -141,9 +138,8 @@ function testI16Array() {
 function testI16ArrayRangeerror() {
     let src = new Int16Array([1, 1, 1])
     let val: short = 0;
-    arktest.expectThrow(() => {
- src.with(-1 as int, val)
-}, expectedRangeErrors)
+    let r3 = src.with(-1 as int, val);
+    arktest.assertEQ(r3.toString(), '1,1,0')
     arktest.expectThrow(() => {
  src.with(src.length.toInt(), val)
 }, expectedRangeErrors)
@@ -161,9 +157,8 @@ function testU16Array() {
 function testU16ArrayRangeerror() {
     let src = new Uint16Array([1, 1, 1])
     let val: int = 0;
-    arktest.expectThrow(() => {
- src.with(-1 as int, val)
-}, expectedRangeErrors)
+    let r3 = src.with(-1 as int, val);
+    arktest.assertEQ(r3.toString(), '1,1,0')
     arktest.expectThrow(() => {
  src.with(src.length.toInt(), val)
 }, expectedRangeErrors)
