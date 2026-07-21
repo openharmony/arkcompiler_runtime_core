@@ -1534,8 +1534,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @FaAndStageModel
      */
     public with(index: int, value: {{element['primitiveType']}}): {{element['name']}}Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new {{element['name']}}Array(this)
-        res.setUnsafeClamp(index, value)
+        res.setUnsafeClamp(idx, value)
         return res
     }
 
@@ -1550,8 +1554,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @FaAndStageModel
      */
     public with(index: int, value: {{element['subsetType']}}): {{element['name']}}Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new {{element['name']}}Array(this)
-        res.setUnsafeClamp(index, {{fromElementCompat % 'value'}})
+        res.setUnsafeClamp(idx, {{fromElementCompat % 'value'}})
         return res
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,7 +66,8 @@ function test_u8_clamped_array(): void {
 function test_u8_clamped_array_rangeerror() {
     let src = new Uint8ClampedArray([1, 1, 1])
     let val: int = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r = src.with(-1 as int, val);
+    arktest.assertEQ(r.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -82,7 +83,8 @@ function test_i8_array(): void {
 function test_i8_array_rangeerror() {
     let src = new Int8Array([1, 1, 1])
     let val: byte = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r = src.with(-1 as int, val);
+    arktest.assertEQ(r.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -98,7 +100,8 @@ function test_u8_array(): void {
 function test_u8_array_rangeerror() {
     let src = new Uint8Array([1, 1, 1])
     let val: int = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r = src.with(-1 as int, val);
+    arktest.assertEQ(r.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -114,7 +117,8 @@ function test_i16_array(): void {
 function test_i16_array_rangeerror() {
     let src = new Int16Array([1, 1, 1])
     let val: short = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r = src.with(-1 as int, val);
+    arktest.assertEQ(r.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -130,7 +134,8 @@ function test_u16_array(): void {
 function test_u16_array_rangeerror() {
     let src = new Uint16Array([1, 1, 1])
     let val: int = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r = src.with(-1 as int, val);
+    arktest.assertEQ(r.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -146,7 +151,8 @@ function test_i32_array(): void {
 function test_i32_array_rangeerror() {
     let src = new Int32Array([1, 1, 1])
     let val: int = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r = src.with(-1 as int, val);
+    arktest.assertEQ(r.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -162,7 +168,8 @@ function test_u32_array(): void {
 function test_u32_array_rangeerror() {
     let src = new Uint32Array([1, 1, 1])
     let val: long = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r = src.with(-1 as int, val);
+    arktest.assertEQ(r.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -178,7 +185,8 @@ function test_i64_array(): void {
 function test_i64_array_rangeerror() {
     let src = new BigInt64Array([1, 1, 1])
     let val: long = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r = src.with(-1 as int, val);
+    arktest.assertEQ(r.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -194,7 +202,8 @@ function test_u64_array(): void {
 function test_u64_array_rangeerror() {
     let src = new BigUint64Array([1, 1, 1])
     let val: long = 0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r = src.with(-1 as int, val);
+    arktest.assertEQ(r.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -210,7 +219,8 @@ function test_f32_array(): void {
 function test_f32_array_rangeerror() {
     let src = new Float32Array([1, 1, 1])
     let val: float = 0.0f;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r = src.with(-1 as int, val);
+    arktest.assertEQ(r.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }
 
@@ -226,6 +236,7 @@ function test_f64_array(): void {
 function test_f64_array_rangeerror() {
     let src = new Float64Array([1, 1, 1])
     let val: double = 0.0;
-    arktest.expectThrow(() => { src.with(-1 as int, val) }, expectedRangeErrors)
+    let r = src.with(-1 as int, val);
+    arktest.assertEQ(r.toString(), '1,1,0')
     arktest.expectThrow(() => { src.with(src.length.toInt(), val) }, expectedRangeErrors)
 }

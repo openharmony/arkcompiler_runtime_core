@@ -1511,8 +1511,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @FaAndStageModel
      */
     public with(index: int, value: {{T}}): {{N}}Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new {{N}}Array(this)
-        res.set(index, value)
+        res.set(idx, value)
         return res
     }
 
@@ -1529,11 +1533,15 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @FaAndStageModel
      */
     public with(index: int, value: {{elementCompat}}): {{N}}Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new {{N}}Array(this)
         {%- if N != 'Float64' %}
-        res.set(index, value{{fromElementCompat}})
+        res.set(idx, value{{fromElementCompat}})
         {%- else %}
-        res.set(index, value)
+        res.set(idx, value)
         {%- endif %}
         return res
     }

@@ -1276,8 +1276,12 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * @FaAndStageModel
      */
     public with(index: int, value: int): Uint8ClampedArray {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Uint8ClampedArray(this)
-        res.setUnsafeClamp(index, value)
+        res.setUnsafeClamp(idx, value)
         return res
     }
 
@@ -1292,8 +1296,12 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * @FaAndStageModel
      */
     public with(index: int, value: number): Uint8ClampedArray {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Uint8ClampedArray(this)
-        res.setUnsafeClamp(index, value.toInt())
+        res.setUnsafeClamp(idx, value.toInt())
         return res
     }
 
@@ -2904,8 +2912,12 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: int): Uint8Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Uint8Array(this)
-        res.setUnsafeClamp(index, value)
+        res.setUnsafeClamp(idx, value)
         return res
     }
 
@@ -2920,8 +2932,12 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: number): Uint8Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Uint8Array(this)
-        res.setUnsafeClamp(index, value.toInt())
+        res.setUnsafeClamp(idx, value.toInt())
         return res
     }
 
@@ -4514,8 +4530,12 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: int): Uint16Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Uint16Array(this)
-        res.setUnsafeClamp(index, value)
+        res.setUnsafeClamp(idx, value)
         return res
     }
 
@@ -4530,8 +4550,12 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: number): Uint16Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Uint16Array(this)
-        res.setUnsafeClamp(index, value.toInt())
+        res.setUnsafeClamp(idx, value.toInt())
         return res
     }
 
@@ -6162,8 +6186,12 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: long): Uint32Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Uint32Array(this)
-        res.setUnsafeClamp(index, value)
+        res.setUnsafeClamp(idx, value)
         return res
     }
 
@@ -6178,8 +6206,12 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public with(index: int, value: number): Uint32Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new Uint32Array(this)
-        res.setUnsafeClamp(index, value.toLong())
+        res.setUnsafeClamp(idx, value.toLong())
         return res
     }
 
@@ -7828,8 +7860,12 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @FaAndStageModel
      */
     public with(index: int, value: long): BigUint64Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new BigUint64Array(this)
-        res.setUnsafeClamp(index, value)
+        res.setUnsafeClamp(idx, value)
         return res
     }
 
@@ -7844,8 +7880,12 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @FaAndStageModel
      */
     public with(index: int, value: BigInt): BigUint64Array {
+        let idx = index < 0 ? index + this.lengthInt : index
+        if (idx < 0 || idx >= this.lengthInt) {
+            throw new RangeError('Invalid typed array index')
+        }
         let res = new BigUint64Array(this)
-        res.setUnsafeClamp(index, value.getULong())
+        res.setUnsafeClamp(idx, value.getULong())
         return res
     }
 
