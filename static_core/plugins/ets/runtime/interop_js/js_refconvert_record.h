@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,15 @@ public:
         NAPI_CHECK_FATAL(napi_set_named_property(env, handlerObj, "set", setHandleFunc));
 
         NAPI_CHECK_FATAL(napi_create_reference(env, handlerObj, 1, &handleObjCache_));
+    }
+
+    NO_COPY_SEMANTIC(JSRefConvertRecord);
+    NO_MOVE_SEMANTIC(JSRefConvertRecord);
+
+    ~JSRefConvertRecord() override
+    {
+        napi_env env = InteropCtx::Current(EtsExecutionContext::GetCurrent())->GetJSEnv();
+        NAPI_CHECK_FATAL(napi_delete_reference(env, handleObjCache_));
     }
 
     napi_value WrapImpl(InteropCtx *ctx, EtsObject *obj);
