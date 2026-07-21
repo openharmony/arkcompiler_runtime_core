@@ -16,18 +16,22 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    A method is defined in a subinterface with the same name as the method
-    in the superinterface.
-    If signatures are not override-compatible, a compile-time error occurs.
+    If a method is defined in a subinterface with the same name as an accessible method in the superinterface, then the
+    following semantic rules apply:
+    - If signatures are not override-compatible (see Override-Compatible Signatures), and if signatures formed by
+    using effective signature types of original signatures are override-compatible after type erasure, then a compile-
+    time error occurs.
+    - If signatures are override-compatible (see Override-Compatible Signatures), then the method of subinterface
+    overrides the method of superinterface in the subinterface.
+    - Otherwise, Implicit Method Overloading is used.
 tags: [compile-only, negative]
+expected_out:
+    {{c.expected_out}}
 ---*/
-
-class A {}
-class B extends A {}
 
 {{c.decl}}
 
 function main() {
-    {{c.use|indent}}
+    {{(c.use or '')|indent}}
 }
 {%- endfor %}

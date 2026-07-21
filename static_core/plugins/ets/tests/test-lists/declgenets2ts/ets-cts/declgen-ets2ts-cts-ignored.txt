@@ -980,6 +980,7 @@
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_by_instance_methods/overriding_public_method_with_wrong_signature_n.ets
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_requirements/different_signature.ets
 15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_requirements/same_name2_n.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/methods_with_override_compatible_signatures_12.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/access_modifier_over_compatible_0.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/access_modifier_over_compatible_10.ets
 15.semantic_rules/09.overriding/03.override-compatible_signatures/access_modifier_over_compatible_3.ets

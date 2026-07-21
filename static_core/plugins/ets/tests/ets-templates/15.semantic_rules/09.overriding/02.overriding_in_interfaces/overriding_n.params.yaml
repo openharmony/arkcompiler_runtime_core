@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,6 +14,8 @@
 ---
 cases:
     - decl: |-
+          class A {}
+          class B extends A {}
           interface K {
               meth(p: B, q: A, w: Object): A
           }
@@ -21,11 +23,16 @@ cases:
           interface J extends I {
               meth(p: A, q: Object, w: Object): Object // CTE: return type must be covariant
           }
-      use: |-
-          return
+      expected_out:
+          - 'Semantic error ESE985118: Class member meth with type Object in J cannot implement meth with type A
+            property from interface K because the implementing return type is not compatible with the interface return
+            type.'
+          - 'Semantic error ESE0136: Method meth(p: A, q: Object, w: Object): Object in J not overriding any method'
 
     # method returns 'this'
     - decl: |-
+          class A {}
+          class B extends A {}
           interface K {
               meth(p: B, q: A, w: Object): B  // CTE: Return type can be 'this' or supertype
           }
@@ -33,11 +40,15 @@ cases:
           interface J extends I {
               meth(p: B, q: A, w: Object): this
           }
-      use: |-
-          return
+      expected_out:
+          - 'Semantic error ESE985118: Class member meth with type J in J cannot implement meth with type B property
+            from interface K because the implementing return type is not compatible with the interface return type.'
+          - 'Semantic error ESE0136: Method meth(p: B, q: A, w: Object): J in J not overriding any method'
 
     # generics
     - decl: |-
+          class A {}
+          class B extends A {}
           interface K {
               meth<T extends B, U extends A, V extends Object>(p: T, q: U, w: V): A
           }
@@ -45,11 +56,16 @@ cases:
           interface J extends I {
               meth<T extends A, U extends Object, V extends A>(p: T, q: U, w: V): B  // CTE: Constraints must be contravariant
           }
-      use: |-
-          return
+      expected_out:
+          - "Semantic error ESE150729: Class member meth with type B in J cannot override meth with type A field from
+            class K because the overriding type parameter's constraints are not compatible with type parameter
+            constraints of the overridden method."
+          - 'Semantic error ESE0136: Method meth<T, U, V>(p: T, q: U, w: V): B in J not overriding any method'
 
     # generic method returns 'this'
     - decl: |-
+          class A {}
+          class B extends A {}
           interface K {
               meth<T extends B, U extends A, V extends Object>(p: T, q: U, w: V): B // CTE: Return type can be 'this' or supertype
           }
@@ -57,11 +73,15 @@ cases:
           interface J extends I {
               meth<T extends A, U extends Object, V extends Any>(p: T, q: U, w: V): this
           }
-      use: |-
-          return
+      expected_out:
+          - 'Semantic error ESE985118: Class member meth with type J in J cannot implement meth with type B property
+            from interface K because the implementing return type is not compatible with the interface return type.'
+          - 'Semantic error ESE0136: Method meth<T, U, V>(p: T, q: U, w: V): J in J not overriding any method'
 
     # access modifier
     - decl: |-
+          class A {}
+          class B extends A {}
           interface K {
               meth(p: B, q: A, w: Object): A
           }
@@ -69,8 +89,10 @@ cases:
           interface J extends I {
               private meth(p: A, q: Object, w: Any): B {} // CTE: overridden method has weaker access privilege
           }
-      use: |-
-          return
+      expected_out:
+          - 'Semantic error ESE873275: Class member meth with type B in J cannot override meth with type A field from
+            class K because the overridden method has weaker access privileges.'
+          - 'Semantic error ESE0136: Method meth(p: A, q: Object, w: Any): B in J not overriding any method'
 
     # No contravariance between input parameter types
     - decl: |-
@@ -80,8 +102,8 @@ cases:
           class C implements I {
               override foo(a: Object) {}  // CTE: no overriding
           }
-      use: |-
-          return
+      expected_out:
+          - 'Semantic error ESE0136: Method foo(a: Object): undefined in C not overriding any method'
 
     # No contravariance between input parameter types
     - decl: |-
@@ -91,8 +113,8 @@ cases:
           class C implements I {
               override foo(a: FixedArray<Object>) {}  // CTE: no overriding
           }
-      use: |-
-          return
+      expected_out:
+          - 'Semantic error ESE0136: Method foo(a: FixedArray<Object>): undefined in C not overriding any method'
 
     # No covariance between return types
     - decl: |-
@@ -102,8 +124,11 @@ cases:
           class C implements I {
               override foo(): Any { return 2 }  // CTE: no overriding
           }
-      use: |-
-          return
+      expected_out:
+          - 'Semantic error ESE985118: Class member foo with type Any in C cannot implement foo with type Object
+            property from interface I because the implementing return type is not compatible with the interface return
+            type.'
+          - 'Semantic error ESE0136: Method foo(): Any in C not overriding any method'
 
     # No covariance between return types
     - decl: |-
@@ -113,8 +138,11 @@ cases:
           class C implements I {
               override foo(): FixedArray<Any> { return [2] }  // CTE: no overriding
           }
-      use: |-
-          return
+      expected_out:
+          - 'Semantic error ESE985118: Class member foo with type FixedArray<Any> in C cannot implement foo with type
+            FixedArray<Object> property from interface I because the implementing return type is not compatible with the
+            interface return type.'
+          - 'Semantic error ESE0136: Method foo(): FixedArray<Any> in C not overriding any method'
 
     # Any and Object have different effective types: interface return type Object
     # is NOT overridden by class return type Any (Any is covariant to Object) - CTE
@@ -125,7 +153,74 @@ cases:
           class Impl implements I {
               foo(): Any { return 1 }
           }
-          let i: I = new Impl
-      use: |-
-          let v = i.foo()
-          arktest.assertEQ(v, 0)
+      expected_out:
+          - 'Semantic error ESE985118: Class member foo with type Any in Impl cannot implement foo with type Object
+            property from interface I because the implementing return type is not compatible with the interface return
+            type.'
+          - 'Semantic error ESE0136: Method foo(): Any in Impl not overriding any method'
+
+    # foo() return type in Derived is not covariant to return type in Base
+    - decl: |-
+          interface Base {
+              foo(): Object
+          }
+          interface Derived extends Base {
+              foo(): Any
+          }
+      expected_out:
+          - 'Semantic error ESE0136: Method foo(): Any in Derived not overriding any method'
+
+    # Parameter type in Derived is not contravariant to parameter type in Base
+    - decl: |-
+          interface Base {
+              foo(p: Any) {}
+          }
+          interface Derived extends Base {
+              foo(p: Object) {}
+          }
+      expected_out:
+          - 'Semantic error ESE0136: Method foo(p: Object): void in Derived not overriding any method'
+
+    # Not override-compatible before the type erasure, but override-compatible after the type erasure, hence CTE
+    - decl: |-
+          interface Base {
+              foo(p: Array<string>)  // runtime type std.core.Array
+          }
+          interface Derived extends Base {
+              foo(p: Array<number>)  // runtime type std.core.Array
+          }
+      expected_out:
+          - 'TODO: Not override-compatible before the type erasure, but override-compatible after the type erasure'
+
+    # Not override-compatible before the type erasure, but override-compatible after the type erasure, hence CTE
+    - decl: |-
+          interface Base {
+              foo(p: [int, long])  // runtime type std.core.Tuple2
+          }
+          interface Derived extends Base {
+              foo(p: [float, double])  // runtime type std.core.Tuple2
+          }
+      expected_out:
+          - 'TODO: Not override-compatible before the type erasure, but override-compatible after the type erasure'
+
+    # Not override-compatible before the type erasure, but override-compatible after the type erasure, hence CTE
+    - decl: |-
+          interface Base {
+              foo(p: string|undefined) {}  // runtime type std.core.String
+          }
+          interface Derived extends Base {
+              foo(p: Object) {}  // runtime type std.core.Object
+          }
+      expected_out:
+          - 'TODO: Not override-compatible before the type erasure, but override-compatible after the type erasure'
+
+    # Not override-compatible before the type erasure, but override-compatible after the type erasure, hence CTE
+    - decl: |-
+          interface Base {
+              foo(p: 'a'|'b'|'c') {}  // runtime type std.core.String
+          }
+          interface Derived extends Base {
+              foo(p: 'd'|'e'|'f') {}  // runtime type std.core.String
+          }
+      expected_out:
+          - 'TODO: Not override-compatible before the type erasure, but override-compatible after the type erasure'

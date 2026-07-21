@@ -23,6 +23,6 @@ tags: [compile-only, negative]
 {{c.decl}}
 
 function main() {
-    {{c.use|indent}}
+    {{(c.use or '')|indent}}
 }
 {%- endfor %}

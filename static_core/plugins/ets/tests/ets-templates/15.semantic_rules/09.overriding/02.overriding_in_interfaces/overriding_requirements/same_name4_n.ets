@@ -1,39 +1,34 @@
-/*---
-Copyright (c) 2025-2026 Huawei Device Co., Ltd.
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
----*/
+/*
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /*---
 desc: >-
       CTE occurs if the body of an interface declares a method with a name
       that is already used for a property in this declaration.
 tags: [compile-only, negative]
+expected_out:
+    - "Semantic error ESE567795: Method 'foo' in K cannot overload property foo in I."
 ---*/
 
 interface I {
-  private foo(): int {
-    return 1;
-  }
+    foo: number
 }
 
 interface J extends I {
-  foo(i: int): string {
-    return i.toString()
-  }
 }
 
-class C implements J { }
-
-function main() {
-  arktest.assertTrue(new C().foo(2), "2")
+interface K extends J {
+    foo(i: int): string
 }
