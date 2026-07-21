@@ -18,26 +18,26 @@ function testEither<T1, T2>(fst: T1, snd: T2) {
     arktest.assertEQ(lFst.isLeft(), true)
     arktest.assertEQ(lFst.isRight(), false)
     arktest.assertEQ(lFst.left, fst)
-    arktest.expectError(() => {lFst.right}, new Error("Cannot read Right value from Left!"))
+    arktest.expectError(() => {lFst.right}, new Error('Cannot read Right value from Left!'))
 
     let rSnd: Either<T1, T2> = Right<T1, T2>(snd)
     arktest.assertEQ(rSnd.isLeft(), false)
     arktest.assertEQ(rSnd.isRight(), true)
     arktest.assertEQ(rSnd.right, snd)
-    arktest.expectError(() => {rSnd.left}, new Error("Cannot read Left value from Right!"))
+    arktest.expectError(() => {rSnd.left}, new Error('Cannot read Left value from Right!'))
 
     // Swap type positions
     let lSnd: Either<T2, T1> = Left<T2, T1>(snd)
     arktest.assertEQ(lSnd.isLeft(), true)
     arktest.assertEQ(lSnd.isRight(), false)
     arktest.assertEQ(lSnd.left, snd)
-    arktest.expectError(() => {lSnd.right}, new Error("Cannot read Right value from Left!"))
+    arktest.expectError(() => {lSnd.right}, new Error('Cannot read Right value from Left!'))
 
     let rFst: Either<T2, T1> = Right<T2, T1>(fst)
     arktest.assertEQ(rFst.isLeft(), false)
     arktest.assertEQ(rFst.isRight(), true)
     arktest.assertEQ(rFst.right, fst)
-    arktest.expectError(() => {rFst.left}, new Error("Cannot read Left value from Right!"))
+    arktest.expectError(() => {rFst.left}, new Error('Cannot read Left value from Right!'))
 }
 
 class ClassOne {}

@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-function sortArrayFromSecondElementTest(): int
-{
+function sortArrayFromSecondElementTest(): int {
     let size: int = 100;
     let arr: FixedArray<int> = new FixedArray<int>(size);
     let expected: FixedArray<int> = new FixedArray<int>(size);
@@ -32,24 +31,25 @@ function sortArrayFromSecondElementTest(): int
 
     for (let i = 0; i < size; ++i) {
         if (expected[i] != arr[i]) {
-            console.log("Wrong result");
-            console.log("Element " + i + ": expected " + expected[i] + ", got " + arr[i]);
+            // CC-OFFNXT(G.AOD.03) current test suite code style
+            console.log('Wrong result');
+            // CC-OFFNXT(G.AOD.03) current test suite code style
+            console.log('Element ' + i + ': expected ' + expected[i] + ', got ' + arr[i]);
             return 1;
         }
     }
     return 0;
 }
 
-function runTest(result: int, message: String): int
-{
+function runTest(result: int, message: String): int {
     if (result == 0) {
         return 0;
     }
-    console.log("FAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('FAILED: ' + message);
     return 1;
 }
 
-function main(): int
-{
-    return runTest(sortArrayFromSecondElementTest(), "Test sort for int[]");
+function main(): int {
+    return runTest(sortArrayFromSecondElementTest(), 'Test sort for int[]');
 }

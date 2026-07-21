@@ -18,7 +18,7 @@
      const suite = new arktest.ArkTestsuite('Intl.DateTimeFormat formatRange() and formatRangeToParts()')
      suite.addTest('Simple FormatRange', () => {
         const dtf = new Intl.DateTimeFormat().formatRange(new Date(0), new Date())
-        arktest.assertNE("", dtf)
+        arktest.assertNE('', dtf)
      })
      suite.addTest('Simple FormatRangeToParts from numeric values', () => {
         const dtf = new Intl.DateTimeFormat().formatRangeToParts(1000, 1000000000)

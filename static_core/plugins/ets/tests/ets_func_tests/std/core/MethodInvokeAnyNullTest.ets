@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,10 +57,12 @@ class ObjectTestClass {
     }
 
     public isRestNull(...args: Object[]): void {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(args[0]);
     }
 
     public static isRestNull(...args: Object[]): void {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(args[0]);
     }
 }
@@ -77,7 +79,10 @@ function objectNullTest() {
 
         if (method.getName() == 'isRestNull') {
             let args = [null];
-            arktest.expectThrow(() => { method.invoke(method.isStatic() ? null : obj, [args]) }, (e) => e instanceof ClassCastError)
+            // CC-OFFNXT(G.FMT.01) checked tests code style
+            arktest.expectThrow(() => {
+                method.invoke(method.isStatic() ? null : obj, [args])
+            }, (e) => e instanceof ClassCastError)
         }
     }
 }

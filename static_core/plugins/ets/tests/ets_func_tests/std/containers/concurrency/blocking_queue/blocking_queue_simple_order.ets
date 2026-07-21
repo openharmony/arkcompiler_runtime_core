@@ -18,18 +18,19 @@ type BQConstructorI = (capacity: int)=>BlockingQueueI;
 type TestFunction = (constr: BQConstructorI) => void;
 type BlockingQueue = containers.LinkedBlockingQueue<int> | containers.ArrayBlockingQueue<int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T>(arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+function awaitAll <T>(arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
-	for (let i = 0; i < arr.length; ++ i)
+	for (let i = 0; i < arr.length; ++ i) {
 		res.push(arr[i].Await());
+    }
 	return res;
 }
 
-function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
+function sumArrInto(to: FixedArray<int>, from: FixedArray<int>): void {
 	arktest.assertEQ(to.length, from.length);
 	for (let i = 0; i < to.length; ++ i) {
 		to[i] += from[i];
@@ -44,18 +45,21 @@ function subArrInto(to: FixedArray<int>, from: FixedArray<int>): void {
 }
 
 function assertEQAll(array: FixedArray<int>, value: int): void {
-	for (let i=0; i < array.length; ++ i)
+	for (let i = 0; i < array.length; ++ i) {
 		arktest.assertEQ(array[i], value)
+	}
 }
 
 function testOrderPopAndPushF(queue: BlockingQueueI) {
 	let pushF = ()=>{
-		for (let i = 0; i < 100; ++ i)
+		for (let i = 0; i < 100; ++ i) {
 		queue.push(i);
+		}
 	};
 	let popF = ()=>{
-		for (let i = 0; i < 100; ++ i)
+		for (let i = 0; i < 100; ++ i) {
 		arktest.assertEQ(queue.pop(), i);
+		}
 	};
 	awaitAll([
 		launch(pushF),
@@ -67,14 +71,17 @@ function testOrderPopAndPushF(queue: BlockingQueueI) {
 
 function testOrderAddAndPollF(queue: BlockingQueueI) {
 	let addF = ()=>{
-		for (let i = 0; i < 100; ++ i)
+		for (let i = 0; i < 100; ++ i) {
 		queue.add(i);
+		}
 	};
 	let pollF = ()=>{
 		let previous = -1;
 		for (let i = 0; i < 100; ++ i) {
 			let val = queue.poll();
-			if (val == undefined) continue;
+			if (val == undefined) {
+			    continue;
+			}
 			arktest.assertLT(previous, val as int);
 		}
 	}
@@ -101,22 +108,22 @@ function testOrderAddAndPollThin(constr: BQConstructorI) {
 }
 
 function main(): int {
-	let tests: Array<[String, TestFunction]> = [
-		["testOrderPopAndPush", testOrderPopAndPush],
-		["testOrderAddAndPoll", testOrderAddAndPoll],
-		["testOrderPopAndPushThin", testOrderPopAndPushThin],
-		["testOrderAddAndPollThin", testOrderAddAndPollThin],
+	let tests: [String, TestFunction][] = [
+		['testOrderPopAndPush', testOrderPopAndPush],
+		['testOrderAddAndPoll', testOrderAddAndPoll],
+		['testOrderPopAndPushThin', testOrderPopAndPushThin],
+		['testOrderAddAndPollThin', testOrderAddAndPollThin],
 	];
 
-    let LBQTestSuitecase = new arktest.ArkTestsuite("LinkedBlockingQueueTest")
-    let ABQTestSuitecase = new arktest.ArkTestsuite("ArrayBlockingQueueTest")
+    let lbqTestSuitecase = new arktest.ArkTestsuite('LinkedBlockingQueueTest')
+    let abqTestSuitecase = new arktest.ArkTestsuite('ArrayBlockingQueueTest')
 
-	let LBQconstr: BQConstructorI = (capacity: int)=>new containers.LinkedBlockingQueue<int>(capacity);
-	let ABQconstr: BQConstructorI = (capacity: int)=>new containers.ArrayBlockingQueue<int>(capacity);
+	let lbqConstr: BQConstructorI = (capacity: int)=>new containers.LinkedBlockingQueue<int>(capacity);
+	let abqConstr: BQConstructorI = (capacity: int)=>new containers.ArrayBlockingQueue<int>(capacity);
 
-	let suites: Array<[arktest.ArkTestsuite, BQConstructorI]> = [
-		[LBQTestSuitecase, LBQconstr],
-		[ABQTestSuitecase, ABQconstr],
+	let suites: [arktest.ArkTestsuite, BQConstructorI][] = [
+		[lbqTestSuitecase, lbqConstr],
+		[abqTestSuitecase, abqConstr],
 	]
 
 	for (let j = 0; j < suites.length; ++ j) {
@@ -129,9 +136,10 @@ function main(): int {
 		}
 	}
 
-	let codeLBQ = LBQTestSuitecase.run();
-	let codeABQ = ABQTestSuitecase.run();
-	if (codeLBQ == 0)
+	let codeLBQ = lbqTestSuitecase.run();
+	let codeABQ = abqTestSuitecase.run();
+	if (codeLBQ == 0) {
 		return codeABQ;
+	}
 	return codeLBQ;
 }

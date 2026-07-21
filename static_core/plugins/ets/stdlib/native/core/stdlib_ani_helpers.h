@@ -65,7 +65,7 @@ ANI_EXPORT std::string GetFieldStr(ani_env *env, ani_object obj, const char *nam
         }                                                          \
     } while (0)
 
-// CC-OFFNXT(G.PRE.02) should be with define
+// CC-OFFNXT(G.PRE.02, G.PRE.06) should be with define, splitting will degrade readability
 #define ANI_RETURN_ON_PENDING_ERROR(status)                                            \
     do {                                                                               \
         ani_status _status = (status);                                                 \

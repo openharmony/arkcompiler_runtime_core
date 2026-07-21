@@ -14,7 +14,7 @@
  */
 
 function getTestName(testCase: string): string {
-	return "Int32Array.from - " + testCase;
+	return 'Int32Array.from - ' + testCase;
 }
 
 function testArrayLikeNumber(): void {
@@ -48,7 +48,7 @@ function testIterableNumberWithMap(): void {
 }
 
 function testArrayLikeTWithMap(): void {
-	const strings = ["100000", "-100000", "123456"];
+	const strings = ['100000', '-100000', '123456'];
 	const ta = Int32Array.from(strings, (v: string): number => parseInt(v));
 	arktest.assertEQ(ta.length, 3);
 	arktest.assertEQ(ta.$_get(0).toDouble(), 100000);
@@ -70,7 +70,7 @@ function testEmpty(): void {
 }
 
 function testDynamicReallocation(): void {
-	const iterable = new Set<number>([0,1,2,3,4,5,6,7,8,9]);
+	const iterable = new Set<number>([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 	const ta = Int32Array.from(iterable);
 	arktest.assertEQ(ta.length, 10);
 	for (let i: int = 0; i < 10; ++i) {
@@ -92,15 +92,15 @@ function testBufferIndependence(): void {
 }
 
 function main(): int {
-	const suite = new arktest.ArkTestsuite("Int32ArrayFrom");
-	suite.addTest(getTestName("ArrayLike Number"), testArrayLikeNumber);
-	suite.addTest(getTestName("Iterable Number No Map"), testIterableNumberWithoutMap);
-	suite.addTest(getTestName("Iterable Number With Map"), testIterableNumberWithMap);
-	suite.addTest(getTestName("ArrayLike T With Map"), testArrayLikeTWithMap);
-	suite.addTest(getTestName("Mapfn Infinity"), testMapfnInfinity);
-	suite.addTest(getTestName("Empty"), testEmpty);
-	suite.addTest(getTestName("Dynamic Reallocation"), testDynamicReallocation);
-	suite.addTest(getTestName("Decimal Truncation"), testDecimalTruncation);
-	suite.addTest(getTestName("Buffer Independence"), testBufferIndependence);
+	const suite = new arktest.ArkTestsuite('Int32ArrayFrom');
+	suite.addTest(getTestName('ArrayLike Number'), testArrayLikeNumber);
+	suite.addTest(getTestName('Iterable Number No Map'), testIterableNumberWithoutMap);
+	suite.addTest(getTestName('Iterable Number With Map'), testIterableNumberWithMap);
+	suite.addTest(getTestName('ArrayLike T With Map'), testArrayLikeTWithMap);
+	suite.addTest(getTestName('Mapfn Infinity'), testMapfnInfinity);
+	suite.addTest(getTestName('Empty'), testEmpty);
+	suite.addTest(getTestName('Dynamic Reallocation'), testDynamicReallocation);
+	suite.addTest(getTestName('Decimal Truncation'), testDecimalTruncation);
+	suite.addTest(getTestName('Buffer Independence'), testBufferIndependence);
 	return suite.run();
 }

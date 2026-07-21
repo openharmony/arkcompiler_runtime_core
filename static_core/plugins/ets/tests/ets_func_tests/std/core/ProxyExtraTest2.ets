@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,12 +45,12 @@ interface Resource {
 }
 
 class ResourceImpl implements Resource {
-    bundleName: string;
-    moudleName: string;
-    id: number;
-    params?: Any[];
-    type?: number;
-    resource?: ResourceString;
+    public bundleName: string;
+    public moudleName: string;
+    public id: number;
+    public params?: Any[];
+    public type?: number;
+    public resource?: ResourceString;
     constructor(bundleName: string, moudleName: string, id: number) {
         this.bundleName = bundleName;
         this.moudleName = moudleName;
@@ -66,10 +66,10 @@ interface A {
 }
 
 class AImpl implements A {
-    a1?: string
-    a2?: Resource
-    a3: Dimension = "test"
-    a4: B
+    public a1?: string
+    public a2?: Resource
+    public a3: Dimension = 'test'
+    public a4: B
     constructor(b: B) {
         this.a4 = b
     }
@@ -81,14 +81,14 @@ interface B {
 }
 
 class BImpl implements B {
-    a1?: string
-    foo (num: number): number | undefined {
+    public a1?: string
+    foo(num: number): number | undefined {
         return num
     }
 }
 
 class AHandler implements reflect.InvocationHandler {
-    instance: A
+    public instance: A
     constructor(other: A) {
         this.instance = other
     }
@@ -106,7 +106,7 @@ class AHandler implements reflect.InvocationHandler {
 }
 
 class BHandler implements reflect.InvocationHandler {
-    instance: B
+    public instance: B
     constructor(other: B) {
         this.instance = other
     }
@@ -125,9 +125,9 @@ class BHandler implements reflect.InvocationHandler {
 
 // Test Array
 function createAProxyTest(){
-    let ifacesB: FixedArray<Class> =  [ Class.from<B>() ]
+    let ifacesB: FixedArray<Class> = [Class.from<B>()]
     let proxyB1: B = createProxy(ifacesB, new BHandler(new BImpl())) as B
-    let ifacesA: FixedArray<Class> =  [ Class.from<A>() ]
+    let ifacesA: FixedArray<Class> = [Class.from<A>()]
     let proxy1: A = createProxy(ifacesA, new AHandler(new AImpl(proxyB1))) as A
     createAProxyTestBody(proxy1)
     let proxyB2: B = createProxy(ifacesB, new BHandler(new BImpl())) as B
@@ -141,16 +141,16 @@ function createAProxyTestBody(proxy: A) {
     let a3 = proxy.a3
     let a4 = proxy.a4
     arktest.assertEQ(proxy.a1, undefined)
-    a1 = "test1"
-    a2 = new ResourceImpl("test1", "test2", 1)
-    a3 = "test2"
-    arktest.assertEQ(a1, "test1")
+    a1 = 'test1'
+    a2 = new ResourceImpl('test1', 'test2', 1)
+    a3 = 'test2'
+    arktest.assertEQ(a1, 'test1')
     arktest.assertEQ((a2 as Resource).id, 1)
-    arktest.assertEQ(a3, "test2")
+    arktest.assertEQ(a3, 'test2')
 
-    a4.a1 = "test3"
+    a4.a1 = 'test3'
     let num = a4.foo(1.0)
-    arktest.assertEQ(a4.a1, "test3")
+    arktest.assertEQ(a4.a1, 'test3')
     arktest.assertDoubleEQ(num!, 1.0, 0.00001)
     num = a4.foo(2.1)
     arktest.assertDoubleEQ(num!, 2.1, 0.00001)

@@ -26,15 +26,15 @@ class ThrowOnInit {
 
 declare class NoImpClass {}
 
-class classWithNoImplField {
+class ClassWithNoImplField {
     public fld: NoImpClass | undefined = undefined
     public static staticFld: NoImpClass | Number = 11
 }
 
 function testInstanceUnresolvedField() {
-    const klass = Class.from<classWithNoImplField>()
-    const fld = klass.getInstanceField("fld") 
-    const staticFld = klass.getStaticField("staticFld")
+    const klass = Class.from<ClassWithNoImplField>()
+    const fld = klass.getInstanceField('fld') 
+    const staticFld = klass.getStaticField('staticFld')
 
     arktest.expectThrow(() => {
         const tp = fld!.getType()
@@ -51,7 +51,7 @@ function testInstanceUnresolvedField() {
 
 function testInitialization() {
     const klass = Class.from<ThrowOnInit>()
-    const staticFld = klass.getStaticField("staticFld")
+    const staticFld = klass.getStaticField('staticFld')
 
     arktest.expectThrow(() => {
         staticFld!.getValue()

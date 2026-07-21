@@ -17,15 +17,16 @@ function test1(shor: String): int {
     let failure = 0
     let ctr = new Int(0);
 
-    let lambda: (str: String, args: (Object | undefined)[]) => String = (str: String, args: (Object | undefined)[]): String => {
-        failure += checkTestResult(str, "x")
+    let lambda: (str: String, args: (Object | undefined)[]) => String =
+        (str: String, args: (Object | undefined)[]): String => {
+        failure += checkTestResult(str, 'x')
         failure += checkTestResult(args[0] as Double, new Double(0.0))
         failure += checkTestResult(args[1]!.toString(), shor)
         let ans = ctr.toString();
         ctr++;
         return ans;
     }
-    failure += checkTestResult(shor.replace("x", lambda), "0axbxcx")
+    failure += checkTestResult(shor.replace('x', lambda), '0axbxcx')
     failure += checkTestResult(ctr, 1)
     return failure
 }
@@ -34,15 +35,16 @@ function test2(shor: String): int {
     let failure = 0
     let ctr = new Int(0);
 
-    let lambda: (str: String, args: (Object | undefined)[]) => String = (str: String, args: (Object | undefined)[]): String => {
-        failure += checkTestResult(str, "x")
+    let lambda: (str: String, args: (Object | undefined)[]) => String =
+        (str: String, args: (Object | undefined)[]): String => {
+        failure += checkTestResult(str, 'x')
         failure += checkTestResult(args[0] as Double, new Double(0.0))
         failure += checkTestResult(args[1]!.toString(), shor)
         let ans = ctr.toString();
         ctr++;
         return ans;
     }
-    failure += checkTestResult(shor.replace(new RegExp("x"), lambda), "0axbxcx")
+    failure += checkTestResult(shor.replace(new RegExp('x'), lambda), '0axbxcx')
     failure += checkTestResult(ctr, 1)
     return failure
 }
@@ -52,15 +54,16 @@ function test3(shor: String): int {
     let failure = 0
     let ctr = new Int(0);
 
-    let lambda: (str: String, args: (Object | undefined)[]) => String = (str: String, args: (Object | undefined)[]): String => {
-        failure += checkTestResult(str, "x")
+    let lambda: (str: String, args: (Object | undefined)[]) => String =
+        (str: String, args: (Object | undefined)[]): String => {
+        failure += checkTestResult(str, 'x')
         failure += checkTestResult(args[0] as Double, new Double((ctr * 2).toDouble()))
         failure += checkTestResult(args[1]!.toString(), shor)
         let ans = ctr.toString();
         ctr++;
         return ans;
     }
-    failure += checkTestResult(shor.replace(new RegExp("x", "g"), lambda), "0a1b2c3")
+    failure += checkTestResult(shor.replace(new RegExp('x', 'g'), lambda), '0a1b2c3')
     failure += checkTestResult(ctr, 4)
     return failure
 }
@@ -69,9 +72,10 @@ function test4(shor: String): int {
     let failure = 0
     let ctr = new Int(0);
 
-    let test: String[] = ["a", "b", "c"]
-    let lambda: (str: String, args: (Object | undefined)[]) => String = (str: String, args: (Object | undefined)[]): String => {
-        failure += checkTestResult(str, "x")
+    let test: String[] = ['a', 'b', 'c']
+    let lambda: (str: String, args: (Object | undefined)[]) => String =
+        (str: String, args: (Object | undefined)[]): String => {
+        failure += checkTestResult(str, 'x')
         failure += checkTestResult(args[0]!.toString(), 'x')
         failure += checkTestResult(args[1]!.toString(), test[ctr])
         failure += checkTestResult(args[2] as Double, new Double((ctr * 2).toDouble()))
@@ -80,7 +84,7 @@ function test4(shor: String): int {
         ctr++;
         return ans;
     }
-    failure += checkTestResult(shor.replace(new RegExp("(x)(?=(.))", "g"), lambda), "0a1b2cx")
+    failure += checkTestResult(shor.replace(new RegExp('(x)(?=(.))', 'g'), lambda), '0a1b2cx')
     failure += checkTestResult(ctr, 3)
     return failure
 }
@@ -88,15 +92,16 @@ function test4(shor: String): int {
 function test5(shor: String): int {
     let failure = 0
 
-    let lambda: (str: String, args: (Object | undefined)[]) => String = (str: String, args: (Object | undefined)[]): String => {
+    let lambda: (str: String, args: (Object | undefined)[]) => String =
+        (str: String, args: (Object | undefined)[]): String => {
         return str.toUpperCase()
     }
-    failure += checkTestResult(shor.replace(new RegExp("(.)", "g"), lambda), "ABCD")
+    failure += checkTestResult(shor.replace(new RegExp('(.)', 'g'), lambda), 'ABCD')
     return failure
 }
 
 function test6(): int {
-    let longstring = "xyzzy"
+    let longstring = 'xyzzy'
     longstring = longstring + longstring
     longstring = longstring + longstring
     longstring = longstring + longstring
@@ -108,22 +113,22 @@ function test6(): int {
     longstring = longstring + longstring
     longstring = longstring + longstring
     longstring = longstring + longstring
-    let str = "<" + longstring + ">"
-    let actual = str.replace(new RegExp("<(.*)>", "g"), "$1$1")
+    let str = '<' + longstring + '>'
+    let actual = str.replace(new RegExp('<(.*)>', 'g'), '$1$1')
     return checkTestResult(actual, longstring + longstring)
 }
 
 function test7(): int {
     let failure = 0
-    let str1 = "foo"
-    let str2 = "•foo"
+    let str1 = 'foo'
+    let str2 = '•foo'
 
-    failure += checkTestResult(str1.replace(new RegExp("(f)|(g)"), "$2"), "oo")
-    failure += checkTestResult(str1.replace(new RegExp("(f)|(g)"), "$1"), "foo")
-    failure += checkTestResult(str1.replace(new RegExp("(q)|(z)"), "$2"), "foo")
-    failure += checkTestResult(str2.replace(new RegExp("(f)|(g)"), "$2"), "•oo")
-    failure += checkTestResult(str2.replace(new RegExp("(f)|(g)"), "$1"), "•foo")
-    failure += checkTestResult(str2.replace(new RegExp("(q)|(z)"), "$2"), "•foo")
+    failure += checkTestResult(str1.replace(new RegExp('(f)|(g)'), '$2'), 'oo')
+    failure += checkTestResult(str1.replace(new RegExp('(f)|(g)'), '$1'), 'foo')
+    failure += checkTestResult(str1.replace(new RegExp('(q)|(z)'), '$2'), 'foo')
+    failure += checkTestResult(str2.replace(new RegExp('(f)|(g)'), '$2'), '•oo')
+    failure += checkTestResult(str2.replace(new RegExp('(f)|(g)'), '$1'), '•foo')
+    failure += checkTestResult(str2.replace(new RegExp('(q)|(z)'), '$2'), '•foo')
 
     return failure
 }
@@ -155,29 +160,31 @@ function test8(): int {
 function test9(): int {
     let failure = 0
     let ctr = new Int(0)
-    let emptyGlobal = new RegExp("(?:)", "g")
-    let emptyLambda: (str: String, args: (Object | undefined)[]) => String = (str: String, args: (Object | undefined)[]): String => {
-        failure += checkTestResult(str, "")
+    let emptyGlobal = new RegExp('(?:)', 'g')
+    let emptyLambda: (str: String, args: (Object | undefined)[]) => String =
+        (str: String, args: (Object | undefined)[]): String => {
+        failure += checkTestResult(str, '')
         failure += checkTestResult(args[0] as Double, new Double(ctr.toDouble()))
         failure += checkTestResult(args[1]!.toString(), 'ab')
         let ans = ctr.toString()
         ctr++
         return ans
     }
-    failure += checkTestResult("0a1b2", "ab".replace(emptyGlobal, emptyLambda))
+    failure += checkTestResult('0a1b2', 'ab'.replace(emptyGlobal, emptyLambda))
     failure += checkTestResult(ctr, 3)
 
     ctr = new Int(0)
-    let emptyUnicodeGlobal = new RegExp("(?:)", "gu")
-    let unicodeLambda: (str: String, args: (Object | undefined)[]) => String = (str: String, args: (Object | undefined)[]): String => {
-        failure += checkTestResult(str, "")
+    let emptyUnicodeGlobal = new RegExp('(?:)', 'gu')
+    let unicodeLambda: (str: String, args: (Object | undefined)[]) => String =
+        (str: String, args: (Object | undefined)[]): String => {
+        failure += checkTestResult(str, '')
         failure += checkTestResult(args[0] as Double, new Double((ctr == 0 ? 0 : 2).toDouble()))
         failure += checkTestResult(args[1]!.toString(), '😀')
         let ans = ctr.toString()
         ctr++
         return ans
     }
-    failure += checkTestResult("0😀1", "😀".replace(emptyUnicodeGlobal, unicodeLambda))
+    failure += checkTestResult('0😀1', '😀'.replace(emptyUnicodeGlobal, unicodeLambda))
     failure += checkTestResult(ctr, 2)
 
     return failure
@@ -185,24 +192,26 @@ function test9(): int {
 
 function test10(): int {
     let failure = 0
-    let named = new RegExp("(?<fst>.)(?<snd>.)", "")
-    let namedLambda: (str: String, args: (Object | undefined)[]) => String = (str: String, args: (Object | undefined)[]): String => {
-        failure += checkTestResult(str, "ab")
+    let named = new RegExp('(?<fst>.)(?<snd>.)', '')
+    let namedLambda: (str: String, args: (Object | undefined)[]) => String =
+        (str: String, args: (Object | undefined)[]): String => {
+        failure += checkTestResult(str, 'ab')
         failure += checkTestResult(args[0]!.toString(), 'a')
         failure += checkTestResult(args[1]!.toString(), 'b')
         failure += checkTestResult(args[2] as Double, new Double(0.0))
         failure += checkTestResult(args[3]!.toString(), 'ab')
         let groups = args[4] as Record<String, String | undefined>
-        failure += checkTestResult(groups.get("fst")!.toString(), "a")
-        failure += checkTestResult(groups.get("snd")!.toString(), "b")
-        return groups.get("snd")! + groups.get("fst")!
+        failure += checkTestResult(groups.get('fst')!.toString(), 'a')
+        failure += checkTestResult(groups.get('snd')!.toString(), 'b')
+        return groups.get('snd')! + groups.get('fst')!
     }
-    failure += checkTestResult("ba", "ab".replace(named, namedLambda))
+    failure += checkTestResult('ba', 'ab'.replace(named, namedLambda))
     return failure
 }
 
 function test12(): void {
-    let lambda: (str: String, args: (Object | undefined)[]) => String = (str: String, args: (Object | undefined)[]): String => {
+    let lambda: (str: String, args: (Object | undefined)[]) => String =
+        (str: String, args: (Object | undefined)[]): String => {
         return 'ok'
     }
     let result = new RegExp('(a)(b)?').replace('a', lambda)
@@ -210,7 +219,8 @@ function test12(): void {
 }
 
 function test13(): void {
-    let lambda: (str: String, args: (Object | undefined)[]) => String = (str: String, args: (Object | undefined)[]): String => {
+    let lambda: (str: String, args: (Object | undefined)[]) => String =
+        (str: String, args: (Object | undefined)[]): String => {
         return 'named'
     }
     let result = new RegExp('(?<letter>a)?b').replace('b', lambda)
@@ -218,7 +228,8 @@ function test13(): void {
 }
 
 function test14(): void {
-    let lambda: (str: String, args: (Object | undefined)[]) => String = (str: String, args: (Object | undefined)[]): String => {
+    let lambda: (str: String, args: (Object | undefined)[]) => String =
+        (str: String, args: (Object | undefined)[]): String => {
         return 'ok'
     }
     let result = new RegExp('(?<left>a)?(b)(?<right>c)?').replace('b', lambda)
@@ -226,13 +237,13 @@ function test14(): void {
 }
 
 function replaceTest(): void {
-    let str = "xaxbxcx"
+    let str = 'xaxbxcx'
     let failure = 0
     failure += test1(str)
     failure += test2(str)
     failure += test3(str)
     failure += test4(str)
-    failure += test5("abcd")
+    failure += test5('abcd')
     failure += test6()
     failure += test7()
     failure += test8()
@@ -254,21 +265,25 @@ function main(): int {
 
 function test11(): int {
     let failure = 0
-    failure += checkTestResult("xaxbx", "ab".replace(new RegExp("(?:)", "g"), "x"))
-    failure += checkTestResult("xx", "😀😀".replace(new RegExp("😀", "g"), "x"))
-    failure += checkTestResult("😎😎", "😀😀".replace(new RegExp("😀", "g"), "😎"))
-    failure += checkTestResult("x😀x", "😀".replace(new RegExp("(?:)", "gu"), "x"))
-    failure += checkTestResult("😎😀😎", "😀".replace(new RegExp("(?:)", "gu"), "😎"))
+    failure += checkTestResult('xaxbx', 'ab'.replace(new RegExp('(?:)', 'g'), 'x'))
+    failure += checkTestResult('xx', '😀😀'.replace(new RegExp('😀', 'g'), 'x'))
+    failure += checkTestResult('😎😎', '😀😀'.replace(new RegExp('😀', 'g'), '😎'))
+    failure += checkTestResult('x😀x', '😀'.replace(new RegExp('(?:)', 'gu'), 'x'))
+    failure += checkTestResult('😎😀😎', '😀'.replace(new RegExp('(?:)', 'gu'), '😎'))
     return failure
 }
 
 function checkTestResult(actual: String, expected: String): int {
-    if (actual.equals(expected)) return 0
+    if (actual.equals(expected)) {
+        return 0
+    }
     return 1
 }
 
 function checkTestResult(actual: Int, expected: Int): int {
-    if (actual.equals(expected)) return 0
+    if (actual.equals(expected)) {
+        return 0
+    }
     return 1
 }
 
@@ -276,18 +291,27 @@ const DBL_EPSILON: double = 1.0e-6;
 const doubleEpsilon: double = 2.22045e-16
 function checkTestResult(actual: Double, expected: Double): int {
     if (expected.isNaN()) {
-        if (actual.isNaN()) return 0;
-        else return 1;
+        if (actual.isNaN()) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
 
     if (expected == Double.POSITIVE_INFINITY) {
-        if (actual == Double.POSITIVE_INFINITY) return 0;
-        else return 1;
+        if (actual == Double.POSITIVE_INFINITY) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
 
     if (expected == Double.NEGATIVE_INFINITY) {
-        if (actual == Double.NEGATIVE_INFINITY) return 0;
-        else return 1;
+        if (actual == Double.NEGATIVE_INFINITY) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
     if (actual == expected) {
         return 0;

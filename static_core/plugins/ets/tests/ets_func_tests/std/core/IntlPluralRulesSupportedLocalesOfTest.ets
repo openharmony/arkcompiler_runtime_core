@@ -31,7 +31,7 @@ function main() {
 function supportedLocalesOfTest01() {
     const locales: FixedArray<string> = ['ban']
     const options = {localeMatcher:'lookup'} as Intl.SupportedLocalesOfOptions
-    const result: Array<string> = Intl.PluralRules.supportedLocalesOf(locales, options)
+    const result: string[] = Intl.PluralRules.supportedLocalesOf(locales, options)
 
     arktest.assertEQ(result.length, 0)
 }
@@ -39,7 +39,7 @@ function supportedLocalesOfTest01() {
 function supportedLocalesOfTest02() {
     const locales: FixedArray<string> = ['ban', 'id-u-co-pinyin', 'de-ID', 'zh-u-co-pinyin', 'en-US']
     const options = {localeMatcher:'lookup'} as Intl.SupportedLocalesOfOptions
-    const result: Array<string> = Intl.PluralRules.supportedLocalesOf(locales, options)
+    const result: string[] = Intl.PluralRules.supportedLocalesOf(locales, options)
 
     arktest.assertEQ(result.length, 4)
     arktest.assertEQ(result[0], 'id-u-co-pinyin')
@@ -51,7 +51,7 @@ function supportedLocalesOfTest02() {
 function supportedLocalesOfTest03() {
     const locales: FixedArray<string> = ['ban', 'id-u-co-pinyin', 'de-iD', 'zh-u-co-pinyin', 'en-US']
     const options = {localeMatcher:'lookup'} as Intl.SupportedLocalesOfOptions
-    const result: Array<string> = Intl.PluralRules.supportedLocalesOf(locales, options)
+    const result: string[] = Intl.PluralRules.supportedLocalesOf(locales, options)
 
     arktest.assertEQ(result.length, 4)
     arktest.assertEQ(result[0], 'id-u-co-pinyin')
@@ -63,7 +63,7 @@ function supportedLocalesOfTest03() {
 function supportedLocalesOfTest04() {
     const locales: FixedArray<string> = ['ban', 'id-u-co-pinyin', 'de-ID', 'De-id', 'zh-u-co-pinyin', 'en-US', 'de-ID', 'De-id']
     const options = {localeMatcher:'lookup'} as Intl.SupportedLocalesOfOptions
-    const result: Array<string> = Intl.PluralRules.supportedLocalesOf(locales, options)
+    const result: string[] = Intl.PluralRules.supportedLocalesOf(locales, options)
 
     arktest.assertEQ(result.length, 4)
     arktest.assertEQ(result[0], 'id-u-co-pinyin')
@@ -73,9 +73,9 @@ function supportedLocalesOfTest04() {
 }
 
 function supportedLocalesOfTest05() {
-    const locales: Array<string> = ['ban']
+    const locales: string[] = ['ban']
     const options = {localeMatcher:'lookup'} as Intl.SupportedLocalesOfOptions
-    const result: Array<string> = Intl.PluralRules.supportedLocalesOf(locales, options)
+    const result: string[] = Intl.PluralRules.supportedLocalesOf(locales, options)
 
     arktest.assertEQ(result.length, 0)
 }
@@ -88,9 +88,9 @@ function supportedLocalesOfTest06() {
 }
 
 function supportedLocalesOfTest07() {
-    const locales: Array<string> = ['ban', 'id-u-co-pinyin', 'de-ID', 'zh-u-co-pinyin', 'en-US']
+    const locales: string[] = ['ban', 'id-u-co-pinyin', 'de-ID', 'zh-u-co-pinyin', 'en-US']
     const options = {localeMatcher:'lookup'} as Intl.SupportedLocalesOfOptions
-    const result: Array<string> = Intl.PluralRules.supportedLocalesOf(locales, options)
+    const result: string[] = Intl.PluralRules.supportedLocalesOf(locales, options)
 
     arktest.assertEQ(result.length, 4)
     arktest.assertEQ(result[0], 'id-u-co-pinyin')
@@ -100,7 +100,7 @@ function supportedLocalesOfTest07() {
 }
 
 function supportedLocalesOfTest08() {
-    const locales: Array<string> = ['']
+    const locales: string[] = ['']
     const options = {localeMatcher:'lookup'} as Intl.SupportedLocalesOfOptions
     arktest.expectError((): void => { Intl.PluralRules.supportedLocalesOf(locales, options) }, 
         new RangeError('invalid locale'))
@@ -109,7 +109,7 @@ function supportedLocalesOfTest08() {
 function supportedLocalesOfTest09() {
     const locales: FixedArray<string> = ['en-US']
     const options = {localeMatcher:'lookup'} as Intl.PluralRulesOptions
-    const result: Array<string> = Intl.PluralRules.supportedLocalesOf(locales, options)
+    const result: string[] = Intl.PluralRules.supportedLocalesOf(locales, options)
 
     arktest.assertEQ(result.length, 1)
 }
@@ -117,7 +117,7 @@ function supportedLocalesOfTest09() {
 function supportedLocalesOfTest10() {
     const locales: FixedArray<string> = ['en-US']
     const options = {localeMatcher:'lookup'} as Intl.SupportedLocalesOfOptions
-    const result: Array<string> = Intl.PluralRules.supportedLocalesOf(locales, options)
+    const result: string[] = Intl.PluralRules.supportedLocalesOf(locales, options)
 
     arktest.assertEQ(result.length, 1)
 }

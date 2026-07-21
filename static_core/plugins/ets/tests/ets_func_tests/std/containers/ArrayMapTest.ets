@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,22 +14,22 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Array API tests for SDK");
-    suite.addTest("Test Array.map with array length reducing", testmap);
+    const suite = new arktest.ArkTestsuite('Array API tests for SDK');
+    suite.addTest('Test Array.map with array length reducing', testmap);
     return suite.run(); 
 }
 
 type FuncType = (val: number, index: int, obj: Array<number>) => number;
 
 class TestData {
-    static callCnt = 0;
-    static readonly srcArr: Array<number> = new Array<number>(1, 2, 3, 4, 5);
-    static readonly callbackfn: FuncType = (val: number, index: int, obj: Array<number>): number => {
+    public static callCnt = 0;
+    public static readonly srcArr: Array<number> = [1, 2, 3, 4, 5];
+    public static readonly callbackfn: FuncType = (val: number, index: int, obj: Array<number>): number => {
         TestData.srcArr.length = 2;
         TestData.callCnt++;
         return 1;
     }
-    static readonly expected = 2;
+    public static readonly expected = 2;
 }
 
 function testmap() {

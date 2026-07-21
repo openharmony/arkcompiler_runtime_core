@@ -20,7 +20,7 @@ This skill covers the complete RegExp implementation stack from ETS managed code
                                  ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │                      ANI Native Bindings                            │
-│  native/core/regexp/RegExp.cpp                                      │
+│  native/core/regexp/regexp.cpp                                      │
 │  - compile(), execImpl(), matchImpl()                                │
 │  - ETS string → native conversion                                   │
 │  - Result object construction                                       │
@@ -51,7 +51,7 @@ This skill covers the complete RegExp implementation stack from ETS managed code
 |-------|------|---------|
 | Managed | `std/core/RegExp.ets` | ETS public API |
 | Managed | `std/core/RegExp.ets` | Result types (RegExpResultArray, etc.) |
-| Native | `native/core/regexp/RegExp.cpp` | ANI bindings |
+| Native | `native/core/regexp/regexp.cpp` | ANI bindings |
 | Native | `native/core/regexp/regexp_executor.cpp` | PCRE2 orchestration |
 | Native | `native/core/regexp/regexp_8.cpp` | UTF-8 PCRE2 wrapper |
 | Native | `native/core/regexp/regexp_16.cpp` | UTF-16 PCRE2 wrapper |
@@ -152,7 +152,7 @@ private native static parse(pattern: String, flags: String): void
 ### Registration (RegExp.cpp:400-416)
 
 ```cpp
-// native/core/regexp/RegExp.cpp
+// native/core/regexp/regexp.cpp
 void RegisterRegExpNativeMethods(ani_env *env)
 {
     const auto regExpImpls = std::array {
@@ -179,7 +179,7 @@ z                      = boolean parameter
 ### String Conversion Helpers
 
 ```cpp
-// native/core/regexp/RegExp.cpp lines 120-150
+// native/core/regexp/regexp.cpp lines 120-150
 bool IsUtf16(ani_env *env, ani_string str)
 {
     ark::ets::ani::ScopedManagedCodeFix s(env);
@@ -512,7 +512,7 @@ cd ../../../
 ## References
 
 - ETS API: `std/core/RegExp.ets`
-- ANI Bindings: `native/core/regexp/RegExp.cpp`
+- ANI Bindings: `native/core/regexp/regexp.cpp`
 - PCRE2 Wrapper: `native/core/regexp/regexp_executor.cpp`
 - Runtime Intrinsics: `plugins/ets/runtime/intrinsics/std_core_RegExp.cpp`
 - Parser: `static_core/runtime/regexp/ecmascript/regexp_parser.cpp`

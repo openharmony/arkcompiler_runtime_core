@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,25 +16,25 @@
 function main(): int {
     let failures = 0;
 
-    failures += test(testDateChangeYear(), "Try to change date's year");
-    failures += test(testDateChangeMonth(), "Try to change date's month");
-    failures += test(testDateChangeMonthOverflow(), "Month overflow adjusts year forward");
-    failures += test(testDateChangeMonthNegative(), "Negative month adjusts year backward");
-    failures += test(testDateChangeDay(), "Try to set date's new day");
-    failures += test(testDateChangeDayZero(), "Day zero rolls back to previous month");
-    failures += test(testDateChangeDayOverflow(), "Day overflow rolls forward to next month");
-    failures += test(testDateChangeHour(), "Try to set new hour");
-    failures += test(testDateChangeHourOverflow(), "Hour overflow updates following fields");
-    failures += test(testDateChangeMinutes(), "Try to set new minutes");
-    failures += test(testDateChangeSeconds(), "Try to set new seconds");
-    failures += test(testSetFromLeapYear(), "Set nonleap year from leap year");
-    failures += test(testSetToLeapYear(), "Set leap year from nonleap year");
-    failures += test(testSetFromLeapDayToNonLeapYear(), "Adjust leap day when moving to common year");
-    failures += test(testSetUTCFullYear(), "Set UTC full year");
+    failures += test(testDateChangeYear(), 'Try to change date\'s year');
+    failures += test(testDateChangeMonth(), 'Try to change date\'s month');
+    failures += test(testDateChangeMonthOverflow(), 'Month overflow adjusts year forward');
+    failures += test(testDateChangeMonthNegative(), 'Negative month adjusts year backward');
+    failures += test(testDateChangeDay(), 'Try to set date\'s new day');
+    failures += test(testDateChangeDayZero(), 'Day zero rolls back to previous month');
+    failures += test(testDateChangeDayOverflow(), 'Day overflow rolls forward to next month');
+    failures += test(testDateChangeHour(), 'Try to set new hour');
+    failures += test(testDateChangeHourOverflow(), 'Hour overflow updates following fields');
+    failures += test(testDateChangeMinutes(), 'Try to set new minutes');
+    failures += test(testDateChangeSeconds(), 'Try to set new seconds');
+    failures += test(testSetFromLeapYear(), 'Set nonleap year from leap year');
+    failures += test(testSetToLeapYear(), 'Set leap year from nonleap year');
+    failures += test(testSetFromLeapDayToNonLeapYear(), 'Adjust leap day when moving to common year');
+    failures += test(testSetUTCFullYear(), 'Set UTC full year');
 
 
-    // next test raises arktest.assertTrue( "Invalid year/month pair")
-    //failures += test(testDateChangeMonthBad(), "Try to change month to bad value");
+    //next test raises arktest.assertTrue( 'Invalid year/month pair')
+    //FIXME: failures += test(testDateChangeMonthBad(), 'Try to change month to bad value');
     return failures;
 }
 
@@ -42,7 +42,8 @@ function test(result: int, message: String): int {
     if (result == 0) {
         return 0;
     }
-    console.println("FAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('FAILED: ' + message);
     return 1;
 }
 
@@ -75,7 +76,9 @@ function testDateChangeYear(): int {
     let year = date.getFullYear();
     date.setFullYear(year - 1);
 
-    if (date.getFullYear() == (year - 1)) return 0;
+    if (date.getFullYear() == (year - 1)) {
+        return 0;
+    }
     return 1;
 
 }
@@ -90,7 +93,9 @@ function testDateChangeMonthImpl(date: Date, change: int) {
     let dmo = daysInMonth(date.getFullYear(), month);
     let newMonth = month + change;
     let dmc = daysInMonth(date.getFullYear(), newMonth);
-    if (dmc < dmo) newMonth++;
+    if (dmc < dmo) {
+        newMonth++;
+    }
     date.setMonth(newMonth);
     arktest.assertEQ(date.getMonth(), newMonth)
 }
@@ -100,7 +105,9 @@ function testDateChangeMonth(): int {
         let date = new Date();
         let month = date.getMonth();
         let change: int = 1;
-        if (month == 11) change = -change;
+        if (month == 11) {
+            change = -change;
+        }
         testDateChangeMonthImpl(date, change);
     } catch (ae) {
         if (ae instanceof AssertionError) {
@@ -145,10 +152,14 @@ function testDateChangeDay(): int {
     let date: Date = new Date();
     let day: byte = date.getDate().toByte();
     let newDay: byte = 15;
-    if (newDay == day) newDay++;
+    if (newDay == day) {
+        newDay++;
+    }
     date.setDate(newDay);
 
-    if (date.getDate() == newDay) return 0;
+    if (date.getDate() == newDay) {
+        return 0;
+    }
     return 1;
 }
 
@@ -174,10 +185,14 @@ function testDateChangeHour(): int {
     let date: Date = new Date();
     let hour: byte = date.getHours().toByte();
     let newHour: byte = 12;
-    if (newHour == hour) newHour = 11;
+    if (newHour == hour) {
+        newHour = 11;
+    }
     date.setHours(newHour);
 
-    if (date.getHours() == newHour) return 0;
+    if (date.getHours() == newHour) {
+        return 0;
+    }
     return 1;
 }
 
@@ -198,10 +213,14 @@ function testDateChangeMinutes(): int {
     let date: Date = new Date();
     let minutes: byte = date.getMinutes().toByte();
     let newMinutes: byte = 30;
-    if (newMinutes == minutes) newMinutes = 21;
+    if (newMinutes == minutes) {
+        newMinutes = 21;
+    }
     date.setMinutes(newMinutes);
 
-    if (date.getMinutes() == newMinutes) return 0;
+    if (date.getMinutes() == newMinutes) {
+        return 0;
+    }
     return 1;
 }
 
@@ -209,10 +228,14 @@ function testDateChangeSeconds(): int {
     let date: Date = new Date();
     let seconds: int = date.getSeconds();
     let newSeconds: int = 30;
-    if (newSeconds == seconds) newSeconds = 21;
+    if (newSeconds == seconds) {
+        newSeconds = 21;
+    }
     date.setSeconds(newSeconds);
 
-    if (date.getSeconds() == newSeconds) return 0;
+    if (date.getSeconds() == newSeconds) {
+        return 0;
+    }
     return 1;
 }
 
@@ -221,10 +244,10 @@ function testSetUTCFullYear(): int {
     let date: Date = new Date(utcValue);
     arktest.assertEQ(date.getUTCFullYear(), 1996);
     arktest.assertEQ(date.valueOf(), 823230245000);
-    arktest.assertEQ(date.toUTCString(), "Fri, 02 Feb 1996 03:04:05 GMT");
+    arktest.assertEQ(date.toUTCString(), 'Fri, 02 Feb 1996 03:04:05 GMT');
     date.setUTCFullYear(96);
     arktest.assertEQ(date.getUTCFullYear(), 96);
     arktest.assertEQ(date.valueOf(), -59134913755000);
-    arktest.assertEQ(date.toUTCString(), "Thu, 02 Feb 0096 03:04:05 GMT");
+    arktest.assertEQ(date.toUTCString(), 'Thu, 02 Feb 0096 03:04:05 GMT');
     return 0;
 }

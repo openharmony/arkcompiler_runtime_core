@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-function check(current_answer: number, correct_answer: number, test: string) {
-    if (current_answer != correct_answer) {
-        if (!Number.isNaN(current_answer) || !Number.isNaN(correct_answer)) {
-            arktest.assertTrue( false, "incorrect " + test + " answer " + current_answer + " instead of " + correct_answer)
+function check(currentAnswer: number, correctAnswer: number, test: string) {
+    if (currentAnswer != correctAnswer) {
+        if (!Number.isNaN(currentAnswer) || !Number.isNaN(correctAnswer)) {
+            arktest.assertTrue( false, 'incorrect ' + test + ' answer ' + currentAnswer + ' instead of ' + correctAnswer)
             return 1;
         }
     }
@@ -27,64 +27,64 @@ function main() {
     let fails = 0;
     let tests: string[] = [
         // empty and whitespace
-        "",
-        "\n",
-        "\t",
-        "    ",
-        "   123   ",
+        '',
+        '\n',
+        '\t',
+        '    ',
+        '   123   ',
         // basic integers
-        "123",
-        "-1",
-        "00015",
+        '123',
+        '-1',
+        '00015',
         // sign + zero
-        "-0",
-        "+0",
+        '-0',
+        '+0',
         // sign + integer
-        "+5",
-        " +5",
-        " +5a",
+        '+5',
+        ' +5',
+        ' +5a',
         // decimals
-        "9.8",
-        ".5",
-        "-1.11111",
+        '9.8',
+        '.5',
+        '-1.11111',
         // Infinity
-        "Infinity",
-        "+Infinity",
-        "-Infinity",
+        'Infinity',
+        '+Infinity',
+        '-Infinity',
         // scientific notation
-        "1e8",
-        "+1234.5678E-90",
-        "10e10000",
+        '1e8',
+        '+1234.5678E-90',
+        '10e10000',
         // invalid strings
-        "NaN",
-        "nan",
-        "aaa",
-        "e8",
-        "1e",
-        "1rew",
+        'NaN',
+        'nan',
+        'aaa',
+        'e8',
+        '1e',
+        '1rew',
         // hex literals
-        "0x11",
-        " 0x1",
-        "0x01R",
-        "0xR",
-        "0x00 001",
-        "0x11 abacaba",
-        "+0x1",
+        '0x11',
+        ' 0x1',
+        '0x01R',
+        '0xR',
+        '0x00 001',
+        '0x11 abacaba',
+        '+0x1',
         // octal literals
-        "0o123",
-        "+0o10",
-        "0o",
+        '0o123',
+        '+0o10',
+        '0o',
         // binary literals
-        "0b0101010",
-        "0b222",
-        "+0b1",
-        "0b",
-        "0b1.01",
-        "0b1e10",
+        '0b0101010',
+        '0b222',
+        '+0b1',
+        '0b',
+        '0b1.01',
+        '0b1e10',
         // mixed edge cases
-        "00b0"
+        '00b0'
     ]
-    const correct_cts: number[] = [
+    const correctCts: number[] = [
         // empty and whitespace
         0,
         0,
@@ -143,7 +143,7 @@ function main() {
         // mixed edge cases
         NaN
     ];
-    const correct_pfs: number[] = [
+    const correctPfs: number[] = [
         // empty and whitespace
         NaN,
         NaN,
@@ -203,16 +203,17 @@ function main() {
         0
     ];
 
-    const force_log = false;
-    for (let test_id = 0; test_id < tests.length; test_id++) {
-        let test = tests[test_id];
-        if (force_log) {
-            console.log("[" + test + "]");
+    const forceLog = false;
+    for (let testId = 0; testId < tests.length; testId++) {
+        let test = tests[testId];
+        if (forceLog) {
+            // CC-OFFNXT(G.AOD.03) current test suite code style
+            console.log('[' + test + ']');
         }
-        let ctor_answer = (new Number(test)); // change to .valueOf to run script in TS
-        let parse_answer = Number.parseFloat(test);
-        fails += check(ctor_answer, correct_cts[test_id], "Number(" + test + ")");
-        fails += check(parse_answer, correct_pfs[test_id], "parseFloat(" + test + ")");
+        let ctorAnswer = (Number(test)); // change to .valueOf to run script in TS
+        let parseAnswer = Number.parseFloat(test);
+        fails += check(ctorAnswer, correctCts[testId], 'Number(' + test + ')');
+        fails += check(parseAnswer, correctPfs[testId], 'parseFloat(' + test + ')');
     }
     return fails;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License")
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,12 +54,12 @@ interface Resource {
 }
 
 class ResourceImpl implements Resource {
-    bundleName: string;
-    moudleName: string;
-    id: number;
-    params?: Any[];
-    type?: number;
-    resource?: ResourceString;
+    public bundleName: string;
+    public moudleName: string;
+    public id: number;
+    public params?: Any[];
+    public type?: number;
+    public resource?: ResourceString;
     constructor(bundleName: string, moudleName: string, id: number) {
         this.bundleName = bundleName;
         this.moudleName = moudleName;
@@ -75,9 +75,9 @@ interface A {
 }
 
 class AImpl implements A {
-    a1?: Array<string>
-    a2?: Array<Resource>
-    a3: Array<Dimension> = []
+    public a1?: Array<string>
+    public a2?: Array<Resource>
+    public a3: Array<Dimension> = []
 }
 
 interface B {
@@ -87,13 +87,13 @@ interface B {
 }
 
 class BImpl implements B {
-    a1?: Map<string, string>
-    a2?: Map<string, Resource>
-    a3: Map<string, Dimension> = new Map<string, Dimension>()
+    public a1?: Map<string, string>
+    public a2?: Map<string, Resource>
+    public a3: Map<string, Dimension> = new Map<string, Dimension>()
 }
 
 class AHandler implements reflect.InvocationHandler {
-    instance: A
+    public instance: A
     constructor(other: A) {
         this.instance = other
     }
@@ -114,7 +114,7 @@ class AHandler implements reflect.InvocationHandler {
 }
 
 class BHandler implements reflect.InvocationHandler {
-    instance: B
+    public instance: B
     constructor(other: B) {
         this.instance = other
     }
@@ -137,7 +137,7 @@ class BHandler implements reflect.InvocationHandler {
 
 // Test Array
 function createAProxyTest(){
-    let ifaces: FixedArray<Class> =  [ Class.from<A>() ]
+    let ifaces: FixedArray<Class> = [Class.from<A>()]
     let proxy1: A = createProxy(ifaces, new AHandler(new AImpl())) as A
     createAProxyTestBody(proxy1)
 
@@ -148,39 +148,39 @@ function createAProxyTest(){
 function createAProxyTestBody(proxy: A) {
     let a1 = proxy.a1
     arktest.assertEQ(proxy.a1, undefined)
-    a1 = new Array<string>()
-    a1.push("test1")
-    a1.push("test2")
-    arktest.assertEQ(a1[0], "test1")
-    arktest.assertEQ(a1[1], "test2")
+    a1 = []
+    a1.push('test1')
+    a1.push('test2')
+    arktest.assertEQ(a1[0], 'test1')
+    arktest.assertEQ(a1[1], 'test2')
     a1 = undefined
 
     let a2 = proxy.a2
     arktest.assertEQ(proxy.a2, undefined)
-    a2 = new Array<Resource>()
-    a2.push(new ResourceImpl("test1", "test2", 1))
-    a2.push(new ResourceImpl("test2", "test1", 2))
+    a2 = []
+    a2.push(new ResourceImpl('test1', 'test2', 1))
+    a2.push(new ResourceImpl('test2', 'test1', 2))
     arktest.assertEQ(a2[0].id, 1)
     arktest.assertEQ(a2[1].id, 2)
     a2 = undefined
 
     let a3 = proxy.a3
     arktest.assertEQ(a3.length, 0)
-    let d1: Dimension = "test1"
+    let d1: Dimension = 'test1'
     a3.push(d1)
     let d2: Dimension = 1
     a3.push(d2)
-    let d3: Dimension = new ResourceImpl("test1", "test2", 3)
+    let d3: Dimension = new ResourceImpl('test1', 'test2', 3)
     a3.push(d3)
     a3.push(undefined)
-    arktest.assertEQ(a3[0], "test1")
+    arktest.assertEQ(a3[0], 'test1')
     arktest.assertEQ(a3[1], 1)
     arktest.assertEQ((a3[2] as Resource).id, 3)
     arktest.assertEQ(a3[3], undefined)
 }
 
 function createBProxyTest(){
-    let ifaces: FixedArray<Class> =  [ Class.from<B>() ]
+    let ifaces: FixedArray<Class> = [Class.from<B>()]
     let proxy1: B = createProxy(ifaces, new BHandler(new BImpl())) as B
     createBProxyTestBody(proxy1)
 
@@ -193,34 +193,34 @@ function createBProxyTestBody(proxy: B) {
     let a1 = proxy.a1
     arktest.assertEQ(proxy.a1, undefined)
     a1 = new Map<string, string>
-    a1.set("test1", "test2")
-    a1.set("test3", "test4")
-    arktest.assertEQ(a1.get("test1"), "test2")
-    arktest.assertEQ(a1.get("test3"), "test4")
+    a1.set('test1', 'test2')
+    a1.set('test3', 'test4')
+    arktest.assertEQ(a1.get('test1'), 'test2')
+    arktest.assertEQ(a1.get('test3'), 'test4')
     a1 = undefined
 
     let a2 = proxy.a2
     arktest.assertEQ(proxy.a2, undefined)
     a2 = new Map<string, Resource>
-    a2.set("test1", new ResourceImpl("test1", "test2", 1))
-    a2.set("test2", new ResourceImpl("test2", "test1", 2))
-    arktest.assertEQ(a2.get("test1")?.id, 1)
-    arktest.assertEQ(a2.get("test2")?.id, 2)
+    a2.set('test1', new ResourceImpl('test1', 'test2', 1))
+    a2.set('test2', new ResourceImpl('test2', 'test1', 2))
+    arktest.assertEQ(a2.get('test1')?.id, 1)
+    arktest.assertEQ(a2.get('test2')?.id, 2)
     a2 = undefined
 
     let a3 = proxy.a3
     arktest.assertEQ(a3.size, 0)
-    let d1: Dimension = "test1"
-    a3.set("test1", d1)
+    let d1: Dimension = 'test1'
+    a3.set('test1', d1)
     let d2: Dimension = 1
-    a3.set("test2", d2)
-    let d3: Dimension = new ResourceImpl("test1", "test2", 3)
-    a3.set("test3", d3)
-    a3.set("test4", undefined)
-    arktest.assertEQ(a3.get("test1"), "test1")
-    arktest.assertEQ(a3.get("test2"), 1)
-    arktest.assertEQ((a3.get("test3") as Resource).id, 3)
-    arktest.assertEQ(a3.get("test4"), undefined)
+    a3.set('test2', d2)
+    let d3: Dimension = new ResourceImpl('test1', 'test2', 3)
+    a3.set('test3', d3)
+    a3.set('test4', undefined)
+    arktest.assertEQ(a3.get('test1'), 'test1')
+    arktest.assertEQ(a3.get('test2'), 1)
+    arktest.assertEQ((a3.get('test3') as Resource).id, 3)
+    arktest.assertEQ(a3.get('test4'), undefined)
 }
 
 

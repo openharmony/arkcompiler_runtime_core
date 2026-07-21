@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,17 +16,17 @@
 function main(): int {
     let failures: int = 0;
     
-    failures += test(testIteratorWithEmptySet(), "Test Iterator With Empty Set");
-    failures += test(testIteratorWithNonEmptySet(), "Test Iterator With Non Empty Set");
-    failures += test(testIteratorBoundaryConditions(),"Test Iterator Boundary Conditions");
+    failures += test(testIteratorWithEmptySet(), 'Test Iterator With Empty Set');
+    failures += test(testIteratorWithNonEmptySet(), 'Test Iterator With Non Empty Set');
+    failures += test(testIteratorBoundaryConditions(), 'Test Iterator Boundary Conditions');
 
-    failures += test(testIteratorWithNonEmptyReadonlySet(),"Test Iterator With Empty ReadonlySet");
-    failures += test(testIteratorWithNonEmptyReadonlySet(), "Test Iterator With Non Empty ReadonlySet");
+    failures += test(testIteratorWithNonEmptyReadonlySet(), 'Test Iterator With Empty ReadonlySet');
+    failures += test(testIteratorWithNonEmptyReadonlySet(), 'Test Iterator With Non Empty ReadonlySet');
   
-    return test(failures, "All tests run");
+    return test(failures, 'All tests run');
 }
 
-const RESULT_SUCCESS  = 0;
+const RESULT_SUCCESS = 0;
 const RESULT_FAILURE = 1;
 
 function testIteratorWithEmptySet(): int {
@@ -36,7 +36,7 @@ function testIteratorWithEmptySet(): int {
     if (!v.done) {
         return RESULT_FAILURE;
     }
-    return RESULT_SUCCESS ;
+    return RESULT_SUCCESS;
 }
 
 function testIteratorWithNonEmptySet(): int {
@@ -60,7 +60,7 @@ function testIteratorWithNonEmptySet(): int {
         return RESULT_FAILURE;
     }
     
-    return RESULT_SUCCESS ;
+    return RESULT_SUCCESS;
 }
 
 function testIteratorBoundaryConditions(): int {
@@ -85,7 +85,7 @@ function testIteratorBoundaryConditions(): int {
         return RESULT_FAILURE;
     }*/
     
-    return RESULT_SUCCESS ;
+    return RESULT_SUCCESS;
 }
 
 function testIteratorWithEmptyReadonlySet(): int {
@@ -131,10 +131,12 @@ function testIteratorWithNonEmptyReadonlySet(): int {
 }
 
 function test(result: int, message: String ): int {
-    if(result == 0) {
+    if (result == 0) {
+      // CC-OFFNXT(G.AOD.03) current test suite code style
       console.println('PASSED: ' + message);
       return 0;
     }
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.println('FAILED: ' + message);
     return 1;
 }

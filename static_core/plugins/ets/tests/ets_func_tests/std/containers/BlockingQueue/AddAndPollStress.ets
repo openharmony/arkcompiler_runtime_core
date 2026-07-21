@@ -14,10 +14,10 @@
  */
 
 function main(): int {
-    let BlockingQueueTestsuite = new arktest.ArkTestsuite("BlockingQueueAddAndPollStressTest")
+    let blockingQueueTestsuite = new arktest.ArkTestsuite('BlockingQueueAddAndPollStressTest')
 
-    BlockingQueueTestsuite.addAsyncTest("addAndPoll", addAndPoll)
-    let res = BlockingQueueTestsuite.run()
+    blockingQueueTestsuite.addAsyncTest('addAndPoll', addAndPoll)
+    let res = blockingQueueTestsuite.run()
     CoroutineExtras.stopTaskpool()
     return res
 }

@@ -15,18 +15,19 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T>(arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+function awaitAll<T>(arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
-	for (let i = 0; i < arr.length; ++ i)
+	for (let i = 0; i < arr.length; ++ i) {
 		res.push(arr[i].Await());
+	}
 	return res;
 }
 
-function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
+function sumArrInto(to: FixedArray<int>, from: FixedArray<int>): void {
 	arktest.assertEQ(to.length, from.length);
 	for (let i = 0; i < to.length; ++ i) {
 		to[i] += from[i];
@@ -34,8 +35,9 @@ function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
 }
 
 function assertEQAll(array: FixedArray<int>, value: int): void {
-	for (let i=0; i < array.length; ++ i)
+	for (let i = 0; i < array.length; ++ i) {
 		arktest.assertEQ(array[i], value)
+	}
 }
 
 function testConcurrentGetAndSet() {
@@ -45,7 +47,7 @@ function testConcurrentGetAndSet() {
 	let map = new CHMap();
 	let getF = () => {
 		for (let i = 0; i < SET_COUNT; ++ i) {
-			let val: int|undefined = undefined;
+			let val: int | undefined;
 			while (val == undefined) {
 				val = map.get(i);
 				Coroutine.Schedule();
@@ -77,8 +79,10 @@ function testConcurrentGetAndSet2() {
 		let prev: int = -1;
 		while (prev != SET_COUNT - 1) {
 			Coroutine.Schedule();
-			let val: int|undefined = map.get(0);
-			if (val == undefined || val == prev) continue;
+			let val: int | undefined = map.get(0);
+			if (val == undefined || val == prev) {
+			    continue;
+			}
 			arktest.assertLT(prev, val as int);
 			prev = val as int;
 		}
@@ -97,9 +101,9 @@ function testConcurrentGetAndSet2() {
 }
 
 function main(): int {
-    let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
-	CHMTestSuitecase.addTest("testConcurrentGetAndSet", testConcurrentGetAndSet);
-	CHMTestSuitecase.addTest("testConcurrentGetAndSet2", testConcurrentGetAndSet2);
+    let chmTestSuitecase = new arktest.ArkTestsuite('ConcurrentHashMapTest')
+	chmTestSuitecase.addTest('testConcurrentGetAndSet', testConcurrentGetAndSet);
+	chmTestSuitecase.addTest('testConcurrentGetAndSet2', testConcurrentGetAndSet2);
 
-    return CHMTestSuitecase.run();
+    return chmTestSuitecase.run();
 }

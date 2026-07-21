@@ -14,9 +14,13 @@
  */
 
 type FormatResult = [number, string | undefined, Intl.NumberFormatOptions | undefined, string]
-const FORMAT_RESULTS = new Array<FormatResult>()
+const FORMAT_RESULTS: FormatResult[] = []
 
-function addFormatResult(i: number, locale: string | undefined, options: Intl.NumberFormatOptions | undefined, result: string): void {
+function addFormatResult(
+    i: number,
+    locale: string | undefined,
+     options: Intl.NumberFormatOptions | undefined,
+     result: string): void {
     const res: [number, string | undefined, Intl.NumberFormatOptions | undefined, string] = [i, locale, options, result]
     FORMAT_RESULTS.push(res)
 }

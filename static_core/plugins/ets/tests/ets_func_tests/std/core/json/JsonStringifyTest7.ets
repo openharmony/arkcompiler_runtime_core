@@ -42,103 +42,103 @@ function main(): int {
 }
 
 class ReplacedContainerValue {
-    value: string = '';
+    public value: string = '';
 }
 
 class RootNestedReplaceObj {
-    container: ReplacedContainerValue = { value: '' };
+    public container: ReplacedContainerValue = { value: '' };
 }
 
 class SumSourceFields {
-    a: number;
-    b: number;
+    public a: number;
+    public b: number;
 }
 
 class SumResultFields extends SumSourceFields {
-    sum: number;
+    public sum: number;
 }
 
 class StrTruncateObj {
-    shortTest: string = '';
-    longTest: string = '';
+    public shortTest: string = '';
+    public longTest: string = '';
 }
 
 class NewlineLevelFields {
-    level2: string = '';
+    public level2: string = '';
 }
 
 class NestedNewlineObj {
-    level1: NewlineLevelFields = { level2: '' };
+    public level1: NewlineLevelFields = { level2: '' };
 }
 
 class RenamePropObj {
-    newKey: string = '';
+    public newKey: string = '';
 }
 
 class TempValueFields {
-    temp: string = '';
+    public temp: string = '';
 }
 
 type SpecialCharArr = (string | string[])[];
 
 class MultiLangObj {
-    en: string = '';
-    zh: string = '';
-    ja: string = '';
+    public en: string = '';
+    public zh: string = '';
+    public ja: string = '';
 }
 
 class ProductCompare {
-    numbers: number[] = [];
-    product: number;
+    public numbers: number[] = [];
+    public product: number;
 }
 
 class TimestampedLogEntry {
-    event: string = '';
-    time: string = '';
+    public event: string = '';
+    public time: string = '';
 }
 
 class LogListObject {
-    logs: TimestampedLogEntry[] = [];
+    public logs: TimestampedLogEntry[] = [];
 }
 
 class EncryptedObj {
-    username: string = '';
-    email: string = '';
+    public username: string = '';
+    public email: string = '';
 }
 
 class SpecialCharLeafFields {
-    key232: number;
+    public key232: number;
 }
 
 class SpecialCharBranchFields {
-    key401: string = '';
-    level2: SpecialCharLeafFields = { key232: 1 };
+    public key401: string = '';
+    public level2: SpecialCharLeafFields = { key232: 1 };
 }
 
 class DeepSpecialCharObj {
-    level1: SpecialCharBranchFields = { key401: '', level2: { key232: 1 } };
+    public level1: SpecialCharBranchFields = { key401: '', level2: { key232: 1 } };
 }
 
 class EmptyArrFilterObj {
-    valid: number[] = [];
-    empty?: never[] = [];
+    public valid: number[] = [];
+    public empty?: never[] = [];
 }
 
 class MultiPunctObj {
-    en: string = '';
-    de: string = '';
-    fr: string = '';
+    public en: string = '';
+    public de: string = '';
+    public fr: string = '';
 }
 
 class CubeRootCompare {
-    numbers: number[] = [];
-    roots: number[] = [];
+    public numbers: number[] = [];
+    public roots: number[] = [];
 }
 
 function unicodeEmojiRoundtrip(): void {
     const originalStr: string = 'Hello 😊 World 🌟'
     const jsonStr: string = JSON.stringify(originalStr)
-    let typ: Type = Type.of(new String())
+    let typ: Type = Type.of('')
     const parsedStr: string = JSON.parse<string>(jsonStr, typ) as string
 
     arktest.assertEQ(parsedStr, originalStr)
@@ -166,7 +166,7 @@ function reviverReplaceContainer(): void {
 function unicodeAccentRoundtrip(): void {
     const originalStr: string = 'é (e\u0301)'
     const jsonStr: string = JSON.stringify(originalStr)
-    let typ: Type = Type.of(new String())
+    let typ: Type = Type.of('')
     const parsedStr: string = JSON.parse<string>(jsonStr, typ) as string
 
     arktest.assertEQ(parsedStr, originalStr)
@@ -306,21 +306,24 @@ function reviverComputeProduct(): void {
     const parsed: jsonx.JsonElement = JSON.parseJsonElement(json, (k: string, v: jsonx.JsonElement) => {
         if (k === '') {
             let p = 1
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
             v['numbers'].asArray().forEach((n: jsonx.JsonElement): void => p *= n.asDouble())
             const original = new jsonx.JsonElement({} as Record<string, jsonx.JsonElement>)
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
             original.setElement('numbers', v['numbers'])
             original.setElement('product', jsonx.JsonElement.createDouble(p))
             return original
         }
         return v
     })
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     arktest.assertEQ(parsed['product'].asDouble(), 24)
 }
 
 function zeroWidthJoinerRoundtrip(): void {
     const originalStr: string = 'a\u200Cb'
     const jsonStr: string = JSON.stringify(originalStr)
-    let typ: Type = Type.of(new String())
+    let typ: Type = Type.of('')
     const parsedStr: string = JSON.parse<string>(jsonStr, typ) as string
 
     arktest.assertEQ(parsedStr, originalStr)
@@ -353,14 +356,16 @@ function reviverDateConvert(): void {
         return value
     })
 
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     arktest.assertEQ(parsedObj['logs'][0]['time'].asDouble(), 1704067200000)
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     arktest.assertEQ(parsedObj['logs'][1]['time'].asDouble(), 1704070800000)
 }
 
 function familyEmojiRoundtrip(): void {
     const originalStr: string = '👨‍👩‍👧‍👦 Family: 👨‍💻 Developer'
     const jsonStr: string = JSON.stringify(originalStr)
-    let typ: Type = Type.of(new String())
+    let typ: Type = Type.of('')
     const parsedStr: string = JSON.parse<string>(jsonStr, typ) as string
     arktest.assertEQ(parsedStr, originalStr)
     arktest.assertEQ(parsedStr.includes('👨‍👩‍👧‍👦'), true)
@@ -373,24 +378,28 @@ function reviverCubeRoot(): void {
     const parsed: jsonx.JsonElement = JSON.parseJsonElement(json, (k: string, v: jsonx.JsonElement) => {
         if (k === '') {
             const r: jsonx.JsonElement[] = []
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
             v['numbers'].asArray()
                 .forEach((n: jsonx.JsonElement): void => r.push(
                     jsonx.JsonElement.createDouble(Math.cbrt(n.asDouble()))))
             const original = new jsonx.JsonElement({} as Record<string, jsonx.JsonElement>)
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
             original.setElement('numbers', v['numbers'])
             original.setElement('roots', jsonx.JsonElement.createArray(r))
             return original
         }
         return v
     })
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     arktest.assertEQ(parsed['roots'][0].asDouble().toInt(), 2)
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     arktest.assertEQ(parsed['roots'][1].asDouble().toInt(), 3)
 }
 
 function crlfNewlineRoundtrip(): void {
     const originalStr: string = 'Line1\r\nLine2\nLine3'
     const jsonStr: string = JSON.stringify(originalStr)
-    let typ: Type = Type.of(new String())
+    let typ: Type = Type.of('')
     const parsedStr: string = JSON.parse<string>(jsonStr, typ) as string
 
     arktest.assertEQ(parsedStr, originalStr)
@@ -440,7 +449,9 @@ function reviverRemoveEmptyArr(): void {
             jsonx.JsonElement.createUndefined() : value
     )
 
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     arktest.assertEQ(parsedObj['valid'].asArray().length, 2)
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     arktest.assertEQ(parsedObj['empty'].jsonType, 0)
 }
 
@@ -472,7 +483,10 @@ function reviverMatrixMeta(): void {
         }
         return value
     })
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     arktest.assertEQ(parsedObj['rows'].asDouble(), 3)
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     arktest.assertEQ(parsedObj['cols'].asDouble(), 2)
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     arktest.assertEQ(parsedObj['data'][1][1].asDouble(), 4)
 }

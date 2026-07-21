@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-const en_US: string = 'en-US'
-const zh_CN: string = 'zh-CN'
-const ru_RU = 'ru-RU'
-const er_ER = 'er-OR' // Fake locale
+const enUS: string = 'en-US'
+const zhCN: string = 'zh-CN'
+const ruRU = 'ru-RU'
+const erER = 'er-OR' // Fake locale
 const badLocale = 'test'
-const localeList: string[] = [er_ER, ru_RU, zh_CN, en_US]
+const localeList: string[] = [erER, ruRU, zhCN, enUS]
 
 function main() {
     let suite = new arktest.ArkTestsuite('Locale matching algos')
@@ -30,31 +30,31 @@ function main() {
 }
 
 function testBestFitLocaleMatchList() {
-    arktest.assertEQ(Intl.intlBestFitLocale(localeList), ru_RU)
+    arktest.assertEQ(Intl.intlBestFitLocale(localeList), ruRU)
 
     const result = Intl.intlBestFitLocales(localeList)
     arktest.assertEQ(result.length, 3)
-    arktest.assertEQ(result[0], ru_RU)
-    arktest.assertEQ(result[1], zh_CN)
-    arktest.assertEQ(result[2], en_US)
+    arktest.assertEQ(result[0], ruRU)
+    arktest.assertEQ(result[1], zhCN)
+    arktest.assertEQ(result[2], enUS)
 }
 
 function testLookupLocaleMatchSingle() {
-    arktest.assertEQ(Intl.intlLookUpLocale(en_US), en_US)
+    arktest.assertEQ(Intl.intlLookUpLocale(enUS), enUS)
 
-    const result = Intl.intlLookUpLocales(en_US)
+    const result = Intl.intlLookUpLocales(enUS)
     arktest.assertEQ(result.length, 1)
-    arktest.assertEQ(result[0], en_US)
+    arktest.assertEQ(result[0], enUS)
 }
 
 function testLookupLocaleMatchList() {
-    arktest.assertEQ(Intl.intlLookUpLocale(localeList), ru_RU)
+    arktest.assertEQ(Intl.intlLookUpLocale(localeList), ruRU)
 
     let result = Intl.intlLookUpLocales(localeList)
     arktest.assertEQ(result.length, 3)
-    arktest.assertEQ(result[0], ru_RU)
-    arktest.assertEQ(result[1], zh_CN)
-    arktest.assertEQ(result[2], en_US)
+    arktest.assertEQ(result[0], ruRU)
+    arktest.assertEQ(result[1], zhCN)
+    arktest.assertEQ(result[2], enUS)
 }
 
 function negativeTestLanguageTag() {

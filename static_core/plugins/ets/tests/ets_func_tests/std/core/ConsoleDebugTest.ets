@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 class QueryParams {
-    id: number;
-    filter: string;
+    public id: number;
+    public filter: string;
 
     constructor(id: number, filter: string) {
         this.id = id;
@@ -23,8 +23,8 @@ class QueryParams {
 }
 
 class SystemInfo {
-    memory: string;
-    cpu: string;
+    public memory: string;
+    public cpu: string;
 
     constructor(memory: string, cpu: string) {
         this.memory = memory;
@@ -33,9 +33,9 @@ class SystemInfo {
 }
 
 class Info {
-    level: string;
-    message: string;
-    details: SystemInfo;
+    public level: string;
+    public message: string;
+    public details: SystemInfo;
 
     constructor(level: string, message: string, details: SystemInfo) {
         this.level = level;
@@ -46,37 +46,51 @@ class Info {
 
 function main() {
     // Basic debug messages
-    console.debug("Debug message");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.debug('Debug message');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.debug(42);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.debug(undefined);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.debug(null);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.debug()
 
     // Multiple arguments
-    console.debug("Debug:", "Database connection established");
-    console.debug("Query params:", new QueryParams(1, "active"));
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.debug('Debug:', 'Database connection established');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.debug('Query params:', new QueryParams(1, 'active'));
 
     // Debug with objects
-    const systemInfo = new SystemInfo("1.2GB", "45%");
+    const systemInfo = new SystemInfo('1.2GB', '45%');
     const debugData = new Info(
-        "debug",
-        "System check",
+        'debug',
+        'System check',
         systemInfo
     );
-    console.debug("System status:", debugData);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.debug('System status:', debugData);
 
     // Debug with Error objects
     try {
-        throw new Error("Test error");
+        throw new Error('Test error');
     } catch (error) {
-        console.debug("Caught error:", error);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.debug('Caught error:', error);
     }
 
     // Formatted strings
-    console.debug("%d")
-    console.debug("%d", 1)
-    console.debug("%d", 1, 2)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.debug('%d')
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.debug('%d', 1)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.debug('%d', 1, 2)
 
-    console.debug("%s %s", "37", 37)
-    console.debug("%s %s", "19.5", 19.5)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.debug('%s %s', '37', 37)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.debug('%s %s', '19.5', 19.5)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 function check(str: String): int {
     let it = str.$_iterator()
-    let fin = ""
+    let fin = ''
     while (true) {
         let res = it.next()
         if (res.done) {
@@ -24,7 +24,8 @@ function check(str: String): int {
         fin += res.value
     }
     if (str != fin) {
-        console.log("Incorrect iterator working!")
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Incorrect iterator working!')
         return 1
     }
     return 0
@@ -33,18 +34,18 @@ function check(str: String): int {
 function main(): int {
     let fails = 0
     let tests = [
-        "",
-        "abc",
-        "aaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "iuq634o7vpq43w76iyvu3oqnpmc-mqynu",
-        "FGkT Et t ФКШПШГЙ\N\N\N\n\n\n\r\r\r",
-        "\taa \t   \t      \tt\t\taaaaaaaaaaaaaaaaaa\t",
-        "\r\n\n\r",
-        "\n\r\r\n",
-        "\v\v\v\n\n\n\v\v\n\r\r\v\r\n\r\n\v\r\v",
-        "\0",
-        "aaa\0aaa",
-        "SS$SS aaаа",
+        '',
+        'abc',
+        'aaaaaaaaaaaaaaaaaaaaaaaaaa',
+        'iuq634o7vpq43w76iyvu3oqnpmc-mqynu',
+        'FGkT Et t ФКШПШГЙ\N\N\N\n\n\n\r\r\r',
+        '\taa \t   \t      \tt\t\taaaaaaaaaaaaaaaaaa\t',
+        '\r\n\n\r',
+        '\n\r\r\n',
+        '\v\v\v\n\n\n\v\v\n\r\r\v\r\n\r\n\v\r\v',
+        '\0',
+        'aaa\0aaa',
+        'SS$SS aaаа',
     ]
     for (let test of tests) {
         fails += check(test)

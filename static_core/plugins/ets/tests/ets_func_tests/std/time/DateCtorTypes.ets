@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ const intHours: int[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 17, 22];
 const intMinutes: int[] = [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56];
 
 
-function tests_long(): void {
+function testsLong(): void {
     for (let i: int = 0; i < intYears.length; i++) {
         let cd = new Date(intYears[i]);
         let cd1 = new Date(intYears[i]);
@@ -68,7 +68,7 @@ function tests_long(): void {
 }
 
 function main(): int {
-    tests_long()
+    testsLong()
 
     return 0;
 }

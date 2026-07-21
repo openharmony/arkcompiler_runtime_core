@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * You may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,7 +82,7 @@ function testMultipleClassIsolation() {
 
 class Inner {}
 class Outer {
-  field: Inner;
+  public field: Inner;
   constructor() {
     this.field = new Inner();
   }
@@ -99,7 +99,7 @@ function testNestedObjectCount() {
 }
 
 class Box1<T> {
-  value: T;
+  public value: T;
   constructor(v: T) {
     this.value = v;
   }

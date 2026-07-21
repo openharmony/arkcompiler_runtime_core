@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,16 +14,16 @@
  */
 
 class RequestHeaders {
-    Authorization: string;
+    public authorization: string;
 
-    constructor(Authorization: string) {
-        this.Authorization = Authorization;
+    constructor(authorization: string) {
+        this.authorization = authorization;
     }
 }
 
 class User {
-    id: number;
-    name: string;
+    public id: number;
+    public name: string;
 
     constructor(id: number, name: string) {
         this.id = id;
@@ -33,50 +33,81 @@ class User {
 
 class ConsoleLogger {
     static logUserDetails(): void {
-        console.group("User Details");
-        console.log("Name: John");
-        console.log("Age: 30");
-        console.log("Email: john@example.com");
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.group('User Details');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Name: John');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Age: 30');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Email: john@example.com');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.groupEnd();
     }
 
     static logApplicationInfo(): void {
-        console.group("Application Info");
-        console.log("Version: 1.0.0");
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.group('Application Info');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Version: 1.0.0');
 
-        console.group("System Details");
-        console.log("OS: Windows");
-        console.log("Browser: Chrome");
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.group('System Details');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('OS: Windows');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Browser: Chrome');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.groupEnd();
 
-        console.group("Performance");
-        console.log("Memory: 4GB");
-        console.log("CPU: 2.4GHz");
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.group('Performance');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Memory: 4GB');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('CPU: 2.4GHz');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.groupEnd();
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.groupEnd();
     }
 
     static logDebugInfo(): void {
-        console.groupCollapsed("Debug Information");
-        console.log("Debug Level: Verbose");
-        console.log("Stack Trace: Enabled");
-        console.log("Logging: Enabled");
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.groupCollapsed('Debug Information');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Debug Level: Verbose');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Stack Trace: Enabled');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Logging: Enabled');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.groupEnd();
     }
 
     static logApiCalls(): void {
-        console.group("API Calls");
-        console.log("GET /users");
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.group('API Calls');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('GET /users');
 
-        console.groupCollapsed("Request Details");
-        const headers = new RequestHeaders("Bearer token");
-        console.log("Headers:", headers);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.groupCollapsed('Request Details');
+        const headers = new RequestHeaders('Bearer token');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Headers:', headers);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.groupEnd();
 
-        console.groupCollapsed("Response");
-        console.log("Status: 200");
-        console.log("Data:", [new User(1, "John")] as FixedArray<User>);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.groupCollapsed('Response');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Status: 200');
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('Data:', [new User(1, 'John')] as FixedArray<User>);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.groupEnd();
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.groupEnd();
     }
 }
@@ -95,32 +126,51 @@ function main() {
     ConsoleLogger.logApiCalls();
 
     // Group
-    console.log("outter");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('outter');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.group();
-    console.log("level 1");
-    console.group("in level 1");
-    console.log("level 2");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('level 1');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.group('in level 1');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('level 2');
 
     // Reset for next test
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.groupEnd()
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.groupEnd()
 
     // Collapsed
-    console.log("outter Collapsed");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('outter Collapsed');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.groupCollapsed();
-    console.log("level 1 Collapsed");
-    console.groupCollapsed("in level 1 Collapsed");
-    console.log("level 2 Collapsed");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('level 1 Collapsed');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.groupCollapsed('in level 1 Collapsed');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('level 2 Collapsed');
 
     // Reset for next test
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.groupEnd()
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.groupEnd()
 
     let num = 1
-    let str = "str"
+    let str = 'str'
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.groupCollapsed(num, str)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.groupCollapsed(str)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.groupCollapsed('count %d')
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.groupCollapsed()
-    console.groupCollapsed(num, str, "sdsf")
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.groupCollapsed(num, str, 'sdsf')
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,23 +16,25 @@
 function main(): int {
     let failures = 0;
 
-    let src: String = "All mimsy were the borgoves";
+    let src: String = 'All mimsy were the borgoves';
     try {
         src.at(100);
     } catch (e) {
         let b: boolean = e instanceof ArgumentOutOfRangeError;
-        if(!b) {
-            console.println("Unexpected exception" + e);
+        if (!b) {
+            // CC-OFFNXT(G.AOD.03) current test suite code style
+            console.println('Unexpected exception' + e);
             return 1;
         }
     }
-    src = "Twas brillig, and the slithy toves";
+    src = 'Twas brillig, and the slithy toves';
     try {
         src.at(-100);
     } catch (e) {
         let b: boolean = e instanceof ArgumentOutOfRangeError;
-        if(!b) {
-            console.println("Unexpected exception" + e);
+        if (!b) {
+            // CC-OFFNXT(G.AOD.03) current test suite code style
+            console.println('Unexpected exception' + e);
             return 1;
         }
     }

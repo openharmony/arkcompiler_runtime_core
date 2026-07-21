@@ -22,7 +22,7 @@ class C {
         return a.toLong() + b
     }
 
-    a: int = 0
+    public a: int = 0
 }
 
 function testSum(sum: Method): void {
@@ -55,11 +55,11 @@ function main(): void {
     let got = 0
     for (let i = 0; i < meths; i++) {
         const m = cType.getMethod(i)
-        if (m.getName() == "sum") {
+        if (m.getName() == 'sum') {
             testSum(m)
             got++
         }
-        if (m.getName() == "getIsEvenPlusX") {
+        if (m.getName() == 'getIsEvenPlusX') {
             testGetIsEvenPlusX(m)
             got++
         }

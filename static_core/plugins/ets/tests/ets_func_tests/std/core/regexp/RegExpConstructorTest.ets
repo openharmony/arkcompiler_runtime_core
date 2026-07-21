@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,127 +20,129 @@ function main(): int {
     let failCounter: int = 0;
     let testResult: int = 0;
 
-    let regExpObj10 = new RegExp("Brawn Fox");
-    testResult = checkTestResult(regExpObj10, "Brawn Fox", "", false, false, false, false, false, false, false, false)
-    printTestVerdict(testResult, "test10")
+    let regExpObj10 = new RegExp('Brawn Fox');
+    testResult = checkTestResult(regExpObj10, 'Brawn Fox', '', false, false, false, false, false, false, false, false)
+    printTestVerdict(testResult, 'test10')
     failCounter += testResult
 
-    let regExpObj20 = new RegExp("");
-    testResult = checkTestResult(regExpObj20, "(?:)", "", false, false, false, false, false, false, false, false)
-    printTestVerdict(testResult, "test20")
+    let regExpObj20 = new RegExp('');
+    testResult = checkTestResult(regExpObj20, '(?:)', '', false, false, false, false, false, false, false, false)
+    printTestVerdict(testResult, 'test20')
     failCounter += testResult
 
-    let regExpObj30 = new RegExp("Brawn", "gsu");
-    testResult = checkTestResult(regExpObj30, "Brawn", "gsu", true, true, false, false, false, false, true, false)
-    printTestVerdict(testResult, "test30")
+    let regExpObj30 = new RegExp('Brawn', 'gsu');
+    testResult = checkTestResult(regExpObj30, 'Brawn', 'gsu', true, true, false, false, false, false, true, false)
+    printTestVerdict(testResult, 'test30')
     failCounter += testResult
 
-    let regExpObj40 = new RegExp("Brawn", "g");
-    testResult = checkTestResult(regExpObj40, "Brawn", "g", true, false, false, false, false, false, false, false)
-    printTestVerdict(testResult, "test40")
+    let regExpObj40 = new RegExp('Brawn', 'g');
+    testResult = checkTestResult(regExpObj40, 'Brawn', 'g', true, false, false, false, false, false, false, false)
+    printTestVerdict(testResult, 'test40')
     failCounter += testResult
 
-    let regExpObj50 = new RegExp("Brawn", "s");
-    testResult = checkTestResult(regExpObj50, "Brawn", "s", false, true, false, false, false, false, false, false)
-    printTestVerdict(testResult, "test50")
+    let regExpObj50 = new RegExp('Brawn', 's');
+    testResult = checkTestResult(regExpObj50, 'Brawn', 's', false, true, false, false, false, false, false, false)
+    printTestVerdict(testResult, 'test50')
     failCounter += testResult
 
-    let regExpObj60 = new RegExp("Brawn", "u");
-    testResult = checkTestResult(regExpObj60, "Brawn", "u", false, false, false, false, false, false, true, false)
-    printTestVerdict(testResult, "test60")
+    let regExpObj60 = new RegExp('Brawn', 'u');
+    testResult = checkTestResult(regExpObj60, 'Brawn', 'u', false, false, false, false, false, false, true, false)
+    printTestVerdict(testResult, 'test60')
     failCounter += testResult
 
-    let regExpObj70 = new RegExp("Brawn", "gu");
-    testResult = checkTestResult(regExpObj70, "Brawn", "gu", true, false, false, false, false, false, true, false)
-    printTestVerdict(testResult, "test70")
+    let regExpObj70 = new RegExp('Brawn', 'gu');
+    testResult = checkTestResult(regExpObj70, 'Brawn', 'gu', true, false, false, false, false, false, true, false)
+    printTestVerdict(testResult, 'test70')
     failCounter += testResult
 
-    let regExpObj80 = new RegExp("Brawn", "gs");
-    testResult = checkTestResult(regExpObj80, "Brawn", "gs", true, true, false, false, false, false, false, false)
-    printTestVerdict(testResult, "test80")
+    let regExpObj80 = new RegExp('Brawn', 'gs');
+    testResult = checkTestResult(regExpObj80, 'Brawn', 'gs', true, true, false, false, false, false, false, false)
+    printTestVerdict(testResult, 'test80')
     failCounter += testResult
 
-    let regExpObj90 = new RegExp("Brawn", "su");
-    testResult = checkTestResult(regExpObj90, "Brawn", "su", false, true, false, false, false, false, true, false)
-    printTestVerdict(testResult, "test90")
+    let regExpObj90 = new RegExp('Brawn', 'su');
+    testResult = checkTestResult(regExpObj90, 'Brawn', 'su', false, true, false, false, false, false, true, false)
+    printTestVerdict(testResult, 'test90')
     failCounter += testResult
 
-    let regExpObj100 = new RegExp("", "dgimsuy");
-    testResult = checkTestResult(regExpObj100, "(?:)", "dgimsuy", true, true, true, true, true, true, true, false)
-    printTestVerdict(testResult, "test100")
+    let regExpObj100 = new RegExp('', 'dgimsuy');
+    testResult = checkTestResult(regExpObj100, '(?:)', 'dgimsuy', true, true, true, true, true, true, true, false)
+    printTestVerdict(testResult, 'test100')
     failCounter += testResult
 
-    let regExpObj110 = new RegExp("", "yusmigd");
-    testResult = checkTestResult(regExpObj110, "(?:)", "dgimsuy", true, true, true, true, true, true, true, false)
-    printTestVerdict(testResult, "test110")
+    let regExpObj110 = new RegExp('', 'yusmigd');
+    testResult = checkTestResult(regExpObj110, '(?:)', 'dgimsuy', true, true, true, true, true, true, true, false)
+    printTestVerdict(testResult, 'test110')
     failCounter += testResult
 
-    let regExpObj120 = RegExp("Brawn Fox");
-    testResult = checkTestResult(regExpObj120, "Brawn Fox", "", false, false, false, false, false, false, false, false)
-    printTestVerdict(testResult, "test120")
+    let regExpObj120 = RegExp('Brawn Fox');
+    testResult = checkTestResult(regExpObj120, 'Brawn Fox', '', false, false, false, false, false, false, false, false)
+    printTestVerdict(testResult, 'test120')
     failCounter += testResult
 
-    let regExpObj130 = RegExp("");
-    testResult = checkTestResult(regExpObj130, "(?:)", "", false, false, false, false, false, false, false, false)
-    printTestVerdict(testResult, "test130")
+    let regExpObj130 = RegExp('');
+    testResult = checkTestResult(regExpObj130, '(?:)', '', false, false, false, false, false, false, false, false)
+    printTestVerdict(testResult, 'test130')
     failCounter += testResult
 
-    let regExpObj140 = RegExp("Brawn", "gsu");
-    testResult = checkTestResult(regExpObj140, "Brawn", "gsu", true, true, false, false, false, false, true, false)
-    printTestVerdict(testResult, "test140")
+    let regExpObj140 = RegExp('Brawn', 'gsu');
+    testResult = checkTestResult(regExpObj140, 'Brawn', 'gsu', true, true, false, false, false, false, true, false)
+    printTestVerdict(testResult, 'test140')
     failCounter += testResult
 
-    let regExpObj150 = RegExp("Brawn", "g");
-    testResult = checkTestResult(regExpObj150, "Brawn", "g", true, false, false, false, false, false, false, false)
-    printTestVerdict(testResult, "test150")
+    let regExpObj150 = RegExp('Brawn', 'g');
+    testResult = checkTestResult(regExpObj150, 'Brawn', 'g', true, false, false, false, false, false, false, false)
+    printTestVerdict(testResult, 'test150')
     failCounter += testResult
 
-    let regExpObj160 = RegExp("Brawn", "s");
-    testResult = checkTestResult(regExpObj160, "Brawn", "s", false, true, false, false, false, false, false, false)
-    printTestVerdict(testResult, "test160")
+    let regExpObj160 = RegExp('Brawn', 's');
+    testResult = checkTestResult(regExpObj160, 'Brawn', 's', false, true, false, false, false, false, false, false)
+    printTestVerdict(testResult, 'test160')
     failCounter += testResult
 
-    let regExpObj170 = RegExp("Brawn", "u");
-    testResult = checkTestResult(regExpObj170, "Brawn", "u", false, false, false, false, false, false, true, false)
-    printTestVerdict(testResult, "test170")
+    let regExpObj170 = RegExp('Brawn', 'u');
+    testResult = checkTestResult(regExpObj170, 'Brawn', 'u', false, false, false, false, false, false, true, false)
+    printTestVerdict(testResult, 'test170')
     failCounter += testResult
 
-    let regExpObj180 = RegExp("Brawn", "gu");
-    testResult = checkTestResult(regExpObj180, "Brawn", "gu", true, false, false, false, false, false, true, false)
-    printTestVerdict(testResult, "test180")
+    let regExpObj180 = RegExp('Brawn', 'gu');
+    testResult = checkTestResult(regExpObj180, 'Brawn', 'gu', true, false, false, false, false, false, true, false)
+    printTestVerdict(testResult, 'test180')
     failCounter += testResult
 
-    let regExpObj190 = RegExp("Brawn", "gs");
-    testResult = checkTestResult(regExpObj190, "Brawn", "gs", true, true, false, false, false, false, false, false)
-    printTestVerdict(testResult, "test190")
+    let regExpObj190 = RegExp('Brawn', 'gs');
+    testResult = checkTestResult(regExpObj190, 'Brawn', 'gs', true, true, false, false, false, false, false, false)
+    printTestVerdict(testResult, 'test190')
     failCounter += testResult
 
-    let regExpObj200 = RegExp("Brawn", "su");
-    testResult = checkTestResult(regExpObj200, "Brawn", "su", false, true, false, false, false, false, true, false)
-    printTestVerdict(testResult, "test200")
+    let regExpObj200 = RegExp('Brawn', 'su');
+    testResult = checkTestResult(regExpObj200, 'Brawn', 'su', false, true, false, false, false, false, true, false)
+    printTestVerdict(testResult, 'test200')
     failCounter += testResult
 
-    let regExpObj210 = RegExp("", "dgimsuy");
-    testResult = checkTestResult(regExpObj210, "(?:)", "dgimsuy", true, true, true, true, true, true, true, false)
-    printTestVerdict(testResult, "test210")
+    let regExpObj210 = RegExp('', 'dgimsuy');
+    testResult = checkTestResult(regExpObj210, '(?:)', 'dgimsuy', true, true, true, true, true, true, true, false)
+    printTestVerdict(testResult, 'test210')
     failCounter += testResult
 
-    let regExpObj220 = RegExp("", "yusmigd");
-    testResult = checkTestResult(regExpObj220, "(?:)", "dgimsuy", true, true, true, true, true, true, true, false)
-    printTestVerdict(testResult, "test220")
+    let regExpObj220 = RegExp('', 'yusmigd');
+    testResult = checkTestResult(regExpObj220, '(?:)', 'dgimsuy', true, true, true, true, true, true, true, false)
+    printTestVerdict(testResult, 'test220')
     failCounter += testResult
 
-    let regExpObj230 = new RegExp("(?:\u{23456})");
-    testResult = checkTestResult(regExpObj230, "(?:𣑖)", "", false, false, false, false, false, false, false, false)
-    printTestVerdict(testResult, "test230")
+    let regExpObj230 = new RegExp('(?:\u{23456})');
+    testResult = checkTestResult(regExpObj230, '(?:𣑖)', '', false, false, false, false, false, false, false, false)
+    printTestVerdict(testResult, 'test230')
     failCounter += testResult
 
-    failCounter += test(testRegExpParse(),"Regpex parse failed and returned SyntaxError");
-    failCounter += test(testRegExpParseUnclosedGroup(),"Regpex parse failed and returned SyntaxError");
-    failCounter += test(testRegExpParseQuantifierRange(),"Regpex parse failed and returned SyntaxError");
-    failCounter += test(testRegExpParseNestedQuantifiers(),"Regpex parse failed and returned SyntaxError");
+    failCounter += test(testRegExpParse(), 'Regpex parse failed and returned SyntaxError');
+    failCounter += test(testRegExpParseUnclosedGroup(), 'Regpex parse failed and returned SyntaxError');
+    failCounter += test(testRegExpParseQuantifierRange(), 'Regpex parse failed and returned SyntaxError');
+    failCounter += test(testRegExpParseNestedQuantifiers(), 'Regpex parse failed and returned SyntaxError');
 
-    if (failCounter > 0) return 1
+    if (failCounter > 0) {
+        return 1
+    }
     return 0;
 }
 
@@ -150,58 +152,71 @@ function checkTestResult(actual : RegExp, pattern: String, flags: String,
     unicode: boolean, unicodeSets: boolean): int {
     let checkResult : boolean = true;
     if (!actual.source.equals(pattern)) {
-        console.println("Source " + actual.source + " is not equal expected " + pattern);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('Source ' + actual.source + ' is not equal expected ' + pattern);
         checkResult = false;
     }
     if (!actual.flags.equals(flags)) {
-        console.println("Flags " + actual.flags + " is not equal expected " + flags);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('Flags ' + actual.flags + ' is not equal expected ' + flags);
         checkResult = false;
     }
 
     if (actual.global != global) {
-        console.println("Global " + actual.global + " is not equal expected " + global);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('Global ' + actual.global + ' is not equal expected ' + global);
         checkResult = false;
     }
     if (actual.unicode != unicode) {
-        console.println("Unicode " + actual.unicode + " is not equal expected " + unicode);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('Unicode ' + actual.unicode + ' is not equal expected ' + unicode);
         checkResult = false;
     }
     if (actual.dotAll != dotAll) {
-        console.println("dotAll " + actual.dotAll + " is not equal expected " + dotAll);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('dotAll ' + actual.dotAll + ' is not equal expected ' + dotAll);
         checkResult = false;
     }
     if (actual.hasIndices != hasIndices) {
-        console.println("hasIndices " + actual.hasIndices + " is not equal expected " + hasIndices);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('hasIndices ' + actual.hasIndices + ' is not equal expected ' + hasIndices);
         checkResult = false;
     }
     if (actual.multiline != multiline) {
-        console.println("multiline " + actual.multiline + " is not equal expected " + multiline);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('multiline ' + actual.multiline + ' is not equal expected ' + multiline);
         checkResult = false;
     }
     if (actual.sticky != sticky) {
-        console.println("sticky " + actual.sticky + " is not equal expected " + sticky);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('sticky ' + actual.sticky + ' is not equal expected ' + sticky);
         checkResult = false;
     }
     if (actual.unicodeSets != unicodeSets) {
-        console.println("unicodeSets " + actual.unicodeSets + " is not equal expected " + unicodeSets);
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('unicodeSets ' + actual.unicodeSets + ' is not equal expected ' + unicodeSets);
         checkResult = false;
     }
 
-    if (!checkResult) return 1;
+    if (!checkResult) {
+        return 1;
+    }
     return 0;
 }
 
 function printTestVerdict(flag: int, testName: String) {
     if (flag == 0) {
-        console.println(testName + " : PASSED")
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println(testName + ' : PASSED')
     } else {
-        console.println(testName + " : FAILED")
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println(testName + ' : FAILED')
     }
 }
 
 function testRegExpParse(): int {
     try {
-        let regExpObj120 = new RegExp("a**");
+        let regExpObj120 = new RegExp('a**');
     } catch (err) {
         if (err instanceof SyntaxError) {
             return success
@@ -213,7 +228,7 @@ function testRegExpParse(): int {
 
 function testRegExpParseUnclosedGroup(): int {
     try {
-        let regExpObj120 = new RegExp("(abc|def");
+        let regExpObj120 = new RegExp('(abc|def');
     } catch (err) {
         if (err instanceof SyntaxError) {
             return success
@@ -225,7 +240,7 @@ function testRegExpParseUnclosedGroup(): int {
 
 function testRegExpParseQuantifierRange(): int {
     try {
-        let regExpObj120 = new RegExp("a{3,2}");
+        let regExpObj120 = new RegExp('a{3,2}');
     } catch (err) {
         if (err instanceof SyntaxError) {
             return success
@@ -237,7 +252,7 @@ function testRegExpParseQuantifierRange(): int {
 
 function testRegExpParseNestedQuantifiers(): int {
     try {
-        let regExpObj120 = new RegExp("a++b");
+        let regExpObj120 = new RegExp('a++b');
     } catch (err) {
         if (err instanceof SyntaxError) {
             return success
@@ -251,6 +266,7 @@ function test(result: int, message: String): int {
     if (result == 0) {
       return success;
     }
-    console.println("FAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('FAILED: ' + message);
     return fail;
 }

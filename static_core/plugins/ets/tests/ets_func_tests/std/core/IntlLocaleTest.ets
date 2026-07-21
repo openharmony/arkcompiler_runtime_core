@@ -45,13 +45,11 @@ function processCreateLocaleError(createLocaleFunction : () => Intl.Locale, msg 
     let assertOccurred = false
     try {
         createLocaleFunction()
-    }
-    catch (e) {
+    } catch (e) {
         arktest.assertTrue(e instanceof RangeError)
         arktest.assertEQ((e as RangeError).message, (msg != undefined ? msg : errMsg))
         assertOccurred = true
-    }
-    finally {
+    } finally {
         arktest.assertTrue(assertOccurred)
     }
 }

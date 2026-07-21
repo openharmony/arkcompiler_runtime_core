@@ -13,90 +13,85 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
+import { launch } from 'std/concurrency'
 
 let flag: int = 0;
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrKeysOne: number[] = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
 let arrKeysTwo: number[] = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
-let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+let arrValues: string[] = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
 
-let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
+let concurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
-    let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetForEachTest");
+    let concurrentSetTestsuite = new arktest.ArkTestsuite('ConcurrentSetForEachTest');
 
-    ConcurrentSetTestsuite.addTest("TestForEach004", () =>
-    {
-        let ConcurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
-        ConcurrentSetTest.add(arrValues[0]);
-        ConcurrentSetTest.add(arrValues[1]);
-        ConcurrentSetTest.forEach((valOne: string, valTwo: string, set: containers.ConcurrentSet<string>) => {
-            if (valOne == "zero") {
-                arktest.assertEQ(valOne, "zero");
-                arktest.assertEQ(valTwo, "zero");
+    concurrentSetTestsuite.addTest('TestForEach004', () => {
+        let concurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
+        concurrentSetTest.add(arrValues[0]);
+        concurrentSetTest.add(arrValues[1]);
+        concurrentSetTest.forEach((valOne: string, valTwo: string, set: containers.ConcurrentSet<string>) => {
+            if (valOne == 'zero') {
+                arktest.assertEQ(valOne, 'zero');
+                arktest.assertEQ(valTwo, 'zero');
             } else {
-                arktest.assertEQ(valOne, "one");
-                arktest.assertEQ(valTwo, "one");
+                arktest.assertEQ(valOne, 'one');
+                arktest.assertEQ(valTwo, 'one');
             }
         });
-        let add: string = ConcurrentSetTest.toString();
-        let addstr = "ConcurrentSet[zero,one]";
+        let add: string = concurrentSetTest.toString();
+        let addstr = 'ConcurrentSet[zero,one]';
         arktest.assertEQ(add, addstr);
     });
-    ConcurrentSetTestsuite.addTest("ForEach&AddTest006", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestsuite.addTest('ForEach&AddTest006', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         flag = 0;
         let p1 = launch(forEachThree);
         let p2 = launch(addAll);
         p1.Await();
         p2.Await();
-        arktest.assertTrue(ConcurrentSetTestOne.size >= 0);
+        arktest.assertTrue(concurrentSetTestOne.size >= 0);
     });
-    ConcurrentSetTestsuite.addTest("ForEach&DeteleTest004", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestsuite.addTest('ForEach&DeteleTest004', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         flag = 0;
         addAll();
         let p1 = launch(forEachThree);
         let p2 = launch(deleteAllBack);
         p1.Await();
         p2.Await();
-        arktest.assertTrue(ConcurrentSetTestOne.size < 11);
+        arktest.assertTrue(concurrentSetTestOne.size < 11);
     });
-    ConcurrentSetTestsuite.addTest("ForEach&HasTest004", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestsuite.addTest('ForEach&HasTest004', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         flag = 0;
         addAll();
         let p1 = launch(forEachThree);
         let p2 = launch(hasAll);
         p1.Await();
         p2.Await();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 10);
+        arktest.assertEQ(concurrentSetTestOne.size, 10);
     });
-    ConcurrentSetTestsuite.addTest("ForEach&ClearTest004", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestsuite.addTest('ForEach&ClearTest004', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         flag = 0;
         addAll();
         let p1 = launch(forEachThree);
         let p2 = launch(clearTest);
         p1.Await();
         p2.Await();
-        arktest.assertTrue(ConcurrentSetTestOne.size < 11);
+        arktest.assertTrue(concurrentSetTestOne.size < 11);
     });
 
-    return ConcurrentSetTestsuite.run();
+    return concurrentSetTestsuite.run();
 }
 
 function forEachThree() {
-    ConcurrentSetTestOne.forEach((keyOne: number, keyTwo: number, set: containers.ConcurrentSet<number>) => {
+    concurrentSetTestOne.forEach((keyOne: number, keyTwo: number, set: containers.ConcurrentSet<number>) => {
         arrKeysOne[flag] = keyOne;
         arrKeysTwo[flag++] = keyTwo;
         let strThree = set.toString();
@@ -104,23 +99,23 @@ function forEachThree() {
 }
 
 function clearTest() {
-    ConcurrentSetTestOne.clear();
+    concurrentSetTestOne.clear();
 }
 
 function deleteAllBack() {
     for (let i: int = 9; i >= 0; i--) {
-        ConcurrentSetTestOne.delete(i);
+        concurrentSetTestOne.delete(i);
     }
 }
 
 function hasAll() {
-    for (let i: int = 0; i < 10 ; i++) {
-        ConcurrentSetTestOne.has(i);
+    for (let i: int = 0; i < 10; i++) {
+        concurrentSetTestOne.has(i);
     }
 }
 
 function addAll() {
-    for (let i: int = 0; i < 10 ; i++) {
-        ConcurrentSetTestOne.add(arrKeys[i]);
+    for (let i: int = 0; i < 10; i++) {
+        concurrentSetTestOne.add(arrKeys[i]);
     }
 }

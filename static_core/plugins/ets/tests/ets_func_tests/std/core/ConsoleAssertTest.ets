@@ -13,19 +13,34 @@
  * limitations under the License.
  */
 
-console.assert(false, "assert should print if condition is false")
-console.assert(true, "assert should not print if condition is true")
+// CC-OFFNXT(G.AOD.03) current test suite code style
+console.assert(false, 'assert should print if condition is false')
+// CC-OFFNXT(G.AOD.03) current test suite code style
+console.assert(true, 'assert should not print if condition is true')
 
-console.assert("count: %d", 1)
-console.assert("count: %d")
-console.assert("1")
-console.assert("count: %d", "str")
-console.assert("str")
+// CC-OFFNXT(G.AOD.03) current test suite code style
+console.assert('count: %d', 1)
+// CC-OFFNXT(G.AOD.03) current test suite code style
+console.assert('count: %d')
+// CC-OFFNXT(G.AOD.03) current test suite code style
+console.assert('1')
+// CC-OFFNXT(G.AOD.03) current test suite code style
+console.assert('count: %d', 'str')
+// CC-OFFNXT(G.AOD.03) current test suite code style
+console.assert('str')
+// CC-OFFNXT(G.AOD.03) current test suite code style
 console.assert()
+// CC-OFFNXT(G.AOD.03) current test suite code style
 console.assert(false)
-console.assert("test")
+// CC-OFFNXT(G.AOD.03) current test suite code style
+console.assert('test')
+// CC-OFFNXT(G.AOD.03) current test suite code style
 console.assert(100, 'number 100.5')
+// CC-OFFNXT(G.AOD.03) current test suite code style
 console.assert(-99.9, 'number -99.9')
+// CC-OFFNXT(G.AOD.03) current test suite code style
 console.assert(false, 'console %s work', "didn't")
+// CC-OFFNXT(G.AOD.03) current test suite code style
 console.assert(undefined)
+// CC-OFFNXT(G.AOD.03) current test suite code style
 console.assert(true)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,29 +16,30 @@
 function main(): int {
     let failures = 0;
 
-    failures += testEscapeId("azAZ123@*_+-./_")
+    failures += testEscapeId('azAZ123@*_+-./_')
 
-    failures += testUnescapeId("abc123")
-    failures += testUnescapeId("")
-    failures += testUnescapeId("%1")
-    failures += testUnescapeId("%u6fg123%6pf")
+    failures += testUnescapeId('abc123')
+    failures += testUnescapeId('')
+    failures += testUnescapeId('%1')
+    failures += testUnescapeId('%u6fg123%6pf')
     failures += testUnescapeId('%6A', 'j')
     failures += testUnescapeId('%6a', 'j')
     failures += testUnescapeId('%5C', '\\')
 
-    failures += testInverse("^")
-    failures += testInverse("\\")
-    failures += testInverse("!@#$%^&*()-=_+1234567890%%%")
-    failures += testInverse("äöü")
-    failures += test(unescape("%E4%F6%FC") == "äöü", "äöü failed, got " + unescape("%E4%F6%FC"))
+    failures += testInverse('^')
+    failures += testInverse('\\')
+    failures += testInverse('!@#$%^&*()-=_+1234567890%%%')
+    failures += testInverse('äöü')
+    failures += test(unescape('%E4%F6%FC') == 'äöü', 'äöü failed, got ' + unescape('%E4%F6%FC'))
 
-    failures += testInverse("🌈🌬️👩🏻‍🏭💅🏿")
+    failures += testInverse('🌈🌬️👩🏻‍🏭💅🏿')
 
-    failures += testInverse("^")
-    failures += testInverse("♍⊕⢷⧏▏⠁∰⅛┅⍏➈③⿕⎢⍭≠⒚ⅴ⦾Ɑ⾤Ⓞ⹫⳰⻦⊮₢┄Ⲹ⩓⥬ⷱ⺽⎳≧⎘↾ⱓ✈ⳓ⇯Ⓑ⟋☱⨴⾼⾿⭉⺓⋇‷⾏Ⰾ✤⾤⤺⾐⿢⻶☓⳷℁▧◴⎀⛟♙⛨↹⼍⫤⎷⡚⪛⎾⾡⊼⎘⎈⌇⒱⽨⒯╖⏦⫻⇲⨩╅⨞")
+    failures += testInverse('^')
+    failures += testInverse('♍⊕⢷⧏▏⠁∰⅛┅⍏➈③⿕⎢⍭≠⒚ⅴ⦾Ɑ⾤Ⓞ⹫⳰⻦⊮₢┄Ⲹ⩓⥬ⷱ⺽⎳≧⎘↾ⱓ✈ⳓ⇯Ⓑ⟋☱⨴⾼⾿⭉⺓⋇‷⾏Ⰾ✤⾤⤺⾐⿢⻶☓⳷℁▧◴⎀⛟♙⛨↹⼍⫤⎷⡚⪛⎾⾡⊼⎘⎈⌇⒱⽨⒯╖⏦⫻⇲⨩╅⨞')
 
     if (failures != 0) {
-        console.println("Failed " + failures + " tests")
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('Failed ' + failures + ' tests')
     }
     return failures
 }
@@ -65,6 +66,7 @@ function testInverse(s1: string): int {
 
 function test(result: boolean, msg: string): int {
     if (!result) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.println(msg)
         return 1
     }

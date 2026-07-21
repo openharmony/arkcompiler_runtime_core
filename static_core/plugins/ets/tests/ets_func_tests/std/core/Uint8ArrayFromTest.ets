@@ -14,7 +14,7 @@
  */
 
 function getTestName(testCase: string): string {
-	return "Uint8Array.from - " + testCase;
+	return 'Uint8Array.from - ' + testCase;
 }
 
 function testArrayLikeNumber(): void {
@@ -62,7 +62,7 @@ function testNaNAndInfinity(): void {
 }
 
 function testArrayLikeTWithMap(): void {
-	const strings = ["10", "256", "-1"];
+	const strings = ['10', '256', '-1'];
 	const ta = Uint8Array.from(strings, (v: string): number => parseInt(v));
 	arktest.assertEQ(ta.length, 3);
 	arktest.assertEQ(ta.$_get(0).toDouble(), 10);
@@ -95,15 +95,15 @@ function testBufferIndependence(): void {
 }
 
 function main(): int {
-	const suite = new arktest.ArkTestsuite("Uint8ArrayFrom");
-	suite.addTest(getTestName("ArrayLike Number"), testArrayLikeNumber);
-	suite.addTest(getTestName("Iterable Number No Map"), testIterableNumberWithoutMap);
-	suite.addTest(getTestName("Iterable Number With Map"), testIterableNumberWithMap);
-	suite.addTest(getTestName("Decimal Truncation"), testDecimalTruncation);
-	suite.addTest(getTestName("NaN and Infinity"), testNaNAndInfinity);
-	suite.addTest(getTestName("ArrayLike T With Map"), testArrayLikeTWithMap);
-	suite.addTest(getTestName("Empty"), testEmpty);
-	suite.addTest(getTestName("Dynamic Reallocation"), testDynamicReallocation);
-	suite.addTest(getTestName("Buffer Independence"), testBufferIndependence);
+	const suite = new arktest.ArkTestsuite('Uint8ArrayFrom');
+	suite.addTest(getTestName('ArrayLike Number'), testArrayLikeNumber);
+	suite.addTest(getTestName('Iterable Number No Map'), testIterableNumberWithoutMap);
+	suite.addTest(getTestName('Iterable Number With Map'), testIterableNumberWithMap);
+	suite.addTest(getTestName('Decimal Truncation'), testDecimalTruncation);
+	suite.addTest(getTestName('NaN and Infinity'), testNaNAndInfinity);
+	suite.addTest(getTestName('ArrayLike T With Map'), testArrayLikeTWithMap);
+	suite.addTest(getTestName('Empty'), testEmpty);
+	suite.addTest(getTestName('Dynamic Reallocation'), testDynamicReallocation);
+	suite.addTest(getTestName('Buffer Independence'), testBufferIndependence);
 	return suite.run();
 }

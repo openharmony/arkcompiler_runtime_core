@@ -14,10 +14,9 @@
  */
 
 class A {
-    name: string
-    age: int
-    constructor(name: string, age: int)
-    {
+    public name: string
+    public age: int
+    constructor(name: string, age: int) {
         this.name = name
         this.age = age
     }
@@ -25,41 +24,60 @@ class A {
 
 function main() {
     // Basic values
-    console.warn("Simple string message");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.warn('Simple string message');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.warn(42);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.warn(true);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.warn(undefined);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.warn(null);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.warn()
 
     // Multiple arguments
-    console.warn("User:", "John", "Age:", 30);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.warn('User:', 'John', 'Age:', 30);
 
     // Objects
-    console.warn(new A("John", 30));
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.warn(new A('John', 30));
 
     // Template strings
-    const name = "Alice";
+    const name = 'Alice';
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.warn(`Hello, ${name}!`);
 
     // Styled console output
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.warn(
-        "%c Styled text",
-        "color: blue;"
+        '%c Styled text',
+        'color: blue;'
     );
 
     // Error objects
-    console.warn(new Error("Test error"));
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.warn(new Error('Test error'));
 
-    console.warn(null, undefined, 11, "123", new Object())
+    let obj: Object = {}
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.warn(null, undefined, 11, '123', obj)
     let arr = Array.create<string | null | undefined>(3, undefined)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.warn(arr)
 
     // Formatted strings
-    console.warn("%d")
-    console.warn("%d", 1)
-    console.warn("%d", 1, 2)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.warn('%d')
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.warn('%d', 1)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.warn('%d', 1, 2)
 
-    console.warn("%s %s", "37", 37)
-    console.warn("%s %s", "19.5", 19.5)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.warn('%s %s', '37', 37)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.warn('%s %s', '19.5', 19.5)
 }

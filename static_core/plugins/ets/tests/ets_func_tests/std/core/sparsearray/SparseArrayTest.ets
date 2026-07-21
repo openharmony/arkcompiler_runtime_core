@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,8 +85,9 @@ function testFromArrayLike() {
 function testIsArray() {
     let x = new SparseArray<int>()
     arktest.assertTrue(SparseArray.isArray(x), 'it is SparseArray')
-    arktest.assertFalse(SparseArray.isArray(new Object), 'it is not SparseArray')
-    arktest.assertFalse(SparseArray.isArray(new Array<int>()), 'it is not SparseArray')
+    let obj: Object = {}
+    arktest.assertFalse(SparseArray.isArray(obj), 'it is not SparseArray')
+    arktest.assertFalse(SparseArray.isArray([] as Array<int>), 'it is not SparseArray')
 }
 
 function testSparseArrayOf() {
@@ -253,7 +254,7 @@ function testFindIndex() {
 }
 
 function testIndexOf() {
-    let x  = new SparseArray<int>(1)
+    let x = new SparseArray<int>(1)
     x.push(1, 3, 5)
     let res = x.indexOf(3)
     arktest.assertEQ(res, 2)
@@ -268,7 +269,7 @@ function testIndexOf() {
 }
 
 function testIncludes() {
-    let x  = new SparseArray<number>(1)
+    let x = new SparseArray<number>(1)
     x.push(1, 3, 5, NaN)
     arktest.assertTrue(x.includes(3), '3 is in array')
     arktest.assertTrue(x.includes(NaN), 'NaN is in array')
@@ -300,7 +301,7 @@ function testKeysValues() {
     let actual = Array.from<int>(x.keys())
 
     // ignores holes
-    let expectedKeys: Array<int> = [1, 2, 3]
+    let expectedKeys: int[] = [1, 2, 3]
     arktest.assertEQ(actual.length, 3)
     for (let i = 0; i < actual.length; i++) {
         arktest.assertEQ(actual[i], expectedKeys[i])
@@ -308,7 +309,7 @@ function testKeysValues() {
 
     // ignores holes
     let actualVals = Array.from<int>(x.values())
-    let expectedVals: Array<int> = [1, 3, 5]
+    let expectedVals: int[] = [1, 3, 5]
     arktest.assertEQ(actual.length, 3)
     for (let i = 0; i < actual.length; i++) {
         arktest.assertEQ(actualVals[i], expectedVals[i])
@@ -316,7 +317,7 @@ function testKeysValues() {
 
     // ignores holes
     let actualEntries = Array.from<[int, int]>(x.entries())
-    let expectedEntries: Array<[int, int]> = [[1, 1], [2, 3], [3, 5]]
+    let expectedEntries: [int, int][] = [[1, 1], [2, 3], [3, 5]]
     for (let i = 0; i < actual.length; i++) {
         arktest.assertEQ(actualEntries[i][0], expectedEntries[i][0])
         arktest.assertEQ(actualEntries[i][1], expectedEntries[i][1])
@@ -328,11 +329,11 @@ function testFlat() {
     let x = new SparseArray<int | SparseArray<int>>(1)
     x.push(1, 3, 5)
     x.push(inner)
-    let expected: Array<int> = [1, 3, 5, 44, 55, 66]
+    let expected: int[] = [1, 3, 5, 44, 55, 66]
     checkExpected(x.flat<int>(), expected)
 
     // ignores holes
-    let expectedFlatMap: Array<string> = ['1', '3', '5', '44,55,66']
+    let expectedFlatMap: string[] = ['1', '3', '5', '44,55,66']
     checkExpected(x.flatMap<string>((val, i, arr) => { return val.toString() }), expectedFlatMap)
 }
 

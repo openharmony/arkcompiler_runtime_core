@@ -14,7 +14,7 @@
  */
 
 function getTestName(arrayType: string): string {
-	return arrayType + " copy constructor"
+	return arrayType + ' copy constructor'
 }
 
 function testInt8ArrayCopyCtor(): void {
@@ -40,10 +40,10 @@ function testInt32ArrayCopyCtor(): void {
 }
 
 function main(): int {
-	const suite = new arktest.ArkTestsuite("TypedArray")
+	const suite = new arktest.ArkTestsuite('TypedArray')
 
-	suite.addTest(getTestName("Int8Array"), testInt8ArrayCopyCtor)
-	suite.addTest(getTestName("Int32Array"), testInt32ArrayCopyCtor)
+	suite.addTest(getTestName('Int8Array'), testInt8ArrayCopyCtor)
+	suite.addTest(getTestName('Int32Array'), testInt32ArrayCopyCtor)
 
 	return suite.run()
 }

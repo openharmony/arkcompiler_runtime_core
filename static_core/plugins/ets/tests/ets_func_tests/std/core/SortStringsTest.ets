@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-function sortStringTest(): int
-{
+function sortStringTest(): int {
     let size: int = 10;
-    let arr = new Array<String>();
-    let expected = new Array<String>();
-    let sorted = new Array<String>();
+    let arr: string[] = [];
+    let expected: string[] = [];
+    let sorted: string[] = [];
 
     for (let i = 0; i < size; ++i) {
-        arr.push("value " + i);
-        expected.push("value " + i);
+        arr.push('value ' + i);
+        expected.push('value ' + i);
     }
 
     try {
@@ -33,7 +32,9 @@ function sortStringTest(): int
 
     for (let i = 0; i < size; ++i) {
         if (expected[i] != sorted[i]) {
+            // CC-OFFNXT(G.AOD.03) current test suite code style
             console.log('Wrong result');
+            // CC-OFFNXT(G.AOD.03) current test suite code style
             console.log('Element ' + i + ': expected ' + expected[i] + ', got ' + sorted[i]);
             return 1;
         }
@@ -41,16 +42,15 @@ function sortStringTest(): int
     return 0;
 }
 
-function runTest(result: int, message: String): int
-{
+function runTest(result: int, message: String): int {
     if (result == 0) {
         return 0;
     }
-    console.log("FAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.log('FAILED: ' + message);
     return 1;
 }
 
-function main(): int
-{
-    return runTest(sortStringTest(), "Test sort for Array<String>");
+function main(): int {
+    return runTest(sortStringTest(), 'Test sort for Array<String>');
 }

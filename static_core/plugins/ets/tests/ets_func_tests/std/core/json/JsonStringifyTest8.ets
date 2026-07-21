@@ -51,214 +51,214 @@ function main(): int {
 }
 
 class SensitiveUserRecord {
-    id: number;
-    name: string = '';
-    password?: string = '';
+    public id: number;
+    public name: string = '';
+    public password?: string = '';
 }
 
 class ArrSensitiveObj {
-    users: SensitiveUserRecord[] = [];
+    public users: SensitiveUserRecord[] = [];
 }
 
 class NumToStringObj {
-    a: string = '';
-    b: string = '';
-    c: string = '';
+    public a: string = '';
+    public b: string = '';
+    public c: string = '';
 }
 
 class MaskedObj {
-    phone: string = '';
-    email: string = '';
+    public phone: string = '';
+    public email: string = '';
 }
 
 class SpecialNumFilterObj {
-    nan: null = null;
-    inf: null = null;
-    normal: number;
+    public nan: null = null;
+    public inf: null = null;
+    public normal: number;
 }
 
 class ParsedSpecialNumberLeaf {
-    inf: null = null;
-    num: number;
+    public inf: null = null;
+    public num: number;
 }
 
 class ParsedSpecialNumberBranch {
-    nan: null = null;
-    level2: ParsedSpecialNumberLeaf = { inf: null, num: 1 };
+    public nan: null = null;
+    public level2: ParsedSpecialNumberLeaf = { inf: null, num: 1 };
 }
 
 class DeepSpecialNumObj {
-    level1: ParsedSpecialNumberBranch = { nan: null, level2: { inf: null, num: 1 } };
+    public level1: ParsedSpecialNumberBranch = { nan: null, level2: { inf: null, num: 1 } };
 }
 
 class MathSymbolNestedFields {
-    cxToAd: number;
+    public cxToAd: number;
 }
 
 class MathSymbolFormulaFields {
-    axToBb: string = '';
-    nested: MathSymbolNestedFields = { cxToAd: 1 };
+    public axToBb: string = '';
+    public nested: MathSymbolNestedFields = { cxToAd: 1 };
 }
 
 class MathSymbolObj {
-    formulas: MathSymbolFormulaFields = { axToBb: '', nested: { cxToAd: 1 } };
+    public formulas: MathSymbolFormulaFields = { axToBb: '', nested: { cxToAd: 1 } };
 }
 
 class MultiBracketObj {
-    text: string = '';
+    public text: string = '';
 }
 
 class ValueClampObj {
-    score: number;
-    age: number;
+    public score: number;
+    public age: number;
 }
 
 class PartialMaskObj {
-    cardNumber: string = '';
-    phone: string = '';
+    public cardNumber: string = '';
+    public phone: string = '';
 }
 
 class MultiQuoteObj {
-    text: string = '';
+    public text: string = '';
 }
 
 class ZeroWidthLeafFields {
-    keyx: number;
+    public keyx: number;
 }
 
 class ZeroWidthBranchFields {
-    keyy: string = '';
-    level2: ZeroWidthLeafFields = { keyx: 1 };
+    public keyy: string = '';
+    public level2: ZeroWidthLeafFields = { keyx: 1 };
 }
 
 class DeepZeroWidthObj {
-    level1: ZeroWidthBranchFields = { keyy: '', level2: { keyx: 1 } };
+    public level1: ZeroWidthBranchFields = { keyy: '', level2: { keyx: 1 } };
 }
 
 class ResponseDataFields {
-    message: string = '';
-    timestamp: number;
+    public message: string = '';
+    public timestamp: number;
 }
 
 class ApiResponse {
-    code: number;
-    data: ResponseDataFields = { message: '', timestamp: 1 };
+    public code: number;
+    public data: ResponseDataFields = { message: '', timestamp: 1 };
 }
 
 class ChemicalNestedFields {
-    CO2: number;
+    public CO2: number;
 }
 
 class ChemicalElementFields {
-    H2O: string = '';
-    nested: ChemicalNestedFields = { CO2: 0 };
+    public H2O: string = '';
+    public nested: ChemicalNestedFields = { CO2: 0 };
 }
 
 class ChemicalSymbolObj {
-    elements: ChemicalElementFields = { H2O: '', nested: { CO2: 0 } };
+    public elements: ChemicalElementFields = { H2O: '', nested: { CO2: 0 } };
 }
 
 class MusicNestedFields {
-    Dx23: number;
+    public Dx23: number;
 }
 
 class MusicNoteFields {
-    Cx23: string = '';
-    nested: MusicNestedFields = { Dx23: 0 };
+    public Cx23: string = '';
+    public nested: MusicNestedFields = { Dx23: 0 };
 }
 
 class MusicSymbolObj {
-    notes: MusicNoteFields = { Cx23: '', nested: { Dx23: 0 } };
+    public notes: MusicNoteFields = { Cx23: '', nested: { Dx23: 0 } };
 }
 
 class OriginalSpecialNumberFields {
-    nan: number;
-    inf: number;
-    normal: number;
+    public nan: number;
+    public inf: number;
+    public normal: number;
 }
 
 class OriginalSpecialNumberLeaf {
-    inf: number;
-    num: number;
+    public inf: number;
+    public num: number;
 }
 
 class OriginalSpecialNumberBranch {
-    nan: number;
-    level2: OriginalSpecialNumberLeaf = { inf: 1, num: 1 };
+    public nan: number;
+    public level2: OriginalSpecialNumberLeaf = { inf: 1, num: 1 };
 }
 
 class OriginalDeepSpecialNumbers {
-    level1: OriginalSpecialNumberBranch = { nan: 1, level2: { inf: 1, num: 1 } };
+    public level1: OriginalSpecialNumberBranch = { nan: 1, level2: { inf: 1, num: 1 } };
 }
 
 class EmojiUserStatus {
-    name: string = '';
-    status: string = '';
+    public name: string = '';
+    public status: string = '';
 }
 
 class EmojiNestedObj {
-    user: EmojiUserStatus = new EmojiUserStatus();
+    public user: EmojiUserStatus = new EmojiUserStatus();
 }
 
 class ConfigRuntimeFields {
-    enabled: boolean;
-    timeout: number;
+    public enabled: boolean;
+    public timeout: number;
 }
 
 class DefaultConfigFields {
-    theme: string = '';
-    layout: string = '';
-    nested: ConfigRuntimeFields = new ConfigRuntimeFields();
+    public theme: string = '';
+    public layout: string = '';
+    public nested: ConfigRuntimeFields = new ConfigRuntimeFields();
 }
 
 class DefaultValueDeepObj {
-    config: DefaultConfigFields = new DefaultConfigFields();
+    public config: DefaultConfigFields = new DefaultConfigFields();
 }
 
 class ZeroWidthTextFields {
-    withJoiner: string = '';
-    withSpace: string = '';
+    public withJoiner: string = '';
+    public withSpace: string = '';
 }
 
 class ZeroWidthCharObj {
-    text: ZeroWidthTextFields = new ZeroWidthTextFields();
+    public text: ZeroWidthTextFields = new ZeroWidthTextFields();
 }
 
 class SpecialCharNestedSettings {
-    enable_ssl: boolean;
-    timeout_ms: number;
+    public enableSsl: boolean;
+    public timeoutMs: number;
 }
 
 class SpecialCharSettings {
-    api_endpoint: string = '';
-    max_size: string = '';
-    nested: SpecialCharNestedSettings = new SpecialCharNestedSettings();
+    public apiEndpoint: string = '';
+    public maxSize: string = '';
+    public nested: SpecialCharNestedSettings = new SpecialCharNestedSettings();
 }
 
 class SpecialCharConfigObj {
-    settings: SpecialCharSettings = new SpecialCharSettings();
+    public settings: SpecialCharSettings = new SpecialCharSettings();
 }
 
 class ZeroWidthNonJoinerNestedText {
-    combined: string = '';
+    public combined: string = '';
 }
 
 class ZeroWidthNonJoinerTexts {
-    original: string = '';
-    nested: ZeroWidthNonJoinerNestedText = new ZeroWidthNonJoinerNestedText();
+    public original: string = '';
+    public nested: ZeroWidthNonJoinerNestedText = new ZeroWidthNonJoinerNestedText();
 }
 
 class ZeroWidthNonJoinerObj {
-    texts: ZeroWidthNonJoinerTexts = new ZeroWidthNonJoinerTexts();
+    public texts: ZeroWidthNonJoinerTexts = new ZeroWidthNonJoinerTexts();
 }
 
 class RangeLimitedSettings {
-    volume: number;
-    brightness: number;
+    public volume: number;
+    public brightness: number;
 }
 
 class ValueRangeCheckObj {
-    settings: RangeLimitedSettings = new RangeLimitedSettings();
+    public settings: RangeLimitedSettings = new RangeLimitedSettings();
 }
 
 function zeroWidthSpaceRoundtrip(): void {
@@ -285,7 +285,9 @@ function replacerMaskPwdArr(): void {
         JSON.stringify(originalObj, (key: string, value: Any) => key === 'password' ? undefined : value)
     const parsedObj: jsonx.JsonElement = JSON.parseJsonElement(jsonStr)
 
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     arktest.assertEQ(parsedObj['users'][0].tryGetElement('password'), undefined)
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     arktest.assertEQ(parsedObj['users'][1]['name'].asString(), 'Eve')
 }
 
@@ -305,7 +307,7 @@ function numToStringReplacer(): void {
 function flagEmojiRoundtrip(): void {
     const originalStr: string = '🇨🇳 China 🇺🇸 USA'
     const jsonStr: string = JSON.stringify(originalStr)
-    let typ: Type = Type.of(new String())
+    let typ: Type = Type.of('')
     const parsedStr: string = JSON.parse<string>(jsonStr, typ) as string
 
     arktest.assertEQ(parsedStr, originalStr)
@@ -337,7 +339,7 @@ function replacerMaskPhoneEmail(): void {
 function zwjRoundtrip(): void {
     const originalStr: string = 'a\u200Db'
     const jsonStr: string = JSON.stringify(originalStr)
-    let typ: Type = Type.of(new String())
+    let typ: Type = Type.of('')
     const parsedStr: string = JSON.parse<string>(jsonStr, typ) as string
     arktest.assertEQ(parsedStr, originalStr)
     arktest.assertEQ(parsedStr.includes('\u200D'), true)
@@ -378,7 +380,7 @@ function deepNanInfToNull(): void {
 function skinToneEmojiRoundtrip(): void {
     const originalStr: string = '👨🏿‍💻 Dark skin developer'
     const jsonStr: string = JSON.stringify(originalStr)
-    let typ: Type = Type.of(new String())
+    let typ: Type = Type.of('')
     const parsedStr: string = JSON.parse<string>(jsonStr, typ) as string
 
     arktest.assertEQ(parsedStr, originalStr)
@@ -433,7 +435,7 @@ function replacerClampValues(): void {
 function subflagEmojiRoundtrip(): void {
     const originalStr: string = '🏴󠁧󠁢󠁥󠁮󠁧󠁿 UK 🇪🇸 Spain'
     const jsonStr: string = JSON.stringify(originalStr)
-    let typ: Type = Type.of(new String())
+    let typ: Type = Type.of('')
     const parsedStr: string = JSON.parse<string>(jsonStr, typ) as string
 
     arktest.assertEQ(parsedStr, originalStr)
@@ -508,7 +510,7 @@ function reviverValidateType(): void {
 function foodEmojiRoundtrip(): void {
     const originalStr: string = '🍕 Pizza 🍟 Fries 🍔 Burger'
     const jsonStr: string = JSON.stringify(originalStr)
-    let typ: Type = Type.of(new String())
+    let typ: Type = Type.of('')
     const parsedStr: string = JSON.parse<string>(jsonStr, typ) as string
 
     arktest.assertEQ(parsedStr, originalStr)
@@ -609,17 +611,19 @@ function zeroWidthCharObjRoundtrip(): void {
 function specialCharConfigRoundtrip(): void {
     const originalObj: SpecialCharConfigObj = {
         settings: {
-            api_endpoint: 'https://api.example.com/v1',
-            max_size: '10MB',
-            nested: { 'enable_ssl': true, timeout_ms: 5000 }
+            // CC-OFFNXT(G.OTH.05) test checks hardcoded ip or url
+            apiEndpoint: 'https://api.example.com/v1',
+            maxSize: '10MB',
+            nested: { 'enableSsl': true, timeoutMs: 5000 }
         }
     }
     const jsonStr: string = JSON.stringify(originalObj)
     const parsedObj: SpecialCharConfigObj = JSON.parse<SpecialCharConfigObj>(jsonStr,
         Type.from<SpecialCharConfigObj>()) as SpecialCharConfigObj
 
-    arktest.assertEQ(parsedObj.settings.api_endpoint, 'https://api.example.com/v1')
-    arktest.assertEQ(parsedObj.settings.nested.timeout_ms, 5000)
+    // CC-OFFNXT(G.OTH.05) test checks hardcoded ip or url
+    arktest.assertEQ(parsedObj.settings.apiEndpoint, 'https://api.example.com/v1')
+    arktest.assertEQ(parsedObj.settings.nested.timeoutMs, 5000)
 }
 
 function setToArrayReplacer(): void {

@@ -82,8 +82,8 @@ function testBufferIndependence(): void {
 function testLargeValues(): void {
 	const largeVals: bigint[] = [
 		18446744073709551615n, // max uint64
-		9223372036854775808n,  // 2^63
-		9223372036854775807n,  // 2^63 - 1
+		9223372036854775808n, // 2^63
+		9223372036854775807n, // 2^63 - 1
 		0n
 	];
 	const ta = BigUint64Array.from(largeVals);

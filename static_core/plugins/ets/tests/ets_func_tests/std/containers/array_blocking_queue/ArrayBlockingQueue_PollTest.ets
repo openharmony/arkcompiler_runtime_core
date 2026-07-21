@@ -19,10 +19,9 @@ const stressNum: int = 100;
 let sMTQueueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(stressNum);
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueuePollTest");
+    let arrayBlockingQueueTestsuite = new arktest.ArkTestsuite('ArrayBlockingQueuePollTest');
 
-    ArrayBlockingQueueTestsuite.addTest("PollTest001", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('PollTest001', () => {
         let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         for (let i = 0; i < elementsNum; i++) {
             arktest.assertEQ(queueInt.add(i), true);
@@ -38,8 +37,7 @@ function main(): int {
         arktest.assertEQ(queueInt.size, 0);
         arktest.assertEQ(queueInt.poll(), undefined);
     });
-    ArrayBlockingQueueTestsuite.addTest("PollStressTest004", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('PollStressTest004', () => {
         let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
@@ -49,8 +47,7 @@ function main(): int {
         }
         arktest.assertEQ(queueInt.size, 0);
     });
-    ArrayBlockingQueueTestsuite.addTest("ThreadsPollStressTest003", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('ThreadsPollStressTest003', () => {
         while (!sMTQueueInt.isEmpty()) {
             sMTQueueInt.pop();
         }
@@ -68,7 +65,7 @@ function main(): int {
         arktest.assertEQ(sMTQueueInt.size, 0);
     });
 
-    return ArrayBlockingQueueTestsuite.run();
+    return arrayBlockingQueueTestsuite.run();
 }
 
 function sQueuePollData() {

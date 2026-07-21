@@ -14,10 +14,9 @@
  */
 
 class A {
-    name: string
-    age: int
-    constructor(name: string, age: int)
-    {
+    public name: string
+    public age: int
+    constructor(name: string, age: int) {
         this.name = name
         this.age = age
     }
@@ -25,41 +24,60 @@ class A {
 
 function main() {
     // Basic values
-    console.error("Simple string message");
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.error('Simple string message');
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.error(42);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.error(true);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.error(undefined);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.error(null);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.error()
 
     // Multiple arguments
-    console.error("User:", "John", "Age:", 30);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.error('User:', 'John', 'Age:', 30);
 
     // Objects and arrays
-    console.error(new A("John", 30));
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.error(new A('John', 30));
 
     // Template strings
-    const name = "Alice";
+    const name = 'Alice';
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.error(`Hello, ${name}!`);
 
     // Styled console output
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.error(
-        "%c Styled text",
-        "color: blue;"
+        '%c Styled text',
+        'color: blue;'
     );
 
     // Error objects
-    console.error(new Error("Test error"));
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.error(new Error('Test error'));
 
-    console.error(null, undefined, 11, "123", new Object())
+    let obj: Object = {}
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.error(null, undefined, 11, '123', obj)
     let arr = Array.create<string | null | undefined>(3, undefined)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.error(arr)
 
     // Formatted strings
-    console.error("%d")
-    console.error("%d", 1)
-    console.error("%d", 1, 2)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.error('%d')
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.error('%d', 1)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.error('%d', 1, 2)
 
-    console.error("%s %s", "37", 37)
-    console.error("%s %s", "19.5", 19.5)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.error('%s %s', '37', 37)
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.error('%s %s', '19.5', 19.5)
 }

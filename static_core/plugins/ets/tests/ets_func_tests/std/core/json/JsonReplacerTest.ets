@@ -133,7 +133,7 @@ function jsonStringifyArrayWithFunctionReplacer(): void {
         }
     }
 
-    const array: Array<A> = Array.of(new A(), new A())
+    const array: A[] = Array.of(new A(), new A())
     arktest.assertEQ(JSON.stringify(array, dummyReplacer), '[{"id":1,"name":"A"},{"id":1,"name":"A"}]')
     arktest.assertEQ(JSON.stringify(array, toStringReplacer), '["A(1)","A(1)"]')
     arktest.assertEQ(JSON.stringify(array, toStringReplacer, '\t'), '[\n\t"A(1)",\n\t"A(1)"\n]')
@@ -199,8 +199,8 @@ function jsonStringifyWithUndefinedReplacer(): void {
 }
 
 function jsonStringifyWithJsonReplacer(): void {
-    let testClass: O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>
-        = new O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>(20)
+    let testClass: O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object> =
+        new O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>(20)
     testClass.pushBack('zhang san')
     testClass.pushBack(1)
     testClass.pushBack({
@@ -215,8 +215,11 @@ function jsonStringifyWithJsonReplacer(): void {
 }
 
 function jsonStringifyWithNestedReplacer(): void {
-    let testClass: D<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>
-        = new D<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>(20)
+    let testClass: D<
+        number | string | Array<number | string | boolean> | boolean | undefined | null | Object
+    > = new D<
+        number | string | Array<number | string | boolean> | boolean | undefined | null | Object
+    >(20)
     testClass.pushBack('zhang san')
     testClass.pushBack(1)
     testClass.pushBack({
@@ -227,12 +230,12 @@ function jsonStringifyWithNestedReplacer(): void {
     testClass.pushBack(true)
     let jsonResult = JSON.stringify(testClass)
     let result = '{"value":{"0":"zhang san","1":1,"2":{"age":10,"name":"zhang"},"4":null,"5":true},"capacity":20}'
-    arktest.assertEQ(jsonResult, result, '{"value":{"0":"zhang san","1":1,"2":{"age":10,"name":"zhang"},"4":null,"5":true},"capacity":20}')
+    arktest.assertEQ(jsonResult, result, result)
 }
 
 function jsonStringifyWithSpaceReplacer(): void {
-    let testClass: O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>
-        = new O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>(20)
+    let testClass: O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object> =
+        new O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>(20)
     testClass.pushBack('zhang san')
     testClass.pushBack(1)
     testClass.pushBack({
@@ -242,13 +245,14 @@ function jsonStringifyWithSpaceReplacer(): void {
     testClass.pushBack(null)
     testClass.pushBack(true)
     let jsonResult = JSON.stringify(testClass, undefined, ' ')
-    let result = '{\n "0": "zhang san",\n "1": 1,\n "2": {\n  "age": 10,\n  "name": "zhang"\n },\n "4": null,\n "5": true\n}'
-    arktest.assertEQ(jsonResult, result, '{\n "0": "zhang san",\n "1": 1,\n "2": {\n  "age": 10,\n  "name": "zhang"\n },\n "4": null,\n "5": true\n}')
+    let result = '{\n "0": "zhang san",\n "1": 1,\n "2": {\n' +
+        '  "age": 10,\n  "name": "zhang"\n },\n "4": null,\n "5": true\n}'
+    arktest.assertEQ(jsonResult, result, result)
 }
 
 function jsonStringifyWithReplacer(): void {
-    let testClass: O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>
-        = new O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>(20)
+    let testClass: O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object> =
+        new O<number | string | Array<number | string | boolean> | boolean | undefined | null | Object>(20)
     testClass.pushBack('zhang san')
     testClass.pushBack(1)
     testClass.pushBack({
@@ -264,9 +268,9 @@ function jsonStringifyWithReplacer(): void {
 
 function jsonStringifyStringArrayReplacer(): void {
     let arr = Array.of<TestClass1>(new TestClass1(), new TestClass1(), new TestClass1());
-    let b = Array.of<string>('param1','param4')
-    let ret = JSON.stringify(arr,b);
-    let objArray : Array<TestClass1> = parseJsonString(ret)
+    let b = Array.of<string>('param1', 'param4')
+    let ret = JSON.stringify(arr, b);
+    let objArray : TestClass1[] = parseJsonString(ret)
     arktest.assertEQ(objArray[0].param1, '"test1"')
     arktest.assertEQ(objArray[0].param4, '"test4"')
     arktest.assertEQ(objArray[1].param1, '"test1"')
@@ -298,10 +302,10 @@ class TestClass1 {
     public param4: string = 'test4';
 }
 
-function parseJsonString(jsonStr: string): Array<TestClass1>  {
+function parseJsonString(jsonStr: string): Array<TestClass1> {
   let content: string = jsonStr.slice(1, -1)
   let objStrs: string[] = content.split('},{')
-  let result: Array<TestClass1> = []
+  let result: TestClass1[] = []
   objStrs.forEach((str: string, index: int, array: string[]) => {
     let objStr: string = str
     if (index === 0) {
@@ -314,13 +318,13 @@ function parseJsonString(jsonStr: string): Array<TestClass1>  {
       objStr = '{' + objStr + '}';  
     }
     let keyValueStr: string = objStr.slice(1, -1);
-    let keyValuePairs: Array<string> = keyValueStr.split(',')
-    let obj:TestClass1 = new TestClass1() ;
+    let keyValuePairs: string[] = keyValueStr.split(',')
+    let obj:TestClass1 = new TestClass1();
     keyValuePairs.forEach(pair => {
-      let parts: Array<string> = pair.split(':')
+      let parts: string[] = pair.split(':')
       let keyPart: string = parts[0]
       let valuePart: string = parts[1]
-      let key : string = keyPart.slice(1,-1)
+      let key : string = keyPart.slice(1, -1)
       if (key === 'param1') {
         obj.param1 = valuePart
       } else if (key === 'param4') {

@@ -16,7 +16,7 @@
 function main(): int {
     const suite = new arktest.ArkTestsuite('Test BigInt array set');
 
-    suite.addTest("-1", () => {
+    suite.addTest('-1', () => {
         let testValue = -1n;
 
         let source = new BigInt64Array([testValue])
@@ -27,7 +27,7 @@ function main(): int {
 
     })
 
-    suite.addTest("0", () => {
+    suite.addTest('0', () => {
         let testValue = 0n;
 
         let source = new BigInt64Array([testValue])
@@ -37,7 +37,7 @@ function main(): int {
         arktest.assertEQ(testValue, target[0])
     })
 
-    suite.addTest("42", () => {
+    suite.addTest('42', () => {
         let testValue = 42n;
 
         let source = new BigInt64Array([testValue])
@@ -47,7 +47,7 @@ function main(): int {
         arktest.assertEQ(testValue, target[0])
     })
 
-    suite.addTest("1", () => {
+    suite.addTest('1', () => {
         let testValue = 1n;
 
         let source = new BigInt64Array([testValue])
@@ -58,7 +58,7 @@ function main(): int {
 
     })
 
-    suite.addTest("2^63-1", () => {
+    suite.addTest('2^63-1', () => {
         let testValue = 9223372036854775807n;
 
         let source = new BigInt64Array([testValue])
@@ -69,7 +69,7 @@ function main(): int {
 
     })
 
-    suite.addTest("2^63", () => {
+    suite.addTest('2^63', () => {
         let testValue = 9223372036854775808n;
 
         let source = new BigInt64Array([testValue])
@@ -80,7 +80,7 @@ function main(): int {
 
     })
 
-    suite.addTest("(2^63) + 1", () => {
+    suite.addTest('(2^63) + 1', () => {
         let testValue = 9223372036854775809n;
 
         let source = new BigInt64Array([testValue])
@@ -91,7 +91,7 @@ function main(): int {
 
     })
 
-    suite.addTest("(2^63) + (2^63)", () => {
+    suite.addTest('(2^63) + (2^63)', () => {
         let testValue = 9223372036854775808n;
         testValue += testValue
 
@@ -103,7 +103,7 @@ function main(): int {
 
     })
 
-    suite.addTest("-(2^63)", () => {
+    suite.addTest('-(2^63)', () => {
         let testValue = 9223372036854775808n;
         testValue = -testValue
 
@@ -115,7 +115,7 @@ function main(): int {
 
     })
 
-    suite.addTest("-((2^63) + (2^63))", () => {
+    suite.addTest('-((2^63) + (2^63))', () => {
         let testValue = 9223372036854775808n;
         testValue += testValue
         testValue = -testValue

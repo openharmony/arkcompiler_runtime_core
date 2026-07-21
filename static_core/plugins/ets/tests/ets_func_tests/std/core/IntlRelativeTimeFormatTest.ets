@@ -15,7 +15,7 @@
 
 const fakeLocale = 'er-or'
 
-function main(): int  {
+function main(): int {
     const suite = new arktest.ArkTestsuite('Intl.RelativeTimeFormat format');
     suite.addTest('testFormat', testFormat);
     suite.addTest('testFormatToParts', testFormatToParts);
@@ -243,6 +243,7 @@ function testResolvedOptions() {
     {
         const format = new Intl.RelativeTimeFormat('en')
         const result = format.resolvedOptions()
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.log(result)
         arktest.assertEQ(result.style, 'long')
         arktest.assertEQ(result.numeric, 'always')

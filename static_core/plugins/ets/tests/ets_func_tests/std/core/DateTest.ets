@@ -89,7 +89,7 @@ function testGetSeconds0003() {
 function testGetTime0002() {
     const moonLanding = new Date('January 20, 69 00:20:00');
     const copy = new Date();
-	const copyTimeStamp =copy.setTime(moonLanding.getTime())
+	const copyTimeStamp = copy.setTime(moonLanding.getTime())
     let expected = new Date(1969, 0, 20, 0, 20, 0);
 	const expectedCopy = new Date();
 	const expectedCopyTimeStamp = expectedCopy.setTime(expected.getTime())
@@ -371,8 +371,8 @@ function testLeapYear() {
 }
 
 function testInvalidDate() {
-    arktest.expectError(() => { new Date(" 2024-02-19T08:00:00") }, "Invalid time value")
-    arktest.expectError(() => { new Date("Not date") }, "Invalid time value")
+    arktest.expectError(() => { new Date(' 2024-02-19T08:00:00') }, 'Invalid time value')
+    arktest.expectError(() => { new Date('Not date') }, 'Invalid time value')
 }
 
 function testDateToLocaleStringConstEvent0001() {
@@ -433,7 +433,7 @@ function testDateToLocaleTimeStringAndLocaleString0001() {
 }
 
 function testInvalidDate0002() {
-    const errorMsg = "Invalid time value";
+    const errorMsg = 'Invalid time value';
 
     let birthday = new Date('August 0, 1975 23:15:30');
     arktest.expectError(() => { birthday.getDate() }, errorMsg);
@@ -544,17 +544,17 @@ function testSetTime0002() {
     let birthday = new Date('');
     let copy = new Date();
     copy.setTime(birthday.getTime());
-    arktest.assertTrue(Double.isNaN(copy.setTime(birthday.getTime())), 'result='+copy.setTime(birthday.getTime()));
+    arktest.assertTrue(Double.isNaN(copy.setTime(birthday.getTime())), 'result=' + copy.setTime(birthday.getTime()));
 }
 
 function testSetTime0003() {
     let birthday = new Date('');
     birthday.setTime(0);
-    arktest.assertEQ(birthday.getTime(), 0, 'result='+birthday.getTime());
+    arktest.assertEQ(birthday.getTime(), 0, 'result=' + birthday.getTime());
 }
 
 function main() {
-    let myTestsuite = new arktest.ArkTestsuite("DateTest");
+    let myTestsuite = new arktest.ArkTestsuite('DateTest');
     myTestsuite.addTest('testDateToUTCString', testDateToUTCString);
     myTestsuite.addTest('testGetDate0002', testGetDate0002);
     myTestsuite.addTest('testGetDay0002', testGetDay0002);

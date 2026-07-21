@@ -80,7 +80,7 @@ function equaledNumberFormats(a: Intl.NumberFormat, b: Intl.NumberFormat, value:
 }
 
 function printResolvedOptions(options: Intl.ResolvedNumberFormatOptions): string {
-    let parts = new Array<string>
+    let parts: string[] = []
     let addValue = (value: int | string | boolean | undefined, name: string) => {
         let s = name + ' : ' + (value === undefined ? 'undefined' : String(value));
         parts.push(s);

@@ -14,7 +14,7 @@
  */
 
 const success : int = 0;
-const fail    : int = 1;
+const fail : int = 1;
 
 
 function main(): int {
@@ -41,6 +41,7 @@ function testF(
 ): void {
     const expected = args[2]
     const a = fromCallFn(args[0], args[1])
+    // CC-OFFNXT(G.AOD.03) current test suite code style
     console.log(expected, a);
     arktest.assertEQ(a.length, expected.length, 'Source and final array length mismatch')
     let r = success
@@ -57,7 +58,7 @@ const testFromBuiltinArray0 = parametrize<NumberToStringCase>(
     'testBuiltinArray0',
     [
         [
-            [new Number(1), new Number(2)],
+            [Number(1), Number(2)],
             (): String => 'foo',
             ['foo', 'foo']
         ] as NumberToStringCase,
@@ -71,7 +72,7 @@ const testFromBuiltinArray1 = parametrize<NumberToStringCase>(
     'testBuiltinArray1',
     [
         [
-            [new Number(1), new Number(2)],
+            [Number(1), Number(2)],
             (x: Number): String => x.toString(),
             ['1', '2']
         ] as NumberToStringCase,
@@ -85,7 +86,7 @@ const testFromBuiltinArray2 = parametrize<NumberToStringCase>(
     'testBuiltinArray2',
     [
         [
-            [new Number(1), new Number(2)],
+            [Number(1), Number(2)],
             (x: Number, i: int): String => `${x}:${i}`,
             ['1:0', '2:1']
         ] as NumberToStringCase,

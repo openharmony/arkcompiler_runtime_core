@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*---
+/*---
     tags: [no-warmup]
  ---*/
 
@@ -62,23 +62,23 @@ class TestObject{
      constructor(){
      }
 
-     constructor(a1:string,a2:int){
-         this.a1= a1;
-         this.a2=a2;
+     constructor(a1:string, a2:int){
+         this.a1 = a1;
+         this.a2 = a2;
      }
 
-     a1 = 'a1';
-     a2 = 0;
+     public a1 = 'a1';
+     public a2 = 0;
 }
 
 function testWithMultiInit() {
     let wl = new WorkerLocal<TestObject>(() => new TestObject('a0', 0));
     arktest.assertEQ(wl.get().a1, 'a0');
     arktest.assertEQ(wl.get().a2, 0);
-    for(let i = 0; i < 50; i++){
+    for (let i = 0; i < 50; i++){
         arktest.assertEQ(wl.get().a1, 'a0');
         arktest.assertEQ(wl.get().a2, 0);
-        for(let i = 0; i < 20; i++){
+        for (let i = 0; i < 20; i++){
             wl.set(new TestObject('a' + i, i));
             arktest.assertEQ(wl.get().a1, 'a' + i);
             arktest.assertEQ(wl.get().a2, i);
@@ -91,7 +91,7 @@ function testWithMultiInit() {
 
 function testWithworkerInit(){
     let initCount = 0;
-    let wl =new WorkerLocal<TestObject>(() =>{
+    let wl = new WorkerLocal<TestObject>(() => {
         initCount++;
         return new TestObject('a0', initCount);
     });
@@ -114,9 +114,9 @@ async function testConcurrentReads() {
     let iterationsPerWorker = 10;
 
     let promises: Promise<Any>[] = [];
-    for(let i = 0; i < workerCount; i++) {
+    for (let i = 0; i < workerCount; i++) {
         promises.push(taskpool.execute(() => {
-            for(let j = 0; j < iterationsPerWorker; j++) {
+            for (let j = 0; j < iterationsPerWorker; j++) {
                 let value = wl.get();
                 arktest.assertEQ(value, 100);
             }
@@ -132,10 +132,10 @@ async function testConcurrentWrites() {
     let iterationsPerWorker = 5;
 
     let promises: Promise<Any>[] = [];
-    for(let i = 0; i < workerCount; i++) {
+    for (let i = 0; i < workerCount; i++) {
         let workerId = i;
         promises.push(taskpool.execute(() => {
-            for(let j = 0; j < iterationsPerWorker; j++) {
+            for (let j = 0; j < iterationsPerWorker; j++) {
                 wl.set(workerId * 100 + j);
                 let value = wl.get();
                 arktest.assertEQ(value, workerId * 100 + j);
@@ -187,7 +187,7 @@ async function testMultipleInstances() {
 function testNestedOperations() {
     let wl = new WorkerLocal<int>(() => 0);
 
-    for(let i = 0; i < 10; i++) {
+    for (let i = 0; i < 10; i++) {
         let val1 = wl.get();
         let val2 = wl.get();
         arktest.assertEQ(val1, val2);
@@ -202,7 +202,7 @@ function testNestedOperations() {
 }
 
 async function main(): Promise<int> {
-    const testSuite = new arktest.ArkTestsuite("WorkerLocalTest");
+    const testSuite = new arktest.ArkTestsuite('WorkerLocalTest');
     testSuite.addAsyncTest('testInit', testInit);
     testSuite.addAsyncTest('testWithoutInit', testWithoutInit);
     testSuite.addTest('testWithMultiInit', testWithMultiInit);

@@ -24,7 +24,7 @@ function main(): int {
 }
 
 function testStringToBigIntWithMode2(): void {
-    let str = '9007199254740991'  // Double.MAX_SAFE_INTEGER
+    let str = '9007199254740991' // NOTICE: Double.MAX_SAFE_INTEGER
     let opt: jsonx.ParseOptions = {bigIntMode: jsonx.BigIntMode.ALWAYS_PARSE_AS_BIGINT} as jsonx.ParseOptions;
     let elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asBigInt(), 9007199254740991n)
@@ -35,27 +35,27 @@ function testStringToBigIntWithMode2(): void {
     arktest.assertEQ(elem.tryAsDouble(), undefined)
     
 
-    str = '9223372036854775807'  // Long.MAX_VALUE
+    str = '9223372036854775807' // NOTICE: Long.MAX_VALUE
     elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asBigInt(), 9223372036854775807n)
     arktest.assertEQ(elem.tryAsLong(), undefined) 
     
 
-    str = '9223372036854775808'  // Long.MAX_VALUE + 1
+    str = '9223372036854775808' // Long.MAX_VALUE + 1
     elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asBigInt(), 9223372036854775808n)
     
 
-    str = '1000000000000000000000000'  // 10^24
+    str = '1000000000000000000000000' // 10^24
     elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asBigInt(), 1000000000000000000000000n)
     
 
-    str = '-9007199254740992'  // MIN_SAFE_INTEGER
+    str = '-9007199254740992' // MIN_SAFE_INTEGER
     elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asBigInt(), -9007199254740992n)
     
-    str = '-9223372036854775808'  // Long.MIN_VALUE
+    str = '-9223372036854775808' // NOTICE: Long.MIN_VALUE
     elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asBigInt(), -9223372036854775808n)
     
@@ -68,13 +68,13 @@ function testStringToBigIntWithMode2(): void {
     elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asBigInt(), 0n)  
     
-    str = '18446744073709551616'  // 2^64
+    str = '18446744073709551616' // 2^64
     elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asBigInt(), 18446744073709551616n)    
 }
 
 function testStringToBigIntWithMode1(): void {
-    let str = '9007199254740991'  // Double.MAX_SAFE_INTEGER
+    let str = '9007199254740991' // NOTICE: Double.MAX_SAFE_INTEGER
     let opt: jsonx.ParseOptions = {bigIntMode: jsonx.BigIntMode.PARSE_AS_BIGINT} as jsonx.ParseOptions;
     let elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asLong(), 9007199254740991)
@@ -89,25 +89,25 @@ function testStringToBigIntWithMode1(): void {
     arktest.assertEQ(elem.tryAsBigInt(), 9007199254740992n)
     arktest.assertEQ(elem.asBigInt(), 9007199254740992n)
         
-    str = '9223372036854775808'  // Long.MAX_VALUE + 1
+    str = '9223372036854775808' // Long.MAX_VALUE + 1
     elem = JSON.parseJsonElement(str, opt)
     arktest.expectError((): void => { elem.asLong() }, new jsonx.JsonTypeError(`Expected long, but element stores different value type.`))
     arktest.expectError((): void => { elem.asDouble() }, new jsonx.JsonTypeError(`This value's ValueKind is not Number.`))
     arktest.assertEQ(elem.asBigInt(), 9223372036854775808n)
 
-    str = '1000000000000000000000000'  // 10^24
+    str = '1000000000000000000000000' // 10^24
     elem = JSON.parseJsonElement(str, opt)
     arktest.expectError((): void => { elem.asLong() }, new jsonx.JsonTypeError(`Expected long, but element stores different value type.`))
     arktest.expectError((): void => { elem.asDouble() }, new jsonx.JsonTypeError(`This value's ValueKind is not Number.`))
     arktest.assertEQ(elem.asBigInt(), 1000000000000000000000000n)
 
-    str = '-9007199254740992'  // MIN_SAFE_INTEGER   
+    str = '-9007199254740992' // MIN_SAFE_INTEGER   
     elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asLong(), -9007199254740992)
     arktest.expectError((): void => { elem.asDouble() }, new RangeError(`'-9007199254740992' is not a double`))
     arktest.assertEQ(elem.asBigInt(), -9007199254740992n)
 
-    str = '-9223372036854775808'  // MIN_SAFE_INTEGER   
+    str = '-9223372036854775808' // MIN_SAFE_INTEGER   
     elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asLong(), -9223372036854775808)
     arktest.expectError((): void => { elem.asDouble() }, new RangeError(`'-9223372036854775808' is not a double`))
@@ -125,7 +125,7 @@ function testStringToBigIntWithMode1(): void {
     arktest.assertEQ(elem.asDouble(), 0)
     arktest.assertEQ(elem.tryAsBigInt(), 0n)
 
-    str = '18446744073709551616'  // 2^64  
+    str = '18446744073709551616' // 2^64  
     elem = JSON.parseJsonElement(str, opt)
     arktest.expectError((): void => { elem.asLong() }, new jsonx.JsonTypeError(`Expected long, but element stores different value type.`))
     arktest.expectError((): void => { elem.asDouble() }, new jsonx.JsonTypeError(`This value's ValueKind is not Number.`))
@@ -133,7 +133,7 @@ function testStringToBigIntWithMode1(): void {
 }
 
 function testStringToBigIntWithMode0(): void {
-    let str = '9007199254740991'  // Double.MAX_SAFE_INTEGER
+    let str = '9007199254740991' // NOTICE: Double.MAX_SAFE_INTEGER
     let opt: jsonx.ParseOptions = {bigIntMode: jsonx.BigIntMode.DEFAULT} as jsonx.ParseOptions;
     let elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asLong(), 9007199254740991)
@@ -146,21 +146,21 @@ function testStringToBigIntWithMode0(): void {
     arktest.expectError((): void => { elem.asDouble() }, new RangeError(`'9007199254740992' is not a double`))
     arktest.assertEQ(elem.asBigInt(), 9007199254740992n)
         
-    str = '9223372036854775808'  // Long.MAX_VALUE + 1
+    str = '9223372036854775808' // Long.MAX_VALUE + 1
     arktest.expectError((): void => { JSON.parseJsonElement(str, opt) }, new FormatError('Value exceeds integer limits'))
     arktest.expectError((): void => { JSON.parseJsonElement(str, opt).asBigInt() }, new FormatError('Value exceeds integer limits'))
 
     
-    str = '1000000000000000000000000'  // 10^24
+    str = '1000000000000000000000000' // 10^24
     arktest.expectError((): void => { JSON.parseJsonElement(str, opt) }, new FormatError('Value exceeds integer limits'))
 
-    str = '-9007199254740992'  // MIN_SAFE_INTEGER   
+    str = '-9007199254740992' // MIN_SAFE_INTEGER   
     elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asLong(), -9007199254740992)
     arktest.expectError((): void => { elem.asDouble() }, new RangeError(`'-9007199254740992' is not a double`))
     arktest.assertEQ(elem.asBigInt(), -9007199254740992n)
 
-    str = '-9223372036854775808'  // MIN_SAFE_INTEGER   
+    str = '-9223372036854775808' // MIN_SAFE_INTEGER   
     elem = JSON.parseJsonElement(str, opt)
     arktest.assertEQ(elem.asLong(), -9223372036854775808)
     arktest.expectError((): void => { elem.asDouble() }, new RangeError(`'-9223372036854775808' is not a double`))
@@ -178,14 +178,14 @@ function testStringToBigIntWithMode0(): void {
     arktest.assertEQ(elem.asDouble(), 0)
     arktest.assertEQ(elem.tryAsBigInt(), 0n)
 
-    str = '18446744073709551616'  // 2^64  
+    str = '18446744073709551616' // 2^64  
     arktest.expectError((): void => { JSON.parseJsonElement(str, opt) }, new FormatError('Value exceeds integer limits'))
 }
 
 class User implements jsonx.JsonElementSerializable {
-    name: string = '';
-    age: int = 0;
-    money: bigint = 0n;
+    public name: string = '';
+    public age: int = 0;
+    public money: bigint = 0n;
 
     toJSON(): jsonx.JsonElement {
         let elem = new jsonx.JsonElement({} as Record<string, jsonx.JsonElement>);
@@ -200,7 +200,7 @@ function testUesrParseJsonElement() {
     let user = new User();
     user.name = 'John';
     user.age = 30;
-    user.money=BigInt('1000000000000000000000000');
+    user.money = BigInt('1000000000000000000000000');
     const jsonelem = user.toJSON();
     const jsonstr = JSON.stringifyJsonElement(jsonelem)
     let opt: jsonx.ParseOptions = {bigIntMode: jsonx.BigIntMode.PARSE_AS_BIGINT} as jsonx.ParseOptions;

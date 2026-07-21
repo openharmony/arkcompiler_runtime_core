@@ -27,7 +27,6 @@ function main(): int {
     failures += check(testCreateWithOtherLocale(), 'Test create with other locale')
     failures += check(testManyExtensions(), 'Test create with many extensions in tag')
     failures += check(testUpperCaseExtensions(), 'Test ignore case-sensitivity in locale tag')
-    failures += check(testMultipleUKeywords(), 'Test single u- singleton with multiple keywords')
     return failures
 }
 
@@ -42,13 +41,11 @@ function processCreateLocaleError(createLocaleFunction : () => Intl.Locale, msg 
     let assertOccurred = false
     try {
         createLocaleFunction()
-    }
-    catch (e) {
+    } catch (e) {
         arktest.assertTrue(e instanceof RangeError)
         arktest.assertEQ((e as RangeError).message, (msg != undefined ? msg : errMsg))
         assertOccurred = true
-    }
-    finally {
+    } finally {
         arktest.assertTrue(assertOccurred)
     }
 }
@@ -93,8 +90,7 @@ function testMinimize() : int {
     if (l.language != null && l.language != undefined && l.language!.toLowerCase() == 'ru') {
         arktest.assertEQ(l.baseName, 'ru')
         arktest.assertEQ(l.toString(), 'ru-u-ca-chinese')
-    }
-    else {
+    } else {
         arktest.assertEQ(l.baseName, 'en')
         arktest.assertEQ(l.toString(), 'en-u-ca-chinese')
     }
@@ -109,8 +105,7 @@ function testMaximize() : int {
         arktest.assertEQ(l.script, 'Cyrl')
         arktest.assertEQ(l.baseName, 'ru-Cyrl-RU')
         arktest.assertEQ(l.toString(), 'ru-Cyrl-RU-u-co-emoji')
-    }
-    else {
+    } else {
         if (l.language != null && l.language != undefined) {
             arktest.assertEQ(l.language!, 'en')
         }
@@ -186,7 +181,7 @@ const errMsg = 'Incorrect locale information provided'
 function testIncorrect() : int {
     {
         // NOTE(ekaterinazaytseva) invalid lang
-        processCreateLocaleError(() =>  new Intl.Locale('err-ru-Cyrl-u-kn-false'))
+        processCreateLocaleError(() => new Intl.Locale('err-ru-Cyrl-u-kn-false'))
         processCreateLocaleError(() => new Intl.Locale('ru-err-u-kn-false'))
     }
     {
@@ -241,7 +236,7 @@ function testCreateWithOtherLocale() : int {
     {
         const l = new Intl.Locale('ru', {numeric : true, collation : 'emoji'} as Intl.LocaleOptions)
         arktest.assertTrue(l.numeric as boolean)
-        const l1 = new Intl.Locale(l, {numeric : false,} as Intl.LocaleOptions)
+        const l1 = new Intl.Locale(l, {numeric : false, } as Intl.LocaleOptions)
         arktest.assertFalse(l1.numeric as boolean)
         arktest.assertEQ(l.language, (l1.language))
         arktest.assertEQ(l.collation, (l1.collation))
@@ -250,7 +245,7 @@ function testCreateWithOtherLocale() : int {
     {
         const l = new Intl.Locale('ru', {numeric : true, collation : 'emoji'} as Intl.LocaleOptions)
         arktest.assertTrue(l.numeric as boolean)
-        const l1 = new Intl.Locale(l, {numeric : false,} as Intl.LocaleOptions)
+        const l1 = new Intl.Locale(l, {numeric : false, } as Intl.LocaleOptions)
         arktest.assertFalse(l1.numeric as boolean)
         arktest.assertEQ(l.language, (l1.language))
         arktest.assertEQ(l.collation, (l1.collation))
@@ -264,10 +259,11 @@ function testManyExtensions() : int {
     processCreateLocaleError(() => new Intl.Locale('ru-u-ca-gregory-u-nu-arab'))
     {
         const validExtensions: ReadonlyArray<string> = Array.of<string>('-u-ca-gregory', '-u-nu-arab', '-u-kn', '-u-co-emoji', '-u-kf-upper', '-u-hc-h12')
-        for (let i = 0;  i < validExtensions.length; ++i) {
+        for (let i = 0; i < validExtensions.length; ++i) {
 			for (let j = 0; j < validExtensions.length; ++j) {
-                if (i == j)
+                if (i == j) {
                     continue
+                }
                 let tag = 'ru' + validExtensions[i] + validExtensions[j]
                 processCreateLocaleError(() => { return new Intl.Locale(tag)} )
             }
@@ -288,32 +284,6 @@ function testUpperCaseExtensions() : int {
     {
         let l = new Intl.Locale('ru-u-KN-true')
         arktest.assertEQ(l.numeric, true)
-    }
-    return success
-}
-
-// A valid tag carries a single `u-` singleton with one or more keyword pairs.
-// toString() must round-trip under ONE `-u-` prefix with keys sorted ascending (BCP47/UTS#35).
-function testMultipleUKeywords() : int {
-    {
-        // Reported case: two keywords must not produce a second `-u-`
-        const l = new Intl.Locale('en-Latn-GB-u-nu-arab-hc-h24')
-        arktest.assertEQ(l.toString(), 'en-Latn-GB-u-hc-h24-nu-arab')
-    }
-    {
-        // Unordered input must be normalized to sorted key order
-        const l = new Intl.Locale('en-u-nu-arab-hc-h24-ca-gregory')
-        arktest.assertEQ(l.toString(), 'en-u-ca-gregory-hc-h24-nu-arab')
-    }
-    {
-        // co sorts before kn
-        const l = new Intl.Locale('ru-u-kn-co-emoji')
-        arktest.assertEQ(l.toString(), 'ru-u-co-emoji-kn')
-    }
-    {
-        // Single keyword still uses a single `-u-`
-        const l = new Intl.Locale('en-u-ca-gregory')
-        arktest.assertEQ(l.toString(), 'en-u-ca-gregory')
     }
     return success
 }

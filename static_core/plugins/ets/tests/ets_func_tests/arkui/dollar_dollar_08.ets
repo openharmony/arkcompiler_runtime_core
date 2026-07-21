@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,10 +24,10 @@ function increment(n: int): void {
 }
 
 function main(): void {
-  let nArr: int[] = [5,5]
+  let nArr: int[] = [5, 5]
   increment($$nArr[0])
-  arktest.assertEQ(nArr[0],  6)
+  arktest.assertEQ(nArr[0], 6)
 
   increment(nArr[1])
-  arktest.assertEQ(nArr[1],  5)
+  arktest.assertEQ(nArr[1], 5)
 }

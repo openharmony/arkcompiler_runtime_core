@@ -13,7 +13,7 @@ PCRE2 (Perl Compatible Regular Expressions 2) is the native regex engine backing
 std/core/RegExp.ets (ETS API)
          |
          v
-native/core/regexp/RegExp.cpp (ANI bindings)
+native/core/regexp/regexp.cpp (ANI bindings)
          |
          v
 native/core/regexp/regexp_executor.cpp (Executor)
@@ -31,7 +31,7 @@ regexp_8.cpp  regexp_16.cpp (PCRE2 wrappers)
 | File | Purpose |
 |------|---------|
 | `std/core/RegExp.ets` | ETS public API, result types |
-| `native/core/regexp/RegExp.cpp` | ANI native method bindings |
+| `native/core/regexp/regexp.cpp` | ANI native method bindings |
 | `native/core/regexp/regexp_executor.cpp` | Compile/Execute orchestration |
 | `native/core/regexp/regexp_8.cpp` | UTF-8 PCRE2 wrapper |
 | `native/core/regexp/regexp_16.cpp` | UTF-16 PCRE2 wrapper |
@@ -172,7 +172,7 @@ constexpr int PCRE2_GROUPS_NAME_ENTRY_SHIFT = 4;
 
 ### 1. Add Native Method
 
-In `native/core/regexp/RegExp.cpp`:
+In `native/core/regexp/regexp.cpp`:
 ```cpp
 // ANI binding
 ani_long MyNewMethod(ani_env *env, /* params */) {

@@ -15,54 +15,54 @@
 
 function setDeleteRemovesValue(): void {
     let set: Set<string> = new Set<string>(4)
-    set.add("a")
-    set.add("b")
+    set.add('a')
+    set.add('b')
     arktest.assertEQ(set.size, 2)
-    arktest.assertTrue(set.has("a"))
+    arktest.assertTrue(set.has('a'))
 
-    let deleted: boolean = set.delete("a")
+    let deleted: boolean = set.delete('a')
     arktest.assertTrue(deleted)
     arktest.assertEQ(set.size, 1)
-    arktest.assertFalse(set.has("a"))
-    arktest.assertTrue(set.has("b"))
+    arktest.assertFalse(set.has('a'))
+    arktest.assertTrue(set.has('b'))
 
     let values: string[] = []
     for (let v of set.values()) {
         values.push(v)
     }
     arktest.assertEQ(values.length, 1)
-    arktest.assertEQ(values[0], "b")
+    arktest.assertEQ(values[0], 'b')
 }
 
 function setDeleteMultipleWithoutRehash(): void {
     let set: Set<string> = new Set<string>(8)
-    set.add("v1")
-    set.add("v2")
-    set.add("v3")
+    set.add('v1')
+    set.add('v2')
+    set.add('v3')
     arktest.assertEQ(set.size, 3)
 
-    set.delete("v2")
+    set.delete('v2')
     arktest.assertEQ(set.size, 2)
-    arktest.assertFalse(set.has("v2"))
-    arktest.assertTrue(set.has("v1"))
-    arktest.assertTrue(set.has("v3"))
+    arktest.assertFalse(set.has('v2'))
+    arktest.assertTrue(set.has('v1'))
+    arktest.assertTrue(set.has('v3'))
 
-    set.delete("v1")
+    set.delete('v1')
     arktest.assertEQ(set.size, 1)
-    arktest.assertFalse(set.has("v1"))
-    arktest.assertTrue(set.has("v3"))
+    arktest.assertFalse(set.has('v1'))
+    arktest.assertTrue(set.has('v3'))
 
-    set.delete("v3")
+    set.delete('v3')
     arktest.assertEQ(set.size, 0)
-    arktest.assertFalse(set.has("v3"))
+    arktest.assertFalse(set.has('v3'))
 }
 
 function setDeleteNonexistentReturnsFalse(): void {
     let set: Set<string> = new Set<string>(4)
-    set.add("a")
-    arktest.assertFalse(set.delete("b"))
+    set.add('a')
+    arktest.assertFalse(set.delete('b'))
     arktest.assertEQ(set.size, 1)
-    arktest.assertTrue(set.has("a"))
+    arktest.assertTrue(set.has('a'))
 }
 
 function main(): int {

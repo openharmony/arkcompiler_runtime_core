@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,22 +14,22 @@
  */
 
 function testBigIntToLocaleString(): void {
-    const langTag = "zh-CN"
+    const langTag = 'zh-CN'
     const options: BigIntToLocaleStringOptions = { useGrouping: false }
 
     const locale = new Intl.Locale(langTag)
     const num: bigint = 45678n
 
-    arktest.assertEQ(num.toLocaleString(langTag, options), "45678")
-    arktest.assertEQ(num.toLocaleString(locale, options), "45678")
+    arktest.assertEQ(num.toLocaleString(langTag, options), '45678')
+    arktest.assertEQ(num.toLocaleString(locale, options), '45678')
 
-    arktest.assertEQ(num.toLocaleString(langTag), "45,678")
-    arktest.assertEQ(num.toLocaleString(locale), "45,678")
+    arktest.assertEQ(num.toLocaleString(langTag), '45,678')
+    arktest.assertEQ(num.toLocaleString(locale), '45,678')
     arktest.assertEQ(num.toLocaleString(), num.toLocaleString(undefined))
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("BigInt")
-    suite.addTest("toLocaleString", testBigIntToLocaleString)
+    const suite = new arktest.ArkTestsuite('BigInt')
+    suite.addTest('toLocaleString', testBigIntToLocaleString)
     return suite.run()
 }

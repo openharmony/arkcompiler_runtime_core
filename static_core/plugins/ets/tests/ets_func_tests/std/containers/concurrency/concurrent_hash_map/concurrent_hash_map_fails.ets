@@ -15,18 +15,19 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T>(arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+function awaitAll<T>(arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
-	for (let i = 0; i < arr.length; ++ i)
+	for (let i = 0; i < arr.length; ++ i) {
 		res.push(arr[i].Await());
+	}
 	return res;
 }
 
-function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
+function sumArrInto(to: FixedArray<int>, from: FixedArray<int>): void {
 	arktest.assertEQ(to.length, from.length);
 	for (let i = 0; i < to.length; ++ i) {
 		to[i] += from[i];
@@ -34,8 +35,9 @@ function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
 }
 
 function assertEQAll(array: FixedArray<int>, value: int): void {
-	for (let i=0; i < array.length; ++ i)
+	for (let i = 0; i < array.length; ++ i) {
 		arktest.assertEQ(array[i], value)
+	}
 }
 
 function testConcurrentSizeAndSR1() {
@@ -59,8 +61,9 @@ function testConcurrentSizeAndSR1() {
 	}
 	let sizeJob = launch(sizeF);
 	let srJobs: Job<void>[] = [];
-	for (let i = 0; i < JOB_COUNT; ++ i)
+	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(srJobs, srF);
+	}
 	awaitAll(srJobs);
 	running = false;
 	sizeJob.Await();
@@ -87,18 +90,19 @@ function testConcurrentSizeAndSRI() {
 	}
 	let sizeJob = launch(sizeF);
 	let srJobs: Job<void>[] = [];
-	for (let i = 0; i < JOB_COUNT; ++ i)
+	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(srJobs, srF);
+	}
 	awaitAll(srJobs);
 	running = false;
 	sizeJob.Await();
 }
 
 function main(): int {
-    let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
+    let chmTestSuitecase = new arktest.ArkTestsuite('ConcurrentHashMapTest')
 
-	CHMTestSuitecase.addTest("testConcurrentSizeAndSR1", testConcurrentSizeAndSR1);
-	CHMTestSuitecase.addTest("testConcurrentSizeAndSRI", testConcurrentSizeAndSRI);
+	chmTestSuitecase.addTest('testConcurrentSizeAndSR1', testConcurrentSizeAndSR1);
+	chmTestSuitecase.addTest('testConcurrentSizeAndSRI', testConcurrentSizeAndSRI);
 
-    return CHMTestSuitecase.run();
+    return chmTestSuitecase.run();
 }

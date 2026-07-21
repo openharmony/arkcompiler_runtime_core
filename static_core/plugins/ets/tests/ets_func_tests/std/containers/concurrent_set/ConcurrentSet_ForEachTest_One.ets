@@ -13,116 +13,110 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
+import { launch } from 'std/concurrency'
 
 let flag: int = 0;
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 let arrKeysZero: number[] = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
-let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+let arrValues: string[] = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
 
-let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
+let concurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
-    let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetForEachTest");
+    let concurrentSetTestSuite = new arktest.ArkTestsuite('ConcurrentSetForEachTest');
 
-    ConcurrentSetTestsuite.addTest("TestForEach002", () =>
-    {
-        let ConcurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
-        ConcurrentSetTest.add(arrValues[0]);
-        ConcurrentSetTest.add(arrValues[1]);
-        let iterValues: IterableIterator<string> = ConcurrentSetTest.values();
+    concurrentSetTestSuite.addTest('TestForEach002', () => {
+        let concurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
+        concurrentSetTest.add(arrValues[0]);
+        concurrentSetTest.add(arrValues[1]);
+        let iterValues: IterableIterator<string> = concurrentSetTest.values();
         flag = 0;
-        ConcurrentSetTest.forEach((val: string) => {
+        concurrentSetTest.forEach((val: string) => {
             if (val == arrValues[flag] && iterValues.next().value == val) {
                 flag++;
             }
         });
         arktest.assertEQ(flag, 2);
     });
-    ConcurrentSetTestsuite.addTest("ForEach&AddTest003", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestSuite.addTest('ForEach&AddTest003', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         flag = 0;
         let p1 = launch(forEachOne);
         let p2 = launch(addAll);
         p1.Await();
         p2.Await();
-        arktest.assertTrue(ConcurrentSetTestOne.size >= 0);
+        arktest.assertTrue(concurrentSetTestOne.size >= 0);
     });
-    ConcurrentSetTestsuite.addTest("ForEach&AddTest004", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestSuite.addTest('ForEach&AddTest004', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         flag = 0;
         forEachOne();
         addAll();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 10);
+        arktest.assertEQ(concurrentSetTestOne.size, 10);
     });
-    ConcurrentSetTestsuite.addTest("ForEach&DeteleTest002", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestSuite.addTest('ForEach&DeteleTest002', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         flag = 0;
         addAll();
         let p1 = launch(forEachOne);
         let p2 = launch(deleteAllBack);
         p1.Await();
         p2.Await();
-        arktest.assertTrue(ConcurrentSetTestOne.size < 11);
+        arktest.assertTrue(concurrentSetTestOne.size < 11);
     });
-    ConcurrentSetTestsuite.addTest("ForEach&HasTest002", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestSuite.addTest('ForEach&HasTest002', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         flag = 0;
         addAll();
         let p1 = launch(forEachOne);
         let p2 = launch(hasAll);
         p1.Await();
         p2.Await();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 10);
+        arktest.assertEQ(concurrentSetTestOne.size, 10);
     });
-    ConcurrentSetTestsuite.addTest("ForEach&ClearTest002", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestSuite.addTest('ForEach&ClearTest002', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         flag = 0;
         addAll();
         let p1 = launch(forEachOne);
         let p2 = launch(clearTest);
         p1.Await();
         p2.Await();
-        arktest.assertTrue(ConcurrentSetTestOne.size < 11);
+        arktest.assertTrue(concurrentSetTestOne.size < 11);
     });
 
-    return ConcurrentSetTestsuite.run();
+    return concurrentSetTestSuite.run();
 }
 
 function forEachOne() {
-    ConcurrentSetTestOne.forEach((key: number) => {
+    concurrentSetTestOne.forEach((key: number) => {
         arrKeysZero[flag++] = key;
     });
 }
 
 function clearTest() {
-    ConcurrentSetTestOne.clear();
+    concurrentSetTestOne.clear();
 }
 
 function deleteAllBack() {
     for (let i: int = 9; i >= 0; i--) {
-        ConcurrentSetTestOne.delete(i);
+        concurrentSetTestOne.delete(i);
     }
 }
 
 function hasAll() {
-    for (let i: int = 0; i < 10 ; i++) {
-        ConcurrentSetTestOne.has(i);
+    for (let i: int = 0; i < 10; i++) {
+        concurrentSetTestOne.has(i);
     }
 }
 
 function addAll() {
-    for (let i: int = 0; i < 10 ; i++) {
-        ConcurrentSetTestOne.add(arrKeys[i]);
+    for (let i: int = 0; i < 10; i++) {
+        concurrentSetTestOne.add(arrKeys[i]);
     }
 }

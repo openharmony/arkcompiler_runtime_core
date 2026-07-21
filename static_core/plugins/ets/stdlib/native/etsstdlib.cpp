@@ -16,7 +16,7 @@
 #include <ani.h>
 #include <iostream>
 
-#include "plugins/ets/stdlib/native/core/Intl.h"
+#include "plugins/ets/stdlib/native/core/intl.h"
 
 namespace ark::ets::stdlib {
 

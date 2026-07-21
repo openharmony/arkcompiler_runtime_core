@@ -14,35 +14,38 @@
  */
 
 const success : int = 0;
-const fail    : int = 1;
+const fail : int = 1;
 
 function main(): int {
     let failures: int = 0;
     //NOTE (ikorobkov): below tests have no implementation/support in Array
-    failures += check((): int => { return createWithArrayOfNumber()}, "Create Array with given first item and Number[]");
-    failures += check((): int => { return findWithFuncArg3ReadonlyArray()}, "findWithFuncArg3ReadonlyArray");
-    failures += check((): int => { return findIndexFuncArg3ReadonlyArray()}, "findIndexFuncArg3ReadonlyArray");
-    failures += check((): int => { return mapFuncArg3ReadonlyArray()}, "mapFuncArg3ReadonlyArray");
-    failures += check((): int => { return everyFuncArg3ReadonlyArray()}, "everyFuncArg3ReadonlyArray");
-    failures += check((): int => { return fromArg1()}, "fromArg1");
-    failures += check((): int => { return fromArg2()}, "fromArg2");
-    failures += check((): int => { return fromArrayLikeAndIterable()}, "fromArrayLikeAndIterable");
-    failures += check((): int => { return fromArrayLikeAndIterableAndFunc()}, "fromArrayLikeAndIterableAndFunc");
-    failures += check((): int => { return filterFuncArg3ReadonlyArray()}, "filterFuncArg3ReadonlyArray");
-    failures += check((): int => { return reduceFuncArg4ReadonlyArray()}, "reduceFuncArg4ReadonlyArray");
-    failures += check((): int => { return reduceFuncArg4ReadonlyArrayWithInitialValue()}, "reduceFuncArg4ReadonlyArrayWithInitialValue");
-    failures += check((): int => { return reduceRightFuncArg4ReadonlyArray()}, "reduceRightFuncArg4ReadonlyArray");
-    failures += check((): int => { return reduceRightFuncArg4ReadonlyArrayWithInitialValue()}, "reduceRightFuncArg4ReadonlyArrayWithInitialValue");
-    failures += check((): int => { return forEachFuncArg3ReadonlyArray()}, "forEachFuncArg3ReadonlyArray");
-    failures += check((): int => { return flatMapFuncArg3()}, "flatMapFuncArg3");
-    failures += check((): int => { return flatMapFuncArg2()}, "flatMapFuncArg2");
-    failures += check((): int => { return flatMapFuncArg1()}, "flatMapFuncArg1");
-    failures += check((): int => { return flat()}, "flat");
-    failures += check((): int => { return flatDepth()}, "flatDepth");
-    failures += check((): int => { return toLocaleString()}, "toLocaleString");
-    failures += check((): int => { return toLocaleStringObject()}, "toLocaleStringObject");
-    failures += check((): int => { return toLocaleStringObjectOption()}, "toLocaleStringObjectOption");
-    return check(failures, "All tests run");
+    failures += check((): int => { return createWithArrayOfNumber()},
+        'Create Array with given first item and Number[]');
+    failures += check((): int => { return findWithFuncArg3ReadonlyArray()}, 'findWithFuncArg3ReadonlyArray');
+    failures += check((): int => { return findIndexFuncArg3ReadonlyArray()}, 'findIndexFuncArg3ReadonlyArray');
+    failures += check((): int => { return mapFuncArg3ReadonlyArray()}, 'mapFuncArg3ReadonlyArray');
+    failures += check((): int => { return everyFuncArg3ReadonlyArray()}, 'everyFuncArg3ReadonlyArray');
+    failures += check((): int => { return fromArg1()}, 'fromArg1');
+    failures += check((): int => { return fromArg2()}, 'fromArg2');
+    failures += check((): int => { return fromArrayLikeAndIterable()}, 'fromArrayLikeAndIterable');
+    failures += check((): int => { return fromArrayLikeAndIterableAndFunc()}, 'fromArrayLikeAndIterableAndFunc');
+    failures += check((): int => { return filterFuncArg3ReadonlyArray()}, 'filterFuncArg3ReadonlyArray');
+    failures += check((): int => { return reduceFuncArg4ReadonlyArray()}, 'reduceFuncArg4ReadonlyArray');
+    failures += check((): int => { return reduceFuncArg4ReadonlyArrayWithInitialValue()},
+        'reduceFuncArg4ReadonlyArrayWithInitialValue');
+    failures += check((): int => { return reduceRightFuncArg4ReadonlyArray()}, 'reduceRightFuncArg4ReadonlyArray');
+    failures += check((): int => { return reduceRightFuncArg4ReadonlyArrayWithInitialValue()},
+        'reduceRightFuncArg4ReadonlyArrayWithInitialValue');
+    failures += check((): int => { return forEachFuncArg3ReadonlyArray()}, 'forEachFuncArg3ReadonlyArray');
+    failures += check((): int => { return flatMapFuncArg3()}, 'flatMapFuncArg3');
+    failures += check((): int => { return flatMapFuncArg2()}, 'flatMapFuncArg2');
+    failures += check((): int => { return flatMapFuncArg1()}, 'flatMapFuncArg1');
+    failures += check((): int => { return flat()}, 'flat');
+    failures += check((): int => { return flatDepth()}, 'flatDepth');
+    failures += check((): int => { return toLocaleString()}, 'toLocaleString');
+    failures += check((): int => { return toLocaleStringObject()}, 'toLocaleStringObject');
+    failures += check((): int => { return toLocaleStringObjectOption()}, 'toLocaleStringObjectOption');
+    return check(failures, 'All tests run');
 }
 
 
@@ -52,8 +55,8 @@ const dd: Number[] = [1, 0, 3, 4, 0, 6];
 function createWithArrayOfNumber(): int {
     return success;
     //NOTE (ikorobkov): uncomment when Rest parameters will be supported by Array
-    // let first = new Number(0);
-    // let arr = new Array<Number>(first, ...d);
+    // FIXME let first = new Number(0);
+    // FIXME let arr = new Array<Number>(first, ...d);
     // if (arr[0].valueOf() != first.valueOf()) { return fail; }
     // for(let i: int = 0; i < d.length; ++i) {
     //     if(arr[i+1]! != d[i]) {
@@ -67,14 +70,22 @@ function createWithArrayOfNumber(): int {
 function findWithFuncArg3ReadonlyArray(): int {
     return success;
     //NOTE (ikorobkov): uncomment when ReadonlyArray will be supported
-    // let arr = new Array<Number>;
+    // FIXME let arr = new Array<Number>;
     // for(let i: int = 0; i < d.length; ++i) {
-    //     arr.push(d[i]);
+    // FIXME     arr.push(d[i]);
     // }
-    // let fnPositive = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem.valueOf() == 12 && index > 0; };
-    // let fnNegative = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem.valueOf() < 0 && index > 0; };
-    // let fnUndefined = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj.at(index) == undefined && index < 0; };
-    // let fnNull = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj.at(index) == null && index > 0; };
+    // FIXME let fnPositive = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => {
+    //     return obj[index] == elem && elem.valueOf() == 12 && index > 0;
+    // };
+    // FIXME let fnNegative = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => {
+    //     return obj[index] == elem && elem.valueOf() < 0 && index > 0;
+    // };
+    // FIXME let fnUndefined = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => {
+    //     return obj.at(index) == undefined && index < 0;
+    // };
+    // FIXME let fnNull = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => {
+    //     return obj.at(index) == null && index > 0;
+    // };
     // if (arr.find(fnPositive) != 12) { return fail; }
     // if (arr.find(fnNegative) != -1) { return fail; }
     // if (arr.find(fnUndefined) != undefined) { return fail; }
@@ -85,14 +96,22 @@ function findWithFuncArg3ReadonlyArray(): int {
 function findIndexFuncArg3ReadonlyArray(): int {
     return success;
     //NOTE (ikorobkov): uncomment when ReadonlyArray will be supported
-    //let arr = new Array<Number>;
+    // FIXME let arr = new Array<Number>;
     //for(let i: int = 0; i < d.length; ++i) {
-    //    arr.push(d[i]);
+    // FIXME    arr.push(d[i]);
     //}
-    // let fnPositive = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem.valueOf() == 12 && index > 0; };
-    // let fnNegative = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj[index] == elem && elem.valueOf() < 0 && index > 0; };
-    // let fnUndefined = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj.at(index) == undefined && index < 0; };
-    // let fnNull = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => { return obj.at(index) == null && index > 0; };
+    // FIXME let fnPositive = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => {
+    //     return obj[index] == elem && elem.valueOf() == 12 && index > 0;
+    // };
+    // FIXME let fnNegative = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => {
+    //     return obj[index] == elem && elem.valueOf() < 0 && index > 0;
+    // };
+    // FIXME let fnUndefined = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => {
+    //     return obj.at(index) == undefined && index < 0;
+    // };
+    // FIXME let fnNull = (elem: Number, index: number, obj: ReadonlyArray<Number>): boolean => {
+    //     return obj.at(index) == null && index > 0;
+    // };
     // if (arr.findIndex(fnPositive) != 9) { return fail; }
     // if (arr.findIndex(fnNegative) != 1) { return fail; }
     // if (arr.findIndex(fnUndefined) != -1) { return fail; }
@@ -110,22 +129,22 @@ function mapFuncArg3ReadonlyArray(): int {
     //         return new Number(0);
     //     }
     // }
-    // let arrEmpty = new Array<Number>;
-    // let res0 = arrEmpty.map<Number>(fn);
+    // FIXME let arrEmpty = new Array<Number>;
+    // FIXME let res0 = arrEmpty.map<Number>(fn);
     // if (res0.length != arrEmpty.length) { return fail; }
     // if (res0.length != 0) { return fail; }
-    // let arr = new Array<Number>;
+    // FIXME let arr = new Array<Number>;
     // for(let i: int = 0; i < d.length; ++i) {
-    //     arr.push(d[i]);
+    // FIXME     arr.push(d[i]);
     // }
-    // let res = arr.map<Number>(fn);
+    // FIXME let res = arr.map<Number>(fn);
     // if (res.length != arr.length) { return fail; }
-    // let tmp: Number;
+    // FIXME let tmp: Number;
     // for (let i: int = 0; i < res.length; ++i) {
     //     if (i < 4) {
-    //         tmp = new Number(arr[i].valueOf() * arr[i].valueOf());
+    // FIXME         tmp = new Number(arr[i].valueOf() * arr[i].valueOf());
     //     } else {
-    //         tmp = new Number(0);
+    // FIXME         tmp = new Number(0);
     //     }
     //     if (res[i].valueOf() != tmp.valueOf()) {
     //         return fail;
@@ -144,22 +163,22 @@ function everyFuncArg3ReadonlyArray(): int {
     //         return new Number(0);
     //     }
     // }
-    // let arrEmpty = new Array<Number>;
-    // let res0 = arrEmpty.map<Number>(fn);
+    // FIXME let arrEmpty = new Array<Number>;
+    // FIXME let res0 = arrEmpty.map<Number>(fn);
     // if (res0.length != arrEmpty.length) { return fail; }
     // if (res0.length != 0) { return fail; }
-    // let arr = new Array<Number>;
+    // FIXME let arr = new Array<Number>;
     // for(let i: int = 0; i < d.length; ++i) {
-    //     arr.push(d[i]);
+    // FIXME     arr.push(d[i]);
     // }
-    // let res = arr.map<Number>(fn);
+    // FIXME let res = arr.map<Number>(fn);
     // if (res.length != arr.length) { return fail; }
-    // let tmp: Number;
+    // FIXME let tmp: Number;
     // for (let i: int = 0; i < res.length; ++i) {
     //     if (i < 4) {
-    //         tmp = new Number(arr[i].valueOf() * arr[i].valueOf());
+    // FIXME         tmp = new Number(arr[i].valueOf() * arr[i].valueOf());
     //     } else {
-    //         tmp = new Number(0);
+    // FIXME         tmp = new Number(0);
     //     }
     //     if (res[i).valueOf() != tmp.valueOf()) {
     //         return fail;
@@ -168,19 +187,20 @@ function everyFuncArg3ReadonlyArray(): int {
     // return success;
 }
 
-// NOTE (ikorobkov): uncomment when Array will have implementation of from<T,U>(arr: ArrayLike<T>|Iterable<T>, fn: (v: T, k: number) => U)
+// NOTE (ikorobkov): uncomment when Array will have implementation of from<T,U>
+// (arr: ArrayLike<T>|Iterable<T>, fn: (v: T, k: number) => U)
 //
 // class ArrayLikeImplTest<T> implements ArrayLike<T> {
 //     private buffer: Any[]
 //     internal actualLength: int
 //
 //     public at(index: number): T | undefined {
-//         let len = this.actualLength;
-//         let k: int;
+// FIXME         let len = this.actualLength;
+// FIXME         let k: int;
 //         if (index >= 0) {
-//             k = index as int;
+// FIXME             k = index as int;
 //         } else {
-//             k = len + index as int;
+// FIXME             k = len + index as int;
 //         }
 //         if (k < 0 || k >= len) {
 //             return undefined;
@@ -190,7 +210,7 @@ function everyFuncArg3ReadonlyArray(): int {
 //
 //     public $_get(index: number): T {
 //         if ((index as int  < 0) || (index as int >= this.actualLength)) {
-//             throw new RangeError("Out of bounds");
+// FIXME             throw new RangeError("Out of bounds");
 //         }
 //         return this.buffer[index as int] as T;
 //     }
@@ -200,25 +220,25 @@ function everyFuncArg3ReadonlyArray(): int {
 //     }
 //
 //     public push(val: T): number {
-//         this.ensureUnusedCapacity(1);
-//         this.buffer[this.actualLength] = val as Any;
-//         this.actualLength += 1;
+// FIXME         this.ensureUnusedCapacity(1);
+// FIXME         this.buffer[this.actualLength] = val as Any;
+// FIXME         this.actualLength += 1;
 //         return this.actualLength;
 //     }
 //
 //     private ensureUnusedCapacity(cap: int): void {
 //         if (this.actualLength + cap > this.buffer.length) {
-//             const copy = new Any[this.buffer.length * 2 + cap];
+// FIXME             const copy = new Any[this.buffer.length * 2 + cap];
 //             for (let i = 0; i < this.actualLength; i++) {
-//                 copy[i] = this.buffer[i];
+// FIXME                 copy[i] = this.buffer[i];
 //             }
-//             this.buffer = copy;
+// FIXME             this.buffer = copy;
 //         }
 //     }
 //
 //     public constructor() {
-//         this.buffer = new Any[4]
-//         this.actualLength = 0
+// FIXME         this.buffer = new Any[4]
+// FIXME         this.actualLength = 0
 //     }
 // }
 
@@ -228,11 +248,11 @@ function everyFuncArg3ReadonlyArray(): int {
 //     private idx: int = 0
 //
 //     constructor() {
-//         this.parent = new Array<T>;
+// FIXME         this.parent = new Array<T>;
 //     }
 //
 //     constructor(parent: Array<T>) {
-//         this.parent = parent;
+// FIXME         this.parent = parent;
 //     }
 //
 //     override next(): IteratorResult<T> {
@@ -250,11 +270,11 @@ function everyFuncArg3ReadonlyArray(): int {
 function fromArg1(): int {
     return success;
     //NOTE (ikorobkov): uncomment when Array will have implementation of from
-    // let arr2 = new Array<Number>;
+    // FIXME let arr2 = new Array<Number>;
     // for(let i: int = 0; i < dd.length; ++i) {
-    //     arr2.push(dd[i]);
+    // FIXME     arr2.push(dd[i]);
     // }
-    // let arr1 = Array.from<Number>(arr2);
+    // FIXME let arr1 = Array.from<Number>(arr2);
     // if (arr1.length != arr2.length) {
     //     return fail;
     // }
@@ -269,12 +289,12 @@ function fromArg1(): int {
 function fromArg2(): int {
     return success;
     //NOTE (ikorobkov): uncomment when Array will have implementation of from
-    // let arr2 = new Array<Number>;
+    // FIXME let arr2 = new Array<Number>;
     // for(let i: int = 0; i < dd.length; ++i) {
-    //     arr2.push(dd[i]);
+    // FIXME     arr2.push(dd[i]);
     // }
-    // let fn = (v: Number, k: number): Number => { return v = new Number(v + k); };
-    // let arr1 = Array.from<Number, Number>(arr2, fn);
+    // FIXME let fn = (v: Number, k: number): Number => { return v = new Number(v + k); };
+    // FIXME let arr1 = Array.from<Number, Number>(arr2, fn);
     // if (arr1.length != arr2.length) {
     //     return fail;
     // }
@@ -290,14 +310,14 @@ function fromArrayLikeAndIterable(): int {
     return success;
     //NOTE (ikorobkov): uncomment when Array will have implementation of from from<T>(arr: ArrayLike<T>|Iterable<T>)
     //NOTE (ikorobkov): below is check of ArrayLike<T>
-    // let arrEmpty = new Array<Number>;
-    // let res0 = arrEmpty.from<Number>(new ArrayLikeImplTest<Number>);
+    // FIXME let arrEmpty = new Array<Number>;
+    // FIXME let res0 = arrEmpty.from<Number>(new ArrayLikeImplTest<Number>);
     // if (res0.length > 0) { return fail; }
-    // let arrLike = new ArrayLikeImplTest<Number>;
+    // FIXME let arrLike = new ArrayLikeImplTest<Number>;
     // for (let i: int = 0; i < d.length; ++i) {
-    //     arrLike.push(d[i]);
+    // FIXME     arrLike.push(d[i]);
     // }
-    // let res = arrEmpty.from<Number>(arrLike);
+    // FIXME let res = arrEmpty.from<Number>(arrLike);
     // if ((res.length as int != arrLike.lengthMakeProp() as int) || (arrEmpty.length != 0)) {
     //     return fail;
     // }
@@ -307,13 +327,13 @@ function fromArrayLikeAndIterable(): int {
     //     }
     // }
     // //NOTE (ikorobkov): below is check of Iterable<T>
-    // let res00 = arrEmpty.from<Number>(new IterableImplTest<Number>);
+    // FIXME let res00 = arrEmpty.from<Number>(new IterableImplTest<Number>);
     // if (res00.length > 0) { return fail; }
-    // let tmp = new Array<Number>;
+    // FIXME let tmp = new Array<Number>;
     // for (let i: int = 0; i < d.length; ++i) {
-    //     tmp.push(d[i]);
+    // FIXME     tmp.push(d[i]);
     // }
-    // res = arrEmpty.from<Number>(new IterableImplTest<Number>(tmp));
+    // FIXME res = arrEmpty.from<Number>(new IterableImplTest<Number>(tmp));
     // if ((res.length as int != tmp.length as int) || (arrEmpty.length != 0)) {
     //     return fail;
     // }
@@ -327,7 +347,8 @@ function fromArrayLikeAndIterable(): int {
 
 function fromArrayLikeAndIterableAndFunc(): int {
     return success;
-    //NOTE (ikorobkov): uncomment when Array will have implementation of from<T,U>(arr: ArrayLike<T>|Iterable<T>, fn: (v: T, k: number) => U)
+    //NOTE (ikorobkov): uncomment when Array will have implementation of from<T,U>
+    // (arr: ArrayLike<T>|Iterable<T>, fn: (v: T, k: number) => U)
     //NOTE (ikorobkov):  and have call 'iteratorForEach<T>' at 801Line in Array.ets
     //NOTE (ikorobkov): Below is check ArrayLike<T>
     // let fn = (val: Number, index: number): Number => {
@@ -337,14 +358,14 @@ function fromArrayLikeAndIterableAndFunc(): int {
     //         return new Number(val.valueOf() * 2);
     //     }
     // }
-    // let arrEmpty = new Array<Number>;
-    // let res0 = arrEmpty.from<Number, Number>(new ArrayLikeImplTest<Number>, fn);
+    // FIXME let arrEmpty = new Array<Number>;
+    // FIXME let res0 = arrEmpty.from<Number, Number>(new ArrayLikeImplTest<Number>, fn);
     // if (res0.length > 0) { return fail; }
-    // let arrLike = new ArrayLikeImplTest<Number>;
+    // FIXME let arrLike = new ArrayLikeImplTest<Number>;
     // for (let i: int = 0; i < d.length; ++i) {
-    //     arrLike.push(d[i]);
+    // FIXME     arrLike.push(d[i]);
     // }
-    // let res = arrEmpty.from<Number, Number>(arrLike, fn);
+    // FIXME let res = arrEmpty.from<Number, Number>(arrLike, fn);
     // if ((res.length as int != arrLike.lengthMakeProp() as int) || (arrEmpty.length != 0)) {
     //     return fail;
     // }
@@ -354,13 +375,13 @@ function fromArrayLikeAndIterableAndFunc(): int {
     //     }
     // }
     // //NOTE (ikorobkov): below is check Iterable<T>
-    // let res00 = arrEmpty.from<Number, Number>(new IterableImplTest<Number>, fn);
+    // FIXME let res00 = arrEmpty.from<Number, Number>(new IterableImplTest<Number>, fn);
     // if (res00.length > 0) { return fail; }
-    // let tmp = new Array<Number>;
+    // FIXME let tmp = new Array<Number>;
     // for (let i: int = 0; i < d.length; ++i) {
-    //     tmp.push(d[i]);
+    // FIXME     tmp.push(d[i]);
     // }
-    // res = arrEmpty.from<Number, Number>(new IterableImplTest<Number>(tmp), fn);
+    // FIXME res = arrEmpty.from<Number, Number>(new IterableImplTest<Number>(tmp), fn);
     // if ((res.length as int != tmp.length as int) || (arrEmpty.length != 0)) {
     //     return fail;
     // }
@@ -378,13 +399,13 @@ function filterFuncArg3ReadonlyArray(): int {
     // let fnTrue = (v: Number, index: number, arr: ReadonlyArray<Number>): boolean => {
     //     return arr[index].valueOf() == v.valueOf() && v.valueOf() > -1000;
     // }
-    // let arrEmpty = new Array<Number>;
+    // FIXME let arrEmpty = new Array<Number>;
     // if (arrEmpty.filter(fnTrue).length != 0) { return fail; }
-    // let arr = new Array<Number>;
+    // FIXME let arr = new Array<Number>;
     // for(let i: int = 0; i < d.length; ++i) {
-    //     arr.push(d[i]);
+    // FIXME     arr.push(d[i]);
     // }
-    // let res = arr.filter(fnTrue);
+    // FIXME let res = arr.filter(fnTrue);
     // if (res.length != arr.length) { return fail; }
     // for(let i: int = 0; i < arr.length; ++i) {
     //     if (res[i] != arr[i]) { return fail; }
@@ -405,20 +426,20 @@ function reduceFuncArg4ReadonlyArray(): int {
     //     }
     //     return new Number(a.valueOf() + b.valueOf() + arr[index].valueOf());
     // }
-    // let arrEmpty = new Array<Number>;
-    // let hasError: boolean = false;
+    // FIXME let arrEmpty = new Array<Number>;
+    // FIXME let hasError: boolean = false;
     // try {
-    //     let res = arrEmpty.reduce(fn);
+    // FIXME     let res = arrEmpty.reduce(fn);
     //     return fail;
     // } catch(e) {
-    //     hasError = true;
+    // FIXME     hasError = true;
     // }
     // if (hasError == false) { return fail; }
-    // let arr = new Array<Number>;
+    // FIXME let arr = new Array<Number>;
     // for(let i: int = 0; i < d.length; ++i) {
-    //     arr.push(d[i]);
+    // FIXME     arr.push(d[i]);
     // }
-    // let res = arr.reduce(fn);
+    // FIXME let res = arr.reduce(fn);
     // if (res.valueOf() != 996) { return fail; }
     // if (res.valueOf() ==  -1) { return fail; }
     // return success;
@@ -433,16 +454,16 @@ function reduceFuncArg4ReadonlyArrayWithInitialValue(): int {
     //     }
     //     return new Number(a.valueOf() + b.valueOf() + arr[index].valueOf());
     // }
-    // let arrEmpty = new Array<Number>;
-    // let initialValue = new Number(0);
-    // let res = arrEmpty.reduce(fn, initialValue);
+    // FIXME let arrEmpty = new Array<Number>;
+    // FIXME let initialValue = new Number(0);
+    // FIXME let res = arrEmpty.reduce(fn, initialValue);
     // if (res.valueOf() != initialValue.valueOf()) { return fail; }
-    // let arr = new Array<Number>;
+    // FIXME let arr = new Array<Number>;
     // for(let i: int = 0; i < d.length; ++i) {
-    //     arr.push(d[i]);
+    // FIXME     arr.push(d[i]);
     // }
-    // initialValue = -arr[0];
-    // res = arr.reduce(fn, initialValue);
+    // FIXME initialValue = -arr[0];
+    // FIXME res = arr.reduce(fn, initialValue);
     // if (res.valueOf() != 996) { return fail; }
     // if (res.valueOf() ==  -1) { return fail; }
     // return success;
@@ -457,20 +478,20 @@ function reduceRightFuncArg4ReadonlyArray(): int {
     //     }
     //     return new Number(a.valueOf() + b.valueOf() + arr[index].valueOf());
     // }
-    // let arrEmpty = new Array<Number>;
-    // let hasError: boolean = false;
+    // FIXME let arrEmpty = new Array<Number>;
+    // FIXME let hasError: boolean = false;
     // try {
-    //     let res = arrEmpty.reduceRight(fn);
+    // FIXME     let res = arrEmpty.reduceRight(fn);
     //     return fail;
     // } catch(e) {
-    //     hasError = true;
+    // FIXME     hasError = true;
     // }
     // if (hasError == false) { return fail; }
-    // let arr = new Array<Number>;
+    // FIXME let arr = new Array<Number>;
     // for(let i: int = 0; i < d.length; ++i) {
-    //     arr.push(d[i]);
+    // FIXME     arr.push(d[i]);
     // }
-    // let res = arr.reduceRight(fn);
+    // FIXME let res = arr.reduceRight(fn);
     // if (res.valueOf() != 994) { return fail; }
     // if (res.valueOf() ==  -1) { return fail; }
     // return success;
@@ -486,16 +507,16 @@ function reduceRightFuncArg4ReadonlyArrayWithInitialValue(): int {
     //     }
     //     return new Number(a.valueOf() + b.valueOf() + arr[index].valueOf());
     // }
-    // let arrEmpty = new Array<Number>;
-    // let initialValue = new Number(0);
-    // let res = arrEmpty.reduce(fn, initialValue);
+    // FIXME let arrEmpty = new Array<Number>;
+    // FIXME let initialValue = new Number(0);
+    // FIXME let res = arrEmpty.reduce(fn, initialValue);
     // if (res.valueOf() != initialValue.valueOf()) { return fail; }
-    // let arr = new Array<Number>;
+    // FIXME let arr = new Array<Number>;
     // for(let i: int = 0; i < d.length; ++i) {
-    //     arr.push(d[i]);
+    // FIXME     arr.push(d[i]);
     // }
-    // initialValue = -arr[0];
-    // res = arr.reduce(fn, initialValue);
+    // FIXME initialValue = -arr[0];
+    // FIXME res = arr.reduce(fn, initialValue);
     // if (res.valueOf() != 996) { return fail; }
     // if (res.valueOf() ==  -1) { return fail; }
     // return success;
@@ -504,95 +525,96 @@ function reduceRightFuncArg4ReadonlyArrayWithInitialValue(): int {
 function forEachFuncArg3ReadonlyArray(): int {
     return success;
     //NOTE (ikorobkov): uncomment when ReadonlyArray will be supported
-    // let s = new String;
+    // FIXME let s = new String;
     // let fn = (a: Number, index: number, arr: ReadonlyArray<Number>): void => {
     //     if (index < 0 && index >= arr.length) {
     //         s = "";
     //     } else {
-    //         let tmp = new Number(arr[index].valueOf() + a.valueOf());
-    //         s += tmp.toString() + ",";
+    // FIXME         let tmp = new Number(arr[index].valueOf() + a.valueOf());
+    // FIXME         s += tmp.toString() + ",";
     //     }
     // }
-    // let arr = new Array<Number>;
+    // FIXME let arr = new Array<Number>;
     // for(let i: int = 0; i < d.length; ++i) {
-    //     arr.push(d[i]);
+    // FIXME     arr.push(d[i]);
     // }
-    // arr.forEach(fn);
+    // FIXME arr.forEach(fn);
     // if (s != "20,-2,474,-10,296,130,6,68,0,24,") { return fail; }
     // return success;
 }
 
 function flatMapFuncArg3(): int {
-    let s = "Not implemented. No implementation of flat method in Array";
+    let s = 'Not implemented. No implementation of flat method in Array';
     return success;
 }
 
 function flatMapFuncArg2(): int {
-    let s = "Not implemented. No implementation of flat method in Array";
+    let s = 'Not implemented. No implementation of flat method in Array';
     return success;
 }
 
 function flatMapFuncArg1(): int {
-    let s = "Not implemented. No implementation of flat method in Array";
+    let s = 'Not implemented. No implementation of flat method in Array';
     return success;
 }
 
 // NOTE (ikorobkov): below commented types could be used for future test for testing of Array.flat method
-// type UT0 = Array<(Number)>;
-// type UT1 = Array<(Number|UT0)>;
-// type UT2 = Array<(Number|UT1)>;
-// type UT3 = Array<(Number|UT2)>;
+// FIXME type UT0 = Array<(Number)>;
+// FIXME type UT1 = Array<(Number|UT0)>;
+// FIXME type UT2 = Array<(Number|UT1)>;
+// FIXME type UT3 = Array<(Number|UT2)>;
 
 function flat(): int {
-    let s = "Not implemented. No implementation of flat method in Array";
+    let s = 'Not implemented. No implementation of flat method in Array';
     return success;
     //NOTE (ikorobkov): draft ideas for future test of method Array.flat are presented below:
-    // const small: UT0 = new UT0();
-    // small.push(333);
-    // small.push(444);
-    // const big: UT1 = new UT1();
-    // big.push(111);
-    // big.push(small);
-    // const small:   UT0 = [333, 444];
-    // const big:     UT1 = [111, small];
-    // const veryBig: UT2 = [0, big];
-    // const veryVeryBig: UT3 = [-1, veryBig];
-    // let arr = new Array<UT3>(veryVeryBig);
-    // let arr2 = arr1.flat();
-    // console.log(arr2);
-    // console.log(arr2 instanceof Array);
-    // console.log("[0]: " + (arr2[0] instanceof Array) + " " + typeof arr2[0]);
-    // console.log("[1]: " + (arr2[1] instanceof Array) + " " + typeof arr2[0]);
-    // console.log("[2]: " + (arr2[2] instanceof Array) + " " + typeof arr2[0]);
-    // console.log("[3]: " + (arr2[3] instanceof Array) + " " + typeof arr2[0]);
+    // FIXME const small: UT0 = new UT0();
+    // FIXME small.push(333);
+    // FIXME small.push(444);
+    // FIXME const big: UT1 = new UT1();
+    // FIXME big.push(111);
+    // FIXME big.push(small);
+    // FIXME const small:   UT0 = [333, 444];
+    // FIXME const big:     UT1 = [111, small];
+    // FIXME const veryBig: UT2 = [0, big];
+    // FIXME const veryVeryBig: UT3 = [-1, veryBig];
+    // FIXME let arr = new Array<UT3>(veryVeryBig);
+    // FIXME let arr2 = arr1.flat();
+    // FIXME console.log(arr2);
+    // FIXME console.log(arr2 instanceof Array);
+    // FIXME console.log("[0]: " + (arr2[0] instanceof Array) + " " + typeof arr2[0]);
+    // FIXME console.log("[1]: " + (arr2[1] instanceof Array) + " " + typeof arr2[0]);
+    // FIXME console.log("[2]: " + (arr2[2] instanceof Array) + " " + typeof arr2[0]);
+    // FIXME console.log("[3]: " + (arr2[3] instanceof Array) + " " + typeof arr2[0]);
     // return success;
 }
 
 function flatDepth(): int {
-    let s = "Not implemented. No implementation of flat in Array";
+    let s = 'Not implemented. No implementation of flat in Array';
     return success
 }
 
 function toLocaleString(): int {
-    let s = "Not implemented. No implementation of toLocaleString in Array";
+    let s = 'Not implemented. No implementation of toLocaleString in Array';
     return success;
 }
 
 function toLocaleStringObject(): int {
-    let s = "Not implemented. No implementation of toLocaleString in Array";
+    let s = 'Not implemented. No implementation of toLocaleString in Array';
     return success;
 }
 
 function toLocaleStringObjectOption(): int {
-    let s = "Not implemented. No implementation of toLocaleString in Array";
+    let s = 'Not implemented. No implementation of toLocaleString in Array';
     return success;
 }
 
 function check(result: int, message: String): int {
-    if(result == 0) {
+    if (result == 0) {
       return 0;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return 1;
 }
 
@@ -600,14 +622,16 @@ function check(fn: () => int, message: String): int {
     let result: int = 0;
     try {
         result = fn();
-    } catch(e) {
-        console.println("FAILED: " + message + " => Error catched: " + e);
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: ' + message + ' => Error catched: ' + e);
         return 1;
     }
 
-    if(result == success) {
+    if (result == success) {
       return 0;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return 1;
 }

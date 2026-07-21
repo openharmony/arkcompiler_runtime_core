@@ -103,7 +103,7 @@ function testBigUint64ArraySetWithEmptyArrayAndOffset(): void {
 
 function main(): int {
 	const suite = new arktest.ArkTestsuite('TypedArraySetArrayOffset')
-	suite.addTest(fullTestName("Int8Array"), testInt8ArraySetWithEmptyArrayAndOffset)
+	suite.addTest(fullTestName('Int8Array'), testInt8ArraySetWithEmptyArrayAndOffset)
 	suite.addTest(fullTestName('Uint8Array'), testUint8ArraySetWithEmptyArrayAndOffset)
 	suite.addTest(fullTestName('Int16Array'), testInt16ArraySetWithEmptyArrayAndOffset)
 	suite.addTest(fullTestName('Uint16Array'), testUint16ArraySetWithEmptyArrayAndOffset)

@@ -33,7 +33,7 @@ function testIsSafeIntegerLong(): void {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("isSafeInteger tests")
+    const suite = new arktest.ArkTestsuite('isSafeInteger tests')
     suite.addTest('isSafeInteger for int', testIsSafeIntegerInt);
     suite.addTest('isSafeInteger for long', testIsSafeIntegerLong);
     return suite.run()

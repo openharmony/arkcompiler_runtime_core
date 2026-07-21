@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (C) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License')
  * you may not use this file except in compliance with the License.
@@ -73,10 +73,10 @@ class Protected {
 }
 
 class Strings {
-    public a: string = ""
+    public a: string = ''
 
     public get b(): string {
-        return ""
+        return ''
     }
 }
 
@@ -121,8 +121,8 @@ interface Interface2 {
 }
 
 class Impl1 implements Interface1 {
-    a: int;
-    c: int;
+    public a: int;
+    public c: int;
     
     constructor() {
         this.a = 0;
@@ -141,8 +141,8 @@ class Impl1 implements Interface1 {
 }
 
 class Impl2 implements Interface2 {
-    b: int;
-    c: int;
+    public b: int;
+    public c: int;
     
     constructor() {
         this.b = 0;
@@ -161,9 +161,9 @@ class Impl2 implements Interface2 {
 }
 
 class Impl12 implements Interface1, Interface2 {
-    a: int;
-    b: int;
-    c: int;
+    public a: int;
+    public b: int;
+    public c: int;
     
     constructor() {
         this.a = 0;
@@ -188,8 +188,8 @@ function check(cls: Class, names: Set<String>) {
     let getters = reflect.getInstanceGettersRecursive(cls)
     arktest.assertEQ(getters.length, names.size)
     for (let getter of getters) {
-        arktest.assertTrue(getter.isGetter(), getter.getName() + " is not getter")
-        arktest.assertTrue(names.has(getter.getName().substring(6)), cls.getName() + " has not " + getter.getName())
+        arktest.assertTrue(getter.isGetter(), getter.getName() + ' is not getter')
+        arktest.assertTrue(names.has(getter.getName().substring(6)), cls.getName() + ' has not ' + getter.getName())
     }
 }
 
@@ -198,13 +198,13 @@ function testBasic() {
     check(simple, new Set<String>([]))
 
     let withGetters = Class.from<WithGetters>()
-    check(withGetters, new Set<String>(["b"]))
+    check(withGetters, new Set<String>(['b']))
 
     let withSetters = Class.from<WithSetters>()
     check(withSetters, new Set<String>([]))
 
     let withGettersAndSetters = Class.from<WithGettersAndSetters>()
-    check(withGettersAndSetters, new Set<String>(["b", "d"]))
+    check(withGettersAndSetters, new Set<String>(['b', 'd']))
 
     let empty = Class.from<Empty>()
     check(empty, new Set<String>([]))
@@ -216,43 +216,43 @@ function testBasic() {
     check(prot, new Set<String>([]))
 
     let str = Class.from<Strings>()
-    check(str, new Set<String>(["b"]))
+    check(str, new Set<String>(['b']))
 
     let undef = Class.from<Undefined>()
-    check(undef, new Set<String>(["b"]))
+    check(undef, new Set<String>(['b']))
 }
 
 function testDerived() {
     let der = Class.from<Derived>()
-    check(der, new Set<String>(["b", "d"]))
+    check(der, new Set<String>(['b', 'd']))
 
     let derder = Class.from<DerivedDerived>()
-    check(derder, new Set<String>(["b", "d", "f"]))
+    check(derder, new Set<String>(['b', 'd', 'f']))
 }
 
 function testInterfaces() {
     let int1 = Class.from<Interface1>()
-    check(int1, new Set<String>(["a", "getter1"]))
+    check(int1, new Set<String>(['a', 'getter1']))
 
     let int2 = Class.from<Interface2>()
-    check(int2, new Set<String>(["b", "getter2"]))
+    check(int2, new Set<String>(['b', 'getter2']))
 
     let impl1 = Class.from<Impl1>()
-    check(impl1, new Set<String>(["a", "getter1", "getterImpl1"]))
+    check(impl1, new Set<String>(['a', 'getter1', 'getterImpl1']))
 
     let impl2 = Class.from<Impl2>()
-    check(impl2, new Set<String>(["b", "getter2", "getterImpl2"]))
+    check(impl2, new Set<String>(['b', 'getter2', 'getterImpl2']))
 
     let impl12 = Class.from<Impl12>()
-    check(impl12, new Set<String>(["a", "getter1", "b", "getter2"]))
+    check(impl12, new Set<String>(['a', 'getter1', 'b', 'getter2']))
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("reflect.getInstanceGettersRecursive")
+    const suite = new arktest.ArkTestsuite('reflect.getInstanceGettersRecursive')
 
-    suite.addTest("Test getter names in basic classes", testBasic)
-    suite.addTest("Test field names in inherited classes", testDerived)
-    suite.addTest("Test field names within interfaces", testInterfaces)
+    suite.addTest('Test getter names in basic classes', testBasic)
+    suite.addTest('Test field names in inherited classes', testDerived)
+    suite.addTest('Test field names within interfaces', testInterfaces)
 
     return suite.run()
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,7 @@ function testBoolean(): void {
         if (method.getName().endsWith('BooleanTest') && !method.getName().startsWith('rest')) {
             let ret = method.invoke(method.isStatic() ? null : obj, [false]);
             arktest.assertFalse(ret as boolean);
-            ret = method.invoke(method.isStatic() ? null : obj, [new Boolean(true)]);
+            ret = method.invoke(method.isStatic() ? null : obj, [Boolean(true)]);
             arktest.assertTrue(ret as boolean);
         }
     }
@@ -68,7 +68,7 @@ function testRestBoolean(): void {
     let obj = new MethodTestClass();
     let ct = Type.from<MethodTestClass>() as ClassType;
     let num = ct.getMethodsNum();
-    let args = [true, new Boolean(true), false, new Boolean(false)];
+    let args = [true, Boolean(true), false, Boolean(false)];
     let result = 'truetruefalsefalse';
     for (let i = 0; i < num; i++) {
         let method = ct.getMethod(i);

@@ -46,7 +46,9 @@ function testInt16ArrayFromLiteral() {
 function testInt32ArrayFromLiteral() {
     const arrayIntsLiteral = [1, 2, 3, 4, 5, -1, -65536, -128, -129, 127, 128, -32768, 32767, -2147483648, 2147483647];
     const result = new Int32Array(arrayIntsLiteral);
-    const expected = Int32Array.from([1, 2, 3, 4, 5, -1, -65536, -128, -129, 127, 128, -32768, 32767, -2147483648, 2147483647]);
+    const expected = Int32Array.from(
+        [1, 2, 3, 4, 5, -1, -65536, -128, -129, 127, 128, -32768, 32767, -2147483648, 2147483647]
+    );
     
     assertArrayEquals(result, expected);
 }
@@ -62,7 +64,10 @@ function testUint16ArrayFromLiteral() {
 function testUint32ArrayFromLiteral() {
     const arrayIntsLiteral = [1, 2, 3, 4, 5, -1, -65536, -128, -129, 127, 128, -32768, 32767, -2147483648, 2147483647];
     const result = new Uint32Array(arrayIntsLiteral);
-    const expected = new Uint32Array([1, 2, 3, 4, 5, 4294967295, 4294901760, 4294967168, 4294967167, 127, 128, 4294934528, 32767, 2147483648, 2147483647]);
+    const expected = new Uint32Array(
+        [1, 2, 3, 4, 5, 4294967295, 4294901760, 4294967168, 4294967167, 127,
+         128, 4294934528, 32767, 2147483648, 2147483647]
+    );
     
     assertArrayEquals(result, expected);
 }
@@ -78,20 +83,21 @@ function testUint8ArrayFromLiteral() {
 function testUint8ClampedArrayFromLiteral() {
     const arrayIntsLiteral = [1, 2, 3, 4, 5, -1, -65536, -128, -129, 127, 128, 255, 256, 300, -32768];
     const result = new Uint8ClampedArray(arrayIntsLiteral);
-    // The constructor applies .toByte() first (which wraps the value to fit in a byte range: -128 to 127), and THEN applies clamping (which converts negative values to 0 and keeps positive values as-is up to 255).
+    // The constructor applies .toByte() first (which wraps the value to fit in a byte range: -128 to 127),
+    // and THEN applies clamping (which converts negative values to 0 and keeps positive values as-is up to 255).
     const expected = Uint8ClampedArray.from([1, 2, 3, 4, 5, 0, 0, 0, 127, 127, 0, 0, 0, 44, 0]);
     
     assertArrayEquals(result, expected);
 }
 
 function main() {
-    let myTestsuite = new arktest.ArkTestsuite("TypedArray Constructor from Array<int> Suite");
-    myTestsuite.addTest("testInt8ArrayFromLiteral", testInt8ArrayFromLiteral);
-    myTestsuite.addTest("testInt16ArrayFromLiteral", testInt16ArrayFromLiteral);
-    myTestsuite.addTest("testInt32ArrayFromLiteral", testInt32ArrayFromLiteral);
-    myTestsuite.addTest("testUint16ArrayFromLiteral", testUint16ArrayFromLiteral);
-    myTestsuite.addTest("testUint32ArrayFromLiteral", testUint32ArrayFromLiteral);
-    myTestsuite.addTest("testUint8ArrayFromLiteral", testUint8ArrayFromLiteral);
-    myTestsuite.addTest("testUint8ClampedArrayFromLiteral", testUint8ClampedArrayFromLiteral);
+    let myTestsuite = new arktest.ArkTestsuite('TypedArray Constructor from Array<int> Suite');
+    myTestsuite.addTest('testInt8ArrayFromLiteral', testInt8ArrayFromLiteral);
+    myTestsuite.addTest('testInt16ArrayFromLiteral', testInt16ArrayFromLiteral);
+    myTestsuite.addTest('testInt32ArrayFromLiteral', testInt32ArrayFromLiteral);
+    myTestsuite.addTest('testUint16ArrayFromLiteral', testUint16ArrayFromLiteral);
+    myTestsuite.addTest('testUint32ArrayFromLiteral', testUint32ArrayFromLiteral);
+    myTestsuite.addTest('testUint8ArrayFromLiteral', testUint8ArrayFromLiteral);
+    myTestsuite.addTest('testUint8ClampedArrayFromLiteral', testUint8ClampedArrayFromLiteral);
     myTestsuite.run();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,41 +14,39 @@
  */
 
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+let arrValues: string[] = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
 
-let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
+let concurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
-    let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetClearTest");
+    let concurrentSetTestsuite = new arktest.ArkTestsuite('ConcurrentSetClearTest');
     // Single Thread Test
-    ConcurrentSetTestsuite.addTest("ClearTestOne001", () =>
-    {
-        let ConcurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
-        let res = ConcurrentSetTest.size;
+    concurrentSetTestsuite.addTest('ClearTestOne001', () => {
+        let concurrentSetTest: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
+        let res = concurrentSetTest.size;
         arktest.assertEQ(res, 0);
-        for (let i: int = 0; i < 10 ; i++) {
-            ConcurrentSetTest.add(arrKeys[i]);
+        for (let i: int = 0; i < 10; i++) {
+            concurrentSetTest.add(arrKeys[i]);
         }
-        res = ConcurrentSetTest.size;
+        res = concurrentSetTest.size;
         arktest.assertEQ(res, 10);
-        ConcurrentSetTest.clear();
-        res = ConcurrentSetTest.size;
+        concurrentSetTest.clear();
+        res = concurrentSetTest.size;
         arktest.assertEQ(res, 0);
     });
-    ConcurrentSetTestsuite.addTest("ClearTestTwo001", () =>
-    {
-        let ConcurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
-        let res = ConcurrentSetTest.size;
+    concurrentSetTestsuite.addTest('ClearTestTwo001', () => {
+        let concurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
+        let res = concurrentSetTest.size;
         arktest.assertEQ(res, 0);
-        for (let i: int = 0; i < 10 ; i++) {
-            ConcurrentSetTest.add(arrValues[i]);
+        for (let i: int = 0; i < 10; i++) {
+            concurrentSetTest.add(arrValues[i]);
         }
-        res = ConcurrentSetTest.size;
+        res = concurrentSetTest.size;
         arktest.assertEQ(res, 10);
-        ConcurrentSetTest.clear();
-        res = ConcurrentSetTest.size;
+        concurrentSetTest.clear();
+        res = concurrentSetTest.size;
         arktest.assertEQ(res, 0);
     });
 
-    return ConcurrentSetTestsuite.run();
+    return concurrentSetTestsuite.run();
 }

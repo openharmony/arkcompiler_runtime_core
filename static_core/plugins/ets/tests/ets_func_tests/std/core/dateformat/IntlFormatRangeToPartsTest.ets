@@ -51,7 +51,7 @@ function testDtfRangeBasicDate(): void {
         timeZone: 'UTC'
     })
     let start = new Date(Date.UTC(2024, 0, 15)) // Jan 15, 2024
-    let end = new Date(Date.UTC(2024, 5, 20))   // Jun 20, 2024
+    let end = new Date(Date.UTC(2024, 5, 20)) // Jun 20, 2024
     let parts = dtf.formatRangeToParts(start, end)
 
     arktest.assertTrue(parts !== null, 'should produce parts')
@@ -83,8 +83,8 @@ function testDtfRangeTimeOnly(): void {
         minute: '2-digit',
         timeZone: 'UTC'
     })
-    let start = new Date(Date.UTC(2024, 0, 1, 9, 30, 0))  // 09:30
-    let end = new Date(Date.UTC(2024, 0, 1, 14, 45, 0))   // 14:45
+    let start = new Date(Date.UTC(2024, 0, 1, 9, 30, 0)) // 09:30
+    let end = new Date(Date.UTC(2024, 0, 1, 14, 45, 0)) // 14:45
     let parts = dtf.formatRangeToParts(start, end)
 
     arktest.assertTrue(parts !== null, 'should produce time range parts')
@@ -178,8 +178,8 @@ function testDtfRangeDifferentYears(): void {
         month: 'short',
         timeZone: 'UTC'
     })
-    let start = new Date(Date.UTC(2020, 0, 1))  // Jan 2020
-    let end = new Date(Date.UTC(2025, 6, 1))    // Jul 2025
+    let start = new Date(Date.UTC(2020, 0, 1)) // Jan 2020
+    let end = new Date(Date.UTC(2025, 6, 1)) // Jul 2025
     let parts = dtf.formatRangeToParts(start, end)
 
     arktest.assertTrue(parts !== null, 'different-year range should produce parts')
@@ -220,7 +220,7 @@ function testNfRangeBasic(): void {
 
 // Equal values collapse to approximatelySign + shared integer
 // "approximatelySign" is not in NumberFormatPartTypes union but IS emitted at runtime
-// by native code (IntlNumberFormat.cpp:256, UNUM_APPROXIMATELY_SIGN_FIELD) when equal
+// by native code (intl_number_format.cpp:256, UNUM_APPROXIMATELY_SIGN_FIELD) when equal
 // values are collapsed by ICU. Use assertNfRangePart (takes string parameter) to avoid
 // type-narrowing making an inline literal comparison always false.
 function testNfRangeSameValue(): void {
@@ -301,14 +301,14 @@ function testNfRangeAllSourcesValid(): void {
 function main(): int {
     const suite = new arktest.ArkTestsuite('formatRangeToParts tests')
 
-    // DateTimeFormat.formatRangeToParts
+    // testing DateTimeFormat.formatRangeToParts
     suite.addTest('DTF range basic date', testDtfRangeBasicDate)
     suite.addTest('DTF range time only', testDtfRangeTimeOnly)
     suite.addTest('DTF range same date', testDtfRangeSameDate)
     suite.addTest('DTF range source attribution', testDtfRangeSourceAttribution)
     suite.addTest('DTF range different years', testDtfRangeDifferentYears)
 
-    // NumberFormat.formatRangeToParts
+    // testing NumberFormat.formatRangeToParts
     suite.addTest('NF range basic', testNfRangeBasic)
     suite.addTest('NF range same value (collapse)', testNfRangeSameValue)
     suite.addTest('NF range negative', testNfRangeNegative)

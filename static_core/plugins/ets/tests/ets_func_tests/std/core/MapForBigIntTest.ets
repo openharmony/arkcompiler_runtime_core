@@ -30,7 +30,7 @@ function testMapForBigInt1(): void {
 }
 
 function testMapForBigInt2(): void {
-    let map1: Map<BigInt, BigInt> = new Map<BigInt, BigInt>([[6666666n, 6666666n],[9999999n, 9999999n]])
+    let map1: Map<BigInt, BigInt> = new Map<BigInt, BigInt>([[6666666n, 6666666n], [9999999n, 9999999n]])
     arktest.assertTrue(map1.size === 2)
     map1.set(6666666n, 6666666n)
     let c: BigInt = new BigInt(6666666n)
@@ -75,12 +75,12 @@ function testSetForBigInt2(): void {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Map Set BigInt")
+    const suite = new arktest.ArkTestsuite('Map Set BigInt')
 
-    suite.addTest("Map use BigInt key1", testMapForBigInt1)
-    suite.addTest("Map use BigInt key2", testMapForBigInt2)
-    suite.addTest("Set use BigInt key1", testSetForBigInt1)
-    suite.addTest("Set use BigInt key2", testSetForBigInt2)
+    suite.addTest('Map use BigInt key1', testMapForBigInt1)
+    suite.addTest('Map use BigInt key2', testMapForBigInt2)
+    suite.addTest('Set use BigInt key1', testSetForBigInt1)
+    suite.addTest('Set use BigInt key2', testSetForBigInt2)
 
     return suite.run()
 }

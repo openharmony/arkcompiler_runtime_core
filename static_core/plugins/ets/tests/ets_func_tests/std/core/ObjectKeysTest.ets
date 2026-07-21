@@ -13,27 +13,27 @@
  * limitations under the License.
  */
 
-function ObjectKeysTestDate(): void {
+function objectKeysTestDate(): void {
     let date: Date = new Date()
     let keys: string[] = Object.keys(date)
     arktest.assertTrue(keys.length === 0, 'Object.keys should return 0 keys for Date')
 }
 
 class A {
-    a: string = 'hello'
+    public a: string = 'hello'
     private b: string = 'world'
     protected c: string = 'arkts'
 }
 
-function ObjectKeysTestObject(): void {
+function objectKeysTestObject(): void {
     let a = new A()
     let entries = Object.entries(a)
     arktest.assertTrue(entries.length === 1, 'Object.keys should return 1 key for Object')
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Object.keys tests")
-    suite.addTest('Object.keys for Date', ObjectKeysTestDate);
-    suite.addTest('Object.keys for Object', ObjectKeysTestObject);
+    const suite = new arktest.ArkTestsuite('Object.keys tests')
+    suite.addTest('Object.keys for Date', objectKeysTestDate);
+    suite.addTest('Object.keys for Object', objectKeysTestObject);
     return suite.run()
 }

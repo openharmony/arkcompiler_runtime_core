@@ -14,8 +14,9 @@
  */
 
 const fixedArraySource: FixedArray<number> = [NaN, Infinity, -Infinity, -2147483649, 2147483648];
-const arraySource: Array<number> = [NaN, Infinity, -Infinity, -2147483649, 2147483648];
-const arrayLikeSource: ArrayLike<Number> | ArrayBuffer = Array.of<number>(NaN, Infinity, -Infinity, -2147483649, 2147483648);
+const arraySource: number[] = [NaN, Infinity, -Infinity, -2147483649, 2147483648];
+const arrayLikeSource: ArrayLike<Number> | ArrayBuffer = Array.of<number>(NaN, Infinity, -Infinity, -2147483649,
+    2147483648);
 const result1: FixedArray<int> = [0, 0, 0, -1, 0];
 const result2: FixedArray<int> = [0, 0, 0, 2147483647, -2147483648];
 const result3: FixedArray<int> = [0, 0, 0, 255, 0];
@@ -167,7 +168,7 @@ function testUint32Array(): void {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("TypedArray and TypedUArray number2int");
+    const suite = new arktest.ArkTestsuite('TypedArray and TypedUArray number2int');
     suite.addTest('Int8Array test', testInt8Array);
     suite.addTest('Int16Array test', testInt16Array);
     suite.addTest('Int32Array test', testInt32Array);

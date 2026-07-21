@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,35 +14,49 @@
  */
 
 function testResolvedOptionsRetrieval1(): void {
-    const locale = "en-US"
-    const opts: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }
+    const locale = 'en-US'
+    const opts: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'UTC'
+    }
     const formatter = new Intl.DateTimeFormat(locale, opts)
     const resolvedOpts = formatter.resolvedOptions()
 
     arktest.assertEQ(resolvedOpts.locale, locale)
-    arktest.assertEQ(resolvedOpts.calendar, "gregory")
-    arktest.assertEQ(resolvedOpts.numberingSystem, "latn")
+    arktest.assertEQ(resolvedOpts.calendar, 'gregory')
+    arktest.assertEQ(resolvedOpts.numberingSystem, 'latn')
     arktest.assertEQ(resolvedOpts.timeZone, opts.timeZone)
-    arktest.assertEQ(resolvedOpts.hourCycle, "h12")
+    arktest.assertEQ(resolvedOpts.hourCycle, 'h12')
     arktest.assertEQ(resolvedOpts.hour12, true)
 }
 
 function testResolvedOptionsRetrieval2(): void {
-    const locale = "am-ET-u-ca-ethioaa"
-    const opts: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }
+    const locale = 'am-ET-u-ca-ethioaa'
+    const opts: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'UTC'
+    }
     const formatter = new Intl.DateTimeFormat(locale, opts)
     const resolvedOpts = formatter.resolvedOptions()
 
     arktest.assertEQ(resolvedOpts.locale, locale)
-    arktest.assertEQ(resolvedOpts.calendar, "ethioaa")
-    arktest.assertEQ(resolvedOpts.numberingSystem, "latn")
+    arktest.assertEQ(resolvedOpts.calendar, 'ethioaa')
+    arktest.assertEQ(resolvedOpts.numberingSystem, 'latn')
     arktest.assertEQ(resolvedOpts.timeZone, opts.timeZone)
-    arktest.assertEQ(resolvedOpts.hourCycle, "h12")
+    arktest.assertEQ(resolvedOpts.hourCycle, 'h12')
     arktest.assertEQ(resolvedOpts.hour12, true)
 }
 
 function testSupportedLocalesOfStringArray(): void {
-    const requestedLocales = ["en-US-u-hc-h23", "zh-CN", "foo", "en-US"]
+    const requestedLocales = ['en-US-u-hc-h23', 'zh-CN', 'foo', 'en-US']
     const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf(requestedLocales)
 
     arktest.assertEQ(supportedLocales.length, 3)
@@ -52,7 +66,7 @@ function testSupportedLocalesOfStringArray(): void {
 }
 
 function testSupportedLocalesOfString(): void {
-    const requestedLocale = "en-US-u-hc-h23"
+    const requestedLocale = 'en-US-u-hc-h23'
     const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf(requestedLocale)
 
     arktest.assertEQ(supportedLocales.length, 1)
@@ -60,7 +74,7 @@ function testSupportedLocalesOfString(): void {
 }
 
 function testSupportedLocalesOfLocaleArray(): void {
-    const requestedLocales = [new Intl.Locale("en-US-u-hc-h23"), new Intl.Locale("foo"), new Intl.Locale("zh-CN")]
+    const requestedLocales = [new Intl.Locale('en-US-u-hc-h23'), new Intl.Locale('foo'), new Intl.Locale('zh-CN')]
     const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf(requestedLocales)
 
     arktest.assertEQ(supportedLocales.length, 2)
@@ -69,7 +83,7 @@ function testSupportedLocalesOfLocaleArray(): void {
 }
 
 function testSupportedLocalesOfLocale(): void {
-    const requestedLocale = new Intl.Locale("en-US-u-hc-h23")
+    const requestedLocale = new Intl.Locale('en-US-u-hc-h23')
     const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf(requestedLocale)
 
     arktest.assertEQ(supportedLocales.length, 1)
@@ -77,12 +91,12 @@ function testSupportedLocalesOfLocale(): void {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Intl.DateTimeFormat")
-    suite.addTest("resolved options retrieval", testResolvedOptionsRetrieval1)
-    suite.addTest("resolved options retrieval", testResolvedOptionsRetrieval2)
-    suite.addTest("supportedLocalesOf(string[])", testSupportedLocalesOfStringArray)
-    suite.addTest("supportedLocalesOf(string)", testSupportedLocalesOfString)
-    suite.addTest("supportedLocalesOf(Locale[])", testSupportedLocalesOfLocaleArray)
-    suite.addTest("supportedLocalesOf(Locale)", testSupportedLocalesOfLocale)
+    const suite = new arktest.ArkTestsuite('Intl.DateTimeFormat')
+    suite.addTest('resolved options retrieval', testResolvedOptionsRetrieval1)
+    suite.addTest('resolved options retrieval', testResolvedOptionsRetrieval2)
+    suite.addTest('supportedLocalesOf(string[])', testSupportedLocalesOfStringArray)
+    suite.addTest('supportedLocalesOf(string)', testSupportedLocalesOfString)
+    suite.addTest('supportedLocalesOf(Locale[])', testSupportedLocalesOfLocaleArray)
+    suite.addTest('supportedLocalesOf(Locale)', testSupportedLocalesOfLocale)
     return suite.run()
 }

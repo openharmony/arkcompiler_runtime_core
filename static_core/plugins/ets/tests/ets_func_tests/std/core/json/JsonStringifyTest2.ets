@@ -14,30 +14,30 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("JSON.stringify")
+    const suite = new arktest.ArkTestsuite('JSON.stringify')
 
-    suite.addTest("Stringify Date with negative number in constructor", stringifyNegativeDate)
-    suite.addTest("Stringify object literal - simple cases", stringifyObjectLiteralSimpleCases)
-    suite.addTest("Stringify object literal - corner cases", stringifyObjectLiteralCornerCases)
+    suite.addTest('Stringify Date with negative number in constructor', stringifyNegativeDate)
+    suite.addTest('Stringify object literal - simple cases', stringifyObjectLiteralSimpleCases)
+    suite.addTest('Stringify object literal - corner cases', stringifyObjectLiteralCornerCases)
 
     // Typed array tests
-    suite.addTest("Stringify typed arrays", testStringifyTypedArray1);
-    suite.addTest("Stringify typed arrays", testStringifyTypedArray2);
-    suite.addTest("Stringify typed arrays", testStringifyTypedArray3);
-    suite.addTest("Stringify typed arrays", testStringifyTypedArray4);
-    suite.addTest("Stringify typed arrays", testStringifyTypedArray5);
-    suite.addTest("Stringify typed arrays", testStringifyTypedArray6);
-    suite.addTest("Stringify typed arrays", testStringifyTypedArray7);
-    suite.addTest("Stringify typed arrays", testStringifyTypedArray8);
-    suite.addTest("Stringify typed arrays", testStringifyTypedArray9);
-    suite.addTest("Stringify typed arrays", testStringifyTypedArray10);
-    suite.addTest("Stringify typed arrays", testStringifyTypedArray11);
-    suite.addTest("Stringify typed arrays", testStringifyTypedArray12);
-    suite.addTest("Stringify Interface", testStringifyInterface01);
-    suite.addTest("Stringify Interface", testStringifyInterface02);
-    suite.addTest("Stringify Interface", testStringifyInterface03);
-    suite.addTest("Stringify Interface", testStringifyInterface04);
-    suite.addTest("Stringify Interface", testStringifyInterface05);
+    suite.addTest('Stringify typed arrays', testStringifyTypedArray1);
+    suite.addTest('Stringify typed arrays', testStringifyTypedArray2);
+    suite.addTest('Stringify typed arrays', testStringifyTypedArray3);
+    suite.addTest('Stringify typed arrays', testStringifyTypedArray4);
+    suite.addTest('Stringify typed arrays', testStringifyTypedArray5);
+    suite.addTest('Stringify typed arrays', testStringifyTypedArray6);
+    suite.addTest('Stringify typed arrays', testStringifyTypedArray7);
+    suite.addTest('Stringify typed arrays', testStringifyTypedArray8);
+    suite.addTest('Stringify typed arrays', testStringifyTypedArray9);
+    suite.addTest('Stringify typed arrays', testStringifyTypedArray10);
+    suite.addTest('Stringify typed arrays', testStringifyTypedArray11);
+    suite.addTest('Stringify typed arrays', testStringifyTypedArray12);
+    suite.addTest('Stringify Interface', testStringifyInterface01);
+    suite.addTest('Stringify Interface', testStringifyInterface02);
+    suite.addTest('Stringify Interface', testStringifyInterface03);
+    suite.addTest('Stringify Interface', testStringifyInterface04);
+    suite.addTest('Stringify Interface', testStringifyInterface05);
 
     // DataView and ArrayBuffer tests
     suite.addTest('Stringify DataView', testStringifyDataView);
@@ -47,22 +47,22 @@ function main(): int {
     suite.addTest('Stringify RegExp', testStringifyRegExp);
 
     // Circular reference tests
-    suite.addTest("Stringify array circular reference to self", testStringifyArrayCircularSelf);
-    suite.addTest("Stringify array circular reference to each other", testStringifyArrayCircularEachOther);
-    suite.addTest("Stringify object circular reference to self", testStringifyObjectCircularSelf);
-    suite.addTest("Stringify object circular reference to each other", testStringifyObjectCircularEachOther);
-    suite.addTest("Stringify deeply nested circular reference", testStringifyDeeplyNestedCircular);
+    suite.addTest('Stringify array circular reference to self', testStringifyArrayCircularSelf);
+    suite.addTest('Stringify array circular reference to each other', testStringifyArrayCircularEachOther);
+    suite.addTest('Stringify object circular reference to self', testStringifyObjectCircularSelf);
+    suite.addTest('Stringify object circular reference to each other', testStringifyObjectCircularEachOther);
+    suite.addTest('Stringify deeply nested circular reference', testStringifyDeeplyNestedCircular);
 
     return suite.run()
 }
 
 function stringifyNegativeDate() {
     let d = new Date(-271822)
-    arktest.assertEQ(JSON.stringify(d), "\"1969-12-31T23:55:28.178Z\"")
+    arktest.assertEQ(JSON.stringify(d), '\"1969-12-31T23:55:28.178Z\"')
 }
 
 class TestClass {
-    value: string;
+    public value: string;
     constructor(v: string) { this.value = v }
 }
 
@@ -73,16 +73,16 @@ interface TestInterface {
 }
 
 class TestInterfaceImpl implements TestInterface {
-    s: string = ""
-    d: double = 0
-    a: Any = undefined
+    public s: string = ''
+    public d: double = 0
+    public a: Any = undefined
 }
 
 function stringifyObjectLiteralSimpleCases(): void {
     let obj: TestInterface = {s: 'str', d: -1.5, a: undefined}
     arktest.assertTrue(reflect.isLiteralInitializedInterface(obj))
 
-    // Expect {"d":-1.5,"s":"str"}
+    //Comment: Expect {"d":-1.5,"s":"str"}
     let jsonStr = JSON.stringify(obj)
 
     let jsonObj = JSON.parseJsonElement(jsonStr)
@@ -90,7 +90,7 @@ function stringifyObjectLiteralSimpleCases(): void {
     arktest.assertEQ(jsonObj.getDouble('d'), -1.5)
 
     obj.a = new TestClass('val')
-    // Expect {"a":{"value":"val"},"d":-1.5,"s":"str"}
+    //Comment: Expect {"a":{"value":"val"},"d":-1.5,"s":"str"}
     jsonStr = JSON.stringify(obj)
     jsonObj = JSON.parseJsonElement(jsonStr)
     let innerObj = jsonObj.getElement('a')
@@ -99,7 +99,7 @@ function stringifyObjectLiteralSimpleCases(): void {
     arktest.assertEQ(jsonObj.getDouble('d'), -1.5)   
 
     let array: TestInterface[] = [{s: '', d: 0.0, a: undefined}, {s: 's', d: 1.5, a: new TestClass('val')}]
-    // Expect [{"d":0,"s":""},{"a":{"value":"val"},"d":1.5,"s":"s"}]
+    //Comment: Expect [{"d":0,"s":""},{"a":{"value":"val"},"d":1.5,"s":"s"}]
     jsonStr = JSON.stringify(array)
     let jsonArr = JSON.parseJsonElement(jsonStr).asArray()
     jsonObj = jsonArr[0]
@@ -112,7 +112,7 @@ function stringifyObjectLiteralSimpleCases(): void {
     arktest.assertEQ(jsonObj.getDouble('d'), 1.5)
 
     let fixedArray: FixedArray<TestInterface> = [{s: '', d: 0.0, a: undefined}, {s: 's', d: 1.5, a: new TestClass('val')}]
-    // Expect [{"d":0,"s":""},{"a":{"value":"val"},"d":1.5,"s":"s"}]
+    //Comment: Expect [{"d":0,"s":""},{"a":{"value":"val"},"d":1.5,"s":"s"}]
     jsonStr = JSON.stringify(fixedArray)
     jsonArr = JSON.parseJsonElement(jsonStr).asArray()
     jsonObj = jsonArr[0]
@@ -126,8 +126,9 @@ function stringifyObjectLiteralSimpleCases(): void {
 
 
     let record: Record<string, TestInterface[]> = new Record<string, TestInterface[]>()
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
     record['filler'] = array
-    // Expect {"filler":[{"d":0,"s":""},{"a":{"value":"val"},"d":-1.5,"s":"str"}]}
+    //Comment: Expect {"filler":[{"d":0,"s":""},{"a":{"value":"val"},"d":-1.5,"s":"str"}]}
     jsonStr = JSON.stringify(record)
     jsonObj = JSON.parseJsonElement(jsonStr)
     jsonArr = jsonObj.getArray('filler')
@@ -146,7 +147,7 @@ function stringifyObjectLiteralCornerCases(): void {
     let objLit: TestInterface = {s: 'str', d: -1.5, a: testObj}
     arktest.assertTrue(reflect.isLiteralInitializedInterface(objLit))
 
-    // Expect {"a":{"value":"val"},"d":-1.5,"s":"str"}
+    //FIXME: Expect {"a":{"value":"val"},"d":-1.5,"s":"str"}
     let jsonStr = JSON.stringify(objLit)
     let jsonObj = JSON.parseJsonElement(jsonStr)
     let innerObj = jsonObj.getElement('a')
@@ -155,14 +156,14 @@ function stringifyObjectLiteralCornerCases(): void {
     arktest.assertEQ(jsonObj.getDouble('d'), -1.5)
 
     // Check that replacer is applied
-    // Expect {"a":123,"d":-1.5,"s":"str"}
+    //Comment: Expect {"a":123,"d":-1.5,"s":"str"}
     jsonStr = JSON.stringify(objLit, (key: String, value: Any): Any => { return (key == 'a') ? 123 : value })
     jsonObj = JSON.parseJsonElement(jsonStr)
     arktest.assertEQ(jsonObj.getInteger('a'), 123)
     arktest.assertEQ(jsonObj.getString('s'), 'str')
     arktest.assertEQ(jsonObj.getDouble('d'), -1.5)
 
-    // Expect {"s":"str"}
+    //Comment: Expect {"s":"str"}
     jsonStr = JSON.stringify(objLit, ['s'])
     jsonObj = JSON.parseJsonElement(jsonStr)
     arktest.assertEQ(jsonObj.tryGetElement('d'), undefined)
@@ -247,20 +248,20 @@ function testStringifyTypedArray1(): void {
     };
     let jsonStr = JSON.stringify(data)
     let jsonElement = JSON.parseJsonElement(jsonStr)
-    arktest.assertEQ(jsonElement.getInteger("id"),  1);
-    arktest.assertEQ(jsonElement.getElement("values").getInteger("0"),  10);
+    arktest.assertEQ(jsonElement.getInteger('id'), 1);
+    arktest.assertEQ(jsonElement.getElement('values').getInteger('0'), 10);
 }
 
 function testStringifyTypedArray2(): void {
     let buffer = new Int8Array([-10]);
     let data: GeneratedObjectLiteralInterface_2 = {
-        name: "test",
+        name: 'test',
         buffer: buffer
     };
     let jsonStr = JSON.stringify(data)
     let jsonElement = JSON.parseJsonElement(jsonStr)
-    arktest.assertEQ(jsonElement.getString("name"),  "test");
-    arktest.assertEQ(jsonElement.getElement("buffer").getInteger("0"),  -10);
+    arktest.assertEQ(jsonElement.getString('name'), 'test');
+    arktest.assertEQ(jsonElement.getElement('buffer').getInteger('0'), -10);
 }
 
 function testStringifyTypedArray3(): void {
@@ -271,8 +272,8 @@ function testStringifyTypedArray3(): void {
     };
     let jsonStr = JSON.stringify(data)
     let jsonElement = JSON.parseJsonElement(jsonStr)
-    arktest.assertEQ(jsonElement.getInteger("count"),  5);
-    arktest.assertEQ(jsonElement.getElement("data").getInteger("0"),  255);
+    arktest.assertEQ(jsonElement.getInteger('count'), 5);
+    arktest.assertEQ(jsonElement.getElement('data').getInteger('0'), 255);
 }
 
 function testStringifyTypedArray4(): void {
@@ -283,8 +284,8 @@ function testStringifyTypedArray4(): void {
     };
     let jsonStr = JSON.stringify(data)
     let jsonElement = JSON.parseJsonElement(jsonStr)
-    arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
-    arktest.assertEQ(jsonElement.getElement("values").getInteger("0"),  1000);
+    arktest.assertEQ(jsonElement.getBoolean('flags'), true);
+    arktest.assertEQ(jsonElement.getElement('values').getInteger('0'), 1000);
 }
 
 function testStringifyTypedArray5(): void {
@@ -295,8 +296,8 @@ function testStringifyTypedArray5(): void {
     };
     let jsonStr = JSON.stringify(data)
     let jsonElement = JSON.parseJsonElement(jsonStr)
-    arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
-    arktest.assertEQ(jsonElement.getElement("values").getDouble("0"),  1.0);
+    arktest.assertEQ(jsonElement.getBoolean('flags'), true);
+    arktest.assertEQ(jsonElement.getElement('values').getDouble('0'), 1.0);
 }
 
 function testStringifyTypedArray6(): void {
@@ -307,20 +308,20 @@ function testStringifyTypedArray6(): void {
     };
     let jsonStr = JSON.stringify(data)
     let jsonElement = JSON.parseJsonElement(jsonStr)
-    arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
-    arktest.assertEQ(jsonElement.getElement("values").getDouble("0"),  3.14159);
+    arktest.assertEQ(jsonElement.getBoolean('flags'), true);
+    arktest.assertEQ(jsonElement.getElement('values').getDouble('0'), 3.14159);
 }
 
 function testStringifyTypedArray7(): void {
     let buffer = new Uint16Array([0]);
     let data: GeneratedObjectLiteralInterface_7 = {
-        name: "test",
+        name: 'test',
         buffer: buffer
     };
     let jsonStr = JSON.stringify(data)
     let jsonElement = JSON.parseJsonElement(jsonStr)
-    arktest.assertEQ(jsonElement.getString("name"),  "test");
-    arktest.assertEQ(jsonElement.getElement("buffer").getInteger("0"),  0);
+    arktest.assertEQ(jsonElement.getString('name'), 'test');
+    arktest.assertEQ(jsonElement.getElement('buffer').getInteger('0'), 0);
 }
 
 function testStringifyTypedArray8(): void {
@@ -332,8 +333,8 @@ function testStringifyTypedArray8(): void {
     let jsonStr = JSON.stringify(data)
 
     let jsonElement = JSON.parseJsonElement(jsonStr)
-    arktest.assertEQ(jsonElement.getInteger("count"),  5);
-    arktest.assertEQ(jsonElement.getElement("data").getInteger("0"),  255);
+    arktest.assertEQ(jsonElement.getInteger('count'), 5);
+    arktest.assertEQ(jsonElement.getElement('data').getInteger('0'), 255);
 }
 
 function testStringifyTypedArray9(): void {
@@ -344,8 +345,8 @@ function testStringifyTypedArray9(): void {
     };
     let jsonStr = JSON.stringify(data)
     let jsonElement = JSON.parseJsonElement(jsonStr)
-    arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
-    arktest.assertEQ(jsonElement.getElement("values").getInteger("0"),  1);
+    arktest.assertEQ(jsonElement.getBoolean('flags'), true);
+    arktest.assertEQ(jsonElement.getElement('values').getInteger('0'), 1);
 }
 
 function testStringifyTypedArray10(): void {
@@ -356,8 +357,8 @@ function testStringifyTypedArray10(): void {
     };
     let jsonStr = JSON.stringify(data)
     let jsonElement = JSON.parseJsonElement(jsonStr)
-    arktest.assertEQ(jsonElement.getBoolean("flags"),  false);
-    arktest.assertEQ(jsonElement.getElement("values").getInteger("0"),  200000);
+    arktest.assertEQ(jsonElement.getBoolean('flags'), false);
+    arktest.assertEQ(jsonElement.getElement('values').getInteger('0'), 200000);
 }
 
 function testStringifyTypedArray11(): void {
@@ -368,8 +369,8 @@ function testStringifyTypedArray11(): void {
     };
     let jsonStr = JSON.stringify(data)
     let jsonElement = JSON.parseJsonElement(jsonStr)
-    arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
-    arktest.assertEQ(jsonElement.getElement("values").getInteger("0"),  100000);
+    arktest.assertEQ(jsonElement.getBoolean('flags'), true);
+    arktest.assertEQ(jsonElement.getElement('values').getInteger('0'), 100000);
 }
 function checkArray(): void {
     
@@ -390,8 +391,8 @@ function testStringifyTypedArray12(): void {
     };
     let jsonStr = JSON.stringify(data)
     let jsonElement = JSON.parseJsonElement(jsonStr)
-    arktest.assertEQ(jsonElement.getBoolean("flags"),  true);
-    arktest.assertEQ(jsonElement.getArray("values")[0].getInteger("num1"), 1);
+    arktest.assertEQ(jsonElement.getBoolean('flags'), true);
+    arktest.assertEQ(jsonElement.getArray('values')[0].getInteger('num1'), 1);
 }
 
 interface I1 {
@@ -409,7 +410,7 @@ interface I3 {
 }
 
 class A1 implements I1 {
-    str1: string = '1'
+    public str1: string = '1'
 }
 function testStringifyInterface01(): void {
     let str = JSON.stringify(new A1)
@@ -418,8 +419,8 @@ function testStringifyInterface01(): void {
 }
 
 class B1 implements I2 {
-    str1: string = 'str'
-    num1: int = 10
+    public str1: string = 'str'
+    public num1: int = 10
 }
 function testStringifyInterface02(): void {
     let str = JSON.stringify(new B1)
@@ -429,10 +430,10 @@ function testStringifyInterface02(): void {
 }
 
 class C2 implements I2, I3 {
-    str1: string = 'yes'
-    num1: int = 10
-    str2: string = 'no'
-    num2: int = 100
+    public str1: string = 'yes'
+    public num1: int = 10
+    public str2: string = 'no'
+    public num2: int = 100
 }
 function testStringifyInterface03(): void {
     let str = JSON.stringify(new C2)
@@ -444,7 +445,7 @@ function testStringifyInterface03(): void {
 }
 
 class D1 implements I1 {
-    str1: string = 'str'
+    public str1: string = 'str'
 }
 
 class D2 extends D1 {
@@ -457,12 +458,12 @@ function testStringifyInterface04(): void {
 }
 
 class E1 implements I1 {
-    str1: string = 'str'
+    public str1: string = 'str'
 }
 
 class E2 extends E1 implements I3{
-    str2: string = 'yes'
-    num2: int = 1
+    public str2: string = 'yes'
+    public num2: int = 1
 }
 function testStringifyInterface05(): void {
     let str = JSON.stringify(new E2)
@@ -490,14 +491,14 @@ function testStringifyRegExp(): void {
 }
 
 function testStringifyArrayCircularSelf(): void {
-    const arr: Object[] = Array.create<Object>(1, new Object())
+    const arr: Object[] = Array.create<Object>(1, {})
     arr[0] = arr
     arktest.expectThrow(() => { JSON.stringify(arr) }, (e: Error) => e instanceof TypeError)
 }
 
 function testStringifyArrayCircularEachOther(): void {
-    const arr1: Object[] = Array.create<Object>(1, new Object())
-    const arr2: Object[] = Array.create<Object>(1, new Object())
+    const arr1: Object[] = Array.create<Object>(1, {})
+    const arr2: Object[] = Array.create<Object>(1, {})
     arr1[0] = arr2
     arr2[0] = arr1
     arktest.expectThrow(() => { JSON.stringify(arr1) }, (e: Error) => e instanceof TypeError)
@@ -505,15 +506,18 @@ function testStringifyArrayCircularEachOther(): void {
 
 function testStringifyObjectCircularSelf(): void {
     const obj: Record<string, Object> = new Record<string, Object>()
-    obj["self"] = obj
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    obj['self'] = obj
     arktest.expectThrow(() => { JSON.stringify(obj) }, (e: Error) => e instanceof TypeError)
 }
 
 function testStringifyObjectCircularEachOther(): void {
     const obj1: Record<string, Object> = new Record<string, Object>()
     const obj2: Record<string, Object> = new Record<string, Object>()
-    obj1["ref"] = obj2
-    obj2["ref"] = obj1
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    obj1['ref'] = obj2
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    obj2['ref'] = obj1
     arktest.expectThrow(() => { JSON.stringify(obj1) }, (e: Error) => e instanceof TypeError)
 }
 
@@ -521,8 +525,11 @@ function testStringifyDeeplyNestedCircular(): void {
     const level1: Record<string, Object> = new Record<string, Object>()
     const level2: Record<string, Object> = new Record<string, Object>()
     const level3: Record<string, Object> = new Record<string, Object>()
-    level1["child"] = level2
-    level2["nested"] = level3
-    level3["circular"] = level2
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    level1['child'] = level2
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    level2['nested'] = level3
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    level3['circular'] = level2
     arktest.expectThrow(() => { JSON.stringify(level1) }, (e: Error) => e instanceof TypeError)
 }

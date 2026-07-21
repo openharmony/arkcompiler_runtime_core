@@ -19,7 +19,7 @@ const RESULT_FAILURE = 1
 function main(): int {
     let testsFailed = 0
 
-    testsFailed += runTest(testArrayBufferDataView, "ArrayBufferView methods")
+    testsFailed += runTest(testArrayBufferDataView, 'ArrayBufferView methods')
 
     return testsFailed == 0 ? RESULT_SUCCESS : RESULT_FAILURE
 }
@@ -29,9 +29,9 @@ function testArrayBufferDataView(): int {
 
     let bufferView: ArrayBufferView = new DataView(buffer, 4, 12)
 
-    arktest.assertEQ(buffer, bufferView.buffer, "ArrayBufferView.buffer returned completely different buffer instance")
-    arktest.assertEQ(12, bufferView.byteLength, "ArrayBufferView.byteLength")
-    arktest.assertEQ(4, bufferView.byteOffset, "ArrayBufferView.byteOffset")
+    arktest.assertEQ(buffer, bufferView.buffer, 'ArrayBufferView.buffer returned completely different buffer instance')
+    arktest.assertEQ(12, bufferView.byteLength, 'ArrayBufferView.byteLength')
+    arktest.assertEQ(4, bufferView.byteOffset, 'ArrayBufferView.byteOffset')
 
     return RESULT_SUCCESS
 }
@@ -40,15 +40,22 @@ function runTest(test: () => int, message: String) {
   try {
     const testResult = test()
 
-    if (testResult == RESULT_SUCCESS) console.println("PASSED: " + message)
-    else console.println("FAILED: " + message);
+    if (testResult == RESULT_SUCCESS) {
+      // CC-OFFNXT(G.AOD.03) current test suite code style
+      console.println('PASSED: ' + message)
+    } else {
+      // CC-OFFNXT(G.AOD.03) current test suite code style
+      console.println('FAILED: ' + message)
+    }
 
     return testResult
   } catch (e) {
     if (e instanceof AssertionError) {
       const error = e as AssertionError
+      // CC-OFFNXT(G.AOD.03) current test suite code style
       console.println(`FAILED: '${message}' with error: ${error.name}(${error.message})`)
     } else {
+      // CC-OFFNXT(G.AOD.03) current test suite code style
       console.println(`FAILED '${message}' with error ` + e)
     }
     return RESULT_FAILURE

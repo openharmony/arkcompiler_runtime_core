@@ -15,18 +15,19 @@
 
 type CHMap = containers.ConcurrentHashMap<int, int>;
 
-function addLaunch<T> (arr: Array<Job<T>>, func: ()=>T): void {
+function addLaunch<T>(arr: Array<Job<T>>, func: ()=>T): void {
 	arr.push(launch(func));
 }
 
-function awaitAll <T> (arr: Array<Job<T>>): Array<T> {
+function awaitAll<T>(arr: Array<Job<T>>): Array<T> {
 	let res: T[] = [];
-	for (let i = 0; i < arr.length; ++ i)
+	for (let i = 0; i < arr.length; ++ i) {
 		res.push(arr[i].Await());
+    }
 	return res;
 }
 
-function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
+function sumArrInto(to: FixedArray<int>, from: FixedArray<int>): void {
 	arktest.assertEQ(to.length, from.length);
 	for (let i = 0; i < to.length; ++ i) {
 		to[i] += from[i];
@@ -34,8 +35,9 @@ function sumArrInto (to: FixedArray<int>, from: FixedArray<int>): void {
 }
 
 function assertEQAll(array: FixedArray<int>, value: int): void {
-	for (let i=0; i < array.length; ++ i)
+	for (let i = 0; i < array.length; ++ i) {
 		arktest.assertEQ(array[i], value)
+	}
 }
 
 function testConcurrentClearAndSet() {
@@ -44,8 +46,9 @@ function testConcurrentClearAndSet() {
 	let SET_COUNT = 100;
 
 	let setF = ()=>{
-		for (let i = 0; i < SET_COUNT; ++ i)
+		for (let i = 0; i < SET_COUNT; ++ i) {
 			map.set(i, i);
+		}
 	}
 
 	let setJobs: Job<void>[] = [];
@@ -65,14 +68,16 @@ function testConcurrentClearAndGet() {
 	let JOB_COUNT = 10;
 	let SET_COUNT = 100;
 
-	for (let i = 0; i < SET_COUNT; ++ i)
+	for (let i = 0; i < SET_COUNT; ++ i) {
 		map.set(i, i);
+	}
 
 	let getF = ()=>{
 		for (let i = 0; i < SET_COUNT; ++ i) {
 			let val = map.get(i)
-			if (val != undefined)
+			if (val != undefined) {
 				arktest.assertEQ(val, i);
+			}
 		}
 	}
 
@@ -91,14 +96,16 @@ function testConcurrentClearAndRemove() {
 	let JOB_COUNT = 10;
 	let SET_COUNT = 100;
 
-	for (let i = 0; i < SET_COUNT; ++ i)
+	for (let i = 0; i < SET_COUNT; ++ i) {
 		map.set(i, i);
+	}
 
 	let rmF = ()=>{
 		for (let i = 0; i < SET_COUNT; ++ i) {
 			let val = map.remove(i)
-			if (val != undefined)
+			if (val != undefined) {
 				arktest.assertEQ(val, i);
+			}
 		}
 	}
 
@@ -133,8 +140,9 @@ function testConcurrentSizeAndSR1() {
 	}
 	let sizeJob = launch(sizeF);
 	let srJobs: Job<void>[] = [];
-	for (let i = 0; i < JOB_COUNT; ++ i)
+	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(srJobs, srF);
+    }
 	awaitAll(srJobs);
 	running = false;
 	sizeJob.Await();
@@ -161,18 +169,19 @@ function testConcurrentSizeAndSRI() {
 	}
 	let sizeJob = launch(sizeF);
 	let srJobs: Job<void>[] = [];
-	for (let i = 0; i < JOB_COUNT; ++ i)
+	for (let i = 0; i < JOB_COUNT; ++ i) {
 		addLaunch(srJobs, srF);
+    }
 	awaitAll(srJobs);
 	running = false;
 	sizeJob.Await();
 }
 
 function main(): int {
-    let CHMTestSuitecase  = new arktest.ArkTestsuite("ConcurrentHashMapTest")
-	CHMTestSuitecase.addTest("testConcurrentClearAndSet", testConcurrentClearAndSet);
-	CHMTestSuitecase.addTest("testConcurrentClearAndGet", testConcurrentClearAndGet);
-	CHMTestSuitecase.addTest("testConcurrentClearAndRemove", testConcurrentClearAndRemove);
+    let chmTestSuitecase = new arktest.ArkTestsuite('ConcurrentHashMapTest')
+	chmTestSuitecase.addTest('testConcurrentClearAndSet', testConcurrentClearAndSet);
+	chmTestSuitecase.addTest('testConcurrentClearAndGet', testConcurrentClearAndGet);
+	chmTestSuitecase.addTest('testConcurrentClearAndRemove', testConcurrentClearAndRemove);
 
-    return CHMTestSuitecase.run();
+    return chmTestSuitecase.run();
 }

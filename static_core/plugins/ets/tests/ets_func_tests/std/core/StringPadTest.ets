@@ -21,21 +21,21 @@ function main(): int {
 }
 
 class TestData {
-   static readonly str = 'abc';
-   static readonly padend_length = 5;
-   static readonly padstart_length = 4;
-   static readonly expected = 'abc'
+   public static readonly str = 'abc';
+   public static readonly padendLength = 5;
+   public static readonly padstartLength = 4;
+   public static readonly expected = 'abc'
 
 }
 
 function testStringPadEnd() {
    let str = TestData.str;
-   let a = str.padEnd(TestData.padend_length, '')
+   let a = str.padEnd(TestData.padendLength, '')
    arktest.assertEQ(TestData.expected, a, `Expected: "${TestData.expected}", Actual: "${a}"`);
 }
 
 function testStringPadStart() {
    let str = TestData.str;
-   let a = str.padStart(TestData.padstart_length, '')
+   let a = str.padStart(TestData.padstartLength, '')
    arktest.assertEQ(TestData.expected, a, `Expected: "${TestData.expected}", Actual: "${a}"`);
 }

@@ -14,25 +14,26 @@
  */
 
 const success : int = 0;
-const fail    : int = 1;
+const fail : int = 1;
 
 function main(): int {
     let failures: int = 0;
-    failures += check((): int => { return everyFuncArg3ArrayNumber() }, "everyFuncArg3ArrayNumber");
-    failures += check((): int => { return everyFuncArg2() }, "everyFuncArg2");
-    failures += check((): int => { return everyFuncArg1() }, "everyFuncArg1");
-    failures += check((): int => { return someFuncArg2() }, "someFuncArg2");
-    failures += check((): int => { return someFuncArg1() }, "someFuncArg1");
-    failures += check((): int => { return filterFuncArg3ArrayNumber() }, "filterFuncArg3ArrayNumber");
-    failures += check((): int => { return filterFuncArg2() }, "filterFuncArg2");
-    failures += check((): int => { return filterFuncArg1() }, "filterFuncArg1");
-    failures += check((): int => { return reduceFuncArg4ArrayNumber() }, "reduceFuncArg4ArrayNumber");
-    failures += check((): int => { return reduceFuncArg3() }, "reduceFuncArg3");
-    failures += check((): int => { return reduceFuncArg2() }, "reduceFuncArg2");
-    failures += check((): int => { return reduceFuncArg4ArrayNumberWithInitialValue() }, "reduceFuncArg4ArrayNumberWithInitialValue");
-    failures += check((): int => { return reduceFuncArg3WithInitialValue() }, "reduceFuncArg3WithInitialValue");
-    failures += check((): int => { return reduceFuncArg2WithInitialValue() }, "reduceFuncArg2WithInitialValue");
-    return check(failures, "All tests run");
+    failures += check((): int => { return everyFuncArg3ArrayNumber() }, 'everyFuncArg3ArrayNumber');
+    failures += check((): int => { return everyFuncArg2() }, 'everyFuncArg2');
+    failures += check((): int => { return everyFuncArg1() }, 'everyFuncArg1');
+    failures += check((): int => { return someFuncArg2() }, 'someFuncArg2');
+    failures += check((): int => { return someFuncArg1() }, 'someFuncArg1');
+    failures += check((): int => { return filterFuncArg3ArrayNumber() }, 'filterFuncArg3ArrayNumber');
+    failures += check((): int => { return filterFuncArg2() }, 'filterFuncArg2');
+    failures += check((): int => { return filterFuncArg1() }, 'filterFuncArg1');
+    failures += check((): int => { return reduceFuncArg4ArrayNumber() }, 'reduceFuncArg4ArrayNumber');
+    failures += check((): int => { return reduceFuncArg3() }, 'reduceFuncArg3');
+    failures += check((): int => { return reduceFuncArg2() }, 'reduceFuncArg2');
+    failures += check((): int => { return reduceFuncArg4ArrayNumberWithInitialValue() },
+        'reduceFuncArg4ArrayNumberWithInitialValue');
+    failures += check((): int => { return reduceFuncArg3WithInitialValue() }, 'reduceFuncArg3WithInitialValue');
+    failures += check((): int => { return reduceFuncArg2WithInitialValue() }, 'reduceFuncArg2WithInitialValue');
+    return check(failures, 'All tests run');
 }
 
 
@@ -59,7 +60,7 @@ function everyFuncArg3ArrayNumber(): int {
         return arr.at(index)! == elem && elem < 238;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         if (arr.every(fnTrue) == false) { return fail; }
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -79,7 +80,7 @@ function everyFuncArg2(): int {
         return index >= 0 && elem < 238;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         if (arr.every(fnTrue) == false) { return fail; }
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -99,7 +100,7 @@ function everyFuncArg1(): int {
         return elem < 238;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         if (arr.every(fnTrue) == false) { return fail; }
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -119,7 +120,7 @@ function someFuncArg2(): int {
         return index >= 0 && v < -4;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         if (arr.some(fnTrue) == true) { return fail; }
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -139,7 +140,7 @@ function someFuncArg1(): int {
         return v < -4;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         if (arr.some(fnTrue) == true) { return fail; }
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -159,7 +160,7 @@ function filterFuncArg3ArrayNumber(): int {
         return (arr.at(index)! == v) && v > -1000;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         if (arr.filter(fnTrue).length != 0) { return fail; }
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -183,7 +184,7 @@ function filterFuncArg2(): int {
         return index >= 0 && v > -1000;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         if (arr.filter(fnTrue).length != 0) { return fail; }
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -207,7 +208,7 @@ function filterFuncArg1(): int {
         return v > -1000;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         if (arr.filter(fnTrue).length != 0) { return fail; }
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
@@ -231,15 +232,15 @@ function reduceFuncArg4ArrayNumber(): int {
         if (index < 0 || index >= arr.length) {
             return -1;
         }
-        return new Number(a + b + (arr.at(index) as Number));
+        return Number(a + b + (arr.at(index) as Number));
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let hasError: boolean = false;
         try {
             let res = arr.reduce(fn);
             return fail;
-        } catch(e) {
+        } catch (e) {
             hasError = true;
         }
         if (hasError == false) { return fail; }
@@ -249,7 +250,7 @@ function reduceFuncArg4ArrayNumber(): int {
         }
         let res = arr.reduce(fn);
         if (res != 996) { return fail; }
-        if (res ==  -1) { return fail; }
+        if (res == -1) { return fail; }
         return success;
     })
 }
@@ -262,12 +263,12 @@ function reduceFuncArg3(): int {
         return a + b;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let hasError: boolean = false;
         try {
             let res = arr.reduce(fn);
             return fail;
-        } catch(e) {
+        } catch (e) {
             hasError = true;
         }
         if (hasError == false) { return fail; }
@@ -277,7 +278,7 @@ function reduceFuncArg3(): int {
         }
         let res = arr.reduce(fn);
         if (res != 503) { return fail; }
-        if (res ==  -1) { return fail; }
+        if (res == -1) { return fail; }
         return success;
     })
 }
@@ -287,12 +288,12 @@ function reduceFuncArg2(): int {
         return a + b;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let hasError: boolean = false;
         try {
             let res = arr.reduce(fn);
             return fail;
-        } catch(e) {
+        } catch (e) {
             hasError = true;
         }
         if (hasError == false) { return fail; }
@@ -302,7 +303,7 @@ function reduceFuncArg2(): int {
         }
         let res = arr.reduce(fn);
         if (res != 503) { return fail; }
-        if (res ==  -1) { return fail; }
+        if (res == -1) { return fail; }
         return success;
     })
 }
@@ -315,7 +316,7 @@ function reduceFuncArg4ArrayNumberWithInitialValue(): int {
         return a + b + arr.at(index)!;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let initialValue = 0.0;
         let res = arr.reduce(fn, initialValue);
         if (res != initialValue) { return fail; }
@@ -326,7 +327,7 @@ function reduceFuncArg4ArrayNumberWithInitialValue(): int {
         initialValue = -arr.at(0)!;
         res = arr.reduce(fn, initialValue);
         if (res != 996) { return fail; }
-        if (res ==  -1) { return fail; }
+        if (res == -1) { return fail; }
         return success;
     })
 }
@@ -339,7 +340,7 @@ function reduceFuncArg3WithInitialValue(): int {
         return a + b;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let initialValue = 0.0;
         let res = arr.reduce(fn, initialValue);
         if (res != initialValue) { return fail; }
@@ -349,7 +350,7 @@ function reduceFuncArg3WithInitialValue(): int {
         }
         res = arr.reduce(fn, initialValue);
         if (res != 503) { return fail; }
-        if (res ==  -1) { return fail; }
+        if (res == -1) { return fail; }
         return success;
     })
 }
@@ -359,7 +360,7 @@ function reduceFuncArg2WithInitialValue(): int {
         return a + b;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let initialValue = 0.0;
         let res = arr.reduce(fn, initialValue);
         if (res != initialValue) { return fail; }
@@ -369,7 +370,7 @@ function reduceFuncArg2WithInitialValue(): int {
         }
         res = arr.reduce(fn, initialValue);
         if (res != 503) { return fail; }
-        if (res ==  -1) { return fail; }
+        if (res == -1) { return fail; }
         return success;
     })
 }
@@ -378,7 +379,8 @@ function check(result: int, message: String): int {
     if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }
 
@@ -386,13 +388,15 @@ function check(fn: () => int, message: String): int {
     let result: int = 0;
     try {
         result = fn();
-    } catch(e) {
-        console.println("FAILED: " + message + " => Error catched: " + e);
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: ' + message + ' => Error catched: ' + e);
         return 1;
     }
     if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }

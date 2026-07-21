@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,10 @@
  */
 
 function main() {
-    let myTestsuite = new arktest.ArkTestsuite("myTestsuite");
-    myTestsuite.addTest("testDecimal", testDecimal);
-    myTestsuite.addTest("testFullDigit", testFullDigit);
-    myTestsuite.addTest("testScientific", testScientific);
+    let myTestsuite = new arktest.ArkTestsuite('myTestsuite');
+    myTestsuite.addTest('testDecimal', testDecimal);
+    myTestsuite.addTest('testFullDigit', testFullDigit);
+    myTestsuite.addTest('testScientific', testScientific);
     myTestsuite.run();
 }
 
@@ -40,14 +40,14 @@ function testDecimal() {
     const str7 = num7.toPrecision(7);
     const str8 = num8.toPrecision(8);
 
-    arktest.assertEQ(str1, "0.1");
-    arktest.assertEQ(str2, "0.010");
-    arktest.assertEQ(str3, "0.00100");
-    arktest.assertEQ(str4, "0.0001000");
-    arktest.assertEQ(str5, "0.000010000");
-    arktest.assertEQ(str6, "0.00000100000");
-    arktest.assertEQ(str7, "1.000000e-7");
-    arktest.assertEQ(str8, "1.0000000e-8");
+    arktest.assertEQ(str1, '0.1');
+    arktest.assertEQ(str2, '0.010');
+    arktest.assertEQ(str3, '0.00100');
+    arktest.assertEQ(str4, '0.0001000');
+    arktest.assertEQ(str5, '0.000010000');
+    arktest.assertEQ(str6, '0.00000100000');
+    arktest.assertEQ(str7, '1.000000e-7');
+    arktest.assertEQ(str8, '1.0000000e-8');
 }
 
 function testFullDigit() {
@@ -69,14 +69,14 @@ function testFullDigit() {
     const str7 = num7.toPrecision(7);
     const str8 = num8.toPrecision(8);
 
-    arktest.assertEQ(str1, "1");
-    arktest.assertEQ(str2, "12");
-    arktest.assertEQ(str3, "123");
-    arktest.assertEQ(str4, "1234");
-    arktest.assertEQ(str5, "12345");
-    arktest.assertEQ(str6, "123456");
-    arktest.assertEQ(str7, "1234567");
-    arktest.assertEQ(str8, "12345678");
+    arktest.assertEQ(str1, '1');
+    arktest.assertEQ(str2, '12');
+    arktest.assertEQ(str3, '123');
+    arktest.assertEQ(str4, '1234');
+    arktest.assertEQ(str5, '12345');
+    arktest.assertEQ(str6, '123456');
+    arktest.assertEQ(str7, '1234567');
+    arktest.assertEQ(str8, '12345678');
 }
 
 function testScientific() {
@@ -95,17 +95,17 @@ function testScientific() {
     const str11 = num.toPrecision(11);
     const str12 = num.toPrecision(12);
 
-    arktest.assertEQ(str1, "1e+9");
-    arktest.assertEQ(str2, "1.2e+9");
-    arktest.assertEQ(str3, "1.23e+9");
-    arktest.assertEQ(str4, "1.235e+9");
-    arktest.assertEQ(str5, "1.2346e+9");
-    arktest.assertEQ(str6, "1.23457e+9");
-    arktest.assertEQ(str7, "1.234568e+9");
-    arktest.assertEQ(str8, "1.2345679e+9");
-    arktest.assertEQ(str9, "1.23456789e+9");
-    arktest.assertEQ(str10, "1234567890");
-    arktest.assertEQ(str11, "1234567890.0");
-    arktest.assertEQ(str12, "1234567890.00");
+    arktest.assertEQ(str1, '1e+9');
+    arktest.assertEQ(str2, '1.2e+9');
+    arktest.assertEQ(str3, '1.23e+9');
+    arktest.assertEQ(str4, '1.235e+9');
+    arktest.assertEQ(str5, '1.2346e+9');
+    arktest.assertEQ(str6, '1.23457e+9');
+    arktest.assertEQ(str7, '1.234568e+9');
+    arktest.assertEQ(str8, '1.2345679e+9');
+    arktest.assertEQ(str9, '1.23456789e+9');
+    arktest.assertEQ(str10, '1234567890');
+    arktest.assertEQ(str11, '1234567890.0');
+    arktest.assertEQ(str12, '1234567890.00');
 }
 

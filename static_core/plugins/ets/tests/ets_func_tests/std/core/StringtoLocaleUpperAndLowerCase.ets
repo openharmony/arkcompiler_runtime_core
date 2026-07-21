@@ -13,33 +13,33 @@
  * limitations under the License.
  */
 
-const input = ["hello", "HeLlO", "", "123!@#", "æøå", "ß"]
-const outputUpper = ["HELLO", "HELLO", "", "123!@#", "ÆØÅ", "SS"]
-const outputLower = ["hello", "hello", "", "123!@#", "æøå", "ß"]
+const input = ['hello', 'HeLlO', '', '123!@#', 'æøå', 'ß']
+const outputUpper = ['HELLO', 'HELLO', '', '123!@#', 'ÆØÅ', 'SS']
+const outputLower = ['hello', 'hello', '', '123!@#', 'æøå', 'ß']
 
 function testStringtoLocaleUpperCase() {
-    for (let i = 0;i < input.length;i++) {
+    for (let i = 0; i < input.length; i++) {
         arktest.assertEQ(input[i].toLocaleUpperCase(), outputUpper[i]);
-        arktest.assertEQ(input[i].toLocaleUpperCase("en-US"), outputUpper[i]);
-        arktest.assertEQ(input[i].toLocaleUpperCase(["en-US", "tr-TR"]), outputUpper[i]);
-        arktest.assertEQ(input[i].toLocaleUpperCase(["zh-CN", "tr-TR"]), outputUpper[i]);
-        arktest.assertEQ(input[i].toLocaleUpperCase(new Array<string>()), outputUpper[i]);
+        arktest.assertEQ(input[i].toLocaleUpperCase('en-US'), outputUpper[i]);
+        arktest.assertEQ(input[i].toLocaleUpperCase(['en-US', 'tr-TR']), outputUpper[i]);
+        arktest.assertEQ(input[i].toLocaleUpperCase(['zh-CN', 'tr-TR']), outputUpper[i]);
+        arktest.assertEQ(input[i].toLocaleUpperCase([]), outputUpper[i]);
     }
 }
 
 function testStringtoLocaleLowerCase() {
-    for (let i = 0;i < input.length;i++) {
+    for (let i = 0; i < input.length; i++) {
         arktest.assertEQ(input[i].toLocaleLowerCase(), outputLower[i]);
-        arktest.assertEQ(input[i].toLocaleLowerCase("en-US"), outputLower[i]);
-        arktest.assertEQ(input[i].toLocaleLowerCase(["en-US", "tr-TR"]), outputLower[i]);
-        arktest.assertEQ(input[i].toLocaleLowerCase(["zh-CN", "tr-TR"]), outputLower[i]);
-        arktest.assertEQ(input[i].toLocaleLowerCase(new Array<string>()), outputLower[i]);
+        arktest.assertEQ(input[i].toLocaleLowerCase('en-US'), outputLower[i]);
+        arktest.assertEQ(input[i].toLocaleLowerCase(['en-US', 'tr-TR']), outputLower[i]);
+        arktest.assertEQ(input[i].toLocaleLowerCase(['zh-CN', 'tr-TR']), outputLower[i]);
+        arktest.assertEQ(input[i].toLocaleLowerCase([]), outputLower[i]);
     }
 }
 
 function main(): int {
-   const suite = new arktest.ArkTestsuite("String.toLocaleUpperAndLowerCase");
-   suite.addTest("Test testStringtoLocaleUpperCase", testStringtoLocaleUpperCase);
-   suite.addTest("Test testStringtoLocaleLowerCase", testStringtoLocaleLowerCase);
+   const suite = new arktest.ArkTestsuite('String.toLocaleUpperAndLowerCase');
+   suite.addTest('Test testStringtoLocaleUpperCase', testStringtoLocaleUpperCase);
+   suite.addTest('Test testStringtoLocaleLowerCase', testStringtoLocaleLowerCase);
    return suite.run()
 }

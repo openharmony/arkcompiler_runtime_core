@@ -33,7 +33,7 @@ Array<String | undefined> → RegExpResultArray (isCorrect, endIndex, groups)
 | ETS | `std/core/RegExp.ets` | RegExp class, flags computation, native method declarations |
 | Intrinsic | `runtime/intrinsics/std_core_RegExp.cpp` | `StdCoreRegExpParse`: pattern validate + PCRE2 compile |
 | Intrinsic Registration | `runtime/ets_libbase_runtime.yaml` | Intrinsic binding for `parse()` |
-| ANI Registration | `native/core/regexp/RegExp.cpp` | `RegisterRegExpNativeMethods()` (7 methods, excluding parse) |
+| ANI Registration | `native/core/regexp/regexp.cpp` | `RegisterRegExpNativeMethods()` (7 methods, excluding parse) |
 | Dispatch | `native/core/regexp/regexp_executor.{h,cpp}` | `EtsRegExp`: compile/execute dispatch |
 | Execution | `native/core/regexp/regexp_8.{h,cpp}`, `regexp_16.{h,cpp}` | PCRE2 8-bit / 16-bit compile and match |
 | Shared | `native/core/regexp/regexp_common.{h,cpp}` | Input dispatch, zero-copy string access |

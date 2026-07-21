@@ -14,22 +14,25 @@
  */
 
 const success : int = 0;
-const fail    : int = 1;
+const fail : int = 1;
 
 function main(): int {
     let failures: int = 0;
-    failures += check((): int => { return reduceRightFuncArg4ArrayNumber() }, "reduceRightFuncArg4ArrayNumber");
-    failures += check((): int => { return reduceRightFuncArg3() }, "reduceRightFuncArg3");
-    failures += check((): int => { return reduceRightFuncArg2() }, "reduceRightFuncArg2");
-    failures += check((): int => { return reduceRightFuncArg4ArrayNumberWithInitialValue() }, "reduceRightFuncArg4ArrayNumberWithInitialValue");
-    failures += check((): int => { return reduceRightFuncArg3WithInitialValue() }, "reduceRightFuncArg3WithInitialValue");
-    failures += check((): int => { return reduceRightFuncArg2WithInitialValue() }, "reduceRightFuncArg2WithInitialValue");
-    failures += check((): int => { return forEachFuncArg3ArrayNumber() }, "forEachFuncArg3ArrayNumber");
-    failures += check((): int => { return forEachFuncArg2() }, "forEachFuncArg2");
-    failures += check((): int => { return forEachFuncArg1() }, "forEachFuncArg1");
-    failures += check((): int => { return sortFunc() }, "sortFunc");
-    failures += check((): int => { return toSortedFunc() }, "toSortedFunc");
-    return check(failures, "All tests run");
+    failures += check((): int => { return reduceRightFuncArg4ArrayNumber() }, 'reduceRightFuncArg4ArrayNumber');
+    failures += check((): int => { return reduceRightFuncArg3() }, 'reduceRightFuncArg3');
+    failures += check((): int => { return reduceRightFuncArg2() }, 'reduceRightFuncArg2');
+    failures += check((): int => { return reduceRightFuncArg4ArrayNumberWithInitialValue() },
+        'reduceRightFuncArg4ArrayNumberWithInitialValue');
+    failures += check((): int => { return reduceRightFuncArg3WithInitialValue() },
+        'reduceRightFuncArg3WithInitialValue');
+    failures += check((): int => { return reduceRightFuncArg2WithInitialValue() },
+        'reduceRightFuncArg2WithInitialValue');
+    failures += check((): int => { return forEachFuncArg3ArrayNumber() }, 'forEachFuncArg3ArrayNumber');
+    failures += check((): int => { return forEachFuncArg2() }, 'forEachFuncArg2');
+    failures += check((): int => { return forEachFuncArg1() }, 'forEachFuncArg1');
+    failures += check((): int => { return sortFunc() }, 'sortFunc');
+    failures += check((): int => { return toSortedFunc() }, 'toSortedFunc');
+    return check(failures, 'All tests run');
 }
 
 
@@ -59,12 +62,12 @@ function reduceRightFuncArg4ArrayNumber(): int {
         return a + b + arr.at(index)!;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let hasError: boolean = false;
         try {
             let res = arr.reduceRight(fn);
             return fail;
-        } catch(e) {
+        } catch (e) {
             hasError = true;
         }
         if (hasError == false) { return fail; }
@@ -74,7 +77,7 @@ function reduceRightFuncArg4ArrayNumber(): int {
         }
         let res = arr.reduceRight(fn);
         if (res != 994) { return fail; }
-        if (res ==  -1) { return fail; }
+        if (res == -1) { return fail; }
         return success;
     })
 }
@@ -87,12 +90,12 @@ function reduceRightFuncArg3(): int {
         return a + b;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let hasError: boolean = false;
         try {
             let res = arr.reduceRight(fn);
             return fail;
-        } catch(e) {
+        } catch (e) {
             hasError = true;
         }
         if (hasError == false) { return fail; }
@@ -102,7 +105,7 @@ function reduceRightFuncArg3(): int {
         }
         let res = arr.reduceRight(fn);
         if (res != 503) { return fail; }
-        if (res ==  -1) { return fail; }
+        if (res == -1) { return fail; }
         return success;
     })
 }
@@ -112,12 +115,12 @@ function reduceRightFuncArg2(): int {
         return a + b;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let hasError: boolean = false;
         try {
             let res = arr.reduceRight(fn);
             return fail;
-        } catch(e) {
+        } catch (e) {
             hasError = true;
         }
         if (hasError == false) { return fail; }
@@ -139,7 +142,7 @@ function reduceRightFuncArg4ArrayNumberWithInitialValue(): int {
         return a + b + arr.at(index)!;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let initialValue = 0.0;
         let res = arr.reduce(fn, initialValue);
         if (res != initialValue) { return fail; }
@@ -150,7 +153,7 @@ function reduceRightFuncArg4ArrayNumberWithInitialValue(): int {
         initialValue = -arr.at(0)!;
         res = arr.reduce(fn, initialValue);
         if (res != 996) { return fail; }
-        if (res ==  -1) { return fail; }
+        if (res == -1) { return fail; }
         return success;
     })
 }
@@ -163,7 +166,7 @@ function reduceRightFuncArg3WithInitialValue(): int {
         return a + b;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let initialValue = 0.0;
         let res = arr.reduce(fn, initialValue);
         if (res != initialValue) { return fail; }
@@ -174,7 +177,7 @@ function reduceRightFuncArg3WithInitialValue(): int {
         initialValue = -arr.at(0)!;
         res = arr.reduce(fn, initialValue);
         if (res != 493) { return fail; }
-        if (res ==  -1) { return fail; }
+        if (res == -1) { return fail; }
         return success;
     })
 }
@@ -184,7 +187,7 @@ function reduceRightFuncArg2WithInitialValue(): int {
         return a + b;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let initialValue = 0.0;
         let res = arr.reduce(fn, initialValue);
         if (res != initialValue) { return fail; }
@@ -200,14 +203,14 @@ function reduceRightFuncArg2WithInitialValue(): int {
 }
 
 function forEachFuncArg3ArrayNumber(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
-        let s = new String;
+    return check(() => [], (arr: Array<Number>) => {
+        let s = String();
         let fn = (a: number, index: number, arr: Array<Number>): void => {
             if (index < 0 && index >= arr.length) {
-                s = "";
+                s = '';
             } else {
                 let tmp = arr.at(index)! + a;
-                s += (tmp as Number).toString() + ",";
+                s += (tmp as Number).toString() + ',';
             }
         }
 
@@ -215,41 +218,41 @@ function forEachFuncArg3ArrayNumber(): int {
             arr.push(d[i]);
         }
         arr.forEach(fn);
-        if (s != "20,-2,474,-10,296,130,6,68,0,24,") { return fail; }
+        if (s != '20,-2,474,-10,296,130,6,68,0,24,') { return fail; }
         return success;
     })
 }
 
 function forEachFuncArg2(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
-        let s = new String;
+    return check(() => [], (arr: Array<Number>) => {
+        let s = String();
         let fn = (a: number, index: number): void => {
             if (index < 0) {
-                s = "";
+                s = '';
             } else {
-                s += (a as Number).toString() + ",";
+                s += (a as Number).toString() + ',';
             }
         }
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
         }
         arr.forEach(fn);
-        if (s != "10,-1,237,-5,148,65,3,34,0,12,") { return fail; }
+        if (s != '10,-1,237,-5,148,65,3,34,0,12,') { return fail; }
         return success;
     })
 }
 
 function forEachFuncArg1(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
-        let s = new String;
+    return check(() => [], (arr: Array<Number>) => {
+        let s = String();
         let fn = (a: number): void => {
-            s += (a as Number).toString() + ",";
+            s += (a as Number).toString() + ',';
         }
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
         }
         arr.forEach(fn);
-        if (s != "10,-1,237,-5,148,65,3,34,0,12,") { return fail; }
+        if (s != '10,-1,237,-5,148,65,3,34,0,12,') { return fail; }
         return success;
     })
 }
@@ -260,25 +263,25 @@ function sortFunc(): int {
         return res;
     }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let res0 = arr.sort(fn);
         if (res0.length > 0) { return fail; }
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
         }
         let res = arr.sort(fn);
-        if (res.length != arr.length)   { return fail; }
+        if (res.length != arr.length) { return fail; }
         for (let i: int = 0; i < res.length; ++i) {
             if (res.at(i) == undefined) { return fail; }
         }
-        if (res.at(0)! != -5)  { return fail; }
-        if (res.at(1)! != -1)  { return fail; }
-        if (res.at(2)! != -0)  { return fail; }
-        if (res.at(3)! != 3)   { return fail; }
-        if (res.at(4)! != 10)  { return fail; }
-        if (res.at(5)! != 12)  { return fail; }
-        if (res.at(6)! != 34)  { return fail; }
-        if (res.at(7)! != 65)  { return fail; }
+        if (res.at(0)! != -5) { return fail; }
+        if (res.at(1)! != -1) { return fail; }
+        if (res.at(2)! != -0) { return fail; }
+        if (res.at(3)! != 3) { return fail; }
+        if (res.at(4)! != 10) { return fail; }
+        if (res.at(5)! != 12) { return fail; }
+        if (res.at(6)! != 34) { return fail; }
+        if (res.at(7)! != 65) { return fail; }
         if (res.at(8)! != 148) { return fail; }
         if (res.at(9)! != 237) { return fail; }
         return success;
@@ -288,25 +291,25 @@ function sortFunc(): int {
 function toSortedFunc(): int {
     let fn = (a: number, b: number): number => { return a - b; }
 
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let res0 = arr.sort(fn);
         if (res0.length > 0) { return fail; }
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
         }
         let res = arr.toSorted(fn);
-        if (res.length != arr.length)   { return fail; }
+        if (res.length != arr.length) { return fail; }
         for (let i: int = 0; i < res.length; ++i) {
             if (res.at(i) == undefined) { return fail; }
         }
-        if (res.at(0)! != -5)  { return fail; }
-        if (res.at(1)! != -1)  { return fail; }
-        if (res.at(2)! != -0)  { return fail; }
-        if (res.at(3)! != 3)   { return fail; }
-        if (res.at(4)! != 10)  { return fail; }
-        if (res.at(5)! != 12)  { return fail; }
-        if (res.at(6)! != 34)  { return fail; }
-        if (res.at(7)! != 65)  { return fail; }
+        if (res.at(0)! != -5) { return fail; }
+        if (res.at(1)! != -1) { return fail; }
+        if (res.at(2)! != -0) { return fail; }
+        if (res.at(3)! != 3) { return fail; }
+        if (res.at(4)! != 10) { return fail; }
+        if (res.at(5)! != 12) { return fail; }
+        if (res.at(6)! != 34) { return fail; }
+        if (res.at(7)! != 65) { return fail; }
         if (res.at(8)! != 148) { return fail; }
         if (res.at(9)! != 237) { return fail; }
         return success;
@@ -317,7 +320,8 @@ function check(result: int, message: String): int {
     if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }
 
@@ -325,13 +329,15 @@ function check(fn: () => int, message: String): int {
     let result: int = 0;
     try {
         result = fn();
-    } catch(e) {
-        console.println("FAILED: " + message + " => Error catched: " + e);
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: ' + message + ' => Error catched: ' + e);
         return fail;
     }
     if (result == success) {
       return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }

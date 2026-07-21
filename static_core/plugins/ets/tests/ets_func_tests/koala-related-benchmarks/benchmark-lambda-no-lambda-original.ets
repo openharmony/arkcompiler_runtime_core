@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,26 +43,31 @@ function benchNoLambda() {
 let start: number = 0
 const N = 10000000
 
-function Benchmark() {
-  console.log("Starting benchmarks, N="+N)
+function benchmark() {
+  // CC-OFFNXT(G.AOD.03) for test purposes
+  console.log('Starting benchmarks, N=' + N)
   totalWorkload = 0
   totalCompute = 0
-  console.log("Starting lambda benchmark")
+  // CC-OFFNXT(G.AOD.03) for test purposes
+  console.log('Starting lambda benchmark')
   start = Date.now()
-  for (let i=0; i<N; i++) {
+  for (let i = 0; i < N; i++) {
     benchLambda()
   }
-  console.log("lambda time: " + (Date.now() - start).toString())
+  // CC-OFFNXT(G.AOD.03) for test purposes
+  console.log('lambda time: ' + (Date.now() - start).toString())
 
   totalWorkload = 0
   totalCompute = 0
-  console.log("Starting no-lambda benchmark")
+  // CC-OFFNXT(G.AOD.03) for test purposes
+  console.log('Starting no-lambda benchmark')
   start = Date.now()
-  for (let i=0; i<N; i++) {
+  for (let i = 0; i < N; i++) {
     benchNoLambda()
   }
-  console.log("no lambda time: " + (Date.now() - start).toString())
+  // CC-OFFNXT(G.AOD.03) for test purposes
+  console.log('no lambda time: ' + (Date.now() - start).toString())
 }
 
-Benchmark()
+benchmark()
 

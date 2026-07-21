@@ -22,7 +22,7 @@ function getIndexOfTestName(testCase: string): string {
 // not wrap to 255 (modulo 2^8) and falsely match a stored 255.
 function testIndexOfNegative(): void {
 	const arr = new Uint8ClampedArray([0, 1, 255]);
-	arktest.assertEQ(arr.indexOf(-1), -1);   // -1 must not match 255
+	arktest.assertEQ(arr.indexOf(-1), -1); // -1 must not match 255
 	arktest.assertEQ(arr.indexOf(-2), -1);
 	arktest.assertEQ(arr.indexOf(-255), -1);
 	arktest.assertEQ(arr.indexOf(-256), -1);
@@ -30,7 +30,7 @@ function testIndexOfNegative(): void {
 
 function testLastIndexOfNegative(): void {
 	const arr = new Uint8ClampedArray([0, 1, 255, 1]);
-	arktest.assertEQ(arr.lastIndexOf(-1), -1);   // lastIndexOf shares the same bug
+	arktest.assertEQ(arr.lastIndexOf(-1), -1); // lastIndexOf shares the same bug
 	arktest.assertEQ(arr.lastIndexOf(-2), -1);
 }
 

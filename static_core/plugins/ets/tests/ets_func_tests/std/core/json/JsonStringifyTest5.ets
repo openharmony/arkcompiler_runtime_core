@@ -107,9 +107,9 @@ interface StringAndNumberFields {
 }
 
 class PropertyListCandidate {
-    a: number
-    b: number
-    c: number
+    public a: number
+    public b: number
+    public c: number
 }
 
 interface SingleXNumberFields {
@@ -620,7 +620,8 @@ function wrapDbl() {
     const obj: SingleANumberFields = { a: 5 }
     const jsonStr = JSON.stringify(obj,
         (k: string, v: Any) => k === '' ? {
-            a: { a: (v as SingleANumberFields).a * 2 } as SingleANumberFields } as WrappedSingleANumberFields : v)
+            a: { a: (v as SingleANumberFields).a * 2 } as SingleANumberFields
+        } as WrappedSingleANumberFields : v)
     arktest.assertEQ(jsonStr, '{"a":{"a":10}}')
 }
 
@@ -790,7 +791,8 @@ function obj2Arr2() {
     const obj: SingleANumberFields = { a: 3 }
     const jsonStr = JSON.stringify(obj,
         (k: string, v: Any) => k === '' ? [{ a: (v as SingleANumberFields).a } as SingleANumberFields, {
-            a: (v as SingleANumberFields).a * 2 } as SingleANumberFields] : v)
+            a: (v as SingleANumberFields).a * 2
+        } as SingleANumberFields] : v)
     arktest.assertEQ(jsonStr, '[{"a":3},{"a":6}]')
 }
 
@@ -872,7 +874,8 @@ function arrFltFunc() {
 function nestMul3() {
     const obj: XNumberFields = { x: 4 }
     const jsonStr = JSON.stringify(obj, (k: string, v: Any) => k === '' ? {
-        a: { b: (v as XNumberFields).x * 3 } } as NestedABRootFields : v)
+        a: { b: (v as XNumberFields).x * 3 }
+    } as NestedABRootFields : v)
     arktest.assertEQ(jsonStr, '{"a":{"b":12}}')
 }
 

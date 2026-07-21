@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,9 @@ const testNum: int = 20;
 const stressNum: int = 100;
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueueRemainingCapacityTest");
+    let linkedBlockingQueueTestsuite = new arktest.ArkTestsuite('LinkedBlockingQueueRemainingCapacityTest');
 
-    LinkedBlockingQueueTestsuite.addTest("RemainingCapacityTest001", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('RemainingCapacityTest001', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(elementsNum);
         for (let i = 0; i < 5; i++) {
             arktest.assertEQ(queueInt.add(i), true);
@@ -33,8 +32,7 @@ function main(): int {
         arktest.assertEQ(queueInt.size, 6);
         arktest.assertEQ(queueInt.remainingCapacity(), 4);
     });
-    LinkedBlockingQueueTestsuite.addTest("RemainingCapacityTest006", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('RemainingCapacityTest006', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         for (let i = 0; i < 10; i++) {
             arktest.assertEQ(queueInt.remainingCapacity(), stressNum - i);
@@ -45,8 +43,7 @@ function main(): int {
         }
         arktest.assertEQ(queueInt.remainingCapacity(), stressNum - 20);
     });
-    LinkedBlockingQueueTestsuite.addTest("RemainingCapacityStressTest009", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('RemainingCapacityStressTest009', () => {
         let queueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
         let j: int = stressNum;
         for (let i = 0; i < stressNum; i++) {
@@ -57,5 +54,5 @@ function main(): int {
         arktest.assertEQ(queueInt.size, stressNum);
     });
 
-    return LinkedBlockingQueueTestsuite.run();
+    return linkedBlockingQueueTestsuite.run();
 }

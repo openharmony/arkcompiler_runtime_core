@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,17 +19,17 @@ function main(): void {
     s.set(2, 2)
     s.set(3, 3)
     s.set(1, 4)
-    arktest.assertEQ( s.size, 3, "size")
-    arktest.assertTrue( s.has(1), "has 1")
-    arktest.assertTrue( s.has(2), "has 2")
-    arktest.assertTrue( s.has(3), "has 3")
+    arktest.assertEQ( s.size, 3, 'size')
+    arktest.assertTrue( s.has(1), 'has 1')
+    arktest.assertTrue( s.has(2), 'has 2')
+    arktest.assertTrue( s.has(3), 'has 3')
     const it = s.values()
-    arktest.assertEQ( it.next().value!, 4, "it1")
-    arktest.assertEQ( it.next().value!, 2, "it2")
-    arktest.assertEQ( it.next().value!, 3, "it3")
+    arktest.assertEQ( it.next().value!, 4, 'it1')
+    arktest.assertEQ( it.next().value!, 2, 'it2')
+    arktest.assertEQ( it.next().value!, 3, 'it3')
 
     const kit = s.keys()
-    arktest.assertEQ( kit.next().value!, 1, "kit1")
-    arktest.assertEQ( kit.next().value!, 2, "kit2")
-    arktest.assertEQ( kit.next().value!, 3, "kit3")
+    arktest.assertEQ( kit.next().value!, 1, 'kit1')
+    arktest.assertEQ( kit.next().value!, 2, 'kit2')
+    arktest.assertEQ( kit.next().value!, 3, 'kit3')
 }

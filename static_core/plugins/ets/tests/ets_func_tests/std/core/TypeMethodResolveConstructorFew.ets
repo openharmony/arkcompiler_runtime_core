@@ -21,7 +21,7 @@ class A implements I {}
 class B implements J {}
 class C implements I, J {}
 
-const TestType = Type.of(new Test()) as ClassType
+const testType = Type.of(new Test()) as ClassType
 
 class Test {
     constructor() {}
@@ -38,17 +38,21 @@ class Test {
 function test(args: FixedArray<Any>, exp: int): int {
     called = -1
     try {
-        TestType.make(args)
+        testType.make(args)
     } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.println(e.toString())
         called = -1
     }
     if (called != exp) {
-        console.println("FAILED: " + exp + " got " + called)
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: ' + exp + ' got ' + called)
+        // CC-OFFNXT(G.AOD.03) current test suite code style
         console.println(args)
         return 1
     } else {
-        console.log("ok " + exp)
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.log('ok ' + exp)
     }
     return 0
 }
@@ -66,13 +70,14 @@ function main(): int {
 
     let threw = false
     try {
-        TestType.make(from(new C()))
+        testType.make(from(new C()))
     } catch (e) {
         threw = true
     }
     if (!threw) {
         f += 1
-        console.println("error not thrown")
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('error not thrown')
     }
     return f
 }

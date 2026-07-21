@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,9 @@ const testNum: int = 20;
 const stressNum: int = 100;
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueCapacityTest");
+    let arrayBlockingQueueTestsuite = new arktest.ArkTestsuite('ArrayBlockingQueueCapacityTest');
 
-    ArrayBlockingQueueTestsuite.addTest("CapacityTest001", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('CapacityTest001', () => {
         let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(elementsNum);
         for (let i = 0; i < 5; i++) {
             arktest.assertEQ(queueInt.add(i), true);
@@ -33,8 +32,7 @@ function main(): int {
         arktest.assertEQ(queueInt.size, 6);
         arktest.assertEQ(queueInt.capacity, elementsNum);
     });
-    ArrayBlockingQueueTestsuite.addTest("CapacityTest007", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('CapacityTest007', () => {
         let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(stressNum);
         for (let i = 0; i < 10; i++) {
             arktest.assertEQ(queueInt.capacity, stressNum);
@@ -45,8 +43,7 @@ function main(): int {
         }
         arktest.assertEQ(queueInt.capacity, stressNum);
     });
-    ArrayBlockingQueueTestsuite.addTest("GetCapacityStressTest008", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('GetCapacityStressTest008', () => {
         let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(stressNum);
         for (let i = 0; i < stressNum; i++) {
             queueInt.add(i);
@@ -55,5 +52,5 @@ function main(): int {
         arktest.assertEQ(queueInt.size, stressNum);
     });
 
-    return ArrayBlockingQueueTestsuite.run();
+    return arrayBlockingQueueTestsuite.run();
 }

@@ -14,32 +14,32 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Array API tests for SDK");
-    suite.addTest("Array shrinkTo with negative length ", testShrinkToNegLength);
-    suite.addTest("Array shrinkTo with normal length ", testShrinkToLength);
-    suite.addTest("Array shrinkTo with out length ", testShrinkToOutLength);
-    suite.addTest("Array shrinkTo with Int.MIN_VALUE", testShrinkToIntMinValue);
+    const suite = new arktest.ArkTestsuite('Array API tests for SDK');
+    suite.addTest('Array shrinkTo with negative length ', testShrinkToNegLength);
+    suite.addTest('Array shrinkTo with normal length ', testShrinkToLength);
+    suite.addTest('Array shrinkTo with out length ', testShrinkToOutLength);
+    suite.addTest('Array shrinkTo with Int.MIN_VALUE', testShrinkToIntMinValue);
     return suite.run();
 }
 
 class TestData {
-    static readonly src = Array.of<number>(1, 2, 3);
-    static readonly arrayLength1: int = -1;
-    static readonly expected1 = Array.from<number>(TestData.src);
-    static readonly arrayLength2: int = 2;
-    static readonly expected2 = TestData.src.slice(0, 2);
-    static readonly arrayLength3: int = 5;
-    static readonly expected3 = Array.from<number>(TestData.src);
-    static readonly arrayLength4: int = Int.MIN_VALUE
-    static readonly limit4: number = 10;
-    static readonly expected4 = new Array<number>;
+    public static readonly src = Array.of<number>(1, 2, 3);
+    public static readonly arrayLength1: int = -1;
+    public static readonly expected1 = Array.from<number>(TestData.src);
+    public static readonly arrayLength2: int = 2;
+    public static readonly expected2 = TestData.src.slice(0, 2);
+    public static readonly arrayLength3: int = 5;
+    public static readonly expected3 = Array.from<number>(TestData.src);
+    public static readonly arrayLength4: int = Int.MIN_VALUE
+    public static readonly limit4: number = 10;
+    public static readonly expected4: number[] = [];
 }
 
 function testShrinkToNegLength() {
     try {
         let a = Array.from<number>(TestData.src);
         a.shrinkTo(TestData.arrayLength1);
-    } catch(error) {
+    } catch (error) {
         arktest.assertEQ(error.toString(), 'RangeError: Parameter error.Invalid array length.')
     }
 }
@@ -48,14 +48,14 @@ function testShrinkToLength() {
     let a = Array.from<number>(TestData.src);
     a.shrinkTo(TestData.arrayLength2);
     let result: boolean = equaled(TestData.expected2, a);
-    arktest.assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected2);
+    arktest.assertTrue(result, 'Error. Got: ' + a + '. Expected: ' + TestData.expected2);
 }
 
 function testShrinkToOutLength() {
     let a = Array.from<number>(TestData.src);
     a.shrinkTo(TestData.arrayLength3);
     let result: boolean = equaled(TestData.expected3, a);
-    arktest.assertTrue(result, "Error. Got: " + a + ". Expected: " + TestData.expected3);
+    arktest.assertTrue(result, 'Error. Got: ' + a + '. Expected: ' + TestData.expected3);
 }
 
 function testShrinkToIntMinValue() {
@@ -63,13 +63,13 @@ function testShrinkToIntMinValue() {
     for (let i: int = 0; i < TestData.limit4; ++i) {
         try {
             a.shrinkTo(TestData.arrayLength4 + i);
-        } catch(error) {
+        } catch (error) {
             arktest.assertEQ( error.toString(), 'RangeError: Parameter error.Invalid array length.')
         }
     }
 }
 
-function equaled(arr1:  Array<number>, arr2:  Array<number>): boolean {
+function equaled(arr1: Array<number>, arr2: Array<number>): boolean {
     if (arr1.length != arr2.length) {
         return false;
     }

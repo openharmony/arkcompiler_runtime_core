@@ -13,28 +13,27 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
+import { launch } from 'std/concurrency'
 
 let flag: int = 0;
 let arrKeys: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-let arrValues: string[] = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+let arrValues: string[] = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
 
-let ConcurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
+let concurrentSetTestOne: containers.ConcurrentSet<number> = new containers.ConcurrentSet<number>();
 
 function main(): int {
-    let ConcurrentSetTestsuite = new arktest.ArkTestsuite("ConcurrentSetValuesTest");
+    let concurrentSetTestsuite = new arktest.ArkTestsuite('ConcurrentSetValuesTest');
     // Single Thread Test
-    ConcurrentSetTestsuite.addTest("ValuesTest001", () =>
-    {
-        let ConcurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
-        let res = ConcurrentSetTest.size;
+    concurrentSetTestsuite.addTest('ValuesTest001', () => {
+        let concurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
+        let res = concurrentSetTest.size;
         arktest.assertEQ(res, 0);
-        for (let i: int = 0; i < 10 ; i++) {
-            ConcurrentSetTest.add(arrValues[i]);
+        for (let i: int = 0; i < 10; i++) {
+            concurrentSetTest.add(arrValues[i]);
         }
-        res = ConcurrentSetTest.size;
+        res = concurrentSetTest.size;
         arktest.assertEQ(res, 10);
-        let iterValues: IterableIterator<string> = ConcurrentSetTest.values();
+        let iterValues: IterableIterator<string> = concurrentSetTest.values();
         flag = 0;
         for (let i: int = 0; i < 10; i++) {
             if (iterValues.next().value != arrValues[i]) {
@@ -44,25 +43,23 @@ function main(): int {
         arktest.assertEQ(flag, 0);
         arktest.assertEQ(iterValues.next().value, undefined);
     });
-    ConcurrentSetTestsuite.addTest("ValuesTest002", () =>
-    {
-        let ConcurrentSetTestNull: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
-        let res = ConcurrentSetTestNull.size;
+    concurrentSetTestsuite.addTest('ValuesTest002', () => {
+        let concurrentSetTestNull: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
+        let res = concurrentSetTestNull.size;
         arktest.assertEQ(res, 0);
-        let iterValue: IterableIterator<string> = ConcurrentSetTestNull.values();
+        let iterValue: IterableIterator<string> = concurrentSetTestNull.values();
         arktest.assertEQ(iterValue.next().value, undefined);
     });
-    ConcurrentSetTestsuite.addTest("$_iteratorTest001", () =>
-    {
-        let ConcurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
-        let res = ConcurrentSetTest.size;
+    concurrentSetTestsuite.addTest('$_iteratorTest001', () => {
+        let concurrentSetTest: containers.ConcurrentSet<string> = new containers.ConcurrentSet<string>();
+        let res = concurrentSetTest.size;
         arktest.assertEQ(res, 0);
-        for (let i: int = 0; i < 10 ; i++) {
-            ConcurrentSetTest.add(arrValues[i]);
+        for (let i: int = 0; i < 10; i++) {
+            concurrentSetTest.add(arrValues[i]);
         }
-        res = ConcurrentSetTest.size;
+        res = concurrentSetTest.size;
         arktest.assertEQ(res, 10);
-        let iterValues: IterableIterator<string> = ConcurrentSetTest.$_iterator();
+        let iterValues: IterableIterator<string> = concurrentSetTest.$_iterator();
         flag = 0;
         for (let i: int = 0; i < 10; i++) {
             if (iterValues.next().value != arrValues[i]) {
@@ -73,54 +70,50 @@ function main(): int {
         arktest.assertEQ(iterValues.next().value, undefined);
     });
     // Multiple Threads Test
-    ConcurrentSetTestsuite.addTest("Values&AddTest001", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestsuite.addTest('Values&AddTest001', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         addFront();
         let p1 = launch(addBack);
         let p2 = launch(valuesAll);
         p1.Await();
         p2.Await();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 10);
+        arktest.assertEQ(concurrentSetTestOne.size, 10);
     });
-    ConcurrentSetTestsuite.addTest("Values&DeteleTest001", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestsuite.addTest('Values&DeteleTest001', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         addAll();
         let p1 = launch(deleteAll);
         let p2 = launch(valuesAll);
         p1.Await();
         p2.Await();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
     });
-    ConcurrentSetTestsuite.addTest("Values&DeteleTest002", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestsuite.addTest('Values&DeteleTest002', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         addAll();
         deleteAll();
         valuesAll();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
     });
-    ConcurrentSetTestsuite.addTest("Values&ClearTest001", () =>
-    {
-        ConcurrentSetTestOne.clear();
-        arktest.assertEQ(ConcurrentSetTestOne.size, 0);
+    concurrentSetTestsuite.addTest('Values&ClearTest001', () => {
+        concurrentSetTestOne.clear();
+        arktest.assertEQ(concurrentSetTestOne.size, 0);
         addAll();
         let p1 = launch(valuesAll);
         let p2 = launch(clearTest);
         p1.Await();
         p2.Await();
-        arktest.assertTrue(ConcurrentSetTestOne.size < 11);
+        arktest.assertTrue(concurrentSetTestOne.size < 11);
     });
 
-    return ConcurrentSetTestsuite.run();
+    return concurrentSetTestsuite.run();
 }
 
 function valuesAll() {
-    let iterValues = ConcurrentSetTestOne.values();
+    let iterValues = concurrentSetTestOne.values();
     let j = 0;
     for (let i = 0; i < 10; i++) {
         if (iterValues.next().value == arrKeys[i]) {
@@ -131,28 +124,28 @@ function valuesAll() {
 
 function addFront() {
     for (let i: int = 0; i < 5; i++) {
-        ConcurrentSetTestOne.add(arrKeys[i]);
+        concurrentSetTestOne.add(arrKeys[i]);
     }
 }
 
 function addBack() {
     for (let i: int = 5; i < 10; i++) {
-        ConcurrentSetTestOne.add(arrKeys[i]);
+        concurrentSetTestOne.add(arrKeys[i]);
     }
 }
 
 function clearTest() {
-    ConcurrentSetTestOne.clear();
+    concurrentSetTestOne.clear();
 }
 
 function deleteAll() {
     for (let i: int = 0; i < 10; i++) {
-        ConcurrentSetTestOne.delete(i);
+        concurrentSetTestOne.delete(i);
     }
 }
 
 function addAll() {
-    for (let i: int = 0; i < 10 ; i++) {
-        ConcurrentSetTestOne.add(arrKeys[i]);
+    for (let i: int = 0; i < 10; i++) {
+        concurrentSetTestOne.add(arrKeys[i]);
     }
 }

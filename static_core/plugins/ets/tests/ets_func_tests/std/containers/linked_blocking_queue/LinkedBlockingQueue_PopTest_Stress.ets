@@ -13,18 +13,17 @@
  * limitations under the License.
  */
 
-import { launch } from "std/concurrency"
-import { Job } from "std/core"
+import { launch } from 'std/concurrency'
+import { Job } from 'std/core'
 
 const stressNum: int = 100;
 
 let sMTQueueInt: containers.LinkedBlockingQueue<int> = new containers.LinkedBlockingQueue<int>(stressNum);
 
 function main(): int {
-    let LinkedBlockingQueueTestsuite = new arktest.ArkTestsuite("LinkedBlockingQueuePopTest");
+    let linkedBlockingQueueTestsuite = new arktest.ArkTestsuite('LinkedBlockingQueuePopTest');
 
-    LinkedBlockingQueueTestsuite.addTest("ThreadsPopStressTest004", () =>
-    {
+    linkedBlockingQueueTestsuite.addTest('ThreadsPopStressTest004', () => {
         while (!sMTQueueInt.isEmpty()) {
             sMTQueueInt.pop();
         }
@@ -41,7 +40,7 @@ function main(): int {
         arktest.assertEQ(sMTQueueInt.size, 0);
     });
 
-    return LinkedBlockingQueueTestsuite.run();
+    return linkedBlockingQueueTestsuite.run();
 }
 
 function sQueuePopData() {

@@ -14,7 +14,7 @@
  */
 
 function getTestName(testCase: string): string {
-	return "Float32Array.from - " + testCase;
+	return 'Float32Array.from - ' + testCase;
 }
 
 function testArrayLikeNumber(): void {
@@ -73,7 +73,9 @@ function testEmpty(): void {
 
 function testDynamicReallocation(): void {
 	const iterable = new Set<number>();
-	for (let i = 0; i < 16; ++i) iterable.add(i * 0.125);
+	for (let i = 0; i < 16; ++i) {
+                iterable.add(i * 0.125);
+        }
 	const ta = Float32Array.from(iterable);
 	arktest.assertEQ(ta.length, 16);
 	const epsilon = 1e-6;
@@ -93,14 +95,14 @@ function testBufferIndependence(): void {
 }
 
 function main(): int {
-	const suite = new arktest.ArkTestsuite("Float32ArrayFrom");
-	suite.addTest(getTestName("ArrayLike Number"), testArrayLikeNumber);
-	suite.addTest(getTestName("Iterable Number No Map"), testIterableNumberWithoutMap);
-	suite.addTest(getTestName("Iterable Number With Map"), testIterableNumberWithMap);
-	suite.addTest(getTestName("Mapfn Infinity"), testMapfnInfinity);
-	suite.addTest(getTestName("Mapfn NaN"), testMapfnNaN);
-	suite.addTest(getTestName("Empty"), testEmpty);
-	suite.addTest(getTestName("Dynamic Reallocation"), testDynamicReallocation);
-	suite.addTest(getTestName("Buffer Independence"), testBufferIndependence);
+	const suite = new arktest.ArkTestsuite('Float32ArrayFrom');
+	suite.addTest(getTestName('ArrayLike Number'), testArrayLikeNumber);
+	suite.addTest(getTestName('Iterable Number No Map'), testIterableNumberWithoutMap);
+	suite.addTest(getTestName('Iterable Number With Map'), testIterableNumberWithMap);
+	suite.addTest(getTestName('Mapfn Infinity'), testMapfnInfinity);
+	suite.addTest(getTestName('Mapfn NaN'), testMapfnNaN);
+	suite.addTest(getTestName('Empty'), testEmpty);
+	suite.addTest(getTestName('Dynamic Reallocation'), testDynamicReallocation);
+	suite.addTest(getTestName('Buffer Independence'), testBufferIndependence);
 	return suite.run();
 }

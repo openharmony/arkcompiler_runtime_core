@@ -19,27 +19,24 @@ let queueInt: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQ
 let queueIntPopN: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
 
 function main(): int {
-    let ArrayBlockingQueueTestsuite = new arktest.ArkTestsuite("ArrayBlockingQueueAddTest");
+    let arrayBlockingQueueTestsuite = new arktest.ArkTestsuite('ArrayBlockingQueueAddTest');
 
-    ArrayBlockingQueueTestsuite.addTest("AddTestInt001", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('AddTestInt001', () => {
         let queueIntAdd: containers.ArrayBlockingQueue<int> = new containers.ArrayBlockingQueue<int>(200);
         for (let i: int = 0; i < elementsNum; ++i) {
             queueIntAdd.add(i);
         }
         arktest.assertEQ(queueIntAdd.getEnd(), elementsNum - 1);
     });
-    ArrayBlockingQueueTestsuite.addTest("AddTestStr002", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('AddTestStr002', () => {
         let queueStrAdd: containers.ArrayBlockingQueue<String> = new containers.ArrayBlockingQueue<String>(200);
         for (let i: int = 0; i < elementsNum; ++i) {
-            queueStrAdd.add("test");
+            queueStrAdd.add('test');
         }
-        queueStrAdd.add("teststring");
-        arktest.assertEQ(queueStrAdd.getEnd(), "teststring");
+        queueStrAdd.add('teststring');
+        arktest.assertEQ(queueStrAdd.getEnd(), 'teststring');
     });
-    ArrayBlockingQueueTestsuite.addTest("AddTestInt006", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('AddTestInt006', () => {
         while (!queueIntPopN.isEmpty()) {
             queueIntPopN.pop();
         }
@@ -53,8 +50,7 @@ function main(): int {
         p4.Await();
         arktest.assertFalse(queueIntPopN.isEmpty());
     });
-    ArrayBlockingQueueTestsuite.addTest("AddTestInt007", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('AddTestInt007', () => {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
         }
@@ -65,8 +61,7 @@ function main(): int {
         p1.Await();
         arktest.assertEQ(queueInt.size, elementsNum);
     });
-    ArrayBlockingQueueTestsuite.addTest("AddTestInt008", () =>
-    {
+    arrayBlockingQueueTestsuite.addTest('AddTestInt008', () => {
         while (!queueInt.isEmpty()) {
             queueInt.pop();
         }
@@ -78,7 +73,7 @@ function main(): int {
         arktest.assertFalse(queueInt.isEmpty());
     });
 
-    return ArrayBlockingQueueTestsuite.run();
+    return arrayBlockingQueueTestsuite.run();
 }
 
 function queueIntAdddata() {

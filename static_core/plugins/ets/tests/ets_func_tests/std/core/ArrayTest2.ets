@@ -14,17 +14,17 @@
  */
 
 const success : int = 0;
-const fail    : int = 1;
+const fail : int = 1;
 
 function main(): int {
     let failures: int = 0;
-    failures += check((): int => { return key() }, "key");
-    failures += check((): int => { return values() }, "values");
-    failures += check((): int => { return iterator() }, "iterator");
-    failures += check((): int => { return findWithFuncArg1() }, "findWithFuncArg1");
-    failures += check((): int => { return findWithFuncArg2() }, "findWithFuncArg2");
-    failures += check((): int => { return findWithFuncArg3ArrayNumber() }, "findWithFuncArg3ArrayNumber");
-    return check(failures, "All tests run");
+    failures += check((): int => { return key() }, 'key');
+    failures += check((): int => { return values() }, 'values');
+    failures += check((): int => { return iterator() }, 'iterator');
+    failures += check((): int => { return findWithFuncArg1() }, 'findWithFuncArg1');
+    failures += check((): int => { return findWithFuncArg2() }, 'findWithFuncArg2');
+    failures += check((): int => { return findWithFuncArg3ArrayNumber() }, 'findWithFuncArg3ArrayNumber');
+    return check(failures, 'All tests run');
 }
 
 
@@ -47,7 +47,7 @@ function check<T>(newArrayFn: () => Array<T>, testFn: (a: Array<T>) => int): int
 }
 
 function key(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let iterator = arr.keys();
         let i: int = 0;
         while (true) {
@@ -82,7 +82,7 @@ function key(): int {
 }
 
 function values(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let iterator = arr.values();
         let i: int = 0;
         while (true) {
@@ -117,7 +117,7 @@ function values(): int {
 }
 
 function iterator(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         let iterator = arr.$_iterator();
         let i: int = 0;
         while (true) {
@@ -152,7 +152,7 @@ function iterator(): int {
 }
 
 function findWithFuncArg1(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         for (let i: int = 0; i < d.length as int; ++i) {
             arr.push(d[i]);
         }
@@ -169,7 +169,7 @@ function findWithFuncArg1(): int {
 }
 
 function findWithFuncArg2(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
         }
@@ -194,7 +194,7 @@ function findWithFuncArg2(): int {
 }
 
 function findWithFuncArg3ArrayNumber(): int {
-    return check(() => new Array<Number>, (arr: Array<Number>) => {
+    return check(() => [], (arr: Array<Number>) => {
         for (let i: int = 0; i < d.length; ++i) {
             arr.push(d[i]);
         }
@@ -222,7 +222,8 @@ function check(result: int, message: String): int {
     if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }
 
@@ -230,13 +231,15 @@ function check(fn: () => int, message: String): int {
     let result: int = 0;
     try {
         result = fn();
-    } catch(e) {
-        console.println("FAILED: " + message + " => Error catched: " + e);
+    } catch (e) {
+        // CC-OFFNXT(G.AOD.03) current test suite code style
+        console.println('FAILED: ' + message + ' => Error catched: ' + e);
         return fail;
     }
     if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }

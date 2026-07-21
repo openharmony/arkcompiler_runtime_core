@@ -13,7 +13,7 @@ ETS Layer (Intl.ets)                        Native Layer (native/core/)
 ├ Formatting classes                         ├ Sub-modules: parse args → check cache → create ICU object → call ICU → assemble result
 │  NumberFormat / DateTimeFormat             └ ICU4C third-party library
 │  RelativeTimeFormat / ListFormat             (numberformatter / smpdtfmt / coll / brkiter / ...)
-│  DisplayNames                              String bridging (IntlCommon.cpp):
+│  DisplayNames                              String bridging (intl_common.cpp):
 ├ Rules and segmentation classes                ANI String ←→ std::string ←→ ICU UnicodeString
 │  Collator / PluralRules / Segmenter
 └ Each class declares native methods           Data flow:
@@ -25,10 +25,10 @@ ETS Layer (Intl.ets)                        Native Layer (native/core/)
 | Layer | Key Files | Responsibility |
 | --- | --- | --- |
 | ETS | `std/core/Intl.ets` | 11 Intl classes |
-| Entry | `native/core/Intl.{h,cpp}` | `InitCoreIntl()`: create State + register all sub-modules |
-| State | `native/core/IntlState.{h,cpp}` | Global `g_intlState`: holds 5 caches |
-| Bridging | `native/core/IntlCommon.{h,cpp}` | ANI↔ICU string conversion |
-| Sub-modules | `native/core/Intl{Name}.{h,cpp}` | One file per sub-module + corresponding Cache file |
+| Entry | `native/core/intl.{h,cpp}` | `InitCoreIntl()`: create State + register all sub-modules |
+| State | `native/core/intl_state.{h,cpp}` | Global `g_intlState`: holds 5 caches |
+| Bridging | `native/core/intl_common.{h,cpp}` | ANI↔ICU string conversion |
+| Sub-modules | `native/core/intl{Name}.{h,cpp}` | One file per sub-module + corresponding Cache file |
 
 ## Caching Mechanism
 

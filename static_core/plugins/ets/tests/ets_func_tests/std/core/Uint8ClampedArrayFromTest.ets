@@ -14,11 +14,11 @@
  */
 
 function getTestName(testCase: string): string {
-	return "Uint8ClampedArray.from - " + testCase;
+	return 'Uint8ClampedArray.from - ' + testCase;
 }
 
 function testArrayLikeNumber(): void {
-	const arr: number[] = [ -10, 0, 128, 255, 300 ];
+	const arr: number[] = [-10, 0, 128, 255, 300];
 	const ta = Uint8ClampedArray.from(arr);
 	arktest.assertEQ(ta.length, 5);
 	// values below 0 clamp to 0; above 255 clamp to 255
@@ -30,7 +30,7 @@ function testArrayLikeNumber(): void {
 }
 
 function testIterableNumberWithoutMap(): void {
-	const iterable = new Set<number>([ 10, 20, 30, 260 ]);
+	const iterable = new Set<number>([10, 20, 30, 260]);
 	const ta = Uint8ClampedArray.from(iterable);
 	arktest.assertEQ(ta.length, 4);
 	arktest.assertEQ(ta.$_get(0).toDouble(), 10);
@@ -40,7 +40,7 @@ function testIterableNumberWithoutMap(): void {
 }
 
 function testIterableNumberWithMap(): void {
-	const arr: number[] = [ 50, 100, 200 ];
+	const arr: number[] = [50, 100, 200];
 	// double then clamp
 	const ta = Uint8ClampedArray.from(arr, (v: number): number => v * 2);
 	arktest.assertEQ(ta.length, 3);
@@ -50,7 +50,7 @@ function testIterableNumberWithMap(): void {
 }
 
 function testDecimalRounding(): void {
-	const arr: number[] = [ 1.2, 1.5, 1.8, -0.5 ];
+	const arr: number[] = [1.2, 1.5, 1.8, -0.5];
 	const ta = Uint8ClampedArray.from(arr);
 	arktest.assertEQ(ta.length, 4);
 	// 1.2 → 1, 1.5 → 2 (ties to nearest even?), 1.8 → 2, -0.5 → 0
@@ -61,7 +61,7 @@ function testDecimalRounding(): void {
 }
 
 function testNaNAndInfinity(): void {
-	const arr = [ NaN, Infinity, -Infinity ];
+	const arr = [NaN, Infinity, -Infinity];
 	const ta = Uint8ClampedArray.from(arr);
 	arktest.assertEQ(ta.length, 3);
 	// NaN → 0; Infinity → 255; -Infinity → 0
@@ -91,21 +91,21 @@ function testDynamicReallocation(): void {
 }
 
 function testBufferIndependence(): void {
-	const src = [ 5, 15, 25 ];
+	const src = [5, 15, 25];
 	const ta = Uint8ClampedArray.from(src);
 	src[0] = 100;
 	arktest.assertEQ(ta.$_get(0).toDouble(), 5);
 }
 
 function main(): int {
-	const suite = new arktest.ArkTestsuite("Uint8ClampedArrayFrom");
-	suite.addTest(getTestName("ArrayLike Number"), testArrayLikeNumber);
-	suite.addTest(getTestName("Iterable Number No Map"), testIterableNumberWithoutMap);
-	suite.addTest(getTestName("Iterable Number With Map"), testIterableNumberWithMap);
-	suite.addTest(getTestName("Decimal Rounding"), testDecimalRounding);
-	suite.addTest(getTestName("NaN and Infinity"), testNaNAndInfinity);
-	suite.addTest(getTestName("Empty"), testEmpty);
-	suite.addTest(getTestName("Dynamic Reallocation"), testDynamicReallocation);
-	suite.addTest(getTestName("Buffer Independence"), testBufferIndependence);
+	const suite = new arktest.ArkTestsuite('Uint8ClampedArrayFrom');
+	suite.addTest(getTestName('ArrayLike Number'), testArrayLikeNumber);
+	suite.addTest(getTestName('Iterable Number No Map'), testIterableNumberWithoutMap);
+	suite.addTest(getTestName('Iterable Number With Map'), testIterableNumberWithMap);
+	suite.addTest(getTestName('Decimal Rounding'), testDecimalRounding);
+	suite.addTest(getTestName('NaN and Infinity'), testNaNAndInfinity);
+	suite.addTest(getTestName('Empty'), testEmpty);
+	suite.addTest(getTestName('Dynamic Reallocation'), testDynamicReallocation);
+	suite.addTest(getTestName('Buffer Independence'), testBufferIndependence);
 	return suite.run();
 }

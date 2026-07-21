@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,32 +14,32 @@
  */
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Array API tests for SDK");
-    suite.addTest("Test ArrayBuffer.isView with DataView", test1IsView);
-    suite.addTest("Test ArrayBuffer.isView with TypedArray", test2IsView);
-    suite.addTest("Test ArrayBuffer.isView with Illegal Scenes", test3IsView);
+    const suite = new arktest.ArkTestsuite('Array API tests for SDK');
+    suite.addTest('Test ArrayBuffer.isView with DataView', test1IsView);
+    suite.addTest('Test ArrayBuffer.isView with TypedArray', test2IsView);
+    suite.addTest('Test ArrayBuffer.isView with Illegal Scenes', test3IsView);
     return suite.run(); 
 }
 
 class TestData {
-    static readonly sample1 = new DataView(new ArrayBuffer(1), 0, 0);
-    static readonly expected1 = true;
+    public static readonly sample1 = new DataView(new ArrayBuffer(1), 0, 0);
+    public static readonly expected1 = true;
 
-    static readonly sample2 = new Int8Array();
-    static readonly sample3 = new Int16Array();
-    static readonly sample4 = new Int32Array();
-    static readonly sample5 = new BigInt64Array();
-    static readonly sample6 = new Float32Array();
-    static readonly sample7 = new Float64Array();
-    static readonly sample8 = new Uint8Array();
-    static readonly sample9 = new Uint8ClampedArray();
-    static readonly sample10 = new Uint16Array();
-    static readonly sample11 = new Uint32Array();
-    static readonly sample12 = new BigUint64Array();
-    static readonly expected2 = true;
+    public static readonly sample2 = new Int8Array();
+    public static readonly sample3 = new Int16Array();
+    public static readonly sample4 = new Int32Array();
+    public static readonly sample5 = new BigInt64Array();
+    public static readonly sample6 = new Float32Array();
+    public static readonly sample7 = new Float64Array();
+    public static readonly sample8 = new Uint8Array();
+    public static readonly sample9 = new Uint8ClampedArray();
+    public static readonly sample10 = new Uint16Array();
+    public static readonly sample11 = new Uint32Array();
+    public static readonly sample12 = new BigUint64Array();
+    public static readonly expected2 = true;
 
-    static readonly sample13 = new String();
-    static readonly expected3 = false;
+    public static readonly sample13 = String();
+    public static readonly expected3 = false;
 }
 
 function test1IsView() {

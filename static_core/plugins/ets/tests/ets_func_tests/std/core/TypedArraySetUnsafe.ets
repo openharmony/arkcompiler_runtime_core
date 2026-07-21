@@ -14,7 +14,7 @@
  */
 
 function getTestName(arrayType: string): string {
-    return arrayType + " meta $_set/$_get";
+    return arrayType + ' meta $_set/$_get';
 }
 
 function testInt8ArrayMetaSetGet(): void {
@@ -69,12 +69,12 @@ function testFloat64ArrayMetaSetGet(): void {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("TypedArrayMetaSetGet");
-    suite.addTest(getTestName("Int8Array"), testInt8ArrayMetaSetGet);
-    suite.addTest(getTestName("Int16Array"), testInt16ArrayMetaSetGet);
-    suite.addTest(getTestName("Int32Array"), testInt32ArrayMetaSetGet);
-    suite.addTest(getTestName("BigInt64Array"), testBigInt64ArrayMetaSetGet);
-    suite.addTest(getTestName("Float32Array"), testFloat32ArrayMetaSetGet);
-    suite.addTest(getTestName("Float64Array"), testFloat64ArrayMetaSetGet);
+    const suite = new arktest.ArkTestsuite('TypedArrayMetaSetGet');
+    suite.addTest(getTestName('Int8Array'), testInt8ArrayMetaSetGet);
+    suite.addTest(getTestName('Int16Array'), testInt16ArrayMetaSetGet);
+    suite.addTest(getTestName('Int32Array'), testInt32ArrayMetaSetGet);
+    suite.addTest(getTestName('BigInt64Array'), testBigInt64ArrayMetaSetGet);
+    suite.addTest(getTestName('Float32Array'), testFloat32ArrayMetaSetGet);
+    suite.addTest(getTestName('Float64Array'), testFloat64ArrayMetaSetGet);
     return suite.run();
 }

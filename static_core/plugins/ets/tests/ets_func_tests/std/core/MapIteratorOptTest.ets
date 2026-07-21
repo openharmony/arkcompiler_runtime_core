@@ -16,10 +16,10 @@
 function testClearInForEach(): void {
     let map = new Map<Number, String>()
     let num: int = 0
-    map.set(0.0, "zero")
-    map.set(1.0, "one")
-    map.set(2.0, "two")
-    map.set(3.0, "three")
+    map.set(0.0, 'zero')
+    map.set(1.0, 'one')
+    map.set(2.0, 'two')
+    map.set(3.0, 'three')
     map.forEach((value, key, map) => {
         map.clear()
         num = num + 1
@@ -30,14 +30,14 @@ function testClearInForEach(): void {
 function testSetAfterClearInForEach(): void {
     let map = new Map<Number, String>()
     let num: int = 0
-    map.set(0.0, "zero")
-    map.set(1.0, "one")
-    map.set(2.0, "two")
-    map.set(3.0, "three")
+    map.set(0.0, 'zero')
+    map.set(1.0, 'one')
+    map.set(2.0, 'two')
+    map.set(3.0, 'three')
     map.forEach((value, key, map) => {
         map.clear()
         if (num === 0) {
-            map.set(1.0, "one")
+            map.set(1.0, 'one')
         }
         num = num + 1
     });
@@ -48,10 +48,10 @@ function testSetAfterClearInForEach(): void {
 function testClearIterator(): void {
     let map = new Map<Number, String>()
     let num: int = 0
-    map.set(0.0, "zero")
-    map.set(1.0, "one")
-    map.set(2.0, "two")
-    map.set(3.0, "three")
+    map.set(0.0, 'zero')
+    map.set(1.0, 'one')
+    map.set(2.0, 'two')
+    map.set(3.0, 'three')
     let iter = map.keys()
     for (const key of iter) {
         map.clear()
@@ -64,10 +64,10 @@ function testClearIterator(): void {
 function testDeleteCurrentInForEach(): void {
     let map = new Map<Number, String>()
     let num: int = 0
-    map.set(0.0, "zero")
-    map.set(1.0, "one")
-    map.set(2.0, "two")
-    map.set(3.0, "three")
+    map.set(0.0, 'zero')
+    map.set(1.0, 'one')
+    map.set(2.0, 'two')
+    map.set(3.0, 'three')
     map.forEach((value, key, map) => {
         map.delete(0.0)
         num = num + 1
@@ -78,10 +78,10 @@ function testDeleteCurrentInForEach(): void {
 function testDeleteCurrentIterator(): void {
     let map = new Map<Number, String>()
     let num: int = 0
-    map.set(0.0, "zero")
-    map.set(1.0, "one")
-    map.set(2.0, "two")
-    map.set(3.0, "three")
+    map.set(0.0, 'zero')
+    map.set(1.0, 'one')
+    map.set(2.0, 'two')
+    map.set(3.0, 'three')
     let iter = map.keys()
     for (const key of iter) {
         map.delete(0.0)
@@ -93,10 +93,10 @@ function testDeleteCurrentIterator(): void {
 function testDeleteInForEach(): void {
     let map = new Map<Number, String>()
     let num: int = 0
-    map.set(0.0, "zero")
-    map.set(1.0, "one")
-    map.set(2.0, "two")
-    map.set(3.0, "three")
+    map.set(0.0, 'zero')
+    map.set(1.0, 'one')
+    map.set(2.0, 'two')
+    map.set(3.0, 'three')
     map.forEach((value, key, map) => {
         map.delete(2.0)
         num = num + 1
@@ -107,10 +107,10 @@ function testDeleteInForEach(): void {
 function testDeleteInIterator(): void {
     let map = new Map<Number, String>()
     let num: int = 0
-    map.set(0.0, "zero")
-    map.set(1.0, "one")
-    map.set(2.0, "two")
-    map.set(3.0, "three")
+    map.set(0.0, 'zero')
+    map.set(1.0, 'one')
+    map.set(2.0, 'two')
+    map.set(3.0, 'three')
     let iter = map.keys()
     for (const key of iter) {
         map.delete(2.0)
@@ -122,12 +122,12 @@ function testDeleteInIterator(): void {
 function testSetInForEach(): void {
     let map = new Map<Number, String>()
     let num: int = 0
-    map.set(0.0, "zero")
-    map.set(1.0, "one")
-    map.set(2.0, "two")
-    map.set(3.0, "three")
+    map.set(0.0, 'zero')
+    map.set(1.0, 'one')
+    map.set(2.0, 'two')
+    map.set(3.0, 'three')
     map.forEach((value, key, map) => {
-        map.set(4.0, "four")
+        map.set(4.0, 'four')
         num = num + 1
     });
     arktest.assertEQ(num, 5)
@@ -136,13 +136,13 @@ function testSetInForEach(): void {
 function testSetInIterator(): void {
     let map = new Map<Number, String>()
     let num: int = 0
-    map.set(0.0, "zero")
-    map.set(1.0, "one")
-    map.set(2.0, "two")
-    map.set(3.0, "three")
+    map.set(0.0, 'zero')
+    map.set(1.0, 'one')
+    map.set(2.0, 'two')
+    map.set(3.0, 'three')
     let iter = map.keys()
     for (const key of iter) {
-        map.set(4.0, "four")
+        map.set(4.0, 'four')
         num = num + 1
     }
     arktest.assertEQ(num, 5)
@@ -150,16 +150,16 @@ function testSetInIterator(): void {
 
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Map opt about iterator")
+    const suite = new arktest.ArkTestsuite('Map opt about iterator')
 
-    suite.addTest("Map test clear in foreach", testClearInForEach)
-    suite.addTest("Map test set after clear in foreach", testSetAfterClearInForEach)
-    suite.addTest("Map test clear in iterator", testClearIterator)
-    suite.addTest("Map test delete current in foreach", testDeleteCurrentInForEach)
-    suite.addTest("Map test delete current in iterator", testDeleteCurrentIterator)
-    suite.addTest("Map test delete in foreach", testDeleteInForEach)
-    suite.addTest("Map test delete in iterator", testDeleteInIterator)
-    suite.addTest("Map test set in foreach", testSetInForEach)
-    suite.addTest("Map test set in iterator", testSetInIterator)
+    suite.addTest('Map test clear in foreach', testClearInForEach)
+    suite.addTest('Map test set after clear in foreach', testSetAfterClearInForEach)
+    suite.addTest('Map test clear in iterator', testClearIterator)
+    suite.addTest('Map test delete current in foreach', testDeleteCurrentInForEach)
+    suite.addTest('Map test delete current in iterator', testDeleteCurrentIterator)
+    suite.addTest('Map test delete in foreach', testDeleteInForEach)
+    suite.addTest('Map test delete in iterator', testDeleteInIterator)
+    suite.addTest('Map test set in foreach', testSetInForEach)
+    suite.addTest('Map test set in iterator', testSetInIterator)
     return suite.run()
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const strings = ["123", " \tabc\n\v ", "\"'abc'\"", "Русские Буквы", "函数式编程"]
+const strings = ['123', ' \tabc\n\v ', '\"\'abc\'\"', 'Русские Буквы', '函数式编程']
 const validIndices: int[] = [0, 1]
 const invalidIndices: int[] = [-1, -100, 200]
 
@@ -26,7 +26,7 @@ function getError(index: number): RangeError {
 }
 
 function emptyStr(): void {
-    const str = ""
+    const str = ''
     for (const index of validIndices) {
         arktest.expectError(() => { str.charCodeAt(index) }, getError(index))
     }
@@ -36,7 +36,7 @@ function emptyStr(): void {
 }
 
 function singleChar(): void {
-    const str = "𠮷"
+    const str = '𠮷'
     arktest.expectNoThrow(() => { str.charCodeAt(0) })
     for (const index of invalidIndices) {
         arktest.expectError(() => { str.charCodeAt(index) }, getError(index))
@@ -55,11 +55,11 @@ function multipleChars(): void {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("std.core.String.charCodeAt method tests")
+    const suite = new arktest.ArkTestsuite('std.core.String.charCodeAt method tests')
 
-    suite.addTest("empty string", emptyStr)
-    suite.addTest("single character string", singleChar)
-    suite.addTest("multiple characters strings", multipleChars)
+    suite.addTest('empty string', emptyStr)
+    suite.addTest('single character string', singleChar)
+    suite.addTest('multiple characters strings', multipleChars)
 
     return suite.run()
 }

@@ -75,101 +75,101 @@ interface NestedToJSONStringResultHolder {
 }
 
 class StringOverrideToJSONClass implements JsonSerializable {
-    foo: string = 'foo';
+    public foo: string = 'foo';
     toJSON(): string {
         return 'bar';
     }
 }
 
 class ObjectLiteralTextToJSONClass implements JsonSerializable {
-    a: number = 1;
+    public a: number = 1;
     toJSON(): string {
         return '{ b: 2 }';
     }
 }
 
 class NumericTextToJSONClass implements JsonSerializable {
-    a: number = 1;
+    public a: number = 1;
     toJSON(): string {
         return '42';
     }
 }
 
 class ExtendedObjectLiteralTextToJSONClass implements JsonSerializable {
-    a: number = 1;
+    public a: number = 1;
     toJSON(): string {
         return '{ b: 2, c: 3 }';
     }
 }
 
 class UndefinedTextToJSONClass implements JsonSerializable {
-    a: number = 1;
+    public a: number = 1;
     toJSON(): string {
         return 'undefined';
     }
 }
 
 class FunctionTextToJSONClass implements JsonSerializable {
-    a: number = 1;
+    public a: number = 1;
     toJSON(): string {
         return '() => {}';
     }
 }
 
 class ArrayTextToJSONClass implements JsonSerializable {
-    data: number[] = [1, 2, 3];
+    public data: number[] = [1, 2, 3];
     toJSON(): string {
         return JSON.stringify(this.data);
     }
 }
 
 class SinglePropClass {
-    name: string = 'test';
+    public name: string = 'test';
 }
 
 class ConstructorValueClass {
-    value: number;
+    public value: number;
     constructor(value: number) {
         this.value = value;
     }
 }
 
 class PrimitiveFieldsClass {
-    a: number = 1;
-    b: string = 'test';
-    c: boolean = true;
+    public a: number = 1;
+    public b: string = 'test';
+    public c: boolean = true;
 }
 
 class TwoLevelParent {
-    parentProp: string = 'parent';
+    public parentProp: string = 'parent';
 }
 
 class TwoLevelChild extends TwoLevelParent {
-    childProp: string = 'child';
+    public childProp: string = 'child';
 }
 
 class ThreeLevelGrandparent {
-    grandProp: string = 'grand';
+    public grandProp: string = 'grand';
 }
 
 class ThreeLevelParent extends ThreeLevelGrandparent {
-    parentProp: string = 'parent';
+    public parentProp: string = 'parent';
 }
 
 class ThreeLevelChild extends ThreeLevelParent {
-    childProp: string = 'child';
+    public childProp: string = 'child';
 }
 
 class OverridePropParent {
-    prop: string = 'parent';
+    public prop: string = 'parent';
 }
 
 class OverridePropChild extends OverridePropParent {
-    prop: string = 'child';
+    public prop: string = 'child';
 }
 
 class PublicPropParent {
-    publicProp: string = 'public';
+    public publicProp: string = 'public';
 }
 
 class PublicPropChild extends PublicPropParent { }
@@ -191,11 +191,11 @@ interface InterfaceWithExtends {
 }
 
 class InterfaceExtendsParent {
-    parentProp: string = 'parent';
+    public parentProp: string = 'parent';
 }
 
 class InterfaceExtendsChild extends InterfaceExtendsParent implements InterfaceWithExtends {
-    interfaceProp: string = 'interface';
+    public interfaceProp: string = 'interface';
 }
 
 interface ImplThenExtendInterface {
@@ -203,11 +203,11 @@ interface ImplThenExtendInterface {
 }
 
 class ImplThenExtendParent implements ImplThenExtendInterface {
-    interfaceProp: string = 'interface';
+    public interfaceProp: string = 'interface';
 }
 
 class ImplThenExtendChild extends ImplThenExtendParent {
-    childProp: string = 'child';
+    public childProp: string = 'child';
 }
 
 interface SingleFieldInterface {
@@ -215,7 +215,7 @@ interface SingleFieldInterface {
 }
 
 class SingleFieldImpl implements SingleFieldInterface {
-    prop: string = 'value';
+    public prop: string = 'value';
 }
 
 interface OptionalFieldInterface {
@@ -224,8 +224,8 @@ interface OptionalFieldInterface {
 }
 
 class OptionalFieldImpl implements OptionalFieldInterface {
-    required: string = 'value';
-    optional?: number = 42;
+    public required: string = 'value';
+    public optional?: number = 42;
 }
 
 interface ReadonlyFieldInterface {
@@ -233,7 +233,7 @@ interface ReadonlyFieldInterface {
 }
 
 class ReadonlyFieldImpl implements ReadonlyFieldInterface {
-    readonlyProp: string = 'value';
+    public readonlyProp: string = 'value';
 }
 
 interface MultiInterfaceA {
@@ -245,8 +245,8 @@ interface MultiInterfaceB {
 }
 
 class MultiInterfaceImpl implements MultiInterfaceA, MultiInterfaceB {
-    prop1: string = 'value1';
-    prop2: number = 42;
+    public prop1: string = 'value1';
+    public prop2: number = 42;
 }
 
 interface OverlapInterfaceA {
@@ -258,7 +258,7 @@ interface OverlapInterfaceB {
 }
 
 class OverlapInterfaceImpl implements OverlapInterfaceA, OverlapInterfaceB {
-    prop: string = 'value';
+    public prop: string = 'value';
 }
 
 class InstanceMethodClass {
@@ -268,7 +268,7 @@ class InstanceMethodClass {
 }
 
 class PropAndMethodClass {
-    prop: string = 'value';
+    public prop: string = 'value';
     method(): string {
         return 'result';
     }
@@ -305,7 +305,7 @@ class GetterSetterClass {
 }
 
 class PublicPropClass {
-    publicProp: string = 'public';
+    public publicProp: string = 'public';
 }
 
 class PublicMethodClass {
@@ -315,8 +315,8 @@ class PublicMethodClass {
 }
 
 class NumberStringClass {
-    a: number = 1;
-    b: string = 'test';
+    public a: number = 1;
+    public b: string = 'test';
 }
 
 class PrivatePropClass {
@@ -330,7 +330,7 @@ class PrivateMethodClass {
 }
 
 class PublicPrivatePropClass {
-    publicProp: string = 'public';
+    public publicProp: string = 'public';
     private privateProp: string = 'private';
 }
 
@@ -345,16 +345,16 @@ class ProtectedMethodClass {
 }
 
 class PublicProtectedPropClass {
-    publicProp: string = 'public';
+    public publicProp: string = 'public';
     protected protectedProp: string = 'protected';
 }
 
 class ReadonlyPropClass {
-    readonly readonlyProp: string = 'readonly';
+    public readonly readonlyProp: string = 'readonly';
 }
 
 class ReadonlyValueClass {
-    readonly prop: string = 'value';
+    public readonly prop: string = 'value';
 }
 
 class PrivateReadonlyClass {
@@ -362,7 +362,7 @@ class PrivateReadonlyClass {
 }
 
 class StaticPropClass {
-    static staticProp: string = 'static';
+    public static staticProp: string = 'static';
 }
 
 class StaticMethodOnlyClass {
@@ -372,27 +372,27 @@ class StaticMethodOnlyClass {
 }
 
 class StaticAndInstanceClass {
-    static staticProp: string = 'static';
-    instanceProp: string = 'instance';
+    public static staticProp: string = 'static';
+    public instanceProp: string = 'instance';
 }
 
 abstract class AbstractBase {
-    abstractProp: string = 'abstract';
+    public abstractProp: string = 'abstract';
 }
 
 class ConcreteSub extends AbstractBase {
-    concreteProp: string = 'concrete';
+    public concreteProp: string = 'concrete';
 }
 
 class GenericValueHolder<T> {
-    value: T;
+    public value: T;
     constructor(value: T) {
         this.value = value;
     }
 }
 
 class CustomToJSONClass implements JsonSerializable {
-    prop: string = 'value';
+    public prop: string = 'value';
     toJSON(): string {
         return 'custom';
     }
@@ -419,60 +419,60 @@ class OverriddenToJSONChild extends OverriddenToJSONParent {
 }
 
 class OptionalPropClass {
-    prop?: string;
+    public prop?: string;
 }
 
 class NestedInner {
-    innerProp: string = 'inner';
+    public innerProp: string = 'inner';
 }
 
 class NestedOuter {
-    outerProp: string = 'outer';
-    inner: NestedInner = new NestedInner();
+    public outerProp: string = 'outer';
+    public inner: NestedInner = new NestedInner();
 }
 
 class ArrayItem {
-    value: number = 0;
+    public value: number = 0;
 }
 
 class ArrayContainer {
-    items: ArrayItem[] = [new ArrayItem(), new ArrayItem()];
+    public items: ArrayItem[] = [new ArrayItem(), new ArrayItem()];
 }
 
 class MapItem {
-    value: number = 0;
+    public value: number = 0;
 }
 
 class MapContainer {
-    itemMap: Record<string, MapItem> = { 'a': new MapItem(), 'b': new MapItem() };
+    public itemMap: Record<string, MapItem> = { 'a': new MapItem(), 'b': new MapItem() };
 }
 
 class TwoStringFieldsClass {
-    prop1: string = 'value1';
-    prop2: string = 'value2';
+    public prop1: string = 'value1';
+    public prop2: string = 'value2';
 }
 
 class NumberValueClass {
-    value: number = 42;
+    public value: number = 42;
 }
 
 class ThreeStringFieldsClass {
-    prop1: string = 'value1';
-    prop2: string = 'value2';
-    prop3: string = 'value3';
+    public prop1: string = 'value1';
+    public prop2: string = 'value2';
+    public prop3: string = 'value3';
 }
 
 class PrettyPrintedPropClass {
-    prop: string = 'value';
+    public prop: string = 'value';
 }
 
 class PrettyPrintedNestedInner {
-    innerProp: string = 'inner';
+    public innerProp: string = 'inner';
 }
 
 class PrettyPrintedNestedOuter {
-    outerProp: string = 'outer';
-    inner: PrettyPrintedNestedInner = new PrettyPrintedNestedInner();
+    public outerProp: string = 'outer';
+    public inner: PrettyPrintedNestedInner = new PrettyPrintedNestedInner();
 }
 
 interface SingleNumberIndentFields {

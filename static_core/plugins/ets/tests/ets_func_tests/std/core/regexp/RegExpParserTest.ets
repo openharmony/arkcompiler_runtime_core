@@ -69,160 +69,160 @@ function testRegExpParserCase1() {
 }
 
 function testRegExpParserCase2() {
-    arktest.expectThrow(() => { new RegExp('a𐐀b𐐁','z'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('a𐐀b𐐁', 'z'); }, expectedSyntaxError)
 }
 
 function testRegExpParserCase3() {
-    arktest.expectThrow(() => { new RegExp('(','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp(')','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp(']','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('{','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('}','u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('(', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp(')', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp(']', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('{', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('}', 'u'); }, expectedSyntaxError)
 }
 
 function testRegExpParserCase4() {
-    arktest.expectThrow(() => { new RegExp('[\\d-a]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[\\D-a]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[\\s-a]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[\\S-a]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[\\w-a]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[a-\\d]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[a-\\D]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[a-\\s]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[a-\\S]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[a-\\w]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[a-\\W]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[\\d-\\d]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[\\D-\\D]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[\\s-\\s]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[\\S-\\S]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[\\w-\\w]','u'); }, expectedSyntaxError)
-    arktest.expectThrow(() => { new RegExp('[\\W-\\W]','u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[\\d-a]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[\\D-a]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[\\s-a]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[\\S-a]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[\\w-a]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[a-\\d]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[a-\\D]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[a-\\s]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[a-\\S]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[a-\\w]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[a-\\W]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[\\d-\\d]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[\\D-\\D]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[\\s-\\s]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[\\S-\\S]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[\\w-\\w]', 'u'); }, expectedSyntaxError)
+    arktest.expectThrow(() => { new RegExp('[\\W-\\W]', 'u'); }, expectedSyntaxError)
 }
 
 // NOTE (templinkonstantin): The tests have been temporarily commented out due
 // to refactoring of the regular expression pre-parsing.
 // The tests will be restored as part of internal issue #33869
 // 
-// function testRegExpParserCase5() {
-//     let isSyntaxCharacter = (c: string): boolean =>{
-//         switch (c) {
-//             case '^':
-//             case '$':
-//             case '\\':
-//             case '.':
-//             case '*':
-//             case '+':
-//             case '?':
-//             case '(':
-//             case ')':
-//             case '[':
-//             case ']':
-//             case '{':
-//             case '}':
-//             case '|':
-//                 return true;
-//             default:
-//                 return false;
-//         }
-//     }
-//     let isAlphaDight = (c: string): boolean => {
-//         return ('0' <= c && c<= '9') || ('A' <= c && c<= 'Z') || ('a' <= c && c<= 'z')
-//     }
-//     for(let cu = 0x00; cu <= 0x7f; ++cu){
-//         let s = String.fromCharCode(cu);
-//         if(!isAlphaDight(s) && !isSyntaxCharacter(s) && s !== '/'){
-//             arktest.expectThrow(() => { new RegExp('\\'+s,'u'); }, expectedSyntaxError)
-//         }
-//     }
-//     for(let cu = 0x00; cu <= 0x7f; ++cu){
-//         let s = String.fromCharCode(cu);
-//         if(!isAlphaDight(s) && !isSyntaxCharacter(s) && s !== '/' && s !== '-'){
-//             arktest.expectThrow(() => { new RegExp('[\\'+s+']','u'); }, expectedSyntaxError)
-//         }
-//     }
-// }
-// 
-// function testRegExpParserCase6() {
-//     let isValidAlphaEscapeInAtom = (s: string): boolean =>{
-//         switch (s) {
-//             case 'b':
-//             case 'B':
-//             case 'f':
-//             case 'n':
-//             case 'r':
-//             case 't':
-//             case 'v':
-//             case 'd':
-//             case 'D':
-//             case 's':
-//             case 'S':
-//             case 'w':
-//             case 'W':
-//                 return true;
-//             default:
-//                 return false;
-//         }
-//     }
-//     let isValidAlphaEscapeInClass = (s: string): boolean =>{
-//         switch (s) {
-//             case 'b':
-//             case 'f':
-//             case 'n':
-//             case 'r':
-//             case 't':
-//             case 'v':
-//             case 'd':
-//             case 'D':
-//             case 's':
-//             case 'S':
-//             case 'w':
-//             case 'W':
-//                 return true;
-//             default:
-//                 return false;
-//         }
-//     }
-//     const uppercaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-//     const lowercaseLetters = 'abcdefghijklmnopqrstuvwxyz';
-//     for(let s of uppercaseLetters) {
-//         if(!isValidAlphaEscapeInAtom(s)) {
-//             arktest.expectThrow(() => { new RegExp('\\'+s,'u'); }, expectedSyntaxError)
-//         }
-//         if (!isValidAlphaEscapeInClass(s)){
-//             arktest.expectThrow(() => { new RegExp('[\\' + s + ']', 'u'); }, expectedSyntaxError)
-//         }
-//     }
-//     for(let s of lowercaseLetters){
-//         if(!isValidAlphaEscapeInAtom(s)){
-//             arktest.expectThrow(() => { new RegExp('\\' + s, 'u'); }, expectedSyntaxError)
-//         }
-//         if (!isValidAlphaEscapeInClass(s)){
-//             arktest.expectThrow(() => { new RegExp('[\\' + s + ']', 'u'); }, expectedSyntaxError)
-//         }
-//     }
-// }
+//TODO function testRegExpParserCase5() {
+//TODO     let isSyntaxCharacter = (c: string): boolean =>{
+//TODO         switch (c) {
+//TODO             case '^':
+//TODO             case '$':
+//TODO             case '\\':
+//TODO             case '.':
+//TODO             case '*':
+//TODO             case '+':
+//TODO             case '?':
+//TODO             case '(':
+//TODO             case ')':
+//TODO             case '[':
+//TODO             case ']':
+//TODO             case '{':
+//TODO             case '}':
+//TODO             case '|':
+//TODO                 return true;
+//TODO             default:
+//TODO                 return false;
+//TODO         }
+//TODO     }
+//TODO     let isAlphaDight = (c: string): boolean => {
+//TODO         return ('0' <= c && c<= '9') || ('A' <= c && c<= 'Z') || ('a' <= c && c<= 'z')
+//TODO     }
+//TODO     for(let cu = 0x00; cu <= 0x7f; ++cu){
+//TODO         let s = String.fromCharCode(cu);
+//TODO         if(!isAlphaDight(s) && !isSyntaxCharacter(s) && s !== '/'){
+//TODO             arktest.expectThrow(() => { new RegExp('\\'+s,'u'); }, expectedSyntaxError)
+//TODO         }
+//TODO     }
+//TODO     for(let cu = 0x00; cu <= 0x7f; ++cu){
+//TODO         let s = String.fromCharCode(cu);
+//TODO         if(!isAlphaDight(s) && !isSyntaxCharacter(s) && s !== '/' && s !== '-'){
+//TODO             arktest.expectThrow(() => { new RegExp('[\\'+s+']','u'); }, expectedSyntaxError)
+//TODO         }
+//TODO     }
+//TODO }
+//TODO 
+//TODO function testRegExpParserCase6() {
+//TODO     let isValidAlphaEscapeInAtom = (s: string): boolean =>{
+//TODO         switch (s) {
+//TODO             case 'b':
+//TODO             case 'B':
+//TODO             case 'f':
+//TODO             case 'n':
+//TODO             case 'r':
+//TODO             case 't':
+//TODO             case 'v':
+//TODO             case 'd':
+//TODO             case 'D':
+//TODO             case 's':
+//TODO             case 'S':
+//TODO             case 'w':
+//TODO             case 'W':
+//TODO                 return true;
+//TODO             default:
+//TODO                 return false;
+//TODO         }
+//TODO     }
+//TODO     let isValidAlphaEscapeInClass = (s: string): boolean =>{
+//TODO         switch (s) {
+//TODO             case 'b':
+//TODO             case 'f':
+//TODO             case 'n':
+//TODO             case 'r':
+//TODO             case 't':
+//TODO             case 'v':
+//TODO             case 'd':
+//TODO             case 'D':
+//TODO             case 's':
+//TODO             case 'S':
+//TODO             case 'w':
+//TODO             case 'W':
+//TODO                 return true;
+//TODO             default:
+//TODO                 return false;
+//TODO         }
+//TODO     }
+//TODO     const uppercaseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+//TODO     const lowercaseLetters = 'abcdefghijklmnopqrstuvwxyz';
+//TODO     for(let s of uppercaseLetters) {
+//TODO         if(!isValidAlphaEscapeInAtom(s)) {
+//TODO             arktest.expectThrow(() => { new RegExp('\\'+s,'u'); }, expectedSyntaxError)
+//TODO         }
+//TODO         if (!isValidAlphaEscapeInClass(s)){
+//TODO             arktest.expectThrow(() => { new RegExp('[\\' + s + ']', 'u'); }, expectedSyntaxError)
+//TODO         }
+//TODO     }
+//TODO     for(let s of lowercaseLetters){
+//TODO         if(!isValidAlphaEscapeInAtom(s)){
+//TODO             arktest.expectThrow(() => { new RegExp('\\' + s, 'u'); }, expectedSyntaxError)
+//TODO         }
+//TODO         if (!isValidAlphaEscapeInClass(s)){
+//TODO             arktest.expectThrow(() => { new RegExp('[\\' + s + ']', 'u'); }, expectedSyntaxError)
+//TODO         }
+//TODO     }
+//TODO }
 
-// function testRegExpParserCase7() {
-//     let isAlpha = (c: string): boolean => {
-//         return ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z');
-//     }
-//     arktest.expectThrow(() => { new RegExp('\\c', 'u'); }, expectedSyntaxError)
-//     for (let cu = 0x00; cu <= 0x7f; ++cu){
-//         let s = String.fromCharCode(cu);
-//         if(!isAlpha(s)) {
-//             arktest.expectThrow(() => { new RegExp('\\c' + s, 'u'); }, expectedSyntaxError)
-//         }
-//     }
-//     arktest.expectThrow(() => { new RegExp('[\\c]', 'u'); }, expectedSyntaxError)
-//     for (let cu = 0x00; cu <= 0x7f; ++cu){
-//         let s = String.fromCharCode(cu);
-//         if(!isAlpha(s)) {
-//             arktest.expectThrow(() => { new RegExp('[\\c' + s + ']', 'u'); }, expectedSyntaxError)
-//         }
-//     }
-// }
+//TODO function testRegExpParserCase7() {
+//TODO     let isAlpha = (c: string): boolean => {
+//TODO         return ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z');
+//TODO     }
+//TODO     arktest.expectThrow(() => { new RegExp('\\c', 'u'); }, expectedSyntaxError)
+//TODO     for (let cu = 0x00; cu <= 0x7f; ++cu){
+//TODO         let s = String.fromCharCode(cu);
+//TODO         if(!isAlpha(s)) {
+//TODO             arktest.expectThrow(() => { new RegExp('\\c' + s, 'u'); }, expectedSyntaxError)
+//TODO         }
+//TODO     }
+//TODO     arktest.expectThrow(() => { new RegExp('[\\c]', 'u'); }, expectedSyntaxError)
+//TODO     for (let cu = 0x00; cu <= 0x7f; ++cu){
+//TODO         let s = String.fromCharCode(cu);
+//TODO         if(!isAlpha(s)) {
+//TODO             arktest.expectThrow(() => { new RegExp('[\\c' + s + ']', 'u'); }, expectedSyntaxError)
+//TODO         }
+//TODO     }
+//TODO }
 
 function testRegExpParserCase8() {
     arktest.expectThrow(() => { new RegExp('\\u', 'u'); }, expectedSyntaxError)
@@ -280,8 +280,8 @@ function testRegExpParserCase11() {
     arktest.expectThrow(() => { new RegExp('\\9', 'u'); }, expectedSyntaxError)
 
     // DecimalEscape without leading 0 in ClassEscape
-    // ClassEscape[U] :: DecimalEscape
-    // DecimalEscaoe :: DecimalIntegerLiteral [lookahead /= DecimalDigit]
+    //TODO ClassEscape[U] :: DecimalEscape
+    //TODO DecimalEscaoe :: DecimalIntegerLiteral [lookahead /= DecimalDigit]
     arktest.expectThrow(() => { new RegExp('[\\1]', 'u'); }, expectedSyntaxError)
     arktest.expectThrow(() => { new RegExp('[\\2]', 'u'); }, expectedSyntaxError)
     arktest.expectThrow(() => { new RegExp('[\\3]', 'u'); }, expectedSyntaxError)
@@ -293,8 +293,8 @@ function testRegExpParserCase11() {
     arktest.expectThrow(() => { new RegExp('[\\9]', 'u'); }, expectedSyntaxError)
 
     // DecimalEscape with leading 0 in AtomEscape.
-    // Atom[U] :: DecimalEscape
-    // DecimalEscaoe :: DecimalIntegerLiteral [lookahead /= DecimalDigit]
+    //TODO Atom[U] :: DecimalEscape
+    //TODO DecimalEscaoe :: DecimalIntegerLiteral [lookahead /= DecimalDigit]
     arktest.expectThrow(() => { new RegExp('\\00', 'u'); }, expectedSyntaxError)
     arktest.expectThrow(() => { new RegExp('\\01', 'u'); }, expectedSyntaxError)
     arktest.expectThrow(() => { new RegExp('\\02', 'u'); }, expectedSyntaxError)
@@ -307,8 +307,8 @@ function testRegExpParserCase11() {
     arktest.expectThrow(() => { new RegExp('\\09', 'u'); }, expectedSyntaxError)
 
     // DecimalEscape with leading 0 in ClassEscape.
-    // ClassEscape[U] :: DecimalEscape
-    // DecimalEscaoe :: DecimalIntegerLiteral [lookahead /= DecimalDigit]
+    //TODO ClassEscape[U] :: DecimalEscape
+    //TODO DecimalEscaoe :: DecimalIntegerLiteral [lookahead /= DecimalDigit]
     arktest.expectThrow(() => { new RegExp('[\\00]', 'u'); }, expectedSyntaxError)
     arktest.expectThrow(() => { new RegExp('[\\01]', 'u'); }, expectedSyntaxError)
     arktest.expectThrow(() => { new RegExp('[\\02]', 'u'); }, expectedSyntaxError)
@@ -364,23 +364,23 @@ function testRegExpParserCase15() {
 
 function main(): int {
     let suite = new arktest.ArkTestsuite('parse test');
-    suite.addTest('test1',testRegExpParserCase1);
-    suite.addTest('test2',testRegExpParserCase2);
-    suite.addTest('test3',testRegExpParserCase3);
-    suite.addTest('test4',testRegExpParserCase4);
+    suite.addTest('test1', testRegExpParserCase1);
+    suite.addTest('test2', testRegExpParserCase2);
+    suite.addTest('test3', testRegExpParserCase3);
+    suite.addTest('test4', testRegExpParserCase4);
     // NOTE (templinkonstantin): restore as part of internal issue #33869
-    // suite.addTest('test5',testRegExpParserCase5);
-    // suite.addTest('test6',testRegExpParserCase6);
-    // suite.addTest('test7',testRegExpParserCase7);
-    suite.addTest('test8',testRegExpParserCase8);
-    suite.addTest('test9',testRegExpParserCase9);
-    suite.addTest('test10',testRegExpParserCase10);
-    suite.addTest('test11',testRegExpParserCase11);
-    suite.addTest('test12',testRegExpParserCase12);
+    //TODO suite.addTest('test5', testRegExpParserCase5);
+    //TODO suite.addTest('test6', testRegExpParserCase6);
+    //TODO suite.addTest('test7', testRegExpParserCase7);
+    suite.addTest('test8', testRegExpParserCase8);
+    suite.addTest('test9', testRegExpParserCase9);
+    suite.addTest('test10', testRegExpParserCase10);
+    suite.addTest('test11', testRegExpParserCase11);
+    suite.addTest('test12', testRegExpParserCase12);
 
-    suite.addTest('test13',testRegExpParserCase13);
-    suite.addTest('test14',testRegExpParserCase14);
-    suite.addTest('test15',testRegExpParserCase15);
+    suite.addTest('test13', testRegExpParserCase13);
+    suite.addTest('test14', testRegExpParserCase14);
+    suite.addTest('test15', testRegExpParserCase15);
     return suite.run();
 }
 

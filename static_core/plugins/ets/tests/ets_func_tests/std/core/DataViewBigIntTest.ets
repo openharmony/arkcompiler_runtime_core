@@ -13,31 +13,33 @@
  * limitations under the License.
  */
 
-const BIG_UINT_MAX = new BigInt("18446744073709551615");
+const BIG_UINT_MAX = new BigInt('18446744073709551615');
 const BIG_UINT_MIN = 0n;
-const BIG_INT_MAX = new BigInt("9223372036854775807");
-const BIG_INT_MIN = new BigInt("-9223372036854775808");
+const BIG_INT_MAX = new BigInt('9223372036854775807');
+const BIG_INT_MIN = new BigInt('-9223372036854775808');
 
 const success : int = 0;
-const fail    : int = 1;
+const fail : int = 1;
 
 function check(result: int, message: String): int {
-    if(result == success) {
+    if (result == success) {
         return success;
     }
-    console.println("\nFAILED: " + message);
+    // CC-OFFNXT(G.AOD.03) current test suite code style
+    console.println('\nFAILED: ' + message);
     return fail;
 }
 
 function main(): int {
     let failures: int = 0;
-    failures += check(testDataViewBigIntMaxValue(), "testDataViewBigIntMaxValue");
-    failures += check(testDataViewBigUnsingedIntMaxValue(), "testDataViewBigUnsingedIntMaxValue");
-    failures += check(testDataViewBigIntSignedMinValue(), "testDataViewBigIntSignedMinValue")
-    failures += check(testDataViewBigIntSignedMaxValue(), "testDataViewBigIntSignedMaxValue")
-    failures += check(testDataViewBigUnsingedIntMinValue(), "testDataViewBigUnsingedIntMinValue")
+    failures += check(testDataViewBigIntMaxValue(), 'testDataViewBigIntMaxValue');
+    failures += check(testDataViewBigUnsingedIntMaxValue(), 'testDataViewBigUnsingedIntMaxValue');
+    failures += check(testDataViewBigIntSignedMinValue(), 'testDataViewBigIntSignedMinValue')
+    failures += check(testDataViewBigIntSignedMaxValue(), 'testDataViewBigIntSignedMaxValue')
+    failures += check(testDataViewBigUnsingedIntMinValue(), 'testDataViewBigUnsingedIntMinValue')
     // NOTE(aleksander-sotov) Internal issue 21446
-    // failures += check(testDataViewBigUnsingedIntMaxUValueOverflow(), "testDataViewBigUnsingedIntMaxUValueOverflow")
+    // FIXME failures += check(testDataViewBigUnsingedIntMaxUValueOverflow(),
+    //     "testDataViewBigUnsingedIntMaxUValueOverflow")
     return failures
 }
 

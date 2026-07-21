@@ -33,8 +33,10 @@ function createResizableArrayBuffer(): void {
     arktest.assertEQ(a.byteLength, 0)
     arktest.assertFalse(a.detached)
 
-    arktest.expectError((): void => { let a1 = new ArrayBuffer(11, -10) }, new RangeError("maxByteLength can't be less than 0"))
-    arktest.expectError((): void => { let a1 = new ArrayBuffer(11, 10) }, new RangeError("length can't be greater than maxByteLength"))
+    arktest.expectError((): void => { let a1 = new ArrayBuffer(11, -10) },
+        new RangeError('maxByteLength can\'t be less than 0'))
+    arktest.expectError((): void => { let a1 = new ArrayBuffer(11, 10) },
+        new RangeError('length can\'t be greater than maxByteLength'))
 }
 
 function checkCreatedArrayBuffer(a: ArrayBuffer, bytes: FixedArray<byte>): void {
@@ -79,7 +81,7 @@ function createArrayBufferFrom(): void {
  */
 function resizeArrayBuffer(): void {
     let a = new ArrayBuffer(10)
-    arktest.expectError((): void => { a.resize(5) }, new TypeError("ArrayBuffer is not resizable"))
+    arktest.expectError((): void => { a.resize(5) }, new TypeError('ArrayBuffer is not resizable'))
 
     a = new ArrayBuffer(10, 10.0);
 
@@ -87,8 +89,9 @@ function resizeArrayBuffer(): void {
     a.resize(5);
     arktest.assertEQ(a.byteLength, 5)
 
-    arktest.expectError((): void => { a.set(5, 0 .toByte()) }, new IndexOutOfBoundsError("ArrayBuffer position 5 is out of bounds"))
-    arktest.expectError((): void => { a.at(5) }, new IndexOutOfBoundsError("ArrayBuffer position 5 is out of bounds"))
+    arktest.expectError((): void => { a.set(5, 0 .toByte()) },
+        new IndexOutOfBoundsError('ArrayBuffer position 5 is out of bounds'))
+    arktest.expectError((): void => { a.at(5) }, new IndexOutOfBoundsError('ArrayBuffer position 5 is out of bounds'))
 
     // Return previous length
     a.resize(10);
@@ -97,12 +100,13 @@ function resizeArrayBuffer(): void {
     a.set(5, VALUE)
     arktest.assertEQ(a.at(5), VALUE)
 
-    arktest.expectError((): void => { a.resize(11) }, new RangeError("new length cannot be larger than maxByteLength"))
-    arktest.expectError((): void => { a.resize(-11) }, new RangeError("new length cannot be larger than maxByteLength"))
+    arktest.expectError((): void => { a.resize(11) }, new RangeError('new length cannot be larger than maxByteLength'))
+    arktest.expectError((): void => { a.resize(-11) }, new RangeError('new length cannot be larger than maxByteLength'))
 
     a = new ArrayBuffer(10, 12.0)
-    arktest.expectError((): void => { a.set(10, 0 .toByte()) }, new IndexOutOfBoundsError("ArrayBuffer position 10 is out of bounds"))
-    arktest.expectError((): void => { a.at(10) }, new IndexOutOfBoundsError("ArrayBuffer position 10 is out of bounds"))
+    arktest.expectError((): void => { a.set(10, 0 .toByte()) },
+        new IndexOutOfBoundsError('ArrayBuffer position 10 is out of bounds'))
+    arktest.expectError((): void => { a.at(10) }, new IndexOutOfBoundsError('ArrayBuffer position 10 is out of bounds'))
 
     a.resize(11)
     a.set(10, VALUE)
@@ -137,12 +141,12 @@ function testManagedAccessors(): void {
 }
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("ArrayBuffer properties")
+    const suite = new arktest.ArkTestsuite('ArrayBuffer properties')
 
-    suite.addTest("Resizable ArrayBuffer creation", createResizableArrayBuffer)
-    suite.addTest("ArrayBuffer factory methods", createArrayBufferFrom)
-    suite.addTest("ArrayBuffer resize", resizeArrayBuffer)
-    suite.addTest("Test at / set methods of managed ArrayBuffer instance", testManagedAccessors)
+    suite.addTest('Resizable ArrayBuffer creation', createResizableArrayBuffer)
+    suite.addTest('ArrayBuffer factory methods', createArrayBufferFrom)
+    suite.addTest('ArrayBuffer resize', resizeArrayBuffer)
+    suite.addTest('Test at / set methods of managed ArrayBuffer instance', testManagedAccessors)
 
     return suite.run()
 }
