@@ -342,3 +342,122 @@ cases:
       arktest.assertEQ(res, 21);
       Derived.foo(tpl1);
       arktest.assertEQ(res, 22);
+
+  - doc: |-
+      After reverting Any bytecode support, Any and Object produce the same bytecode signature.
+      Derived.bar(a: Object) overrides Base.bar(a: Any) because both map to the same method slot.
+      Due to generic type erasure, foo<T>(a: T) erases to foo(Object) at runtime, so
+      Derived.foo(a: Object) overrides Base.foo<T>(a: T) via vtable dispatch.
+    decl: |-
+      class Base {
+        foo<T>(a: T): int { return 1 }
+        bar(a: Any): int { return 2 }
+      }
+
+      class Derived extends Base {
+        foo(a: Object): int { return 3 }
+        bar(a: Object): int { return 4 }
+      }
+
+      function foo(a: Base) { return a.foo<Object>(new Object()) }
+      function bar(a: Base) { return a.bar(new Object()) }
+    use: |-
+      arktest.assertEQ(foo(new Base()), 1)
+      arktest.assertEQ(foo(new Derived()), 3)
+      arktest.assertEQ(bar(new Base()), 2)
+      arktest.assertEQ(bar(new Derived()), 4)
+
+  - doc: |-
+      After reverting Any bytecode support, bar(a: Any) and bar(a: Object) produce the same
+      bytecode signature. Derived.bar(a: Any) overrides Base.bar(a: Object) because both
+      occupy the same method slot in the vtable.
+    decl: |-
+      class Base {
+        bar(a: Object): int { return 1 }
+      }
+
+      class Derived extends Base {
+        bar(a: Any): int { return 2 }
+      }
+
+      function bar(a: Base) { return a.bar(new Object()) }
+    use: |-
+      arktest.assertEQ(bar(new Base()), 1)
+      arktest.assertEQ(bar(new Derived()), 2)
+
+  - doc: |-
+      After reverting Any bytecode support, Any and Object produce the same runtime type.
+      Derived.foo(): Object overrides Base.foo(): Any because both occupy the same method
+      slot in the vtable; the override is valid since Object is the same as Any at runtime.
+    decl: |-
+      class Base {
+        foo(): Any { return 1 }
+      }
+
+      class Derived extends Base {
+        foo(): Object { return new Object() }
+      }
+
+      function callFoo(a: Base): Any { return a.foo() }
+    use: |-
+      arktest.assertEQ(callFoo(new Base()), 1)
+      arktest.assertTrue(callFoo(new Derived()) instanceof Object)
+
+  - doc: |-
+      After reverting Any bytecode support, FixedArray<Any> and FixedArray<Object> produce
+      the same bytecode signature. Derived.foo(a: FixedArray<Object>) overrides
+      Base.foo(a: FixedArray<Any>) because both occupy the same method slot in the vtable.
+    decl: |-
+      class Base {
+        foo(a: FixedArray<Any>): int { return 1 }
+      }
+
+      class Derived extends Base {
+        foo(a: FixedArray<Object>): int { return 2 }
+      }
+
+      function foo(a: Base) { return a.foo([new Object()]) }
+    use: |-
+      arktest.assertEQ(foo(new Base()), 1)
+      arktest.assertEQ(foo(new Derived()), 2)
+
+  - doc: |-
+      After reverting Any bytecode support, FixedArray<Any> and FixedArray<Object> produce
+      the same bytecode signature. Derived.foo(a: FixedArray<Any>) overrides
+      Base.foo(a: FixedArray<Object>) because both occupy the same method slot in the vtable.
+    decl: |-
+      class Base {
+        foo(a: FixedArray<Object>): int { return 1 }
+      }
+
+      class Derived extends Base {
+        foo(a: FixedArray<Any>): int { return 2 }
+      }
+
+      function foo(a: Base) { return a.foo([new Object()]) }
+    use: |-
+      arktest.assertEQ(foo(new Base()), 1)
+      arktest.assertEQ(foo(new Derived()), 2)
+
+  - doc: |-
+      After reverting Any bytecode support, Any and Object produce the same bytecode signature.
+      When mixed in multi-parameter methods, all (Any, Object) positions collapse to Object,
+      so Derived.foo and Derived.bar override their Base counterparts via vtable dispatch.
+    decl: |-
+      class Base {
+        foo(a: Any, b: Object): int { return 1 }
+        bar(a: Object, b: Any): int { return 2 }
+      }
+
+      class Derived extends Base {
+        foo(a: Object, b: Any): int { return 3 }
+        bar(a: Any, b: Object): int { return 4 }
+      }
+
+      function foo(a: Base) { return a.foo(1, new Object()) }
+      function bar(a: Base) { return a.bar(new Object(), 1) }
+    use: |-
+      arktest.assertEQ(foo(new Base()), 1)
+      arktest.assertEQ(foo(new Derived()), 3)
+      arktest.assertEQ(bar(new Base()), 2)
+      arktest.assertEQ(bar(new Derived()), 4)

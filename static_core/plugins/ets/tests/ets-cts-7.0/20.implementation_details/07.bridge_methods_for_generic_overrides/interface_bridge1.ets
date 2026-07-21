@@ -89,7 +89,7 @@ class LongChild implements LongBase<int|long> {
   compute(v: int|long): int|long { return v instanceof int ? v * 3 : v * 2; }
 }
 
-interface NullishBase<T extends null|undefined|void> {
+interface NullishBase<T extends null|undefined|void|never> {
   compute(v: T): T
 }
 class NullishChild implements NullishBase<undefined> {
@@ -169,7 +169,7 @@ function main(): int {
 
   suite.addTest("Bridge method expects Int", () => {
     let obj = ((): Object => new VoidChild())();
-    let b: VoidBase<Object> = obj as VoidBase<Object>;
+    let b: VoidBase<Any> = obj as VoidBase<Any>;
     b.store(42);
     arktest.assertEQ(b.get(), 84);
     arktest.expectThrow(

@@ -277,9 +277,6 @@ cases:
     new_val_0: "\"abc\""
     new_val_1: "123"
     new_val_2: "c'z'"
-    new_wrong_val_0: "null"
-    new_wrong_val_1: "null"
-    new_wrong_val_2: "null"
     test_suffix: "object"
 
   - element_type: "number | string"
@@ -295,9 +292,6 @@ cases:
     new_val_0: "\"abc\""
     new_val_1: "\"efg\""
     new_val_2: "123"
-    new_wrong_val_0: "17n"
-    new_wrong_val_1: "7n"
-    new_wrong_val_2: "125n"
     test_suffix: "union_num_str"
 
   - element_type: "\"a\" | \"b\" | \"c\""
