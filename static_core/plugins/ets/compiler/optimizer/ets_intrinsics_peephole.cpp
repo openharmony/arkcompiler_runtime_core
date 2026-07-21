@@ -42,6 +42,7 @@ static void ReplaceWithCompareEQ(IntrinsicInst *intrinsic)
     compare->SetInput(1, input1);
     bb->InsertAfter(compare, intrinsic);
     intrinsic->ReplaceUsers(compare);
+    intrinsic->ClearFlag(inst_flags::NO_DCE);
 }
 
 static bool ReplaceTypeofWithIsInstance(IntrinsicInst *intrinsic)

@@ -45,6 +45,7 @@
 #include "optimizer/optimizations/try_catch_resolving.h"
 #include "optimizer/optimizations/vn.h"
 #include "optimizer/optimizations/string_flat_check.h"
+#include "optimizer/optimizations/string_flat_check_elimination.h"
 #include "optimizer/analysis/monitor_analysis.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "runtime/include/method.h"
@@ -320,12 +321,11 @@ bool LLVMAotCompiler::RunArkPasses(compiler::Graph *graph)
         graph->RunPass<compiler::Cleanup>(false);
         graph->RunPass<compiler::Peepholes>();
         graph->RunPass<compiler::ChecksElimination>();
+        graph->RunPass<compiler::StringFlatCheck>();
         if (llvmPreOpt == 2U) {
             PreOpt2(graph);
         }
-        // Run after LSE, LICM etc to avoid redundant StringFlatCheck instruction insertions
-        // and before SaveStateOptimization since it might optimize save states inserted here
-        graph->RunPass<compiler::StringFlatCheck>();
+        graph->RunPass<compiler::StringFlatCheckElimination>();
         if (llvmPreOpt == 2U) {
             PreOpt2Epilog(graph);
         }

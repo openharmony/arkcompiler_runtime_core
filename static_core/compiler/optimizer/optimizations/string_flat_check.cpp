@@ -20,7 +20,6 @@
 #include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/analysis/bounds_analysis.h"
 #include "optimizer/analysis/loop_analyzer.h"
-#include "optimizer/analysis/linear_order.h"
 
 namespace ark::compiler {
 StringFlatCheck::StringFlatCheck(Graph *graph) : Optimization(graph), users_(graph->GetAllocator()->Adapter()) {}
@@ -54,24 +53,26 @@ bool StringFlatCheck::IsEnable(RuntimeInterface *runtime)
     return g_options.IsCompilerStringFlatCheck() && runtime->CanUseStringFlatCheck();
 }
 
+bool StringFlatCheck::IntrinsicRequiresFlatCheck(const IntrinsicInst *intrinsic, unsigned input)
+{
+    auto stringFlatCheckArgMask = GetStringFlatCheckArgMask(intrinsic->GetIntrinsicId());
+    // CC-OFFNXT(G.FMT.17-CPP) false positive
+    return (stringFlatCheckArgMask & (1 << input)) != 0;  // NOLINT(hicpp-signed-bitwise, bugprone-signed-bitwise)
+}
+
 void StringFlatCheck::VisitIntrinsic(GraphVisitor *v, Inst *inst)
 {
     auto *intrinsic = inst->CastToIntrinsic();
-    auto stringFlatCheckArgMask = GetStringFlatCheckArgMask(intrinsic->GetIntrinsicId());
-    if (stringFlatCheckArgMask == 0) {
-        return;
-    }
-
     auto *visitor = static_cast<StringFlatCheck *>(v);
-    visitor->InsertStringFlatCheck(intrinsic, stringFlatCheckArgMask);
+    visitor->InsertStringFlatCheck(intrinsic);
 }
 
-void StringFlatCheck::InsertStringFlatCheck(IntrinsicInst *intrinsic, uint32_t stringFlatCheckArgMask)
+void StringFlatCheck::InsertStringFlatCheck(IntrinsicInst *intrinsic)
 {
     auto argsCount = intrinsic->RequireState() ? intrinsic->GetInputsCount() - 1 : intrinsic->GetInputsCount();
 
     for (size_t i = 0; i < argsCount; i++) {
-        if ((stringFlatCheckArgMask & (1 << i)) == 0) {  // NOLINT(hicpp-signed-bitwise)
+        if (!IntrinsicRequiresFlatCheck(intrinsic, i)) {
             continue;
         }
 
@@ -157,7 +158,8 @@ Inst *StringFlatCheck::InsertInputStringFlatCheck(IntrinsicInst *intrinsic, Inst
     auto *flatCheck = graph->CreateInstStringFlatCheck(DataType::REFERENCE, intrinsic->GetPc());
 
     auto *foundSaveState = intrinsic->GetBasicBlock()->FindSaveState(intrinsic);
-    ASSERT_PRINT(foundSaveState != nullptr, "Intrinsic BB should have SaveState for StringFlatCheck ");
+    ASSERT_PRINT(foundSaveState != nullptr, "Intrinsic BB " << intrinsic->GetBasicBlock()->GetId()
+                                                            << " should have SaveState for StringFlatCheck ");
 
     if (intrinsic->RequireState() && inputInst->GetSaveState() == intrinsic->GetSaveState()) {
         ASSERT(foundSaveState == intrinsic->GetSaveState());
@@ -197,7 +199,7 @@ void StringFlatCheck::ReplaceUsers(Inst *inputInst, Inst *flatCheck)
 
 bool StringFlatCheck::CanUpdateInput(Inst *userInst, Inst *flatCheck) const
 {
-    if (!flatCheck->IsDominate(userInst) || userInst == flatCheck) {
+    if (userInst == flatCheck || userInst->Is(Opcode::StringFlatCheck) || !flatCheck->IsDominate(userInst)) {
         return false;
     }
 

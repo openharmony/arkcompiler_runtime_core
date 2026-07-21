@@ -225,6 +225,7 @@ set(OPTIMIZER_SOURCES
         optimizer/optimizations/vn.cpp
         optimizer/optimizations/cse.cpp
         optimizer/optimizations/string_flat_check.cpp
+        optimizer/optimizations/string_flat_check_elimination.cpp
         tools/debug/jit_writer.cpp
         compiler_logger.cpp
         compiler_options.cpp

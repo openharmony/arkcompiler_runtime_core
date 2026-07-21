@@ -53,13 +53,15 @@ public:
         return NAME;
     }
 
+    static bool IntrinsicRequiresFlatCheck(const IntrinsicInst *intrinsic, unsigned input);
+
     static void VisitIntrinsic(GraphVisitor *v, Inst *inst);
 
 #include "optimizer/ir/visitor.inc"
 private:
     const ArenaVector<BasicBlock *> &GetBlocksToVisit() const override;
     bool SeparatedByOsrEntry(BasicBlock *bb1, BasicBlock *bb2) const;
-    void InsertStringFlatCheck(IntrinsicInst *intrinsic, uint32_t stringFlatCheckArgMask);
+    void InsertStringFlatCheck(IntrinsicInst *intrinsic);
     Inst *GetStringFlatCheckUser(IntrinsicInst *intrinsic, Inst *inst) const;
     bool MoveThroughDominationTree(Inst *flatCheck, IntrinsicInst *intrinsic) const;
     Inst *InsertInputStringFlatCheck(IntrinsicInst *intrinsic, Inst *inputInst) const;
