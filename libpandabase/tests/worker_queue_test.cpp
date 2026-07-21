@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,8 +33,12 @@ class TestWorkerQueue : public WorkerQueue {
 public:
     explicit TestWorkerQueue(size_t threadCount) : WorkerQueue(threadCount) {}
     void Schedule() override {}
+
+    // Hold m_ so the push + jobsCount_ update cannot race with worker threads,
+    // which read jobsCount_/jobs_ inside WorkerQueue::Consume.
     void AddJob(WorkerJob *job)
     {
+        std::lock_guard<std::mutex> lock(m_);
         jobs_.push_back(job);
         jobsCount_++;
     }
@@ -140,15 +144,15 @@ HWTEST_F(WorkerQueueTest, ConcurrentJobs, testing::ext::TestSize.Level0)
     std::atomic<int> counter(0);
     {
         TestWorkerQueue *queue = new TestWorkerQueue(2);
-    
+
         // Add a waiting job
         queue->AddJob(new WaitingJob());
-        
+
         // Add some counting jobs
         for (int i = 0; i < 3; i++) {
             queue->AddJob(new CountingJob(counter));
         }
-        
+
         queue->Consume();
         queue->Wait();
         delete queue;
