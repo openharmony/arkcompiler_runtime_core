@@ -165,8 +165,8 @@ cases:
           arktest.assertTrue(i.meth(new B, new A, new Object) instanceof C)
           arktest.assertTrue(j.meth(new A, new Object, null) instanceof C)
 
-    # Any and Object have different effective types: interface method with Object param
-    # is overridden by class impl with Any param (Any is contravariant to Object)
+    # After reverting Any bytecode support, Any and Object produce the same bytecode signature.
+    # Interface method with Object param is overridden by class impl with Any param via vtable dispatch.
     - decl: |-
           interface I {
               foo(a: Object): int { return 0 }
@@ -184,33 +184,27 @@ cases:
           arktest.assertEQ(i1.foo(new A), 1)
           arktest.assertEQ(i2.foo(new Object()), 2)
           arktest.assertEQ(i2.foo(new A), 2)
-          arktest.assertEQ(i2.foo(1), 2)
 
-    # Any and Object have different effective types: interface method with Any param
-    # is NOT overridden by class impl with Object param
+    # After reverting Any bytecode support, Any and Object produce the same bytecode signature.
+    # Declaring both foo(a: Object) and foo(a: Any) in the same class would produce a duplicate
+    # method error. This test verifies that foo(a: Any) overrides the interface default method
+    # since both share the same runtime signature.
     - decl: |-
           interface I {
               foo(a: Any): int { return 0 }
           }
-          class Impl1 implements I {
-              foo(a: Object): int { return 1 }
-          }
-          class Impl2 implements I {
-              foo(a: Object): int { return 2 }
+          class Impl implements I {
               foo(a: Any): int { return 3 }
           }
-          let i1: I = new Impl1
-          let i2: I = new Impl2
+          let i: I = new Impl
       use: |-
-          arktest.assertEQ(i1.foo(null), 0)
-          arktest.assertEQ(i1.foo(undefined), 0)
-          arktest.assertEQ(i1.foo(new Object()), 0)
-          arktest.assertEQ(i2.foo(null), 3)
-          arktest.assertEQ(i2.foo(undefined), 3)
-          arktest.assertEQ(i2.foo(new Object()), 3)
+          arktest.assertEQ(i.foo(null), 3)
+          arktest.assertEQ(i.foo(undefined), 3)
+          arktest.assertEQ(i.foo(new Object()), 3)
 
-    # Any and Object have different effective types: interface return type Any
-    # is overridden by class return type Object (Object is covariant to Any)
+    # After reverting Any bytecode support, Any and Object produce the same bytecode signature.
+    # Interface return type Any is overridden by class return type Object via vtable dispatch,
+    # since both map to the same runtime type.
     - decl: |-
           interface I {
               foo(): Any { return 0 }
@@ -223,7 +217,9 @@ cases:
           let v = i.foo()
           arktest.assertEQ(v, 1)
 
-    # FixedArray<Any> vs FixedArray<Object> in interface overriding: contravariant param
+    # After reverting Any bytecode support, FixedArray<Any> and FixedArray<Object> produce
+    # the same bytecode signature. Impl.foo(a: FixedArray<Any>) overrides I.foo(a: FixedArray<Object>)
+    # via vtable dispatch.
     - decl: |-
           interface I {
               foo(a: FixedArray<Object>): int { return 0 }
@@ -235,22 +231,17 @@ cases:
       use: |-
           arktest.assertEQ(i.foo([new Object()]), 1)
 
-    # FixedArray<Any> and FixedArray<Object> have different effective types in interface overriding
+    # After reverting Any bytecode support, FixedArray<Any> and FixedArray<Object> produce
+    # the same bytecode signature. Declaring both would cause a duplicate method error.
+    # Impl.foo(a: FixedArray<Object>) overrides I.foo(a: FixedArray<Any>) via vtable dispatch.
     - decl: |-
           interface I {
               foo(a: FixedArray<Any>): int { return 0 }
           }
-          class Impl1 implements I {
-              foo(a: FixedArray<Object>): int { return 1 }
+          class Impl implements I {
+              foo(a: FixedArray<Object>): int { return 3 }
           }
-          class Impl2 implements I {
-              foo(a: FixedArray<Object>): int { return 2 }
-              foo(a: FixedArray<Any>): int { return 3 }
-          }
-          let i1: I = new Impl1
-          let i2: I = new Impl2
+          let i: I = new Impl
       use: |-
-          arktest.assertEQ(i1.foo([1, 2]), 0)
-          arktest.assertEQ(i1.foo([null, undefined]), 0)
-          arktest.assertEQ(i2.foo([1, 2]), 3)
-          arktest.assertEQ(i2.foo([null, undefined]), 3)
+          arktest.assertEQ(i.foo([1, 2]), 3)
+          arktest.assertEQ(i.foo([null, undefined]), 3)

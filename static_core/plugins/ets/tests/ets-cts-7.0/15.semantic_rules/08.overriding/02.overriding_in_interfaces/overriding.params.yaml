@@ -164,3 +164,84 @@ cases:
           arktest.assertTrue(k.meth(new C, new B, new A) instanceof C)
           arktest.assertTrue(i.meth(new B, new A, new Object) instanceof C)
           arktest.assertTrue(j.meth(new A, new Object, null) instanceof C)
+
+    # After reverting Any bytecode support, Any and Object produce the same bytecode signature.
+    # Interface method with Object param is overridden by class impl with Any param via vtable dispatch.
+    - decl: |-
+          interface I {
+              foo(a: Object): int { return 0 }
+          }
+          class Impl1 implements I {
+              foo(a: Object): int { return 1 }
+          }
+          class Impl2 implements I {
+              foo(a: Any): int { return 2 }
+          }
+          let i1: I = new Impl1
+          let i2: I = new Impl2
+      use: |-
+          arktest.assertEQ(i1.foo(new Object()), 1)
+          arktest.assertEQ(i1.foo(new A), 1)
+          arktest.assertEQ(i2.foo(new Object()), 2)
+          arktest.assertEQ(i2.foo(new A), 2)
+
+    # After reverting Any bytecode support, Any and Object produce the same bytecode signature.
+    # Declaring both foo(a: Object) and foo(a: Any) in the same class would produce a duplicate
+    # method error. This test verifies that foo(a: Any) overrides the interface default method
+    # since both share the same runtime signature.
+    - decl: |-
+          interface I {
+              foo(a: Any): int { return 0 }
+          }
+          class Impl implements I {
+              foo(a: Any): int { return 3 }
+          }
+          let i: I = new Impl
+      use: |-
+          arktest.assertEQ(i.foo(null), 3)
+          arktest.assertEQ(i.foo(undefined), 3)
+          arktest.assertEQ(i.foo(new Object()), 3)
+
+    # After reverting Any bytecode support, Any and Object produce the same bytecode signature.
+    # Interface return type Any is overridden by class return type Object via vtable dispatch,
+    # since both map to the same runtime type.
+    - decl: |-
+          interface I {
+              foo(): Any { return 0 }
+          }
+          class Impl implements I {
+              foo(): Object { return 1 }
+          }
+          let i: I = new Impl
+      use: |-
+          let v = i.foo()
+          arktest.assertEQ(v, 1)
+
+    # After reverting Any bytecode support, FixedArray<Any> and FixedArray<Object> produce
+    # the same bytecode signature. Impl.foo(a: FixedArray<Any>) overrides I.foo(a: FixedArray<Object>)
+    # via vtable dispatch.
+    - decl: |-
+          interface I {
+              foo(a: FixedArray<Object>): int { return 0 }
+          }
+          class Impl implements I {
+              foo(a: FixedArray<Any>): int { return 1 }
+          }
+          let i: I = new Impl
+      use: |-
+          arktest.assertEQ(i.foo([new Object()]), 1)
+
+    # After reverting Any bytecode support, FixedArray<Any> and FixedArray<Object> produce
+    # the same bytecode signature. Declaring both would cause a duplicate method error.
+    # Impl.foo(a: FixedArray<Object>) overrides I.foo(a: FixedArray<Any>) via vtable dispatch.
+    - decl: |-
+          interface I {
+              foo(a: FixedArray<Any>): int { return 0 }
+          }
+          class Impl implements I {
+              foo(a: FixedArray<Object>): int { return 3 }
+          }
+          let i: I = new Impl
+      use: |-
+          arktest.assertEQ(i.foo([1, 2]), 3)
+          arktest.assertEQ(i.foo([null, undefined]), 3)

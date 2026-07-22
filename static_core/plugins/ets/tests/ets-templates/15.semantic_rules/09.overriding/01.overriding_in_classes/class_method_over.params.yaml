@@ -344,7 +344,10 @@ cases:
       arktest.assertEQ(res, 22);
 
   - doc: |-
-      No overriding of instance methods if arguments are not contravariant.
+      After reverting Any bytecode support, Any and Object produce the same bytecode signature.
+      Derived.bar(a: Object) overrides Base.bar(a: Any) because both map to the same method slot.
+      Due to generic type erasure, foo<T>(a: T) erases to foo(Object) at runtime, so
+      Derived.foo(a: Object) overrides Base.foo<T>(a: T) via vtable dispatch.
     decl: |-
       class Base {
         foo<T>(a: T): int { return 1 }
@@ -360,13 +363,14 @@ cases:
       function bar(a: Base) { return a.bar(new Object()) }
     use: |-
       arktest.assertEQ(foo(new Base()), 1)
-      arktest.assertEQ(foo(new Derived()), 1)
+      arktest.assertEQ(foo(new Derived()), 3)
       arktest.assertEQ(bar(new Base()), 2)
-      arktest.assertEQ(bar(new Derived()), 2)
+      arktest.assertEQ(bar(new Derived()), 4)
 
   - doc: |-
-      No overriding when Any and Object have the same runtime signature.
-      After reverting Any bytecode support, bar(a: Any) and bar(a: Object) both use Object signature.
+      After reverting Any bytecode support, bar(a: Any) and bar(a: Object) produce the same
+      bytecode signature. Derived.bar(a: Any) overrides Base.bar(a: Object) because both
+      occupy the same method slot in the vtable.
     decl: |-
       class Base {
         bar(a: Object): int { return 1 }
@@ -379,11 +383,12 @@ cases:
       function bar(a: Base) { return a.bar(new Object()) }
     use: |-
       arktest.assertEQ(bar(new Base()), 1)
-      arktest.assertEQ(bar(new Derived()), 1)
+      arktest.assertEQ(bar(new Derived()), 2)
 
   - doc: |-
-      Overriding is possible when derived method return type is covariant.
-      Object is a subtype of Any, so foo(): Any in Base is overridden by foo(): Object in Derived.
+      After reverting Any bytecode support, Any and Object produce the same runtime type.
+      Derived.foo(): Object overrides Base.foo(): Any because both occupy the same method
+      slot in the vtable; the override is valid since Object is the same as Any at runtime.
     decl: |-
       class Base {
         foo(): Any { return 1 }
@@ -399,8 +404,9 @@ cases:
       arktest.assertTrue(callFoo(new Derived()) instanceof Object)
 
   - doc: |-
-      No overriding of instance methods if FixedArray element types are not contravariant.
-      FixedArray<Any> param in base is not overridden by FixedArray<Object> param in derived.
+      After reverting Any bytecode support, FixedArray<Any> and FixedArray<Object> produce
+      the same bytecode signature. Derived.foo(a: FixedArray<Object>) overrides
+      Base.foo(a: FixedArray<Any>) because both occupy the same method slot in the vtable.
     decl: |-
       class Base {
         foo(a: FixedArray<Any>): int { return 1 }
@@ -413,11 +419,12 @@ cases:
       function foo(a: Base) { return a.foo([new Object()]) }
     use: |-
       arktest.assertEQ(foo(new Base()), 1)
-      arktest.assertEQ(foo(new Derived()), 1)
+      arktest.assertEQ(foo(new Derived()), 2)
 
   - doc: |-
-      No overriding when FixedArray<Any> and FixedArray<Object> have the same runtime signature.
-      After reverting Any bytecode support, FixedArray<Any> uses Object element signature.
+      After reverting Any bytecode support, FixedArray<Any> and FixedArray<Object> produce
+      the same bytecode signature. Derived.foo(a: FixedArray<Any>) overrides
+      Base.foo(a: FixedArray<Object>) because both occupy the same method slot in the vtable.
     decl: |-
       class Base {
         foo(a: FixedArray<Object>): int { return 1 }
@@ -430,10 +437,12 @@ cases:
       function foo(a: Base) { return a.foo([new Object()]) }
     use: |-
       arktest.assertEQ(foo(new Base()), 1)
-      arktest.assertEQ(foo(new Derived()), 1)
+      arktest.assertEQ(foo(new Derived()), 2)
 
   - doc: |-
-      No overriding of instance methods when mixing Any and Object in multi-parameter methods.
+      After reverting Any bytecode support, Any and Object produce the same bytecode signature.
+      When mixed in multi-parameter methods, all (Any, Object) positions collapse to Object,
+      so Derived.foo and Derived.bar override their Base counterparts via vtable dispatch.
     decl: |-
       class Base {
         foo(a: Any, b: Object): int { return 1 }
@@ -449,6 +458,6 @@ cases:
       function bar(a: Base) { return a.bar(new Object(), 1) }
     use: |-
       arktest.assertEQ(foo(new Base()), 1)
-      arktest.assertEQ(foo(new Derived()), 1)
+      arktest.assertEQ(foo(new Derived()), 3)
       arktest.assertEQ(bar(new Base()), 2)
-      arktest.assertEQ(bar(new Derived()), 2)
+      arktest.assertEQ(bar(new Derived()), 4)

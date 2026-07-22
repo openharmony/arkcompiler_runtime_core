@@ -21,15 +21,9 @@ desc: Overload Resolution for Overload Declarations - implicit function overload
 
 function singleArg(a: Any): int { return 1 }
 
-function singleArg(a: Object): int { return 2 }
-
 function multipleArgs(a: double, b: Any, c: string): int { return 1 }
 
-function multipleArgs(a: double, b: Object, c: string): int { return 2 }
-
 function optionalArg(a: double, b?: Any): int { return 1 }
-
-function optionalArg(a: double, b?: Object): int { return 2 }
 
 function main() {
     let testSuite = new arktest.ArkTestsuite('Implicit overload function 4')
