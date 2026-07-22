@@ -425,7 +425,6 @@
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_14.ets
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_15.ets
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_16.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_2.ets
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_3.ets
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_4.ets
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_5.ets
@@ -576,10 +575,7 @@
 
 #35472
 24.build_system/metadata/complex_tests/stress_limits_cross_package/test_methods.ets
-24.build_system/metadata/complex_tests/stress_limits_cross_package/test_enum.ets
-24.build_system/metadata/complex_tests/stress_limits_cross_package/test_genparams.ets
 24.build_system/metadata/complex_tests/stress_limits_cross_package/test_multi_import.ets
-24.build_system/metadata/complex_tests/stress_limits_cross_package/test_union.ets
 
 #34886
 24.build_system/binary-metadata/base_tests/abstract_class/test_import.ets
