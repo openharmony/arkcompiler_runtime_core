@@ -1034,6 +1034,8 @@
 24.build_system/metadata/base_tests/export_specifier_dump/test_import.ets
 24.build_system/metadata/base_tests/export_type_directive_rename/test_import.ets
 24.build_system/binary-metadata/base_tests/export_type_directive_rename/test_import.ets
+24.build_system/metadata/base_tests/export_type_reexport_nonexported/test_import.ets
+24.build_system/binary-metadata/base_tests/export_type_reexport_nonexported/test_import.ets
 
 #34837
 24.build_system/metadata/base_tests/simultaneous_glob_dets/test_main.ets
@@ -1143,6 +1145,8 @@
 24.build_system/binary-metadata/base_tests/reexport_named_as_default/test_import.ets
 24.build_system/binary-metadata/base_tests/reexport_rename_multiple_aliases/test_import.ets
 24.build_system/binary-metadata/base_tests/reexport_star_chain/test_import.ets
+24.build_system/binary-metadata/base_tests/alias_to_imported_type/test_import.ets
+24.build_system/binary-metadata/base_tests/reexport_nonexported_specifier_n/test_reexport_n.ets
 
 #34887
 24.build_system/binary-metadata/base_tests/all_combined/main.ets
