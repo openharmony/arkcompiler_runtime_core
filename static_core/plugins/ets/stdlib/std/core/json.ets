@@ -267,7 +267,7 @@ class FieldMetadataCache {
 
 // JsonSerializable provides a interface for external classes to override toJSON
 export interface JsonSerializable {
-    toJSON(): string
+    toJSON(): Any
 }
 
 export class JSON {
@@ -1190,7 +1190,7 @@ class JSONWriter {
         } else if (obj instanceof jsonx.JsonElementSerializable) {
             this.buffer.append(JSON.stringifyJsonElement(obj))
         } else if (obj instanceof JsonSerializable) {
-            this.buffer.append('"'.concat(obj.toJSON(), '"'))
+            this.writeObject(obj.toJSON())
         } else if (obj instanceof ArrayBuffer || obj instanceof DataView) {
             this.buffer.append(JSONObject.EMPTY)
         } else if (obj instanceof Function) {
@@ -1254,7 +1254,7 @@ class JSONWriter {
         } else if (obj instanceof ESValue) {
             this.writeInteropESValue(obj)
         } else if (obj instanceof JsonSerializable) {
-            this.buffer.append('"'.concat(obj.toJSON(), '"'))
+            this.writeObject(obj.toJSON())
         } else if (obj instanceof jsonx.JsonElementSerializable) {
             this.buffer.append(JSON.stringifyJsonElement(obj))
         } else if (obj instanceof ArrayBuffer || obj instanceof DataView) {

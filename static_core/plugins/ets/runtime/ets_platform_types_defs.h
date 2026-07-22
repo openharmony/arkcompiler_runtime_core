@@ -280,7 +280,7 @@
     TP("Lstd/core/JsonReplacer;", coreJsonReplacer)                                                                    \
     TP("Lstd/core/jsonx/JsonElementSerializable;", coreJsonElementSerializable)                                        \
     TP("Lstd/core/JsonSerializable;", coreJsonSerializable)                                                            \
-    IM("Lstd/core/JsonSerializable;", "toJSON", ":Lstd/core/String;", coreJsonSerializableToJSON)                      \
+    IM("Lstd/core/JsonSerializable;", "toJSON", ":Lstd/core/Object;", coreJsonSerializableToJSON)                      \
     AN("Lstd/core/JSONStringifyIgnore;", coreJSONStringifyIgnore)                                                      \
     AN("Lstd/core/JSONParseIgnore;", coreJSONParseIgnore)                                                              \
     AN("Lstd/core/JSONRename;", coreJSONRename)                                                                        \

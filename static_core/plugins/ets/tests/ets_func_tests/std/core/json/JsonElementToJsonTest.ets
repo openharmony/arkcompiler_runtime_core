@@ -19,6 +19,34 @@ function main() {
 	const suite = new arktest.ArkTestsuite('jsonx.toJson')
 
 	suite.addTest('Test toJson', testToJson)
+	suite.addTest('toJSON test to json', testToJsonTest1)
+    suite.addTest('toJSON test to json', testToJsonTest2)
+	return suite.run()
+}
+
+export class JsonA implements JsonSerializable {
+    public toJSON(): string {
+        return 'A'
+    }
+}
+
+export class JsonCustomClass implements JsonSerializable {
+    public toJSON(): Any {
+        let a: Record<string, string> = {'custom':'json_works'}
+        return a
+    }
+}
+
+function testToJsonTest1(): void {
+    let a = new JsonA()
+    let json = JSON.stringify(a)
+    arktest.assertEQ(json, '"A"')
+}
+
+function testToJsonTest2(): void {
+    let customClass = new JsonCustomClass() 
+    let json = JSON.stringify(customClass)
+    arktest.assertEQ(json, '{"custom":"json_works"}')
 }
 
 function testToJson() {
