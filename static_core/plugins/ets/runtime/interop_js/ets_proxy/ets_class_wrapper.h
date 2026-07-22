@@ -202,6 +202,7 @@ private:
     std::vector<std::unique_ptr<EtsFieldWrapper>> getterSetterFieldWrappers_;
     uint32_t numMethods_ {};
     uint32_t numFields_ {};
+    bool hasReservedConflict_ {};
 
     bool needProxy_ = false;
     napi_ref jsProxyCtorRef_ {};

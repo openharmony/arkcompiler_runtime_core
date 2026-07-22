@@ -91,6 +91,11 @@ PandaString PreprocessBigIntInJson(const PandaString &jsonStr);
 
 PANDA_PUBLIC_API void ThrowNoInteropContextException();
 
+inline bool IsReservedJSBuiltin(const char *name)
+{
+    return strcmp(name, "name") == 0 || strcmp(name, "length") == 0 || strcmp(name, "prototype") == 0;
+}
+
 void ThrowJSErrorNotAssignable(napi_env env, const EtsClass *fromKlass, EtsClass *toKlass);
 
 bool NapiGetProperty(napi_env env, napi_value object, napi_value key, napi_value *result);
