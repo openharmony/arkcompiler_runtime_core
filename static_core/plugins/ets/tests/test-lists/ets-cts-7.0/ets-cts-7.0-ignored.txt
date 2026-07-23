@@ -1,9 +1,6 @@
 #34809
 05.generics/01.type_parameters/02.type_parameter_default/generic_type_alias/type_alias_self_referential_default.ets
 
-#34392 CTE on implicit char to string conversion
-07.expressions/34.string_interpolation_expressions/char_interpolation.ets
-
 #34393 es2panda aborts on bigint expression in string interpolation expression
 07.expressions/34.string_interpolation_expressions/bigint_interpolation_conditional.ets
 07.expressions/34.string_interpolation_expressions/bigint_interpolation_enum.ets
@@ -21,11 +18,6 @@
 
 #33978
 11.enumerations/01.enumeration_base_type/enum_str_1.ets
-11.enumerations/02.enumeration_with_explicit_base_type/enum_string_decl_udvt_0_0.ets
-
-#33979
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_citoomaxv1_byte_0_0.ets
-11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_citoomaxv1_short_0_0.ets
 
 #34956
 15.semantic_rules/09.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_5.ets
