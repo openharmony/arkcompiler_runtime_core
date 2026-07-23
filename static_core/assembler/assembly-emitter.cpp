@@ -1924,15 +1924,18 @@ bool AsmEmitter::AssignProfileInfo(std::unordered_map<size_t, std::vector<Ins *>
         }
         size_t index = 0;
         for (auto it = SIZES.rbegin(); it != SIZES.rend(); ++it) {
-            std::vector<Ins *> &vec = instMap[*it];
-            for (auto inst : vec) {
+            auto itv = instMap.find(*it);
+            if (itv == instMap.end()) {
+                continue;
+            }
+            for (auto inst : itv->second) {
                 inst->profileId = index;
                 index += *it;
             }
-            vec.clear();
+            itv->second.clear();
         }
 
-        functionTable.at(func.first).profileSize = index;
+        func.second.profileSize = index;
     }
     return true;
 }
