@@ -19,6 +19,10 @@
 #include "common_components/common/type_def.h"
 #include "common_interfaces/base/runtime_param.h"
 
+namespace ark::mem {
+class HeapSpace;
+}
+
 namespace ark::common_vm {
 class BaseObject;
 // replace this for Heap.
@@ -28,7 +32,7 @@ public:
     ~HeapManager() = default;
 
     // runtime required lifecycle interfaces
-    void Init(const mem::RuntimeParam &param);
+    void Init(const mem::RuntimeParam &param, mem::HeapSpace *heapSpace);
     void Fini();
 
     // alloc return memory address, not "object" pointers, since they're not

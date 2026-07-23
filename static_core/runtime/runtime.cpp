@@ -85,6 +85,7 @@
 
 #if defined(ARK_USE_COMMON_RUNTIME)
 #include "runtime/mem/gc/cmc/heap/heap.h"
+#include "common_components/common_runtime/base_runtime_param.h"
 #endif  // ARK_USE_COMMON_RUNTIME
 
 namespace ark {
@@ -291,7 +292,12 @@ inline bool CreateMemorySpaces(const RuntimeOptions &options)
         return false;
     }
     size_t initialObjectSize = options.GetInitHeapSizeLimit();
+#if defined(ARK_USE_COMMON_RUNTIME)
+    auto param = common_vm::BaseRuntimeParam::DefaultRuntimeParam();
+    size_t maxObjectSize = param.heapParam.heapSize * common_vm::KB;
+#else
     size_t maxObjectSize = options.GetHeapSizeLimit();
+#endif
     bool wasSetInitialObjectSize = options.WasSetInitHeapSizeLimit();
     bool wasSetMaxObjectSize = options.WasSetHeapSizeLimit();
     if (!wasSetInitialObjectSize && wasSetMaxObjectSize) {

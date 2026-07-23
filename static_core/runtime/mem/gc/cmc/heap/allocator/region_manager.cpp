@@ -360,63 +360,34 @@ inline void RegionManager::UntagHugePage(RegionDesc *region, size_t num) const
 #endif
 }
 
-size_t FreeRegionManager::ReleaseGarbageRegions(size_t targetCachedSize)
+void RegionManager::Initialize(size_t nRegion, mem::HeapSpace *heapSpace)
 {
-    size_t dirtyBytes = dirtyUnitTree_.GetTotalCount() * RegionDesc::UNIT_SIZE;
-    if (dirtyBytes <= targetCachedSize) {
-        LOG(DEBUG, GC) << "release heap garbage memory 0 bytes, cache " << dirtyBytes << "(" << targetCachedSize
-                       << ") bytes";
-        return 0;
-    }
+    heapSpace_ = heapSpace;
+    // propagate region heap layout
+    RegionDesc::Initialize(nRegion, PoolManager::GetMmapMemPool()->GetMinObjectAddress());
 
-    size_t releasedBytes = 0;
-    while (dirtyBytes > targetCachedSize) {
-        ark::os::memory::LockHolder lock1(dirtyUnitTreeMutex_);
-        auto node = dirtyUnitTree_.RootNode();
-        if (node == nullptr) {
-            break;
-        }
-        uint32_t idx = node->GetIndex();
-        uint32_t num = node->GetCount();
-        dirtyUnitTree_.ReleaseRootNode();
-
-        ark::os::memory::LockHolder lock2(releasedUnitTreeMutex_);
-        LOG_IF(UNLIKELY(!releasedUnitTree_.MergeInsert(idx, num, true)), FATAL, MM_OBJECT_EVENTS)
-            << "tid " << GetTid() << ": failed to release garbage units[" << idx << "+" << num << ", " << (idx + num)
-            << ")";
-        releasedBytes += (num * RegionDesc::UNIT_SIZE);
-        dirtyBytes = dirtyUnitTree_.GetTotalCount() * RegionDesc::UNIT_SIZE;
-    }
-    LOG(DEBUG, GC) << "release heap garbage memory " << releasedBytes << " bytes, cache " << dirtyBytes << "("
-                   << targetCachedSize << ") bytes";
-    return releasedBytes;
+    LOG(DEBUG, GC) << "region info heap [0x" << std::hex << PoolManager::GetMmapMemPool()->GetMinObjectAddress()
+                   << ", 0x" << std::hex << PoolManager::GetMmapMemPool()->GetMaxObjectAddress() << "), unit count "
+                   << std::dec << nRegion;
 }
 
-void RegionManager::Initialize(size_t nRegion, uintptr_t heapStart)
+void RegionManager::Fini()
 {
-    regionHeapStart_ = RoundUp<size_t>(heapStart, RegionDesc::UNIT_SIZE);
-    regionHeapEnd_ = regionHeapStart_ + nRegion * RegionDesc::UNIT_SIZE;
-    // Atomic with seq_cst order reason: initialization of inactiveZone_ with requirement for sequentially consistent
-    // order where threads observe all modifications in the same order
-    inactiveZone_.store(regionHeapStart_, std::memory_order_seq_cst);
-    // propagate region heap layout
-    RegionDesc::Initialize(nRegion, regionHeapStart_);
-    freeRegionManager_.Initialize(nRegion);
-
-    LOG(DEBUG, GC) << "region info heap [0x" << std::hex << regionHeapStart_ << ", 0x" << std::hex << regionHeapEnd_
-                   << "), unit count " << std::dec << nRegion;
-#ifdef USE_HWASAN
-    ASAN_UNPOISON_MEMORY_REGION(reinterpret_cast<const volatile void *>(heapStart), nRegion * RegionDesc::UNIT_SIZE);
-    const uintptr_t p_addr = heapStart;
-    const uintptr_t p_size = nRegion * RegionDesc::UNIT_SIZE;
-    LOG(DEBUG, COMMON) << std::hex << "set [" << p_addr << std::hex << ", " << p_addr + p_size << ") unpoisoned\n";
+    os::memory::LockHolder h(regionsInUseLock_);
+    IterateAllocatedUnits([this](RegionDesc *region) {
+        if (region->IsValidRegion() && !region->IsFreeRegion()) {
+#if defined(COMMON_SANITIZER_SUPPORT)
+            Sanitizer::OnHeapDeallocated(region, region->GetRegionBaseSize());
 #endif
+            heapSpace_->FreePool(region, region->GetRegionBaseSize(), true);
+        }
+    });
+    regionsInUse_.clear();
 }
 
 void RegionManager::ReclaimRegion(RegionDesc *region)
 {
     size_t num = region->GetUnitCount();
-    size_t unitIndex = region->GetUnitIdx();
     if (num >= HUGE_PAGE_UNIT_NUM) {
         UntagHugePage(region, num);
     }
@@ -425,22 +396,26 @@ void RegionManager::ReclaimRegion(RegionDesc *region)
                    << "+" << std::dec << region->GetRegionAllocatedSize() << " type "
                    << static_cast<size_t>(region->GetRegionType());
     region->InitFreeUnits();
-    freeRegionManager_.AddGarbageUnits(unitIndex, num);
+    heapSpace_->FreePool(region, num * RegionDesc::UNIT_SIZE, false);
+
+    os::memory::LockHolder h(regionsInUseLock_);
+    regionsInUse_.erase(region);
 }
 
 size_t RegionManager::ReleaseRegion(RegionDesc *region)
 {
     size_t res = region->GetRegionSize();
     size_t num = region->GetUnitCount();
-    size_t unitIndex = region->GetUnitIdx();
     if (num >= HUGE_PAGE_UNIT_NUM) {
         UntagHugePage(region, num);
     }
     LOG(DEBUG, GC) << "release region " << region << " @0x" << std::hex << region->GetRegionStart() << "+" << std::dec
                    << region->GetRegionAllocatedSize() << " type " << static_cast<size_t>(region->GetRegionType());
     region->InitFreeUnits();
-    RegionDesc::ReleaseUnits(unitIndex, num);
-    freeRegionManager_.AddReleaseUnits(unitIndex, num);
+    heapSpace_->FreePool(region, num * RegionDesc::UNIT_SIZE, true);
+
+    os::memory::LockHolder h(regionsInUseLock_);
+    regionsInUse_.erase(region);
     return res;
 }
 
@@ -452,15 +427,12 @@ void RegionManager::CountLiveObject(const BaseObject *obj)
 
 void RegionManager::ForEachObjectUnsafe(const std::function<void(BaseObject *)> &visitor) const
 {
-    for (uintptr_t regionAddr = regionHeapStart_; regionAddr < inactiveZone_;) {
-        RegionDesc *region = reinterpret_cast<RegionDesc *>(regionAddr);
-        uintptr_t next = region->GetRegionEnd();
-        regionAddr = next;
-        if (!region->IsValidRegion() || region->IsFreeRegion() || region->IsGarbageRegion()) {
-            continue;
+    os::memory::LockHolder h(regionsInUseLock_);
+    IterateAllocatedUnits([&visitor](RegionDesc *region) {
+        if (region->IsValidRegion() && !region->IsFreeRegion() && !region->IsGarbageRegion()) {
+            region->VisitAllObjects([&visitor](BaseObject *object) { visitor(object); });
         }
-        region->VisitAllObjects([&visitor](BaseObject *object) { visitor(object); });
-    }
+    });
 }
 
 void RegionManager::ForEachObjectSafe(const std::function<void(BaseObject *)> &visitor) const
@@ -499,75 +471,59 @@ RegionDesc *RegionManager::TakeRegion(size_t num, RegionDesc::UnitRole type, boo
         }
     }
 
-    RegionDesc *region = freeRegionManager_.TakeRegion(num, type, expectPhysicalMem);
-    if (region != nullptr) {
-        if (num >= HUGE_PAGE_UNIT_NUM) {
-            TagHugePage(region, num);
-        }
-        return region;
+    auto pool = heapSpace_->TryAllocPool(size,
+                                         type == RegionDesc::UnitRole::SMALL_SIZED_UNITS
+                                             ? SpaceType::SPACE_TYPE_OBJECT
+                                             : SpaceType::SPACE_TYPE_HUMONGOUS_OBJECT,
+                                         AllocatorType::REGION_ALLOCATOR, nullptr);
+    if (pool.GetMem() == nullptr) {
+        return nullptr;
     }
 
-    // when free regions are not enough for allocation
-    if (num <= GetInactiveUnitCount()) {
-        // Atomic with acq_rel order reason: data race with inactiveZone_ during concurrent region allocation
-        uintptr_t addr = inactiveZone_.fetch_add(size, std::memory_order_acq_rel);
+    uintptr_t addr = ToUintPtr(pool.GetMem());
 
 #ifndef PANDA_TARGET_32
-        size_t totalHeapSize = regionHeapEnd_ - regionHeapStart_;
-        // 2: half space reserved for forward copy. throw oom when gc finish.
-        if (GetActiveSize() * 2 > totalHeapSize) {
-            if (!isCopy) {
-                // Atomic with acq_rel order reason: rollback inactiveZone_ on allocation failure
-                (void)inactiveZone_.fetch_sub(size, std::memory_order_acq_rel);
-                return nullptr;
-            } else {
-                Heap::GetHeap().SetForceThrowOOM(true);
-            }
-        }
-#endif
-
-        if (addr < regionHeapEnd_ - size) {
-            region = RegionDesc::InitRegionAt(addr, num, type);
-            size_t idx = region->GetUnitIdx();
-#ifdef _WIN64
-            MemoryMap::CommitMemory(reinterpret_cast<void *>(RegionDesc::GetUnitAddress(idx)),
-                                    num * RegionDesc::UNIT_SIZE);
-#endif
-            (void)idx;  // eliminate compilation warning
-            LOG(DEBUG, GC) << "take inactive units [" << idx << "+" << num << ", " << idx + num << ") at [0x"
-                           << std::hex << RegionDesc::GetUnitAddress(idx) << ", 0x"
-                           << RegionDesc::GetUnitAddress(idx + num) << std::dec << ")";
-            if (num >= HUGE_PAGE_UNIT_NUM) {
-                TagHugePage(region, num);
-            }
-            if (expectPhysicalMem) {
-                RegionDesc::ClearUnits(idx, num);
-            }
-            return region;
+    size_t totalHeapSize = heapSpace_->GetMaxHeapSize();
+    // 2: half space reserved for forward copy. throw oom when gc finish.
+    if (heapSpace_->GetCurrentHeapSize() * 2 > totalHeapSize) {
+        if (!isCopy) {
+            heapSpace_->FreePool(pool.GetMem(), pool.GetSize(), false);
+            return nullptr;
         } else {
-            // Atomic with acq_rel order reason: rollback inactiveZone_ on allocation failure
-            (void)inactiveZone_.fetch_sub(size, std::memory_order_acq_rel);
+            Heap::GetHeap().SetForceThrowOOM(true);
         }
     }
+#endif
 
-    return nullptr;
+#if defined(COMMON_SANITIZER_SUPPORT)
+    Sanitizer::OnHeapAllocated(pool.GetMem(), pool.GetSize());
+#endif
+
+    RegionDesc *region = RegionDesc::InitRegionAt(addr, num, type);
+    size_t idx = region->GetUnitIdx();
+    LOG(DEBUG, GC) << "take inactive units [" << idx << "+" << num << ", " << idx + num << ") at [0x" << std::hex
+                   << RegionDesc::GetUnitAddress(idx) << ", 0x" << RegionDesc::GetUnitAddress(idx + num) << std::dec
+                   << ")";
+    if (num >= HUGE_PAGE_UNIT_NUM) {
+        TagHugePage(region, num);
+    }
+    RegionDesc::ClearUnits(idx, num);
+
+    os::memory::LockHolder h(regionsInUseLock_);
+    regionsInUse_.insert(region);
+    return region;
 }
 
 void RegionManager::DumpRegionStats() const
 {
-    size_t totalSize = regionHeapEnd_ - regionHeapStart_;
+    size_t totalSize = heapSpace_->GetMaxHeapSize();
     size_t totalUnits = totalSize / RegionDesc::UNIT_SIZE;
-    size_t activeSize = inactiveZone_ - regionHeapStart_;
+    size_t activeSize = heapSpace_->GetCurrentHeapSize();
     size_t activeUnits = activeSize / RegionDesc::UNIT_SIZE;
     LOG(DEBUG, GC) << "\ttotal units: " << totalUnits << " (" << totalSize << " B)";
     LOG(DEBUG, GC) << "\tactive units: " << activeUnits << " (" << activeSize << " B)";
 
     garbageRegionList_.DumpRegionSummary();
-
-    size_t releasedUnits = freeRegionManager_.GetReleasedUnitCount();
-    size_t dirtyUnits = freeRegionManager_.GetDirtyUnitCount();
-    LOG(DEBUG, GC) << "\treleased units: " << releasedUnits << " (" << releasedUnits * RegionDesc::UNIT_SIZE << " B)";
-    LOG(DEBUG, GC) << "\tdirty units: " << dirtyUnits << " (" << dirtyUnits * RegionDesc::UNIT_SIZE << " B)";
 }
 
 void RegionManager::RequestForRegion(size_t size)
@@ -610,5 +566,15 @@ void RegionManager::RequestForRegion(size_t size)
     // Atomic with relaxed order reason: data race with prevRegionAllocTime_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     prevRegionAllocTime_.store(TimeUtil::NanoSeconds(), std::memory_order_relaxed);
+}
+
+size_t RegionManager::GetCurrentHeapSize() const
+{
+    return heapSpace_->GetCurrentHeapSize();
+}
+
+size_t RegionManager::GetMaxHeapSize() const
+{
+    return heapSpace_->GetMaxHeapSize();
 }
 }  // namespace ark::common_vm

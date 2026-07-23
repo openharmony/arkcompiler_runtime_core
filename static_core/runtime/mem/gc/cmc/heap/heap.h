@@ -54,7 +54,7 @@ public:
     static Heap &GetHeap();
 
     // should be removed after HeapParam is supported
-    virtual void Init(const RuntimeParam &param) = 0;
+    virtual void Init(const RuntimeParam &param, mem::HeapSpace *heapSpace) = 0;
     virtual void Fini() = 0;
 
     virtual void StartRuntimeThreads() = 0;
@@ -140,16 +140,6 @@ public:
         return GetMaxCapacity();
     }
 
-    virtual HeapAddress GetStartAddress() const = 0;
-    virtual HeapAddress GetSpaceEndAddress() const = 0;
-
-    // IsHeapAddress is a range-based check, used to quickly identify heap address,
-    // assuming non-heap address never falls into this address range.
-    static bool IsHeapAddress(HeapAddress addr)
-    {
-        return (addr >= heapStartAddr_) && (addr < heapCurrentEnd_);
-    }
-
     static bool IsTaggedObject(HeapAddress addr)
     {
         // relies on the definition of ArkTs
@@ -164,11 +154,6 @@ public:
         }
 
         return false;
-    }
-
-    static bool IsHeapAddress(const void *addr)
-    {
-        return IsHeapAddress(reinterpret_cast<HeapAddress>(addr));
     }
 
     virtual bool ForEachObject(const std::function<void(BaseObject *)> &, bool safe) = 0;
@@ -192,21 +177,7 @@ public:
     virtual const HeapParam &GetHeapParam() const = 0;
     virtual GCParam &GetGCParam() = 0;
 
-    static void OnHeapCreated(HeapAddress startAddr)
-    {
-        heapStartAddr_ = startAddr;
-        heapCurrentEnd_ = 0;
-    }
-
-    static void OnHeapExtended(HeapAddress newEnd)
-    {
-        heapCurrentEnd_ = newEnd;
-    }
-
     virtual ~Heap() {}
-
-    static HeapAddress heapStartAddr_;
-    static HeapAddress heapCurrentEnd_;
 };  // class Heap
 }  // namespace ark::common_vm
 #endif

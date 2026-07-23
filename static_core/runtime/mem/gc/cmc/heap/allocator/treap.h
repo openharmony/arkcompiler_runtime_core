@@ -186,7 +186,6 @@ public:
         }
 
         void RefreshFreeRegionDesc();
-        void ReleaseMemory();
 
         TreapNode *l;
         TreapNode *r;
@@ -277,7 +276,6 @@ public:
     // root node records the largest block of memory.
     void ReleaseRootNode()
     {
-        root_->ReleaseMemory();
         RemoveNode(root_);
     }
 

@@ -225,7 +225,7 @@ public:
     bool IsFromObject(ObjectHeader *obj) const override
     {
         // filter const string object.
-        if (Heap::IsHeapAddress(obj)) {
+        if (IsAddressInObjectsHeap(obj)) {
             return RegionDesc::GetRegionDescAt(obj)->IsFromRegion();
         }
 

@@ -62,20 +62,10 @@ public:
     virtual ~Allocator() {}
     Allocator();
 
-    virtual void Init(const RuntimeParam &param) = 0;
+    virtual void Init(const RuntimeParam &param, mem::HeapSpace *heapSpace) = 0;
     virtual size_t GetMaxCapacity() const = 0;
     virtual size_t GetCurrentCapacity() const = 0;
     virtual size_t GetUsedPageSize() const = 0;
-    virtual HeapAddress GetSpaceStartAddress() const = 0;
-    virtual HeapAddress GetSpaceEndAddress() const = 0;
-
-    // IsHeapAddress is a range-based check, used to quickly identify heap address,
-    // non-heap address never falls into this address range.
-    // for more accurate check, use IsHeapObject().
-    ALWAYS_INLINE bool IsHeapAddress(HeapAddress addr) const
-    {
-        return Heap::IsHeapAddress(addr);
-    }
 
 #ifndef NDEBUG
     virtual bool IsHeapObject(HeapAddress) const = 0;

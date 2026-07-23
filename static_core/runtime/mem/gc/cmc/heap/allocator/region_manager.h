@@ -20,12 +20,13 @@
 #include <map>
 #include <set>
 #include <thread>
+#include <unordered_set>
 #include <vector>
 
+#include "libarkbase/os/mutex.h"
 #include "common_components/common/run_type.h"
 #include "runtime/mem/gc/cmc/heap/allocator/alloc_buffer.h"
 #include "runtime/mem/gc/cmc/heap/allocator/allocator.h"
-#include "runtime/mem/gc/cmc/heap/allocator/free_region_manager.h"
 #include "runtime/mem/gc/cmc/heap/allocator/region_list.h"
 #include "runtime/mem/gc/cmc/heap/allocator/fix_heap.h"
 #include "runtime/mem/gc/cmc/heap/allocator/slot_list.h"
@@ -56,7 +57,7 @@ public:
         return regionNum;
     }
 
-    void Initialize(size_t regionNum, uintptr_t heapStart);
+    void Initialize(size_t regionNum, mem::HeapSpace *heapSpace);
 
     RegionManager() : garbageRegionList_("garbage regions") {}
 
@@ -66,25 +67,10 @@ public:
 
     void DumpRegionStats() const;
 
-    uintptr_t GetInactiveZone() const
+    ~RegionManager()
     {
-        return inactiveZone_;
+        Fini();
     }
-
-    uintptr_t GetRegionHeapStart() const
-    {
-        return regionHeapStart_;
-    }
-
-    RegionDesc *GetFirstRegion() const
-    {
-        if (regionHeapStart_ < inactiveZone_) {
-            return reinterpret_cast<RegionDesc *>(regionHeapStart_);
-        }
-        return nullptr;
-    }
-
-    ~RegionManager() {}
 
     // take a region with *num* units for allocation
     RegionDesc *TakeRegion(size_t num, RegionDesc::UnitRole, bool expectPhysicalMem = false, bool allowgc = true,
@@ -135,46 +121,28 @@ public:
         }
     }
 
-    // targetSize: size of memory which we do not release and keep it as cache for future allocation.
-    size_t ReleaseGarbageRegions(size_t targetSize)
-    {
-        return freeRegionManager_.ReleaseGarbageRegions(targetSize);
-    }
-
     void ForEachObjectUnsafe(const std::function<void(BaseObject *)> &visitor) const;
     void ForEachObjectSafe(const std::function<void(BaseObject *)> &visitor) const;
-
-    size_t GetDirtyUnitCount() const
-    {
-        return freeRegionManager_.GetDirtyUnitCount();
-    }
-
-    size_t GetInactiveUnitCount() const
-    {
-        return (regionHeapEnd_ - inactiveZone_) / RegionDesc::UNIT_SIZE;
-    }
-    size_t GetActiveSize() const
-    {
-        return inactiveZone_ - regionHeapStart_;
-    }
-
-    RegionDesc *GetNextNeighborRegion(RegionDesc *region) const
-    {
-        HeapAddress address = region->GetRegionEnd();
-        // Atomic with acquire order reason: data race with inactiveZone_ with dependecies on reads after the load
-        if (address < inactiveZone_.load(std::memory_order_acquire)) {
-            return reinterpret_cast<RegionDesc *>(address);
-        }
-        return nullptr;
-    }
 
     // this method checks whether allocation is permitted for now, otherwise, it is suspened
     // until allocation does no harm to gc.
     void RequestForRegion(size_t size);
 
+    size_t GetCurrentHeapSize() const;
+
+    size_t GetMaxHeapSize() const;
+
 private:
     inline void TagHugePage(RegionDesc *region, size_t num) const;
     inline void UntagHugePage(RegionDesc *region, size_t num) const;
+
+    template <typename V>
+    void IterateAllocatedUnits(const V &visitor) const
+    {
+        for (auto *region : regionsInUse_) {
+            visitor(region);
+        }
+    }
 
     void ClearGCInfo(RegionList &list)
     {
@@ -187,19 +155,17 @@ private:
         });
     }
 
-    FreeRegionManager freeRegionManager_;
+    void Fini();
 
     // cache for fromRegionList after forwarding.
     RegionList garbageRegionList_;
-
-    uintptr_t regionHeapStart_ = 0;  // the address of first region to allocate object
-    uintptr_t regionHeapEnd_ = 0;
+    mutable os::memory::Mutex regionsInUseLock_;
+    std::unordered_set<RegionDesc *> regionsInUse_;
 
     // the time when previous region was allocated, which is assigned with returned value by timeutil::NanoSeconds().
     std::atomic<uint64_t> prevRegionAllocTime_ = {0};
 
-    // heap space not allocated yet for even once. this value should not be decreased.
-    std::atomic<uintptr_t> inactiveZone_ = {0};
+    mem::HeapSpace *heapSpace_ {nullptr};
 
     friend class VerifyIterator;
 };

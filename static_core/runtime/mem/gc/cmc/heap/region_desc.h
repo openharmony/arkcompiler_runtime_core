@@ -506,34 +506,6 @@ public:
         MemorySet(unitAddress, size, 0, size);
     }
 
-    static void ReleaseUnits(size_t idx, size_t cnt)
-    {
-        void *unitAddress = reinterpret_cast<void *>(RegionDesc::GetUnitAddress(idx));
-        size_t size = cnt * RegionDesc::UNIT_SIZE;
-        LOG(DEBUG, GC) << "release physical memory for units [" << idx << "+" << cnt << ", " << idx + cnt << ") @["
-                       << unitAddress << "+" << size << ", 0x" << std::hex << RegionDesc::GetUnitAddress(idx + cnt)
-                       << std::dec << ")";
-#if defined(_WIN64)
-        LOG_IF(UNLIKELY(!VirtualFree(unitAddress, size, MEM_DECOMMIT)), ERROR, MM_OBJECT_EVENTS)
-            << "VirtualFree failed in ReturnPage, errno: " << GetLastError();
-
-#elif defined(__APPLE__)
-        MemorySet(reinterpret_cast<uintptr_t>(unitAddress), size, 0, size);
-        (void)madvise(unitAddress, size, MADV_DONTNEED);
-#else
-        (void)madvise(unitAddress, size, MADV_DONTNEED);
-#endif
-#ifdef COMMON_ASAN_SUPPORT
-        Sanitizer::OnHeapMadvise(unitAddress, size);
-#endif
-#ifdef USE_HWASAN
-        ASAN_POISON_MEMORY_REGION(unitAddress, size);
-        const uintptr_t pSz = size;
-        LOG(DEBUG, COMMON) << std::hex << "set [" << unitAddress << ", "
-                           << (reinterpret_cast<uintptr_t>(unitAddress) + pSz) << ") poisoned\n";
-#endif
-    }
-
     size_t GetRegionSize() const
     {
         DCHECK(GetRegionEnd() > GetRegionStart());
@@ -1217,11 +1189,6 @@ private:
         void ClearUnit()
         {
             ClearUnits(GetUnitIdxAt(reinterpret_cast<uintptr_t>(this)), 1);
-        }
-
-        void ReleaseUnit()
-        {
-            ReleaseUnits(GetUnitIdxAt(reinterpret_cast<uintptr_t>(this)), 1);
         }
 
         UnitMetadata &GetMetadata()

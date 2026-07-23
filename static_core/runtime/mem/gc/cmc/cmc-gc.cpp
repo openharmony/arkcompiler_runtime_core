@@ -77,7 +77,7 @@ template <class LanguageConfig>
 bool CmcGC<LanguageConfig>::IsUnmovableFromObject(BaseObject *obj) const
 {
     // filter const string object.
-    if (!Heap::IsHeapAddress(obj)) {
+    if (!IsAddressInObjectsHeap(obj)) {
         return false;
     }
 
@@ -92,7 +92,7 @@ void CmcGC<LanguageConfig>::FixRefField(ObjectHeader *obj, ObjectPointerType *fi
     ObjectHeader *targetObj = AtomicReadRefSlot(field);
 
     // target object could be null or non-heap for some static variable.
-    if (!Heap::IsHeapAddress(targetObj)) {
+    if (!IsAddressInObjectsHeap(targetObj)) {
         return;
     }
 
@@ -782,7 +782,7 @@ void CmcGC<LanguageConfig>::MarkSatbBufferYoung(CmcGCMarkingStack &stack)
     while (!localStack.empty()) {
         ObjectHeader *obj = localStack.top();
         localStack.pop();
-        CHECK(Heap::IsHeapAddress(obj));
+        CHECK(IsAddressInObjectsHeap(obj));
         if (IsFromObject(obj)) {
             obj = ForwardObject(obj);
         }
@@ -814,7 +814,7 @@ void CmcGC<LanguageConfig>::MarkSatbBufferFull(CmcGCMarkingStack &stack)
         while (!remarkStack.empty()) {  // LCOV_EXCL_BR_LINE
             BaseObject *obj = remarkStack.top();
             remarkStack.pop();
-            CHECK(Heap::IsHeapAddress(obj));
+            CHECK(IsAddressInObjectsHeap(obj));
             if (this->MarkObjectIfNotMarked(obj)) {
                 stack.PushToStack(obj);
                 LOG(DEBUG, GC) << "satb buffer add obj " << obj;
@@ -836,7 +836,7 @@ void CmcGC<LanguageConfig>::ProcessEvacuationStack(CmcGCEvacuationStack &stack)
         while (!remarkStack.empty()) {
             ObjectHeader *obj = remarkStack.top();
             remarkStack.pop();
-            CHECK(Heap::IsHeapAddress(obj));
+            CHECK(IsAddressInObjectsHeap(obj));
             if (IsFromObject(obj)) {
                 obj = ForwardObject(obj);
             }
@@ -902,7 +902,7 @@ void CmcGC<LanguageConfig>::ProcessRef(ObjectPointerType *ref, CmcGCEvacuationSt
 {
     auto *obj = AtomicReadRefSlot(ref);
 
-    if (!Heap::IsHeapAddress(obj)) {
+    if (!IsAddressInObjectsHeap(obj)) {
         return;
     }
 
@@ -937,7 +937,7 @@ void CmcGC<LanguageConfig>::MarkRefYoung(ObjectHeader *obj, CmcGCMarkingStack &s
 {
     CHECK(Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE);
 
-    if (!Heap::IsHeapAddress(obj)) {
+    if (!IsAddressInObjectsHeap(obj)) {
         return;
     }
 
@@ -965,7 +965,7 @@ void CmcGC<LanguageConfig>::MarkRefYoung(ObjectHeader *obj, CmcGCMarkingStack &s
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::MarkRefFull(ObjectHeader *obj, CmcGCMarkingStack &stack)
 {
-    DCHECK(Heap::IsHeapAddress(obj));
+    DCHECK(IsAddressInObjectsHeap(obj));
 
     auto targetRegion = RegionDesc::GetAliveRegionDescAt(obj);
     if (targetRegion->IsNewObjectSinceMarking(obj)) {
@@ -1024,7 +1024,7 @@ bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const RegionDesc *region)
 template <class LanguageConfig>
 bool CmcGC<LanguageConfig>::InYoungCollectionSpace(const ObjectHeader *obj)
 {
-    return Heap::IsHeapAddress(obj) && InYoungCollectionSpace(RegionDesc::GetRegionDescAt(obj));
+    return IsAddressInObjectsHeap(obj) && InYoungCollectionSpace(RegionDesc::GetRegionDescAt(obj));
 }
 
 template <class LanguageConfig>
@@ -1267,7 +1267,7 @@ void CmcGC<LanguageConfig>::ProcessMarkStack(CmcGCMarkingStack &stack)
         while (!remarkStack.empty()) {
             BaseObject *obj = remarkStack.top();
             remarkStack.pop();
-            if (Heap::IsHeapAddress(obj) && (MarkObjectIfNotMarked(obj))) {
+            if (IsAddressInObjectsHeap(obj) && (MarkObjectIfNotMarked(obj))) {
                 stack.PushToStack(obj);
                 needProcess = true;
                 LOG(DEBUG, GC) << "tracing take from satb buffer: obj " << obj;
@@ -1719,7 +1719,9 @@ void CmcGC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
                                                                                : GCCollectionType::FULL);
     }
     ConcurrentScope concurrentScope(this);
+    this->GetObjectAllocator()->GetHeapSpace()->SetIsWorkGC(true);
     RunGarbageCollection(ark::common_vm::GCTask::TASK_INDEX_SYNC_GC_MIN, task);
+    this->ComputeNewSize();
 }
 
 // NOLINTNEXTLINE(misc-unused-parameters)

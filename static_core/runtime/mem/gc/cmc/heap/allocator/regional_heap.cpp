@@ -25,6 +25,7 @@
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/gc/gc.h"
+#include "runtime/mem/heap_space.h"
 
 #include "runtime/include/panda_vm.h"
 
@@ -49,15 +50,11 @@ size_t RegionalHeap::ReclaimGarbageMemory(bool releaseAll)
         regionManager_.ReclaimGarbageRegions();
     }
 
-    mem::GCScope<mem::TRACE_TIMING> gcScope("ReleaseGarbageMemory", gc);
     if (releaseAll) {
-        return regionManager_.ReleaseGarbageRegions(0);
-    } else {
-        size_t size = GetAllocatedBytes();
-        double cachedRatio = 1 - Heap::GetHeap().GetHeapParam().heapUtilization;
-        size_t targetCachedSize = static_cast<size_t>(size * cachedRatio);
-        return regionManager_.ReleaseGarbageRegions(targetCachedSize);
+        mem::GCScope<mem::TRACE_TIMING> gcScope("ReleaseGarbageMemory", gc);
+        PoolManager::GetMmapMemPool()->ReleaseFreePagesToOS();
     }
+    return 0;
 }
 
 void RegionalHeap::ExemptFromSpace()
@@ -289,10 +286,8 @@ void RegionalHeap::CopyRegion(RegionDesc *region)
     }
 }
 
-void RegionalHeap::Init(const RuntimeParam &param)
+void RegionalHeap::Init(const RuntimeParam &param, mem::HeapSpace *heapSpace)
 {
-    MemoryMap::Option opt = MemoryMap::DEFAULT_OPTIONS;
-    opt.tag = "region_heap";
     size_t heapSize = param.heapParam.heapSize * KB;
 
 #ifndef PANDA_TARGET_32
@@ -301,35 +296,9 @@ void RegionalHeap::Init(const RuntimeParam &param)
     LOG_IF(UNLIKELY((heapSize / 2) > MAX_SUPPORT_CAPACITY), FATAL, MM_OBJECT_EVENTS) << "Max support capacity 4G";
 #endif
 
-    size_t totalSize = RegionManager::GetHeapMemorySize(heapSize);
     size_t regionNum = RegionManager::GetHeapUnitCount(heapSize);
-#if defined(COMMON_ASAN_SUPPORT)
-    // asan's memory alias technique needs a shareable page
-    opt.flags &= ~MAP_PRIVATE;
-    opt.flags |= MAP_SHARED;
-    LOG(DEBUG, GC) << "mmap flags set to 0x" << std::hex << opt.flags << std::dec;
-#endif
-    // this must succeed otherwise it won't return
-    map_ = MemoryMap::MapMemoryAlignInner4G(totalSize, totalSize, opt);
-
-    uintptr_t baseAddr = reinterpret_cast<uintptr_t>(map_->GetBaseAddr());
-    os::mem::TagAnonymousMemory(reinterpret_cast<void *>(baseAddr), totalSize, "ArkTS Heap CMCGC RegionHeap");
-
-#if defined(COMMON_SANITIZER_SUPPORT)
-    Sanitizer::OnHeapAllocated(map->GetBaseAddr(), map->GetMappedSize());
-#endif
-
     fromSpace_.SetExemptedRegionThreshold(param.heapParam.exemptionThreshold);
-    regionManager_.Initialize(regionNum, baseAddr);
-    reservedStart_ = regionManager_.GetRegionHeapStart();
-    reservedEnd_ = reinterpret_cast<HeapAddress>(map_->GetMappedEndAddr());
-#if defined(COMMON_DUMP_ADDRESS)
-    LOG(DEBUG, GC) << "region metadata@0x" << std::hex << metadata << std::dec << ", heap @[0x" << std::hex
-                   << reservedStart << "+" << std::dec << (reservedEnd - reservedStart) << ", 0x" << std::hex
-                   << reservedEnd << std::dec << ")";
-#endif
-    Heap::OnHeapCreated(reservedStart_);
-    Heap::OnHeapExtended(reservedEnd_);
+    regionManager_.Initialize(regionNum, heapSpace);
 }
 
 AllocationBuffer *AllocationBuffer::GetOrCreateAllocBuffer()
@@ -484,7 +453,7 @@ HeapAddress AllocationBuffer::AllocateImpl(size_t totalSize, AllocType allocType
 #ifndef NDEBUG
 bool RegionalHeap::IsHeapObject(HeapAddress addr) const
 {
-    if (!IsHeapAddress(addr)) {
+    if (!IsAddressInObjectsHeap(addr)) {
         return false;
     }
     return true;

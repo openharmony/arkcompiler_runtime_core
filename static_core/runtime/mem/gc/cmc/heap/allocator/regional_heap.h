@@ -75,13 +75,9 @@ public:
             delete allocBufferManager_;
             allocBufferManager_ = nullptr;
         }
-#if defined(COMMON_SANITIZER_SUPPORT)
-        Sanitizer::OnHeapDeallocated(map->GetBaseAddr(), map->GetMappedSize());
-#endif
-        MemoryMap::DestroyMemoryMap(map_);
     }
 
-    void Init(const RuntimeParam &param) override;
+    void Init(const RuntimeParam &param, mem::HeapSpace *heapSpace) override;
 
     template <AllocBufferType type>
     RegionDesc *AllocateThreadLocalRegion(bool expectPhysicalMem = false);
@@ -142,23 +138,14 @@ public:
         return youngSpace_;
     }
 
-    HeapAddress GetSpaceStartAddress() const override
-    {
-        return reservedStart_;
-    }
-
-    HeapAddress GetSpaceEndAddress() const override
-    {
-        return reservedEnd_;
-    }
-
     size_t GetCurrentCapacity() const override
     {
-        return regionManager_.GetInactiveZone() - reservedStart_;
+        return regionManager_.GetCurrentHeapSize();
     }
+
     size_t GetMaxCapacity() const override
     {
-        return reservedEnd_ - reservedStart_;
+        return regionManager_.GetMaxHeapSize();
     }
 
     inline size_t GetRecentAllocatedSize() const
@@ -404,10 +391,7 @@ private:
     HeapAddress TryAllocateOnce(size_t allocSize, AllocType allocType);
     bool ShouldRetryAllocation(size_t &tryTimes) const;
 
-    HeapAddress reservedStart_ = 0;
-    HeapAddress reservedEnd_ = 0;
     RegionManager regionManager_;
-    MemoryMap *map_ {nullptr};
 
     YoungSpace youngSpace_;
     OldSpace oldSpace_;
