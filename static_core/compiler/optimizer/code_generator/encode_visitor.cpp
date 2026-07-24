@@ -744,6 +744,7 @@ void EncodeVisitor::VisitBoundsCheck(GraphVisitor *visitor, Inst *inst)
 
 void EncodeVisitor::VisitRefTypeCheck(GraphVisitor *visitor, Inst *inst)
 {
+    // In case of a successful check, runtime calls must not trigger GC (`is_check` IR instruction)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto encoder = enc->GetEncoder();
     auto arrayReg = enc->GetCodegen()->ConvertRegister(inst->GetSrcReg(0), DataType::REFERENCE);
@@ -1776,6 +1777,7 @@ void EncodeVisitor::FillCheckCast(GraphVisitor *visitor, Inst *inst, Reg src, La
 
 void EncodeVisitor::VisitCheckCast(GraphVisitor *visitor, Inst *inst)
 {
+    // In case of a successful check, runtime calls must not trigger GC (`is_check` IR instruction)
     auto *enc = static_cast<EncodeVisitor *>(visitor);
     auto method = inst->CastToCheckCast()->GetMethod();
     auto typeId = inst->CastToCheckCast()->GetTypeId();

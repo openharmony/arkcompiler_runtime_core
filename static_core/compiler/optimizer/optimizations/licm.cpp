@@ -230,6 +230,19 @@ void Licm::MoveInstructions(BasicBlock *preHeader, Loop *loop)
     }
 }
 
+static SaveStateInst *FindSaveStateDeoptimizeToClone(BasicBlock *preHeader)
+{
+    // can't use BasicBlock::FindSaveStateDeoptimize in case we match an SSD inside an inlined function
+    for (const auto &inst : preHeader->InstsSafeReverse()) {
+        if (inst->GetOpcode() == Opcode::ReturnInlined) {
+            break;
+        } else if (inst->GetOpcode() == Opcode::SaveStateDeoptimize) {
+            return inst->CastToSaveStateDeoptimize();
+        }
+    }
+    return nullptr;
+}
+
 /*
  * Iterate over all instructions in the loop and move hoistable instructions to the loop preheader
  */
@@ -256,6 +269,10 @@ void Licm::VisitLoop(Loop *loop)
         // Create new pre-header with single successor: loop header
         auto newPreHeader = preHeader->InsertNewBlockToSuccEdge(header);
         preHeader->GetLoop()->AppendBlock(newPreHeader);
+        // Copy preheader SaveStateDeoptimize to it
+        if (auto *saveStateDeopt = FindSaveStateDeoptimizeToClone(preHeader); saveStateDeopt != nullptr) {
+            newPreHeader->AppendInst(CopySaveState(GetGraph(), saveStateDeopt));
+        }
         // Fix Dominators info
         auto &domTree = GetGraph()->GetAnalysis<DominatorsTree>();
         domTree.SetValid(true);

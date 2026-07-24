@@ -252,7 +252,7 @@ public:
     void EraseBlock(BasicBlock *block);
     void RestoreBlock(BasicBlock *block);
     // Remove empty block. Block must have one successor and no Phis.
-    void RemoveEmptyBlock(BasicBlock *block);
+    void RemoveEmptyBlock(BasicBlock *block, bool fixDomTree = true);
 
     // Remove empty block. Block may have Phis and can't be a loop pre-header.
     void RemoveEmptyBlockWithPhis(BasicBlock *block, bool irrLoop = false);

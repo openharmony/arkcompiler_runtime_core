@@ -595,11 +595,11 @@ static bool CheckReturnInlineMismatch(Inst *deopt)
 {
     auto ss = deopt->GetSaveState();
     ASSERT(ss != nullptr);
+    ASSERT(ss->GetBasicBlock() == deopt->GetBasicBlock());
     auto callInst = ss->GetCallerInst();
     if (callInst == nullptr) {
         return false;
     }
-    ASSERT(ss->GetBasicBlock() == deopt->GetBasicBlock());
     int isMatch = 0;
     Inst *inst = deopt;
     // There exists cases like this:
@@ -642,6 +642,9 @@ bool EscapeAnalysis::DecomposeAnalysis::SplitOneBlock(BasicBlock *&deoptBb)
     emptyBb->SetAllFields(deoptBb->GetAllFields());
     emptyBb->SetOsrEntry(false);
     deoptBb->GetLoop()->AppendBlock(emptyBb);
+    if (deoptBb->IsLoopPreHeader()) {
+        deoptBb->GetNextLoop()->SetPreHeader(succBb);
+    }
     deoptBb->AddSucc(emptyBb);
     emptyBb->AddSucc(endBb);
 
@@ -680,22 +683,26 @@ bool EscapeAnalysis::DecomposeAnalysis::SplitOneBlock(BasicBlock *&deoptBb)
 
 void EscapeAnalysis::DecomposeAnalysis::Compose()
 {
-    for (auto &pair : decomposeBbs_) {
-        auto [bb, ss, newDeopt, deoptOpcode, bitFields] = pair.second;
-        BasicBlock *deoptBb = pair.first;
+    while (!decomposeBbs_.empty()) {
+        const auto pairIt = decomposeBbs_.begin();
+        const auto pairSecond = pairIt->second;
+        const auto [bb, ss, newDeopt, deoptOpcode, bitFields] = pairSecond;
+        BasicBlock *deoptBb = pairIt->first;
         auto newDeoptBb = deoptBb->GetSuccessor(1);
         if (bb != newDeoptBb) {
+            decomposeBbs_.erase(deoptBb);
             continue;
         }
         auto materialized = std::find_if(newDeoptBb->AllInsts().begin(), newDeoptBb->AllInsts().end(),
                                          [](Inst *inst) { return inst->IsAllocation(); });
         if (materialized != newDeoptBb->AllInsts().end()) {
+            decomposeBbs_.erase(deoptBb);
             continue;
         }
 
         Inst *deoptInput = nullptr;
         IdentifyDeoptInput(deoptBb, deoptOpcode, deoptInput);
-        RecoverDeopt(deoptBb, pair.second, deoptInput);
+        RecoverDeopt(deoptBb, pairSecond, deoptInput);
     }
 }
 
@@ -772,7 +779,24 @@ void EscapeAnalysis::DecomposeAnalysis::ReplaceDeopt(BasicBlock *deoptBb, BasicB
     }
 }
 
-void EscapeAnalysis::DecomposeAnalysis::RecoverDeopt(BasicBlock *deoptBb, DeoptInfo &deoptInfo, Inst *deoptInput)
+void EscapeAnalysis::DecomposeAnalysis::JoinDeoptSuccessor(BasicBlock *deoptBb)
+{
+    decomposeBbs_.erase(deoptBb);
+    deoptUsers_.erase(deoptBb);
+    ASSERT(deoptBb->GetSuccsBlocks().size() == 1);
+    auto *succBb = deoptBb->GetSuccessor(0);
+    if (auto const foundIt = decomposeBbs_.find(succBb); foundIt != decomposeBbs_.end()) {
+        decomposeBbs_.emplace(deoptBb, std::move(foundIt->second));
+        decomposeBbs_.erase(foundIt);
+    }
+    if (auto const userFoundIt = deoptUsers_.find(succBb); userFoundIt != deoptUsers_.end()) {
+        deoptUsers_.emplace(deoptBb, std::move(userFoundIt->second));
+        deoptUsers_.erase(userFoundIt);
+    }
+    deoptBb->JoinSuccessorBlock(false);
+}
+
+void EscapeAnalysis::DecomposeAnalysis::RecoverDeopt(BasicBlock *deoptBb, DeoptInfo deoptInfo, Inst *deoptInput)
 {
     auto [bb, ss, newDeopt, deoptOpcode, bitFields] = deoptInfo;
     ASSERT(deoptBb != nullptr && deoptInput != nullptr && bb != nullptr && newDeopt != nullptr);
@@ -820,6 +844,10 @@ void EscapeAnalysis::DecomposeAnalysis::RecoverDeopt(BasicBlock *deoptBb, DeoptI
             UNREACHABLE();
         }
     }
+
+    // recoveredSs on next iteration might be from this basic block, but the user will be in the separated succBb.
+    // Absorb succBb back.
+    JoinDeoptSuccessor(deoptBb);
 }
 
 void EscapeAnalysis::DecomposeAnalysis::CloneSaveStatesToSucc(BasicBlock *bb, BasicBlock *succBb, BasicBlock *newBb)
@@ -832,7 +860,7 @@ void EscapeAnalysis::DecomposeAnalysis::CloneSaveStatesToSucc(BasicBlock *bb, Ba
         auto *instBb = inst->GetBasicBlock();
         return instBb != bb && instBb != newBb;
     };
-    auto isSafeToReplaceInput = [succBb](Inst *inst) { return inst->GetBasicBlock() == succBb; };
+    auto isSeparatedInst = [succBb](Inst *inst) { return inst->GetBasicBlock() == succBb; };
 
     for (Inst *saveState : bb->AllInstsSafeReverse()) {
         if (!saveState->IsSaveState()) {
@@ -852,9 +880,12 @@ void EscapeAnalysis::DecomposeAnalysis::CloneSaveStatesToSucc(BasicBlock *bb, Ba
             } else if (isInlinedInst(userInst)) {
                 // This Call*.Inlined or ReturnInlined won't be dominated, leave inlined SaveState structure as-is
                 safeToReplaceInlined = false;
-            } else if (isSafeToReplaceInput(userInst)) {
+            } else if (isSeparatedInst(userInst)) {
                 // Other insts must be in the same block as their input SaveState (c) @haizaibali
                 separatedUsers.push_back(&user);
+            } else {
+                // Last case - user is left in the old block and not separated
+                ASSERT(userInst->GetBasicBlock() == bb);
             }
         }
         if (safeToReplaceInlined && (!separatedUsers.empty() || inlinedUsers.size() == numUsers)) {

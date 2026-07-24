@@ -1,0 +1,127 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#! CHECKER         LICM split preheader and copy SaveStateDeoptimize JIT
+#! RUN             force_jit: true, options: "--compiler-regex=_GLOBAL::foo", entry: "_GLOBAL::main"
+#! METHOD          "_GLOBAL::foo"
+#! # Preheader with two outgoind edges
+#! PASS_BEFORE     "LICM"
+#! IN_BLOCK        "prehead"
+#! INST            /succs: \[bb .*, bb .*\]/
+#! IN_BLOCK        "head"
+#! PASS_AFTER      "LICM"
+#! # LICM splits it, copies SaveStateDeoptimize over to the new preheader
+#! IN_BLOCK        "prehead"
+#! INST_NEXT       "SaveStateDeoptimize"
+#! INST_NEXT       /succs: \[bb .*\]/
+#! # BCE uses it for a conditional deoptimization
+#! PASS_AFTER_NEXT "ChecksElimination"
+#! IN_BLOCK        "prehead"
+#! INST_NEXT       "SaveStateDeoptimize"
+#! INST_NEXT       "DeoptimizeIf BOUNDS_CHECK"
+
+#! CHECKER         LICM split preheader and copy SaveStateDeoptimize AOT
+#! SKIP_IF         @architecture == "arm32"
+#! RUN_PAOC        options: "--compiler-regex=_GLOBAL::foo"
+#! METHOD          "_GLOBAL::foo"
+#! PASS_BEFORE     "LICM"
+#! IN_BLOCK        "prehead"
+#! INST            /succs: \[bb .*, bb .*\]/
+#! IN_BLOCK        "head"
+#! PASS_AFTER      "LICM"
+#! IN_BLOCK        "prehead"
+#! INST_NEXT       "SaveStateDeoptimize"
+#! INST_NEXT       /succs: \[bb .*\]/
+#! PASS_AFTER_NEXT "ChecksElimination"
+#! IN_BLOCK        "prehead"
+#! INST_NEXT       "SaveStateDeoptimize"
+#! INST_NEXT       "DeoptimizeIf BOUNDS_CHECK"
+#! RUN             entry: "_GLOBAL::main"
+
+.language eTS
+
+.record std.core.Object <external>
+.record std.core.Int <external>
+.record std.core.String <external>
+.record std.testing.arktest <external>
+.record Y <external>
+
+.function void std.testing.arktest.assertEQ(std.core.Object a0, std.core.Object a1, std.core.String a2) <external, static, access.function=public>
+.function void std.core.Int._ctor_(std.core.Int a0, i32 a1) <ctor, external, access.function=public>
+.function i32 std.core.String.%%get-length(std.core.String a0) <external, access.function=public>
+
+.function void assertArrayEquals(i32[] a0, i32[] a1) <static, access.function=public> {
+    mov.null v0
+    movi v1, 0x0
+    lenarr a0
+    sta v2
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v2
+    sta.obj v4
+    lenarr a1
+    sta v5
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v5
+    call.acc std.testing.arktest.assertEQ:(std.core.Object,std.core.Object,std.core.String), v4, v0, v0, 0x1
+jump_label_1:
+    lda v1
+    jge v2, jump_label_0
+    lda v1
+    ldarr a0
+    sta v4
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v4
+    sta.obj v4
+    lda v1
+    ldarr a1
+    sta v5
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v5
+    call.acc std.testing.arktest.assertEQ:(std.core.Object,std.core.Object,std.core.String), v4, v0, v0, 0x1
+    inci v1, 0x1
+    jmp jump_label_1
+jump_label_0:
+    return.void
+}
+
+.function i32[] foo(i32[] a0, std.core.String a1) <static, access.function=public> {
+    lenarr a0
+    movi v0, 0x0
+    movi v1, 0x2
+    jle v1, jump_label_0
+jump_label_1:
+    call.short std.core.String.%%get-length:(std.core.String), a1
+    jle v0, jump_label_0
+    call.short std.core.String.%%get-length:(std.core.String), a1
+    starr a0, v0
+    inci v0, 0x1
+    jmp jump_label_1
+jump_label_0:
+    lda.obj a0
+    return.obj
+}
+
+.array array_0 i32 2 { 1 2 }
+.array array_1 i32 2 { 1 2 }
+.array array_2 i32 3 { 3 3 3 }
+.array array_3 i32 3 { 1 2 3 }
+
+.function void main() <static, access.function=public> {
+    lda.const v0, array_3
+    lda.str "123"
+    call.acc.short foo:(i32[],std.core.String), v0, 0x1
+    lda.const v0, array_2
+    call.acc.short assertArrayEquals:(i32[],i32[]), v0, 0x0
+    lda.const v0, array_1
+    lda.str "123"
+    call.acc.short foo:(i32[],std.core.String), v0, 0x1
+    lda.const v0, array_0
+    call.acc.short assertArrayEquals:(i32[],i32[]), v0, 0x0
+    return.void
+}

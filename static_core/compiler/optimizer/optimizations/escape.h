@@ -278,7 +278,8 @@ public:
         void Compose();
         bool SplitOneBlock(BasicBlock *&deoptBb);
         void ReplaceDeopt(BasicBlock *deoptBb, BasicBlock *succBb, Inst *deopt, Inst *newDeopt);
-        void RecoverDeopt(BasicBlock *deoptBb, DeoptInfo &deoptInfo, Inst *deoptInput);
+        void JoinDeoptSuccessor(BasicBlock *deoptBb);
+        void RecoverDeopt(BasicBlock *deoptBb, DeoptInfo deoptInfo, Inst *deoptInput);
         void IdentifyDeoptInput(BasicBlock *deoptBb, Opcode opcode, Inst *&deoptInput);
         void CloneSaveStatesToSucc(BasicBlock *bb, BasicBlock *succBb, BasicBlock *newBb);
     };

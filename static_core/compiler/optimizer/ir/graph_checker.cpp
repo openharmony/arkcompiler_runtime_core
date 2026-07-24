@@ -162,8 +162,8 @@ bool GraphChecker::Check()
         // NOTE(compiler): Run only after special pass which will SSS inputs
         // Check that SaveStateSuspend includes all live values.
         CheckSaveStateSuspendInputs();
-        // Check that between savestate and it's runtime call user have not reference insts.
-        CheckSaveStatesWithRuntimeCallUsers();
+        // Check user requirements (same block, no ref insts before runtime call)
+        CheckSaveStateUsers();
     }
     CheckLoadGCEntrypointBarrierTypes();
     CheckLoadGCEntrypointToUserPaths();
@@ -931,53 +931,62 @@ static inline bool AllUsersDominate(Inst *inst1, Inst *inst2)
     }
     return true;
 }
-#endif
 
-// It is necessary to check because if reference instruction (it is some object) will contain between SaveState and some
-// RuntimeCall user of SaveState, during startup in runtime call GC can be triggered and move our object, so we
+// Check that SaveState users are in the same block.
+// Another necessary check because if reference instruction (it is some object) will contain between SaveState and
+// some RuntimeCall user of SaveState, during startup in runtime call GC can be triggered and move our object, so we
 // will lost them, his new position (object is not contained in SaveState).
-void GraphChecker::CheckSaveStatesWithRuntimeCallUsers()
+void GraphChecker::CheckSaveStateUsers()
 {
-#ifdef COMPILER_DEBUG_CHECKS
     for (auto &block : GetGraph()->GetBlocksRPO()) {
         for (const auto &ss : block->AllInsts()) {
-            if (ss->GetOpcode() != Opcode::SaveState) {
+            if (!ss->IsSaveState()) {
                 continue;
             }
-            CheckSaveStatesWithRuntimeCallUsers(block, ss->CastToSaveState());
+            CheckSaveStateUsers(block, static_cast<SaveStateInst *>(ss));
         }
     }
-#endif
 }
 
-void GraphChecker::CheckSaveStatesWithRuntimeCallUsers(BasicBlock *block, SaveStateInst *ss)
+void GraphChecker::CheckSaveStateUsers(BasicBlock *block, SaveStateInst *ss)
 {
     for (auto &user : ss->GetUsers()) {
-        auto userInst = user.GetInst();
-        if (!userInst->IsRuntimeCall() || userInst->IsCheck()) {
-            continue;
-        }
-        ASSERT(userInst->GetBasicBlock() == ss->GetBasicBlock());
-        auto it = InstSafeIterator<IterationType::ALL, IterationDirection::BACKWARD>(*block, userInst);
-        for (++it; *it != ss; ++it) {
-            if ((*it)->GetOpcode() == Opcode::CastAnyTypeValue) {
-                continue;
-            }
-            // Non-reference instructions, checks, nullptr and classes cannot be moved by GC
-            // The correct state when all users of Object(is "*it") between SaveState and RuntimeCall(is
-            // "user_inst")
-            CHECKER_DO_IF_NOT_AND_PRINT(!(*it)->IsMovableObject() || AllUsersDominate(*it, userInst),
-                                        std::cerr << "We have inst v" << (*it)->GetId()
-                                                  << " which is located between SaveState v" << ss->GetId()
-                                                  << " and RuntimeCall v" << userInst->GetId() << ":\n"
-                                                  << **it << std::endl
-                                                  << *ss << std::endl
-                                                  << *userInst << std::endl);
+        auto *userInst = user.GetInst();
+
+        CHECKER_DO_IF_NOT_AND_PRINT((userInst->IsCall() && static_cast<CallInst *>(userInst)->IsInlined()) ||
+                                        userInst->GetOpcode() == Opcode::ReturnInlined ||
+                                        userInst->GetBasicBlock() == block,
+                                    std::cerr << "SaveState v" << ss->GetId() << " user inst v" << userInst->GetId()
+                                              << " must be in the same block, except for Call*Inlined/ReturnInlined:\n"
+                                              << *ss << "\n"
+                                              << *userInst << std::endl);
+
+        if (userInst->IsRuntimeCall() && !userInst->IsCheck()) {
+            CheckSaveStateRuntimeCallUser(block, ss, userInst);
         }
     }
 }
 
-#ifdef COMPILER_DEBUG_CHECKS
+void GraphChecker::CheckSaveStateRuntimeCallUser(BasicBlock *block, SaveStateInst *ss, Inst *userInst)
+{
+    ASSERT(userInst->GetBasicBlock() == block);
+    auto it = InstSafeIterator<IterationType::ALL, IterationDirection::BACKWARD>(*block, userInst);
+    for (++it; *it != ss; ++it) {
+        if ((*it)->GetOpcode() == Opcode::CastAnyTypeValue) {
+            continue;
+        }
+        // Non-reference instructions, checks, nullptr and classes cannot be moved by GC
+        // The correct state when all users of Object(is "*it") between SaveState and RuntimeCall(is "user_inst")
+        CHECKER_DO_IF_NOT_AND_PRINT(!(*it)->IsMovableObject() || AllUsersDominate(*it, userInst),
+                                    std::cerr << "We have inst v" << (*it)->GetId()
+                                              << " which is located between SaveState v" << ss->GetId()
+                                              << " and RuntimeCall v" << userInst->GetId() << ":\n"
+                                              << **it << std::endl
+                                              << *ss << std::endl
+                                              << *userInst << std::endl);
+    }
+}
+
 // If all indirect (through other Phis) inputs of Phi cannot be moved by GC, result of Phi itself
 // also cannot be moved (and does not need to be checked in CheckSaveStateInputs as input of its users)
 bool GraphChecker::IsPhiSafeToSkipObjectCheck(Inst *inst, Marker visited)
@@ -1125,21 +1134,45 @@ void GraphChecker::CheckSaveStateInputs(Inst *inst, ArenaVector<User *> *users)
     }
     users->clear();
 }
-#endif
+
+void GraphChecker::CheckSaveStateOsrRec(const Inst *inst, const Inst *user, BasicBlock *block, Marker visited)
+{
+    if (block->SetMarker(visited)) {
+        return;
+    }
+    if (inst->GetBasicBlock() == block) {
+        return;
+    }
+    if (block->IsOsrEntry()) {
+        CHECKER_IF_NOT_PRINT(GetGraph()->IsOsrMode());
+        auto ss = block->GetFirstInst();
+        CHECKER_IF_NOT_PRINT(ss != nullptr && ss->GetOpcode() == Opcode::SaveStateOsr);
+        [[maybe_unused]] auto it = std::find_if(ss->GetInputs().begin(), ss->GetInputs().end(), [inst](Input input) {
+            return Inst::GetDataFlowInput(input.GetInst()) == inst;
+        });
+        CHECKER_DO_IF_NOT_AND_PRINT(it != ss->GetInputs().end(),
+                                    std::cerr << "Inst v" << inst->GetId() << " used in v" << user->GetId()
+                                              << ", but not found on the path between them in the "
+                                              << ss->GetOpcodeStr() << " v" << ss->GetId() << ":\n"
+                                              << *inst << std::endl
+                                              << *user << std::endl
+                                              << *ss << std::endl);
+    }
+    for (auto pred : block->GetPredsBlocks()) {
+        CheckSaveStateOsrRec(inst, user, pred, visited);
+    }
+}
 
 void GraphChecker::CheckSaveStateInputs()
 {
-#ifdef COMPILER_DEBUG_CHECKS
     ArenaVector<User *> users(GetLocalAllocator()->Adapter());
     for (auto &block : GetGraph()->GetBlocksRPO()) {
         for (const auto &inst : block->AllInsts()) {
             CheckSaveStateInputs(inst, &users);
         }
     }
-#endif
 }
 
-#ifdef COMPILER_DEBUG_CHECKS
 void GraphChecker::CheckSaveStateSuspendInputs()
 {
     if (!GetGraph()->IsSaveStateSuspendInputsAllocated()) {
@@ -1722,34 +1755,6 @@ void GraphChecker::CheckLoadGCEntrypointToUserPaths()
                                                    << *result->runtimeCall << std::endl);
 }
 #endif  // COMPILER_DEBUG_CHECKS
-
-void GraphChecker::CheckSaveStateOsrRec(const Inst *inst, const Inst *user, BasicBlock *block, Marker visited)
-{
-    if (block->SetMarker(visited)) {
-        return;
-    }
-    if (inst->GetBasicBlock() == block) {
-        return;
-    }
-    if (block->IsOsrEntry()) {
-        CHECKER_IF_NOT_PRINT(GetGraph()->IsOsrMode());
-        auto ss = block->GetFirstInst();
-        CHECKER_IF_NOT_PRINT(ss != nullptr && ss->GetOpcode() == Opcode::SaveStateOsr);
-        [[maybe_unused]] auto it = std::find_if(ss->GetInputs().begin(), ss->GetInputs().end(), [inst](Input input) {
-            return Inst::GetDataFlowInput(input.GetInst()) == inst;
-        });
-        CHECKER_DO_IF_NOT_AND_PRINT(it != ss->GetInputs().end(),
-                                    std::cerr << "Inst v" << inst->GetId() << " used in v" << user->GetId()
-                                              << ", but not found on the path between them in the "
-                                              << ss->GetOpcodeStr() << " v" << ss->GetId() << ":\n"
-                                              << *inst << std::endl
-                                              << *user << std::endl
-                                              << *ss << std::endl);
-    }
-    for (auto pred : block->GetPredsBlocks()) {
-        CheckSaveStateOsrRec(inst, user, pred, visited);
-    }
-}
 
 void GraphChecker::CheckGCBarrierEntrypointInputsCount([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
                                                        [[maybe_unused]] size_t count)

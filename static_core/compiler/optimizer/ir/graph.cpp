@@ -312,20 +312,22 @@ void Graph::RemovePredecessors(BasicBlock *block, bool removeLastInst)
 }
 
 // Helper for the next 2 methods
-static void FinishBlockRemoval(BasicBlock *block)
+static void FinishBlockRemoval(BasicBlock *block, bool fixDomTree = true)
 {
     auto graph = block->GetGraph();
-    graph->GetAnalysis<DominatorsTree>().SetValid(true);
-    auto dominator = block->GetDominator();
-    if (dominator != nullptr) {
-        dominator->RemoveDominatedBlock(block);
-        for (auto domBlock : block->GetDominatedBlocks()) {
-            ASSERT(domBlock->GetDominator() == block);
-            dominator->AddDominatedBlock(domBlock);
-            domBlock->SetDominator(dominator);
+    if (fixDomTree) {
+        graph->GetAnalysis<DominatorsTree>().SetValid(true);
+        auto dominator = block->GetDominator();
+        if (dominator != nullptr) {
+            dominator->RemoveDominatedBlock(block);
+            for (auto domBlock : block->GetDominatedBlocks()) {
+                ASSERT(domBlock->GetDominator() == block);
+                dominator->AddDominatedBlock(domBlock);
+                domBlock->SetDominator(dominator);
+            }
         }
+        block->SetDominator(nullptr);
     }
-    block->SetDominator(nullptr);
 
     block->SetGraph(nullptr);
     if (graph->GetAnalysis<Rpo>().IsValid()) {
@@ -350,9 +352,7 @@ void Graph::DisconnectBlock(BasicBlock *block, bool removeLastInst, bool fixDomT
     if (block->IsEndBlock()) {
         SetEndBlock(nullptr);
     }
-    if (fixDomTree) {
-        FinishBlockRemoval(block);
-    }
+    FinishBlockRemoval(block, fixDomTree);
     EraseBlock(block);
     // NB! please do not forget to fix LoopAnalyzer or invalidate it after the end of the pass
 }
@@ -400,14 +400,14 @@ void Graph::RestoreBlock(BasicBlock *block)
 }
 
 /// @param block - same for block without instructions at all
-void Graph::RemoveEmptyBlock(BasicBlock *block)
+void Graph::RemoveEmptyBlock(BasicBlock *block, bool fixDomTree)
 {
-    ASSERT(IsAnalysisValid<DominatorsTree>());
+    ASSERT(IsAnalysisValid<DominatorsTree>() || !fixDomTree);
     ASSERT(block->GetLastInst() == nullptr);
     ASSERT(block->GetPredsBlocks().empty());
     ASSERT(block->GetSuccsBlocks().empty());
 
-    FinishBlockRemoval(block);
+    FinishBlockRemoval(block, fixDomTree);
     EraseBlock(block);
     // NB! please do not forget to fix LoopAnalyzer or invalidate it after the end of the pass
 }
