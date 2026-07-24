@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,11 +41,7 @@ constexpr size_t DEFAULT_ARENA_SIZE = PANDA_DEFAULT_ARENA_SIZE;
 constexpr Alignment DEFAULT_ARENA_ALIGNMENT = LOG_ALIGN_3;
 // Buffer for on stack allocation
 constexpr size_t ON_STACK_BUFFER_SIZE = 128 * SIZE_1K;
-#ifdef FORCE_ARENA_ALLOCATOR_ON_STACK_CACHE
-constexpr bool ON_STACK_ALLOCATION_ENABLED = true;
-#else
 constexpr bool ON_STACK_ALLOCATION_ENABLED = false;
-#endif
 
 constexpr size_t DEFAULT_ON_STACK_ARENA_ALLOCATOR_BUFF_SIZE = 128 * SIZE_1K;
 
