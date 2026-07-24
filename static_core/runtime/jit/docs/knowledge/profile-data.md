@@ -21,7 +21,7 @@ Profile data records observed runtime behavior so compiler workflows can make be
 | Data | Purpose | Risk |
 |---|---|---|
 | Inline cache | Receiver/type observations for calls | Stale context can misguide inlining |
-| Branch data | Observed branch direction | Missing data can skew layout decisions |
+| Branch data | Observed branch direction | Missing data can skew layout; collection can add interpreter cost |
 | Throw data | Observed exceptional behavior | Rare paths can be underrepresented |
 | `.ap` file | Persisted profile data for offline use | Format/context mismatch must be rejected |
 | Class context | Validates profile against loaded files/classes | Weak matching can attach wrong data |
@@ -60,6 +60,12 @@ Commonly relevant option areas include:
 - branch profile collection when branch detail is needed.
 
 Runtime profiling starts once methods cross the profiling threshold. Profiles can be saved on shutdown or by incremental profile-saver flows.
+
+## Historical Key Issues
+
+| Issue / Signal | Read first |
+|---|---|
+| Cold start with `UpdateBranch*` hot | `branch-profiling-cost.md` |
 
 ## Owners And Anchors
 

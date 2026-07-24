@@ -23,6 +23,9 @@ Runtime structures for these live in `runtime/jit/profiling_data.h`.
 - profiling begins once methods cross `--compiler-profiling-threshold`
 - additional branch detail is controlled by `--profile-branches=true`
 
+Branch detail is not free on every workload. Loop-heavy startup paths can make branch counter updates dominate VM time;
+see [branch-profiling-cost.md](../runtime/jit/docs/knowledge/branch-profiling-cost.md).
+
 Relevant runtime options are defined in `runtime/options.yaml`.
 
 ## How Profiles Are Saved
@@ -61,5 +64,6 @@ Add `--abc-path` or `--abc-dir` when you need resolved class or method names.
 ## Related Guides
 
 - `../runtime/jit/AGENTS.md` - runtime-side ownership and caveats
+- `../runtime/jit/docs/knowledge/branch-profiling-cost.md` - branch profiling collection cost pattern
 - `../compiler/docs/aot_pgo.md` - compiler consumption and current limitations
 - `aptool.md` - `ark_aptool` usage

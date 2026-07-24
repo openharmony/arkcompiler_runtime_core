@@ -100,6 +100,9 @@ AOT PGO has important limits:
   explicitly restricts the CHA path to non-AOT graphs
 - external inline-cache driven inlining still follows the normal AOT external-inlining rules; it is gated by
   `--compiler-inline-external-methods-aot` plus the usual AOT availability constraints
+- branch data is collected by runtime profiling before `ark_aot` consumes the `.ap`; high-frequency branch collection
+  can add startup cost on loop-heavy workloads. See
+  [branch-profiling-cost.md](../../runtime/jit/docs/knowledge/branch-profiling-cost.md)
 - profile data is useful, but it does not remove the usual AOT constraints around unavailable classes, external methods,
   or mismatched load context
 
