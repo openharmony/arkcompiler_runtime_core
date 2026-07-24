@@ -52,8 +52,8 @@ async function startTest() {
     {{ c.assertion | safe }}
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main() {
+    waitForCompletion(startTest);
 }
 
 {% endfor %}

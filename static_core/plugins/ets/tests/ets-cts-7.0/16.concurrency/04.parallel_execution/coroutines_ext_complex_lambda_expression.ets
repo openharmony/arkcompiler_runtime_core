@@ -21,7 +21,8 @@ expected_out:
         - Test for coroutine with a complex lambda expression is passed.
 ---*/
 
-async function main(): Promise<void> {
+function main(): void {
+  waitForCompletion(async (): Promise<void> => {
   const complexLambda = async (n: number): Promise<int> => {
     let sum: int = 0;
     for (let i = 1; i <= n; i++) {
@@ -34,4 +35,5 @@ async function main(): Promise<void> {
     arktest.assertEQ(result, 6);
     console.log("Test for coroutine with a complex lambda expression is passed."); //To ensure the async lambda has completed
   })()
+  });
 }

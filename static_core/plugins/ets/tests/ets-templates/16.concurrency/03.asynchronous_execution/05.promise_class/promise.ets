@@ -25,7 +25,7 @@ async function runTest() {
     {{c.use|indent}}
 }
 
-async function main(): Promise<void> {
-    await runTest()
+function main(){
+    waitForCompletion(runTest);
 }
 {% endfor %}

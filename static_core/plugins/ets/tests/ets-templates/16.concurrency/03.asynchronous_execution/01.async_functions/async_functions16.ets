@@ -37,6 +37,6 @@ async function startTest() {
     await allSettledExample();
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+  waitForCompletion(startTest);
 }

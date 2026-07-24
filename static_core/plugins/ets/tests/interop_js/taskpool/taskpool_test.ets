@@ -31,8 +31,8 @@ function RunTasksWithJsCallTest(): void {
 
     let p1 = taskpool.execute(callback);
     let p2 = taskpool.execute(callback);
-    let result1 = p1.awaitSync();
-    let result2 = p2.awaitSync();
+    let result1 = waitForCompletion(() => p1);
+    let result2 = waitForCompletion(() => p2);
     arktest.assertEQ(result1, 0);
     arktest.assertEQ(result2, 0);
 }
@@ -50,7 +50,7 @@ function RunTasksWithJsAsyncCallTest(): void {
             modified = true;
         });
 
-        promise1.awaitSync();
+        waitForCompletion(() => promise1);
 
         try {
             let value = JSRuntime.getPropertyInt(JSRuntime.getGlobal(), 'value');
@@ -66,7 +66,7 @@ function RunTasksWithJsAsyncCallTest(): void {
     };
 
     let p = taskpool.execute(callback);
-    let result = p.awaitSync();
+    let result = waitForCompletion(() => p);
     arktest.assertEQ(result, 0);
     arktest.assertEQ(CoroutineExtras.isTaskpoolSupportingInterop(), true);
     CoroutineExtras.stopTaskpool();
@@ -113,7 +113,7 @@ function additionDelay(delay: number): void {
     }
 }
 
-async function testCPUTaskDuration(): Promise<void> {
+function testCPUTaskDuration(): void {    
     let task: taskpool.Task = new taskpool.Task(additionDelay, 300.0);
     let runner: taskpool.SequenceRunner = new taskpool.SequenceRunner();
 
@@ -122,7 +122,7 @@ async function testCPUTaskDuration(): Promise<void> {
     arktest.assertTrue(task.cpuDuration == 0);
     arktest.assertTrue(task.totalDuration == 0);
 
-    await runner.execute(task);
+    waitForCompletion(() => runner.execute(task)); 
 
     arktest.assertTrue(task.cpuDuration > 0);
     arktest.assertTrue(task.totalDuration > 0);
@@ -131,7 +131,7 @@ async function testCPUTaskDuration(): Promise<void> {
 
 export function main(): int {
     let testSuite = new arktest.ArkTestsuite('taskpool.taskpool_test');
-    testSuite.addAsyncTest('testCPUTaskDuration', testCPUTaskDuration);
+    testSuite.addTest('testCPUTaskDuration', testCPUTaskDuration);
     let res = testSuite.run();
     return res;
 }

@@ -28,7 +28,7 @@ function startTest(): void {
   const ea = new EAWorker()
   ea.start()
 
-  ea.run<undefined>(() => {
+  waitForCompletion<void>((): Promise<void> => ea.run<Promise<void>>(async() => {
     let low1 = launch<undefined>() {
       order.push(3)
     }
@@ -47,11 +47,11 @@ function startTest(): void {
       return v
     })
 
-    high1.awaitSync()
-    high2.awaitSync()
+    await high1
+    await high2
     low1.Await()
     low2.Await()
-  }).Await()
+  }).Await())
 
   arktest.assertEQ(order.length, 4)
   arktest.assertEQ(order[0], 1)

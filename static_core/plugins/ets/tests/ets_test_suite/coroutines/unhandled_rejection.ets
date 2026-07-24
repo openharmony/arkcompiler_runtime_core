@@ -92,9 +92,10 @@ function testUnhandledRejection(): void {
     Promise.reject();
 }
 
-async function main(): Promise<int> {
+function main(): int {
+    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection');
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection');
     testSuite.addTest('testUnhandledRejection', testUnhandledRejection);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

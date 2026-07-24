@@ -93,7 +93,7 @@ function undefinedTest() {
 
 let eaw:EAWorker = new EAWorker();
 
-async function main(): Promise<int> {
+function main(): int {
     eaw.start();
     const testSuite = new arktest.ArkTestsuite('EAWorkerParameterTest');
     testSuite.addTest('singleObject', singleObject);
@@ -101,7 +101,7 @@ async function main(): Promise<int> {
     testSuite.addTest('arrayParameter', arrayParameter);
     testSuite.addTest('primitiveParameter', primitiveParameter);
     testSuite.addTest("undefinedTest", undefinedTest);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     eaw.join();
     return res;
 }

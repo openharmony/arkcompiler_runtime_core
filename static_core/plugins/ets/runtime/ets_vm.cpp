@@ -17,7 +17,6 @@
 #include "plugins/ets/runtime/ets_vm_out_of_memory_listener.h"
 
 #include "compiler/optimizer/ir/runtime_interface.h"
-#include "execution/job_execution_context.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_execution_context_wrapper.h"
 #include "include/mem/panda_smart_pointers.h"
@@ -36,7 +35,7 @@
 #include "plugins/ets/runtime/ets_vm_options.h"
 #include "plugins/ets/runtime/mem/ets_reference_processor.h"
 #include "plugins/ets/runtime/types/ets_method.h"
-#include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_job.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_taskpool.h"
@@ -56,7 +55,6 @@
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref_list.h"
 #include "plugins/ets/runtime/types/ets_std_core_array.h"
-#include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 #include "plugins/ets/runtime/finalreg/finalization_registry_manager.h"
 
@@ -581,7 +579,7 @@ bool PandaEtsVM::CheckEntrypointSignature(Method *entrypoint)
     ASSERT(entrypoint != nullptr);
 
     if (entrypoint->GetReturnType().GetId() != panda_file::Type::TypeId::I32 &&
-        entrypoint->GetReturnType().GetId() != panda_file::Type::TypeId::VOID && !entrypoint->HasAsyncAnnotation()) {
+        entrypoint->GetReturnType().GetId() != panda_file::Type::TypeId::VOID) {
         return false;
     }
 
@@ -650,35 +648,6 @@ coretypes::String *PandaEtsVM::CreateString(Method *ctor, ObjectHeader *obj)
     return str == nullptr ? nullptr : str->GetCoreType();
 }
 
-static Expected<int, Runtime::Error> WaitForEntrypointCompletion(Value result)
-{
-    if (!result.IsReference()) {
-        return Unexpected(Runtime::Error::INVALID_ENTRY_POINT);
-    }
-
-    auto *executionCtx = EtsExecutionContext::GetCurrent();
-    EtsHandle<EtsPromise> promise(executionCtx, EtsPromise::FromCoreType(result.GetAs<ObjectHeader *>()));
-    ASSERT(promise->GetClass() == PlatformTypes(executionCtx)->corePromise);
-
-    while (promise->IsLinked() || promise->IsPending()) {
-        ScopedNativeCodeThread nativeCode(executionCtx->GetMT());
-        JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager()->ExecuteJobs();
-    }
-    ASSERT(promise->IsResolved() || promise->IsRejected());
-
-    if (promise->IsResolved()) {
-        if (promise->GetValue(executionCtx) == nullptr) {
-            return 0;  // Promise<void>
-        }
-        if (promise->GetValue(executionCtx)->GetClass() == PlatformTypes(executionCtx)->coreInt) {
-            return EtsBoxPrimitive<EtsInt>::FromCoreType(promise->GetValue(executionCtx))->GetValue();
-        }
-        return Unexpected(Runtime::Error::INVALID_ENTRY_POINT);
-    }
-    executionCtx->GetMT()->SetException(promise->GetValue(executionCtx)->GetCoreType());
-    return 0;
-}
-
 Expected<int, Runtime::Error> PandaEtsVM::InvokeEntrypointImpl(Method *entrypoint, const std::vector<std::string> &args)
 {
     ASSERT(Runtime::GetCurrent()->GetLanguageContext(*entrypoint).GetLanguage() == panda_file::SourceLang::ETS);
@@ -708,12 +677,7 @@ Expected<int, Runtime::Error> PandaEtsVM::InvokeEntrypointImpl(Method *entrypoin
         entrypointArgs = &argValue;
     }
 
-    auto v = entrypoint->Invoke(executionCtx->GetMT(), entrypointArgs);
-    if (entrypoint->HasAsyncAnnotation()) {
-        return WaitForEntrypointCompletion(v);
-    }
-
-    return v.GetAs<int>();
+    return entrypoint->Invoke(executionCtx->GetMT(), entrypointArgs).GetAs<int>();
 }
 
 ObjectHeader *PandaEtsVM::GetOOMErrorObject()

@@ -16,7 +16,6 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Using recursion in asynchronous methods.
-tags: [no-warmup]
 ---*/
 
 class MethodWithRecursion {
@@ -34,6 +33,6 @@ async function startTest() {
     arktest.assertEQ(result, 15);
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+    waitForCompletion(startTest);
 }

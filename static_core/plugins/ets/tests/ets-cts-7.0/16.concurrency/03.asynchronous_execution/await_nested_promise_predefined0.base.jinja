@@ -34,11 +34,13 @@ async function nestedPromise(): Promise<{{type_name}}> {
 }
 
 async function waitedPromise(): Promise<{{type_name}}> {
-  
+
   // Asynchronous simulation
   return new Promise<{{type_name}}>((resolve) => {
-    setTimeout(async () => {
-      resolve(await nestedPromise());
+    setTimeout(() => {
+      waitForCompletion(async () => {
+        resolve(await nestedPromise());
+      })
     }, 100);
   });
 }
@@ -48,8 +50,8 @@ async function startTest() {
     arktest.assertEQ(result, value, `Value result must be ${result}`);
 }
 
-async function main(): Promise<void> {
-    await startTest();
+function main() {
+    waitForCompletion(startTest);
 }
 {% endfor %}
 {% endfor %}

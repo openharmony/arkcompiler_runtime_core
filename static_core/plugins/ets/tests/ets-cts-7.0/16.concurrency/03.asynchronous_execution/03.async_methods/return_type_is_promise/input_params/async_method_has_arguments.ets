@@ -28,7 +28,7 @@ async function startTest(){
     arktest.assertEQ(await new AsyncMethodReturnClass().asyncWithArguments({{c.args}}), undefined)
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+    waitForCompletion(startTest);
 }
 {% endfor %}

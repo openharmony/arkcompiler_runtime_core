@@ -22,7 +22,8 @@ async function startTest(): Promise<void> {
     throw new Error("test-1: thrown from async startTest");
 }
 
-async function main(): Promise<void> {
+function main(): void {
+  waitForCompletion(async (): Promise<void> => {
     try {
         await startTest();
         
@@ -43,4 +44,5 @@ async function main(): Promise<void> {
             arktest.assertEQ(stackPattern.test(line), true);
         }
     }
+  });
 }

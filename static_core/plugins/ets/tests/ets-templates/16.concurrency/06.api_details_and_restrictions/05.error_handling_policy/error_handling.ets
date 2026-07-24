@@ -38,7 +38,7 @@ async function outerTask(): Promise<void> {
     await innerTask();
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let suite = new arktest.ArkTestsuite("Error handling policy");
 
     suite.addAsyncTest("Promise rejection absorbed via await try/catch", async (): Promise<void> => {
@@ -68,5 +68,5 @@ async function main(): Promise<int> {
         }
     });
 
-    return await suite.runAsync()
+    return suite.run()
 }

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-async function testProcessInput(): Promise<void> {
+function testProcessInput() {
     let callback = ():boolean => {
         let module = ESValue.load('concurrency_helpers');
         let processInputDy = module.getProperty('processInput');
@@ -22,11 +22,11 @@ async function testProcessInput(): Promise<void> {
         let res = (res1.toNumber() === 10) && (res2.toString() === 'HELLO') && (!res3.toBoolean());
         return res;
     };
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
-async function testCreateArray(): Promise<void> {
+function testCreateArray() {
     let callback = ():boolean => {
         let module = ESValue.load('concurrency_helpers');
         let createArrayDy = module.getProperty('createArray');
@@ -40,11 +40,11 @@ async function testCreateArray(): Promise<void> {
                     (res2.getProperty(0).toString() === 'a') &&
                     (res3.getProperty(0).toBoolean() === true);
     };
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
-async function testGetUser(): Promise<void> {
+function testGetUser() {
     let callback = ():boolean => {
         let module = ESValue.load('concurrency_helpers');
         let getUserDy = module.getProperty('getUser');
@@ -55,7 +55,7 @@ async function testGetUser(): Promise<void> {
         return res1.getProperty('id').toNumber() === 123 &&
                     res2.getProperty('role').toString() === 'admin';
     };
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
@@ -63,7 +63,7 @@ class NewTestClass {
   prop: number = 1;
 }
 
-async function testUnion(): Promise<void> {
+function testUnion() {
   let result = false;
   try {
     let callback = () => {
@@ -84,7 +84,7 @@ async function testUnion(): Promise<void> {
         arktest.assertTrue(dynamicObj.getProperty('unionProp').getProperty('prop').toNumber() === 1);
         result = true;
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
   } catch (error) {
     console.error(error.toString());
     arktest.assertFalse(result);
@@ -92,17 +92,17 @@ async function testUnion(): Promise<void> {
   arktest.assertEQ(result, true);
 }
 
-async function testBaseClass(): Promise<void> {
+function testBaseClass() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let obj = module.getProperty('Base').instantiate().invokeMethod('getCurrent')
         arktest.assertTrue(obj.typeOf() === 'object')
         arktest.assertTrue(obj.getProperty('baseVal').toNumber() === 1)
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
-async function testChildClass(): Promise<void> {
+function testChildClass() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let obj = module.getProperty('Child').instantiate().invokeMethod('getSuper')
@@ -110,77 +110,77 @@ async function testChildClass(): Promise<void> {
         arktest.assertTrue(obj.getProperty('baseVal').toNumber() === 1)
         arktest.assertTrue(obj.getProperty('childVal').toNumber() === 2)
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
-async function testBaseFunc(): Promise<void> {
+function testBaseFunc() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let obj = module.getProperty('baseFunc').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
-async function testChildFunc(): Promise<void> {
+function testChildFunc() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let obj = module.getProperty('childFunc').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(obj, ESValue.Undefined))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
-async function testFooBaseObjInvoke(): Promise<void> {
+function testFooBaseObjInvoke() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let fooBaseObj = module.getProperty('fooBaseObj')
         let result = fooBaseObj.getProperty('foo').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
-async function testFooBaseObjInvokeMethod(): Promise<void> {
+function testFooBaseObjInvokeMethod() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let fooBaseObj = module.getProperty('fooBaseObj')
         let result = fooBaseObj.invokeMethod('fooFunc')
         arktest.assertTrue(ESValue.areStrictlyEqual(result, fooBaseObj))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
-async function testFooChildObjInvoke(): Promise<void> {
+function testFooChildObjInvoke() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let fooChildObj = module.getProperty('fooChildObj')
         let result = fooChildObj.getProperty('foo').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
-async function testFooChildObjInvokeMethod(): Promise<void> {
+function testFooChildObjInvokeMethod() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let fooChildObj = module.getProperty('fooChildObj')
         let result = fooChildObj.invokeMethod('fooFunc')
         arktest.assertTrue(ESValue.areStrictlyEqual(result, fooChildObj))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
-async function testArrowFuncInvoke(): Promise<void> {
+function testArrowFuncInvoke() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let result = module.getProperty('arrowFunc').invoke()
         arktest.assertTrue(ESValue.areStrictlyEqual(result, ESValue.Undefined))
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
-async function testOptionalParams(): Promise<void> {
+function testOptionalParams() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         arktest.assertTrue(module.getProperty('foo1').invoke(ESValue.wrap(1), ESValue.wrap('str')).toBoolean());
@@ -191,7 +191,7 @@ async function testOptionalParams(): Promise<void> {
         arktest.assertTrue(module.getProperty('fun2').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(false)).toBoolean());
         arktest.assertTrue(module.getProperty('fun3').invoke(ESValue.wrap(1), ESValue.wrap('str'), ESValue.wrap(false), ESValue.wrap(2)).toBoolean());
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 
@@ -200,7 +200,7 @@ const ErrorMessage: string = 'Panda: throw new error in ets!';
 const CustomErrorMessage: string = 'Panda: Something went wrong!';
 const CustomErrorCode: number = 1001;
 
-async function testError(): Promise<void> {
+function testError() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let err = module.getProperty('err');
@@ -208,11 +208,11 @@ async function testError(): Promise<void> {
         res = (err.getProperty('message').toString() == ErrMsg);
         return res;
     }
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
-async function testThrowError(): Promise<void> {
+function testThrowError() {
     let callback = () => {
     let module = ESValue.load('concurrency_helpers');
     let res: boolean;
@@ -224,11 +224,11 @@ async function testThrowError(): Promise<void> {
         }
         return res;
     }
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
-async function testCustomThrowError(): Promise<void> {
+function testCustomThrowError() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let res: boolean;
@@ -241,11 +241,11 @@ async function testCustomThrowError(): Promise<void> {
         }
         return res;
     }
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
-async function testTaskpoolNestedExecute(): Promise<void> {
+function testTaskpoolNestedExecute() {
     let callback = ():boolean => {
         let module = ESValue.load('concurrency_helpers');
         let processInputDy = module.getProperty('processInput');
@@ -262,15 +262,15 @@ async function testTaskpoolNestedExecute(): Promise<void> {
             let res3 = processInputDy.invoke(ESValue.wrapBoolean(true)); // false
             return res1.toNumber() === 10 && res2.toString() === 'HELLO' && !res3.toBoolean();
         }
-        let resInner = (taskpool.execute(callbackInner).awaitSync()) as boolean;
+        let resInner = (waitForCompletion(() => taskpool.execute(callbackInner))) as boolean;
         arktest.assertTrue(resInner);
         return res && resInner;
     };
-    let res = (await taskpool.execute(callback)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(callback))) as boolean;
     arktest.assertEQ(res, true);
 }
 
-async function testTaskpoolInteropLoop(): Promise<void> {
+function testTaskpoolInteropLoop() {
     let callback = () => {
         let module = ESValue.load('concurrency_helpers');
         let processInputDy = module.getProperty('processInput');
@@ -283,7 +283,7 @@ async function testTaskpoolInteropLoop(): Promise<void> {
             arktest.assertEQ(res3.toBoolean(), false);
         }
     }
-    await taskpool.execute(callback);
+    waitForCompletion(() => taskpool.execute(callback));
 }
 
 function testSerializeFunc(serializeTestObj: ESValue) {
@@ -296,65 +296,65 @@ function testSerializeFunc(serializeTestObj: ESValue) {
     return true;
 }
 
-async function testTaskpoolSerialize(): Promise<void> {
+function testTaskpoolSerialize() {
     let module = ESValue.load('concurrency_helpers');
     let serializeTestObj = module.getProperty('serializeTestObj');
-    let res = (await taskpool.execute(testSerializeFunc, serializeTestObj)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(testSerializeFunc, serializeTestObj))) as boolean;
     arktest.assertEQ(res, true);
 }
 
-async function testTaskpoolSerializeClassInstantiate(): Promise<void> {
+function testTaskpoolSerializeClassInstantiate() {
     let module = ESValue.load('concurrency_helpers');
     let SerializeTest = module.getProperty('SerializeTest');
     let serializeTestObj = SerializeTest.instantiate('SerializeTest', 1, ['1', '2', '3']);
-    let res = (await taskpool.execute(testSerializeFunc, serializeTestObj)) as boolean;
+    let res = (waitForCompletion(() => taskpool.execute(testSerializeFunc, serializeTestObj))) as boolean;
     arktest.assertEQ(res, true);
 }
 
-async function testTaskpoolSerializeUndefined(): Promise<void> {
+function testTaskpoolSerializeUndefined() {
     let module = ESValue.load('concurrency_helpers');
     let serializeObj = module.getProperty('serializeUndefined');
     let callback = (value: ESValue) => {
         arktest.assertTrue(value.isUndefined());
     }
-    await taskpool.execute(callback, serializeObj);
+    waitForCompletion(() => taskpool.execute(callback, serializeObj));
 }
 
-async function testTaskpoolSerializeNull(): Promise<void> {
+function testTaskpoolSerializeNull() {
     let module = ESValue.load('concurrency_helpers');
     let serializeObj = module.getProperty('serializeNull');
     let callback = (value: ESValue) => {
         arktest.assertTrue(value.isNull());
     }
-    await taskpool.execute(callback, serializeObj);
+    waitForCompletion(() => taskpool.execute(callback, serializeObj));
 }
 
 function taskpoolInteropTest() {
     let taskpoolInteropSuite = new arktest.ArkTestsuite('taskpool.InteropTest');
-    taskpoolInteropSuite.addAsyncTest('testProcessInput', testProcessInput);
-    taskpoolInteropSuite.addAsyncTest('testCreateArray', testCreateArray);
-    taskpoolInteropSuite.addAsyncTest('testGetUser', testGetUser);
+    taskpoolInteropSuite.addTest('testProcessInput', testProcessInput);
+    taskpoolInteropSuite.addTest('testCreateArray', testCreateArray);
+    taskpoolInteropSuite.addTest('testGetUser', testGetUser);
     // Flaky fail: #30965
-    // taskpoolInteropSuite.addAsyncTest('testUnion', testUnion);
-    taskpoolInteropSuite.addAsyncTest('testBaseClass', testBaseClass);
-    taskpoolInteropSuite.addAsyncTest('testChildClass', testChildClass);
-    taskpoolInteropSuite.addAsyncTest('testBaseFunc', testBaseFunc);
-    taskpoolInteropSuite.addAsyncTest('testChildFunc', testChildFunc);
-    taskpoolInteropSuite.addAsyncTest('testFooBaseObjInvoke', testFooBaseObjInvoke);
-    taskpoolInteropSuite.addAsyncTest('testFooBaseObjInvokeMethod', testFooBaseObjInvokeMethod);
-    taskpoolInteropSuite.addAsyncTest('testFooChildObjInvoke', testFooChildObjInvoke);
-    taskpoolInteropSuite.addAsyncTest('testFooChildObjInvokeMethod', testFooChildObjInvokeMethod);
-    taskpoolInteropSuite.addAsyncTest('testArrowFuncInvoke', testArrowFuncInvoke);
-    taskpoolInteropSuite.addAsyncTest('testOptionalParams', testOptionalParams);
-    taskpoolInteropSuite.addAsyncTest('testError', testError);
-    taskpoolInteropSuite.addAsyncTest('testThrowError', testThrowError);
-    taskpoolInteropSuite.addAsyncTest('testCustomThrowError', testCustomThrowError);
-    taskpoolInteropSuite.addAsyncTest('testTaskpoolNestedExecute', testTaskpoolNestedExecute);
-    taskpoolInteropSuite.addAsyncTest('testTaskpoolInteropLoop', testTaskpoolInteropLoop);
-    taskpoolInteropSuite.addAsyncTest('testTaskpoolSerialize', testTaskpoolSerialize);
-    taskpoolInteropSuite.addAsyncTest('testTaskpoolSerializeClassInstantiate', testTaskpoolSerializeClassInstantiate);
-    taskpoolInteropSuite.addAsyncTest('testTaskpoolSerializeUndefined', testTaskpoolSerializeUndefined);
-    taskpoolInteropSuite.addAsyncTest('testTaskpoolSerializeNull', testTaskpoolSerializeNull);
+    // taskpoolInteropSuite.addTest('testUnion', testUnion);
+    taskpoolInteropSuite.addTest('testBaseClass', testBaseClass);
+    taskpoolInteropSuite.addTest('testChildClass', testChildClass);
+    taskpoolInteropSuite.addTest('testBaseFunc', testBaseFunc);
+    taskpoolInteropSuite.addTest('testChildFunc', testChildFunc);
+    taskpoolInteropSuite.addTest('testFooBaseObjInvoke', testFooBaseObjInvoke);
+    taskpoolInteropSuite.addTest('testFooBaseObjInvokeMethod', testFooBaseObjInvokeMethod);
+    taskpoolInteropSuite.addTest('testFooChildObjInvoke', testFooChildObjInvoke);
+    taskpoolInteropSuite.addTest('testFooChildObjInvokeMethod', testFooChildObjInvokeMethod);
+    taskpoolInteropSuite.addTest('testArrowFuncInvoke', testArrowFuncInvoke);
+    taskpoolInteropSuite.addTest('testOptionalParams', testOptionalParams);
+    taskpoolInteropSuite.addTest('testError', testError);
+    taskpoolInteropSuite.addTest('testThrowError', testThrowError);
+    taskpoolInteropSuite.addTest('testCustomThrowError', testCustomThrowError);
+    taskpoolInteropSuite.addTest('testTaskpoolNestedExecute', testTaskpoolNestedExecute);
+    taskpoolInteropSuite.addTest('testTaskpoolInteropLoop', testTaskpoolInteropLoop);
+    taskpoolInteropSuite.addTest('testTaskpoolSerialize', testTaskpoolSerialize);
+    taskpoolInteropSuite.addTest('testTaskpoolSerializeClassInstantiate', testTaskpoolSerializeClassInstantiate);
+    taskpoolInteropSuite.addTest('testTaskpoolSerializeUndefined', testTaskpoolSerializeUndefined);
+    taskpoolInteropSuite.addTest('testTaskpoolSerializeNull', testTaskpoolSerializeNull);
     const res = taskpoolInteropSuite.run();
     CoroutineExtras.stopTaskpool();
     return res == 0;

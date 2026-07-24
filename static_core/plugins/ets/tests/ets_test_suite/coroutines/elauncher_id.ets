@@ -25,9 +25,9 @@ async function testElauncherId(): Promise<void> {
     arktest.assertNE(eLauncherId, CoroutineExtras.getWorkerId());
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.elauncher_id');
     testSuite.addAsyncTest('testElauncherId', testElauncherId);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

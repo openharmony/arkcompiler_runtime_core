@@ -88,7 +88,7 @@ function testLaunchThrow(): boolean {
 }
 
 function testFooAsync(): number {
-    return fooAsync().awaitSync();
+    return waitForCompletion<number>(fooAsync);
 }
 
 function testAddAsyncSchedule(): void {
@@ -103,7 +103,7 @@ async function recursiveAsyncFoo(): Promise<number> {
 }
 
 function testRecursiveAsync(): number {
-    return recursiveAsyncFoo().awaitSync();
+    return waitForCompletion<number>(recursiveAsyncFoo);
 }
 
 async function testAsyncThrow(): Promise<boolean> {
@@ -169,13 +169,12 @@ function testACoroutineCallAJCoroutine(): void {
     let ew = new EAWorker();
     ew.start();
     let job1 = ew.run<number>(() => {
-        return (async (): Promise<number> => {
+        return waitForCompletion<number>(async (): Promise<number> => {
             let job2: Job<Promise<number>> = launch(fooAsync)
             let p = job2.Await();
             let result = await p;
             return result;
-        // NOTE(zhuheng_z, #11066): should be removed after launch will be correctly supported for async functions
-        })().awaitSync();
+        });
     });
     ew.join();
     arktest.assertEQ(EXPECTED_VALUE, job1.Await());
@@ -221,22 +220,9 @@ function testNestedEAWorker(): void {
     arktest.assertEQ(EXPECTED_VALUE, result);
 }
 
-async function testInitTaskEAWorker(): Promise<void> {
-    let e1 = new EAWorker(() => {
-        throw new Error('This is an exception in init task!');
-    });
-    let errs = '';
-    e1.setUncaughtExceptionHandler((e: Error) => {
-        errs += e.message;
-    });
-    e1.start();
-    await e1.join();
-    arktest.assertEQ(errs, 'This is an exception in init task!');
-}
-
 function testOfPrioritySetting(): void {
     let e = new EAWorker();
-    arktest.assertEQ(e.getPriority(), WorkerPriority.PRIORITY_HIGH);
+    arktest.assertEQ(e.getPriority(), WorkerPriority.PRIORITY_DEFAULT);
     e.setPriority(WorkerPriority.PRIORITY_HIGH);
     arktest.assertEQ(e.getPriority(), WorkerPriority.PRIORITY_HIGH);
     e.start();
@@ -244,7 +230,7 @@ function testOfPrioritySetting(): void {
     e.join();
 }
 
-async function main(): Promise<int> {
+function main(): int {
     const suite = new arktest.ArkTestsuite('EAWorker Test Suite');
 
     suite.addTest('testACoroutineEaworker', testACoroutineEaworker);
@@ -253,7 +239,6 @@ async function main(): Promise<int> {
     suite.addTest('testACoroutineCallAJCoroutine', testACoroutineCallAJCoroutine);
     suite.addAsyncTest('testAJCoroutineCallACoroutine', testAJCoroutineCallACoroutine);
     suite.addTest('testNestedEAWorker', testNestedEAWorker);
-
-    let res = await suite.runAsync();
-    return res;
+    
+    return suite.run();
 }

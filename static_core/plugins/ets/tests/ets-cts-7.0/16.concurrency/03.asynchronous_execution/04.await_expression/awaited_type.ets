@@ -16,7 +16,6 @@
 {% for c in cases %}
 /*---
 desc: Awaited type of resolved Promise<{{c.type}}>.
-tags: [no-warmup]
 ---*/
 
 const value: {{c.type}} = {{c.value}}
@@ -31,7 +30,7 @@ async function startTest(){
     arktest.assertTrue(promiseResult instanceof Awaited<{{c.type}}>);
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main() {
+    waitForCompletion(startTest);
 }
 {% endfor %}

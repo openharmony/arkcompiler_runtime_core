@@ -26,16 +26,15 @@ async function foo<T, G>(awaited: Awaited<T>, expected: G) {
 }
 
 async function bar() {
-    foo<{{c.T}},{{c.G}}>( await new Promise<{{c.promiseT}}>( (resolve) => {
+    foo<{{c.T}},{{c.G}}>(await new Promise<{{c.promiseT}}>((resolve) => {
             setTimeout(() => {
                 resolve({{c.val}})
             }, 1000)
-        } ), {{c.check}} 
-    )
+        }), {{c.check}})
 }
 
-async function main(): Promise<void> {
-    await bar()
+function main() {
+    waitForCompletion(bar)
 }
 
-{%- endfor %}
+{% endfor %}

@@ -102,10 +102,10 @@ async function currentTaskTest(): Promise<void> {
     arktest.assertEQ(errSuccessCount.load(), 9);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let suite = new arktest.ArkTestsuite('taskpool.CurrentTaskTest');
     suite.addAsyncTest('CurrentTaskTest', currentTaskTest);
-    let res = await suite.runAsync();
+    let res = suite.run();
     CoroutineExtras.stopTaskpool();
     return res;
 }

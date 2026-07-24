@@ -18,7 +18,7 @@ import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
 
-async function main(): Promise<int> {
+function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Writable cork uncork", testWritableCorkUncork);
@@ -34,7 +34,7 @@ async function main(): Promise<int> {
     suite.addTest("Writable drain event high watermark", testWritableDrainEventHighWatermark);
     suite.addAsyncTest("Writable drain event async high watermark", testWritableDrainEventAsyncHighWatermark);
 
-    return await suite.runAsync();
+    return suite.run();
 }
 
 function mustCallTwoArgs(fn?: Function, times: number = 1) {
@@ -309,7 +309,7 @@ async function testWritableDrainEventAsyncHighWatermark() {
     writable.write('test', 'utf8', mustCallNoArgs((): void => {
     }))
     arktest.assertTrue(writable.doWriteVCalled);
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class TestWritable extends stream.Writable {

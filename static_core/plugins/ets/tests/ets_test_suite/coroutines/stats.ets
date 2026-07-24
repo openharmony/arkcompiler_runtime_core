@@ -44,9 +44,9 @@ async function testCoroStats(): Promise<void> {
     }
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.stats');
     testSuite.addAsyncTest('testCoroStats', testCoroStats);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

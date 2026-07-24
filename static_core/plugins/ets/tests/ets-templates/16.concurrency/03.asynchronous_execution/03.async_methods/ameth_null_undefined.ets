@@ -13,21 +13,23 @@
  * limitations under the License.
  */
 
-{% for c in cases %}
 /*---
-desc: Test cases for various usage scenarios of asynchronous method.
+desc: EAWorker can start, run a job and be quit
 ---*/
 
-class A {
-    {{c.decl|indent}}
-}
-
 async function startTest() {
-    let a = new A()
-    {{c.use|indent}}
+  const ea = new EAWorker()
+  ea.start()
+
+  let result: int = ea.run<int>(() => {
+    return 42
+  }).Await()
+
+  arktest.assertEQ(42, result)
+
+  ea.quit()
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main() {
+  waitForCompletion(startTest)
 }
-{% endfor %}

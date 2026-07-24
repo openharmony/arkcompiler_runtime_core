@@ -40,6 +40,6 @@ async function startTest() {
     arktest.assertEQ(result, "Caught error: Something went wrong!")
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+    waitForCompletion(startTest);
 }

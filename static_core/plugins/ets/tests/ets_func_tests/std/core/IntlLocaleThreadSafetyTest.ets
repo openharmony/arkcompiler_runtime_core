@@ -111,13 +111,13 @@ function testLocaleOptionsStillOverrideCachedData(): void {
     arktest.assertEQ(overridden.calendar, 'gregory');
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let suite = new arktest.ArkTestsuite('IntlLocaleThreadSafety');
     suite.addAsyncTest('concurrent same tag cache hits', testConcurrentSameTagCacheHits);
     suite.addTest('sequential cache replacement', testSequentialCacheReplacement);
     suite.addTest('locale options override cached data', testLocaleOptionsStillOverrideCachedData);
 
-    let result = await suite.runAsync();
+    let result = suite.run();
     CoroutineExtras.stopTaskpool();
     return result;
 }

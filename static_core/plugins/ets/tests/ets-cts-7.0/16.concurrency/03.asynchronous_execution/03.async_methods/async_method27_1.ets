@@ -16,7 +16,6 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Using promise.allsettled in asynchronous methods.
-tags: [no-warmup]
 ---*/
 
 class MethodWithAllSettled {
@@ -50,6 +49,6 @@ async function startTest() {
 
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+    waitForCompletion(startTest);
 }

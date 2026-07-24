@@ -18,7 +18,7 @@ import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
 
-async function main(): Promise<int> {
+function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addTest("Writable properties", testWritableProperties);
@@ -39,7 +39,7 @@ async function main(): Promise<int> {
     suite.addTest("Writable error handling", testWritableErrorHandling);
     suite.addAsyncTest("Writable close event", testWritableCloseEvent);
 
-    return await suite.runAsync();
+    return suite.run();
 }
 
 async function mustCallCheckAll() {
@@ -208,7 +208,7 @@ async function testWritableDrainAfterLargeData() {
     });
     writableStream.write(largeData, 'utf8', mustCallNoArgs((): void => {}));
     arktest.assertEQ(writableStream.writable, true);
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties012
@@ -218,7 +218,7 @@ async function testWritableDrainEvent() {
     writableStream.write(largeData);
     await writableStream.waitForDrain();
     arktest.assertEQ(writableStream.writableEnded, false);
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamWritableProperties013
@@ -270,7 +270,7 @@ async function testWritableCloseEvent() {
         arktest.assertEQ(writableStream.writableFinished, true);
     }));
     writableStream.end();
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 class CustomWritable extends stream.Writable {

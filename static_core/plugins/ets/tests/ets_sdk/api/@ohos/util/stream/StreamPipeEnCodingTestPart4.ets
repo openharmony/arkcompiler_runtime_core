@@ -17,7 +17,7 @@ import { BusinessError } from "@ohos.base";
 import { stream } from "@ohos.util.stream";
 
 const mustChecks: Array<Function> = new Array<Function>();
-async function main(): Promise<int> {
+function main(): int {
     const suite = new arktest.ArkTestsuite("Stream API tests");
 
     suite.addAsyncTest("Set default encoding validation (gb2312).", testWritableStreamSetDefaultEncodingGb2312);
@@ -28,7 +28,7 @@ async function main(): Promise<int> {
     suite.addAsyncTest("Duplex stream write method validation (gbk).", testDuplexStreamWriteEncodingGbk);
     suite.addAsyncTest("Duplex stream write method validation (gb2312).", testDuplexStreamWriteEncodingGb2312);
 
-    return await suite.runAsync();
+    return suite.run();
 }
 
 async function mustCallCheckAll() {
@@ -86,7 +86,7 @@ async function testWritableStreamSetDefaultEncodingGb2312() {
     let writable = new MyWrite();
     writable.setDefaultEncoding('gb2312');
     writable.write('你好');
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 // Test cases ported from ArkTS 1.0:testStreamEncoding010
@@ -133,7 +133,7 @@ async function testDuplexStreamWriteEncodingGb18030() {
 
     let duplex = new MyDuplex1();
     duplex.write('你好', 'gb18030');
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyDuplex2 = 0;
@@ -159,7 +159,7 @@ async function testDuplexStreamWriteEncodingGbk() {
 
     let duplex = new MyDuplex2();
     duplex.write('你好', 'gbk');
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }
 
 let callCount_MyDuplex3 = 0;
@@ -185,5 +185,5 @@ async function testDuplexStreamWriteEncodingGb2312() {
 
     let duplex = new MyDuplex3();
     duplex.write('你好', 'gb2312');
-    await arktest.expectNoThrowAsync(async () => { await mustCallCheckAll(); });
+    arktest.expectNoThrow(() => { waitForCompletion(async () => { await mustCallCheckAll(); }) });
 }

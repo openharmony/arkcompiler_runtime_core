@@ -21,7 +21,7 @@ tags: [no-warmup]
 
 {{c.decl}}
 
-async function main(): Promise<void> {
+function main() {
     {{c.use|indent}}
 }
 {% endfor %}

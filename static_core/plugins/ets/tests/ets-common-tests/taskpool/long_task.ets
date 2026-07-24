@@ -87,14 +87,14 @@ async function longTaskWithParamsTest() {
     arktest.assertEQ(res, 300);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let longTaskTestsuite = new arktest.ArkTestsuite('taskpool.LongTask');
     longTaskTestsuite.addAsyncTest('ExecuteDelayedTest', executeDelayedTest);
     longTaskTestsuite.addAsyncTest('ExecutePeriodicallyTest', executePeriodicallyTest);
     longTaskTestsuite.addAsyncTest('ExecuteTest', executeTest);
     longTaskTestsuite.addAsyncTest('DoubleExecutionTest', doubleExecutionTest);
     longTaskTestsuite.addAsyncTest('LongTaskWithParamsTest', longTaskWithParamsTest);
-    let res = await longTaskTestsuite.runAsync();
+    let res = longTaskTestsuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
 }

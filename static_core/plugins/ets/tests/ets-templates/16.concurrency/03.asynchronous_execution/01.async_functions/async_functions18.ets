@@ -28,6 +28,6 @@ async function startTest() {
     arktest.assertEQ(result, "Nested promise result");
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+  waitForCompletion(startTest);
 }

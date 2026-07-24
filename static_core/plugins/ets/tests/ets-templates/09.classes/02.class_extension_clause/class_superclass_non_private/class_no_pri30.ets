@@ -17,39 +17,35 @@
 desc: >-
     The child class calls the parent class method, and the new asynchronous method of the child class
     is used in the parent class method.
-tags: [no-warmup]
 ---*/
 
 class Parent {
-    public async greet(): Promise<string> {
-        return "Hello from Parent!";
-    }
+  public async greet(): Promise<string> {
+    return 'Hello from Parent!';
+  }
 
-    public async farewell(): Promise<string> {
-        return (await this.greet()) + " Goodbye from Parent!";
-    }
+  public async farewell(): Promise<string> {
+    return (await this.greet()) + ' Goodbye from Parent!';
+  }
 }
 
 class Child extends Parent {
-    public async customFetchMessage(): Promise<string> {
-        return "Custom Hello from Child!";
-    }
+  public async customFetchMessage(): Promise<string> {
+    return 'Custom Hello from Child!';
+  }
 
-    public async greet(): Promise<string> {
-        return await this.customFetchMessage();
-    }
+  public async greet(): Promise<string> {
+    return await this.customFetchMessage();
+  }
 
-    public async callParentFarewell(): Promise<string> {
-        return await this.farewell();
-    }
+  public async callParentFarewell(): Promise<string> {
+    return await this.farewell();
+  }
 }
 
-async function test() {
+function main(): void {
+  waitForCompletion(async () => {
     const child = new Child();
-    arktest.assertEQ(await child.callParentFarewell(), "Custom Hello from Child! Goodbye from Parent!");
-    return true
-}
-
-async function main(): Promise<void> {
-    await test()
+    arktest.assertEQ(await child.callParentFarewell(), 'Custom Hello from Child! Goodbye from Parent!');
+  });
 }

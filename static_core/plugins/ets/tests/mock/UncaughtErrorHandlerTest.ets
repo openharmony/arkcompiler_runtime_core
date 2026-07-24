@@ -22,7 +22,7 @@ class Event {
     }
 
     public Wait() {
-        this.promise.awaitSync();
+        waitForCompletion<Number>(() => this.promise);
     }
 
     public Fire() {
@@ -46,12 +46,12 @@ function SimpleTest(): void {
 }
 
 function SetTimeoutTest(): void {
-    let jb = new Event();
+    let jb = new CompletableJob<void>();
     StdProcess.on('uncaughtError', (err: Object): void => {
-        jb.Fire();
+        jb.finish();
     });
     setTimeout(Failing);
-    jb.Wait();
+    jb.Await();
 }
 
 function NoDeadlockTest(): void {

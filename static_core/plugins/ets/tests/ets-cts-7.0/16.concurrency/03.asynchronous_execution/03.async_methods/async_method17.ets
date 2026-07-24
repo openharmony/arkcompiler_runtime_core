@@ -16,7 +16,6 @@
 /*---
 desc: Test cases for various usage scenarios of asynchronous method.
       Concurrent execution of multiple asynchronous methods.
-tags: [no-warmup]
 ---*/
 
 class MethodConcurrentExecution {
@@ -47,6 +46,6 @@ async function startTest() {
       arktest.assertEQ(result[1], 42.0);
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+      waitForCompletion(startTest);
 }

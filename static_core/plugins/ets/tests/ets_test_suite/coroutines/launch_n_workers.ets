@@ -39,7 +39,7 @@ function compare_worker_ids_async(chain_len: int): int {
     L.log('Testing async function chain');
 
     let id_main: int = CoroutineExtras.getWorkerId();
-    let result = async_function_chain(id_main, chain_len).awaitSync();
+    let result = waitForCompletion(() => async_function_chain(id_main, chain_len));
     if (result == 0) {
         L.log('Successfully ran the async function chain')
     } else {
@@ -149,13 +149,13 @@ function testRunBatchAwait(): void {
     }
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch_error');
     testSuite.addTest('testCompareWorkerIdsAsync', testCompareWorkerIdsAsync);
     testSuite.addTest('testCompareWorkerIds', testCompareWorkerIds);
     testSuite.addTest('testRunBatchLaunch', testRunBatchLaunch);
     testSuite.addTest('testRunAwaitChain', testRunAwaitChain);
     testSuite.addTest('testRunBatchAwait', testRunBatchAwait);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

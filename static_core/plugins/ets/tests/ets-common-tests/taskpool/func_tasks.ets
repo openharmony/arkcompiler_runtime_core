@@ -140,7 +140,7 @@ async function taskpoolFuncTestLongStatic(): Promise<void> {
     arktest.assertEQ(receivedData, 123);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let funcTaskSuite = new arktest.ArkTestsuite('taskpool.FuncTask');
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestSumInt', taskpoolFuncTestSumInt);
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestAnd', taskpoolFuncTestAnd);
@@ -153,7 +153,7 @@ async function main(): Promise<int> {
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestSumInt2SameArguments', taskpoolFuncTestSumInt2SameArguments);
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestSumAndMulti', taskpoolFuncTestSumAndMulti);
     funcTaskSuite.addAsyncTest('TaskpoolFuncTestLongStatic', taskpoolFuncTestLongStatic);
-    let res = await funcTaskSuite.runAsync();
+    let res = funcTaskSuite.run();
     CoroutineExtras.stopTaskpool();
     return res;
 }

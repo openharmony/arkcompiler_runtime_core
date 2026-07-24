@@ -44,6 +44,6 @@ async function startTest(): Promise<void> {
     arktest.assertTrue(false)
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+   waitForCompletion(startTest);
 }

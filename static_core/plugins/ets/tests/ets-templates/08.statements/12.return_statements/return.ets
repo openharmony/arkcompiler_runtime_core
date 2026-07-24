@@ -21,12 +21,8 @@ desc: Return statement
 
 {{ case.decl }}
 
-{%- if case.async %}
-async function main(): Promise<void> {
-{% else %}
 function main(): void {
-{%- endif %}
     {{ case.use | indent(4) }}
 }
 
-{%- endfor %}
+{% endfor %}

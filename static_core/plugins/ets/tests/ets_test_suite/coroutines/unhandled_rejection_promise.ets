@@ -89,9 +89,9 @@ async function testUnhandledPromiseRejection(): Promise<void> {
     waiter.wait();
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.unhandled_rejection_promise');
     testSuite.addAsyncTest('testUnhandledPromiseRejection', testUnhandledPromiseRejection);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

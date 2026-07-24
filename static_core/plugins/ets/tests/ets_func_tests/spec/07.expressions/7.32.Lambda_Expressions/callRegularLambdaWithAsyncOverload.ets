@@ -37,6 +37,6 @@ class Test {
     }
 }
 
-async function main(): Promise<void> {
-    await new Test().callOverloadRegularFunc();
+function main(): void {
+    waitForCompletion(new Test().callOverloadRegularFunc);
 }

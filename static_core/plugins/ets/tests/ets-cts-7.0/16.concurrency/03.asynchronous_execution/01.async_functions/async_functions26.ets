@@ -38,6 +38,6 @@ async function startTest() {
   arktest.assertEQ(result.age, 1);
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+  waitForCompletion(startTest);
 }

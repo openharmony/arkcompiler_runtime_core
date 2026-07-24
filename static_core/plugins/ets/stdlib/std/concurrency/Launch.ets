@@ -18,6 +18,33 @@ package std.concurrency;
 import { stub } from "arkruntime";
 
 /**
+ * Function type used by legacy launch overloads to preserve the old source-compatible generic constraint.
+ *
+ * @template A argument type accepted by the coroutine function.
+ * @template R return type produced by the coroutine function.
+ *
+ * @internal
+ */
+export type CoroFunT<A, R> = (
+  a0: A,
+  a1: A,
+  a2: A,
+  a3: A,
+  a4: A,
+  a5: A,
+  a6: A,
+  a7: A,
+  a8: A,
+  a9: A,
+  a10: A,
+  a11: A,
+  a12: A,
+  a13: A,
+  a14: A,
+  a15: A
+) => R;
+
+/**
  * @class LaunchParams Class for coroutine launch params.
  * @internal
  */
@@ -35,7 +62,7 @@ export class LaunchParams {
  * @param launchParams parameters of the new coroutine.
  * @param args arguments for the function coroFun.
  *
- * @returns instance of the Promise class that represents newly launched coroutine.
+ * @returns instance of the Job class that represents newly launched coroutine.
  *
  * @internal
  */
@@ -49,12 +76,56 @@ export function launch<R>(launchParams: LaunchParams, coroFun: () => R): Job<R> 
  * @param coroFun entrypoint of the the new coroutine.
  * @param args arguments for the function coroFun.
  *
- * @returns instance of the Promise class that represents newly launched coroutine.
+ * @returns instance of the Job class that represents newly launched coroutine.
  *
  * @internal
  */
 export function launch<R>(coroFun: () => R): Job<R> {
   return launchInternal<R>(coroFun);
+}
+
+/**
+ * Compatibility overload for the old launch(coroFun, launchParams, ...args) syntax.
+ *
+ * @param coroFun entrypoint of the the new coroutine.
+ * @param launchParams parameters of the new coroutine.
+ * @param args arguments for the function coroFun.
+ *
+ * @returns instance of the Job class that represents newly launched coroutine.
+ *
+ * @internal
+ */
+export function launch<R>(coroFun: () => R, launchParams: LaunchParams): Job<R> {
+  return launchInternal<R>(coroFun, launchParams);
+}
+
+/**
+ * Compatibility overload for the old launch(coroFun, launchParams, ...args) syntax.
+ *
+ * @param coroFun entrypoint of the the new coroutine.
+ * @param launchParams parameters of the new coroutine.
+ * @param args arguments for the function coroFun.
+ *
+ * @returns instance of the Job class that represents newly launched coroutine.
+ *
+ * @internal
+ */
+export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, launchParams: LaunchParams, ...args: FixedArray<Any>): Job<R> {
+  return launchWithArgs<R>(coroFun as Function, args as FixedArray<Any>, launchParams);
+}
+
+/**
+ * Compatibility overload for the old launch(coroFun, ...args) syntax.
+ *
+ * @param coroFun entrypoint of the the new coroutine.
+ * @param args arguments for the function coroFun.
+ *
+ * @returns instance of the Job class that represents newly launched coroutine.
+ *
+ * @internal
+ */
+export function launch<R, F extends CoroFunT<never, R>>(coroFun: F, ...args: FixedArray<Any>): Job<R> {
+  return launchWithArgs<R>(coroFun as Function, args as FixedArray<Any>);
 }
 
 /**
@@ -135,10 +206,23 @@ export class WorkerGroup {
  */
 export function waitForCompletion<T>(asyncCallback: () => Promise<T>): T {
     let resultPromise = asyncCallback();
-    return resultPromise.awaitSync();
+    let job = new CompletableJob<T>();
+    resultPromise.then((res: T) => {
+        job.finish(res);
+    }).catch((e: Error) => {
+        job.fail(e);
+    })
+    return job.Await();
 }
 
 native function launchInternalJobNative<R>(coroFun: () => R, abortFlag: boolean, gid: ValueArray<long>): Job<R>;
+
+function launchWithArgs<R>(coroFun: Function, args: FixedArray<Any>, launchParams?: LaunchParams): Job<R> {
+  let wrappedTask = (): R => {
+    return coroFun.unsafeCall(...args) as R;
+  };
+  return launchInternal<R>(wrappedTask, launchParams);
+}
 
 function launchInternal<R>(coroFun: () => R, launchParams?: LaunchParams): Job<R> {
   if (launchParams) {

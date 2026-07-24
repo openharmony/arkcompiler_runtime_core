@@ -38,6 +38,6 @@ async function testCallAsyncLambda(): Promise<void> {
     arktest.assertEQ(call_async_lambda, true)
 }
 
-async function main(): Promise<void> {
-    await testCallAsyncLambda();
+function main(): void {
+    waitForCompletion(testCallAsyncLambda);
 }

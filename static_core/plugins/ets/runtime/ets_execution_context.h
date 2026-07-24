@@ -72,6 +72,11 @@ public:
         return promiseClassPtr_;
     }
 
+    void SetJobClass(void *jobClass)
+    {
+        jobClassPtr_ = jobClass;
+    }
+
     // Returns a unique object representing "null" reference
     ALWAYS_INLINE ObjectHeader *GetNullValue() const
     {
@@ -129,12 +134,16 @@ public:
 
     int32_t GetTaskpoolSubmissionId() const;
 
+    /// @brief traverse current unhandled failed jobs with custom handler
+    void ProcessUnhandledFailedJobs();
+
     /// @brief traverse current unhandled rejected promises with custom handler
     void ProcessUnhandledRejectedPromises(bool listAllObjects);
 
 private:
     PandaAniEnv *etsAniEnv_ {nullptr};
     void *promiseClassPtr_ {nullptr};
+    void *jobClassPtr_ {nullptr};
 
     ObjectHeader *nullValue_ {};
 

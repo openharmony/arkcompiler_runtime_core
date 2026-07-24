@@ -36,16 +36,16 @@ function blockedExpandInnerTask(): int {
 function blockedExpandOuterTask(): int {
     // Block this taskpool worker thread synchronously while waiting for another taskpool task.
     // With only one worker this creates a deadlock until the blocked-worker monitor triggers special expansion.
-    let job = new PromiseWithResolvers<int>();
+    let job = new CompletableJob<int>();
 
     (taskpool.execute(blockedExpandInnerTask) as Promise<int>).then((val: Any): void => {
-        job.resolve(val as int);
+        job.finish(val as int);
     }).catch((e: Any): void => {
         const err = (e instanceof Error) ? (e as Error) : new Error('blockedExpandInnerTask failed');
-        job.reject(err);
+        job.fail(err);
     })
 
-    return job.promise.awaitSync();
+    return job.Await();
 }
 
 async function waitUntilWorkersNum(expected: int, timeoutMs: int): Promise<int> {

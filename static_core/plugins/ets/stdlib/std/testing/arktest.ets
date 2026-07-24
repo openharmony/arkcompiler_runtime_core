@@ -19,9 +19,6 @@
 
 package std.testing;
 
-type VoidFunc = () => void;
-type AsyncVoidFunc = () => Promise<void>;
-
 /**
  * Provide a namespace for ArkTS testing-related functionality.
  * @namespace
@@ -376,76 +373,6 @@ export namespace arktest {
     }
 
     /**
-    * Asserts that an async callback function throws an exception and tests the thrown value.
-    * @param {Function} cb The async callback function to be executed.
-    * @param {Function} [test] A function used to test the thrown value,
-    *     acting as a predicate or returning an error message.
-    * @throws {AssertionError} Thrown when the callback function does not throw a value
-    *     or when the thrown value does not satisfy the test predicate.
-    * @syscap SystemCapability.Utils.Lang
-    * @FaAndStageModel
-    */
-    export async function expectThrowAsync(
-        cb: () => Promise<void>,
-        test?: (v: Error) => boolean | string): Promise<void> {
-        try {
-            await cb()
-        } catch (e) {
-            let res = test?.(e)
-            if (res != undefined && res != true) {
-                failingAssertion((typeof res == "string") ? res as string : ("Unexpected value thrown: " + e))
-            }
-            return
-        }
-        failingAssertion("Callback expected to throw");
-    }
-
-    /**
-    * Executes the async callback function and checks whether an Error occurs. If an expected value is provided,
-    * also checks whether the thrown error matches the expected value.
-    * @param {Function} fn The async callback function to be executed.
-    * @param {Function} [expect] An optional string message or Error instance used to test the thrown value.
-    * @throws {AssertionError} Thrown when no error occurs or when the thrown error does not match the expected error.
-    * @syscap SystemCapability.Utils.Lang
-    * @FaAndStageModel
-    */
-    export async function expectErrorAsync(fn: () => Promise<void>, expect?: string | Error): Promise<void> {
-        await expectThrowAsync(fn, (e) => {
-            if (expect === undefined) {
-                return true
-            } else if (typeof expect == "string") {
-                return e.message == expect
-            } else {
-                const expectedError = expect as Error // broken smartcast
-                const eType = Class.of(e)
-                const expectType = Class.of(expectedError)
-                if (eType !== expectType) {
-                    return "Expected " + expectType.getName() + ", got " + eType.getName()
-                }
-                if (e.message != expectedError.message) {
-                    return "Expected '" + expectedError.message + "', got '" + e.message + "'"
-                }
-                return true
-            }
-        })
-    }
-
-    /**
-    * Executes the async callback function and checks that no error occurs.
-    * @param {Function} fn The async callback function to be executed.
-    * @throws {AssertionError} Thrown when an error occurs.
-    * @syscap SystemCapability.Utils.Lang
-    * @FaAndStageModel
-    */
-    export async function expectNoThrowAsync(fn: () => Promise<void>): Promise<void> {
-        try {
-            await fn();
-        } catch (e) {
-            assertCommon(false, "Error is not expected, but has ocurred: " + e);
-        }
-    }
-
-    /**
      * Represents terminal colors.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
@@ -506,23 +433,57 @@ export namespace arktest {
     }
 
     /**
-     * A testcase holder.
-     * @class ArkTestBase Provides an interface for a testcase holder.
+     * Provides an interface for running a single test.
+     * @class ArkTest Provides an interface for running a test.
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    class ArkTestBase {
+    export class ArkTest {
         /**
          * Creates a test instance.
          * @param {string} name The test name.
+         * @param {Function} callback The callback function containing the test body.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
          */
-        protected constructor(name: string) {
+        constructor(name: string, callback: () => void) {
             this.name = name;
+            this.callback = callback;
         }
 
-        protected addTermColor(color: TermColor, str: string): string {
+        /**
+         * Runs this test.
+         * @returns {boolean} 
+         * @syscap SystemCapability.Utils.Lang
+         * @FaAndStageModel
+         */
+        final run(): boolean {
+            let testcaseName: string = this.getFullName();
+            let startMs = Date.now();
+            try {
+                this.callback();
+            } catch (e) {
+                const failedMsg = this.addTermColor(TermColor.RED, "FAILED")
+                const msgFail = '[ ' + failedMsg + ' ] ' + testcaseName + ' (' + (Date.now() - startMs) + ' ms)';
+                if (!(e instanceof AssertionError)) {
+                    console.error('Unexpected error: ' + e);
+                } else {
+                    // AssertionError already print message in constructor console.error,
+                    // so set message to empty to avoid double printing
+                    e.message = "";
+                }
+                if (e.stack) {
+                    console.error(e.stack);
+                }
+                console.log(msgFail);
+                return false;
+            }
+            const passedMsg = this.addTermColor(TermColor.GREEN, "PASSED")
+            console.log('[ ' + passedMsg + ' ] ' + testcaseName + ' (' + (Date.now() - startMs) + ' ms)');
+            return true;
+        }
+
+        private addTermColor(color: TermColor, str: string): string {
             return "\x1b[38;5;" + color + "m" + str + "\x1b[0m"
         }
 
@@ -550,22 +511,6 @@ export namespace arktest {
             this.suite = suite;
         }
 
-        protected handleTestError(testcaseName: string, startMs: long, e: Error): void {
-            const failedMsg = this.addTermColor(TermColor.RED, "FAILED")
-            const msgFail = "[ " + failedMsg + " ] " + testcaseName + " (" + (Date.now() - startMs) + " ms)";
-            if (!(e instanceof AssertionError)) {
-                console.error("Unexpected error: " + e);
-            } else {
-                // AssertionError already print message in constructor console.error,
-                // so set message to empty to avoid double printing
-                e.message = "";
-            }
-            if (e.stack) {
-                console.error(e.stack);
-            }
-            console.log(msgFail);
-        }
-
         /**
          * The test name.
          * @type {string}
@@ -575,80 +520,8 @@ export namespace arktest {
          */
         readonly name: string;
 
-        protected suite?: ArkTestsuite;
-    }
-
-    /**
-     * Provides an interface for running a single synchronous test.
-     * @class ArkTestSync holds a sync testcase.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    final class ArkTestSync extends ArkTestBase {
-        constructor(name: string, callback: VoidFunc) {
-            super(name);
-            this.callback = callback;
-        }
-
-        /**
-         * Runs this test.
-         * @returns {boolean}
-         * @syscap SystemCapability.Utils.Lang
-         * @FaAndStageModel
-         * @since 24
-         */
-        final run(): boolean {
-            let testcaseName: string = this.getFullName();
-            let startMs = Date.now();
-            try {
-                this.callback();
-            } catch (e) {
-                this.handleTestError(testcaseName, startMs, e);
-                return false;
-            }
-            const passedMsg = this.addTermColor(TermColor.GREEN, "PASSED")
-            console.log("[ " + passedMsg + " ] " + testcaseName + " (" + (Date.now() - startMs) + " ms)");
-            return true;
-        }
-
-        private callback: VoidFunc;
-    }
-
-    /**
-     * Provides an interface for running a single asynchronous test.
-     * @class ArkTestAsync holds an async testcase.
-     * @syscap SystemCapability.Utils.Lang
-     * @FaAndStageModel
-     */
-    final class ArkTestAsync extends ArkTestBase {
-        constructor(name: string, callback: AsyncVoidFunc) {
-            super(name);
-            this.callback = callback;
-        }
-
-        /**
-         * Runs this test.
-         * @returns {Promise<boolean>}
-         * @syscap SystemCapability.Utils.Lang
-         * @FaAndStageModel
-         * @since 26
-         */
-        final async runAsync(): Promise<boolean> {
-            let testcaseName: string = this.getFullName();
-            let startMs = Date.now();
-            try {
-                let res = this.callback();
-                await res;
-            } catch (e) {
-                this.handleTestError(testcaseName, startMs, e);
-                return false;
-            }
-            const passedMsg = this.addTermColor(TermColor.GREEN, "PASSED")
-            console.log("[ " + passedMsg + " ] " + testcaseName + " (" + (Date.now() - startMs) + " ms)");
-            return true;
-        }
-
-        private callback: AsyncVoidFunc;
+        private readonly callback: () => void;
+        private suite?: ArkTestsuite;
     }
 
     /**
@@ -667,7 +540,7 @@ export namespace arktest {
          */
         constructor(name: string) {
             this.name = name;
-            this.tests = new Array<ArkTestBase>();
+            this.tests = new Array<ArkTest>();
         }
 
         /**
@@ -692,8 +565,8 @@ export namespace arktest {
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
          */
-        final addTest(name: string, callback: VoidFunc): void {
-            this.addTest(new ArkTestSync(name, callback));
+        final addTest(name: string, callback: () => void): void {
+            this.addTest(new ArkTest(name, callback));
         }
 
         /**
@@ -704,18 +577,21 @@ export namespace arktest {
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
          */
-        final addAsyncTest(name: string, asyncCallback: AsyncVoidFunc): void {
-            this.addTest(new ArkTestAsync(name, asyncCallback));
+        final addAsyncTest(name: string, asyncCallback: () => Promise<void>): void {
+            let callback = () => {
+                waitForCompletion(asyncCallback);
+            };
+            this.addTest(new ArkTest(name, callback));
         }
 
         /**
          * Adds a new test instance to the test suite.
-         * @param {ArkTestBase} test The test instance.
+         * @param {ArkTest} test The test instance.
          * @throws {Error} Thrown when the test name is empty.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
          */
-        private final addTest(test: ArkTestBase): void {
+        final addTest(test: ArkTest): void {
             if (test.name == "") {
                 throw new Error("Test with empty name is not allowed");
             }
@@ -724,80 +600,35 @@ export namespace arktest {
         }
 
         /**
-         * Using run() to run a test suite in case when it contains async tests is strongly discouraged
-         *   and will cause a runtime error in future.
-         * Please use runAsync() in such cases.
-         *
-         * Runs all tests in the test suite, synchronously waiting for completion of async tests.
+         * Runs all tests in the test suite.
          * @returns {int} The number of failed tests.
          * @syscap SystemCapability.Utils.Lang
          * @FaAndStageModel
          */
         final run(): int {
             let startMs = Date.now();
-            for (let test of this.tests) {
-                let runner: () => boolean;
-                if (test instanceof ArkTestAsync) {
-                    runner = () => waitForCompletion(() => (test as ArkTestAsync).runAsync());
-                } else {
-                    runner = () => (test as ArkTestSync).run();
-                }
+            this.tests.forEach((test: ArkTest) => {
                 this.before();
-                if (runner()) {
+                if (test.run()) {
                     this.passedTests += 1;
                 } else {
                     this.failedTests += 1;
                 }
                 this.after();
-            }
-            let failedTestsCount = this.failedTests;
-            this.logTestSuiteStat(startMs);
-            this.failedTests = 0;
-            this.passedTests = 0;
-            return failedTestsCount;
-        }
-
-        /**
-         * Runs all tests in the test suite asynchronously.
-         * @returns {Promise<int>} The number of failed tests.
-         * @syscap SystemCapability.Utils.Lang
-         * @FaAndStageModel
-         */
-        final async runAsync(): Promise<int> {
-            let startMs = Date.now();
-            for (let test of this.tests) {
-                let runner: () => Promise<boolean>;
-                if (test instanceof ArkTestAsync) {
-                    runner = async () => { return await (test as ArkTestAsync).runAsync() };
-                } else {
-                    runner = async () => { return await (test as ArkTestSync).run(); };
-                }
-                this.before();
-                if (await runner()) {
-                    this.passedTests += 1;
-                } else {
-                    this.failedTests += 1;
-                }
-                this.after();
-            }
-            let failedTestsCount = this.failedTests;
-            this.logTestSuiteStat(startMs);
-            this.failedTests = 0;
-            this.passedTests = 0;
-            return failedTestsCount;
-        }
-
-        private logTestSuiteStat(startMs: long) {
-            let execTimeMs: string = "(" + (Date.now() - startMs) + " ms)";
+            });
+            let execTimeMs: string = '(' + (Date.now() - startMs) + ' ms)';
             let failedTestsCount = this.failedTests;
             if (failedTestsCount != 0) {
-                console.log("Passed tests: " + this.passedTests);
-                console.log("Failed tests: " + this.failedTests);
-                console.log(this.name + " testsuite failed " + execTimeMs);
+                console.log('Passed tests: ' + this.passedTests);
+                console.log('Failed tests: ' + this.failedTests);
+                console.log(this.name + ' testsuite failed ' + execTimeMs);
             } else {
-                let testStr: string = this.passedTests + ((this.passedTests == 1) ? " test" : " tests");
-                console.log(testStr + " from " +  this.name + " testsuite passed " + execTimeMs);
+                let testStr: string = this.passedTests + ((this.passedTests == 1) ? ' test' : ' tests');
+                console.log(testStr + ' from ' + this.name + ' testsuite passed ' + execTimeMs);
             }
+            this.failedTests = 0;
+            this.passedTests = 0;
+            return failedTestsCount;
         }
 
         /**
@@ -809,7 +640,7 @@ export namespace arktest {
          */
         readonly name: string;
 
-        private tests: Array<ArkTestBase>;
+        private tests: Array<ArkTest>;
         private passedTests: int = 0;
         private failedTests: int = 0;
     }

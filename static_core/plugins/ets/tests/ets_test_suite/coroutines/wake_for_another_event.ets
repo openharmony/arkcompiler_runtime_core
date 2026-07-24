@@ -43,9 +43,8 @@ async function testWakeForEvent() {
     arktest.assertEQ(value, 42);
 }
 
-async function main(): Promise<int> {
-    let testSuite = new arktest.ArkTestsuite('coroutines.wake_for_another_event');
-    testSuite.addAsyncTest('testWakeForEvent', testWakeForEvent);
-    let res = await testSuite.runAsync()
-    return res;
+function main(): int {
+    // NOTE(panferovi): #34019 (fix arktest.addAsyncTest)
+    testWakeForEvent();
+    return 0;
 }

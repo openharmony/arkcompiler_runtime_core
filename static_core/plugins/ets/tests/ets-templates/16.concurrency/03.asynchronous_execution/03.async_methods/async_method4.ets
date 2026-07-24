@@ -32,6 +32,6 @@ async function startTest() {
     await example.methodReturnVoidImplicit();
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+    waitForCompletion(startTest);
 }

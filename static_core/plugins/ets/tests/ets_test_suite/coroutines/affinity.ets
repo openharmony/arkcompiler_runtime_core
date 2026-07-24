@@ -64,7 +64,7 @@ function check_sync_id_nonmain(number_of_coros: int): int {
 function check_default_policy(): int {
     L.log('Testing the DEFAULT affinity type');
 
-    if (check_async_id().awaitSync() != 0) {
+    if (waitForCompletion(check_async_id) != 0) {
         L.logError('async function worker ID is different from launcher function worker ID');
         return 1;
     }
@@ -75,7 +75,7 @@ function check_nonmain_policy(): int {
     L.log('Testing the NON_MAIN affinity type');
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
 
-    if (check_async_id().awaitSync() != 0) {
+    if (waitForCompletion(check_async_id) != 0) {
         L.logError('async function worker ID is different from launcher function worker ID');
         return 1;
     }
@@ -112,11 +112,12 @@ function testExclusiveLaunchFlag(): void {
 }
 
 
-async function main(): Promise<int> {
+function main(): int {
     // Call L's enableLogging method to enable logs.
     let testSuite = new arktest.ArkTestsuite('coroutines.affinity');
     testSuite.addTest('testAsyncDefaultPolicy', testAsyncDefaultPolicy);
     testSuite.addTest('testAsyncNonMainPolicy', testAsyncNonMainPolicy);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }
+

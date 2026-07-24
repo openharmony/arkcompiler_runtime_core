@@ -28,9 +28,9 @@ async function testLaunch() {
     arktest.assertEQ((await res), 'AA');
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch_launch');
     testSuite.addAsyncTest('testLaunch', testLaunch);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

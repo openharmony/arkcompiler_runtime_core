@@ -17,7 +17,7 @@ file_name: ani_test_promise_ops_resolve
 ---*/
 
 function checkResolve(promise: Promise<String>, resolution: String): boolean {
-    return checkResolveAsync(promise, resolution).awaitSync();
+    return waitForCompletion(() => checkResolveAsync(promise, resolution));
 }
 
 async function checkResolveAsync(promise: Promise<String>, resolution: String): Promise<boolean> {

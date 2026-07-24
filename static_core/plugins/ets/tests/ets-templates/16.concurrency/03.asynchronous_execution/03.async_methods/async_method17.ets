@@ -47,6 +47,6 @@ async function startTest() {
       arktest.assertEQ(result[1], 42.0);
 }
 
-async function main(): Promise<void> {
-    await startTest()
+function main(): void {
+      waitForCompletion(startTest);
 }

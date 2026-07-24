@@ -97,9 +97,9 @@ function testMigration(): void {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_ANY);
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.migration');
     testSuite.addTest('testMigration', testMigration);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

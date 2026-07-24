@@ -57,10 +57,10 @@ function testGetEAWorkerId() {
     arktest.assertEQ(worker3Id1, ew3.getWorkerId());
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.eworker_id');
     testSuite.addTest('testEworkerId', testEworkerId);
     testSuite.addTest('testGetEAWorkerId', testGetEAWorkerId);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

@@ -39,6 +39,6 @@ class LambdaTests {
     }
 }
 
-async function main(): Promise<void> {
-    await new LambdaTests().testCallFromAsyncLambdaRegularFunc();
+function main(): void {
+    waitForCompletion(new LambdaTests().testCallFromAsyncLambdaRegularFunc);
 }

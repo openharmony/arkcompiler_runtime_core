@@ -45,6 +45,32 @@ async function delay(ms: int) {
     });
 }
 
+class Event {
+    constructor() {
+        this.promise = new Promise<boolean>((resolve: (val: boolean) => void) => {
+            this.resolveFn = resolve;
+        })
+        this.job = new CompletableJob<boolean>();
+        this.promise.then((result: boolean) => {
+            this.job.finish(result);
+        }).catch((e: Error) => {
+            this.job.fail(e);
+        });
+    }
+
+    public wait(): boolean {
+        return this.job.Await();
+    }
+
+    public fire(val: boolean = true) {
+        this.resolveFn!(val);
+    }
+
+    private promise: Promise<boolean>;
+    private resolveFn: ((val: boolean) => void) | null = null;
+    private job: CompletableJob<boolean>;
+}
+
 async function executePeriodicallyTest() {
     CoroutineExtras.setSchedulingPolicy(CoroutineExtras.POLICY_NON_MAIN);
     let runner = new taskpool.AsyncRunner('testRunner', 3);
@@ -363,20 +389,20 @@ async function testEdgeConstructor(): Promise<void> {
 async function testAsyncRunnerExecuteOrder(): Promise<void>{
     let count : int = 0;
     let runner = new taskpool.AsyncRunner(1);
-    let isRunning = new PromiseWithResolvers<void>();
+    let isRunning = new Event();
     let result: int[] = [];
     for(let i : int = 0; i < 10; i++){
         let task = new taskpool.Task(`task_${i}`, () => {
             await delay(30);
             result.push(i);
             count++;
-            if(count >= 10) {
-                isRunning.resolve(undefined);
+            if (count >= 10) {
+                isRunning.fire();
             }
         });
         runner.execute(task);
     }
-    await isRunning.promise;
+    isRunning.wait();
     for (let i : int = 0; i < 10; i++) {
         arktest.assertEQ(result[i], i);
     }

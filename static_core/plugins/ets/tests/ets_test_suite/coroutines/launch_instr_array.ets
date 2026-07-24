@@ -41,9 +41,9 @@ function testLaunchInstrArray(): void {
     a.run();
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let testSuite = new arktest.ArkTestsuite('coroutines.launch_instr_array');
     testSuite.addTest('testLaunchInstrArray', testLaunchInstrArray);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

@@ -97,10 +97,11 @@ async function testAwaitRejectCatchNotTriggered(): Promise<void> {
     }
 }
 
-async function main(): Promise<int> {
+function main(): int {
+    StdProcess.off('unhandledJobRejection' as 'unhandledPromiseRejection')
     let testSuite = new arktest.ArkTestsuite('coroutines.allhandled_rejection');
     testSuite.addTest('testAllhandledRejection', testAllhandledRejection);
     testSuite.addAsyncTest('testAwaitRejectCatchNotTriggered', testAwaitRejectCatchNotTriggered);
-    let res = await testSuite.runAsync();
+    let res = testSuite.run();
     return res;
 }

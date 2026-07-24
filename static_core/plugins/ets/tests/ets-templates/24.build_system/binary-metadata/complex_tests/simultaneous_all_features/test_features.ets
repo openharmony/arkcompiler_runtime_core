@@ -27,9 +27,9 @@ expected_out:
 
 {{c.imports}}
 
-{% if c.is_async is defined and c.is_async %}async function main(): Promise<void> {
-    console.log(await {{c.call}})
-}{% else %}function main(): void {
-    console.log({{c.call}})
-}{% endif %}
+function main(): void {
+{% if c.is_async is defined and c.is_async %}    console.log(waitForCompletion(async () => await {{c.call}}))
+{% else %}    console.log({{c.call}})
+{% endif %}
+}
 {% endfor %}

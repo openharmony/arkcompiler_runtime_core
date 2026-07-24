@@ -37,7 +37,7 @@ class SharedJob<T> {
         SharedJob.completeJob(jobs, this.sharedJob);
     }
 
-    public Await() {
+    public Await(): void {
         this.sharedJob.Await();
     }
 
@@ -177,7 +177,7 @@ function exclusiveRWLockTest() {
     exclusiveLockTest(new RWLock().writeLock());
 }
 
-async function main(): Promise<int> {
+function main() {
     let testSuite = new arktest.ArkTestsuite('coroutines.sync_primitives');
     testSuite.addTest('exclusiveMutexLockTest', exclusiveMutexLockTest);
     testSuite.addTest('exclusiveRWLockTest', exclusiveRWLockTest);
@@ -185,6 +185,5 @@ async function main(): Promise<int> {
     testSuite.addTest('illegalLockStateTest', illegalLockStateTest);
     testSuite.addTest('readWriteMutualExclusionTest', readWriteMutualExclusionTest);
 
-    let res = await testSuite.runAsync();
-    return res;
+    return testSuite.run();
 }

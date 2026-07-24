@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { CoroutineExtras } from 'std/debug/concurrency';
+import { CoroutineExtras, AtomicFlag } from 'std/debug/concurrency';
 
 /*---
 tags: [no-warmup]
@@ -23,7 +23,29 @@ let transientShrinkBlockersStarted: AtomicInt = new AtomicInt(0);
 let transientShrinkBlockerRelease: AtomicFlag = new AtomicFlag(false);
 let transientShrinkShortDone: AtomicFlag = new AtomicFlag(false);
 let transientShrinkLongStarted: AtomicFlag = new AtomicFlag(false);
-let transientShrinkLongDeferred: PromiseWithResolvers<int> = new PromiseWithResolvers<int>();
+let transientShrinkLongDeferred: DeferredInt = new DeferredInt();
+
+class DeferredInt {
+    constructor() {
+        this.promise = new Promise<int>((resolve: (val: int) => void) => {
+            this.resolveFn = resolve;
+        })
+    }
+
+    public getPromise(): Promise<int> {
+        return this.promise;
+    }
+
+    public resolve(val: int): void {
+        if (this.resolveFn != null) {
+            this.resolveFn!(val);
+            this.resolveFn = null;
+        }
+    }
+
+    private promise: Promise<int>;
+    private resolveFn: ((val: int) => void) | null = null;
+}
 
 async function delay(ms: int): Promise<void> {
     await new Promise<void>((resolve) => {
@@ -61,7 +83,7 @@ function resetTransientShrinkRegressionState(): void {
     transientShrinkBlockerRelease.set(false);
     transientShrinkShortDone.set(false);
     transientShrinkLongStarted.set(false);
-    transientShrinkLongDeferred = new PromiseWithResolvers<int>();
+    transientShrinkLongDeferred = new DeferredInt();
 }
 
 function warmupTask(): int {
@@ -77,9 +99,9 @@ function transientShrinkBlockerTask(): int {
 }
 
 function transientShrinkLongTask(): Promise<int> {
-    transientShrinkLongDeferred = new PromiseWithResolvers<int>();
+    transientShrinkLongDeferred = new DeferredInt();
     transientShrinkLongStarted.set(true);
-    return transientShrinkLongDeferred.promise;
+    return transientShrinkLongDeferred.getPromise();
 }
 
 function transientShrinkShortTask(): int {
@@ -156,13 +178,13 @@ async function overlappingAsyncTransientShouldNotShrinkWorkerEarly(): Promise<vo
     }
 }
 
-async function main(): Promise<int> {
+function main(): int {
     let suite = new arktest.ArkTestsuite('taskpool.OverlappingAsyncTransientShrink');
     suite.addAsyncTest(
         'OverlappingAsyncTransientShouldNotShrinkWorkerEarly',
         overlappingAsyncTransientShouldNotShrinkWorkerEarly
     );
-    let res = await suite.runAsync();
+    let res = suite.run();
     CoroutineExtras.stopTaskpool();
     return res;
 }

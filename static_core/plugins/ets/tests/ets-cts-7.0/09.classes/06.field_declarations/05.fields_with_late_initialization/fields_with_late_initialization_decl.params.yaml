@@ -12,7 +12,6 @@
 # limitations under the License.
 
 cases:
-#0
   - desc: |-
       Checking for initialization from constructor.
     check_variants:
@@ -66,7 +65,7 @@ cases:
         let a: A = new A()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#1
+
   - desc: |-
       Checking for initialization from constructor.
     check_variants:
@@ -95,7 +94,7 @@ cases:
         let a: A = new A([check_value])
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#2
+
   - desc: |-
       Checking for initialization from constructor.
     check_variants:
@@ -144,7 +143,7 @@ cases:
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
-#3
+
   - desc: |-
       Checking for initialization from object literal.
     check_variants:
@@ -170,7 +169,7 @@ cases:
         let a: A = {field: [check_value]}
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#4
+
   - desc: |-
       Checking for initialization from object literal.
     check_variants:
@@ -188,7 +187,7 @@ cases:
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
-#5
+
   - desc: |-
       >-
         Checking for initialization from object literal.
@@ -224,7 +223,7 @@ cases:
         arktest.assertEQ(a.f2, "xyz")
         arktest.assertTrue(a.f3 instanceof [check_type])
         arktest.assertEQ(a.f3, [check_value])
-#6
+
   - desc: |-
       Checking for initialization from class method call.
     check_variants:
@@ -261,7 +260,7 @@ cases:
         a.foo()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#7
+
   - desc: |-
       Checking for initialization from class method call.
     check_variants:
@@ -291,7 +290,7 @@ cases:
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
-#8
+
   - desc: |-
       Checking for initialization from outside of constructor.
     check_variants:
@@ -326,7 +325,7 @@ cases:
         lambda()
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
-#9
+
   - desc: |-
       Checking for initialization from outside of constructor.
     check_variants:
@@ -354,7 +353,7 @@ cases:
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
-#10
+
   - desc: |-
       >-
         Checking for initialization from outside of constructor
@@ -510,7 +509,6 @@ cases:
 #15
   - desc: |-
       Checking for initialization with asynchronous API usage.
-    async: true
     check_variants:
       - {check_type: "long", check_value: "5"}
       - {check_type: "int", check_value: "5"}
@@ -540,13 +538,12 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = await a.field
+        let res = waitForCompletion(async () => a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
 #16
   - desc: |-
       Checking for initialization with asynchronous API usage.
-    async: true
     check_variants:
       - {check_type: "C", data_type: "int", init_value: "{data: 5}",
         check_value: "5", cv_decl_data: "class C {data!: int}"}
@@ -567,14 +564,13 @@ cases:
       - |-
         let a: A = new A()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = await a.field
+        let res = waitForCompletion(async () => a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
 #17
   - desc: |-
       Checking for initialization with asynchronous API usage.
-    async: true
     check_variants:
       - {check_type: "long", check_value: "5"}
       - {check_type: "int", check_value: "5"}
@@ -602,13 +598,12 @@ cases:
         let a: A = new A()
         a.field = a.foo()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = await a.field
+        let res = waitForCompletion(async () => a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
 #18
   - desc: |-
       Checking for initialization with asynchronous API usage.
-    async: true
     check_variants:
       - {check_type: "C", data_type: "int", init_value: "{data: 5}",
         check_value: "5", cv_decl_data: "class C {data!: int}"}
@@ -627,14 +622,13 @@ cases:
         let a: A = new A()
         a.field = a.foo()
         arktest.assertTrue(a.field instanceof Promise)
-        let res = await a.field
+        let res = waitForCompletion(async () => a.field)
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
 #19
   - desc: |-
       Checking for initialization with asynchronous API usage.
-    async: true
     check_variants:
       - {check_type: "long", check_value: "5"}
       - {check_type: "int", check_value: "5"}
@@ -659,12 +653,12 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        await a.foo()
+        waitForCompletion(a.foo)
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
       - |-
         let a: A = new A()
-        let res = await a.foo().then((): [check_type] => a.field)
+        let res = waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
         arktest.assertTrue(a.field instanceof [check_type])
@@ -672,7 +666,6 @@ cases:
 #20
   - desc: |-
       Checking for initialization with asynchronous API usage.
-    async: true
     check_variants:
       - {check_type: "C", data_type: "int", init_value: "{data: 5}",
         check_value: "5", cv_decl_data: "class C {data!: int}"}
@@ -688,13 +681,13 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        await a.foo()
+        waitForCompletion(a.foo)
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
       - |-
         let a: A = new A()
-        let res = await a.foo().then((): [check_type] => a.field)
+        let res = waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
@@ -704,7 +697,6 @@ cases:
 #21
   - desc: |-
         Checking for initialization with asynchronous API usage.
-    async: true
     check_variants:
       - {check_type: "long", check_value: "5"}
       - {check_type: "int", check_value: "5"}
@@ -736,12 +728,12 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        await a.foo()
+        waitForCompletion(a.foo)
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertEQ(a.field, [check_value])
       - |-
         let a: A = new A()
-        let res = await a.foo().then((): [check_type] => a.field)
+        let res = waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertEQ(res, [check_value])
         arktest.assertTrue(a.field instanceof [check_type])
@@ -749,7 +741,6 @@ cases:
 #22
   - desc: |-
       Checking for initialization with asynchronous API usage.
-    async: true
     check_variants:
       - {check_type: "C", data_type: "int", init_value: "{data: 5}",
         check_value: "5", cv_decl_data: "class C {data!: int}"}
@@ -772,13 +763,13 @@ cases:
     sub_cases_logic:
       - |-
         let a: A = new A()
-        await a.foo()
+        waitForCompletion(a.foo)
         arktest.assertTrue(a.field instanceof [check_type])
         arktest.assertTrue(a.field.data instanceof [data_type])
         arktest.assertEQ(a.field.data, [check_value])
       - |-
         let a: A = new A()
-        let res = await a.foo().then((): [check_type] => a.field)
+        let res = waitForCompletion(async () => a.foo().then((): [check_type] => a.field))
         arktest.assertTrue(res instanceof [check_type])
         arktest.assertTrue(res.data instanceof [data_type])
         arktest.assertEQ(res.data, [check_value])
