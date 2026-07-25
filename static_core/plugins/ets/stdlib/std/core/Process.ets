@@ -394,7 +394,7 @@ export namespace StdProcess {
         }
         if (type == "uncaughtError") {
             listener = listener as UncaughtErrorListener;
-            setErrorHandler(listener);
+            setErrorHandler(listener, true);
             return;
         }
         throw new Error("Process:: Event type not implemented");
@@ -424,7 +424,7 @@ export namespace StdProcess {
             return true;
         }
         if (type == "uncaughtError") {
-            setErrorHandler(DEFAULT_ERROR_HANDLER_CALLBACK);
+            setErrorHandler(DEFAULT_ERROR_HANDLER_CALLBACK, false);
             return true;
         }
         throw new Error("Process:: Event type not implemented");
@@ -523,7 +523,8 @@ export namespace StdProcess {
     *
     * @param { EventListener } listener user-provided handler
     */
-    function setErrorHandler(listener: UncaughtErrorListener) : void {
+    function setErrorHandler(listener: UncaughtErrorListener, customHandler: boolean) : void {
+        hasCustomErrorHandler.set(customHandler);
         errorHandler.reset(listener);
     }
 
@@ -662,6 +663,20 @@ export namespace StdProcess {
     }
 
     /**
+     * Applies the registered uncaught error handler if a custom handler exists.
+     *
+     * @param { Object } error Uncaught error
+     * @returns { boolean } true if a custom handler was invoked, false otherwise
+     */
+    function HandleUncaughtErrorIfRegistered(error: Object): boolean {
+        if (!hasCustomErrorHandler.get()) {
+            return false;
+        }
+        HandleUncaughtError(error);
+        return true;
+    }
+
+    /**
      *
      * This is a function with no return value
      * Report the uncaught error to vm and use DFX's ability to handle it
@@ -674,6 +689,7 @@ export namespace StdProcess {
     let failedJobHandler: RejectedHandler = new RejectedHandler();
     let rejectedPromiseHandler: RejectedHandler = new RejectedHandler();
     let errorHandler: ProcessErrorHandler = new ProcessErrorHandler(DEFAULT_ERROR_HANDLER_CALLBACK);
+    let hasCustomErrorHandler: AtomicFlag = new AtomicFlag(false);
 }
 
 final class ChildProcessHelper extends StdProcess.ChildProcess {

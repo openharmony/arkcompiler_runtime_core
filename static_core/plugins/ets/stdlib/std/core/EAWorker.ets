@@ -185,7 +185,7 @@ export class EAWorker {
             this.worker.start(() => {
                 try {
                     EAWorker.getWorkers().set(CoroutineExtras.getWorkerId(), this);
-                    let wrappedInitialTask = this.worker.wrapTask<void>(this.initialTask);
+                    let wrappedInitialTask = this.worker.wrapTaskInternal<void>(this.initialTask, true);
                     wrappedInitialTask();
                 } catch (e) {
                     this.releaseUserWorkerSlot();
@@ -456,13 +456,22 @@ export abstract class InternalWorker {
     }
 
     public wrapTask<R>(task: () => R): () => R {
+        return this.wrapTaskInternal<R>(task, false);
+    }
+
+    wrapTaskInternal<R>(task: () => R, notifyProcessIfHandled: boolean): () => R {
         let wrappedTask = (): R => {
             try {
                 return task();
             } catch (e) {
                 if (this.getErrorHandler() != undefined) {
-                    // NOTE(csaba.osztrogonac): remove as cast once e has Error type
-                    this.getErrorHandler()!(e as Error);
+                    try {
+                        this.getErrorHandler()!(e);
+                    } catch (handlerError) {
+                        InternalWorker.handleProcessUncaughtError(handlerError, false);
+                    }
+                } else if (notifyProcessIfHandled) {
+                    InternalWorker.handleProcessUncaughtError(e, true);
                 }
                 throw e;
             }
@@ -482,6 +491,8 @@ export abstract class InternalWorker {
     private static native setCurrentWorkerPriority(priority: int): void;
 
     private static native join(workerId: int): void;
+
+    private static native handleProcessUncaughtError(error: Object, onlyIfRegistered: boolean): boolean;
 }
 
 class InteropWorker extends InternalWorker {
