@@ -80,10 +80,6 @@
 
 15.semantic_rules/10.overload_resolution/03.overload_set_for_interface_methods/combination_overloaded_methods_negative_1.ets
 
-#34907 No warning message on type unsafe casting
-15.semantic_rules/11.type_erasure/cast_erasure_warning_w_2.ets
-15.semantic_rules/11.type_erasure/cast_erasure_warning_w_3.ets
-
 #34056 Wrong CTE on creating FixedArray with non-default constructor type
 17.experimental_features/02.fixed_array_types/01.fixed_size_array_creation/fixed_array_creation_con2_23.ets
 
