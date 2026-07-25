@@ -3227,7 +3227,7 @@ class UnifiedJsonParser {
     public parse(): jsonx.JsonElement {
         this.skipWhitespace()
         if (this.index >= this.length) {
-            throw new JsonParseError("Unexpected end of input", 0, 0)
+            throw JsonParseError("Unexpected end of input", 0, 0)
         }
         let result = this.parseValue()
         if (this.reviver != undefined) {
@@ -3239,11 +3239,11 @@ class UnifiedJsonParser {
     public parseRecord(): Record<string, JsonRecordType> {
         this.skipWhitespace()
         if (this.index >= this.length) {
-            throw new JsonParseError("Unexpected end of input", 0, 0)
+            throw JsonParseError("Unexpected end of input", 0, 0)
         }
         let firstChar = this.ch
         if (firstChar != c'{') {
-            throw new JsonParseError("JSON Record root must be an object (starting with '{')", 0, 0)
+            throw JsonParseError("JSON Record root must be an object (starting with '{')", 0, 0)
         }
         return this.parseObjectRaw()
     }
@@ -3264,7 +3264,7 @@ class UnifiedJsonParser {
 
             this.skipWhitespace()
             if (this.ch != c':') {
-                throw new JsonParseError(`Expected ':' at ${this.getPositionDesc()}`,
+                throw JsonParseError(`Expected ':' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
             this.advance()
@@ -3280,7 +3280,7 @@ class UnifiedJsonParser {
                 this.advance()
                 return result
             } else {
-                throw new JsonParseError(`Expected ',' or '}' at ${this.getPositionDesc()}`,
+                throw JsonParseError(`Expected ',' or '}' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
         }
@@ -3308,7 +3308,7 @@ class UnifiedJsonParser {
             return false
         }
         if ((ch == c'n' || ch == c't' || ch == c'f')) {
-            throw new JsonParseError(`Expected '${ch == c'n' ? "null" : ch == c't' ? "true" : "false"}' at ${this.getPositionDesc()}`, idx, idx + 3)
+            throw JsonParseError(`Expected '${ch == c'n' ? "null" : ch == c't' ? "true" : "false"}' at ${this.getPositionDesc()}`, idx, idx + 3)
         }
 
         switch (this.ch) {
@@ -3323,7 +3323,7 @@ class UnifiedJsonParser {
             case c'5': case c'6': case c'7': case c'8': case c'9':
                 return this.parseNumberRaw()
             default:
-                throw new JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
+                throw JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
                     this.index, this.index)
         }
     }
@@ -3344,14 +3344,14 @@ class UnifiedJsonParser {
                 this.advance()
             }
         } else {
-            throw new JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
+            throw JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
         }
 
         if (this.ch == c'.') {
             hasFraction = true
             this.advance()
             if (!Char.isDecDigit(this.ch)) {
-                throw new JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
+                throw JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
             }
             while (Char.isDecDigit(this.ch)) {
                 this.advance()
@@ -3365,7 +3365,7 @@ class UnifiedJsonParser {
                 this.advance()
             }
             if (!Char.isDecDigit(this.ch)) {
-                throw new JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
+                throw JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
             }
             while (Char.isDecDigit(this.ch)) {
                 this.advance()
@@ -3412,7 +3412,7 @@ class UnifiedJsonParser {
             if (this.ch == c',') {
                 this.advance()
             } else if (this.ch != c']') {
-                throw new JsonParseError(`Expected ',' or ']' at ${this.getPositionDesc()}`,
+                throw JsonParseError(`Expected ',' or ']' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
         }
@@ -3443,7 +3443,7 @@ class UnifiedJsonParser {
             return jsonx.JsonElement.createBoolean(false)
         }
         if ((ch == c'n' || ch == c't' || ch == c'f')) {
-            throw new JsonParseError(`Expected '${ch == c'n' ? "null" : ch == c't' ? "true" : "false"}' at ${this.getPositionDesc()}`, idx, idx + 3)
+            throw JsonParseError(`Expected '${ch == c'n' ? "null" : ch == c't' ? "true" : "false"}' at ${this.getPositionDesc()}`, idx, idx + 3)
         }
 
         switch (this.ch) {
@@ -3458,7 +3458,7 @@ class UnifiedJsonParser {
             case c'5': case c'6': case c'7': case c'8': case c'9':
                 return this.parseNumber()
             default:
-                throw new JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
+                throw JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
                     this.index, this.index)
         }
     }
@@ -3475,7 +3475,7 @@ class UnifiedJsonParser {
         }
         if (qIdx < 0) {
             this.index = this.length
-            throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
+            throw JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
         }
 
         let bsIdx = this.nextBsIdx
@@ -3521,7 +3521,7 @@ class UnifiedJsonParser {
 
         if (quoteIdx < 0) {
             this.index = this.length
-            throw new JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
+            throw JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
         }
 
         let decoded = new ValueArray<char>(decodedLen)
@@ -3547,7 +3547,7 @@ class UnifiedJsonParser {
 
     private static getEscapeLength(src: string, index: int, length: int): int {
         if (index >= length) {
-            throw new JsonParseError(`Incomplete escape sequence at ${index}`, index, index)
+            throw JsonParseError(`Incomplete escape sequence at ${index}`, index, index)
         }
 
         const escChar = src.charAt(index)
@@ -3564,14 +3564,14 @@ class UnifiedJsonParser {
             case c'u':
                 return UnifiedJsonParser.parseUnicodeEscape(src, index + 1, length) + 1
             default:
-                throw new JsonParseError(`Invalid escape sequence '\\${escChar}' at ${index}`,
+                throw JsonParseError(`Invalid escape sequence '\\${escChar}' at ${index}`,
                     index - 1, index + 1)
         }
     }
 
     private static decodeEscape(src: string, index: int, length: int, decoded: ValueArray<char>, decodedOffset: int): int {
         if (index >= length) {
-            throw new JsonParseError(`Incomplete escape sequence at ${index}`, index, index)
+            throw JsonParseError(`Incomplete escape sequence at ${index}`, index, index)
         }
 
         const escChar = src.charAt(index)
@@ -3603,7 +3603,7 @@ class UnifiedJsonParser {
             case c'u':
                 return UnifiedJsonParser.parseUnicodeEscape(src, index + 1, length, decoded, decodedOffset) + 1
             default:
-                throw new JsonParseError(`Invalid escape sequence '\\${escChar}' at ${index}`,
+                throw JsonParseError(`Invalid escape sequence '\\${escChar}' at ${index}`,
                     index - 1, index + 1)
         }
     }
@@ -3622,14 +3622,14 @@ class UnifiedJsonParser {
 
     private static parseUnicodeEscapeCodePoint(src: string, index: int, length: int): int {
         if (index + 4 > length) {
-            throw new JsonParseError(`Incomplete Unicode escape sequence at ${index}`, index, index)
+            throw JsonParseError(`Incomplete Unicode escape sequence at ${index}`, index, index)
         }
 
         let codePoint: int = 0
         for (let i = 0; i < 4; i++) {
             const c = src.charAt(index + i)
             if (!Char.isHexDigit(c)) {
-                throw new JsonParseError(`Invalid hexadecimal digit '${c}' at ${index + i}`,
+                throw JsonParseError(`Invalid hexadecimal digit '${c}' at ${index + i}`,
                     index + i, index + i + 1)
             }
             codePoint = codePoint * 16 + jsonUnhex(c)
@@ -3654,14 +3654,14 @@ class UnifiedJsonParser {
                 this.advance()
             }
         } else {
-            throw new JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
+            throw JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
         }
 
         if (this.ch == c'.') {
             hasFraction = true
             this.advance()
             if (!Char.isDecDigit(this.ch)) {
-                throw new JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
+                throw JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
             }
             while (Char.isDecDigit(this.ch)) {
                 this.advance()
@@ -3675,7 +3675,7 @@ class UnifiedJsonParser {
                 this.advance()
             }
             if (!Char.isDecDigit(this.ch)) {
-                throw new JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
+                throw JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
             }
             while (Char.isDecDigit(this.ch)) {
                 this.advance()
@@ -3730,7 +3730,7 @@ class UnifiedJsonParser {
             if (this.ch == c',') {
                 this.advance()
             } else if (this.ch != c']') {
-                throw new JsonParseError(`Expected ',' or ']' at ${this.getPositionDesc()}`,
+                throw JsonParseError(`Expected ',' or ']' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
         }
@@ -3757,7 +3757,7 @@ class UnifiedJsonParser {
 
             this.skipWhitespace()
             if (this.ch != c':') {
-                throw new JsonParseError(`Expected ':' at ${this.getPositionDesc()}`,
+                throw JsonParseError(`Expected ':' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
             this.advance()
@@ -3778,7 +3778,7 @@ class UnifiedJsonParser {
                 this.advance()
                 return result
             } else {
-                throw new JsonParseError(`Expected ',' or '}' at ${this.getPositionDesc()}`,
+                throw JsonParseError(`Expected ',' or '}' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
         }
@@ -3803,12 +3803,12 @@ class UnifiedJsonParser {
     public parseToJSONValue(): JSONValue {
         this.skipWhitespace()
         if (this.index >= this.length) {
-            throw new JsonParseError("Unexpected end of input", 0, 0)
+            throw JsonParseError("Unexpected end of input", 0, 0)
         }
         let result = this.parseValueToJSON()
         this.skipWhitespace()
         if (this.index < this.length) {
-            throw new JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
+            throw JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
                 this.index, this.index)
         }
         return result
@@ -3850,7 +3850,7 @@ class UnifiedJsonParser {
             case c'5': case c'6': case c'7': case c'8': case c'9':
                 return this.parseNumberToJSON()
             default:
-                throw new JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
+                throw JsonParseError(`Unexpected character '${this.ch}' at ${this.getPositionDesc()}`,
                     this.index, this.index)
         }
     }
@@ -3869,13 +3869,13 @@ class UnifiedJsonParser {
                 this.advance()
             }
         } else {
-            throw new JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
+            throw JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
         }
 
         if (this.ch == c'.') {
             this.advance()
             if (!Char.isDecDigit(this.ch)) {
-                throw new JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
+                throw JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
             }
             while (Char.isDecDigit(this.ch)) {
                 this.advance()
@@ -3888,7 +3888,7 @@ class UnifiedJsonParser {
                 this.advance()
             }
             if (!Char.isDecDigit(this.ch)) {
-                throw new JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
+                throw JsonParseError(`Invalid number format at ${this.getPositionDesc()}`, start, this.index)
             }
             while (Char.isDecDigit(this.ch)) {
                 this.advance()
@@ -3922,7 +3922,7 @@ class UnifiedJsonParser {
             if (this.ch == c',') {
                 this.advance()
             } else if (this.ch != c']') {
-                throw new JsonParseError(`Expected ',' or ']' at ${this.getPositionDesc()}`,
+                throw JsonParseError(`Expected ',' or ']' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
         }
@@ -3944,7 +3944,7 @@ class UnifiedJsonParser {
 
             this.skipWhitespace()
             if (this.ch != c':') {
-                throw new JsonParseError(`Expected ':' at ${this.getPositionDesc()}`,
+                throw JsonParseError(`Expected ':' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
             this.advance()
@@ -3961,7 +3961,7 @@ class UnifiedJsonParser {
             if (this.ch == c',') {
                 this.advance()
             } else if (this.ch != c'}') {
-                throw new JsonParseError(`Expected ',' or '}' at ${this.getPositionDesc()}`,
+                throw JsonParseError(`Expected ',' or '}' at ${this.getPositionDesc()}`,
                     this.index, this.index)
             }
         }
@@ -4350,8 +4350,11 @@ class JSONValueParser {
  * Error thrown when parsing JSON fails.
  */
 export class JsonParseError extends SyntaxError {
-    public constructor(msg: string, start_offset?: int, end_offset?: int) {
-        super(`${msg} at ${start_offset}..${end_offset}`)
+    public constructor(message?: String, options?: ErrorOptions) {
+        super(message, options)
+    }
+    static $_invoke(msg: string, start_offset?: int, end_offset?: int): JsonParseError {
+        return new JsonParseError(`${msg} at ${start_offset}..${end_offset}`)
     }
 }
 
