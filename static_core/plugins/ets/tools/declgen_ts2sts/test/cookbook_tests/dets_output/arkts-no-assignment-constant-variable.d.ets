@@ -24,7 +24,7 @@ declare const b5: boolean;
 declare let b4: boolean;
 declare let b8: boolean;
 //33781
-//declare const b9 = "";
+declare const b9: string;
 declare const b10: number;
 declare let b12: string;
 declare let b13: number;

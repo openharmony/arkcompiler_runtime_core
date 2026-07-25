@@ -26,7 +26,7 @@ let b4 = b1 || b2;
 let b8 = !b1 && b2;
 
 //33781
-//const b9 = '';
+const b9 = '';
 const b10 = 0;
 
 let b12 = '';
