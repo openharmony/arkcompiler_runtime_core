@@ -30,9 +30,6 @@
 namespace ark::common_vm {
 static_assert(Heap::NORMAL_UNIT_SIZE == RegionDesc::UNIT_SIZE);
 
-HeapAddress Heap::heapStartAddr_ = 0;
-HeapAddress Heap::heapCurrentEnd_ = 0;
-
 class HeapImpl : public Heap {
 public:
     HeapImpl() : theSpace_(Allocator::CreateAllocator())
@@ -41,7 +38,7 @@ public:
     }
 
     ~HeapImpl() override = default;
-    void Init(const RuntimeParam &param) override;
+    void Init(const RuntimeParam &param, mem::HeapSpace *heap) override;
     void Fini() override;
     void StartRuntimeThreads() override;
     void StopRuntimeThreads() override;
@@ -140,8 +137,6 @@ public:
     size_t GetFootprintBytes() const override;
     size_t GetSurvivedSize() const override;
     size_t GetRemainHeapSize() const override;
-    HeapAddress GetStartAddress() const override;
-    HeapAddress GetSpaceEndAddress() const override;
     bool ForEachObject(const std::function<void(BaseObject *)> &, bool) override;
     CollectorResources &GetCollectorResources() override;
     void RegisterAllocBuffer(AllocationBuffer &buffer) override;
@@ -201,7 +196,7 @@ bool HeapImpl::ForEachObject(const std::function<void(BaseObject *)> &visitor, b
     return theSpace_->ForEachObject(visitor, safe);
 }
 
-void HeapImpl::Init(const RuntimeParam &param)
+void HeapImpl::Init(const RuntimeParam &param, mem::HeapSpace *heapSpace)
 {
     if (theSpace_ == nullptr) {
         // Hack impl, since HeapImpl is Immortal, this may happen in multi UT case
@@ -209,7 +204,7 @@ void HeapImpl::Init(const RuntimeParam &param)
     }
     runtimeParam_ = param;
     ASSERT(theSpace_ != nullptr);
-    theSpace_->Init(param);
+    theSpace_->Init(param, heapSpace);
     heuristicGCPolicy_.Init();
 }
 
@@ -348,16 +343,6 @@ size_t HeapImpl::GetRemainHeapSize() const
 size_t HeapImpl::GetSurvivedSize() const
 {
     return theSpace_->GetSurvivedSize();
-}
-
-HeapAddress HeapImpl::GetStartAddress() const
-{
-    return theSpace_->GetSpaceStartAddress();
-}
-
-HeapAddress HeapImpl::GetSpaceEndAddress() const
-{
-    return theSpace_->GetSpaceEndAddress();
 }
 
 Heap &Heap::GetHeap()

@@ -240,7 +240,7 @@ constexpr bool IsAddressInObjectsHeap([[maybe_unused]] uintptr_t address)
 #if defined(PANDA_32_BIT_MANAGED_POINTER) && defined(PANDA_TARGET_64)
     return PANDA_32BITS_HEAP_START_ADDRESS <= address && address < PANDA_32BITS_HEAP_END_OBJECTS_ADDRESS;
 #else  // In this case, all 64 bits addresses are valid
-    return true;
+    return address > 0;
 #endif
 }
 

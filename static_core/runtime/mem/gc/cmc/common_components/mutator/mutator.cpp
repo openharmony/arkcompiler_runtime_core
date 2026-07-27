@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 #include "common_components/common/type_def.h"
+#include "libarkbase/mem/mem.h"
 #include "mutator/satb_buffer.h"
 #include "runtime/include/mutator.h"
 #include "runtime/include/panda_vm.h"
@@ -63,7 +64,7 @@ Mutator::~Mutator()
 
 void Mutator::RememberObjectImpl(const BaseObject *obj)
 {
-    if (LIKELY(Heap::IsHeapAddress(obj))) {
+    if (LIKELY(IsAddressInObjectsHeap(obj))) {
         if (SatbBuffer::ShouldEnqueue(obj)) {
             SatbBuffer::Instance().EnsureGoodNode(CastSatbNode(satbNode_));
             CastSatbNode(satbNode_)->Push(obj);

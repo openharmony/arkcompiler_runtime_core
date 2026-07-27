@@ -134,11 +134,4 @@ void Treap::TreapNode::RefreshFreeRegionDesc()
     uint32_t cnt = GetCount();
     RegionDesc::InitFreeRegion(idx, cnt);
 }
-
-void Treap::TreapNode::ReleaseMemory()
-{
-    uint32_t idx = GetIndex();
-    uint32_t cnt = GetCount();
-    RegionDesc::ReleaseUnits(idx, cnt);
-}
 }  // namespace ark::common_vm

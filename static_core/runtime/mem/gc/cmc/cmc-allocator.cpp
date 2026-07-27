@@ -45,7 +45,7 @@ CMCObjectAllocator::CMCObjectAllocator(MemStatsType *memStats, bool createPygote
 
     heapManager_ = new (std::nothrow) cvm::HeapManager();
     LOG_IF(UNLIKELY(heapManager_ == nullptr), FATAL, RUNTIME) << "HeapManager instance creation failed.";
-    heapManager_->Init(param);
+    heapManager_->Init(param, this->GetHeapSpace());
 
     constexpr int logFloatingPointPrecision = 2;
     LOG(DEBUG, GC) << "Arkcommon runtime started.";

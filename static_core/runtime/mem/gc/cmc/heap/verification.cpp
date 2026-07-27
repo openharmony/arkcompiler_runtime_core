@@ -95,7 +95,7 @@ PandaString GetObjectInfo(const BaseObject *obj)
     }
 
     s << "> Region Info:" << std::endl;
-    if (!Heap::IsHeapAddress(obj)) {
+    if (!IsAddressInObjectsHeap(obj)) {
         s << "Skip: Object is not in heap range" << std::endl;
     } else {
         auto region = RegionDesc::GetRegionDescAt(obj);
@@ -131,12 +131,10 @@ void IsValidRef(const BaseObject *obj, ObjectPointerType *ref)
     // ...
 
     // check referenee
-    auto refObj = ReadRefSlot(ref);
+    auto *refObj = ReadRefSlot(ref);
 
-    LOG_IF(!(Heap::IsHeapAddress(refObj)), FATAL, COMMON)
-        << "Check failed: Heap::IsHeapAddress(refObj)" << CONTEXT << std::hex << "Object address: 0x"
-        << reinterpret_cast<MAddress>(refObj) << ","
-        << "Heap range: [0x" << Heap::heapStartAddr_ << ", 0x" << Heap::heapCurrentEnd_ << "]";
+    LOG_IF(!(IsAddressInObjectsHeap(refObj)), FATAL, COMMON)
+        << "Check failed: IsAddressInObjectsHeap(refObj)" << CONTEXT << "Object address: " << refObj;
 
     auto region = RegionDesc::GetRegionDescAt(refObj);
     LOG_IF(!(region->GetRegionType() != RegionDesc::RegionType::GARBAGE_REGION), FATAL, COMMON)
