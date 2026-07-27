@@ -1054,7 +1054,7 @@ void Context::TryDelete()
     cont_.DeleteItems();
 }
 
-void Context::Patch()
+void Context::PatchBytecodeOnly()
 {
     // CC-OFFNXT(G.NAM.03-CPP) project code style
     constexpr size_t BYTECODE_PATCH_CHUNK_SIZE = 256;
@@ -1066,7 +1066,6 @@ void Context::Patch()
     auto threadCount = std::min(chunkCount, static_cast<size_t>(hardwareThreads));
     if (threadCount <= 1) {
         patcher_.PatchBytecode({0, patchSize});
-        patcher_.PatchDebug();
         return;
     }
 
@@ -1088,8 +1087,21 @@ void Context::Patch()
     for (auto &thread : threads) {
         thread.join();
     }
+}
+
+void Context::Patch()
+{
+    PatchBytecodeOnly();
     // Debug info patching mutates shared debug structures, so it stays serial after parallel bytecode patching.
     patcher_.PatchDebug();
+}
+
+void Context::FinalizeForWrite()
+{
+    // Deduplicate final linked contents, then rebuild offsets before the final write.
+    cont_.DeduplicateItems(false);
+    cont_.ComputeLayout();
+    PatchBytecodeOnly();
 }
 
 panda_file::BaseClassItem *Context::ClassFromOld(panda_file::BaseClassItem *old)

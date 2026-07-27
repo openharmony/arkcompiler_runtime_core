@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <fstream>
 #include <iterator>
+#include <limits>
 #include <string>
 #include <thread>
 #include <vector>
@@ -56,6 +57,43 @@ static uint32_t ReadU32(const std::vector<uint8_t> &data)
         value |= (static_cast<uint32_t>(data[i]) & BYTE_MASK) << (i * BYTE_WIDTH);
     }
     return value;
+}
+
+class LegacyChecksumWriter final : public Writer {
+public:
+    bool WriteByte(uint8_t byte) override
+    {
+        data_.push_back(byte);
+        return true;
+    }
+
+    size_t GetOffset() const override
+    {
+        return data_.size();
+    }
+
+    bool WriteChecksum(size_t offset) override
+    {
+        checksumOffset_ = offset;
+        return true;
+    }
+
+    size_t GetChecksumOffset() const
+    {
+        return checksumOffset_;
+    }
+
+private:
+    std::vector<uint8_t> data_;
+    size_t checksumOffset_ {std::numeric_limits<size_t>::max()};
+};
+
+TEST(FileWriter, FinalizeChecksumKeepsLegacyWriterContract)
+{
+    LegacyChecksumWriter writer;
+    ASSERT_TRUE(writer.Write<uint32_t>(0));
+    ASSERT_TRUE(writer.FinalizeChecksum(sizeof(uint32_t), 0));
+    EXPECT_EQ(writer.GetChecksumOffset(), 0U);
 }
 
 #ifndef PANDA_TARGET_WINDOWS

@@ -128,6 +128,7 @@ Result Link(const Config &conf, const std::string &output, const std::vector<std
 
     points.patch = Clock::now();
 
+    ctx.FinalizeForWrite();
     ctx.ReleasePreWriteState();
     points.cleanup = Clock::now();
 

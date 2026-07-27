@@ -169,6 +169,8 @@ public:
 
     void Patch();
 
+    void FinalizeForWrite();
+
     void TryDelete();
 
     void ReleasePreWriteState();
@@ -203,6 +205,8 @@ public:
 
 private:
     friend class CodePatcher;
+
+    void PatchBytecodeOnly();
 
     Config conf_;
     Result result_;

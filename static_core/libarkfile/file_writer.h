@@ -79,9 +79,9 @@ public:
         return false;
     }
 
-    virtual bool FinalizeChecksum(size_t /* contentBeginOffset */, size_t /* checksumStoreOffset */)
+    virtual bool FinalizeChecksum(size_t /* contentBeginOffset */, size_t checksumStoreOffset)
     {
-        return false;
+        return WriteChecksum(checksumStoreOffset);
     }
 
     bool Align(size_t alignment)

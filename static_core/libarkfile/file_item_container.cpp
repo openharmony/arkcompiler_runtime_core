@@ -17,6 +17,7 @@
 #include <atomic>
 #include <cstdint>
 #include <cstdlib>
+#include <limits>
 #include <thread>
 #include <type_traits>
 #include "libarkbase/macros.h"
@@ -1037,11 +1038,21 @@ bool ItemContainer::WriteItemsParallel(Writer *writer, const std::vector<BaseIte
     }
 
     const size_t sectionStart = itemsArr.front()->GetOffset();
-    const size_t sectionEnd = itemsArr.back()->GetOffset() + itemsArr.back()->GetSize();
-    if (sectionEnd <= sectionStart) {
+    const size_t lastOffset = itemsArr.back()->GetOffset();
+    const size_t lastSize = itemsArr.back()->GetSize();
+    if (lastOffset > std::numeric_limits<size_t>::max() - lastSize) {
+        return false;
+    }
+    const size_t sectionEnd = lastOffset + lastSize;
+    if (sectionEnd < sectionStart) {
+        return false;
+    }
+    if (writer->GetOffset() != sectionStart) {
+        return false;
+    }
+    if (sectionEnd == sectionStart) {
         return true;
     }
-    ASSERT(writer->GetOffset() == sectionStart);
 
     const size_t sectionSize = sectionEnd - sectionStart;
     std::vector<uint8_t> sectionBuf(sectionSize, 0);
@@ -1049,7 +1060,7 @@ bool ItemContainer::WriteItemsParallel(Writer *writer, const std::vector<BaseIte
     const unsigned nThreads = std::max(1U, std::min<unsigned>(GetItemWriteThreadCount(), itemsArr.size()));
     std::atomic<bool> ok {true};
 
-    auto runRange = [&itemsArr, sectionStart, sectionSize, &sectionBuf, &ok](size_t begin, size_t end) {
+    auto runRange = [&itemsArr, sectionStart, sectionEnd, &sectionBuf, &ok](size_t begin, size_t end) {
         for (size_t i = begin; i < end; ++i) {
             // Atomic with relaxed order reason: best-effort early exit; thread join provides synchronization
             if (!ok.load(std::memory_order_relaxed)) {
@@ -1058,14 +1069,14 @@ bool ItemContainer::WriteItemsParallel(Writer *writer, const std::vector<BaseIte
             BaseItem *item = itemsArr[i];
             const size_t absOff = item->GetOffset();
             const size_t sz = item->GetSize();
-            if (absOff < sectionStart || absOff + sz > sectionStart + sectionSize) {
+            if (absOff < sectionStart || absOff > sectionEnd || sz > sectionEnd - absOff) {
                 // Atomic with relaxed order reason: failure flag with no ordering constraints between workers
                 ok.store(false, std::memory_order_relaxed);
                 return;
             }
             auto sectionSp = ark::Span<uint8_t>(sectionBuf);
             OffsetWriter w(sectionSp.SubSpan(absOff - sectionStart, sz).data(), absOff, sz);
-            if (!item->Write(&w)) {
+            if (!item->Write(&w) || w.GetOffset() != absOff + sz) {
                 // Atomic with relaxed order reason: failure flag with no ordering constraints between workers
                 ok.store(false, std::memory_order_relaxed);
                 return;
@@ -1077,7 +1088,7 @@ bool ItemContainer::WriteItemsParallel(Writer *writer, const std::vector<BaseIte
         runRange(0, itemsArr.size());
     } else {
         const size_t n = itemsArr.size();
-        const size_t chunk = (n + nThreads - 1U) / nThreads;
+        const size_t chunk = n / nThreads + (n % nThreads != 0U ? 1U : 0U);
         std::vector<std::thread> workers;
         workers.reserve(nThreads - 1U);
         for (unsigned t = 0; t + 1U < nThreads; ++t) {
@@ -1175,10 +1186,20 @@ bool ItemContainer::WriteBody(Writer *writer)
     }
 
     const auto &emittedItems = emitItems_;
-    const size_t itemsSectionBytes =
-        emittedItems.empty()
-            ? 0U
-            : (emittedItems.back()->GetOffset() + emittedItems.back()->GetSize() - emittedItems.front()->GetOffset());
+    size_t itemsSectionBytes = 0;
+    if (!emittedItems.empty()) {
+        const size_t sectionStart = emittedItems.front()->GetOffset();
+        const size_t lastOffset = emittedItems.back()->GetOffset();
+        const size_t lastSize = emittedItems.back()->GetSize();
+        if (lastOffset < sectionStart || lastOffset > std::numeric_limits<size_t>::max() - lastSize) {
+            return false;
+        }
+        const size_t sectionEnd = lastOffset + lastSize;
+        if (sectionEnd < sectionStart) {
+            return false;
+        }
+        itemsSectionBytes = sectionEnd - sectionStart;
+    }
     if (GetItemWriteThreadCount() > 1U && emittedItems.size() > 1U && itemsSectionBytes > GetItemWriteMinBytes()) {
         if (!writer->Align(emittedItems.front()->Alignment())) {
             return false;
