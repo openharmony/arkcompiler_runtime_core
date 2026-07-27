@@ -291,10 +291,7 @@ export class JSON {
      * @returns String - JSON representation of char
      */
     public static stringify(d: char): String {
-        let sb = new StringBuilder('"')
-        sb.append(d)
-        sb.append('"')
-        return sb.toString()
+        return JSONAPI.stringifyStringFast(new String(d))
     }
 
     /**
@@ -438,14 +435,11 @@ export class JSON {
         let s = new StringBuilder('[')
         let last_elem = d.length - 1
         for (let i = 0; i < last_elem; ++i) {
-            s.append('"')
-            s.append(d[i])
-            s.append('",')
+            s.append(JSONAPI.stringifyStringFast(new String(d[i])))
+            s.append(',')
         }
         if (d.length > 0) {
-            s.append('"')
-            s.append(d[last_elem])
-            s.append('"')
+            s.append(JSONAPI.stringifyStringFast(new String(d[last_elem])))
         }
         s.append(']')
         return s.toString()
