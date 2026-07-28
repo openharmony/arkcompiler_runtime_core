@@ -1,0 +1,166 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - description: 'The instance method has a priority over the implicitly called function with receiver'
+      decl: |-
+          class A {
+              foo(): string {
+                  return 'the instance method'
+              }
+          }
+          function foo(this: A): string {
+              return 'the function'
+          }
+      main: |-
+          arktest.assertEQ((new A).foo(), 'the instance method');
+          arktest.assertEQ(foo(new A), 'the function');
+
+    - description: 'The instance method has a priority over the implicitly called function with receiver'
+      decl: |-
+          class A {
+              foo(): string {
+                  return 'the instance method'
+              }
+          }
+          class B extends A {
+          }
+          function foo(this: B): string {
+              return 'the function'
+          }
+      main: |-
+          arktest.assertEQ((new B).foo(), 'the instance method');
+          arktest.assertEQ(foo(new B), 'the function');
+
+    - description: 'The instance method has a priority over the implicitly called function with receiver'
+      decl: |-
+          interface A {
+              foo(): string {
+                  return 'the instance method'
+              }
+          }
+          function foo(this: A): string {
+              return 'the function'
+          }
+          let a: A = {}
+      main: |-
+          arktest.assertEQ(a.foo(), 'the instance method');
+          arktest.assertEQ(foo(a), 'the function');
+
+    - description: 'The instance method has a priority over the implicitly called function with receiver'
+      decl: |-
+          interface A {
+              foo(): string {
+                  return 'the instance method'
+              }
+          }
+          interface B extends A {
+          }
+          function foo(this: B): string {
+              return 'the function'
+          }
+          let b: B = {}
+      main: |-
+          arktest.assertEQ(b.foo(), 'the instance method');
+          arktest.assertEQ(foo(b), 'the function');
+
+    - description: 'The method and the function with generics'
+      decl: |-
+          class B {
+              bar<T>(): string {
+                  return 'the instance method'
+              }
+          }
+          function bar<T>(this: B): string {
+              return 'the function'
+          }
+      main: |-
+          arktest.assertEQ(bar<boolean>(new B), 'the function');
+          arktest.assertEQ((new B).bar<int>(), 'the instance method');
+
+    - description: 'The function with generics'
+      decl: |-
+          let res = ''
+
+          class C {
+              func(): C {
+                  res = 'the instance method'
+                  return this
+              }
+          }
+          function func<T extends Object>(this: T): T {
+              res = 'the function'
+              return this
+          }
+      main: |-
+          res = ''
+          func(new C)
+          arktest.assertEQ(res, 'the function')
+          new C().func<C>()
+          arktest.assertEQ(res, 'the function')
+          new C().func()
+          arktest.assertEQ(res, 'the instance method')
+
+    - description: 'The function with generics'
+      decl: |-
+          let res = ''
+
+          class C {
+              func<T extends Object>(): C {
+                  res = 'the instance method'
+                  return this
+              }
+          }
+          function func<T extends Object>(this: T): T {
+              res = 'the function'
+              return this
+          }
+      main: |-
+          res = ''
+          func(new C)
+          arktest.assertEQ(res, 'the function')
+          new C().func<C>()
+          arktest.assertEQ(res, 'the instance method')
+          new C().func()
+          arktest.assertEQ(res, 'the function')
+
+    - description: 'getName method from enum type'
+      decl: |-
+          enum Color {
+              Red,
+              Green = 42,
+              Blue = 5,
+          }
+          function getName<T extends Color>(this: T): string {
+              return 'the function'
+          }
+          let e = Color.Green
+      main: |-
+          arktest.assertEQ(e.getName(), 'Green')
+          arktest.assertEQ(getName(e), 'the function')
+
+    - description: 'valueOf method from enum type'
+      decl: |-
+          enum Color {
+              Red,
+              Green = 42,
+              Blue = 5,
+          }
+          function valueOf<T extends Color>(this: T): int {
+              return -1
+          }
+          let e = Color.Green
+      main: |-
+          arktest.assertEQ(e.valueOf(), 42)
+          arktest.assertEQ(valueOf(e), -1)
