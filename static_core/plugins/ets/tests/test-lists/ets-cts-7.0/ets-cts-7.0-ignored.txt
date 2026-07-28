@@ -51,30 +51,6 @@
 11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_citoomaxv1_byte_0_0.ets
 11.enumerations/03.initialization_of_enum_members/enum_explicit_integer_types_common_decl_citoomaxv1_short_0_0.ets
 
-#33476
-13.modules_and_namespaces/02.module_header/module_header.ets
-13.modules_and_namespaces/02.module_header/module_header_export.ets
-
-#33474
-13.modules_and_namespaces/02.module_header/module_header_declare.ets
-
-#33476
-13.modules_and_namespaces/09.multifile_module/multifile_module_mismatched_export_n.ets
-
-#34114
-15.semantic_rules/07.type_inference/01.type_inference_for_constant_expressions/numeric_default_literal_types_7.ets
-
-#33245 Wrong CTE for generic extends union type (spec 15.9.3)
-15.semantic_rules/08.overriding/03.override-compatible_signatures/override_generic_extends_union.ets
-
-#33246 Wrong CTE for generic method type parameter in implementing class (spec 15.9.3)
-15.semantic_rules/08.overriding/03.override-compatible_signatures/override_generic_method_type_param.ets
-
-#34493 CTE on object literal of interface with generic method
-15.semantic_rules/08.overriding/03.override-compatible_signatures/object_literal_5.ets
-15.semantic_rules/08.overriding/03.override-compatible_signatures/object_literal_7.ets
-15.semantic_rules/08.overriding/03.override-compatible_signatures/object_literal_11.ets
-
 #34956
 15.semantic_rules/09.overloading/02.implicit_method_overloading/instantiation_generic_interface_overload_equivalent_5.ets
 
