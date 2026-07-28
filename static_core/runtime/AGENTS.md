@@ -12,10 +12,10 @@ This file provides guidance to AI when working with code in this repository.
 
 The **runtime/** directory contains the core ArkVM runtime implementation:
 
-- **Memory Management**: GC implementations (G1GC, Epsilon), allocators
+- **Memory Management**: GC implementations (STW, G1GC, CMC, Epsilon), allocators
 - **Interpreter**: Bytecode interpreter
 - **Compiler Interface**: JIT, OSR, and AOT orchestration
-- **Threading**: ManagedThread, safepoints, stack walking
+- **Mutators & Threading**: Mutator (heap-mutating unit GC coordinates) vs ManagedThread (bytecode-executing mutator), safepoints, stack walking
 - **Class Linking**: Class loading, resolution, vtable/itable building
 - **Bridges**: Interpreter-to-compiled transitions, deoptimization, runtime entrypoints
 
@@ -27,7 +27,10 @@ Main File Directories
 runtime/
 ├── include/                    # Public headers
 │   ├── runtime.h              # Main Runtime class
-│   ├── thread.h               # ManagedThread interface
+│   ├── mutator.h              # Mutator base (heap-mutating unit; MutatorType MANAGED/COMPILER/GC)
+│   ├── managed_thread.h       # ManagedThread interface (: public Mutator; executes bytecode)
+│   ├── mtmanaged_thread.h     # MTManagedThread (one ManagedThread per OS thread)
+│   ├── thread.h               # Thin Thread base (PandaVM*, signal stack) — not ManagedThread
 │   ├── class_linker.h         # ClassLinker interface
 │   ├── object_header.h        # Object header design
 │   ├── coretypes/
@@ -50,7 +53,8 @@ runtime/
 ├── deoptimization.cpp/h       # Compiled-to-interpreter transition
 ├── intrinsics.cpp             # Runtime intrinsics used by compiled code
 ├── runtime.cpp/h              # Runtime implementation
-├── thread.cpp/h               # ManagedThread implementation
+├── mutator.cpp                # Mutator base implementation (header include/mutator.h)
+├── thread.cpp                 # ManagedThread / MTManagedThread implementation (headers in include/)
 ├── class_linker.cpp/h         # ClassLinker implementation
 │
 ├── coroutines/                # Coroutine support
@@ -96,14 +100,27 @@ For compiler debugging, do not treat `runtime/jit/` as the whole JIT subsystem:
 - Compaction
 - TLAB (Thread-Local Allocation Buffers)
 
-### 2. Threading (`thread.cpp/h`)
+### 2. Mutators and Threads
 
-**ManagedThread**:
+`Mutator` and `ManagedThread` are **not** the same concept — do not conflate them (see `../docs/mutators.md`).
 
-- Per-thread runtime state
-- Safepoint implementation for GC stop-the-world
-- Stack walking for root scanning
-- Thread local storage
+**Mutator** (`include/mutator.h`, base class):
+
+- Any entity that can *mutate* the managed heap (read/write references, allocate objects) — the unit GC coordinates for
+  STW and barriers, via `MutatorManager` (`include/mutator_manager.h`) and `MutatorStatus` (`include/mutator_status.h`)
+- **Not** an OS thread and not 1:1 with one: an OS thread may run several mutators over time; the current mutator is
+  held in TLS (`Mutator::GetCurrent()`)
+- `MutatorType`: `MANAGED` (executes bytecode), `COMPILER` (JIT tasks), `GC` (GC tasks)
+
+**ManagedThread** (`include/managed_thread.h`, `class ManagedThread : public Mutator`):
+
+- A `MANAGED` mutator that can **execute bytecode** and holds the state for it: current frame(s), pending exception,
+  stack-frame allocator, handle scopes
+- Provides safepoint handling for GC stop-the-world and stack walking for root scanning
+- `MTManagedThread` (`include/mtmanaged_thread.h`, `: public ManagedThread`) is the multi-threaded model — one
+  `ManagedThread` bound to one OS thread
+
+`include/thread.h` is only the thin `Thread` base (holds `PandaVM*`/signal stack); it is **not** the ManagedThread interface.
 
 ### 3. Class Linking (`class_linker.cpp/h`)
 

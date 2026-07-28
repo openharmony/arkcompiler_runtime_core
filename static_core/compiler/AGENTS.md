@@ -1,8 +1,10 @@
-# ArkTS-Sta Compiler Agent Guide
+# Ark Compiler Agent Guide
 
 ## 1. Code Map
 
-This AGENTS.md applies to `static_core/compiler/`. This directory turns Ark bytecode into executable code and covers JIT, OSR, AOT, and optional LLVM AOT workflows.
+This AGENTS.md applies to `static_core/compiler/`, the **language-agnostic** optimizing compiler. It turns Panda
+bytecode (`.abc`) into executable code and covers JIT, OSR, AOT, and optional LLVM AOT workflows. ArkTS-Sta (ETS)
+specific compiler extensions live separately under `../plugins/ets/compiler/` — see its `AGENTS.md`.
 
 Key areas:
 
