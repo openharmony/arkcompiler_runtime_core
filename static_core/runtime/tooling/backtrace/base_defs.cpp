@@ -23,7 +23,7 @@
 
 namespace ark::tooling {
 
-static std::string GetClassName(const uint8_t *descriptor)
+std::string GetClassName(const uint8_t *descriptor)
 {
     switch (*descriptor) {
         case 'V':

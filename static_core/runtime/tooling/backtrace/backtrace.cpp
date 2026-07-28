@@ -171,7 +171,7 @@ int Backtrace::SymbolizeByManagedFrame(uintptr_t pc, uintptr_t mapBase, uint32_t
             panda_file::ClassDataAccessor cda(*file, mda.GetClassId());
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
             int size = snprintf_s(function->functionName, FUNCTIONNAME_MAX, FUNCTIONNAME_MAX - 1, "%s.%s",
-                                  ClassHelper::GetName(cda.GetDescriptor()).c_str(), mda.GetName().data);
+                                  GetClassName(cda.GetDescriptor()).c_str(), mda.GetName().data);
             if (size < 0) {
                 LOG(ERROR, RUNTIME) << "copy funtionname failed!";
             }

@@ -47,6 +47,7 @@ struct MethodInfo {
     }
 };
 
+std::string GetClassName(const uint8_t *descriptor);
 std::vector<MethodInfo> ReadAllMethodInfos(const ark::panda_file::File *pandaFile);
 std::optional<MethodInfo> ReadMethodInfo(ark::panda_file::MethodDataAccessor &mda);
 bool SymbolizeByNativeFrameImpl(uintptr_t pc, uintptr_t mapBase, uintptr_t loadOffset, const panda_file::File *file,
