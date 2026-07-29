@@ -25,10 +25,10 @@ export declare let p10: Promise<IP5>;
 export declare let p3: E5;
 export declare function foo3(a: E6): E7;
 export declare let p12: Promise<E8>;
-declare interface I0 {
+export declare interface I0 {
     I0Method?(a: string): string;
 }
-declare interface I1 {
+export declare interface I1 {
     I1Method?(a: number): number;
 }
 export declare class Base {
@@ -119,7 +119,7 @@ export declare interface IP2 {
 }
 export declare interface IP3 {
 }
-declare interface IP4 {
+export declare interface IP4 {
 }
 export declare interface IP5 {
 }

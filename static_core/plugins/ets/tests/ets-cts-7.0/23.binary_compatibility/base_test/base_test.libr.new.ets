@@ -24,7 +24,7 @@ files: ['../building_blocks/method_signatures.ets', '../building_blocks/param_in
 import * as MS from '../building_blocks/method_signatures'
 import * as PI from '../building_blocks/param_interfaces'
 
-interface I3 extends MS.I1, MS.I2 {
+export interface I3 extends MS.I1, MS.I2 {
     m(p: PI.PI5): string {
         return "C1"
     }
