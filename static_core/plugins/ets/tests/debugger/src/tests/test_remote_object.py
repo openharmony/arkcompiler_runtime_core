@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -78,7 +78,7 @@ async def test_let_vars(
         scope_vars = await paused.frame().scope().mirror_variables()
         expect = {
             "b": value("boolean", True),
-            "f": value("number", 1.2),
+            "f": value("number", 1.2000000476837158),  # float32(1.2) widened to float64
             "i": value("number", 31),
             "n": value("number", 1.3),
             "s": value("string", "str"),
