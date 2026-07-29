@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 #include <array>
 #include <string>
 #include <sstream>
+#include <cstddef>
+#include <optional>
 
 #include "libarkfile/file.h"
 
@@ -36,6 +38,32 @@ inline void PrintBytecodeVersion()
     ss << "Minimum supported bytecode version " << GetVersion(MIN_VERSION) << '\n';
 
     std::cout << ss.str() << std::endl;
+}
+
+% current_version_raw = Panda::version.split('.')
+% current_api = current_version_raw[0]
+% current_version = current_version_raw.join(', ')
+struct VersionMapping {
+    uint8_t api;
+    std::array<uint8_t, File::VERSION_SIZE> version;
+};
+
+constexpr std::array<VersionMapping, <%= 2 + Panda::api_version_map.size %>> VERSION_TABLE {{
+    {0, {<%= current_version %>}},
+% Panda::api_version_map.each do |api_version|
+    {<%= api_version[0] %>, {<%= api_version[1].split('.').join(', ') %>}},
+% end
+    {<%= current_api %>, {<%= current_version %>}}
+}};
+
+inline std::optional<const std::array<uint8_t, File::VERSION_SIZE>> GetVersionByApi(uint8_t api)
+{
+    for (const auto &entry : VERSION_TABLE) {
+        if (entry.api == api) {
+            return entry.version;
+        }
+    }
+    return VERSION;
 }
 
 }  // namespace ark::panda_file

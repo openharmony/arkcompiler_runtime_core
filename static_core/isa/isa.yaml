@@ -107,6 +107,9 @@ chapters:
 min_version: 0.0.0.6
 version: 0.1.0.7
 
+# api_version_map lists only overrides — 0 and the current version are derived from 'version' automatically.
+api_version_map: [[24, 0.0.0.6], [26, 0.1.0.7]]
+
 properties:
   - tag: type_id
     description: Use an id which resolves into a type constant.
