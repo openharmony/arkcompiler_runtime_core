@@ -47,6 +47,34 @@ void SetCurrentWorkerPriority(int priority)
     QosHelper::SetCurrentWorkerPriority(static_cast<Priority>(priority));
 }
 
+EtsBoolean HandleProcessUncaughtError(EtsObject *error, EtsBoolean onlyIfRegistered)
+{
+    ASSERT(error != nullptr);
+    static constexpr const char *HANDLE_UNCAUGHT_ERROR_IF_REGISTERED = "HandleUncaughtErrorIfRegistered";
+    static constexpr const char *HANDLE_UNCAUGHT_ERROR_IF_REGISTERED_SIGNATURE = "Lstd/core/Object;:Z";
+
+    auto *method = onlyIfRegistered != 0U
+                       ? PlatformTypes()->coreStdProcess->GetStaticMethod(HANDLE_UNCAUGHT_ERROR_IF_REGISTERED,
+                                                                          HANDLE_UNCAUGHT_ERROR_IF_REGISTERED_SIGNATURE)
+                       : PlatformTypes()->coreStdProcessHandleUncaughtError;
+    if (UNLIKELY(method == nullptr)) {
+        LOG(ERROR, COROUTINES) << "StdProcess uncaught error handler method is not found";
+        return ToEtsBoolean(false);
+    }
+
+    std::array args = {Value(error->GetCoreType())};
+    auto *thread = ManagedThread::GetCurrent();
+    if (onlyIfRegistered != 0U) {
+        auto result = method->GetPandaMethod()->Invoke(thread, args.data());
+        if (UNLIKELY(thread->HasPendingException())) {
+            return ToEtsBoolean(false);
+        }
+        return result.GetAs<EtsBoolean>();
+    }
+    method->GetPandaMethod()->InvokeVoid(thread, args.data());
+    return ToEtsBoolean(!thread->HasPendingException());
+}
+
 static void RunExclusiveTask(mem::Reference *taskRef, mem::GlobalObjectStorage *refStorage)
 {
     ScopedManagedCodeThread managedCode(ManagedThread::GetCurrent());

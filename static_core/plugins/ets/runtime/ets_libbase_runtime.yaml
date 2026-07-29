@@ -10297,6 +10297,16 @@ intrinsics:
         - i32
     impl: ark::ets::intrinsics::JoinExclusiveWorker
 
+  - name: EtsEAWorkerHandleProcessUncaughtError
+    space: ets
+    class_name: std.core.InternalWorker
+    method_name: handleProcessUncaughtError
+    static: true
+    signature:
+      ret: u1
+      args: [std.core.Object, u1]
+    impl: ark::ets::intrinsics::HandleProcessUncaughtError
+
 ###################
 # std.concurrency #
 ###################
