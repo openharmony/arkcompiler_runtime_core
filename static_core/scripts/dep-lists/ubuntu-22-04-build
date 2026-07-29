@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,3 +17,7 @@ g++=4:11.2.0-*
 make=4.3-*
 ruby=1:3.0*            # Needed for a framework for automatic code generation written in Ruby
 ccache=4.5.1-*
+
+# Host (glibc) compiler-rt sanitizer runtimes (ASan/TSan/UBSan).
+# The OHOS clang prebuilt omits host runtimes, so prebuilts_download copies these into the OHOS clang resource dir.
+libclang-common-15-dev=1:15.0.7-*
