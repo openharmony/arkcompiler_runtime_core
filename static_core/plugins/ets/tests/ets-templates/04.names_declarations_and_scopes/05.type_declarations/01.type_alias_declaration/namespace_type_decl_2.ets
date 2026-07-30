@@ -17,7 +17,7 @@
  desc: Declare type inside namespace
  ---*/
 
-interface MyInterface {
+export interface MyInterface {
 }
 
 type OuterType = MyInterface

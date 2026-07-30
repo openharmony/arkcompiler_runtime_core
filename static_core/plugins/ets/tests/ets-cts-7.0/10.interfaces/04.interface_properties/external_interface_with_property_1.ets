@@ -23,7 +23,7 @@ export interface I {
     text: string;
 }
 
-interface J<T> {
+export interface J<T> {
     readonly x: T;
 }
 

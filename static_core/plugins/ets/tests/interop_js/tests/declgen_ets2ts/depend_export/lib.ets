@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-interface I0 {
+export interface I0 {
     I0Method(a: string): string { return a; };
 }
 
-interface I1 {
+export interface I1 {
     I1Method(a: double): double { return a; };
 }
 
@@ -84,7 +84,7 @@ export class CI3 {}
 export interface IP1 {}
 export interface IP2 {}
 export interface IP3 {}
-interface IP4 {}
+export interface IP4 {}
 export interface IP5 {}
 enum E1 {
   A
