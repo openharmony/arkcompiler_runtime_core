@@ -1,0 +1,78 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+cases:
+
+    # unions of iterables
+
+    - desc: 'Iterating over union Array<Enum1>|FixedArray<Enum2>'
+      expected_out: "Semantic error ESE0402: Unions of types with iterator and fixed/value arrays are currently unsupported in an iteration: Array<Enum1>|FixedArray<Enum2>."
+      main: |-
+          for (let v: Enum1|Enum2 of ((): Enum1[]|FixedArray<Enum2> => [Enum1.Zero, Enum1.Five, Enum1.Six])())
+              res += v.valueOf()
+          arktest.assertEQ(res, 11)
+
+          res = 0
+          for (let v: Enum1|Enum2 of ((): Enum1[]|FixedArray<Enum2> => [Enum2.Seven, Enum2.Seven, Enum2.Ten])())
+              res += v.valueOf()
+          arktest.assertEQ(res, 24)
+
+    - desc: 'Iterating over union of EnumIterable<Enum1> and FixedArray<Enum2>'
+      expected_out: "Semantic error ESE0402: Unions of types with iterator and fixed/value arrays are currently unsupported in an iteration: EnumIterable<Enum1>|FixedArray<Enum2>."
+      main: |-
+          for (let v: Enum1|Enum2 of
+              ((): EnumIterable<Enum1>|FixedArray<Enum2> => new EnumIterable<Enum1>([Enum1.Zero, Enum1.Five, Enum1.Six]))())
+              res += v.valueOf()
+          arktest.assertEQ(res, 11)
+
+          res = 0
+          for (let v: Enum1|Enum2 of
+              ((): EnumIterable<Enum1>|FixedArray<Enum2> => [Enum2.Seven, Enum2.Seven, Enum2.Ten])())
+              res += v.valueOf()
+          arktest.assertEQ(res, 24)
+
+    # union of unions
+
+    - desc: 'Iterating over FixedArray<Enum1|Enum2>|Array<Enum3|Enum4>'
+      expected_out: "Semantic error ESE0402: Unions of types with iterator and fixed/value arrays are currently unsupported in an iteration: FixedArray<(Enum1|Enum2)>|Array<Enum3|Enum4>."
+      decl: |-
+          enum Enum3: byte { Three = 3 }
+          enum Enum4: byte { Four = 4 }
+      main: |-
+          for (let v: Enum1|Enum2|Enum3|Enum4 of
+              ((): FixedArray<Enum1|Enum2>|Array<Enum3|Enum4> => [Enum1.Zero, Enum1.Five, Enum1.Six, Enum2.Seven, Enum2.Ten])())
+              res += v.valueOf()
+          arktest.assertEQ(res, 28)
+
+          res = 0
+          for (let v: Enum1|Enum2|Enum3|Enum4 of
+              ((): FixedArray<Enum1|Enum2>|Array<Enum3|Enum4> => [Enum3.Three, Enum4.Four])())
+              res += v.valueOf()
+          arktest.assertEQ(res, 7)
+
+    - desc: 'Iterating over FixedArray<Enum1|Enum2>|EnumIterable<Enum3|Enum4>'
+      expected_out: "Semantic error ESE0402: Unions of types with iterator and fixed/value arrays are currently unsupported in an iteration: FixedArray<(Enum1|Enum2)>|EnumIterable<Enum3|Enum4>."
+      decl: |-
+          enum Enum3: byte { Three = 3 }
+          enum Enum4: byte { Four = 4 }
+      main: |-
+          for (let v: Enum1|Enum2|Enum3|Enum4 of
+              ((): FixedArray<Enum1|Enum2>|EnumIterable<Enum3|Enum4> => [Enum1.Zero, Enum1.Five, Enum1.Six, Enum2.Seven, Enum2.Ten])())
+              res += v.valueOf()
+          arktest.assertEQ(res, 28)
+
+          res = 0
+          for (let v: Enum1|Enum2|Enum3|Enum4 of
+              ((): FixedArray<Enum1|Enum2>|EnumIterable<Enum3|Enum4> => new EnumIterable<Enum3|Enum4>([Enum3.Three, Enum4.Four]))())
+              res += v.valueOf()
+          arktest.assertEQ(res, 7)

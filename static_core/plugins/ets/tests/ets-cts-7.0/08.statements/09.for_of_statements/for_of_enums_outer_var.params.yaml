@@ -62,18 +62,6 @@ cases:
               res += v.valueOf()
           arktest.assertEQ(res, 24)
 
-    - desc: 'Iterating over union Array<Enum1>|FixedArray<Enum2>'
-      main: |-
-          let v: Enum1|Enum2
-          for (v of ((): Enum1[]|FixedArray<Enum2> => [Enum1.Zero, Enum1.Five, Enum1.Six])())
-              res += v.valueOf()
-          arktest.assertEQ(res, 11)
-
-          res = 0
-          for (v of ((): Enum1[]|FixedArray<Enum2> => [Enum2.Seven, Enum2.Seven, Enum2.Ten])())
-              res += v.valueOf()
-          arktest.assertEQ(res, 24)
-
     - desc: 'Iterating over union of EnumIterables'
       main: |-
           let v: Enum1|Enum2
@@ -99,20 +87,6 @@ cases:
           res = 0
           for (v of
               ((): EnumIterable<Enum1>|Array<Enum2> => [Enum2.Seven, Enum2.Seven, Enum2.Ten])())
-              res += v.valueOf()
-          arktest.assertEQ(res, 24)
-
-    - desc: 'Iterating over union of EnumIterable<Enum1> and FixedArray<Enum2>'
-      main: |-
-          let v: Enum1|Enum2
-          for (v of
-              ((): EnumIterable<Enum1>|FixedArray<Enum2> => new EnumIterable<Enum1>([Enum1.Zero, Enum1.Five, Enum1.Six]))())
-              res += v.valueOf()
-          arktest.assertEQ(res, 11)
-
-          res = 0
-          for (v of
-              ((): EnumIterable<Enum1>|FixedArray<Enum2> => [Enum2.Seven, Enum2.Seven, Enum2.Ten])())
               res += v.valueOf()
           arktest.assertEQ(res, 24)
 
@@ -178,23 +152,6 @@ cases:
               res += v.valueOf()
           arktest.assertEQ(res, 7)
 
-    - desc: 'Iterating over FixedArray<Enum1|Enum2>|Array<Enum3|Enum4>'
-      decl: |-
-          enum Enum3: short { Three = 3 }
-          enum Enum4: short { Four = 4 }
-      main: |-
-          let v: Enum1|Enum2|Enum3|Enum4
-          for (v of
-              ((): FixedArray<Enum1|Enum2>|Array<Enum3|Enum4> => [Enum1.Zero, Enum1.Five, Enum1.Six, Enum2.Seven, Enum2.Ten])())
-              res += v.valueOf()
-          arktest.assertEQ(res, 28)
-
-          res = 0
-          for (v of
-              ((): FixedArray<Enum1|Enum2>|Array<Enum3|Enum4> => [Enum3.Three, Enum4.Four])())
-              res += v.valueOf()
-          arktest.assertEQ(res, 7)
-
     - desc: 'Iterating over EnumIterable<Enum1|Enum2>|EnumIterable<Enum3|Enum4>'
       decl: |-
           enum Enum3: short { Three = 3 }
@@ -226,22 +183,5 @@ cases:
           res = 0
           for (v of
               ((): EnumIterable<Enum1|Enum2>|Array<Enum3|Enum4> => [Enum3.Three, Enum4.Four])())
-              res += v.valueOf()
-          arktest.assertEQ(res, 7)
-
-    - desc: 'Iterating over FixedArray<Enum1|Enum2>|EnumIterable<Enum3|Enum4>'
-      decl: |-
-          enum Enum3: short { Three = 3 }
-          enum Enum4: short { Four = 4 }
-      main: |-
-          let v: Enum1|Enum2|Enum3|Enum4
-          for (v of
-              ((): FixedArray<Enum1|Enum2>|EnumIterable<Enum3|Enum4> => [Enum1.Zero, Enum1.Five, Enum1.Six, Enum2.Seven, Enum2.Ten])())
-              res += v.valueOf()
-          arktest.assertEQ(res, 28)
-
-          res = 0
-          for (v of
-              ((): FixedArray<Enum1|Enum2>|EnumIterable<Enum3|Enum4> => new EnumIterable<Enum3|Enum4>([Enum3.Three, Enum4.Four]))())
               res += v.valueOf()
           arktest.assertEQ(res, 7)

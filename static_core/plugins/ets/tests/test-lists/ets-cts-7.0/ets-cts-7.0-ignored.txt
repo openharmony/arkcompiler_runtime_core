@@ -27,17 +27,9 @@
 
 #34987 CTE when for-of statement iterates over a union type with FixedArray
 08.statements/09.for_of_statements/for_of_enums_inner_var_4.ets
-08.statements/09.for_of_statements/for_of_enums_inner_var_13.ets
-08.statements/09.for_of_statements/for_of_enums_outer_var_13.ets
-08.statements/09.for_of_statements/for_of_enums_outer_var_14.ets
+08.statements/09.for_of_statements/for_of_enums_inner_var_12.ets
 08.statements/09.for_of_statements/for_of_enums_outer_var_4.ets
-08.statements/09.for_of_statements/for_of_enums_outer_var_5.ets
-
-#34988 Unions of types with iterator and fixed/value arrays are currently unsupported
-08.statements/09.for_of_statements/for_of_enums_inner_var_17.ets
-08.statements/09.for_of_statements/for_of_enums_inner_var_8.ets
-08.statements/09.for_of_statements/for_of_enums_outer_var_17.ets
-08.statements/09.for_of_statements/for_of_enums_outer_var_8.ets
+08.statements/09.for_of_statements/for_of_enums_outer_var_11.ets
 
 #34999 Verifier error on a union of FixedArray or ValueArray
 08.statements/09.for_of_statements/for_of_36.ets
@@ -68,18 +60,8 @@
 15.semantic_rules/09.overloading/first_match/first_match_3c_8i.ets
 
 #34987 CTE when for-of statement iterates over a union with FixedArray
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_13.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_14.ets
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_4.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_5.ets
-
-#34988 Unions of types with iterator and fixed/value arrays are currently unsupported
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_17.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_8.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_17.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_base_type_8.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_17.ets
-17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_with_conv_to_union_type_8.ets
+17.experimental_features/08.statements/01.for-of_type_annotation/for_of_enums_11.ets
 
 #34999 Verifier error on a union of FixedArray or ValueArray
 17.experimental_features/08.statements/01.for-of_type_annotation/for_of_32.ets
