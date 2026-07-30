@@ -62,17 +62,19 @@ Current behavior:
 --paoc-use-profile:path=<profile.ap>[,force]
 ```
 
-When reusing a profile, also load the same application panda files through `--panda-files` so they are already present
-in the runtime context before the profile is checked and attached. If `--paoc-panda-files=file1.abc,file2.abc`, mirror
-that set as `--panda-files=file1.abc:file2.abc`.
+When reusing a profile, pass the application panda files to compile through `--paoc-panda-files`. `ark_aot` loads
+those files before the profile is checked and attached, so they do not need to be duplicated in `--panda-files` only for
+AOT-PGO profile attachment. Reserve `--panda-files` for additional runtime-context files that are not compilation
+inputs.
 
 Current loading flow in `compiler/tools/paoc/paoc.cpp`:
 
-1. load boot and application panda files into the current runtime context
-2. load `.ap`
-3. validate class context against the current runtime/AOT context
-4. attach per-method profiling data back to loaded methods
-5. let optimization passes query that data through the runtime interface
+1. load runtime-context files from `--panda-files`
+2. load compilation inputs from `--paoc-panda-files`
+3. load `.ap`
+4. validate class context against the current runtime/AOT context
+5. attach per-method profiling data back to loaded methods
+6. let optimization passes query that data through the runtime interface
 
 If the class context does not match, the profile is rejected.
 
@@ -110,7 +112,7 @@ AOT PGO has important limits:
 
 1. Run the workload with profiling enabled and profile saving turned on.
 2. Inspect the saved `.ap` with `ark_aptool dump`.
-3. Re-run `ark_aot` with `--paoc-use-profile:path=<profile.ap>` and matching `--panda-files` inputs.
+3. Re-run `ark_aot` with `--paoc-use-profile:path=<profile.ap>` and matching `--paoc-panda-files` inputs.
 4. Use `--compiler-regex`, `--compiler-dump`, and `--compiler-disasm-dump:single-file` to verify which methods and
    optimizations changed.
 
@@ -130,7 +132,6 @@ Example shape:
   --load-runtimes=ets \
   --boot-panda-files=./out/plugins/ets/etsstdlib.abc \
   --paoc-panda-files=app.abc \
-  --panda-files=app.abc \
   --paoc-output=app.an \
   --paoc-use-profile:path=workload.ap
 ```

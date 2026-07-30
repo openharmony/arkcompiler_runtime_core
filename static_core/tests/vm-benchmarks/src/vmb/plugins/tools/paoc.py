@@ -84,7 +84,7 @@ class Tool(ToolBase):
         an = abc.with_suffix('.an')
         _, bu_opts = self.get_bu_opts(bu)
         libs = self.x_libs(bu, '.abc')
-        opts = self.panda_files(list(libs) + [abc] if profdata else libs)
+        opts = self.panda_files(libs)
         if bu_opts:
             opts += ' ' + bu_opts
         for lib in libs:

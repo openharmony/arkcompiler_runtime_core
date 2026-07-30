@@ -1688,12 +1688,6 @@ void EscapeAnalysis::VisitSafePoint(Inst *inst)
 
 void EscapeAnalysis::VisitGetInstanceClass(Inst *inst)
 {
-    auto graph = inst->GetBasicBlock()->GetGraph();
-    // AOT: don't fold GetInstanceClass into LoadImmediate(class).
-    // In AOT class pointer may not match runtime class pointer, causing INLINE_IC deopt.
-    if (!graph->IsJitOrOsrMode()) {
-        return;
-    }
     auto blockState = GetState(inst->GetBasicBlock());
     auto input = inst->GetInput(0).GetInst();
     if (auto vstate = blockState->GetState(input)) {

@@ -36,7 +36,7 @@ import { __noinline__createB as createB, __noinline__createC as createC } from '
 //! PASS_AFTER    "Inline"
 //! INST          /DeoptimizeIf INLINE_IC/
 //! RUN           entry: "classid_set.ETSGLOBAL::main1", options: "--log-debug=interop --panda-files=\
-//!../classid_set.1.abc:../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
+//!../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
 //! READ_FILE     "console.out"
 //! INST_NOT      "D/interop: Destroy compiled method: classid_set.ETSGLOBAL::main1"
 
@@ -66,7 +66,7 @@ function main1(): int {
 //! PASS_AFTER    "Inline"
 //! INST          /DeoptimizeIf INLINE_IC/
 //! RUN           entry: "classid_set.ETSGLOBAL::main3", options: "--log-debug=interop --panda-files=\
-//!../classid_set.1.abc:../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
+//!../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
 //! READ_FILE     "console.out"
 //! INST_NOT      "D/interop: Destroy compiled method: classid_set.ETSGLOBAL::main3"
 //!
@@ -96,7 +96,7 @@ function main3(): int {
 //! PASS_AFTER    "Inline"
 //! INST          /DeoptimizeIf INLINE_IC/
 //! RUN           entry: "classid_set.ETSGLOBAL::main2", options: "--log-debug=interop --panda-files=\
-//!../classid_set.1.abc:../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
+//!../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
 //! READ_FILE     "console.out"
 //! INST_NOT      "D/interop: Destroy compiled method: classid_set.ETSGLOBAL::main2"
 //!
@@ -129,7 +129,7 @@ function main2(): int {
 //! INST_NOT      /DeoptimizeIf INLINE_IC/
 //! EVENT         /Inline,.*processC.*,.*getValue.*,.*,FAIL_RESOLVE/
 //! RUN           entry: "classid_set.ETSGLOBAL::main4", options: "--panda-files=\
-//!../classid_set.1.abc:../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
+//!../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
 
 function processC(obj: Base): int {
   return obj.getValue();
@@ -156,7 +156,7 @@ function main4(): int {
 //! INST_NOT      /DeoptimizeIf INLINE_IC/
 //! EVENT         /Inline,.*processAC.*,.*getValue.*,.*,FAIL_RESOLVE/
 //! RUN           entry: "classid_set.ETSGLOBAL::main5", options: "--panda-files=\
-//!../classid_set.1.abc:../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
+//!../classid_set_classid_set_b.ets.abc:../classid_set_classid_set_c.ets.abc"
 
 function processAC(obj: Base): int {
   return obj.getValue();

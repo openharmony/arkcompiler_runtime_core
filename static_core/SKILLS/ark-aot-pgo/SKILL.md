@@ -58,15 +58,14 @@ ${BUILD}/bin/ark_aptool dump \
 
 - Use the current form `--paoc-use-profile:path=<profile.ap>[,force]`.
 - Keep the same boot/runtime context that produced the workload.
-- Load the same application panda files through `--panda-files` before the profile is applied.
-- If `--paoc-panda-files` contains more than one file, mirror the same set in `--panda-files` with `:` separators.
+- Pass profiled compilation inputs through `--paoc-panda-files`; `ark_aot` loads them before applying the profile.
+- Use `--panda-files` only for additional runtime-context files that are not compilation inputs.
 
 ```bash
 ${BUILD}/bin/ark_aot \
   --load-runtimes=ets \
   --boot-panda-files=${BUILD}/plugins/ets/etsstdlib.abc \
   --paoc-panda-files=app.abc \
-  --panda-files=app.abc \
   --paoc-output=app.an \
   --paoc-use-profile:path=workload.ap
 ```
@@ -80,7 +79,7 @@ ${BUILD}/bin/ark_aot \
 
 - Do not assume `profile.ap` is meaningful until `ark_aptool dump` confirms the expected workload is present.
 - Do not forget that class-context mismatch rejects the profile.
-- Do not forget to mirror profiled application files into `--panda-files` when reusing a profile.
+- Do not mirror `--paoc-panda-files` into `--panda-files` just to make AOT-PGO profile attachment work.
 - Do not expect AOT PGO to restore JIT-style CHA behavior.
 - Do not expect AOT PGO to bypass `--compiler-inline-external-methods-aot` or the normal AOT external-inlining checks.
 - Do not use historical paoc flag names when adding the profile to `ark_aot`.

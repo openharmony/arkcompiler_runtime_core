@@ -28,6 +28,7 @@
 #include "optimizer/ir_builder/ir_builder.h"
 #include "libarkbase/os/filesystem.h"
 #include "libarkbase/panda_gen_options/generated/logger_options.h"
+#include "libarkbase/generated/ark_version.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <memory>
@@ -103,6 +104,9 @@ public:
         ASSERT(args.Data() != nullptr);
         ark::PandArgParser paParser;
 
+        ark::PandArg<bool> help("help", false, "Print this message and exit");
+        paParser.Add(&help);
+
         paoc_->runtimeOptions_ = std::make_unique<decltype(paoc_->runtimeOptions_)::element_type>(args[0]);
         paoc_->runtimeOptions_->AddOptions(&paParser);
         paoc_->paocOptions_ = std::make_unique<decltype(paoc_->paocOptions_)::element_type>(args[0]);
@@ -119,7 +123,12 @@ public:
             return -1;
         }
         Logger::Initialize(loggerOptions);
-        if (paoc_->paocOptions_->GetPaocPandaFiles().empty()) {
+
+        if (paoc_->runtimeOptions_->IsVersion()) {
+            ark::PrintPandaVersion();
+            return 1;
+        }
+        if (help.GetValue() || paoc_->paocOptions_->GetPaocPandaFiles().empty()) {
             paoc_->PrintUsage(paParser);
             return 1;
         }
@@ -135,13 +144,8 @@ public:
                       << "\n";
             return -1;
         }
-        if (InitRuntime() != 0) {
-            return -1;
-        }
-        if (InitCompiler() != 0) {
-            return -1;
-        }
-        if (paoc_->paocOptions_->WasSetPaocClusters() && !InitPaocClusters(&paParser)) {
+        if (InitRuntime() != 0 || InitCompiler() != 0 ||
+            (paoc_->paocOptions_->WasSetPaocClusters() && !InitPaocClusters(&paParser))) {
             return -1;
         }
         if (paoc_->IsLLVMAotMode()) {
@@ -240,16 +244,16 @@ private:
                     LOG_PAOC(FATAL)
                         << "number of locations in --paoc-boot-panda-locations less then files in --boot-panda-files\n";
                 }
-                auto filename = locations[i];
+                auto locFilePath = locations[i];
                 auto bpfName = bpf->GetFilename();
-                if (!CompareBootFiles(bpfName, filename)) {
+                if (!CompareBootFiles(bpfName, locFilePath)) {
                     EVENT_PAOC("different files in --paoc-boot-panda-locations and --boot-panda-files");
-                    LOG_PAOC(ERROR) << "The file from --paoc-boot-panda-locations: " << filename;
+                    LOG_PAOC(ERROR) << "The file from --paoc-boot-panda-locations: " << locFilePath;
                     LOG_PAOC(ERROR) << "isn't eqaul the file from --boot-panda-files: " << bpf->GetFilename();
                     LOG_PAOC(FATAL) << "Files posotions " << i;
                 }
-                paoc_->locationMapping_[bpfName] = filename;
-                paoc_->preloadedFiles_[paoc_->GetFilePath(bpfName)] = bpf;
+                paoc_->AddPaocLocationMapping(bpfName, locFilePath);
+                paoc_->AddPreloadedPandaFile(bpfName, *bpf);
                 ++i;
             }
             if (i != locations.size()) {
@@ -261,10 +265,10 @@ private:
         // In fact boot files are preloaded by Runtime
         for (auto bpf : Runtime::GetCurrent()->GetClassLinker()->GetBootPandaFiles()) {
             if (!paoc_->paocOptions_->GetPaocBootLocation().empty()) {
-                std::string filename = GetFileLocation(*bpf, paoc_->paocOptions_->GetPaocBootLocation());
-                paoc_->locationMapping_[bpf->GetFilename()] = filename;
+                std::string locFilePath = GetFileLocation(*bpf, paoc_->paocOptions_->GetPaocBootLocation());
+                paoc_->AddPaocLocationMapping(bpf->GetFilename(), locFilePath);
             }
-            paoc_->preloadedFiles_[paoc_->GetFilePath(bpf->GetFilename())] = bpf;
+            paoc_->AddPreloadedPandaFile(bpf->GetFilename(), *bpf);
         }
     }
 
@@ -356,8 +360,8 @@ private:
 int Paoc::Run(const ark::Span<const char *> &args)
 {
     StartCompilationTimer();
-    if (PaocInitializer(this).Init(args) != 0) {
-        return -1;
+    if (auto initStatus = PaocInitializer(this).Init(args); initStatus != 0) {
+        return initStatus;
     }
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     if (compiler::g_options.WasSetCompilerProfile()) {
@@ -407,11 +411,7 @@ std::string Paoc::BuildClassContext()
 {
     std::string classCtx;
     loader_->EnumeratePandaFiles([this, &classCtx](const panda_file::File &pf) {
-        if (locationMapping_.find(pf.GetFilename()) == locationMapping_.end()) {
-            classCtx += GetFilePath(pf.GetFilename());
-        } else {
-            classCtx += locationMapping_[pf.GetFilename()];
-        }
+        classCtx += FileNameToPaocLocation(pf.GetFilename());
         classCtx += AotClassContextCollector::HASH_DELIMETER;
         classCtx += pf.GetPaddedChecksum();
         classCtx += AotClassContextCollector::DELIMETER;
@@ -470,15 +470,9 @@ void Paoc::Clear(ark::mem::InternalAllocatorPtr allocator)
 void Paoc::StartAotFile(const panda_file::File &pfileRef)
 {
     ASSERT(IsAotMode());
-    std::string filename;
-    if (paocOptions_->GetPaocLocation().empty()) {
-        filename = GetFilePath(pfileRef.GetFilename());
-    } else {
-        filename = GetFileLocation(pfileRef, paocOptions_->GetPaocLocation());
-        locationMapping_[pfileRef.GetFilename()] = filename;
-    }
-    ASSERT(!filename.empty());
-    aotBuilder_->StartFile(filename, pfileRef.GetHeader()->checksum);
+    std::string locFilePath = FileNameToPaocLocation(pfileRef.GetFilename());
+    ASSERT(!locFilePath.empty());
+    aotBuilder_->StartFile(locFilePath, pfileRef.GetHeader()->checksum);
 }
 
 static bool CheckFilesInClassContext(std::string_view profileContext, std::string_view context)
@@ -528,6 +522,13 @@ bool Paoc::TryLoadAotProfile()
         profileClassCtxStr = std::move(*profileCtxOrError);
     }
 
+    if (paocOptions_->IsPaocVerbose()) {
+        LOG_PAOC(INFO) << "Opened AOT profile with the following panda files:";
+        for (auto &&[idx, name] : profilingLoader.GetAotProfilingData().GetPandaFileMapReverse()) {
+            LOG_PAOC(INFO) << "  [" << idx << "] = " << name;
+        }
+    }
+
     auto classCtxStr = BuildClassContext();
     if (!CheckFilesInClassContext(profileClassCtxStr, classCtxStr)) {
         LOG_PAOC(WARNING) << "Cannot use profile '" << paocOptions_->GetPaocUseProfilePath() << "'";
@@ -540,14 +541,15 @@ bool Paoc::TryLoadAotProfile()
 
     bool errorOccurred = false;
     loader_->EnumeratePandaFiles([this, &profilingLoader, &errorOccurred](const panda_file::File &pfileRef) {
-        std::string filename;
-        if (auto mappedIt = locationMapping_.find(pfileRef.GetFilename()); mappedIt != locationMapping_.end()) {
-            filename = mappedIt->second;
-        } else {
-            filename = GetFilePath(pfileRef.GetFilename());
-        }
-        if (auto pfileIdx = profilingLoader.GetAotProfilingData().GetPandaFileIdxByName(filename); pfileIdx != -1) {
-            errorOccurred = errorOccurred || !TryLoadAotFileProfile(profilingLoader, pfileRef, pfileIdx);
+        std::string locFilePath = FileNameToPaocLocation(pfileRef.GetFilename());
+        if (auto pfileIdx = profilingLoader.GetAotProfilingData().GetPandaFileIdxByName(locFilePath); pfileIdx != -1) {
+            if (!TryLoadAotFileProfile(profilingLoader, pfileRef, pfileIdx)) {
+                LOG_PAOC(INFO) << "Error while loading AOT profile for panda file: " << pfileRef.GetFilename();
+                errorOccurred = true;
+            }
+        } else if (paocOptions_->IsPaocVerbose()) {
+            LOG_PAOC(INFO) << "No AOT profile for panda file: " << pfileRef.GetFilename() << " (searched for "
+                           << locFilePath << ")";
         }
         return true;
     });
@@ -575,6 +577,9 @@ bool Paoc::TryLoadAotFileProfile(ProfilingLoader &profilingLoader, const panda_f
     auto &allMethods = profilingLoader.GetAotProfilingData().GetAllMethods();
     auto fileProfiles = allMethods.find(pfileIdx);
     if (fileProfiles == allMethods.end()) {
+        if (paocOptions_->IsPaocVerbose()) {
+            LOG_PAOC(INFO) << "No AOT profile data for panda file: " << pfileRef.GetFilename();
+        }
         return true;
     }
     auto &methodProfiles = fileProfiles->second;
@@ -595,6 +600,7 @@ bool Paoc::TryLoadAotFileProfile(ProfilingLoader &profilingLoader, const panda_f
             });
     }
 
+    LOG_PAOC(INFO) << "Finished loading AOT profile data for panda file: " << pfileRef.GetFilename();
     return !errorOccurred;
 }
 
@@ -606,15 +612,15 @@ bool Paoc::TryLoadAotMethodProfile(
     // CC-OFFNXT(G.FMT.14-CPP) project code style
     auto classResolver = [this, &profilingLoader](uint32_t classIdx, size_t fileIdx) -> ark::Class * {
         const auto &fileMapRev = profilingLoader.GetAotProfilingData().GetPandaFileMapReverse();
-        auto fileNameIt = fileMapRev.find(fileIdx);
-        if (fileNameIt == fileMapRev.end()) {
+        auto filePathIt = fileMapRev.find(fileIdx);
+        if (filePathIt == fileMapRev.end()) {
             return nullptr;
         }
-        auto fileIt = preloadedFiles_.find(std::string(fileNameIt->second));
-        if (fileIt == preloadedFiles_.end()) {
+        auto *pfile = FilePathToPandaFile(PaocLocationToFilePath(std::string(filePathIt->second)));
+        if (pfile == nullptr) {
             return nullptr;
         }
-        return ResolveClass(*fileIt->second, panda_file::File::EntityId(classIdx));
+        return ResolveClass(*pfile, panda_file::File::EntityId(classIdx));
     };
 
     auto methodId = method.GetFileId();
@@ -636,52 +642,13 @@ bool Paoc::TryLoadAotMethodProfile(
         return false;
     }
 
+    if (paocOptions_->IsPaocVerbose()) {
+        LOG_PAOC(DEBUG) << "Finished loading AOT profile data for method: " << runtime_->GetMethodFullName(&method);
+    }
     return true;
 }
 
-bool Paoc::TryLoadPandaFile(const std::string &fileName, PandaVM *vm)
-{
-    const panda_file::File *pfile;
-    bool errorOccurred = false;
-
-    auto filePath = GetFilePath(fileName);
-    if (preloadedFiles_.find(filePath) != preloadedFiles_.end()) {
-        pfile = preloadedFiles_[filePath];
-    } else {
-        std::unique_ptr<const panda_file::File> file;
-        if (paocOptions_->GetPaocZipPandaFile().empty()) {
-            file = vm->OpenPandaFile(fileName);
-        } else {
-            file = TryLoadZipPandaFile(fileName);
-        }
-        if (!file) {
-            if (!ShouldIgnoreFailures()) {
-                LOG_PAOC(FATAL) << "Can not open file: " << fileName;
-            }
-            LOG_PAOC(WARNING) << "Can not open file: " << fileName;
-            return false;
-        }
-        pfile = file.get();
-        loader_->AddPandaFile(std::move(file));
-        LOG_PAOC(DEBUG) << "Added panda file: " << fileName;
-    }
-    auto &pfileRef = *pfile;
-
-    if (IsAotMode()) {
-        StartAotFile(pfileRef);
-    }
-
-    if (!CompilePandaFile(pfileRef)) {
-        errorOccurred = true;
-    }
-
-    if (IsAotMode()) {
-        aotBuilder_->EndFile();
-    }
-    return !errorOccurred || ShouldIgnoreFailures();
-}
-
-std::unique_ptr<const panda_file::File> Paoc::TryLoadZipPandaFile(const std::string &fileName)
+std::unique_ptr<const panda_file::File> Paoc::OpenZipPandaFile(const std::string &fileName)
 {
     std::string zipPandaFilePath = paocOptions_->GetPaocZipPandaFile();
     size_t pos = fileName.rfind(zipPandaFilePath);
@@ -718,6 +685,7 @@ std::unique_ptr<const panda_file::File> Paoc::TryLoadZipPandaFile(const std::str
         }
         rawFd = fileno(fp.get());
     }
+    LOG_PAOC(DEBUG) << "Unzip panda file: " << fileName << " -> " << zipPandaFilePath;
     auto file = panda_file::OpenZipPandaFile(fp.get(), fileName, zipPandaFilePath);
     if (file != nullptr) {
         // Success: OpenZipPandaFile didn't fclose. Guard closes on destruction.
@@ -740,10 +708,21 @@ std::unique_ptr<const panda_file::File> Paoc::TryLoadZipPandaFile(const std::str
  */
 bool Paoc::CompileFiles()
 {
-    auto pfiles = paocOptions_->GetPaocPandaFiles();
-    auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
-    for (auto &fileName : pfiles) {
-        if (!TryLoadPandaFile(fileName, vm)) {
+    for (auto &fileName : paocOptions_->GetPaocPandaFiles()) {
+        auto *pfile = FilePathToPandaFile(GetFilePath(fileName));
+        if (pfile == nullptr) {
+            ASSERT(ShouldIgnoreFailures());  // otherwise would've failed after LoadPandaFiles
+            continue;
+        }
+
+        if (IsAotMode()) {
+            StartAotFile(*pfile);
+        }
+        bool isok = CompilePandaFile(*pfile);
+        if (IsAotMode()) {
+            aotBuilder_->EndFile();
+        }
+        if (!isok && !ShouldIgnoreFailures()) {
             return false;
         }
     }
@@ -756,6 +735,42 @@ std::string Paoc::GetFilePath(std::string fileName)
         return os::GetAbsolutePath(fileName);
     }
     return fileName;
+}
+
+std::string Paoc::FileNameToPaocLocation(const std::string &fileName)
+{
+    auto filePath = GetFilePath(fileName);
+    if (auto mappedIt = locationMapping_.find(filePath); mappedIt != locationMapping_.end()) {
+        return mappedIt->second;
+    }
+    return filePath;
+}
+
+std::string Paoc::PaocLocationToFilePath(const std::string &filePath)
+{
+    if (auto mappedIt = locationMappingInv_.find(filePath); mappedIt != locationMappingInv_.end()) {
+        return mappedIt->second;
+    }
+    return filePath;
+}
+
+void Paoc::AddPaocLocationMapping(const std::string &fromFileName, const std::string &toFilePath)
+{
+    auto fromFilePath = GetFilePath(fromFileName);
+    locationMapping_[fromFilePath] = toFilePath;
+    locationMappingInv_[toFilePath] = fromFilePath;
+}
+
+void Paoc::AddPreloadedPandaFile(const std::string &fileName, const panda_file::File &pfileRef)
+{
+    auto filePath = GetFilePath(fileName);
+    preloadedFiles_[filePath] = &pfileRef;
+}
+
+void Paoc::AddPaocPandaFile(const std::string &fileName, const panda_file::File &pfileRef)
+{
+    auto filePath = GetFilePath(fileName);
+    paocFiles_[filePath] = &pfileRef;
 }
 
 /**
@@ -1224,31 +1239,81 @@ bool Paoc::CompareBootFiles(std::string filename, std::string paocLocation)
     return paocLocation == filename;
 }
 
+const panda_file::File *Paoc::DoLoadPandaFile(const std::string &fileName, PandaVM *vm, bool isZipPandaFile)
+{
+    auto file = isZipPandaFile ? OpenZipPandaFile(fileName) : vm->OpenPandaFile(fileName);
+    if (!file) {
+        if (!ShouldIgnoreFailures()) {
+            LOG_PAOC(FATAL) << "Can not open file: " << fileName;
+        }
+        LOG_PAOC(WARNING) << "Can not open file: " << fileName;
+        return nullptr;
+    }
+    const panda_file::File *pfile = file.get();
+
+    if (!paocOptions_->GetPaocLocation().empty()) {
+        std::string locFilePath = GetFileLocation(*pfile, paocOptions_->GetPaocLocation());
+        AddPaocLocationMapping(pfile->GetFilename(), locFilePath);
+    }
+
+    loader_->AddPandaFile(std::move(file));
+    LOG_PAOC(DEBUG) << "Loaded panda file: " << fileName;
+    return pfile;
+}
+
+bool Paoc::TryPreloadPandaFile(const std::string &fileName, PandaVM *vm)
+{
+    if (auto *pfile = DoLoadPandaFile(fileName, vm, false); pfile != nullptr) {
+        AddPreloadedPandaFile(fileName, *pfile);
+        return true;
+    }
+    return false;
+}
+
+bool Paoc::TryLoadPaocPandaFile(const std::string &fileName, PandaVM *vm)
+{
+    auto *pfile = FilePathToPandaFile(GetFilePath(fileName));
+    if (pfile == nullptr) {
+        pfile = DoLoadPandaFile(fileName, vm, !paocOptions_->GetPaocZipPandaFile().empty());
+    }
+    if (pfile == nullptr) {
+        return false;
+    }
+    AddPaocPandaFile(fileName, *pfile);
+    return true;
+}
+
 bool Paoc::LoadPandaFiles()
 {
     bool errorOccurred = false;
     auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
-    auto pfiles = runtimeOptions_->GetPandaFiles();
-    for (auto &fileName : pfiles) {
-        auto pfile = vm->OpenPandaFile(fileName);
-        if (!pfile) {
+
+    // Preload --panda-files
+    for (auto &fileName : runtimeOptions_->GetPandaFiles()) {
+        if (!TryPreloadPandaFile(fileName, vm)) {
             errorOccurred = true;
-            if (!ShouldIgnoreFailures()) {
-                LOG_PAOC(FATAL) << "Can not open file: " << fileName;
-            }
-            LOG_PAOC(WARNING) << "Can not open file: " << fileName;
-            continue;
         }
-
-        if (!paocOptions_->GetPaocLocation().empty()) {
-            std::string filename = GetFileLocation(*pfile, paocOptions_->GetPaocLocation());
-            locationMapping_[pfile->GetFilename()] = filename;
-        }
-
-        preloadedFiles_[GetFilePath(fileName)] = pfile.get();
-        loader_->AddPandaFile(std::move(pfile));
     }
+
+    // Load --paoc-panda-files before loading the AOT profile
+    for (auto &fileName : paocOptions_->GetPaocPandaFiles()) {
+        if (!TryLoadPaocPandaFile(fileName, vm) && !ShouldIgnoreFailures()) {
+            errorOccurred = true;
+        }
+    }
+
     return !errorOccurred;
+}
+
+const panda_file::File *Paoc::FilePathToPandaFile(const std::string &filePath)
+{
+    if (auto fileIt = preloadedFiles_.find(filePath); fileIt != preloadedFiles_.end()) {
+        return fileIt->second;
+    }
+    if (auto fileIt = paocFiles_.find(filePath); fileIt != paocFiles_.end()) {
+        return fileIt->second;
+    }
+    return nullptr;
 }
 
 void Paoc::BuildClassHashTable(const panda_file::File &pfileRef)

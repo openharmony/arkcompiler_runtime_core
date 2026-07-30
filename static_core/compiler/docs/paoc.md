@@ -84,8 +84,8 @@ If no method filter is provided, paoc compiles every method from `--paoc-panda-f
 
 - Load runtime profile data from a `.ap` file for AOT PGO
 - `force` makes paoc fail if the profile is missing or invalid
-- Mirror the application files from `--paoc-panda-files` through `--panda-files` before the profile is applied; for
-  multiple inputs, pass the same file set with `:` separators
+- `ark_aot` loads `--paoc-panda-files` before applying the profile, so compilation inputs do not need to be mirrored
+  through `--panda-files` only for AOT-PGO profile attachment
 
 #### `--paoc-dump-stats-csv`
 
@@ -147,7 +147,6 @@ Compile with a saved profile:
   --load-runtimes=ets \
   --boot-panda-files=./out/plugins/ets/etsstdlib.abc \
   --paoc-panda-files=app.abc \
-  --panda-files=app.abc \
   --paoc-output=app.an \
   --paoc-use-profile:path=workload.ap
 ```

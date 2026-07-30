@@ -473,7 +473,6 @@ class Checker
         next unless value
         raise "call RUN with `pgo_emit_profdata: true` (or RUN_PGO_PROF) before :pgo_use_profdata" unless @profdata_file
         options << "--paoc-use-profile:path=#{@profdata_file},force"
-        options << "--panda-files=#{@options.test_file}"  # NOTE (urandon): this is required for compiler's runtime now
       when :log_file
         next unless value
        options << '--log-file=./log_compiler.csv --log-stream=file'

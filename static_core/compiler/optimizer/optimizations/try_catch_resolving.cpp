@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,13 +127,21 @@ void TryCatchResolving::CollectCandidates()
 {
     for (auto bb : GetGraph()->GetBlocksRPO()) {
         if (bb->IsCatch() && !(bb->IsCatchBegin() || bb->IsTryBegin() || bb->IsTryEnd())) {
-            catchBlocks_.emplace(bb->GetGuestPc(), bb);
             BasicBlock *cblPred = FindCatchBeginBlock(bb);
-            if (cblPred != nullptr) {
-                cblPred->RemoveSucc(bb);
-                bb->RemovePred(cblPred);
-                catch2cphis_.emplace(bb, cblPred);
+            if (cblPred == nullptr) {
+                continue;
             }
+            // Some catch blocks can contain Phi instructions:
+            // - IR builder is not accurate with `catch` marking and will mark a continuation that is only
+            //   reachable through a throw edge as `catch`, and it might contain a Phi;
+            // - even if it's fixed, same situation is possible when this is all in a bigger catch block.
+            // So create an empty replacement for `catch_begin` block to not break these Phi's and connect through
+            // that.
+            auto *precatch = GetGraph()->CreateEmptyBlock(bb);
+            bb->ReplacePred(cblPred, precatch);
+            cblPred->RemoveSucc(bb);
+            catch2cphis_.emplace(precatch, cblPred);
+            catchBlocks_.emplace(bb->GetGuestPc(), precatch);
         } else if (bb->IsTry()) {
             auto throwInst = bb->GetLastInst();
             if (throwInst != nullptr && throwInst->GetOpcode() != Opcode::Throw) {

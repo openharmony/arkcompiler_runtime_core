@@ -41,7 +41,7 @@ Profile data records observed runtime behavior so compiler workflows can make be
 | Rule | Reason |
 |---|---|
 | `--paoc-use-profile:path=<profile.ap>[,force]` must name the profile path | The profile is not implied by runtime save options |
-| Mirror `--paoc-panda-files` into `--panda-files` when applying a profile | The runtime context must load the same application files before profile attachment |
+| `ark_aot` loads `--paoc-panda-files` before applying a profile | Compiled application files no longer need to be mirrored into `--panda-files` only for profile attachment |
 | A profile file existing is not enough | It must contain useful data and pass context checks |
 | AOT PGO does not remove normal AOT eligibility limits | External methods, unavailable classes, and load-context limits still apply |
 | Inline-cache guided AOT inlining still follows AOT external-inlining rules | Profile data is guidance, not permission to bypass AOT constraints |
@@ -97,7 +97,8 @@ Runtime profiling starts once methods cross the profiling threshold. Profiles ca
 
 ## Common Misroutes
 
-- If AOT PGO is ignored, check the profile path option, application files loaded for matching, and class context first.
+- If AOT PGO is ignored, check the profile path option, `--paoc-panda-files` and `--paoc-location` matching,
+  and class context first.
 - If a profile file exists but has no effect, check content, method names, profile thresholds, and consumer options.
 - If JIT behavior differs, check runtime hotness and profile collection before assuming compiler pass logic is wrong.
 - If profile load fails, check context mismatch, format compatibility, and diagnostics.
