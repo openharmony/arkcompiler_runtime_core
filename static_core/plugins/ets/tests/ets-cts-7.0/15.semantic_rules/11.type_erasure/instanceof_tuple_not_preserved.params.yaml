@@ -31,3 +31,11 @@ cases:
           ((): Object => x)() instanceof [number]
       expected_out: |-
             Semantic error ESE38251: Type '[number]' cannot be used on the right hand side of an 'instanceof' expression
+
+    # A readonly tuple is also represented by an erased internal generic tuple type → CTE
+    - decl: |-
+          let x: readonly [number, string] = [1.0, "abc"]
+      use: >-
+          ((): Object => x)() instanceof readonly [number, string]
+      expected_out: |-
+            Semantic error ESE38251: Type '[number, string]' cannot be used on the right hand side of an 'instanceof' expression

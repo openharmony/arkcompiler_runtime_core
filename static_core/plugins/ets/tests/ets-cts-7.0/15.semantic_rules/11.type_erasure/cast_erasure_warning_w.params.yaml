@@ -50,7 +50,7 @@ cases:
       main: |-
           let t = obj as [number, string]
       expected_out: |-
-          Warning W369037: Cast expression `as [Double,String]` is type unsafe. 'ClassCastError' exception can be thrown at runtime
+          Warning W369037: Cast expression `as [Double, String]` is type unsafe. 'ClassCastError' exception can be thrown at runtime
 
     - desc: Record type args not preserved
       decl: |-
@@ -80,3 +80,12 @@ cases:
           let obj = ((): Object => new FixedArray<int>(1))()
           let t = obj as FixedArray<int>
       expected_out: ''
+
+    - desc: Readonly tuple element types not preserved
+      decl: |-
+          let tup: readonly [number, string] = [1.0, 'a']
+          let obj = ((): Any => tup)()
+      main: |-
+          let t = obj as readonly [number, string]
+      expected_out: |-
+          Warning W369037: Cast expression `as readonly [Double, String]` is type unsafe. 'ClassCastError' exception can be thrown at runtime
