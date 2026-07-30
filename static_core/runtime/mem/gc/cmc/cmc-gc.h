@@ -260,7 +260,7 @@ public:
 
     void ReclaimGarbageMemory(GCTaskCause reason);
 
-    void TransitionToGCPhase(const GCPhase phase)
+    void TransitionToGCPhase(const GCPhase phase, bool firePhaseStarted = true)
     {
         const auto currentPhase = this->GetGCPhase();
         this->FireGCPhaseFinished(currentPhase);
@@ -269,7 +269,9 @@ public:
                        << static_cast<int>(currentPhase) << ") -> " << GCScopedPhase::GetPhaseName(phase) << "("
                        << static_cast<int>(phase) << ")";
         ForEachManagedMutator([this, phase](Mutator *mutator) { UpdateBarrierEntrypoint(mutator, phase); });
-        this->FireGCPhaseStarted(phase);
+        if (firePhaseStarted) {
+            this->FireGCPhaseStarted(phase);
+        }
     }
 
     virtual void UpdateGCStats();

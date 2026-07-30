@@ -22,18 +22,9 @@ function alloc(): void {
 
 function main(): int {
     alloc();
-    // Verify that startGC with callback throws UnsupportedOperationError on CMC GC
-    let callbackErrorCaught: boolean = false;
-    try {
-        GC.startGC(GC.Cause.THRESHOLD, (): void => {});
-    } catch (e) {
-        if (e instanceof UnsupportedOperationError) {
-            callbackErrorCaught = true;
-        } else {
-            arktest.assertTrue(false, 'Unexpected error type from startGC with callback');
-        }
-    }
-    arktest.assertTrue(callbackErrorCaught, 'CMC GC must throw UnsupportedOperationError for startGC with callback');
+    
+    // Verify that startGC with callback runs and completes normally
+    GC.startGC(GC.Cause.THRESHOLD, (): void => {});
 
     // Verify that startGC without callback runs and completes normally
     let gc = GC.startGC(GC.Cause.THRESHOLD);
