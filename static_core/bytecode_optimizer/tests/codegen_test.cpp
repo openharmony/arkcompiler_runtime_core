@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+
 #include "assembler/assembly-emitter.h"
 #include "assembler/assembly-function.h"
 #include "assembler/assembly-literals.h"
 #include "assembler/assembly-parser.h"
 #include "assembler/assembly-program.h"
+#include "assembler/mangling.h"
 #include "common.h"
 #include "codegen.h"
 #include "compiler/optimizer/optimizations/peepholes.h"
@@ -28,6 +31,23 @@
 #include "reg_acc_alloc.h"
 
 namespace ark::bytecodeopt::test {
+
+class TotalTest : public testing::Test {
+protected:
+    void SetUp() override
+    {
+        oldOptions_ = g_options;
+        g_options = Options("--opt-level=2");
+    }
+
+    void TearDown() override
+    {
+        g_options = oldOptions_;
+    }
+
+private:
+    Options oldOptions_ {"--opt-level=2"};
+};
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -1640,7 +1660,218 @@ TEST_F(CommonTest, CodegenLdai)
     }
 }
 
-TEST(TotalTest, OptimizeBytecode)
+TEST_F(TotalTest, BuildMapSkipsInvalidInstructions)
+{
+    auto source = R"(
+.function i32 main() {
+    ldai 0
+    jmp label_0
+label_0:
+    ldai 1
+    return
+}
+    )";
+    ark::pandasm::Parser parser;
+    const std::string fileName = "build_map_invalid_opcode.bin";
+    auto res = parser.Parse(source, fileName);
+    ASSERT_EQ(parser.ShowError().err, ark::pandasm::Error::ErrorType::ERR_NONE);
+
+    auto &prog = res.Value();
+    pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(fileName, prog, nullptr, &maps));
+
+    ASSERT_TRUE(OptimizeBytecode(&prog, &maps, fileName));
+
+    const auto signature = ::ark::pandasm::GetFunctionSignatureFromName("main", {});
+    const auto &function = prog.functionStaticTable.at(signature);
+    auto returnIt = std::find_if(function.ins.cbegin(), function.ins.cend(),
+                                 [](const auto &ins) { return ins.opcode == pandasm::Opcode::RETURN; });
+    ASSERT_NE(returnIt, function.ins.cend());
+    EXPECT_EQ(returnIt->insDebug.LineNumber(), 7U);
+}
+
+TEST_F(TotalTest, OptimizedCallKeepsOriginalSourceLine)
+{
+    auto source = R"(
+.record A {}
+
+.function void A._ctor_(A a0) <ctor> {
+    return.void
+}
+
+.function i32 A.add(A a0, i32 a1, i32 a2) {
+    ldai 3
+    return
+}
+
+.function i32 main() {
+entry:
+    initobj.short A._ctor_:(A)
+    sta.obj v0
+    movi v1, 1
+    movi v2, 2
+    call.virt A.add:(A, i32, i32), v0, v1, v2
+    sta v3
+    jmp after_call
+after_call:
+    lda v3
+    return
+}
+    )";
+    ark::pandasm::Parser parser;
+    const std::string fileName = "optimized_call_line.bin";
+    auto res = parser.Parse(source, fileName);
+    ASSERT_EQ(parser.ShowError().err, ark::pandasm::Error::ErrorType::ERR_NONE);
+
+    auto &prog = res.Value();
+    pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(fileName, prog, nullptr, &maps));
+
+    ASSERT_TRUE(OptimizeBytecode(&prog, &maps, fileName));
+
+    const auto signature = ::ark::pandasm::GetFunctionSignatureFromName("main", {});
+    const auto &function = prog.functionStaticTable.at(signature);
+    auto callIt = std::find_if(function.ins.cbegin(), function.ins.cend(), [](const auto &ins) {
+        return ins.IsCall() && ins.IDSize() > 0U && ins.GetID(0).find("A.add") != std::string::npos;
+    });
+    ASSERT_NE(callIt, function.ins.cend());
+    EXPECT_EQ(callIt->insDebug.LineNumber(), 19U);
+}
+
+TEST_F(TotalTest, OptimizedCallAfterTryCatchKeepsOriginalSourceLine)
+{
+    auto source = R"(
+.record A {}
+
+.function void may_throw() <static> {
+    return.void
+}
+
+.function void A._ctor_(A a0) <ctor> {
+    return.void
+}
+
+.function i32 A.add(A a0, i32 a1, i32 a2) {
+    ldai 3
+    return
+}
+
+.function i32 main() {
+try_begin:
+    call.short may_throw
+try_end:
+    jmp after_try
+catch_begin:
+    ldai 0
+    sta v4
+    jmp after_try
+after_try:
+    initobj.short A._ctor_:(A)
+    sta.obj v0
+    movi v1, 1
+    movi v2, 2
+    call.virt A.add:(A, i32, i32), v0, v1, v2
+    sta v3
+    lda v3
+    return
+.catchall try_begin, try_end, catch_begin
+}
+    )";
+    ark::pandasm::Parser parser;
+    const std::string fileName = "optimized_call_after_try_catch_line.bin";
+    auto res = parser.Parse(source, fileName);
+    ASSERT_EQ(parser.ShowError().err, ark::pandasm::Error::ErrorType::ERR_NONE);
+
+    auto &prog = res.Value();
+    pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(fileName, prog, nullptr, &maps));
+
+    ASSERT_TRUE(OptimizeBytecode(&prog, &maps, fileName));
+
+    const auto signature = ::ark::pandasm::GetFunctionSignatureFromName("main", {});
+    const auto &function = prog.functionStaticTable.at(signature);
+    auto callIt = std::find_if(function.ins.cbegin(), function.ins.cend(), [](const auto &ins) {
+        return ins.IsCall() && ins.IDSize() > 0U && ins.GetID(0).find("A.add") != std::string::npos;
+    });
+    ASSERT_NE(callIt, function.ins.cend());
+    EXPECT_EQ(callIt->insDebug.LineNumber(), 31U);
+}
+
+TEST_F(TotalTest, OptimizedCallAfterTryCatchWithCatchCallKeepsOriginalSourceLine)
+{
+    auto source = R"(
+.record A {}
+
+.function void may_throw() <static> {
+    return.void
+}
+
+.function void catch_handler() <static> {
+    return.void
+}
+
+.function void simple_function() <static> {
+    return.void
+}
+
+.function void static_har_func() <static> {
+    return.void
+}
+
+.function void A._ctor_(A a0) <ctor> {
+    return.void
+}
+
+.function i32 A.add(A a0, i32 a1, i32 a2) {
+    ldai 3
+    return
+}
+
+.function i32 main() {
+try_begin:
+    call.short may_throw
+try_end:
+    jmp after_try
+catch_begin:
+    call.short catch_handler
+    jmp after_try
+after_try:
+    call.short simple_function
+    call.short static_har_func
+    initobj.short A._ctor_:(A)
+    sta.obj v0
+    lda.obj v0
+    sta.obj v2
+    movi v3, 1
+    movi v4, 2
+    call.virt A.add:(A, i32, i32), v2, v3, v4
+    sta v1
+    lda v1
+    return
+.catchall try_begin, try_end, catch_begin
+}
+    )";
+    ark::pandasm::Parser parser;
+    const std::string fileName = "optimized_call_after_try_catch_with_call_line.bin";
+    auto res = parser.Parse(source, fileName);
+    ASSERT_EQ(parser.ShowError().err, ark::pandasm::Error::ErrorType::ERR_NONE);
+
+    auto &prog = res.Value();
+    pandasm::AsmEmitter::PandaFileToPandaAsmMaps maps;
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(fileName, prog, nullptr, &maps));
+
+    ASSERT_TRUE(OptimizeBytecode(&prog, &maps, fileName));
+
+    const auto signature = ::ark::pandasm::GetFunctionSignatureFromName("main", {});
+    const auto &function = prog.functionStaticTable.at(signature);
+    auto callIt = std::find_if(function.ins.cbegin(), function.ins.cend(), [](const auto &ins) {
+        return ins.IsCall() && ins.IDSize() > 0U && ins.GetID(0).find("A.add") != std::string::npos;
+    });
+    ASSERT_NE(callIt, function.ins.cend());
+    EXPECT_EQ(callIt->insDebug.LineNumber(), 46U);
+}
+
+TEST_F(TotalTest, OptimizeBytecode)
 {
     auto source = R"(
     .function i8 main() {

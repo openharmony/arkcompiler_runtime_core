@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,11 +145,15 @@ void BuildMapFromPcToIns(pandasm::Function &function, BytecodeOptIrInterface &ir
     pcInsMap->reserve(function.ins.size());
     auto instructionsBuf = graph->GetRuntime()->GetMethodCode(methodPtr);
     compiler::BytecodeInstructions instructions(instructionsBuf, graph->GetRuntime()->GetMethodCodeSize(methodPtr));
-    size_t idx = 0;
-    for (auto insn : instructions) {
-        pandasm::Ins &ins = function.ins[idx++];
-        pcInsMap->emplace(instructions.GetPc(insn), &ins);
-        if (idx >= function.ins.size()) {
+    auto insnIter = instructions.begin();
+    for (auto &ins : function.ins) {
+        if (ins.opcode == pandasm::Opcode::INVALID) {
+            continue;
+        }
+        if (insnIter != instructions.end()) {
+            pcInsMap->emplace(instructions.GetPc(*insnIter), &ins);
+            ++insnIter;
+        } else {
             break;
         }
     }
