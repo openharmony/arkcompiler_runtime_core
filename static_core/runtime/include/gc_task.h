@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_GC_TASK_H_
-#define PANDA_RUNTIME_GC_TASK_H_
+#ifndef PANDA_RUNTIME_INCLUDE_GC_TASK_H
+#define PANDA_RUNTIME_INCLUDE_GC_TASK_H
 
 #include <cstdint>
 
@@ -36,9 +36,10 @@ enum class GCTaskCause : uint8_t {
     STARTUP_COMPLETE_CAUSE,
     NATIVE_ALLOC_CAUSE,
     HEAP_USAGE_THRESHOLD_CAUSE,
-    MIXED,           // startGC(mixed). In this case we ignore garbage percentage for tenured regions.
-    EXPLICIT_CAUSE,  // System.gc
-    OOM_CAUSE,       // if all heap is full
+    MIXED,             // startGC(mixed). In this case we ignore garbage percentage for tenured regions.
+    EXPLICIT_CAUSE,    // System.gc
+    BACKGROUND_CAUSE,  // GC reason for application switch to the background
+    OOM_CAUSE,         // if all heap is full
     CROSSREF_CAUSE,
 };
 
@@ -102,4 +103,4 @@ std::ostream &operator<<(std::ostream &os, const GCCollectionType &collectionTyp
 
 }  // namespace ark
 
-#endif  // PANDA_RUNTIME_GC_TASK_H_
+#endif  // PANDA_RUNTIME_INCLUDE_GC_TASK_H

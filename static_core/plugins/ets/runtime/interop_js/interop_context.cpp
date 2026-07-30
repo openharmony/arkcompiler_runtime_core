@@ -81,25 +81,41 @@ static void AppStateCallback(int state, int64_t timeStamp)
 {
     auto appState = AppState(static_cast<AppState::State>(state), timeStamp);
     auto *etsVm = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM());
-    AppStateManager::GetCurrent()->UpdateAppState(appState);
-    etsVm->GetGC()->SetFastGCFlag(appState.GetState() == AppState::State::SENSITIVE_START);
+    auto prevAppState = AppStateManager::GetCurrent()->UpdateAppState(appState);
+    auto *gc = etsVm->GetGC();
+    gc->SetFastGCFlag(appState.GetState() == AppState::State::SENSITIVE_START);
     switch (static_cast<AppState::State>(state)) {
         case AppState::State::SENSITIVE_START:
             if (!etsVm->IsPostFork()) {
-                etsVm->GetGC()->PostponeGCStart();
+                gc->PostponeGCStart();
             }
             break;
+        case AppState::State::BACKGROUND: {
+            LOG(INFO, RUNTIME) << "Application switched to background";
+            auto prevState = prevAppState.GetState();
+            if (prevState.has_value() && prevState.value() != AppState::State::BACKGROUND) {
+                // On the background switch,
+                // GC collects the managed heap to reduce memory usage by backgrounded applications
+                // and avoid memory consumption in kernel compacted RAM
+                gc->Trigger(MakePandaUnique<GCTask>(GCTaskCause::BACKGROUND_CAUSE, time::GetCurrentTimeInNanos()));
+            }
+            break;
+        }
         case AppState::State::COLD_START_FINISHED:
-            LOG(INFO, GC) << "App cold start finished";
+            LOG(INFO, RUNTIME) << "Application cold start finished";
             [[fallthrough]];
         case AppState::State::SENSITIVE_END:
             if (!etsVm->IsPostFork()) {
-                etsVm->GetGC()->PostponeGCEnd();
-                etsVm->GetGC()->Trigger(
-                    MakePandaUnique<GCTask>(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, time::GetCurrentTimeInNanos()));
+                // Trigger a postponed GC task into PostponeGCEnd after a high-sensitivity scenario (active UI usage)
+                // if the heap usage reached the heap threashold for GC
+                gc->PostponeGCEnd();
             }
             break;
+        case AppState::State::FOREGROUND:
+            LOG(INFO, RUNTIME) << "Application switched to foreground";
+            break;
         default:
+            LOG(ERROR, RUNTIME) << "Unsupported application state: " << state;
             break;
     }
 }

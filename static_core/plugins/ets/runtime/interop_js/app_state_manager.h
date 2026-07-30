@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,12 +40,19 @@ public:
         return instance_;
     }
 
-    void UpdateAppState(AppState appState)
+    /**
+     * @param appState a new application state
+     * @returns the previous application state before setting a new state
+     */
+    AppState UpdateAppState(AppState appState)
     {
         os::memory::LockHolder lh(appStateLock_);
+        auto prevAppState = appState_;
         appState_ = appState;
+        return prevAppState;
     }
 
+    /// @returns current application state
     AppState GetAppState() const
     {
         os::memory::LockHolder lh(appStateLock_);

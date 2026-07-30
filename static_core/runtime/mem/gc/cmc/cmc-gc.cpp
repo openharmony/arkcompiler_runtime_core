@@ -1527,7 +1527,7 @@ void CmcGC<LanguageConfig>::CopyObject(const BaseObject &fromObj, BaseObject &to
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ReclaimGarbageMemory(GCTaskCause reason)
 {
-    if (reason == GCTaskCause::OOM_CAUSE) {
+    if (reason == GCTaskCause::OOM_CAUSE || reason == GCTaskCause::BACKGROUND_CAUSE) {
         Heap::GetHeap().GetAllocator().ReclaimGarbageMemory(true);
     } else {
         Heap::GetHeap().GetAllocator().ReclaimGarbageMemory(false);

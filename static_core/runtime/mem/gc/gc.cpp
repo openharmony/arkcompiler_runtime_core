@@ -396,7 +396,8 @@ void GC::RunPhases(GCTask &task)
 
         FireGCStarted(task, bytesInHeapBeforeGc);
         PreRunPhasesImpl();
-        clearSoftReferencesEnabled_ = task.reason == GCTaskCause::OOM_CAUSE || IsExplicitFull(task);
+        clearSoftReferencesEnabled_ = task.reason == GCTaskCause::OOM_CAUSE ||
+                                      task.reason == GCTaskCause::BACKGROUND_CAUSE || IsExplicitFull(task);
         // NOLINTNEXTLINE(performance-unnecessary-value-param)
         RunPhasesImpl(task);
         // Clear Internal allocator unused pools (must do it on pause to avoid race conditions):
@@ -503,7 +504,8 @@ void GC::ProcessReferences(GCPhase gcPhase, const GCTask &task, const ReferenceC
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     LOG(DEBUG, REF_PROC) << "Start processing cleared references";
     ASSERT(referenceProcessor_ != nullptr);
-    bool clearSoftReferences = task.reason == GCTaskCause::OOM_CAUSE || IsExplicitFull(task);
+    bool clearSoftReferences =
+        task.reason == GCTaskCause::OOM_CAUSE || task.reason == GCTaskCause::BACKGROUND_CAUSE || IsExplicitFull(task);
     referenceProcessor_->ProcessReferences(false, clearSoftReferences, gcPhase, pred);
     Reference *processedRef = referenceProcessor_->CollectClearedReferences();
     if (processedRef != nullptr) {
