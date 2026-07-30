@@ -44,7 +44,7 @@ static inline size_t ClampToSizeT(EtsLong n)
 /**
  * The function triggers specific GC.
  * @param cause - integer denotes type of GC. Possible values are: YOUNG_CAUSE = 0, THRESHOLD_CAUSE = 1,
- *                MIXED_CAUSE = 2, FULL_CAUSE = 3
+ *                FULL_CAUSE = 2
  * @param isRunGcInPlace - option to run GC in place
  * @return gc id. The id should be passed to waitForFinishGC to ensure the GC is finished.
  *  - The function may return 0 in case the GC is executed in-place. It means there is no need to wait such GC.
