@@ -41,6 +41,9 @@ public:
     // NOLINTBEGIN(readability-identifier-naming)
 % Common::events.each do |op|
     void <%= op.method_name %>(<%= op.args_list %>) {
+        if (!events_file_.is_open()) {
+            return;
+        }
         events_file_ << className_.data() << "::" << methodName_.data() << ',' << "<%= op.name %>" << ',';
         <%= op.print_line %>;
         events_file_ << std::endl;

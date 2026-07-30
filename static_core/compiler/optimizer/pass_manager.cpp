@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstring>
 #include <iomanip>
 #include "pass_manager.h"
 #include "compiler_logger.h"
@@ -210,14 +211,13 @@ bool PassManager::RunPass(Pass *pass, size_t localMemSizeBeforePass)
 #endif  // NDEBUG
 
     if (!IsCheckMode()) {
-        ASSERT(graph_->GetLocalAllocator()->GetAllocatedSize() >= localMemSizeBeforePass);
-        stats_->ProcessAfterRun(graph_->GetLocalAllocator()->GetAllocatedSize() - localMemSizeBeforePass);
+        stats_->ProcessAfterRun(localMemSizeBeforePass);
     }
 
     if (pass->IsAnalysis()) {
         pass->SetValid(result);
     }
-    bool isCodegen = std::string("Codegen") == pass->GetPassName();
+    bool isCodegen = std::strcmp("Codegen", pass->GetPassName()) == 0;
     if (g_options.IsCompilerDump() && pass->ShouldDump() && !IsCheckMode()) {
         if (!g_options.IsCompilerDumpFinal() || isCodegen) {
             DumpGraph(pass->GetPassName());

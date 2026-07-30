@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,6 +74,16 @@ void PassManagerStatistics::PrintStatistics() const
 
 void PassManagerStatistics::ProcessBeforeRun(const Pass &pass)
 {
+    if (!IsStatisticsCollectionEnabled()) {
+        if (CompilerLogger::IsComponentEnabled(CompilerLoggerComponents::PM)) {
+            constexpr auto OFFSET_NORMAL = 2;
+            std::string indent(passCallDepth_ * OFFSET_NORMAL, '.');
+            COMPILER_LOG(DEBUG, PM) << "Run pass: " << indent << pass.GetPassName();
+        }
+        passCallDepth_++;
+        return;
+    }
+
     size_t allocatedSize = graph_->GetAllocator()->GetAllocatedSize();
     constexpr auto OFFSET_NORMAL = 2;
     std::string indent(passCallDepth_ * OFFSET_NORMAL, '.');
@@ -114,8 +124,17 @@ void PassManagerStatistics::ProcessBeforeRun(const Pass &pass)
     passCallDepth_++;
 }
 
-void PassManagerStatistics::ProcessAfterRun(size_t localMemUsed)
+void PassManagerStatistics::ProcessAfterRun(size_t localMemSizeBeforePass)
 {
+    if (!IsStatisticsCollectionEnabled()) {
+        passCallDepth_--;
+        passRunIndex_++;
+        return;
+    }
+
+    auto localMemSizeAfterPass = graph_->GetLocalAllocator()->GetAllocatedSize();
+    ASSERT(localMemSizeAfterPass >= localMemSizeBeforePass);
+    auto localMemUsed = localMemSizeAfterPass - localMemSizeBeforePass;
     auto topPass = passStatStack_.top();
     ASSERT(graph_->GetAllocator()->GetAllocatedSize() >= lastAllocatedIr_);
     topPass->memUsedIr += graph_->GetAllocator()->GetAllocatedSize() - lastAllocatedIr_;
@@ -148,6 +167,12 @@ void PassManagerStatistics::ProcessAfterRun(size_t localMemUsed)
 
     passCallDepth_--;
     passRunIndex_++;
+}
+
+bool PassManagerStatistics::IsStatisticsCollectionEnabled() const
+{
+    return g_options.IsCompilerPrintStats() || g_options.WasSetCompilerDumpStatsCsv() ||
+           g_options.IsCompilerEnableIrStats();
 }
 
 void PassManagerStatistics::DumpStatisticsCsv(char sep) const
