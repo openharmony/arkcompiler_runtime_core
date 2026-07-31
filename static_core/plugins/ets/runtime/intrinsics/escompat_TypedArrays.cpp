@@ -204,13 +204,15 @@ static void EtsEscompatTypedArraySetValuesImpl(T *thisArray, S *srcArray, EtsInt
      * us from proceeding
      */
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    if (UNLIKELY(pos < 0 || pos + srcArray->GetLengthInt() > thisArray->GetLengthInt())) {
+    const auto srcLength = srcArray->GetLengthInt();
+    const auto dstLength = thisArray->GetLengthInt();
+    if (UNLIKELY(pos < 0 || pos > dstLength || srcLength > dstLength - pos)) {
         EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreRangeError, "offset is out of bounds");
         return;
     }
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    if (UNLIKELY(srcArray->GetLengthInt() == 0)) {
+    if (UNLIKELY(srcLength == 0)) {
         return;
     }
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
@@ -218,9 +220,9 @@ static void EtsEscompatTypedArraySetValuesImpl(T *thisArray, S *srcArray, EtsInt
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto *src = ToVoidPtr(ToUintPtr(srcData) + srcArray->GetByteOffset());
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    [[maybe_unused]] auto error = memmove_s(dst, (thisArray->GetLengthInt() - pos) * sizeof(ElementType), src,
+    [[maybe_unused]] auto error = memmove_s(dst, (dstLength - pos) * sizeof(ElementType), src,
                                             // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-                                            srcArray->GetLengthInt() * sizeof(ElementType));
+                                            srcLength * sizeof(ElementType));
     ASSERT(error == EOK);
 }
 
