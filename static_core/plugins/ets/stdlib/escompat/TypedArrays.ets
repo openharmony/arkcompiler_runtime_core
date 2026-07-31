@@ -476,8 +476,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public copyWithin(target: int): Int8Array {
-        this.copyWithinImpl(target, 0, this.lengthInt)
-        return this
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**
@@ -2119,8 +2118,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public copyWithin(target: int): Int16Array {
-        this.copyWithinImpl(target, 0, this.lengthInt)
-        return this
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**
@@ -3764,8 +3762,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public copyWithin(target: int): Int32Array {
-        this.copyWithinImpl(target, 0, this.lengthInt)
-        return this
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**
@@ -5381,8 +5378,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @FaAndStageModel
      */
     public copyWithin(target: int): BigInt64Array {
-        this.copyWithinImpl(target, 0, this.lengthInt)
-        return this
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**
@@ -7013,8 +7009,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public copyWithin(target: int): Float32Array {
-        this.copyWithinImpl(target, 0, this.lengthInt)
-        return this
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**
@@ -8633,8 +8628,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public copyWithin(target: int): Float64Array {
-        this.copyWithinImpl(target, 0, this.lengthInt)
-        return this
+        return this.copyWithin(target, 0, this.lengthInt)
     }
 
     /**

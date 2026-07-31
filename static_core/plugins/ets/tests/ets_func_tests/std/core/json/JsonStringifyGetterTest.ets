@@ -398,6 +398,30 @@ function testStringifyWithGettersThenParseUpdateMultiple(): void {
     arktest.assertEQ(target.b, 8)
 }
 
+class NestedGetterInner {
+    public data: string = "raw"
+
+    @JSONStringifyGetter
+    get greeting(): string {
+        return "hello from getter"
+    }
+}
+
+class NestedGetterOuter {
+    public name: string = "outer"
+    public inner: NestedGetterInner = new NestedGetterInner()
+}
+
+function testNestedGetterIncluded(): void {
+    const outer = new NestedGetterOuter()
+    const json = JSON.stringifyWithGetters(outer)
+    const parsed = JSON.parseJsonElement(json)
+    arktest.assertEQ(parsed.getString("name"), "outer")
+    const inner = parsed.getElement("inner")
+    arktest.assertEQ(inner.getString("data"), "raw")
+    arktest.assertEQ(inner.getString("greeting"), "hello from getter")
+}
+
 // ---------------------------------------------------------------------------
 // Entry point
 // ---------------------------------------------------------------------------
@@ -420,5 +444,6 @@ function main(): int {
     suite.addTest('stringifyWithGetters then parseUpdate', testStringifyWithGettersThenParseUpdate)
     suite.addTest('stringifyWithGetters then parseUpdate inherited', testStringifyWithGettersThenParseUpdateInherited)
     suite.addTest('stringifyWithGetters then parseUpdate multiple', testStringifyWithGettersThenParseUpdateMultiple)
+    suite.addTest('nested get accessor included', testNestedGetterIncluded)
     return suite.run()
 }

@@ -1211,7 +1211,7 @@ class JSONWriter {
             } else if (objCls.isEnum()) {
                 this.writeEnumValue(obj, objCls)
             } else {
-                if (FieldMetadataCache.hasFastObjectLayout(objCls)) {
+                if (FieldMetadataCache.hasFastObjectLayout(objCls) && !this.useAnnotatedGetters) {
                     if (this.useSimpleFastPath) {
                         this.writeClassInline(obj, FieldMetadataCache.getObjectLayout(objCls))
                     } else {
@@ -1953,9 +1953,8 @@ class JSONWriter {
             if (cachedEntry !== undefined) {
                 let nestedInfo = cachedEntry.cachedNestedInfo
                 if (nestedInfo === -1) {
-                    // First time: probe nested structure and cache
                     nestedInfo = JSONWriter.probeNestedArrayType(array)
-                    cachedEntry.cachedNestedInfo = nestedInfo
+                    cachedEntry.cachedNestedInfo = nestedInfo >= 0 ? nestedInfo : -2
                 }
                 if (nestedInfo >= 0) {
                     const depth = nestedInfo >> 8
@@ -4012,6 +4011,10 @@ class JSONValueParser {
         if (type === BigIntType
             && (this.bigIntMode === 2 || (!Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return value.bigintValue
+        } else if (type.isEnum() && this.bigIntMode === 2) {
+            // Under ALWAYS_PARSE_AS_BIGINT the number is only available as a BigInt; enum constants
+            // are integer-valued, so convert to int for the enum-value comparison in parse().
+            return value.bigintValue.getLong().toInt()
         } else if ((Types.isDoubleType(type) || type.isEnum())
             && (this.bigIntMode === 0 || (Double.isSafeInteger(value.value) && this.bigIntMode === 1))) {
             return value.value

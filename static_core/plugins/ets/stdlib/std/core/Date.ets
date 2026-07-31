@@ -1759,6 +1759,9 @@ export class Date {
      * @FaAndStageModel
      */
     public toISOString(): string {
+        if (!this.isDateValid()) {
+            throw new RangeError('Invalid time value')
+        }
         let sb = new StringBuilder();
         let y = this.getUTCFullYear();
         let yearLength: int = 4;
