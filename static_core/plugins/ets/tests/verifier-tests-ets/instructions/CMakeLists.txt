@@ -17,6 +17,7 @@ panda_ets_add_gtest(
     SOURCES 
         async_dispatch_test.cpp
         async_suspend_test.cpp
+        union_array_test.cpp
     LIBRARIES arkruntime arkassembler
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
     SANITIZERS ${PANDA_SANITIZERS_LIST}
