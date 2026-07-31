@@ -153,26 +153,6 @@ The name of an *annotation* cannot coincide with the name of another entity:
 
     class Position {/*body*/} // Compile-time error, duplicate identifier
 
-An annotation declaration defines no type. No type alias can be applied to
-the annotation or used as an interface:
-
-.. code-block:: typescript
-   :linenos:
-
-    @interface Position {}
-    type Pos = Position // Compile-time error
-
-    class A implements Position {} // Compile-time error
-
-.. index::
-   annotation
-   type alias
-   inheritance
-   annotation declaration
-   interface
-   entity
-   type
-
 |
 
 .. _Types of Annotation Fields:
@@ -186,10 +166,23 @@ Types of Annotation Fields
 The choice of *types for annotation fields* is limited to the following:
 
 - :ref:`Numeric Types`;
+
 - :ref:`Type boolean`;
+
 - :ref:`Type string`;
-- Unions (see :ref:`Union Types`) of :ref:`String Literal Types`;
-- Arrays (see :ref:`Array Types`) of the above types (e.g., ``string[]``),
+
+- Enumeration types (see :ref:`Enumerations`), but only those that meet
+  the following requirements:
+
+  - The enumeration type is declared in the same module as the annotation;
+  - The enumeration declaration is not an ambient declaration
+    (see :ref:`Ambient Declarations`);
+  - All enumeration members are initialized with constant expressions 
+    explicitly or implicitly.
+
+.. - Unions (see :ref:`Union Types`) of :ref:`String Literal Types`;
+
+- Built-in arrays (see :ref:`Resizable Array Types`) of the above types (e.g., ``string[]``),
   including arrays of arrays (e.g., ``string[][]``).
 
 A :index:`compile-time error` occurs if any other type is used as the type of
@@ -327,6 +320,41 @@ Otherwise, a :index:`compile-time error` occurs:
 
     function foo () @MyAnno() {} // wrong target for annotation
 
+
+.. note::
+
+    An annotation applied to a class or interface member has no effect
+    on an overridden member in a subtype.
+
+
+A :index:`compile-time error` occurs if an annotation that has the retention
+policy other than "SOURCE" (see :ref:`Retention Annotation`) is applied
+to a type, lambda expression, or local declaration:
+
+.. code-block:: typescript
+   :linenos:
+
+    @Retention({policy: "RUNTIME"})
+    @interface RT{}
+
+    @Retention({policy: "SOURCE"})
+    @interface SRC{}
+
+    function foo () {
+        @SRC()
+        let a = 1 // OK
+        @RT()
+        let b = 1 // Compile-time error
+    } 
+
+.. index::
+   retention policy
+
+An annotation declaration defines no type by itself, but 
+for an annotation with the "RUNTIME" *retention policy*
+(see :ref:`Retention Annotation`) a type with the name of
+the annotation is implicitly declared by the compiler
+(see :ref:`Runtime Access to Annotations`).
 
 A :index:`compile-time error` occurs if an annotation is applied to 
 an overridden field (see :ref:`Override Fields`):
@@ -759,9 +787,9 @@ As ``@Retention`` has a single field, it can be used with a short notation
    string literal
    notation
 
-If an annotation has the "BYTECODE" or "RUNTIME" policy, but not the "SOURCE"
-policy, then the values of its fields can be read during
-execution, see :ref:`Runtime Access to Annotations` for detail.
+If an annotation has the "RUNTIME" policy, then the values of its fields
+can be read during execution, see :ref:`Runtime Access to Annotations`
+for detail.
 
 |
 
@@ -798,22 +826,21 @@ The annotation ``@Target`` has a single field ``targets`` of type
    :linenos:
 
     // short form:
-    @Target(["FUNCTION", "CLASS_METHOD"])
+    @Target([AnnotationTargets.FUNCTION, AnnotationTargets.CLASS_METHOD])
     @interface SpecialCall {/*some fields*/}
 
     // long form:
-    @Target({targets: ["PARAMETER"]})
+    @Target({targets: [AnnotationTargets.PARAMETER]})
     @interface SpecialParameter {/*some fields*/}
 
 If the annotation is present in the declaration of annotation ``X``, then
 the compiler checks that ``X`` is used in the specified contexts only.
 Otherwise, a :index:`compile-time error` occurs.
 
-If the annotation is not present in the declaration of annotation ``X``, then
+If ``@Target`` is not used in the declaration of annotation ``X``, then
 the usage of ``X`` is not restricted.
 
-The ``AnnotationTargets`` type contains string literals for the following
-targets:
+The ``AnnotationTargets`` type contains the following targets:
 
 .. index::
    annotation
@@ -827,35 +854,35 @@ targets:
 
 -  Targets for :ref:`Top-Level Declarations`:
 
-    - ``"CLASS"``;
-    - ``"ENUMERATION"``;
-    - ``"FUNCTION"``;
-    - ``"FUNCTION_WITH_RECEIVER"``;
-    - ``"INTERFACE"``;
-    - ``"NAMESPACE"``;
-    - ``"TYPE_ALIAS"``;
-    - ``"VARIABLE"``;
+    - ``CLASS``;
+    - ``ENUMERATION``;
+    - ``FUNCTION``;
+    - ``FUNCTION_WITH_RECEIVER``;
+    - ``INTERFACE``;
+    - ``NAMESPACE``;
+    - ``TYPE_ALIAS``;
+    - ``VARIABLE``;
 
 -  Targets for :ref:`Class Members`:
 
-    - ``"CLASS_FIELD"``;
-    - ``"CLASS_METHOD"``;
-    - ``"CLASS_GETTER"``;
-    - ``"CLASS_SETTER"``;
+    - ``CLASS_FIELD``;
+    - ``CLASS_METHOD``;
+    - ``CLASS_GETTER``;
+    - ``CLASS_SETTER``;
 
 -  Targets for :ref:`Interface Members`:
 
-    - ``"INTERFACE_METHOD"``;
-    - ``"INTERFACE_GETTER"``;
-    - ``"INTERFACE_SETTER"``;
+    - ``INTERFACE_METHOD``;
+    - ``INTERFACE_GETTER``;
+    - ``INTERFACE_SETTER``;
 
 -  Other targets:
 
-    - ``"LAMBDA"`` for :ref:`Lambda Expressions` and
+    - ``LAMBDA`` for :ref:`Lambda Expressions` and
       :ref:`Lambda Expressions with Receiver`;
-    - ``"PARAMETER"`` for function, method, and lambda parameter;
-    - ``"STRUCT"`` (see :ref:`Keyword struct and ArkUI`);
-    - ``"TYPE"`` (see :ref:`Using Types`).
+    - ``PARAMETER`` for function, method, and lambda parameter;
+    - ``STRUCT`` (see :ref:`Keyword struct and ArkUI`);
+    - ``TYPE`` (see :ref:`Using Types`).
 
 .. index::
    class
@@ -887,7 +914,7 @@ than once in an ``@Target`` annotation:
 .. code-block:: typescript
    :linenos:
 
-    @Target(["CLASS", "INTERFACE", "CLASS"]) // Compile-time error
+    @Target([AnnotationTargets.CLASS, AnnotationTargets.INTERFACE, AnnotationTargets.CLASS]) // Compile-time error
     @interface Anno {}
 
 |
@@ -900,7 +927,7 @@ Runtime Access to Annotations
 .. meta:
     frontend_status: None
 
-For an annotation with the "BYTECODE" or "RUNTIME"  *retention policy*
+For an annotation with the "RUNTIME"  *retention policy*
 (see :ref:`Retention Annotation`) a type with the name of
 the annotation is implicitly declared by the compiler. This type cannot be 
 expressed in the language. It behaves like a ``final abstract class`` with
@@ -956,14 +983,14 @@ The use of such a class is represented in following example:
    readonly name
 
 .. note::
-   - A type **is not** declared for annotations with the "SOURCE"
-     retention policy.
+   - A type **is not declared** for annotations with the
+     retention policy other than "RUNTIME".
   
    - The only way to get instance of an implicitly declared type
      is to call the reflection library;
 
-   - A :index:`compile-time error` occurs if a type is used in a
-     *new expression* or :ref:`Class Extension Clause`.
+   - A :index:`compile-time error` occurs if an implicitly declared type
+     is used in a *new expression* or :ref:`Class Extension Clause`.
 
 .. raw:: pdf
 

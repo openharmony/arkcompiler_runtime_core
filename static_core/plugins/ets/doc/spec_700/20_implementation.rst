@@ -21,36 +21,6 @@ Implementation Details
 
 Important implementation details are discussed in this section.
 
-.. _Import Path Lookup:
-
-Import Path Lookup
-******************
-
-.. meta:
-    frontend_status: Done
-
-If an import path ``<some path>/name`` is resolved to a path in the folder
-'*name*', then  the compiler executes the following lookup sequence:
-
--   If the folder contains the file ``index.ets``, then this file is imported
-    as a module written in |LANG|;
-
--   If the folder contains the file ``index.ts``, then this file is imported
-    as a module written in |TS|.
-
-
-.. index::
-   implementation
-   import path
-   path
-   folder
-   file
-   compiler
-   lookup sequence
-   module
-
-|
-
 .. _Modules in Host System:
 
 Modules in Host System
@@ -127,6 +97,24 @@ but not for ``T`` itself:
 
     let type_of_array1: Class = Class.from<int[]>() // value of Class for Array<> 
     let type_of_array2: Class = Class.from<Array<number>>() // the same Class value
+
+If type ``T`` used as a type argument is a union type, then the |LANG| compiler
+applies extra optimizations on top of normalization, which affect the nature of
+the resulting class.
+
+.. code-block:: typescript
+   :linenos:
+
+    const utype1: Class = Class.from<Object|string>() 
+          // utype1 is a class for Object not the union
+    const utype2: Class = Class.from<string|number>() 
+          // utype2 is a class for the union type
+  
+    class Base {}
+    class Derived extends Base {}
+    const utype2: Class = Class.from<Base|Derived>() 
+          // utype3 is a class for Base not the union
+
 
 .. index::
    type argument

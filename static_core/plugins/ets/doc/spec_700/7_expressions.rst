@@ -1815,6 +1815,26 @@ Otherwise, a :index:`compile-time error` occurs:
     }
     const b: Err = {attr: 42} // Compile-time error, no setter for 'attr'
 
+
+In some cases, for the precise object literal type inference, the |LANG|
+compiler uses smart typing techniques.
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+        b = 1
+    }
+    class Derived extends Base {
+        d = 2
+    }
+    function foo (p: Base | Derived) {
+        consoel.log (p)
+    }
+    foo ({b: 11, d= 22}) // Type of the object literal is inferred as Derived
+    foo ({b: 11})        // Type of the object literal is inferred as Base
+
+
 .. index::
    accessor
    accessor declaration
@@ -3033,6 +3053,28 @@ each form of method call must be performed as follows:
 
 .. ESE26 ABSTRACT_CALL
 
+If a method call is in the form of ``expression.identifier`` and the single
+method is either a class abstract method or an interface method with no default
+implementation, then a :index:`compile-time warning` occurs, as such a code
+pattern leads to a runtime error until such method is made a non-abstract one.
+
+.. code-block:: typescript
+   :linenos:
+
+    interface A { foo() }
+    interface B { foo() { console.log ("B.foo() is called") } }
+    abstract class C { abstract foo() }
+
+    class X1 implements B, A {}
+    class X2 implements A, B {}
+    class X3 extends C implements B {}
+
+    (new X1).foo(); // Valid method call
+    (new X2).foo(); // Compile-time warning, may cause runtime error as A.foo() is abstract
+    (new X3).foo(); // Compile-time warning, may cause runtime error as C.foo() is abstract
+
+
+
 Semantic check of a method call is performed in accordance with
 :ref:`Compatibility of Call Arguments`.
 
@@ -3069,11 +3111,11 @@ Type of a *method call expression* is the return type of the method.
        method()        { console.log ("Instance method() is called") }
     }
 
-
-    let x = A.method()     // Compile-time error, void cannot be used as type annotation
-    A.method ()            // OK
-    let y = new A().method() // Compile-time error, void cannot be used as type annotation
-    new A().method()         // OK
+    // Valid usage of static and instance methods that return undefined.
+    let x: void = A.method()
+    A.method ()
+    let y: undefined = new A().method()
+    new A().method()
 
 .. index::
    method call expression
@@ -3636,24 +3678,6 @@ An indexing expression evaluated at runtime behaves as follows:
    then the result is the value mapped to the key.
 -  Otherwise, the result is the literal ``undefined``.
 
-Syntactically, the *record indexing expression* can be written by using a field
-access notation (see :ref:`Field Access Expression`) if its *index expression*
-is formed as an *identifier* of type *string*.
-
-.. code-block:: typescript
-   :linenos:
-
-    type Keys = 'key1' | 'key2' | 'key3'
-
-    let x: Record<Keys, number> = {
-        'key1': 1,
-        'key2': 2,
-        'key3': 4,
-    }
-    console.log(x.key2) // the same as console.log(x['key2'])
-    x.key2 = 8          // the same as x['key2'] = 8
-    console.log(x.key2) // the same as console.log(x['key2'])
-
 
 .. index::
    string
@@ -4005,6 +4029,13 @@ If type ``T`` is not *preserved up to undefined* by :ref:`Type Erasure`, then a
 expression. In this case, the check is performed against the *erased* type
 (see :ref:`Type Erasure`).
 
+If type ``T`` is a FixedArray (see :ref:`Fixed-Size Array Types`) instantiated
+with a non-nullish type (see :ref:`Nullish Types`), then a 
+:index:`compile-time error` occurs.
+
+If type ``T`` is a tuple type (see :ref:`Tuple Types`), then a
+:index:`compile-time error` occurs.
+
 The approach is represented in the following example:
 
 .. code-block:: typescript
@@ -4027,6 +4058,12 @@ The approach is represented in the following example:
 
    let a = new B<string>()
    foo(a)
+
+   const fa: FixedArray<int> = []
+   fa instanceof FixedArray<int> // Compile-time error
+
+   const t: [string, number] = ["xxx", 3.14]
+   t instanceof [string, number] // Compile-time error
 
 If an *instanceof expression* is known at compile time
 to always evaluate to ``false`` or ``true`` at runtime, then
@@ -4356,6 +4393,30 @@ specifics illustrated by the example below:
     // Output
     Array:  123,123,123
     FixedArray:  [111, 222, 333]
+
+As |LANG| uses type erasure (see :ref:`Type Erasure`) work with tuples has some
+specifics illustrated by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    // Test for the tuple constructed of specific types
+
+    function test0 (o: Object) {
+       if (o instanceof Tuple) { // type erasure allows to check if parameter
+                                 // is of a tuple kind
+          console.log ("Tuple: ", o as Tuple, ", its length is ", o.length, ", first element is ", o.unsafeGet(0))
+            //if (o instanceof [number, string]) { // compile-time error as type erasure
+                                            // does not allows such check
+                console.log ("Tuple: ", o as [number, string]) // But such form of cast works
+            //}
+       }
+    }
+
+    const tuple0: [number, string] = [5, "xyz"]
+    test0 (tuple0)
+
+
 
 |
 
@@ -5175,8 +5236,10 @@ Bitwise Complement
 *Bitwise complement* operator ``'~'`` is applied to an operand
 of a numeric type or type ``bigint``.
 
-If the type of the operand is ``double`` or ``float``, then it is truncated
+If the type of the operand is ``double`` or ``float``, and its value 
+is not ``NaN`` or *infinity*, then the operand is truncated
 first to ``long`` or ``int``, respectively.
+
 If the type of the operand is ``byte`` or ``short``, then the operand is
 widened to ``int``.
 If the type of the operand is ``bigint``, then no conversion is required.
@@ -5189,9 +5252,13 @@ Type of result is determined as follows:
 The result of a unary bitwise complement expression is a value, not a variable
 (even if the result of the operand expression is a variable).
 
-The value of a unary bitwise complement expression at runtime is the bitwise
-complement of the value of the operand. In all cases, *~x* equals
-*(-x)-1*.
+The result of a unary bitwise complement expression:
+
+-  ``-1`` if the operand is ``NaN``;
+-  ``-1`` if the operand is positive or negative inifinity;
+-  Otherwise, the bitwise complement of the value of the ``int``,
+   ``long`` or ``bigint`` operand. For any operand ``x`` of these types,
+   ``~x`` equals ``(-x)-1``.
 
 It is represented by the following example:
 
@@ -5223,7 +5290,9 @@ It is represented by the following example:
 
   let rB = ~B
   console.log(rB, typeof rB) // prints '-3 bigint'
-
+  
+  console.log(~Infinity) // prints '-1'
+  console.log(~NaN)      // prints '-1'
 
 .. index::
    bitwise complement
@@ -5947,7 +6016,7 @@ Exponentiation Expression
 
 Exponentiation expression uses the binary *exponentiation operator* '``**``'.
 
-The binary operator '``**``' raises the first operand (base) to the power of
+The binary operator ``'**'`` raises the first operand (base) to the power of
 the second operand (exponent).
 
 The syntax of an *exponentiation expression* is presented below:
@@ -5993,11 +6062,11 @@ Both variants of the operator '``**``' are represented in example below:
    let z = c ** d // both 'c' and 'd' are converted to 'double'
 
 
-The binary operator '``**``' with *numeric operands* is equivalent to
+The binary operator ``'**'`` with *numeric operands* is equivalent to
 `Math.pow()`. It causes neither a :index:`compile-time error`, nor a
 :index:`runtime error`.
 
-Special cases of the binary operator '``**``' according to IEEE 754 are
+Special cases of the binary operator ``'**'`` according to IEEE 754 are
 represented below.
 
 .. note::
@@ -6062,12 +6131,13 @@ Additive operators group left-to-right.
 
 The following rules apply where the operator  ``'+'`` is used:
 
-- If either operand is of type ``string``, then the operation
-  is a string concatenation (see :ref:`String Concatenation`).
+- If at least one of the operands is of type ``string`` or enumeration type,
+  the base type of which is type ``string``, then the operation
+  is a :ref:`String Concatenation`.
 - If both operands are of type ``bigint``, then no implicit
   conversion is applied, and the inferred type is ``bigint``.
 - In all other cases, type of each operand must be
-  convertible (see :ref:`Widening Numeric Conversions`) to
+  convertible (see :ref:`Implicit Conversions`) to
   a numeric type (see :ref:`Numeric Types`).
 
 Otherwise, a :index:`compile-time error` occurs.
@@ -6084,7 +6154,7 @@ Otherwise, a :index:`compile-time error` occurs.
 Type of an *additive expression* with a valid
 combination of types is determined as follows:
 
--  If any operand is of type ``string``, then ``string``;
+-  If the operation is a string concatenation, then ``string``;
 -  If both operands are of type ``bigint``, then ``bigint``;
 -  If both operands are convertible to a numeric type, then the type inferred
    after widening operands of numeric types by the rules explained in the example
@@ -6113,9 +6183,9 @@ String Concatenation
 .. meta:
     frontend_status: Done
 
-If one operand of an expression is of type ``string``, then the string
-conversion (see :ref:`String Operator Contexts`) is performed on the other
-operand at runtime to produce a string.
+If the operator ``'+'`` denotes the *string concatenation*, the string
+conversion (see :ref:`String Operator Contexts`) is performed on each
+non-``string`` operand to produce a string.
 
 String concatenation produces a reference to a ``string`` object that is a
 concatenation of two operand strings. The left-hand-side operand characters
@@ -7216,8 +7286,8 @@ while ``'|'`` has the lowest precedence.
 Operators group left-to-right. Each operator is commutative if the
 operand expressions have no side effects, and associative.
 
-The bitwise and logical operators can compare two operands of a numeric
-type, or two operands of the ``boolean`` type. Otherwise, a
+The bitwise and logical operators must have two operands of a numeric
+type, or two operands of type ``boolean``. Otherwise, a
 :index:`compile-time error` occurs.
 
 .. index::
@@ -7491,7 +7561,7 @@ The syntax of *assignment expression* is presented below:
         : '='
         | '+='  | '-='  | '*='   | '/='  | '%=' | '**='
         | '<<=' | '>>=' | '>>>='
-        | '&='  | '|='  | '^='
+        | '&='  | '|='  | '^=' 
         ;
 
     lhsExpression:
@@ -8312,14 +8382,16 @@ body but is neither declared in nor assigned before it.
 
 If a *lambda body* is a single ``expression``, then it is handled as follows:
 
--  If the expression is a *call expression* with return type ``void``, then
-   the body is equivalent to the block: ``{ expression }``.
+-  If the expression is a *call expression* with return type ``void`` or
+   ``undefined``, then the body is equivalent to the block: ``{ expression }``.
 
 -  Otherwise, the body is equivalent to the block: ``{ return expression }``.
 
-If *lambda signature* return type is neither ``void`` (see
-:ref:`Type undefined or void`) nor ``never`` (see :ref:`Type never`), and the
-execution path of the lambda body has neither a return statement (see
+If the *lambda signature* return type explicitly specified is neither ``void``
+or ``undefined`` (see :ref:`Type undefined or void`) nor ``never`` (see
+:ref:`Type never`) nor a supertype of ``void``  or ``undefined`` nor a union
+containing at least one of the types mentioned before, and the execution path
+of the lambda body has neither a return statement (see
 :ref:`Return Statements`) nor a single expression as a body, then a
 :index:`compile-time error` occurs.
 
@@ -8534,9 +8606,14 @@ The syntax of *constant expression* is presented below:
         expression
         ;
 
-A *constant expression* can be either of a value type (see
-:ref:`Value Types`) or of type ``string``, while being composed only of the
-following:
+A *constant expression* can be either of 
+
+- A value type (see :ref:`Value Types`);
+- A type ``string``; or
+- An enumeration type (see :ref:`Enumerations`), if all its members are
+  initialized with constant expressions explicitly or implicitly.
+
+A *constant expression* can be composed only of the following:
 
 -  Literals of a predefined value types, and literals of type ``string`` (see
    :ref:`Literals`);
@@ -8544,6 +8621,13 @@ following:
 -  Simple names that refer to constants declared in a surrounding block,
    function, method, or lambda body, if the initializer of the referenced
    constant declaration is itself a constant expression;
+
+-  Qualified names that refer to enumeration members belong to the enumeration
+   type declared in the current module and not in an ambient context
+   (see :ref:`Ambient Declarations`); 
+
+   - In an enumeration member initializer **simple names**
+     that refer to the same type enumeration member (see :ref:`Enumerations`);
 
 -  Unary operators ``'+'``, ``'-'``, ``'~'``, and ``'!'``, but not ``'++'``
    or ``'--'`` (see :ref:`Unary Plus`, :ref:`Unary Minus`,
@@ -8634,13 +8718,18 @@ Specifics of Constant Expressions Evaluation
 If a constant expression contains an unary or a binary operator applied
 to numeric operands, the operator is evaluated as follows:
 
+- If an operator is a *shift operator* (see :ref:`Shift Expressions`) with
+  constant operands, it is evaluated in the same way as with non-constant
+  operands. Type of a left operand of a constant shift operator is evaluated
+  as type of a standalone expression (see :ref:`Type of Expression`); or
+
 - If any of operands are of type ``double`` or the operator is
   *exponentiation operator*, other operands are converted to type ``double``
   before operator evaluation and the result type is ``double``;
 
 - If any of operands are of type ``float``, other operands are converted
   to type ``float`` before operator evaluation and the result type is
-  ``float``; or
+  ``float``;
 
 - Otherwise, all operands before evaluation are converted to
   *compiler-internal integer type* and the result type is that type.

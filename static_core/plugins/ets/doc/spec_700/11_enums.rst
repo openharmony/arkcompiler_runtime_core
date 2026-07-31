@@ -39,11 +39,7 @@ The syntax of *enumeration declaration* is presented below:
         ;
 
     enumMember:
-        identifier initializer?
-        ;
-
-    initializer:
-        '=' expression
+        identifier ('=' constantExpression)?
         ;
 
 .. index::
@@ -77,7 +73,7 @@ Empty ``enum`` is supported as a corner case for compatibility with |TS|.
     enum Empty {} // OK
 
 An enumeration member has a value that can be set
-explicitly by an initializer expression or implicitly (see
+explicitly by a constant expression or implicitly (see
 :ref:`Initialization of Enumeration Members`). 
 
 .. index::
@@ -231,10 +227,9 @@ Initialization of Enumeration Members
 .. meta:
     frontend_status: Done
 
-An enumeration member value can be set explicitly by an initializer
-expression. An initializer expression can be omitted if an
-*enumeration base type* is an integer type. Otherwise, a
-:index:`compile-time error` occurs:
+An enumeration member value can be set explicitly by a constant expression.
+An initializer can be omitted if an *enumeration base type* is an integer
+type. Otherwise, a :index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -253,12 +248,8 @@ immediately preceding member plus one.
 If some but not all members have their values set explicitly, then
 the values of the members are set by the following rules:
 
--  If an initializer is not a *constant expression*
-   (see :ref:`Constant Expressions`), then all subsequent members must be
-   explicitly initialized. Otherwise, a :index:`compile-time error` occurs.
-
--  Member which is the first and has no explicit initializer
-   gets the zero value.
+-  Member which is the first and has no explicit initializer gets the zero
+   value.
 -  Member with an explicit initializer has that explicit value.
 -  Member that is not the first and has no explicit initializer takes the value
    of the immediately preceding constant plus one.
@@ -276,8 +267,7 @@ In the example below, the value of ``Red`` is 0, of ``Blue``, 5, and of
    constant
    value
 
-The example below illustrates the requirement to have explicit initializers
-after non-constant initializer:
+The example below illustrates the requirement for a constant expression:
 
 .. code-block:: typescript
    :linenos:
@@ -285,10 +275,54 @@ after non-constant initializer:
     function foo() { return 1 }
 
     enum Wrong {
-        A,
-        B = foo(),
-        C // Compile-time error, must have explicit initializer
+        A = 1,
+        B = foo(), // Compile-time error, initializer must be a constant expression
+        C = 3
     }
+
+As a special case, a simple name that refers to a member declared in the same
+enumeration declaration can be used in an enumeration member initializer:
+
+.. code-block:: typescript
+   :linenos:
+
+    enum E {
+        N,
+        M = N // OK
+    }
+
+Qualified access to an enumeration member, i.e., an expression of the form
+``EnumTypeName.memberName`` where ``EnumTypeName`` denotes a local enumeration
+identifier, can also be used in an enumeration member initializer, including
+as part of a larger constant expression:
+
+.. code-block:: typescript
+   :linenos:
+
+    enum E { N = 1 }
+    enum E1 {
+        X = E.N,      // OK
+        Y = E.N + 1,  // OK
+        Z = E.N | 1   // OK
+    }
+
+A reference to an imported or otherwise external enumeration member is not a
+constant expression:
+
+.. code-block:: typescript
+   :linenos:
+
+    // file1.ets
+    import { E } from "file2"
+
+    enum E1 {
+        X = E.N,      // Compile-time error
+        Y = E.N + 1,  // Compile-time error
+        Z = E.N | 1   // Compile-time error
+    }
+
+    // file2.ets
+    export enum E { N = 1 }
 
 |
 

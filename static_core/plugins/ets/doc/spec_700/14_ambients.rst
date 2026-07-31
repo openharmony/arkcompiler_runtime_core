@@ -27,8 +27,12 @@ Ambient declarations:
 -  Introduce no new entities like regular declarations do.
 -  Cannot include executable code, and thus 
 
-   - Ambient variables, constants, and enumerations have no initializers;
-   - Ambient functions, methods, and constructors have no bodies.
+   - Ambient functions, methods, and constructors have no bodies;
+   - Ambient variables and constants have no initializers;
+   
+- Members of an enumeration declared in an ambient context can have
+  initializers, but their values  do not correspond to the actual values
+  of the members of the regular enumeration declaration.
 
 .. index::
    ambient declaration
@@ -37,7 +41,6 @@ Ambient declarations:
    entity
    executable code
    initializer
-   initialization
    ambient function
    ambient method
    ambient constructor
@@ -60,10 +63,10 @@ The syntax of *ambient declaration* is presented below:
         | explicitFunctionOverload
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
-        | ambientEnumDeclaration
         | ambientNamespaceDeclaration
         | ambientAnnotationDeclaration
         | ambientAccessorDeclaration
+        | enumDeclaration
         | typeAlias
         )
         ;
@@ -310,7 +313,6 @@ Their syntax is presented below:
    ambient constructor declaration
    ambient method declaration
    ambient accessor declaration
-   initializer declaration
    syntax
 
 .. code-block:: abnf
@@ -634,44 +636,6 @@ as follows:
 
 |
 
-.. _Ambient Enumeration Declarations:
-
-Ambient Enumeration Declarations
-********************************
-
-.. meta:
-    frontend_status: None
-
-The syntax of *ambient enumeration declaration* is presented below:
-
-.. code-block:: abnf
-
-    ambientEnumDeclaration
-        : 'const'? 'enum' identifier enumBaseType? '{' ambientEnumMemberList? '}'
-        ;
-
-    ambientEnumMemberList:
-        identifier (',' identifier)* ','?
-        ;
-
-If an *enumeration declaration* is prefixed with the keyword
-``const``, then a :index:`compile-time error` occurs. This restriction
-is temporary, and the semantics of ``const enum`` is to be made
-available in the future versions of |LANG|.
-
-No member of an enum declaration can have an initializer.
-Otherwise, a :index:`compile-time error` occurs as represented
-in the example below: 
-
-.. code-block:: typescript
-   :linenos:
-
-    declare enum RGB {Red, Green, Blue} // OK
-    
-    declare enum Err1 { A = 5 }      // Compile-time error, initializer is present
-
-|
-
 .. _Ambient Namespace Declarations:
 
 Ambient Namespace Declarations
@@ -705,12 +669,29 @@ The syntax of *ambient namespace declaration* is presented below:
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
         | ambientAccessorDeclaration
-        | ambientEnumDeclaration
+        | enumDeclaration
         | typeAlias
         )
         ;
 
-Only exported entities can be accessed outside a namespace.
+Entities declared in a namespace can only be accessed outside that namespace if
+the namespace is exported.
+
+.. code-block:: typescript
+   :linenos:
+
+    // module1
+    declare export namespace A {
+        function foo()
+        let a: number
+    }
+
+    // module2
+    import {A} from "module1"
+    // entities declared in A can be used
+    A.foo()
+    A.a
+
 
 Namespaces can be nested:
 

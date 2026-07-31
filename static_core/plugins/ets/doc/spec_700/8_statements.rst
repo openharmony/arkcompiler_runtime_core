@@ -187,9 +187,9 @@ until a return occurs (see :ref:`Return Statements`).
 If a block is the body of a ``functionDeclaration`` (see
 :ref:`Function Declarations`) or a ``classMethodDeclaration`` (see
 :ref:`Method Declarations`) declared implicitly or explicitly with
-return type ``void`` (see :ref:`Type undefined or void`), then the block can contain no
-return statement at all. Such a block is equivalent to one that ends in a
-``return`` statement, and is executed accordingly.
+return type ``void`` or ``undefined`` (see :ref:`Type undefined or void`), then
+the block can contain no return statement at all. Such a block is equivalent to
+one that ends in a ``return`` statement, and is executed accordingly.
 
 .. index::
    statement
@@ -426,9 +426,8 @@ The syntax of *loop statements* is presented below:
         | forOfStatement
         ;
 
-A :index:`compile-time error` occurs if the label *identifier* is not used
-within ``loopStatement``, or is used in lambda expressions (see
-:ref:`Lambda Expressions`) within a loop body.
+A :index:`compile-time error` occurs if the label *identifier* is used in
+lambda expressions (see :ref:`Lambda Expressions`) within a loop body.
 
 .. code-block:: typescript
    :linenos:
@@ -445,6 +444,16 @@ within ``loopStatement``, or is used in lambda expressions (see
             while (true)
         }
     }
+
+A :index:`compile-time warning` occurs if the label *identifier* is not used
+within ``loopStatement``.
+
+.. code-block:: typescript
+   :linenos:
+
+    label: for (i = 1; i < 10; i++) {}
+       // Compile-time warning, label is not used in the loop but declared
+
 
 
 .. index::
@@ -935,11 +944,15 @@ A *return statement* in the plain form ``return`` (with no *expression*) can
 occur inside one of the following:
 
 - Constructor body;
+
 - Function, method, or lambda body with return type ``void`` or ``undefined``
-  (see :ref:`Type undefined or void`), or a union type (see :ref:`Union Types`)
-  containing ``void`` or ``undefined``;
+  (see :ref:`Type undefined or void`) or its supertype, or a union type
+  (see :ref:`Union Types`) containing ``void`` or ``undefined``
+  or its supertype;
+
 - Asynchronous function, method or lambda body with return type
-  ``Promise<void>`` (see :ref:`Asynchronous execution`);
+  ``Promise<void>`` or ``Promise<undefined>``
+  (see :ref:`Asynchronous execution`);
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -1121,7 +1134,7 @@ The execution of a ``switch`` statement starts from the evaluation of the
 The value of the ``switch`` expression is compared repeatedly to the value
 of case expressions. The comparison starts from the top and proceeds until the
 first *match*. A *match* occurs when a particular case expression value equals
-the value of the ``switch`` expression in terms of the operator ``'=='``. The
+the value of the ``switch`` expression in terms of the operator ``'==='``. The
 execution is transferred to the set of statements of the *caseClause* where the
 match occurred. If this set of statements executes a ``break`` statement, then
 the entire ``switch`` statement terminates. If no ``break`` statement is

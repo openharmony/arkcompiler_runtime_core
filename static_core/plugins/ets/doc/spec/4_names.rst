@@ -294,13 +294,14 @@ is the region of program text where an entity is declared,
 along with other regions it can be used in. The following entities are always
 referred to by their qualified names only:
 
-- Class and interface members (both static and instance ones);
-- Entities imported via qualified import; and
+- Class members, both static and instance ones (see :ref:`Class Members`);
+- Interface members (see :ref:`Interface Members`);
+- Enumeration members, except initializer expression (see :ref:`Enumerations`);
+- Entities imported via qualified import
+  (see :ref:`Bind All with Qualified Access`); and
 - Entities declared in namespaces (see :ref:`Namespace Declarations`).
 
 Other entities are referred to by their simple (unqualified) names.
-
-Entities within the scope are accessible (see :ref:`Accessible`).
 
 .. index::
    scope
@@ -313,21 +314,14 @@ Entities within the scope are accessible (see :ref:`Accessible`).
    static member
    instance member
    qualified name
-   qualified import
    namespace
    namespace declaration
    simple name
-   access
-   simple name
    unqualified name
-   accessible scope
-   variable
-   constant
-   function call
-   accessibility
 
-The scope level of an entity depends on the context the entity is
-declared in:
+An entity is accessible (see :ref:`Accessible`) in the scope it is declared
+and can be accessible in nested or other module scopes.
+The accessiblity rules depend on the scope level:
 
 .. _module-access:
 
@@ -335,7 +329,7 @@ declared in:
     frontend_status: Partly
 
 -  *Module level scope* is applicable to modules only. *Constants*
-   and *variables* are accessible (see :ref:`Accessible`)
+   and *variables* are accessible
    from their respective points of declaration to the end of the module.
    Other entities are accessible through the entire scope level.
    If exported, a name can be accessed in other modules.
@@ -347,7 +341,7 @@ declared in:
 
 -  *Namespace level scope* is applicable to namespaces only.
    *Constants*   and *variables* are accessible
-   (see :ref:`Accessible`) from their respective points of declaration
+   from their respective points of declaration
    to the end of the namespace including all embedded namespaces.
    Other entities are accessible through the entire namespace scope level
    including embedded namespaces.
@@ -368,8 +362,8 @@ declared in:
 .. meta:
     frontend_status: Done
 
--  A name declared inside a class (*class level scope*) is accessible (see
-   :ref:`Accessible`) in the class and sometimes, depending on the access
+-  A name declared inside a class (*class level scope*) is accessible
+   in the class and sometimes, depending on the access
    modifier (see :ref:`Access Modifiers`), outside the class, or by means of a
    derived class.
 
@@ -414,8 +408,7 @@ declared in:
     frontend_status: Done
 
 -  A name declared inside an interface (*interface level scope*) is accessible
-   (see :ref:`Accessible`) inside and outside that interface (default
-   ``public``).
+   inside and outside that interface (default ``public``).
 
 .. index::
    name
@@ -496,30 +489,6 @@ declared in:
         let y = 1
     }
 
-Scopes of two names can overlap (e.g., when statements are nested). If scopes
-of two names overlap, then:
-
--  The innermost declaration takes precedence; and
--  Access to the outer name is not possible.
-
-Class, interface, and enumeration members can only be accessed by applying
-the dot operator ``'.'`` to an instance or to a type.
-Accessing them otherwise is not possible.
-
-.. index::
-   name
-   scope
-   overlap
-   nested statement
-   innermost declaration
-   precedence
-   access
-   class member
-   interface member
-   enum member
-   instance
-   dot operator
-
 |
 
 .. _Accessible:
@@ -530,16 +499,48 @@ Accessible
 .. meta:
     frontend_status: Done
 
-Entity is considered accessible if it belongs to the current scope (see
-:ref:`Scopes`) and means that its name can be used for different purposes as
+Entity is accessible by its name:
+
+- In the scope it is declared (see :ref:`Scopes` for detail);
+- In the scope in which it is imported;
+- In a nested scope, if:
+
+    - Another entity with the same name is not declared in this scope and in
+      any scopes between this scope and the scope in which the original entity
+      is declared or imported; or
+
+    - The name is used in position of *type* usage
+      (see :ref:`Using Types`) and another type with the same name is
+      not declared in this scope and in any scopes between this scope and
+      the scope in which the original entity is declared or imported.
+
+The example below illustrates accessibility in nested scopes:
+
+.. code-block:: typescript
+   :linenos:
+
+    type T = int
+
+    function foo() {
+        let T = 7    // T is declared as variable, not type
+        let a: T = 8 // Type T is accessible
+        {
+            let b: T = T // 'b' is variable of type 'int' and value = 7
+        }
+    }
+
+If name is *accessible* it can be used for different purposes as
 follows:
 
 - Type name is used to declare variables, constants, parameters, class fields,
   or interface properties;
+
 - Function or method name is used to call the function or method;
+
 - Variable name is used to read or change the value of the variable;
-- Name of a module introduced as a result of import with Bind All with
-  Qualified Access (see :ref:`Bind All with Qualified Access`) is used to deal
+
+- Name of a module introduced as a result of qualified import
+  see :ref:`Bind All with Qualified Access`) is used to deal
   with exported entities.
 
 .. index::
@@ -556,6 +557,8 @@ follows:
    entity
    export
    exported entity
+
+
 
 |
 
@@ -856,7 +859,7 @@ variable is determined as follows:
 -  If no type annotation is available, then ``T`` is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
 
-An ambient variable declaration (see 
+An ambient variable declaration (see
 :ref:`Ambient Constant or Variable Declarations`) must have *type*
 but no *initializer*. Otherwise, a :index:`compile-time error` occurs.
 
@@ -1050,7 +1053,7 @@ from the initializer expression as follows:
    expression.
 
 -  Type of an expression with ternary operator ``condition ? expr1 : expr2``
-   (see :ref:`Ternary Conditional Expressions`) is inferred as follows:   
+   (see :ref:`Ternary Conditional Expressions`) is inferred as follows:
 
    - If ``condition`` can be evaluated at compile time, then the type of the
      entire expression is inferred from ``expr1`` (where ``condition`` is
@@ -1121,7 +1124,7 @@ If type of an initializer expression cannot be inferred, then a
 
 .. note::
 
-    The presence of an initializer for 
+    The presence of an initializer for
     :ref:`Ambient Constant or Variable Declarations`
     causes a :index:`compile-time error`.
 
@@ -1198,7 +1201,7 @@ The syntax of *signature* is presented below:
         parameters returnType?
         ;
 
-    parameters: 
+    parameters:
         '(' parameterList? ')'
         ;
 
@@ -1437,7 +1440,7 @@ The syntax of *rest parameter* is presented below:
 
 A :index:`compile-time error` occurs if a *rest parameter*:
 
--  Is followed by a parameter, which is not a *rest parameter* ;
+-  Is not the last parameter in a parameter list;
 -  Has a type that is not an array type (see :ref:`Array Types`), a tuple type
    (see :ref:`Tuple Types`), nor a type parameter constrained by an array or
    a tuple type.
@@ -1734,12 +1737,13 @@ The syntax of *return type* is presented below:
         ':' (type | 'this')
         ;
 
-If a function, a method, or a lambda return type is other than ``void`` or 
-``undefined`` (see :ref:`Type undefined or void`), or than a union type
-containing ``void`` or ``undefined``, and the execution path in the function,
-method, or lambda body has neither a ``return`` statement (see
-:ref:`Return Statements`) nor a ``throw`` statement (see
-:ref:`Throw Statements`), then a :index:`compile-time error` occurs. 
+If a function, a method, or a lambda return type explicitly specified is other
+than ``void`` or ``undefined`` (see :ref:`Type undefined or void`) or its
+supertype, or than a union type containing ``void`` or ``undefined`` or its
+supertype, and the execution path in the function, method, or lambda body has
+neither a ``return`` statement (see :ref:`Return Statements`) nor a ``throw``
+statement (see :ref:`Throw Statements`), then a :index:`compile-time error`
+occurs. 
 
 If a function, a method, or a lambda return type is ``never`` (see
 :ref:`Type never`), and there is an execution path in which all statements
@@ -1768,14 +1772,25 @@ then the function, method, or lambda return type is ``void`` (see
     function foo5 (): void {}      // OK, it returns 'undefined' value
     let foo6 = (): void => {}      // OK, it returns 'undefined' value
 
-    function foo7 () {}  // OK, return type is void and return value is 'undefined'
-    let foo8 = () => {} // OK, return type is void and return value is 'undefined'
+    // Any is a supertype of undefined
+    function foo7 (): Any {}      // OK, it returns 'undefined' value 
+    let foo8 = (): Any => {}      // OK, it returns 'undefined' value
 
-    function foo9 (): never {}   // Compile-time error, no throw or return never type
-    let foo10 = (): never => {} // Compile-time error, no throw or return never type
+    // Unions
+    function foo9 (): Any|number {}  // OK, it returns 'undefined' value 
+    let foo10 = (): Any|string => {}  // OK, it returns 'undefined' value
+    function foo11 (): undefined|number {}  // OK, it returns 'undefined' value 
+    let foo12 = (): undefined|string => {}  // OK, it returns 'undefined' value
 
-    function foo11 (): never { while (true) {} } // OK, no return occurs
-    let foo12 = (): never => { for (;;) {} }     // OK, no return occurs
+
+    function foo13 () {}  // OK, return type is void and return value is 'undefined'
+    let foo14 = () => {} // OK, return type is void and return value is 'undefined'
+
+    function foo15 (): never {} // Compile-time error, no throw or return never type
+    let foo16 = (): never => {} // Compile-time error, no throw or return never type
+
+    function foo17 (): never { while (true) {} } // OK, no return occurs
+    let foo18 = (): never => { for (;;) {} }     // OK, no return occurs
 
 
 .. index::

@@ -21,7 +21,7 @@ Classes
 Class declarations introduce new reference types and describe the manner
 of their implementation.
 
-A class body contains declarations and initializer blocks.
+A class body contains declarations and initilization blocks.
 
 Declarations can introduce class members (see :ref:`Class Members`) or class
 constructors (see :ref:`Constructor Declaration`).
@@ -46,7 +46,7 @@ Class members include:
    accessor
    constructor
    class member
-   initializer block
+   initialization block
    scope
    declaration scope
 
@@ -519,6 +519,9 @@ If a class is not *abstract*, then the following conditions must be met:
 
 An optional property from a superinterface can be implemented or implicitly
 defined (see :ref:`Implementing Optional Interface Properties`).
+
+The order of superinterfaces in the ``implements`` clause matters for overload
+resolution, see :ref:`Overload Set for Class Instance Methods`.
 
 |
 
@@ -1021,7 +1024,7 @@ The syntax is presented below:
    method overload
    class method
    static block
-   initialization
+   initialization block
    syntax
 
 .. code-block:: abnf
@@ -1095,7 +1098,7 @@ The use of annotations is discussed in :ref:`Using Annotations`.
    class declaration
    interface
    constructor
-   initializer block
+   initialization block
    inheritance
    declaration scope
    overload
@@ -1145,7 +1148,7 @@ Members can be as follows:
    subclass
    access
    constructor
-   initializer block
+   initialization block
    inheritance
    access
    accessibility
@@ -1635,7 +1638,7 @@ follows:
    expression
    field access expression
    field initializer
-   initializer block
+   initialization block
    static field
    class constructor
    non-static field
@@ -2352,9 +2355,36 @@ A :index:`compile-time error` occurs if:
    ``override``.
 
 If the signature of an overridden method contains parameters with default
-values (see :ref:`Optional Parameters`), then the overriding method must
-always use the same default parameter values for the overridden method.
-Otherwise, a :index:`compile-time error` occurs.
+values (see ref: "Optional Parameters"), then the corresponding parameters in
+the overridden method must also have default values aligned with 
+ref: "Override-Compatible Signatures." 
+
+If at least one method parameter in a subclass has no default value, then the
+overloading (not overriding) occurs for both methods. 
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+        foo(p: number = 1) { console.log ("Base.foo(<default>) with ", p) }
+        bar(p: number = 2) { console.log ("Base.bar(<default>) with ", p) }
+    }
+    class Derived extends Base {
+        override foo(p: Object = "some string") { console.log ("Derived.foo(<default>) with ", p) }
+        /* foo() from Derived overrides foo() from Base and provides contravariant
+           parameter type with its own default value */
+        bar(p: number) { console.log ("Derived.bar(<NO default>) with ", p) }
+    }
+
+    const drv = new Derived
+    test (drv)
+    drv.bar (5) // Overload set for Derived.bar {Derived.bar(<default>). Base.bar(<No default>)}
+    function test (b: Base) {
+       b.foo() // default value will be used
+       b.bar() // default value will be used
+       b.bar (5) // No default value
+    }
+   
 
 More details on overriding are provided in :ref:`Overriding in Classes` and
 :ref:`Overriding in Interfaces`.
@@ -2418,7 +2448,9 @@ The rules that apply to return statements in a method body are discussed in
 
 A :index:`compile-time error` occurs if a method:
 
--  Is declared to have a return type other than *void*, and
+-  Is declared to have a return type other than ``void`` or ``undefined`` or
+   a supertype of ``void`` or ``undefined`` or a union that contains one of the
+   types mentioned before and
 -  Has no return statement on any execution path of its body.
 
 

@@ -123,9 +123,15 @@ Module Header
 *************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
 
 *Module header* defines the optional modifier ``export`` and a *module name*.
+
+.. note::
+   The current compiler does not yet implement explicit module headers such as
+   ``module "x"``, ``export module "x"``, and ``declare module "x"``. The
+   rules in this section describe the intended specification semantics rather than
+   currently supported compiler behavior.
 
 The syntax of *module header* is presented below:
 
@@ -236,9 +242,8 @@ The usage of namespaces is represented in the example below:
    syntax
    export
    qualified name
-   initializer block
+   namespace initializer
    namespace variable
-   static initialization
    call
 
 
@@ -334,12 +339,10 @@ The usage of namespaces is represented in the example below:
 
 .. note::
    Namespaces with identical namespace names in a single module merge their
-   exported declarations into a single namespace. A duplication causes a
-   :index:`compile-time error`. Exported and non-exported declarations with the
-   same name are also considered a :index:`compile-time error`. Only one of the
-   merging namespaces can have an initializer. Otherwise, a
-   :index:`compile-time error` occurs.
-
+   exported declarations into a single namespace based on the textual order of
+   declarations. A duplication causes a :index:`compile-time error`. Exported
+   and non-exported declarations with the same name are also considered a
+   :index:`compile-time error`.
 .. index::
    embedded namespace
    namespace
@@ -361,6 +364,11 @@ The usage of namespaces is represented in the example below:
         export namespace C {
             export function too(): void { console.log ("1st A.C.too() exported") }
         }
+        export let a: number = init_a()
+        function init_a(): number {
+            console.log ("a is initialized")
+            return 11
+        }
     }
 
     namespace B {  }
@@ -377,6 +385,12 @@ The usage of namespaces is represented in the example below:
 
         // function foo() { console.log ("2nd A.foo() non-exported") }
         // Compile-time error, foo() was already defined as exported
+        export let b: number = init_b()
+        function init_b(): number {
+            console.log ("b is initialized")
+            return 22
+        }
+
     }
 
     namespace A.C {
@@ -387,6 +401,10 @@ The usage of namespaces is represented in the example below:
     }
 
     A.goo()
+    /*  The output here is determined by the textual order of declarations
+        "a is initialized"
+        "b is initialized"
+    */
 
     // File
     namespace A {
@@ -873,7 +891,7 @@ are represented by the following code:
     import type {Class2} from "./module.ets"
 
     let c1 = new Class1() // OK
-    let c2 = new Class2() // Compile-time error in |TS|, OK in |LANG|
+    let c2 = new Class2() // Compile-time error in TypeScript, OK in ArkTS
 
 Another form of *type import* is used  when ``type`` is attached to a name
 binding. This allows mixing general import and ``type`` import.
@@ -893,7 +911,7 @@ binding. This allows mixing general import and ``type`` import.
     import {Class1, type Class2 } from "./module.ets"
 
     let c1 = new Class1() // OK
-    let c2 = new Class2() // Compile-time error in |TS|, OK in |LANG|
+    let c2 = new Class2() // Compile-time error in TypeScript, OK in ArkTS
 
 .. index::
    import binding
@@ -926,127 +944,22 @@ Import Path
 *Import path* is a string literal that determines where and how an imported
 module is to be searched for.
 
-*Import path* can include the following:
+The |LANG| compiler uses its own algorithm to locate an imported module. For
+more detail see :ref:`ImportPath Resolution Rules`.
 
-- Initial dot  ``'.'`` or two dots ``'..'`` followed by the slash character ``'/'``.
-- One or more path components (the subset of characters and case sensitivity of
-  path components must follow the path rules of a host file system).
-- Slash characters separating components of the path.
+If the compiler cannot locate an imported module, then a
+:index:`compile-time error` occurs.
 
-The slash character ``'/'`` is used in import paths irrespective of the host
-system. The backslash character is not used in this context.
+If an imported module is found, then its exported declarations can be used in
+the current module.
 
-In most file systems, an import path looks like a file path. *Relative* (see
-below) and *non-relative* import paths have different *resolutions* that map
-the import path to a file path of the host system.
-
-.. index::
-   import binding
-   string literal
-   import path
-   alpha-numeric character
-   import
-   compilation
-   import path
-   context
-   file system
-   relative import path
-   non-relative import path
-   resolution
-   path component
-   case sensitivity
-   subset
-   file path
-   path rule
-   slash character
-   backslash character
-
-The compiler uses its own algorithm to locate a module source that processes
-the import path. If the import path specifies no file extension, then the
-compiler can append some according to its own rules and priorities. If the
-import path refers to a folder, then the way to handle the case is determined
-by the actual compiler. If the compiler cannot locate a module source
-definitely, then a :index:`compile-time error` occurs.
 
 .. index::
    compiler
    import path
-   source
    module
-   folder
-   extension
-   file
 
-A *relative import path* starts with ``'./'`` or ``'../'``. Examples of relative
-paths are presented below:
 
-.. code-block:: typescript
-   :linenos:
-
-    "./components/entry"
-    "../constants/http"
-
-Resolving *relative import* is relative to the importing file. *Relative
-import* is used on modules to maintain their relative location.
-
-.. code-block:: typescript
-   :linenos:
-
-    import * as Utils from "./mytreeutils"
-
-Other import paths are *non-relative*.
-
-Resolving a *non-relative path* depends on the compilation environment. The
-definition of the compiler environment can be particularly provided in a
-configuration file or environment variables.
-
-The *base URL* setting is used to resolve a path that starts with ``'/'``.
-*Path mapping* is used in all other cases. Resolution details depend on
-the implementation. For example, the compilation configuration file can contain
-the following lines:
-
-.. code-block:: typescript
-   :linenos:
-
-    "baseUrl": "/home/project",
-    "paths": {
-        "std": "/arkts/stdlib"
-    }
-
-In the example above, ``/net/http`` is resolved to ``/home/project/net/http``,
-and ``std/components/treemap`` to ``/arkts/stdlib/components/treemap``.
-
-File name, placement, and format are implementation-specific.
-
-If the above configuration is in effect, the first path maps directly to
-file system after applying ``baseUrl``, while ``std`` in the second path is
-replaced for ``/arkts/stdlib``. Examples of non-relative paths are presented
-below.
-
-.. code-block:: typescript
-   :linenos:
-
-    "/net/http"
-    "std/components/treemap"
-
-.. index::
-   relative import path
-   relative path
-   non-relative import path
-   non-relative path
-   compilation environment
-   compiler environment
-   imported file
-   relative location
-   configuration file
-   environment variable
-   resolving
-   base URL
-   path mapping
-   resolution
-   implementation
-   treemap
-   file system
 
 
 |
@@ -1347,69 +1260,161 @@ constant variable that is exported by using this export directive. Otherwise, a
     import * as a from "File1" /* compile-time error, such form of import
                                   cannot be used for the default export */
 
-
 |LANG| forbids any exported declaration which, when
-imported into a code, causes a module to access an unexported entity.
-It applies to both global and namespace declarations.
-Types of exported functions, variables, constants, public and protected members
-of classes, default interface methods, interface getters and setters must be
-set explicitly where applicable.
+used outside its scope, allows an access to an unexported entity.
+It applies to both top-level and namespace declarations.
 
-.. note:: The statement *types of exported functions, ..., methods, ...* above
+The following example illustrate that:
+
+   .. code-block:: typescript
+      :linenos:
+      
+        namespace N {
+            class C {}
+            export class D extends C {} // Compile-time error, 'C' is not exported
+        }
+
+Additional examples are provided below.
+
+In stricter terms, entities used in the `accessible part of
+an exported declaration` must be either exported or be 
+directly available (e.g., built-in types).
+Otherwise, a :index:`compile-time error` occurs.
+
+The term `accessible part of an exported declaration` means a set of entities
+which can be used in another module after importing the declaration or in
+the scope outside a namespace.
+For example, public and protected members of an exported class belong to that
+set while the private members do not belong. Similarly, annotations applied
+to public or protected members belong to that set.
+
+Here is a number of examples which violate the above rule and therefore
+trigger a :index:`compile-time error`.
+
+1. An exported function or an accessor uses an unexported entity in its signature.
+   An exported variable, or constant uses an unexported entity as a type.
+   Note, that use of an unexported entity as a default for an
+   :ref:`Optional Parameters` is allowed:
+
+   .. code-block:: typescript
+      :linenos:
+
+      class A { constructor(a: A) {}; };
+
+      // The following declarations cause compile-time errors
+      // because 'A' is not exported
+      export let v: A
+      export function foo (p: A): A { return p; }
+      export const x3: A = new A()
+      export get val(): A { return new A() }
+      export set val(a: A) {}
+
+      export class B { constructor(B: B) {}; };
+      class C extends B {};
+
+      // OK, 'bar' uses an unexported type in the optional parameter default value:
+      export function bar(p: B = new C() ) {} 
+
+
+2. An exported generic entity uses an unexported declaration as a type
+   argument, type parameter constraint or a type parameter default (including cases
+   when the type argument is not used elsewhere in the exported declaration):
+
+   .. code-block:: typescript
+      :linenos:
+
+      class Arg {};
+
+      // OK since T is a type parameter
+      export class G<T> {}
+
+      // Compile-time error, type parameter default 'Arg' not exported
+      export function foo<T = Arg>(): void {}
+      // Compile-time error, type parameter constraint 'Arg' not exported
+      export function foo<T extends Arg>(): void {}
+
+3. An unexported class or interface is used in ``extends`` clause of exported
+   class or interface, or an unexported interface is used in ``implements`` clause
+   of an exported class. A public or protected class field uses an unexported
+   entity as a type. A public or protected method of exported class uses an
+   unexported entity in its signature:
+
+   .. code-block:: typescript
+      :linenos:
+
+      class C { constructor() {} ; };
+      interface I {};
+
+      // unexported type in extends/implements
+      // Compile-time error, 'C' and 'I' must be exported
+      export class C1 extends C implements I {}
+      // Compile-time error, 'I' must be exported
+      export interface I1 extends I {}
+
+      // unexported entity inside a declaration
+      export class C1 {
+         // Compile-time errors due to unexported 'C'
+         f: C = new C;
+         doIt(): C { return new C(); }
+         protected tryMe(): C { return new C(); }
+
+         // OK, unexported 'C' can be used in private members/fields
+         private secret(): C { return new C(); }
+      }
+
+4. An exported type alias declaration refers to an unexported type:
+
+   .. code-block:: typescript
+     :linenos:
+
+      class C {};
+      
+      // Compile-time error, 'C' must be exported
+      export type A = C
+
+5. An exported overload contains one or more unexported entities:
+
+   .. code-block:: typescript
+      :linenos:
+
+      function foo(): void  {};
+      export function bar(): void  {};
+      
+      export overload baz { foo, bar } // Compile-time error, `foo` not exported
+
+6. An annotation which is applied to the exported declaration is not exported or
+   uses an unexported type:
+
+   .. code-block:: typescript
+      :linenos:
+
+        @interface Anno{}
+        export @Anno class C {} // Compile-time error, '@Anno' is not exported
+
+        class D {
+            @Anno() private f = 1 // OK, non-exported annotation for private field
+        }
+
+        type Version = number[];
+        export @interface deprecated {
+                romVersion: Version; // Compile-time error, 'Version' not exported
+        }
+
+As an additional rule, types of exported functions, variables, constants,
+public and protected members of classes, default interface methods, interface
+getters and setters must be set explicitly where applicable.
+Otherwise, a :index:`compile-time error` occurs.
+
+.. note:: 
+   The statement *types of exported functions, ..., methods, ...* above
    means not only the return type but the entire signature
    of an entity, including, where applicable,
    types of parameters. E.g., a *setter* has no return type
    (not even ``void``), but the type of its parameter must be
    exported explicitly.
 
-Any entity declared in
-the current module and used in an accessible part of an exported declaration must be
-either directly available in |LANG| (e.g., built-in type), or also be exported.
-Otherwise, a :index:`compile-time error` occurs.
-
-.. note:: By an `accessible part of an exported declaration` we mean a set of entities
-   which can be used in another module after importing the declaration.
-   For example, public and protected members of an exported class belong to that
-   set while the private members do not belong.  
-
-.. note:: The above requirements of explicit type and explicit export are
-   also applied to :ref:`ambient declarations`.
-
-Here is a number of examples which violate the above rules and therefore
-trigger a compile-time error,
-
--  Exported constants and variables, or non-private fields of exported classes
-   do not have explicit types. Exported functions, or methods of exported interfaces,
-   or non-private methods of exported classes do not have explicit return types.
-   Exported getters (see :ref:`Accessor declarations`) at the top level or in a
-   namespace do not have an explicit return types;
-
--  An exported function or an accessor uses an unexported entity in its signature.
-   An exported variable, or constant uses an unexported entity as a type.
-   Note, that use of an unexported entity as a default for an
-   :ref:`optional parameters` is allowed.
-
--  An exported generic entity uses an unexported declaration as a type
-   argument, type parameter constraint or a type parameter default (including cases
-   when the type argument is not used elsewhere in exported the declaration);
-
--  An unexported class or interface is used in ``extends`` clause of exported
-   class or interface, or an unexported interface is used in ``implements`` clause
-   of an exported class. A public or protected class field uses an unexported
-   entity as a type. A public or protected method of exported class uses an
-   unexported entity in its signature;
-
--  An exported type alias declaration uses unexported type;
-
--  An annotation which is applied to the exported declaration is not exported or
-   uses an unexported type;
-
--  An exported overload contains one or more unexported entities;
-
-
-Here is the series of examples representing that cases:
-
-1. An exported  declarations without explicit types or explicit return types.
+The following example shows code which violate the above rule and therefore
+trigger a :index:`compile-time error`.
 
    .. code-block:: typescript
       :linenos:
@@ -1475,138 +1480,10 @@ Here is the series of examples representing that cases:
                                             // return type
       }
 
+.. note:: 
 
-2. An exported function, a variable, a constant, or an accessor with unexported
-   entity.
-
-   .. code-block:: typescript
-      :linenos:
-
-      class A { constructor(a: A) {}; };
-
-      // The following declarations cause compile-time errors
-      // because 'A' is not exported
-      export let v: A
-      export function foo (p: A): A { return p; }
-      export const x3: A = new A()
-      export get val(): A { return new A() }
-      export set val(a: A) {}
-
-      export class B { constructor(B: B) {}; };
-      class C extends B {};
-
-      // Next is OK, can use an unexported default as an optional parameter
-      export function bar(p: B = new C() ) {}
-
-  |
-
-
-3. An exported generic uses an unexported entity.
-
-   .. code-block:: typescript
-      :linenos:
-
-      class Arg {};
-
-      // OK since T is a type parameter
-      export class G<T> {}
-
-      // Compile-time error, type parameter default 'Arg' not exported
-      export function foo<T = Arg>(): void {}
-      // Compile-time error, type parameter constraint 'Arg' not exported
-      export function foo<T extends Arg>(): void {}
-
-  |
-
-4. An exported class or interface uses an unexported entity as a type of a public
-   or protected field or in a signature of public or protected method.
-
-   .. code-block:: typescript
-      :linenos:
-
-      class C { constructor() {} ; };
-      interface I {};
-
-      // // unexported type in extends/implements
-      // Compile-time error, 'C' and 'I' must be exported
-      export class C1 extends C implements I {}
-      // Compile-time error, 'I' must be exported
-      export interface I1 extends I {}
-
-      // // unexported entity inside a declaration
-      export class C1 {
-         // // Compile-time errors due to unexported 'C'
-         f: C = new C;
-         doIt(): C { return new C(); }
-         protected tryMe(): C { return new C(); }
-
-         // // OK, unexported 'C' can be used in private members/fields
-         private secret(): C { return new C(); }
-      }
-
-  |
-
-
-5. An exported type alias declaration refers to an unexported type.
-
-   .. code-block:: typescript
-     :linenos:
-
-      class C {};
-      
-      // Compile-time error, 'C' must be exported
-      export type A = C
-
-   |
-
-6. An annotation applied to an exported declaration not exported or uses an unexported type.
-
-   .. code-block:: typescript
-      :linenos:
-
-      type Version = number[];
-
-      // Compile-time error, ``Version`` not exported
-      export @interface deprecated {
-                        fromVersion: Version;
-                     }
-
-      export @deprecated([1, 1]) function bar() {};
-
-      |
-
-7. One or more unexported entities in an exported overload:
-
-   .. code-block:: typescript
-      :linenos:
-
-      function foo(): void  {};
-      export function bar(): void  {};
-
-      // Compile-time error, `foo` not exported
-      export overload baz { foo, bar }
-
-   |
-
-
-.. index::
-   exported declaration
-   expression
-   top-level declaration
-   modifier export
-   constant variable
-   evaluation result
-   export
-   default target
-   export target
-   export directive
-   accessibility
-   declaration
-   export
-   declared name
-   default export directive
-   import
-   value
+    The above requirements of explicit export and explicit type are
+    also applied to :ref:`ambient declarations`.
 
 |
 
@@ -2266,7 +2143,7 @@ Entry point functions have the following features:
   line;
 - Entry point function may be asynchronous (see :ref:`Async Functions`);
 - If entry point function is not asynchronous, its return type is either
-  ``void`` (see :ref:`Type undefined or void`) or ``int``;
+  ``void`` or ``undefined`` (see :ref:`Type undefined or void`) or ``int``;
 - If entry point function is asynchronous, its return type is either
   ``Promise<void>`` or ``Promise<int>`` (see :ref:`Concurrency Promise Class`);
 - Entry point function cannot be overloaded;
