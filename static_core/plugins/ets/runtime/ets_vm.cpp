@@ -609,11 +609,11 @@ bool PandaEtsVM::CheckEntrypointSignature(Method *entrypoint)
 
 static EtsObjectArray *CreateArgumentsArray(const std::vector<std::string> &args, PandaEtsVM *etsVm)
 {
-    EtsClass *arrayKlass = PlatformTypes(etsVm)->coreStringFixedArray;
-
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
-    EtsObjectArray *etsArray = EtsObjectArray::Create(arrayKlass, args.size());
+    auto types = PlatformTypes(etsVm);
+    EtsObjectArray *etsArray = EtsObjectArray::Create(types->coreString, args.size());
+    ASSERT(etsArray->GetClass() == types->coreStringFixedArray);
     EtsHandle<EtsObjectArray> arrayHandle(executionCtx, etsArray);
 
     for (size_t i = 0; i < args.size(); i++) {
