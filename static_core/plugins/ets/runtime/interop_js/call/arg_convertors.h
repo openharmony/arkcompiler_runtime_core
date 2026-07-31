@@ -273,6 +273,9 @@ template <typename FRead>
     }
 
     auto klass = ref->template ClassAddr<Class>();
+    if (UNLIKELY(klass == nullptr)) {
+        InteropFatal("InteropFatal, object must have a valid class.");
+    }
     auto execCtx = JobExecutionContext::GetCurrent();
     // start fastpath
     if (klass == PlatformTypes(execCtx)->interopJSValue->GetRuntimeClass()) {
