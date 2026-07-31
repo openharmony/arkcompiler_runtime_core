@@ -93,9 +93,11 @@ rm -rf "$PANDA_SDK_PATH"
 
 build_sdk_targets
 
-echo "> Packing NPM package..."
-mkdir -p "$PANDA_SDK_PATH"
-cp "$SCRIPT_DIR"/package.json "$PANDA_SDK_PATH"
-cd "$PANDA_SDK_PATH"
-npm pack --pack-destination ..
-cd "$BUILD_DIR"
+if [ -z "$PANDA_SDK_SKIP_NPM_PACK" ]; then
+    echo "> Packing NPM package..."
+    mkdir -p "$PANDA_SDK_PATH"
+    cp "$SCRIPT_DIR"/package.json "$PANDA_SDK_PATH"
+    cd "$PANDA_SDK_PATH"
+    npm pack --pack-destination ..
+    cd "$BUILD_DIR"
+fi
