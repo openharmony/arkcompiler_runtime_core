@@ -19,13 +19,18 @@
 let original: String = 'abcde';
 
 //! CHECKER       Equal Substring JIT
-//! RUN           force_jit: true, options: "--compiler-regex='.*main.*'", entry: "ets_string_substring.ETSGLOBAL::main"
+//! RUN           force_jit: true, options: "--compiler-regex='.*GLOB.*'", entry: "ets_string_substring.ETSGLOBAL::main"
 //! METHOD        "ets_string_substring.ETSGLOBAL::main"
 //! PASS_AFTER    "IrBuilder"
 //! INST          "Intrinsic.StdCoreStringSubstring"
 //! PASS_AFTER    "Codegen"
 //! INST_NOT      "Intrinsic.StdCoreStringSubstring"
-
+//! METHOD        "ets_string_substring.ETSGLOBAL::substringFullString"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.StdCoreStringSubstring"
+//! PASS_AFTER    "Peephole"
+//! PASS_AFTER_NEXT "Cleanup"
+//! INST_NOT      "Intrinsic.StdCoreStringSubstring"
 
 //! CHECKER       Equal Substring  AOT
 //! SKIP_IF       @architecture == "arm32"
@@ -36,6 +41,12 @@ let original: String = 'abcde';
 //! PASS_AFTER    "Codegen"
 //! INST_NOT      "Intrinsic.StdCoreStringSubstring"
 //! RUN           entry: "ets_string_substring.ETSGLOBAL::main"
+//! METHOD        "ets_string_substring.ETSGLOBAL::substringFullString"
+//! PASS_AFTER    "IrBuilder"
+//! INST          "Intrinsic.StdCoreStringSubstring"
+//! PASS_AFTER    "Peephole"
+//! PASS_AFTER_NEXT "Cleanup"
+//! INST_NOT      "Intrinsic.StdCoreStringSubstring"
 
 //! CHECKER       Equal Substring INT
 //! RUN           options: "--compiler-enable-jit=false", entry: "ets_string_substring.ETSGLOBAL::main"
@@ -44,9 +55,17 @@ let original: String = 'abcde';
 function __noinline__subString(str: String, begin: int, end: int): String {
     return str.substring(begin, end);
 }
-function main(): int {
-    let subs: String = __noinline__subString(original, 0, original.getLength());
+
+function substringFullString(): int {
+    let subs: String = original.substring(0, original.getLength());
     if (original !== subs) {
+        return 1;
+    }
+    return 0;
+}
+
+function main(): int {
+    if (substringFullString() > 0) {
         return 1;
     }
     let subs1: String = __noinline__subString(original, -1, 100);

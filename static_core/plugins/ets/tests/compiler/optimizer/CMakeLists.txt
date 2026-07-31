@@ -20,6 +20,7 @@ if(PANDA_COMPILER_ENABLE)
             ets_async_ir_builder_test.cpp
             ets_loop_idioms_test.cpp
             string_flat_check_test.cpp
+            string_flat_check_elimination_test.cpp
         LIBRARIES
             arkcompiler arkruntime
         SANITIZERS

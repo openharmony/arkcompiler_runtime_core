@@ -17,6 +17,7 @@
 
 //! CHECKER      AOT IR Builder, check string equality and intrinsic optimizations
 //! RUN_PAOC     options: "--compiler-regex='.*(eliminate|equalsStr|equalsNonStringObject|Equals).*'"
+//! RUN_LLVM     options: "--llvm-pre-opt=2 --compiler-regex='.*(eliminate|equalsStr|equalsNonStringObject|Equals).*'"
 //!
 //! METHOD       "ets_string_equals.ETSGLOBAL::equalsStrStr"
 //! PASS_AFTER   "IrBuilder"
@@ -42,11 +43,15 @@
 //! INST_NOT     /Intrinsic/
 //!
 //! METHOD       "ets_string_equals.ETSGLOBAL::eliminate"
+//! PASS_AFTER   "StringFlatCheck"
+//! INST_COUNT   /StringFlatCheck/, 1
 //! PASS_BEFORE_NTH  "GVN", 1
 //! INST_COUNT       /Intrinsic.StdCoreStringEquals/, 2
 //! PASS_AFTER_NTH   "GVN", 1
 //! PASS_AFTER_NEXT  "Cleanup"
 //! INST_COUNT       /Intrinsic.StdCoreStringEquals/, 2
+//! PASS_AFTER_NEXT  "StringFlatCheckElimination"
+//! INST_COUNT       /StringFlatCheck/, 1
 //!
 //! METHOD       "ets_string_equals.ETSGLOBAL::genericEqualsObjObj"
 //! PASS_AFTER      "IrBuilder"
@@ -67,6 +72,13 @@
 //! PASS_AFTER_NEXT "Peephole"
 //! INST_NOT        /Intrinsic.CompilerEtsEquals/
 //! INST_COUNT      /Intrinsic.StdCoreStringEquals/, 1
+//! PASS_AFTER      "StringFlatCheck"
+//! INST_COUNT      /StringFlatCheck/, 1
+//! PASS_AFTER_NTH  "Peephole", 2
+//! PASS_AFTER_NEXT "Cleanup_light"
+//! INST_NOT        /Intrinsic.StdCoreStringEquals/
+//! PASS_AFTER_NEXT "StringFlatCheckElimination"
+//! INST_NOT        /StringFlatCheck/
 //!
 //! METHOD       "ets_string_equals.ETSGLOBAL::genericEqualsUndefinedStringCaller"
 //! PASS_AFTER      "IrBuilder"
@@ -98,7 +110,35 @@
 //! INST         /Intrinsic.StdCoreStringEquals/
 //!
 //! RUN          entry: "ets_string_equals.ETSGLOBAL::main"
-//! RUN          force_jit: true, options: "--compiler-regex='.*(main|equalsNonStringObject).*'", entry: "ets_string_equals.ETSGLOBAL::main", aot_file: ""
+
+//! CHECKER      JIT, check string equality and intrinsic optimizations
+//! RUN    force_jit: true, options: "--compiler-regex='.*(eliminate|equalsStr|equalsNonStringObject|Equals).*'",
+//!        entry: "ets_string_equals.ETSGLOBAL::main", aot_file: ""
+//! METHOD       "ets_string_equals.ETSGLOBAL::eliminate"
+//! PASS_AFTER   "StringFlatCheck"
+//! INST_COUNT   /StringFlatCheck/, 1
+//! PASS_BEFORE_NTH  "GVN", 1
+//! INST_COUNT       /Intrinsic.StdCoreStringEquals/, 2
+//! PASS_AFTER_NTH   "GVN", 1
+//! PASS_AFTER_NEXT  "Cleanup"
+//! INST_COUNT       /Intrinsic.StdCoreStringEquals/, 2
+//! PASS_AFTER_NEXT  "StringFlatCheckElimination"
+//! INST_COUNT       /StringFlatCheck/, 1
+//!
+//! METHOD       "ets_string_equals.ETSGLOBAL::genericEqualsUndefinedCaller"
+//! PASS_AFTER      "IrBuilder"
+//! INST_COUNT      /Call.*genericEqualsObjObj/, 1
+//! PASS_AFTER      "Inline"
+//! PASS_AFTER_NEXT "Peephole"
+//! INST_NOT        /Intrinsic.CompilerEtsEquals/
+//! INST_COUNT      /Intrinsic.StdCoreStringEquals/, 1
+//! PASS_AFTER      "StringFlatCheck"
+//! INST_COUNT      /StringFlatCheck/, 1
+//! PASS_AFTER_NTH  "Peephole", 3
+//! PASS_AFTER_NEXT "Cleanup_light"
+//! INST_NOT        /Intrinsic.StdCoreStringEquals/
+//! PASS_AFTER_NEXT "StringFlatCheckElimination"
+//! INST_NOT        /StringFlatCheck/
 
 // Prevents comparison elimination by frontend type inference
 function getnull(): String | null {

@@ -224,7 +224,7 @@ OUT_GRAPH(MultipleUsers, Graph *graph)
         {
             INST(46U, Opcode::SaveState).Inputs(0U).SrcVregs({2U});
             INST(44U, Opcode::StringFlatCheck).Inputs(0U, 46U).ref();
-            INST(40U, Opcode::SaveState).Inputs(44U).SrcVregs({2U});
+            INST(40U, Opcode::SaveState).Inputs(44U, 0U).SrcVregs({2U, VirtualRegister::BRIDGE});
             INST(41U, Opcode::Call)
                 .Inputs({{DataType::NO_TYPE, 40U}})
                 .SetFlag(compiler::inst_flags::REQUIRE_STATE)
@@ -279,8 +279,8 @@ OUT_GRAPH(MultipleUsers, Graph *graph)
 
         BASIC_BLOCK(8U, 9U)
         {
-            INST(43U, Opcode::SaveState).Inputs(44U).SrcVregs({2U});
-            INST(42U, Opcode::StringFlatCheck).Inputs(44U, 43U).ref();
+            INST(43U, Opcode::SaveState).Inputs(44U, 0U).SrcVregs({2U, VirtualRegister::BRIDGE});
+            INST(42U, Opcode::StringFlatCheck).Inputs(0U, 43U).ref();
             INST(26U, Opcode::SaveState).Inputs(42U).SrcVregs({2U});
             INST(27U, Opcode::Intrinsic)
                 .IntrinsicId(RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_REPEAT)

@@ -69,6 +69,7 @@
 #include "optimizer/optimizations/adjust_arefs.h"
 #include "optimizer/optimizations/if_merging.h"
 #include "optimizer/optimizations/string_flat_check.h"
+#include "optimizations/string_flat_check_elimination.h"
 
 #include "compiler/generated/pipeline_includes.h"
 
@@ -220,6 +221,7 @@ bool Pipeline::RunOptimizations()
         graph->RunPass<Cleanup>(false);
     }
     graph->RunPass<ChecksElimination>();
+    graph->RunPass<StringFlatCheck>();
     graph->RunPass<Licm>(g_options.GetCompilerLicmHoistLimit());
     graph->RunPass<LicmConditions>();
     graph->RunPass<RedundantLoopElimination>();
@@ -257,7 +259,7 @@ bool Pipeline::RunOptimizations()
     if (graph->IsAotMode()) {
         graph->RunPass<Cse>();
     }
-    graph->RunPass<StringFlatCheck>();
+    graph->RunPass<StringFlatCheckElimination>();
     graph->RunPass<SaveStateOptimization>();
     graph->RunPass<Peepholes>();
 #ifndef NDEBUG
