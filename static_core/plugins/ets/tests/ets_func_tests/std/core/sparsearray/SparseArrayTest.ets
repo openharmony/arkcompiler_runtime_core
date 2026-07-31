@@ -27,6 +27,10 @@ function main(): int {
     suite.addTest('Shift SparseArray', testShift)
     suite.addTest('Splice SparseArray', testSplice)
     suite.addTest('Splice SparseArray single arg', testSpliceSingleArg)
+    suite.addTest('Splice skips holes', testSpliceSkipsHoles)
+    suite.addTest('Splice to end', testSpliceToEnd)
+    suite.addTest('Splice holes toString', testSpliceHolesToString)
+    suite.addTest('toSpliced leaves original', testToSplicedLeavesOriginal)
     suite.addTest('Sort SparseArray', testSortDefault)
     suite.addTest('Fill SparseArray', testFill)
     suite.addTest('Concat SparseArray', testConcat)
@@ -153,6 +157,41 @@ function testSpliceSingleArg() {
     res = x.splice(3, undefined)
     checkExpected(x, [1, 2, 3, 4])
     checkExpected(res, [])
+}
+
+function testSpliceSkipsHoles() {
+    let a = new SparseArray<string>()
+    a.$_set(0, 'zero')
+    a.$_set(2, 'two')
+
+    let deleted = a.splice(0, 3)
+
+    arktest.assertEQ(deleted.length, 3)
+    arktest.assertEQ(deleted.at(0), 'zero')
+    arktest.assertEQ(deleted.at(2), 'two')
+    arktest.assertTrue(deleted.at(1) === undefined)
+}
+
+function testSpliceToEnd() {
+    let arr = new SparseArray<Int>(10, 20, 30, 40, 50)
+    let deleted = arr.splice(2)
+    arktest.assertEQ(arr.toString(), '10,20')
+    arktest.assertEQ(deleted.toString(), '30,40,50')
+}
+
+function testSpliceHolesToString() {
+    let arr = new SparseArray<Int>(6)
+    arr[2] = 10
+    arr[4] = 20
+    let removed = arr.splice(2, 2, 50)
+    arktest.assertEQ(removed.toString(), '10,')
+}
+
+function testToSplicedLeavesOriginal() {
+    let arr = new SparseArray<Int>(1, 2, 3, 4, 5)
+    let n = arr.toSpliced(1, 2, 20, 30)
+    arktest.assertEQ(n.toString(), '1,20,30,4,5')
+    arktest.assertEQ(arr.toString(), '1,2,3,4,5')
 }
 
 function testSortDefault() {

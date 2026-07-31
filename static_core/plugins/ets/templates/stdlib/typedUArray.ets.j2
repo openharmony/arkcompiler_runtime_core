@@ -1039,31 +1039,6 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             mapfn = (v: {{element['subsetType']}}, k: number): {{element['subsetType']}} => { return v }
         }
 
-        let iter = arrayLike.$_iterator()
-        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
-        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
-        //  we can make one pass through the iterator without the need for memory reallocation.
-        const maybeLength = tryGetIteratorLength(arrayLike)
-        if (maybeLength) {
-            const result = new {{element['name']}}Array(maybeLength)
-            for (let i = 0; i < maybeLength; ++i) {
-                const x = iter.next()
-                if (x.done) {
-                    return new {{element['name']}}Array(result.buffer, 0, i)
-                }
-                const mapped = (mapfn)!(x.value!, i)
-                {%- if element.get('name') == 'BigUint64' %}
-                result.setUnsafe(i, mapped.getULong())
-                {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
-                result.setUnsafe(i, {{element.get('name')}}Array.doubleToInt(mapped))
-                {%- else %}
-                result.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(mapped))
-                {%- endif %}
-            }
-            return result
-        }
-
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new {{element['name']}}Array(6)
         let index : FixedArray<int> = new FixedArray<int>(1)

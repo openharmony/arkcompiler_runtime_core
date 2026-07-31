@@ -1066,32 +1066,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
-        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
-        //  we can make one pass through the iterator without the need for memory reallocation.
-        const maybeLength = tryGetIteratorLength(arrayLike)
-        if (maybeLength) {
-            const result = new {{N}}Array(maybeLength)
-            for (let i = 0; i < maybeLength; ++i) {
-                const x = iter.next()
-                if (x.done) {
-                    return new {{N}}Array(result.buffer, 0, i)
-                }
-                const mapped = (mapfn)!(x.value!, i)
-                {%- if N == 'BigInt64' %}
-                result.setUnsafe(i, mapped.getLong())
-                {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
-                result.setUnsafe(i, {{N}}Array.doubleToInt(mapped))
-                {%- elif N == 'Float32' %}
-                result.setUnsafe(i, mapped.toFloat())
-                {%- else %}
-                result.setUnsafe(i, mapped)
-                {%- endif %}
-            }
-            return result
-        }
-
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new {{N}}Array(6)
         let index : FixedArray<int> = new FixedArray<int>(1)
