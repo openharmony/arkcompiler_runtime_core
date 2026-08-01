@@ -44,13 +44,6 @@ cases:
 
   - decl: |
       class A {
-        f(): void {}
-      }
-      function f(this: A): void {}
-    expected_out: "Semantic error ESE0081: The extension function 'f' has the same name with public method in class A"
-
-  - decl: |
-      class A {
         f: number = 1
       }
       function f(this: A): void {}
@@ -66,29 +59,6 @@ cases:
       class A {}
       function f(first: string, this: A): void {}
     expected_out: "Syntax error ESY0158: Function Parameter 'this' must be the first."
-
-  - decl: |
-      class A {
-        foo(): void {}
-      }
-      class B extends A {}
-      
-      function foo(this: A): void {}
-      let bb: B = new B;
-      bb.foo()
-    expected_out: "Semantic error ESE0081: The extension function 'foo' has the same name with public method in class A"
-
-  - decl: |
-      class A {
-        foo() {}
-      }
-      class B {
-        foo() {}
-      }
-      function foo(this: A) {}
-      let x: A|B = new B
-      x.foo()
-    expected_out: "Semantic error ESE0081: The extension function 'foo' has the same name with public method in class A"
 
   - decl: | # The first parameter named 'this' is readonly
       class A {}

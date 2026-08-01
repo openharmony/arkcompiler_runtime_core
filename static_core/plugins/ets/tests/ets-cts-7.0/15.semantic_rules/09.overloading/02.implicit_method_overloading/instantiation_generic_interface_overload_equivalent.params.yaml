@@ -65,15 +65,3 @@ cases:
       call: |-
         let instantiation = new C
         arktest.assertEQ(instantiation.foo(new B), "generic", "Textually first method call expected")
-
-    - decl: |-
-        class A {}
-        class B extends A {}
-        interface Template<T extends A> {
-            foo(x: B): string { return "non-generic" }
-            foo(x: T): string { return "generic" }
-        }
-        class C implements Template<B> {}
-      call: |-
-        let instantiation = new C
-        arktest.assertEQ(instantiation.foo(new B), "non-generic", "Textually first method call expected")

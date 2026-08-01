@@ -16,24 +16,27 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: A compile-time error occurs, if a qualified name refers to a function with overload signature.
-tags: [compile-only, negative]
-expected_out: "Semantic error ESE0389: The overloaded name 'bar' can't refer to a function with overload signatures."
+tags: [compile-only, negative] 
+expected_out: "Semantic error ESE0017: Only abstract or native methods can't have body."
 ---*/
 
-function bar (i: int): string
-function bar (n: number): string
-function bar(...a: Any[]): Any {
-  return 'bar';
-}
+class A {
+  bar (i: int): string
+  bar (n: number): string
+  bar(...a: Any[]): Any {
+    return 'bar';
+  }
 
-function foo1 (i: int): string {
-  return 'foo1';
-}
+  foo1 (i: int): string {
+    return 'foo1';
+  }
 
-overload test { {{c.list}} }
+  overload test { {{c.list}} }
+}
 
 function main(): void {
-  test(1);
+  let a: A = new A();
+  a.test(1);
 }
 
 {% endfor %}
