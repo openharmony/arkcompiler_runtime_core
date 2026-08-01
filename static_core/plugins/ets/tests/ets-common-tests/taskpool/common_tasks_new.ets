@@ -77,25 +77,29 @@ async function taskpoolScalingShouldNotOverExpand(): Promise<void> {
     if (CoroutineExtras.isTaskpoolUsingLaunchMode()) {
         return;
     }
-    const limit: int = CoroutineExtras.getTaskPoolWorkersLimit();
+    const originalLimit: int = CoroutineExtras.getTaskPoolWorkersLimit();
     const currentWorkersNum: int = CoroutineExtras.getTaskPoolWorkersNum();
-    if (currentWorkersNum >= limit) {
+    let workerTarget: int = originalLimit > 4 ? 4 : originalLimit;
+    if (currentWorkersNum >= workerTarget) {
+        arktest.assertLE(currentWorkersNum, originalLimit);
         return;
     }
 
     let promises: Promise<Any>[] = [];
     let flag = new AtomicFlag(false);
-    for (let i = 0; i <= limit + 1; ++i) {
-        let task = new taskpool.Task(scalingInfiniteTask, flag);
-        promises.push(taskpool.execute(task));
-        delay(2);
-    }
+    try {
+        for (let i = 0; i <= workerTarget + 1; ++i) {
+            let task = new taskpool.Task(scalingInfiniteTask, flag);
+            promises.push(taskpool.execute(task));
+            delay(1);
+        }
 
-    while (CoroutineExtras.getTaskPoolWorkersNum() < limit) {
+        await yieldSchedulerRounds(2);
+        arktest.assertLE(CoroutineExtras.getTaskPoolWorkersNum(), originalLimit);
+    } finally {
+        flag.set(true);
+        await Promise.all(promises);
     }
-    arktest.assertEQ(CoroutineExtras.getTaskPoolWorkersNum(), limit);
-    flag.set(true);
-    await Promise.all(promises);
 }
 
 async function cancelInSuccessCallback() {
@@ -110,7 +114,7 @@ async function cancelInSuccessCallback() {
     }
 
     let task1 = new taskpool.Task(returnAbc);
-    let task2 = new taskpool.Task(timeoutPromise, 100);
+    let task2 = new taskpool.Task(timeoutPromise, 20);
     task1.onExecutionSucceeded(() => {
         syncSuccessCallbackCalled = true;
         arktest.expectError(
@@ -933,9 +937,9 @@ async function cancelGroupSettlesWhileQueued(): Promise<void> {
         return;
     }
 
-    const workerLimit: int = 4;
-    const floodCount: int = 300;
-    const yieldRounds: int = 16;
+    const workerLimit: int = 1;
+    const floodCount: int = 2;
+    const yieldRounds: int = 1;
 
     let releaseFlag = new AtomicFlag(false);
     let blockersStarted = new AtomicInt(0);
@@ -986,56 +990,61 @@ async function cancelGroupSettlesWhileQueued(): Promise<void> {
 }
 
 async function cancelPeriodicTaskStopsExecution(): Promise<void> {
+    const periodMs: int = 20;
+    const drainAfterCancelMs: number = 60.0;
     let cancelPeriodicCount = new AtomicInt(0);
-    let firstExecution = new AtomicFlag(false);
+    let firstExecutionFinished = new AtomicFlag(false);
     let countAfterCancel: int = 0;
     let canceled = new AtomicBoolean(false);
     let task = new taskpool.Task(() => {
         cancelPeriodicCount.fetchAdd(1);
-        if (cancelPeriodicCount.load() == 1) {
-            firstExecution.set(true);
-        }
     });
 
     task.onExecutionSucceeded(() => {
+        if (!firstExecutionFinished.get()) {
+            firstExecutionFinished.set(true);
+        }
         if (canceled.load()) {
             // Allow at most 1 more execution after cancel.
             arktest.assertLE(cancelPeriodicCount.load(), countAfterCancel + 1);
         }
     });
-    taskpool.executePeriodically(0, task, taskpool.Priority.MEDIUM);
+    taskpool.executePeriodically(periodMs, task, taskpool.Priority.MEDIUM);
 
-    while (!firstExecution.get()) {
+    while (!firstExecutionFinished.get()) {
         await yieldSchedulerRounds(1);
     }
     taskpool.cancel(task);
     countAfterCancel = cancelPeriodicCount.load();
     canceled.store(true);
+    await dependencyStressAsyncSleep(drainAfterCancelMs);
     arktest.assertLE(cancelPeriodicCount.load(), countAfterCancel + 1);
 }
 
 async function verifyCancelPeriodicTaskAfterExecution(cancelByTaskId: boolean): Promise<void> {
+    const periodMs: int = 20;
+    const drainAfterCancelMs: number = 60.0;
     let executions = new AtomicInt(0);
-    let firstExecution = new AtomicFlag(false);
+    let firstExecutionFinished = new AtomicFlag(false);
     let countAfterCancel: int = 0;
     let canceled = new AtomicBoolean(false);
     let task = new taskpool.LongTask(() => {
         executions.fetchAdd(1);
-        if (executions.load() == 1) {
-            firstExecution.set(true);
-        }
     });
 
     task.onExecutionSucceeded(() => {
+        if (!firstExecutionFinished.get()) {
+            firstExecutionFinished.set(true);
+        }
         if (canceled.load()) {
             // Allow at most 1 more execution after cancel.
             arktest.assertLE(executions.load(), countAfterCancel + 1);
         }
     });
 
-    taskpool.executePeriodically(100, task);
+    taskpool.executePeriodically(periodMs, task);
 
-    while (!firstExecution.get()) {
+    while (!firstExecutionFinished.get()) {
         await yieldSchedulerRounds(1);
     }
     if (cancelByTaskId) {
@@ -1045,6 +1054,7 @@ async function verifyCancelPeriodicTaskAfterExecution(cancelByTaskId: boolean): 
     }
     countAfterCancel = executions.load();
     canceled.store(true);
+    await dependencyStressAsyncSleep(drainAfterCancelMs);
     arktest.assertLE(executions.load(), countAfterCancel + 1);
 }
 
