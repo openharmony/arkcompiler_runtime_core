@@ -36,6 +36,7 @@ const IS_LITTLE_ENDIAN: boolean;
     {%- set _ = element.update({'subsetTypeBoxed':  element['subsetType'][0].upper() + element['subsetType'][1:], 'primitiveTypeBoxed':  element['primitiveType'][0].upper() + element['primitiveType'][1:]}) %}
     {%- set updatedSubsetType = 'int' if element['subsetType'] != 'BigInt' else 'BigInt' %}
     {%- set asElementCompat = ('%s.toDouble()') if element['subsetType'] != 'BigInt' else 'new BigInt(%s)' %}
+    {%- set asCallbackElementCompat = ('%s.toDouble()') if element['subsetType'] != 'BigInt' else 'BigInt.fromULong(%s)' %}
     {%- set fromElementCompat = ('%s.to' + element['primitiveType'].capitalize() + '()') if element['subsetType'] != 'BigInt' else '%s.getULong()' %}
     {%- set numberBigIntToPrimitive = ('.to' + element['primitiveType'].capitalize() + '()') if element['subsetType'] != 'BigInt' else '.getULong()' %}
     {%- set numberBigIntUndefToPrimitive = (numberBigIntToPrimitive) %}
@@ -196,10 +197,11 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @FaAndStageModel
      */
     public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / {{element['name']}}Array.BYTES_PER_ELEMENT)) {
+        const intLength = length.toInt()
+        if (intLength < 0 || length > (Int.MAX_VALUE / {{element['name']}}Array.BYTES_PER_ELEMENT)) {
             throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
-        this.lengthInt = length.toInt()
+        this.lengthInt = intLength
         this.byteLengthInt = this.lengthInt * {{element['name']}}Array.BYTES_PER_ELEMENT
         this.byteOffsetInt = 0
         this.buffer = new ArrayBuffer(this.byteLengthInt)
@@ -312,8 +314,10 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
             const arr = reflect.internals.Types.identity_cast<{{element['subsetTypeValues']}}>(items as ArrayLike<{{element['subsetTypeValues']}}>)
-            this.byteLengthInt = arr.length * {{element['name']}}Array.BYTES_PER_ELEMENT
-            this.lengthInt = arr.length
+            const sourceLength = arr.length
+            const length = sourceLength < 0 ? 0 : sourceLength
+            this.byteLengthInt = length * {{element['name']}}Array.BYTES_PER_ELEMENT
+            this.lengthInt = length
             this.buffer = new ArrayBuffer(this.byteLengthInt)
             this.byteOffsetInt = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
@@ -392,6 +396,11 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             throw new RangeError("byteOffset should be multiple of {{element['bytes']}} as {{element['name']}}Array.BYTES_PER_ELEMENT")
         }
 {% endif %}
+        if (length == undefined && intByteLength % {{element['name']}}Array.BYTES_PER_ELEMENT != 0) {
+            throw new RangeError(
+                'ArrayBuffer byteLength minus byteOffset should be a multiple of {{element['bytes']}} as {{element['name']}}Array.BYTES_PER_ELEMENT'
+            )
+        }
         let intLength: int
         if (length != undefined) {
             intLength = length.toInt()
@@ -697,10 +706,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @FaAndStageModel
      */
     public set(arr: FixedArray<{{element['primitiveType']}}>, insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
+        const sourceLength = arr.length
+        const destinationLength = this.lengthInt
+        if (insertPos < 0 || insertPos > destinationLength || sourceLength > destinationLength - insertPos) {
             throw new RangeError("set(insertPos: int, arr: FixedArray<{{element['primitiveType']}}>): size of arr is greater than {{element['name']}}Array.length")
         }
-        for (let i = 0; i < arr.length; i++) {
+        for (let i = 0; i < sourceLength; i++) {
             this.setUnsafeClamp(insertPos + i, arr[i])
         }
     }
@@ -716,10 +727,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @FaAndStageModel
      */
     public set(arr: FixedArray<{{element['subsetType']}}>, insertPos: int): void {
-        if (insertPos < 0 || insertPos + arr.length > this.lengthInt) {
+        const sourceLength = arr.length
+        const destinationLength = this.lengthInt
+        if (insertPos < 0 || insertPos > destinationLength || sourceLength > destinationLength - insertPos) {
             throw new RangeError("set(insertPos: int, arr: FixedArray<{{element['primitiveType']}}>): size of arr is greater than {{element['name']}}Array.length")
         }
-        for (let i = 0; i < arr.length; i++) {
+        for (let i = 0; i < sourceLength; i++) {
             {%- if element.get('name') == 'BigUint64' %}
             this.setUnsafe(insertPos + i, arr[i].getULong())
             {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
@@ -793,10 +806,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      */
     public set(array: ArrayLike<{% if element['name'] == 'BigUint64' %}BigInt{% else %}number{% endif %}>, offset: int = 0): void {
         const insertPos = offset
-        if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
+        const sourceLength = array.length
+        const destinationLength = this.lengthInt
+        if (insertPos < 0 || insertPos > destinationLength || sourceLength > destinationLength - insertPos) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length; ++i) {
+        for (let i = 0; i < sourceLength; ++i) {
             {%- if element.get('name') == 'BigUint64' %}
             this.setUnsafe(insertPos + i, array[i].getULong())
             {%- elif element.get('name') == 'Uint16' or element.get('name') == 'Uint32' or element.get('name') == 'Uint8' %}
@@ -978,7 +993,8 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      */
     public static from(arr: ArrayLike<{{element['subsetType']}}>): {{element['name']}}Array {
         {%- if element.name == 'Uint8Clamped' %}
-        const len = arr.length;
+        const sourceLength = arr.length;
+        const len = sourceLength < 0 ? 0 : sourceLength;
         const result = new Uint8ClampedArray(len);
         for (let i: int = 0; i < len; ++i) {
             result.setUnsafeClamp(i, Uint8ClampedArray.toUint8Clamped(arr[i]))
@@ -1005,7 +1021,12 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @FaAndStageModel
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
-        let res = new {{element['name']}}Array(arrayLike.length)
+        const sourceLength = arrayLike.length
+        const length = sourceLength < 0 ? 0 : sourceLength
+        let res = new {{element['name']}}Array(length)
+        if (length == 0) {
+            return res
+        }
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
@@ -1064,7 +1085,9 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             index[0]++
         })
 
-        return new {{element['name']}}Array(temp.buffer, 0, index[0])
+        return new {{element['name']}}Array(
+            temp.buffer.slice(0, index[0] * {{element['name']}}Array.BYTES_PER_ELEMENT)
+        )
     }
 
     /**
@@ -1434,14 +1457,14 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         {%- if element['name'] != 'BigUint64' %}
             res.append(this.getUnsafe(0).toLocaleString(locales, options))
         {%- else %}
-            res.append(new BigInt(this.getUnsafe(0)).toLocaleString(locales, options))
+            res.append(BigInt.fromULong(this.getUnsafe(0)).toLocaleString(locales, options))
         {%- endif %}
             for (let i: int = 1; i < this.lengthInt; ++i) {
                 res.append(",")
             {%- if element['name'] != 'BigUint64' %}
                 res.append(this.getUnsafe(i).toLocaleString(locales, options))
             {%- else %}
-                res.append(new BigInt(this.getUnsafe(i)).toLocaleString(locales, options))
+                res.append(BigInt.fromULong(this.getUnsafe(i)).toLocaleString(locales, options))
             {%- endif %}
             }
             return res.toString()
@@ -1508,10 +1531,11 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @FaAndStageModel
      */
     public with(index: int, value: {{element['primitiveType']}}): {{element['name']}}Array {
-        let idx = index < 0 ? index + this.lengthInt : index
-        if (idx < 0 || idx >= this.lengthInt) {
+        const lengthInt = this.lengthInt
+        if (index < -lengthInt || index >= lengthInt) {
             throw new RangeError('Invalid typed array index')
         }
+        let idx = index < 0 ? index + lengthInt : index
         let res = new {{element['name']}}Array(this)
         res.setUnsafeClamp(idx, value)
         return res
@@ -1528,12 +1552,19 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      * @FaAndStageModel
      */
     public with(index: int, value: {{element['subsetType']}}): {{element['name']}}Array {
-        let idx = index < 0 ? index + this.lengthInt : index
-        if (idx < 0 || idx >= this.lengthInt) {
+        const lengthInt = this.lengthInt
+        if (index < -lengthInt || index >= lengthInt) {
             throw new RangeError('Invalid typed array index')
         }
+        let idx = index < 0 ? index + lengthInt : index
         let res = new {{element['name']}}Array(this)
+        {%- if element.get('name') == 'Uint8Clamped' %}
+        res.setUnsafeClamp(idx, Uint8ClampedArray.toUint8Clamped(value))
+        {%- elif element.get('name') == 'Uint8' or element.get('name') == 'Uint16' or element.get('name') == 'Uint32' %}
+        res.setUnsafeClamp(idx, {{element.get('name')}}Array.doubleToInt(value))
+        {%- else %}
         res.setUnsafeClamp(idx, {{fromElementCompat % 'value'}})
+        {%- endif %}
         return res
     }
 
@@ -1546,7 +1577,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
         {%- else %}
             {#- NOTE: castToIdx as toDouble() is not neccessary, widening should be applied implicitly #}
             {%- set idxType, castToIdx = 'int', '' %}
-            {%- set elType, castToEl, castFromEl = element['subsetType'], asElementCompat, fromElementCompat %}
+            {%- set elType, castToEl, castFromEl = element['subsetType'], asCallbackElementCompat, fromElementCompat %}
         {%- endif %}
 
     /**
@@ -1610,7 +1641,11 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
+        {%- if element.get('name') == 'BigUint64' %}
+        let accumulatedValue = this.$_get(0)
+        {%- else %}
         let accumulatedValue = {{castToEl % 'this.$_get(0)'}}
+        {%- endif %}
         for (let i = 1; i < this.lengthInt; i++) {
             accumulatedValue = callbackfn(accumulatedValue, {{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
         }
@@ -1658,7 +1693,11 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
             throw new TypeError("Reduce of empty array with no initial value")
         }
 
+        {%- if element.get('name') == 'BigUint64' %}
+        let accumulatedValue: {{elType}} = this.$_get(this.lengthInt - 1)
+        {%- else %}
         let accumulatedValue: {{elType}} = {{castToEl % 'this.$_get(this.lengthInt - 1)'}}
+        {%- endif %}
         for (let i = this.lengthInt - 2; i >= 0; i--) {
             accumulatedValue = callbackfn(accumulatedValue, {{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
         }

@@ -166,10 +166,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @FaAndStageModel
      */
     public constructor(length: number) {
-        if (length < 0 || length > (Int.MAX_VALUE / {{N}}Array.BYTES_PER_ELEMENT).toInt()) {
+        const intLength = length.toInt()
+        if (intLength < 0 || length > (Int.MAX_VALUE / {{N}}Array.BYTES_PER_ELEMENT).toInt()) {
             throw new RangeError("Range Error: length " + length + " is outside the bounds of the buffer")
         }
-        this.lengthInt = length.toInt()
+        this.lengthInt = intLength
         this.byteLength = this.lengthInt * {{N}}Array.BYTES_PER_ELEMENT
         this.byteOffset = 0
         this.buffer = new ArrayBuffer(this.byteLength)
@@ -283,8 +284,10 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         const items: Object = elements as Object
         if (items instanceof ArrayLike) {
             const arr = reflect.internals.Types.identity_cast<{{subsetTypeValues}}>(items as ArrayLike<{{subsetTypeValues}}>)
-            this.byteLength = arr.length * {{N}}Array.BYTES_PER_ELEMENT
-            this.lengthInt = arr.length
+            const sourceLength = arr.length
+            const length = sourceLength < 0 ? 0 : sourceLength
+            this.byteLength = length * {{N}}Array.BYTES_PER_ELEMENT
+            this.lengthInt = length
             this.buffer = new ArrayBuffer(this.byteLength)
             this.byteOffset = 0
             for (let i: int = 0; i < this.lengthInt; ++i) {
@@ -378,6 +381,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             throw new RangeError("byteOffset should be multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT")
         }
 {% endif %}
+        if (length == undefined && intByteLength % {{N}}Array.BYTES_PER_ELEMENT != 0) {
+            throw new RangeError(
+                'ArrayBuffer byteLength minus byteOffset should be a multiple of {{S}} as {{N}}Array.BYTES_PER_ELEMENT'
+            )
+        }
         let intLength: int
         if (length != undefined) {
             intLength = length.toInt()
@@ -743,10 +751,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      */
     public set(arr: FixedArray<{{T}}>, insertPos: int): void {
         const offset = insertPos
-        if (offset < 0 || offset + arr.length > this.lengthInt) {
+        const sourceLength = arr.length
+        const destinationLength = this.lengthInt
+        if (offset < 0 || offset > destinationLength || sourceLength > destinationLength - offset) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length; ++i) {
+        for (let i = 0; i < sourceLength; ++i) {
             this.setUnsafe(offset + i, arr[i])
         }
     }
@@ -776,10 +786,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      */
     public set(arr: FixedArray<{{elementCompat}}>, insertPos: int): void {
         const offset = insertPos
-        if (offset < 0 || offset + arr.length > this.lengthInt) {
+        const sourceLength = arr.length
+        const destinationLength = this.lengthInt
+        if (offset < 0 || offset > destinationLength || sourceLength > destinationLength - offset) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < arr.length; ++i) {
+        for (let i = 0; i < sourceLength; ++i) {
             {%- if N == 'BigInt64' %}
             this.setUnsafe(offset + i, arr[i].getLong())
             {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
@@ -831,10 +843,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      */
     public set(array: ArrayLike<{% if N == 'BigInt64'%}BigInt{% else %}number{% endif %}>, offset: int = 0): void {
         const insertPos = offset
-        if (insertPos < 0 || insertPos + array.length > this.lengthInt) {
+        const sourceLength = array.length
+        const destinationLength = this.lengthInt
+        if (insertPos < 0 || insertPos > destinationLength || sourceLength > destinationLength - insertPos) {
             throw new RangeError("offset is out of bounds")
         }
-        for (let i = 0; i < array.length; ++i) {
+        for (let i = 0; i < sourceLength; ++i) {
             {%- if N == 'BigInt64' %}
             this.setUnsafe(insertPos + i, array[i].getLong())
             {%- elif N == 'Int32' or N == 'Int16' or N == 'Int8' %}
@@ -1029,7 +1043,12 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @FaAndStageModel
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{elementCompat}}): {{N}}Array {
-        let res = new {{N}}Array(arrayLike.length)
+        const sourceLength = arrayLike.length
+        const length = sourceLength < 0 ? 0 : sourceLength
+        let res = new {{N}}Array(length)
+        if (length == 0) {
+            return res
+        }
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
@@ -1092,7 +1111,9 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             {%- endif %}
             index[0]++
         })
-        return new {{N}}Array(temp.buffer, 0, index[0])
+        return new {{N}}Array(
+            temp.buffer.slice(0, index[0] * {{N}}Array.BYTES_PER_ELEMENT)
+        )
     }
 
     {%- if (N == 'Float32') or (N == 'Float64') %}
@@ -1484,10 +1505,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @FaAndStageModel
      */
     public with(index: int, value: {{T}}): {{N}}Array {
-        let idx = index < 0 ? index + this.lengthInt : index
-        if (idx < 0 || idx >= this.lengthInt) {
+        const lengthInt = this.lengthInt
+        if (index < -lengthInt || index >= lengthInt) {
             throw new RangeError('Invalid typed array index')
         }
+        let idx = index < 0 ? index + lengthInt : index
         let res = new {{N}}Array(this)
         res.set(idx, value)
         return res
@@ -1506,12 +1528,15 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @FaAndStageModel
      */
     public with(index: int, value: {{elementCompat}}): {{N}}Array {
-        let idx = index < 0 ? index + this.lengthInt : index
-        if (idx < 0 || idx >= this.lengthInt) {
+        const lengthInt = this.lengthInt
+        if (index < -lengthInt || index >= lengthInt) {
             throw new RangeError('Invalid typed array index')
         }
+        let idx = index < 0 ? index + lengthInt : index
         let res = new {{N}}Array(this)
-        {%- if N != 'Float64' %}
+        {%- if N == 'Int8' or N == 'Int16' or N == 'Int32' %}
+        res.set(idx, {{N}}Array.doubleToInt(value))
+        {%- elif N != 'Float64' %}
         res.set(idx, value{{fromElementCompat}})
         {%- else %}
         res.set(idx, value)
@@ -1538,7 +1563,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     public findLast(fn: (val: {{elType}}) => boolean): {{elType}} {
         let newF: (val: {{elType}}, index: int, array: {{N}}Array) => boolean =
             (val: {{elType}}, index: int, array: {{N}}Array): boolean => { return fn(val) }
+        {%- if N == 'BigInt64' %}
+        return this.findLast(newF)
+        {%- else %}
         return {{castToEl % 'this.findLast(newF)'}}
+        {%- endif %}
     }
 
     /**
@@ -1874,16 +1903,20 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * Finds the last element in the {{N}}Array that satisfies the condition
      *
      * @param { function } fn - condition
-     * @returns { {{T}} } - the last element that satisfies fn
+     * @returns { {{elType if N == 'BigInt64' else T}} } - the last element that satisfies fn
      * @throws { Error } - If the element cannot be found, throw an exception
      * @syscap SystemCapability.Utils.Lang
      * @FaAndStageModel
      */
-    public findLast(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): {{T}} {
+    public findLast(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): {{elType if N == 'BigInt64' else T}} {
         for (let i = this.lengthInt - 1; i >= 0; --i) {
             let val = this.getUnsafe(i)
             if (fn({{castToEl % 'val'}}, i{{castToIdx}}, this)) {
+                {%- if N == 'BigInt64' %}
+                return {{castToEl % 'val'}}
+                {%- else %}
                 return val
+                {%- endif %}
             }
         }
         throw new Error("{{N}}Array.findLast: not implemented if an element was not found")
