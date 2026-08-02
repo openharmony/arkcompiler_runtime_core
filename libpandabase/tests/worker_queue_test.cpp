@@ -42,6 +42,20 @@ public:
         jobs_.push_back(job);
         jobsCount_++;
     }
+
+    // Batch-add all jobs under a single lock so that jobsCount_ and jobs_.size()
+    // stay in sync.  This prevents a worker thread from consuming a job (and
+    // decrementing jobsCount_) while more jobs are still being added, which
+    // would cause jobsCount_ to diverge from jobs_.size() and make Consume()
+    // skip the last-added job.
+    void AddJobs(std::vector<WorkerJob *> &newJobs)
+    {
+        std::lock_guard<std::mutex> lock(m_);
+        for (auto *job : newJobs) {
+            jobs_.push_back(job);
+            jobsCount_++;
+        }
+    }
 };
 
 // Test job that counts executions
@@ -143,21 +157,23 @@ HWTEST_F(WorkerQueueTest, ConcurrentJobs, testing::ext::TestSize.Level0)
 {
     std::atomic<int> counter(0);
     {
-        TestWorkerQueue *queue = new TestWorkerQueue(2);
+        TestWorkerQueue *queue = new TestWorkerQueue(8);
 
-        // Add a waiting job
-        queue->AddJob(new WaitingJob());
-
-        // Add some counting jobs
-        for (int i = 0; i < 3; i++) {
-            queue->AddJob(new CountingJob(counter));
+        // Batch-add all jobs under a single lock so that a worker thread
+        // cannot consume a job before all jobs are added (which would
+        // desync jobsCount_ from jobs_.size() and skip the last job).
+        std::vector<WorkerJob *> jobs;
+        jobs.push_back(new WaitingJob());
+        for (int i = 0; i < 30; i++) {
+            jobs.push_back(new CountingJob(counter));
         }
+        queue->AddJobs(jobs);
 
         queue->Consume();
         queue->Wait();
         delete queue;
         queue = nullptr;
     }
-    EXPECT_EQ(counter, 3);
+    EXPECT_EQ(counter, 30);
 }
 }  // namespace panda::test
