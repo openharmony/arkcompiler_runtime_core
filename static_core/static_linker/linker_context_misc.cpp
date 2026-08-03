@@ -300,6 +300,7 @@ void Context::Read(const std::vector<std::string> &input)
 {
     std::vector<ReaderEntry> readers;
     readers.reserve(input.size());
+    panda_file::ItemContainer::BytecodeVersion outputVersion {};
 
     for (const auto &i : input) {
         auto rd = panda_file::File::Open(i);
@@ -307,6 +308,7 @@ void Context::Read(const std::vector<std::string> &input)
             Error("Can't open file", {ErrorDetail("location", i)});
             break;
         }
+        outputVersion = std::max(outputVersion, rd->GetHeader()->version);
         auto reader = &readers_.emplace_front(std::move(rd));
         readers.emplace_back(&i, reader);
     }
@@ -314,6 +316,7 @@ void Context::Read(const std::vector<std::string> &input)
     if (HasErrors() || readers.empty()) {
         return;
     }
+    cont_.SetBytecodeVersion(outputVersion);
 
     std::vector<uint8_t> readResults(readers.size(), 0);
     ParallelForDynamic(0U, readers.size(),

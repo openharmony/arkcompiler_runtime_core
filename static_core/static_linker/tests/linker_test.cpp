@@ -133,7 +133,9 @@ void NormalizeGold(std::string &gold)
     gold = std::move(out);
 }
 
-std::optional<std::string> Build(const std::string &path)
+std::optional<std::string> Build(
+    const std::string &path,
+    std::optional<ark::panda_file::ItemContainer::BytecodeVersion> bytecodeVersion = std::nullopt)
 {
     std::string prog;
 
@@ -151,7 +153,7 @@ std::optional<std::string> Build(const std::string &path)
     }
 
     auto writer = ark::panda_file::FileWriter(path + ".abc");
-    if (!ark::pandasm::AsmEmitter::Emit(&writer, res.Value())) {
+    if (!ark::pandasm::AsmEmitter::Emit(&writer, res.Value(), nullptr, nullptr, true, nullptr, bytecodeVersion)) {
         return "can't emit";
     }
 
@@ -285,6 +287,21 @@ void TestMultiple(const std::string &path, std::vector<std::string> perms, bool 
 TEST(linkertests, HelloWorld)
 {
     TestSingle("hello_world");
+}
+
+TEST(linkertests, PreservesInputBytecodeVersion)
+{
+    const auto pathPrefix = std::string {"data/single/"};
+    constexpr ark::panda_file::ItemContainer::BytecodeVersion OLD_VERSION {0, 0, 0, 6};
+    ASSERT_EQ(Build(pathPrefix + "hello_world", OLD_VERSION), std::nullopt);
+
+    const auto output = pathPrefix + "hello_world.old-version.linked.abc";
+    auto linkRes = Link(DefaultConfig(), output, {pathPrefix + "hello_world.abc"});
+    ASSERT_TRUE(linkRes.errors.empty());
+
+    auto linkedFile = ark::panda_file::File::Open(output);
+    ASSERT_NE(linkedFile, nullptr);
+    EXPECT_EQ(linkedFile->GetHeader()->version, OLD_VERSION);
 }
 
 TEST(linkertests, OutputWriteFailure)
