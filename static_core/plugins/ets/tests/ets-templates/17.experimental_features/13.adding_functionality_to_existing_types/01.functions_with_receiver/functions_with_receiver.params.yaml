@@ -270,3 +270,34 @@ cases:
       }
     use:
       arktest.assertEQ(NS.foo(new NS.A), "call") 
+
+  - decl: |
+      class A {
+        f(): void {}
+      }
+      function f(this: A): void {}
+    use: |
+      let a: A = new A()
+      f(a)
+
+  - decl: |
+      class A {
+        foo(): void {}
+      }
+      class B extends A {}
+      function foo(this: A): void {}
+    use: |
+      let bb: B = new B;
+      bb.foo()
+
+  - decl: |
+      class A {
+        foo() {}
+      }
+      class B {
+        foo() {}
+      }
+      function foo(this: A) {}
+    use: |
+      let x: A|B = new B
+      x.foo()

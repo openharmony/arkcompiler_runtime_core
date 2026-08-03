@@ -225,8 +225,8 @@ cases:
       let a: ValueArray<float> = [1.0f, 2.0f, 3.0f]
 
       let it_func = $_iterator(a)
-      sum = 0.0f
-      res = it_func.next()
+      let sum = 0.0f
+      let res = it_func.next()
       while (!res.done) {
         sum += res.value as float
         res = it_func.next()
