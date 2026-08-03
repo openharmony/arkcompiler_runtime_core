@@ -4353,6 +4353,11 @@ private:
             SET_STATUS_FOR_MSG(AlwaysNpe, OK);
             return false;
         }
+        if (regType == bot_) {
+            // Bot appears only on infeasible paths; element type checks do not apply.
+            MoveToNextInst<FORMAT>();
+            return true;
+        }
 
         auto arrEltType = regType.GetArrayElementType(GetTypeSystem());
         if (!IsSubtype(arrEltType, expectedEltType, GetTypeSystem())) {
@@ -4398,6 +4403,11 @@ private:
             SetAcc(top_);
             SET_STATUS_FOR_MSG(AlwaysNpe, OK);
             return false;
+        }
+        if (regType == bot_) {
+            // Bot appears only on infeasible paths; element type checks do not apply.
+            MoveToNextInst<FORMAT>();
+            return true;
         }
 
         auto arrEltType = regType.GetArrayElementType(GetTypeSystem());
@@ -4613,6 +4623,12 @@ private:
             SetAcc(top_);
             SET_STATUS_FOR_MSG(AlwaysNpe, OK);
             return false;
+        }
+        if (regType == bot_) {
+            // Bot appears only on infeasible paths; element type checks do not apply.
+            SetAcc(bot_);
+            MoveToNextInst<FORMAT>();
+            return true;
         }
         auto &&arrEltType = regType.GetArrayElementType(GetTypeSystem());
         auto find = [&expectedEltTypes](auto type) {

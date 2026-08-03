@@ -451,6 +451,10 @@ static bool IsClassSubtypeOfType(Class const *lhsClass, Type rhs, TypeSystem *ts
                 return supertypeOfArray.IsConsistent() && IsSubtype(supertypeOfArray, rhs, tsys);
             }
             auto *rhsComponent = rhs.GetClass()->GetComponentType();
+            if (lhsComponent->IsPrimitive() || rhsComponent->IsPrimitive()) {
+                // Primitive arrays are invariant at runtime: no widening between element types.
+                return lhsComponent == rhsComponent;
+            }
             return IsSubtypeImpl(Type {lhsComponent}, Type {rhsComponent}, tsys);
         }
     }
@@ -746,6 +750,10 @@ Type TpUnion(Type lhs, Type rhs, TypeSystem *tsys)
 
 Type Type::GetArrayElementType(TypeSystem *tsys) const
 {
+    if (*this == Bot()) {
+        // Bot appears on infeasible paths; keep it instead of Top to avoid false errors.
+        return Bot();
+    }
     if (IsClass()) {
         Class const *klass = GetClass();
         if (klass->IsArrayClass()) {
@@ -773,14 +781,19 @@ Type Type::GetArrayElementType(TypeSystem *tsys) const
         // GetArrayElementType may invalidate span, so copy it.
         auto membersSpan = GetUnionMembers(tsys);
         PandaVector<Type> members {membersSpan.begin(), membersSpan.end()};
-        PandaVector<Type> vec;
-        for (auto m : members) {
-            vec.push_back(m.GetArrayElementType(tsys));
-            if (vec.back() == Top()) {
+        // Fold with TpUnion to keep the result normalized: element types may be unions themselves.
+        Type res = members[0].GetArrayElementType(tsys);
+        if (res == Top()) {
+            return Top();
+        }
+        for (size_t i = 1; i < members.size(); i++) {
+            Type elt = members[i].GetArrayElementType(tsys);
+            if (elt == Top()) {
                 return Top();
             }
+            res = TpUnion(res, elt, tsys);
         }
-        return Union(Span {vec}, tsys);
+        return res;
     }
     return Top();
 }
