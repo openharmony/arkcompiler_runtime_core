@@ -488,9 +488,9 @@ TEST_F(ObjectNewTest, object_new_a_multiple_parameters_method)
     ASSERT_NE(checkMethod, nullptr);
 
     auto ref = CallEtsFunction<ani_ref>("object_new_test", "getNull");
-    const auto intArray = static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("object_new_test", "getIntArray"));
+    const auto intArray = static_cast<ani_valuearray_int>(CallEtsFunction<ani_ref>("object_new_test", "getIntArray"));
     const auto byteArray =
-        static_cast<ani_fixedarray_byte>(CallEtsFunction<ani_ref>("object_new_test", "getByteArray"));
+        static_cast<ani_valuearray_byte>(CallEtsFunction<ani_ref>("object_new_test", "getByteArray"));
 
     ani_string tag {};
     GetTestString(&tag);

@@ -25,15 +25,15 @@ class CompatibilityTest : public AniTest {};
 
 TEST_F(CompatibilityTest, SetShortArrayRegionErrorTests)
 {
-    ani_fixedarray_int array;
-    ASSERT_EQ(env_->FixedArray_New_Int(5U, &array), ANI_OK);
+    ani_valuearray_int array;
+    ASSERT_EQ(env_->ValueArray_New_Int(5U, &array), ANI_OK);
 
     const auto managedArray =
-        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("array_compatibility_test", "getArray"));
+        static_cast<ani_valuearray_int>(CallEtsFunction<ani_ref>("array_compatibility_test", "getArray"));
     const auto coreArray =
-        static_cast<ani_fixedarray_int>(CallEtsFunction<ani_ref>("array_compatibility_test", "getStdCoreArray"));
+        static_cast<ani_valuearray_int>(CallEtsFunction<ani_ref>("array_compatibility_test", "getStdCoreArray"));
 
-    // Compare that int[] and FixedArray which is created in FixedArray_New_Int function is the same type
+    // Compare that int[] and ValueArray which is created in ValueArray_New_Int function is the same type
     // It would fail when frontend and spec would begin to match each other
     ScopedManagedCodeFix s(env_);
     const EtsPlatformTypes *platformTypes = PlatformTypes(PandaEtsVM::GetCurrent());

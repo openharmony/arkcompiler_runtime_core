@@ -142,75 +142,75 @@ public:
     }
 };
 
-class VFixedArrayBoolean final : public VFixedArray {
+class VValueArray : public VObject {
 public:
-    ani_fixedarray_boolean GetRef()
+    ani_valuearray GetRef()
     {
-        return static_cast<ani_fixedarray_boolean>(VFixedArray::GetRef());
+        return static_cast<ani_valuearray>(VObject::GetRef());
     }
 };
 
-class VFixedArrayChar final : public VFixedArray {
+class VValueArrayBoolean final : public VValueArray {
 public:
-    ani_fixedarray_char GetRef()
+    ani_valuearray_boolean GetRef()
     {
-        return static_cast<ani_fixedarray_char>(VFixedArray::GetRef());
+        return static_cast<ani_valuearray_boolean>(VValueArray::GetRef());
     }
 };
 
-class VFixedArrayByte final : public VFixedArray {
+class VValueArrayChar final : public VValueArray {
 public:
-    ani_fixedarray_byte GetRef()
+    ani_valuearray_char GetRef()
     {
-        return static_cast<ani_fixedarray_byte>(VFixedArray::GetRef());
+        return static_cast<ani_valuearray_char>(VValueArray::GetRef());
     }
 };
 
-class VFixedArrayShort final : public VFixedArray {
+class VValueArrayByte final : public VValueArray {
 public:
-    ani_fixedarray_short GetRef()
+    ani_valuearray_byte GetRef()
     {
-        return static_cast<ani_fixedarray_short>(VFixedArray::GetRef());
+        return static_cast<ani_valuearray_byte>(VValueArray::GetRef());
     }
 };
 
-class VFixedArrayInt final : public VFixedArray {
+class VValueArrayShort final : public VValueArray {
 public:
-    ani_fixedarray_int GetRef()
+    ani_valuearray_short GetRef()
     {
-        return static_cast<ani_fixedarray_int>(VFixedArray::GetRef());
+        return static_cast<ani_valuearray_short>(VValueArray::GetRef());
     }
 };
 
-class VFixedArrayLong final : public VFixedArray {
+class VValueArrayInt final : public VValueArray {
 public:
-    ani_fixedarray_long GetRef()
+    ani_valuearray_int GetRef()
     {
-        return static_cast<ani_fixedarray_long>(VFixedArray::GetRef());
+        return static_cast<ani_valuearray_int>(VValueArray::GetRef());
     }
 };
 
-class VFixedArrayFloat final : public VFixedArray {
+class VValueArrayLong final : public VValueArray {
 public:
-    ani_fixedarray_float GetRef()
+    ani_valuearray_long GetRef()
     {
-        return static_cast<ani_fixedarray_float>(VFixedArray::GetRef());
+        return static_cast<ani_valuearray_long>(VValueArray::GetRef());
     }
 };
 
-class VFixedArrayDouble final : public VFixedArray {
+class VValueArrayFloat final : public VValueArray {
 public:
-    ani_fixedarray_double GetRef()
+    ani_valuearray_float GetRef()
     {
-        return static_cast<ani_fixedarray_double>(VFixedArray::GetRef());
+        return static_cast<ani_valuearray_float>(VValueArray::GetRef());
     }
 };
 
-class VFixedArrayRef final : public VFixedArray {
+class VValueArrayDouble final : public VValueArray {
 public:
-    ani_fixedarray_ref GetRef()
+    ani_valuearray_double GetRef()
     {
-        return static_cast<ani_fixedarray_ref>(VFixedArray::GetRef());
+        return static_cast<ani_valuearray_double>(VValueArray::GetRef());
     }
 };
 

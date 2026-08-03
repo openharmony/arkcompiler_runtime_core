@@ -169,54 +169,54 @@ napi_value STValueNewFixedArrayPrimitiveImpl(napi_env env, napi_callback_info in
     size_t bindingSize = std::max(elementSize * arrLength, COMPUTED_STVALUE_BINDING_SIZE);
     auto [jsValue, stvalueData] = CreateSTValueInstance(env, bindingSize);
 
-    ani_fixedarray fixArray {};
+    ani_valuearray valueArray {};
     switch (arrayType) {
         case SType::BOOLEAN: {
-            ani_fixedarray_boolean boolArray;
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Boolean(arrLength, &boolArray));
-            fixArray = boolArray;
+            ani_valuearray_boolean boolArray;
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->ValueArray_New_Boolean(arrLength, &boolArray));
+            valueArray = boolArray;
             break;
         }
         case SType::CHAR: {
-            ani_fixedarray_char charArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Char(arrLength, &charArray));
-            fixArray = charArray;
+            ani_valuearray_char charArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->ValueArray_New_Char(arrLength, &charArray));
+            valueArray = charArray;
             break;
         }
         case SType::BYTE: {
-            ani_fixedarray_byte byteArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Byte(arrLength, &byteArray));
-            fixArray = byteArray;
+            ani_valuearray_byte byteArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->ValueArray_New_Byte(arrLength, &byteArray));
+            valueArray = byteArray;
             break;
         }
         case SType::SHORT: {
-            ani_fixedarray_short shortArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Short(arrLength, &shortArray));
-            fixArray = shortArray;
+            ani_valuearray_short shortArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->ValueArray_New_Short(arrLength, &shortArray));
+            valueArray = shortArray;
             break;
         }
         case SType::INT: {
-            ani_fixedarray_int intArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Int(arrLength, &intArray));
-            fixArray = intArray;
+            ani_valuearray_int intArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->ValueArray_New_Int(arrLength, &intArray));
+            valueArray = intArray;
             break;
         }
         case SType::LONG: {
-            ani_fixedarray_long longArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Long(arrLength, &longArray));
-            fixArray = longArray;
+            ani_valuearray_long longArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->ValueArray_New_Long(arrLength, &longArray));
+            valueArray = longArray;
             break;
         }
         case SType::FLOAT: {
-            ani_fixedarray_float floatArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Float(arrLength, &floatArray));
-            fixArray = floatArray;
+            ani_valuearray_float floatArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->ValueArray_New_Float(arrLength, &floatArray));
+            valueArray = floatArray;
             break;
         }
         case SType::DOUBLE: {
-            ani_fixedarray_double doubleArray {};
-            ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Double(arrLength, &doubleArray));
-            fixArray = doubleArray;
+            ani_valuearray_double doubleArray {};
+            ANI_CHECK_ERROR_RETURN(env, aniEnv->ValueArray_New_Double(arrLength, &doubleArray));
+            valueArray = doubleArray;
             break;
         }
         default: {
@@ -225,7 +225,7 @@ napi_value STValueNewFixedArrayPrimitiveImpl(napi_env env, napi_callback_info in
         }
     }
 
-    stvalueData->SetAniRef(env, static_cast<ani_ref>(fixArray));
+    stvalueData->SetAniRef(env, static_cast<ani_ref>(valueArray));
     return jsValue;
 }
 
@@ -272,8 +272,8 @@ napi_value STValueNewFixedArrayReferenceImpl(napi_env env, napi_callback_info in
     auto arrayType = static_cast<ani_type>(typeData->GetAniRef());
     auto initValue = static_cast<ani_ref>(initData->GetAniRef());
 
-    ani_fixedarray_ref fixRefArray {};
-    ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New_Ref(arrayType, arrLength, initValue, &fixRefArray));
+    ani_fixedarray fixRefArray {};
+    ANI_CHECK_ERROR_RETURN(env, aniEnv->FixedArray_New(arrayType, arrLength, initValue, &fixRefArray));
 
     stvalueData->SetAniRef(env, static_cast<ani_ref>(fixRefArray));
     return jsSTValue;

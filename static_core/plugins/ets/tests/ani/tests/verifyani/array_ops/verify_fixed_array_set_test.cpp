@@ -20,7 +20,7 @@ namespace ark::ets::ani::verify::testing {
 
 static constexpr ani_size LENGTH = 3U;
 
-class FixedArraySetRefTest : public VerifyAniTest {};
+class FixedArraySetTest : public VerifyAniTest {};
 
 static void CreateObject(ani_env *env, ani_object *object)
 {
@@ -36,135 +36,134 @@ static void CreateString(ani_env *env, ani_string *str)
     ASSERT_EQ(env->String_NewUTF8("test", sizeof("test") - 1U, str), ANI_OK);
 }
 
-static void CreateStringFixedArray(ani_env *env, ani_fixedarray_ref *array)
+static void CreateStringFixedArray(ani_env *env, ani_fixedarray *array)
 {
     ani_class stringClass {};
     ASSERT_EQ(env->FindClass("std.core.String", &stringClass), ANI_OK);
     ani_string initialElement {};
     CreateString(env, &initialElement);
-    ASSERT_EQ(env->FixedArray_New_Ref(stringClass, LENGTH, initialElement, array), ANI_OK);
+    ASSERT_EQ(env->FixedArray_New(stringClass, LENGTH, initialElement, array), ANI_OK);
 }
 
-TEST_F(FixedArraySetRefTest, wrong_env)
+TEST_F(FixedArraySetTest, wrong_env)
 {
-    ani_fixedarray_ref array {};
+    ani_fixedarray array {};
     CreateStringFixedArray(env_, &array);
     ani_string ref {};
     CreateString(env_, &ref);
 
-    ASSERT_EQ(env_->c_api->FixedArray_Set_Ref(nullptr, array, 0U, ref), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->FixedArray_Set(nullptr, array, 0U, ref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "env is nullptr [ERROR]"},
-        {"array", "ani_fixedarray_ref"},
+        {"array", "ani_fixedarray"},
         {"index", "ani_size"},
         {"ref", "ani_ref"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set_Ref", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set", testLines);
 }
 
-TEST_F(FixedArraySetRefTest, wrong_array)
+TEST_F(FixedArraySetTest, wrong_array)
 {
     ani_string ref {};
     CreateString(env_, &ref);
 
-    ASSERT_EQ(env_->FixedArray_Set_Ref(nullptr, 0U, ref), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FixedArray_Set(nullptr, 0U, ref), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray_ref", "reference is nullptr [ERROR]"},
+        {"array", "ani_fixedarray", "reference is nullptr [ERROR]"},
         {"index", "ani_size"},
         {"ref", "ani_ref"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set_Ref", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set", testLines);
 }
 
-TEST_F(FixedArraySetRefTest, wrong_array_type)
+TEST_F(FixedArraySetTest, wrong_array_type)
 {
-    ani_fixedarray_int array {};
-    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH, &array), ANI_OK);
+    ani_valuearray_int array {};
+    ASSERT_EQ(env_->ValueArray_New_Int(LENGTH, &array), ANI_OK);
     ani_string ref {};
     CreateString(env_, &ref);
 
-    ASSERT_EQ(env_->FixedArray_Set_Ref(reinterpret_cast<ani_fixedarray_ref>(array), 0U, ref), ANI_ERROR);
+    ASSERT_EQ(env_->FixedArray_Set(reinterpret_cast<ani_fixedarray>(array), 0U, ref), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray_ref",
-         "wrong reference type: ani_fixedarray_int, expected: ani_fixedarray_ref [FATAL]"},
+        {"array", "ani_fixedarray", "wrong reference type: ani_valuearray_int, expected: ani_fixedarray [FATAL]"},
         {"index", "ani_size"},
         {"ref", "ani_ref"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set_Ref", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set", testLines);
 }
 
-TEST_F(FixedArraySetRefTest, wrong_ref)
+TEST_F(FixedArraySetTest, wrong_ref)
 {
-    ani_fixedarray_ref array {};
+    ani_fixedarray array {};
     CreateStringFixedArray(env_, &array);
 
-    ASSERT_EQ(env_->FixedArray_Set_Ref(array, 0U, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->FixedArray_Set(array, 0U, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray_ref"},
+        {"array", "ani_fixedarray"},
         {"index", "ani_size"},
         {"ref", "ani_ref", "reference is nullptr [ERROR]"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set_Ref", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set", testLines);
 }
 
-TEST_F(FixedArraySetRefTest, wrong_ref_type)
+TEST_F(FixedArraySetTest, wrong_ref_type)
 {
-    ani_fixedarray_ref array {};
+    ani_fixedarray array {};
     CreateStringFixedArray(env_, &array);
     ani_object object {};
     CreateObject(env_, &object);
 
-    ASSERT_EQ(env_->FixedArray_Set_Ref(array, 0U, object), ANI_INVALID_TYPE);
+    ASSERT_EQ(env_->FixedArray_Set(array, 0U, object), ANI_INVALID_TYPE);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray_ref"},
+        {"array", "ani_fixedarray"},
         {"index", "ani_size"},
         {"ref", "ani_ref", "wrong reference type: ani_object, expected: fixed array component type [ERROR]"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set_Ref", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set", testLines);
 }
 
-TEST_F(FixedArraySetRefTest, out_of_range)
+TEST_F(FixedArraySetTest, out_of_range)
 {
-    ani_fixedarray_ref array {};
+    ani_fixedarray array {};
     CreateStringFixedArray(env_, &array);
     ani_string ref {};
     CreateString(env_, &ref);
 
-    ASSERT_EQ(env_->FixedArray_Set_Ref(array, LENGTH, ref), ANI_OUT_OF_RANGE);
+    ASSERT_EQ(env_->FixedArray_Set(array, LENGTH, ref), ANI_OUT_OF_RANGE);
     ASSERT_NO_ABORT_MESSAGE();
 }
 
-TEST_F(FixedArraySetRefTest, throw_error)
+TEST_F(FixedArraySetTest, throw_error)
 {
-    ani_fixedarray_ref array {};
+    ani_fixedarray array {};
     CreateStringFixedArray(env_, &array);
     ani_string ref {};
     CreateString(env_, &ref);
 
     ThrowError();
 
-    ASSERT_EQ(env_->FixedArray_Set_Ref(array, 0U, ref), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->FixedArray_Set(array, 0U, ref), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has a pending exception [ERROR]"},
-        {"array", "ani_fixedarray_ref"},
+        {"array", "ani_fixedarray"},
         {"index", "ani_size"},
         {"ref", "ani_ref"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set_Ref", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_Set", testLines);
 }
 
-TEST_F(FixedArraySetRefTest, success)
+TEST_F(FixedArraySetTest, success)
 {
-    ani_fixedarray_ref array {};
+    ani_fixedarray array {};
     CreateStringFixedArray(env_, &array);
     ani_string ref {};
     CreateString(env_, &ref);
 
-    ASSERT_EQ(env_->FixedArray_Set_Ref(array, 0U, ref), ANI_OK);
+    ASSERT_EQ(env_->FixedArray_Set(array, 0U, ref), ANI_OK);
 }
 
 }  // namespace ark::ets::ani::verify::testing

@@ -5333,29 +5333,43 @@ This function retrieves the length of the specified array.
 
 
 ---
-### FixedArray_New_`<Type>`
-Example: `FixedArray_New_Int`  
-`ani_status (*FixedArray_New_Int)(ani_env *env, ani_size length, ani_fixedarray_int *result);`
-This function creates a new fixedarray of the specified length for integer values.
+### ValueArray_GetLength
+`ani_status (*ValueArray_GetLength)(ani_env *env, ani_valuearray array, ani_size *result);`
+This function retrieves the length of the specified valuearray.
 
 **PARAMETERS:**
 - **env**: A pointer to the environment structure.  
-- **length**: The number of elements the fixedarray should contain.  
-- **result**: A pointer to store the newly created fixedarray object of the specified type.
+- **array**: The valuearray object whose length is to be retrieved.
+- **result**: A pointer to store the length of the valuearray.
+
+**RETURNS:**
+- Returns a status code of type `ani_status` indicating success or failure.
+
+
+---
+### ValueArray_New_`<Type>`
+Example: `ValueArray_New_Int`
+`ani_status (*ValueArray_New_Int)(ani_env *env, ani_size length, ani_valuearray_int *result);`
+This function creates a new valuearray of the specified length for integer values.
+
+**PARAMETERS:**
+- **env**: A pointer to the environment structure.
+- **length**: The number of elements the valuearray should contain.
+- **result**: A pointer to store the newly created valuearray object of the specified type.
 
 **RETURNS:**  
 - Returns a status code of type `ani_status` indicating success or failure.
 
 
 ---
-### FixedArray_GetRegion_`<Type>`
-Example: `FixedArray_GetRegion_Int`  
-`ani_status (*FixedArray_GetRegion_Int)(ani_env *env, ani_fixedarray_int array, ani_size offset, ani_size length, ani_int *native_buffer);`
-This function retrieves a portion of the specified integer fixedarray into a native buffer.
+### ValueArray_GetRegion_`<Type>`
+Example: `ValueArray_GetRegion_Int`
+`ani_status (*ValueArray_GetRegion_Int)(ani_env *env, ani_valuearray_int array, ani_size offset, ani_size length, ani_int *native_buffer);`
+This function retrieves a portion of the specified integer valuearray into a native buffer.
 
 **PARAMETERS:**
 - **env**: A pointer to the environment structure.  
-- **array**: The fixedarray object to retrieve values from.  
+- **array**: The valuearray object to retrieve values from.
 - **offset**: The starting position in the array.  
 - **length**: The number of elements to retrieve.  
 - **native_buffer**: A pointer to a native buffer to store the retrieved values.
@@ -5365,14 +5379,14 @@ This function retrieves a portion of the specified integer fixedarray into a nat
 
 
 ---
-### FixedArray_SetRegion_`<Type>`
-Example: `FixedArray_SetRegion_Int`  
-`ani_status (*FixedArray_SetRegion_Int)(ani_env *env, ani_fixedarray_int array, ani_size offset, ani_size length, const ani_int *native_buffer);`
-This function sets a portion of the specified integer fixedarray using a native buffer.
+### ValueArray_SetRegion_`<Type>`
+Example: `ValueArray_SetRegion_Int`
+`ani_status (*ValueArray_SetRegion_Int)(ani_env *env, ani_valuearray_int array, ani_size offset, ani_size length, const ani_int *native_buffer);`
+This function sets a portion of the specified integer valuearray using a native buffer.
 
 **PARAMETERS:**
 - **env**: A pointer to the environment structure.  
-- **array**: The fixedarray object to set values in.  
+- **array**: The valuearray object to set values in.
 - **offset**: The starting position in the array.  
 - **length**: The number of elements to set.  
 - **native_buffer**: A pointer to a native buffer containing the values to set.
@@ -5382,8 +5396,8 @@ This function sets a portion of the specified integer fixedarray using a native 
 
 
 ---
-### FixedArray_New_Ref
-`ani_status (*FixedArray_New_Ref)(ani_env *env, ani_type type, ani_size length, ani_ref initial_element, ani_fixedarray_ref *result);`
+### FixedArray_New
+`ani_status (*FixedArray_New)(ani_env *env, ani_type type, ani_size length, ani_ref initial_element, ani_fixedarray *result);`
 This function creates a new fixedarray of references, optionally initializing it with an initial_element ref.
 
 **PARAMETERS:**
@@ -5398,8 +5412,8 @@ This function creates a new fixedarray of references, optionally initializing it
 
 
 ---
-### FixedArray_Set_Ref
-`ani_status (*FixedArray_Set_Ref)(ani_env *env, ani_fixedarray_ref array, ani_size index, ani_ref ref);`
+### FixedArray_Set
+`ani_status (*FixedArray_Set)(ani_env *env, ani_fixedarray array, ani_size index, ani_ref ref);`
 This function sets the value of a reference at the specified index in the fixedarray.
 
 **PARAMETERS:**
@@ -5413,8 +5427,8 @@ This function sets the value of a reference at the specified index in the fixeda
 
 
 ---
-### FixedArray_Get_Ref
-`ani_status (*FixedArray_Get_Ref)(ani_env *env, ani_fixedarray_ref array, ani_size index, ani_ref *result);`
+### FixedArray_Get
+`ani_status (*FixedArray_Get)(ani_env *env, ani_fixedarray array, ani_size index, ani_ref *result);`
 This function retrieves the value of a reference at the specified index in the fixedarray.
 
 **PARAMETERS:**

@@ -101,7 +101,7 @@ extern "C" ani_long SkoalaParagraphTextStyle1nMake([[maybe_unused]] ani_env *env
     return 1;
 }
 extern "C" ani_long SkoalaManagedString1nMake([[maybe_unused]] ani_env *env,
-                                              [[maybe_unused]] ani_fixedarray_byte textStr /*KStringPtr*/)
+                                              [[maybe_unused]] ani_valuearray_byte textStr /*KStringPtr*/)
 {
     return 1;
 }

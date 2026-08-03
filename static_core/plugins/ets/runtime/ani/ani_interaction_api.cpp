@@ -126,8 +126,10 @@ static ani_status InitializeClass(ScopedManagedCodeFix &s, EtsClass *klass)
     bool isInitialized = classLinker->InitializeClass(executionCtx, klass);
     if (!isInitialized) {
         LOG(ERROR, ANI) << "Cannot initialize class: " << klass->GetDescriptor();
-        ASSERT(executionCtx->GetMT()->HasPendingException());
-        return ANI_PENDING_ERROR;
+        if (executionCtx->GetMT()->HasPendingException()) {
+            return ANI_PENDING_ERROR;
+        }
+        return ANI_ERROR;
     }
     return ANI_OK;
 }
@@ -871,7 +873,7 @@ static ani_status NewPrimitiveTypeArray(ani_env *env, ani_size length, AniFixedA
 }
 
 template <typename T>
-static ani_status GetPrimitiveTypeArrayRegion(ani_env *env, ani_fixedarray array, ani_size start, ani_size len, T *buf)
+static ani_status GetPrimitiveTypeArrayRegion(ani_env *env, ani_valuearray array, ani_size start, ani_size len, T *buf)
 {
     ASSERT(array != nullptr);
 
@@ -889,7 +891,7 @@ static ani_status GetPrimitiveTypeArrayRegion(ani_env *env, ani_fixedarray array
 }
 
 template <typename T>
-static ani_status SetPrimitiveTypeArrayRegion(ani_env *env, ani_fixedarray array, ani_size start, ani_size len, T *buf)
+static ani_status SetPrimitiveTypeArrayRegion(ani_env *env, ani_valuearray array, ani_size start, ani_size len, T *buf)
 {
     ASSERT(array != nullptr);
 
@@ -1027,7 +1029,22 @@ NO_UB_SANITIZE static ani_status FixedArray_GetLength(ani_env *env, ani_fixedarr
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Boolean(ani_env *env, ani_size length, ani_fixedarray_boolean *result)
+NO_UB_SANITIZE static ani_status ValueArray_GetLength(ani_env *env, ani_valuearray array, ani_size *result)
+{
+    ANI_DEBUG_TRACE(env);
+    CHECK_ENV(env);
+    CHECK_PTR_ARG(array);
+    CHECK_PTR_ARG(result);
+
+    ScopedManagedCodeFix s(env);
+    EtsArray *etsArray = s.ToInternalType(array);
+    *result = etsArray->GetLength();
+
+    return ANI_OK;
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status ValueArray_New_Boolean(ani_env *env, ani_size length, ani_valuearray_boolean *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1036,7 +1053,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Boolean(ani_env *env, ani_size l
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Char(ani_env *env, ani_size length, ani_fixedarray_char *result)
+NO_UB_SANITIZE static ani_status ValueArray_New_Char(ani_env *env, ani_size length, ani_valuearray_char *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1045,7 +1062,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Char(ani_env *env, ani_size leng
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Byte(ani_env *env, ani_size length, ani_fixedarray_byte *result)
+NO_UB_SANITIZE static ani_status ValueArray_New_Byte(ani_env *env, ani_size length, ani_valuearray_byte *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1054,7 +1071,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Byte(ani_env *env, ani_size leng
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Short(ani_env *env, ani_size length, ani_fixedarray_short *result)
+NO_UB_SANITIZE static ani_status ValueArray_New_Short(ani_env *env, ani_size length, ani_valuearray_short *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1063,7 +1080,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Short(ani_env *env, ani_size len
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Int(ani_env *env, ani_size length, ani_fixedarray_int *result)
+NO_UB_SANITIZE static ani_status ValueArray_New_Int(ani_env *env, ani_size length, ani_valuearray_int *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1072,7 +1089,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Int(ani_env *env, ani_size lengt
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Long(ani_env *env, ani_size length, ani_fixedarray_long *result)
+NO_UB_SANITIZE static ani_status ValueArray_New_Long(ani_env *env, ani_size length, ani_valuearray_long *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1081,7 +1098,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Long(ani_env *env, ani_size leng
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Float(ani_env *env, ani_size length, ani_fixedarray_float *result)
+NO_UB_SANITIZE static ani_status ValueArray_New_Float(ani_env *env, ani_size length, ani_valuearray_float *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1090,7 +1107,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Float(ani_env *env, ani_size len
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Double(ani_env *env, ani_size length, ani_fixedarray_double *result)
+NO_UB_SANITIZE static ani_status ValueArray_New_Double(ani_env *env, ani_size length, ani_valuearray_double *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1099,7 +1116,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Double(ani_env *env, ani_size le
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Boolean(ani_env *env, ani_fixedarray_boolean array,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Boolean(ani_env *env, ani_valuearray_boolean array,
                                                               ani_size offset, ani_size length,
                                                               ani_boolean *nativeBuffer)
 {
@@ -1111,7 +1128,7 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Boolean(ani_env *env, ani_
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Char(ani_env *env, ani_fixedarray_char array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Char(ani_env *env, ani_valuearray_char array, ani_size offset,
                                                            ani_size length, ani_char *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1122,7 +1139,7 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Char(ani_env *env, ani_fix
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Byte(ani_env *env, ani_fixedarray_byte array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Byte(ani_env *env, ani_valuearray_byte array, ani_size offset,
                                                            ani_size length, ani_byte *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1133,8 +1150,8 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Byte(ani_env *env, ani_fix
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Ref(ani_env *env, ani_type type, ani_size length,
-                                                    ani_ref initialElement, ani_fixedarray_ref *result)
+NO_UB_SANITIZE static ani_status FixedArray_New(ani_env *env, ani_type type, ani_size length, ani_ref initialElement,
+                                                ani_fixedarray *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1159,7 +1176,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Ref(ani_env *env, ani_type type,
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_Set_Ref(ani_env *env, ani_fixedarray_ref array, ani_size index, ani_ref ref)
+NO_UB_SANITIZE static ani_status FixedArray_Set(ani_env *env, ani_fixedarray array, ani_size index, ani_ref ref)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1183,8 +1200,7 @@ NO_UB_SANITIZE static ani_status FixedArray_Set_Ref(ani_env *env, ani_fixedarray
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_Get_Ref(ani_env *env, ani_fixedarray_ref array, ani_size index,
-                                                    ani_ref *result)
+NO_UB_SANITIZE static ani_status FixedArray_Get(ani_env *env, ani_fixedarray array, ani_size index, ani_ref *result)
 {
     ANI_DEBUG_TRACE(env);
     CHECK_ENV(env);
@@ -1284,7 +1300,7 @@ NO_UB_SANITIZE static ani_status Namespace_BindNativeFunctions(ani_env *env, ani
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Short(ani_env *env, ani_fixedarray_short array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Short(ani_env *env, ani_valuearray_short array, ani_size offset,
                                                             ani_size length, ani_short *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1295,7 +1311,7 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Short(ani_env *env, ani_fi
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Int(ani_env *env, ani_fixedarray_int array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Int(ani_env *env, ani_valuearray_int array, ani_size offset,
                                                           ani_size length, ani_int *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1306,7 +1322,7 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Int(ani_env *env, ani_fixe
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Long(ani_env *env, ani_fixedarray_long array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Long(ani_env *env, ani_valuearray_long array, ani_size offset,
                                                            ani_size length, ani_long *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1317,7 +1333,7 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Long(ani_env *env, ani_fix
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Float(ani_env *env, ani_fixedarray_float array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Float(ani_env *env, ani_valuearray_float array, ani_size offset,
                                                             ani_size length, ani_float *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1328,7 +1344,7 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Float(ani_env *env, ani_fi
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Double(ani_env *env, ani_fixedarray_double array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Double(ani_env *env, ani_valuearray_double array, ani_size offset,
                                                              ani_size length, ani_double *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1339,7 +1355,7 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Double(ani_env *env, ani_f
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Char(ani_env *env, ani_fixedarray_char array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Char(ani_env *env, ani_valuearray_char array, ani_size offset,
                                                            ani_size length, const ani_char *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1350,7 +1366,7 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Char(ani_env *env, ani_fix
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Boolean(ani_env *env, ani_fixedarray_boolean array,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Boolean(ani_env *env, ani_valuearray_boolean array,
                                                               ani_size offset, ani_size length,
                                                               const ani_boolean *nativeBuffer)
 {
@@ -1362,7 +1378,7 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Boolean(ani_env *env, ani_
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Short(ani_env *env, ani_fixedarray_short array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Short(ani_env *env, ani_valuearray_short array, ani_size offset,
                                                             ani_size length, const ani_short *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1373,7 +1389,7 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Short(ani_env *env, ani_fi
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Int(ani_env *env, ani_fixedarray_int array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Int(ani_env *env, ani_valuearray_int array, ani_size offset,
                                                           ani_size length, const ani_int *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1384,7 +1400,7 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Int(ani_env *env, ani_fixe
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Long(ani_env *env, ani_fixedarray_long array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Long(ani_env *env, ani_valuearray_long array, ani_size offset,
                                                            ani_size length, const ani_long *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1395,7 +1411,7 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Long(ani_env *env, ani_fix
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Float(ani_env *env, ani_fixedarray_float array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Float(ani_env *env, ani_valuearray_float array, ani_size offset,
                                                             ani_size length, const ani_float *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1406,7 +1422,7 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Float(ani_env *env, ani_fi
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Double(ani_env *env, ani_fixedarray_double array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Double(ani_env *env, ani_valuearray_double array, ani_size offset,
                                                              ani_size length, const ani_double *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -1417,7 +1433,7 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Double(ani_env *env, ani_f
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Byte(ani_env *env, ani_fixedarray_byte array, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Byte(ani_env *env, ani_valuearray_byte array, ani_size offset,
                                                            ani_size length, const ani_byte *nativeBuffer)
 {
     ANI_DEBUG_TRACE(env);
@@ -3978,7 +3994,7 @@ NO_UB_SANITIZE static ani_status String_GetUTF8(ani_env *env, ani_string string,
         return ANI_BUFFER_TO_SMALL;
     }
     ani_size actualCopiedSize = internalString->CopyDataRegionUtf8(utf8Buffer, 0, utf8Length, utf8Length);
-    ASSERT(actualCopiedSize == utf8Length);
+    ANI_CHECK_RETURN_IF_NE(actualCopiedSize, utf8Length, ANI_ERROR);
     utf8Buffer[actualCopiedSize] = '\0';  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     *result = actualCopiedSize;
     return ANI_OK;
@@ -4057,7 +4073,7 @@ NO_UB_SANITIZE static ani_status String_GetUTF16(ani_env *env, ani_string string
         return ANI_BUFFER_TO_SMALL;
     }
     ani_size actualCopiedSize = internalString->CopyDataRegionUtf16(utf16Buffer, 0, utf16Length, utf16BufferSize);
-    ASSERT(actualCopiedSize == utf16Length);
+    ANI_CHECK_RETURN_IF_NE(actualCopiedSize, utf16Length, ANI_ERROR);
     utf16Buffer[actualCopiedSize] = 0;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     *result = actualCopiedSize;
     return ANI_OK;
@@ -4083,7 +4099,7 @@ NO_UB_SANITIZE static ani_status String_GetUTF16SubString(ani_env *env, ani_stri
         return ANI_OUT_OF_RANGE;
     }
     ani_size actualCopiedSize = internalString->CopyDataRegionUtf16(utf16Buffer, substr_offset, substrSize, substrSize);
-    ASSERT(actualCopiedSize == substrSize);
+    ANI_CHECK_RETURN_IF_NE(actualCopiedSize, substrSize, ANI_ERROR);
     utf16Buffer[actualCopiedSize] = 0;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     *result = actualCopiedSize;
     return ANI_OK;
@@ -6268,33 +6284,33 @@ const __ani_interaction_api INTERACTION_API = {
     Array_Push,
     Array_Pop,
     FixedArray_GetLength,
-    FixedArray_New_Boolean,
-    FixedArray_New_Char,
-    FixedArray_New_Byte,
-    FixedArray_New_Short,
-    FixedArray_New_Int,
-    FixedArray_New_Long,
-    FixedArray_New_Float,
-    FixedArray_New_Double,
-    FixedArray_GetRegion_Boolean,
-    FixedArray_GetRegion_Char,
-    FixedArray_GetRegion_Byte,
-    FixedArray_GetRegion_Short,
-    FixedArray_GetRegion_Int,
-    FixedArray_GetRegion_Long,
-    FixedArray_GetRegion_Float,
-    FixedArray_GetRegion_Double,
-    FixedArray_SetRegion_Boolean,
-    FixedArray_SetRegion_Char,
-    FixedArray_SetRegion_Byte,
-    FixedArray_SetRegion_Short,
-    FixedArray_SetRegion_Int,
-    FixedArray_SetRegion_Long,
-    FixedArray_SetRegion_Float,
-    FixedArray_SetRegion_Double,
-    FixedArray_New_Ref,
-    FixedArray_Set_Ref,
-    FixedArray_Get_Ref,
+    ValueArray_New_Boolean,
+    ValueArray_New_Char,
+    ValueArray_New_Byte,
+    ValueArray_New_Short,
+    ValueArray_New_Int,
+    ValueArray_New_Long,
+    ValueArray_New_Float,
+    ValueArray_New_Double,
+    ValueArray_GetRegion_Boolean,
+    ValueArray_GetRegion_Char,
+    ValueArray_GetRegion_Byte,
+    ValueArray_GetRegion_Short,
+    ValueArray_GetRegion_Int,
+    ValueArray_GetRegion_Long,
+    ValueArray_GetRegion_Float,
+    ValueArray_GetRegion_Double,
+    ValueArray_SetRegion_Boolean,
+    ValueArray_SetRegion_Char,
+    ValueArray_SetRegion_Byte,
+    ValueArray_SetRegion_Short,
+    ValueArray_SetRegion_Int,
+    ValueArray_SetRegion_Long,
+    ValueArray_SetRegion_Float,
+    ValueArray_SetRegion_Double,
+    FixedArray_New,
+    FixedArray_Set,
+    FixedArray_Get,
     Enum_GetEnumItemByName,
     Enum_GetEnumItemByIndex,
     EnumItem_GetEnum,
@@ -6626,6 +6642,7 @@ const __ani_interaction_api INTERACTION_API = {
     Primitive_Unbox_Float,
     Primitive_Box_Double,
     Primitive_Unbox_Double,
+    ValueArray_GetLength,
 };
 // clang-format on
 

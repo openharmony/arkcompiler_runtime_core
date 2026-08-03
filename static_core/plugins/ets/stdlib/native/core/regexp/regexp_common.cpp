@@ -62,11 +62,11 @@ ani_status SetResultField(ani_env *env, ani_class regexpResultClass, ani_object 
     ANI_FATAL_IF_ERROR(env->Class_FindField(regexpResultClass, RESULT_FIELD_NAME, &resultField));
 
     const auto count = static_cast<ani_size>(matches.size() * 2U);
-    ani_fixedarray_int intArray;
-    ANI_RETURN_ON_PENDING_ERROR(env->FixedArray_New_Int(count, &intArray));
+    ani_valuearray_int intArray;
+    ANI_RETURN_ON_PENDING_ERROR(env->ValueArray_New_Int(count, &intArray));
 
     const auto flat = FlattenPairs(matches, [](const auto &match) { return match; });
-    ANI_FATAL_IF_ERROR(env->FixedArray_SetRegion_Int(intArray, 0, count, flat.data()));
+    ANI_FATAL_IF_ERROR(env->ValueArray_SetRegion_Int(intArray, 0, count, flat.data()));
     ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(regexpExecArray, resultField, static_cast<ani_ref>(intArray)));
     return ANI_OK;
 }
@@ -95,15 +95,15 @@ ani_status SetGroupKeysField(ani_env *env, ani_class regexpResultClass, ani_obje
     ani_string firstKey;
     ANI_RETURN_ON_PENDING_ERROR(env->String_NewUTF8(it->first.c_str(), it->first.size(), &firstKey));
 
-    ani_fixedarray_ref keysArray;
-    ANI_RETURN_ON_PENDING_ERROR(env->FixedArray_New_Ref(stringClass, groups.size(), firstKey, &keysArray));
+    ani_fixedarray keysArray;
+    ANI_RETURN_ON_PENDING_ERROR(env->FixedArray_New(stringClass, groups.size(), firstKey, &keysArray));
 
     ani_size index = 1;
     ++it;
     for (; it != groups.end(); ++it, ++index) {
         ani_string key;
         ANI_RETURN_ON_PENDING_ERROR(env->String_NewUTF8(it->first.c_str(), it->first.size(), &key));
-        ANI_FATAL_IF_ERROR(env->FixedArray_Set_Ref(keysArray, index, key));
+        ANI_FATAL_IF_ERROR(env->FixedArray_Set(keysArray, index, key));
     }
     ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(regexpExecArray, groupKeysField, static_cast<ani_ref>(keysArray)));
     return ANI_OK;
@@ -119,11 +119,11 @@ ani_status SetGroupValsField(ani_env *env, ani_class regexpResultClass, ani_obje
     ANI_FATAL_IF_ERROR(env->Class_FindField(regexpResultClass, GROUP_VALS_FIELD_NAME, &groupValsField));
 
     const auto count = static_cast<ani_size>(groups.size() * 2U);
-    ani_fixedarray_int valsArray;
-    ANI_RETURN_ON_PENDING_ERROR(env->FixedArray_New_Int(count, &valsArray));
+    ani_valuearray_int valsArray;
+    ANI_RETURN_ON_PENDING_ERROR(env->ValueArray_New_Int(count, &valsArray));
 
     const auto flat = FlattenPairs(groups, [](const auto &entry) { return entry.second; });
-    ANI_FATAL_IF_ERROR(env->FixedArray_SetRegion_Int(valsArray, 0, count, flat.data()));
+    ANI_FATAL_IF_ERROR(env->ValueArray_SetRegion_Int(valsArray, 0, count, flat.data()));
     ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(regexpExecArray, groupValsField, static_cast<ani_ref>(valsArray)));
     return ANI_OK;
 }

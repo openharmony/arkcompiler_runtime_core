@@ -79,8 +79,8 @@ static const __ani_interaction_api *GetInteractionAPI(VEnv *venv)
     return PandaAniEnv::FromAniEnv(venv->GetEnv())->GetEnvANIVerifier()->GetInteractionAPI();
 }
 
-template <typename VFixedArrayType>
-static bool IsFixedArrayRegionOutOfRange(VEnv *venv, VFixedArrayType *varray, ani_size offset, ani_size length)
+template <typename VValueArrayType>
+static bool IsValueArrayRegionOutOfRange(VEnv *venv, VValueArrayType *varray, ani_size offset, ani_size length)
 {
     ScopedManagedCodeFix s(venv->GetEnv());
     EtsArray *internalArray = s.ToInternalType(varray->GetRef());
@@ -1306,7 +1306,24 @@ NO_UB_SANITIZE static ani_status FixedArray_GetLength(VEnv *venv, VFixedArray *v
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Boolean(VEnv *venv, ani_size length, VFixedArrayBoolean **vresult)
+NO_UB_SANITIZE static ani_status ValueArray_GetLength(VEnv *venv, VValueArray *varray, ani_size *result)
+{
+    // clang-format off
+    VERIFY_ANI_ARGS(
+        ANIArg::MakeForEnv(venv, "env"),
+        ANIArg::MakeForValueArray(varray, "array"),
+        ANIArg::MakeForSizeStorage(result, "result")
+    );
+    // clang-format on
+    CHECK_PTR_ARG(venv);
+    CHECK_PTR_ARG(varray);
+
+    auto arrayRef = ResolveToAniRef(varray);
+    return GetInteractionAPI(venv)->ValueArray_GetLength(venv->GetEnv(), arrayRef, result);
+}
+
+// NOLINTNEXTLINE(readability-identifier-naming)
+NO_UB_SANITIZE static ani_status ValueArray_New_Boolean(VEnv *venv, ani_size length, VValueArrayBoolean **vresult)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
@@ -1318,15 +1335,15 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Boolean(VEnv *venv, ani_size len
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vresult);
 
-    ani_fixedarray_boolean result {};
-    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Boolean(venv->GetEnv(), length, &result);
+    ani_valuearray_boolean result {};
+    ani_status status = GetInteractionAPI(venv)->ValueArray_New_Boolean(venv->GetEnv(), length, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Char(VEnv *venv, ani_size length, VFixedArrayChar **vresult)
+NO_UB_SANITIZE static ani_status ValueArray_New_Char(VEnv *venv, ani_size length, VValueArrayChar **vresult)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
@@ -1338,15 +1355,15 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Char(VEnv *venv, ani_size length
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vresult);
 
-    ani_fixedarray_char result {};
-    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Char(venv->GetEnv(), length, &result);
+    ani_valuearray_char result {};
+    ani_status status = GetInteractionAPI(venv)->ValueArray_New_Char(venv->GetEnv(), length, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Byte(VEnv *venv, ani_size length, VFixedArrayByte **vresult)
+NO_UB_SANITIZE static ani_status ValueArray_New_Byte(VEnv *venv, ani_size length, VValueArrayByte **vresult)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
@@ -1358,15 +1375,15 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Byte(VEnv *venv, ani_size length
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vresult);
 
-    ani_fixedarray_byte result {};
-    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Byte(venv->GetEnv(), length, &result);
+    ani_valuearray_byte result {};
+    ani_status status = GetInteractionAPI(venv)->ValueArray_New_Byte(venv->GetEnv(), length, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Short(VEnv *venv, ani_size length, VFixedArrayShort **vresult)
+NO_UB_SANITIZE static ani_status ValueArray_New_Short(VEnv *venv, ani_size length, VValueArrayShort **vresult)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
@@ -1378,15 +1395,15 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Short(VEnv *venv, ani_size lengt
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vresult);
 
-    ani_fixedarray_short result {};
-    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Short(venv->GetEnv(), length, &result);
+    ani_valuearray_short result {};
+    ani_status status = GetInteractionAPI(venv)->ValueArray_New_Short(venv->GetEnv(), length, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Int(VEnv *venv, ani_size length, VFixedArrayInt **vresult)
+NO_UB_SANITIZE static ani_status ValueArray_New_Int(VEnv *venv, ani_size length, VValueArrayInt **vresult)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
@@ -1398,15 +1415,15 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Int(VEnv *venv, ani_size length,
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vresult);
 
-    ani_fixedarray_int result {};
-    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Int(venv->GetEnv(), length, &result);
+    ani_valuearray_int result {};
+    ani_status status = GetInteractionAPI(venv)->ValueArray_New_Int(venv->GetEnv(), length, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Long(VEnv *venv, ani_size length, VFixedArrayLong **vresult)
+NO_UB_SANITIZE static ani_status ValueArray_New_Long(VEnv *venv, ani_size length, VValueArrayLong **vresult)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
@@ -1418,15 +1435,15 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Long(VEnv *venv, ani_size length
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vresult);
 
-    ani_fixedarray_long result {};
-    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Long(venv->GetEnv(), length, &result);
+    ani_valuearray_long result {};
+    ani_status status = GetInteractionAPI(venv)->ValueArray_New_Long(venv->GetEnv(), length, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Float(VEnv *venv, ani_size length, VFixedArrayFloat **vresult)
+NO_UB_SANITIZE static ani_status ValueArray_New_Float(VEnv *venv, ani_size length, VValueArrayFloat **vresult)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
@@ -1438,15 +1455,15 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Float(VEnv *venv, ani_size lengt
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vresult);
 
-    ani_fixedarray_float result {};
-    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Float(venv->GetEnv(), length, &result);
+    ani_valuearray_float result {};
+    ani_status status = GetInteractionAPI(venv)->ValueArray_New_Float(venv->GetEnv(), length, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Double(VEnv *venv, ani_size length, VFixedArrayDouble **vresult)
+NO_UB_SANITIZE static ani_status ValueArray_New_Double(VEnv *venv, ani_size length, VValueArrayDouble **vresult)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
@@ -1458,21 +1475,21 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Double(VEnv *venv, ani_size leng
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(vresult);
 
-    ani_fixedarray_double result {};
-    ani_status status = GetInteractionAPI(venv)->FixedArray_New_Double(venv->GetEnv(), length, &result);
+    ani_valuearray_double result {};
+    ani_status status = GetInteractionAPI(venv)->ValueArray_New_Double(venv->GetEnv(), length, &result);
 
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Boolean(VEnv *venv, VFixedArrayBoolean *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Boolean(VEnv *venv, VValueArrayBoolean *varray, ani_size offset,
                                                               ani_size length, ani_boolean *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayBoolean(varray, "array"),
+        ANIArg::MakeForValueArrayBoolean(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1480,23 +1497,23 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Boolean(VEnv *venv, VFixed
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Boolean(venv->GetEnv(), arrayRef, offset, length,
+    return GetInteractionAPI(venv)->ValueArray_GetRegion_Boolean(venv->GetEnv(), arrayRef, offset, length,
                                                                  nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Char(VEnv *venv, VFixedArrayChar *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Char(VEnv *venv, VValueArrayChar *varray, ani_size offset,
                                                            ani_size length, ani_char *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayChar(varray, "array"),
+        ANIArg::MakeForValueArrayChar(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1504,22 +1521,22 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Char(VEnv *venv, VFixedArr
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Char(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_GetRegion_Char(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Byte(VEnv *venv, VFixedArrayByte *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Byte(VEnv *venv, VValueArrayByte *varray, ani_size offset,
                                                            ani_size length, ani_byte *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayByte(varray, "array"),
+        ANIArg::MakeForValueArrayByte(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1527,22 +1544,22 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Byte(VEnv *venv, VFixedArr
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Byte(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_GetRegion_Byte(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Short(VEnv *venv, VFixedArrayShort *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Short(VEnv *venv, VValueArrayShort *varray, ani_size offset,
                                                             ani_size length, ani_short *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayShort(varray, "array"),
+        ANIArg::MakeForValueArrayShort(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1550,22 +1567,22 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Short(VEnv *venv, VFixedAr
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Short(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_GetRegion_Short(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Int(VEnv *venv, VFixedArrayInt *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Int(VEnv *venv, VValueArrayInt *varray, ani_size offset,
                                                           ani_size length, ani_int *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayInt(varray, "array"),
+        ANIArg::MakeForValueArrayInt(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1573,22 +1590,22 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Int(VEnv *venv, VFixedArra
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Int(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_GetRegion_Int(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Long(VEnv *venv, VFixedArrayLong *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Long(VEnv *venv, VValueArrayLong *varray, ani_size offset,
                                                            ani_size length, ani_long *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayLong(varray, "array"),
+        ANIArg::MakeForValueArrayLong(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1596,22 +1613,22 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Long(VEnv *venv, VFixedArr
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Long(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_GetRegion_Long(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Float(VEnv *venv, VFixedArrayFloat *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Float(VEnv *venv, VValueArrayFloat *varray, ani_size offset,
                                                             ani_size length, ani_float *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayFloat(varray, "array"),
+        ANIArg::MakeForValueArrayFloat(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1619,22 +1636,22 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Float(VEnv *venv, VFixedAr
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Float(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_GetRegion_Float(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Double(VEnv *venv, VFixedArrayDouble *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_GetRegion_Double(VEnv *venv, VValueArrayDouble *varray, ani_size offset,
                                                              ani_size length, ani_double *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayDouble(varray, "array"),
+        ANIArg::MakeForValueArrayDouble(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1642,22 +1659,22 @@ NO_UB_SANITIZE static ani_status FixedArray_GetRegion_Double(VEnv *venv, VFixedA
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_GetRegion_Double(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_GetRegion_Double(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Boolean(VEnv *venv, VFixedArrayBoolean *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Boolean(VEnv *venv, VValueArrayBoolean *varray, ani_size offset,
                                                               ani_size length, const ani_boolean *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayBoolean(varray, "array"),
+        ANIArg::MakeForValueArrayBoolean(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1665,24 +1682,24 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Boolean(VEnv *venv, VFixed
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
         VERIFY_ANI_ABORT_IF_ERROR(VerifyBooleanRegionBufferValues(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Boolean(venv->GetEnv(), arrayRef, offset, length,
+    return GetInteractionAPI(venv)->ValueArray_SetRegion_Boolean(venv->GetEnv(), arrayRef, offset, length,
                                                                  nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Char(VEnv *venv, VFixedArrayChar *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Char(VEnv *venv, VValueArrayChar *varray, ani_size offset,
                                                            ani_size length, const ani_char *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayChar(varray, "array"),
+        ANIArg::MakeForValueArrayChar(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1690,22 +1707,22 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Char(VEnv *venv, VFixedArr
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Char(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_SetRegion_Char(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Byte(VEnv *venv, VFixedArrayByte *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Byte(VEnv *venv, VValueArrayByte *varray, ani_size offset,
                                                            ani_size length, const ani_byte *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayByte(varray, "array"),
+        ANIArg::MakeForValueArrayByte(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1713,22 +1730,22 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Byte(VEnv *venv, VFixedArr
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Byte(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_SetRegion_Byte(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Short(VEnv *venv, VFixedArrayShort *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Short(VEnv *venv, VValueArrayShort *varray, ani_size offset,
                                                             ani_size length, const ani_short *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayShort(varray, "array"),
+        ANIArg::MakeForValueArrayShort(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1736,22 +1753,22 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Short(VEnv *venv, VFixedAr
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Short(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_SetRegion_Short(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Int(VEnv *venv, VFixedArrayInt *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Int(VEnv *venv, VValueArrayInt *varray, ani_size offset,
                                                           ani_size length, const ani_int *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayInt(varray, "array"),
+        ANIArg::MakeForValueArrayInt(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1759,22 +1776,22 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Int(VEnv *venv, VFixedArra
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Int(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_SetRegion_Int(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Long(VEnv *venv, VFixedArrayLong *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Long(VEnv *venv, VValueArrayLong *varray, ani_size offset,
                                                            ani_size length, const ani_long *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayLong(varray, "array"),
+        ANIArg::MakeForValueArrayLong(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1782,22 +1799,22 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Long(VEnv *venv, VFixedArr
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Long(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_SetRegion_Long(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Float(VEnv *venv, VFixedArrayFloat *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Float(VEnv *venv, VValueArrayFloat *varray, ani_size offset,
                                                             ani_size length, const ani_float *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayFloat(varray, "array"),
+        ANIArg::MakeForValueArrayFloat(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1805,22 +1822,22 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Float(VEnv *venv, VFixedAr
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Float(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_SetRegion_Float(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Double(VEnv *venv, VFixedArrayDouble *varray, ani_size offset,
+NO_UB_SANITIZE static ani_status ValueArray_SetRegion_Double(VEnv *venv, VValueArrayDouble *varray, ani_size offset,
                                                              ani_size length, const ani_double *nativeBuffer)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayDouble(varray, "array"),
+        ANIArg::MakeForValueArrayDouble(varray, "array"),
         ANIArg::MakeForSize(offset, "offset"),
         ANIArg::MakeForSize(length, "length"),
         ANIArg::MakeForRegionBuffer(nativeBuffer, length, "native_buffer")
@@ -1828,17 +1845,17 @@ NO_UB_SANITIZE static ani_status FixedArray_SetRegion_Double(VEnv *venv, VFixedA
     // clang-format on
     CHECK_PTR_ARG(venv);
     CHECK_PTR_ARG(varray);
-    if (!IsFixedArrayRegionOutOfRange(venv, varray, offset, length)) {
+    if (!IsValueArrayRegionOutOfRange(venv, varray, offset, length)) {
         VERIFY_ANI_ABORT_IF_ERROR(VerifyRegionBufferSpan(nativeBuffer, length));
     }
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_SetRegion_Double(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
+    return GetInteractionAPI(venv)->ValueArray_SetRegion_Double(venv->GetEnv(), arrayRef, offset, length, nativeBuffer);
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_New_Ref(VEnv *venv, VType *vtype, ani_size length, VRef *vinitialElement,
-                                                    VFixedArrayRef **vresult)
+NO_UB_SANITIZE static ani_status FixedArray_New(VEnv *venv, VType *vtype, ani_size length, VRef *vinitialElement,
+                                                VFixedArray **vresult)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
@@ -1846,7 +1863,7 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Ref(VEnv *venv, VType *vtype, an
         ANIArg::MakeForType(vtype, "type"),
         ANIArg::MakeForArrayCreateLength(length, "length"),
         ANIArg::MakeForFixedArrayInitialRef(vinitialElement, "initial_element"),
-        ANIArg::MakeForArrayRefStorage(vresult, "result")
+        ANIArg::MakeForFixedArrayStorage(vresult, "result")
     );
     // clang-format on
     CHECK_PTR_ARG(venv);
@@ -1857,21 +1874,21 @@ NO_UB_SANITIZE static ani_status FixedArray_New_Ref(VEnv *venv, VType *vtype, an
         initialElement = ResolveToAniRef(vinitialElement);
     }
     CHECK_PTR_ARG(vresult);
-    ani_fixedarray_ref result {};
+    ani_fixedarray result {};
     auto typeRef = ResolveToAniType(vtype);
     ani_status status =
-        GetInteractionAPI(venv)->FixedArray_New_Ref(venv->GetEnv(), typeRef, length, initialElement, &result);
+        GetInteractionAPI(venv)->FixedArray_New(venv->GetEnv(), typeRef, length, initialElement, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_Set_Ref(VEnv *venv, VFixedArrayRef *varray, ani_size index, VRef *vref)
+NO_UB_SANITIZE static ani_status FixedArray_Set(VEnv *venv, VFixedArray *varray, ani_size index, VRef *vref)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayRef(varray, "array"),
+        ANIArg::MakeForFixedArray(varray, "array"),
         ANIArg::MakeForSize(index, "index"),
         ANIArg::MakeForFixedArraySetRef(vref, "ref")
     );
@@ -1881,16 +1898,16 @@ NO_UB_SANITIZE static ani_status FixedArray_Set_Ref(VEnv *venv, VFixedArrayRef *
     CHECK_PTR_ARG(vref);
 
     auto arrayRef = ResolveToAniRef(varray);
-    return GetInteractionAPI(venv)->FixedArray_Set_Ref(venv->GetEnv(), arrayRef, index, ResolveToAniRef(vref));
+    return GetInteractionAPI(venv)->FixedArray_Set(venv->GetEnv(), arrayRef, index, ResolveToAniRef(vref));
 }
 
 // NOLINTNEXTLINE(readability-identifier-naming)
-NO_UB_SANITIZE static ani_status FixedArray_Get_Ref(VEnv *venv, VFixedArrayRef *varray, ani_size index, VRef **vresult)
+NO_UB_SANITIZE static ani_status FixedArray_Get(VEnv *venv, VFixedArray *varray, ani_size index, VRef **vresult)
 {
     // clang-format off
     VERIFY_ANI_ARGS(
         ANIArg::MakeForEnv(venv, "env"),
-        ANIArg::MakeForFixedArrayRef(varray, "array"),
+        ANIArg::MakeForFixedArray(varray, "array"),
         ANIArg::MakeForSize(index, "index"),
         ANIArg::MakeForRefStorage(vresult, "result")
     );
@@ -1900,7 +1917,7 @@ NO_UB_SANITIZE static ani_status FixedArray_Get_Ref(VEnv *venv, VFixedArrayRef *
     CHECK_PTR_ARG(vresult);
     ani_ref result {};
     auto arrayRef = ResolveToAniRef(varray);
-    ani_status status = GetInteractionAPI(venv)->FixedArray_Get_Ref(venv->GetEnv(), arrayRef, index, &result);
+    ani_status status = GetInteractionAPI(venv)->FixedArray_Get(venv->GetEnv(), arrayRef, index, &result);
     ADD_VERIFIED_LOCAL_REF_IF_OK(status, venv, result, vresult);
     return status;
 }
@@ -9948,33 +9965,33 @@ const __ani_interaction_api VERIFY_INTERACTION_API = {
     VERIFY_ANI_CAST_API(Array_Push),
     VERIFY_ANI_CAST_API(Array_Pop),
     VERIFY_ANI_CAST_API(FixedArray_GetLength),
-    VERIFY_ANI_CAST_API(FixedArray_New_Boolean),
-    VERIFY_ANI_CAST_API(FixedArray_New_Char),
-    VERIFY_ANI_CAST_API(FixedArray_New_Byte),
-    VERIFY_ANI_CAST_API(FixedArray_New_Short),
-    VERIFY_ANI_CAST_API(FixedArray_New_Int),
-    VERIFY_ANI_CAST_API(FixedArray_New_Long),
-    VERIFY_ANI_CAST_API(FixedArray_New_Float),
-    VERIFY_ANI_CAST_API(FixedArray_New_Double),
-    VERIFY_ANI_CAST_API(FixedArray_GetRegion_Boolean),
-    VERIFY_ANI_CAST_API(FixedArray_GetRegion_Char),
-    VERIFY_ANI_CAST_API(FixedArray_GetRegion_Byte),
-    VERIFY_ANI_CAST_API(FixedArray_GetRegion_Short),
-    VERIFY_ANI_CAST_API(FixedArray_GetRegion_Int),
-    VERIFY_ANI_CAST_API(FixedArray_GetRegion_Long),
-    VERIFY_ANI_CAST_API(FixedArray_GetRegion_Float),
-    VERIFY_ANI_CAST_API(FixedArray_GetRegion_Double),
-    VERIFY_ANI_CAST_API(FixedArray_SetRegion_Boolean),
-    VERIFY_ANI_CAST_API(FixedArray_SetRegion_Char),
-    VERIFY_ANI_CAST_API(FixedArray_SetRegion_Byte),
-    VERIFY_ANI_CAST_API(FixedArray_SetRegion_Short),
-    VERIFY_ANI_CAST_API(FixedArray_SetRegion_Int),
-    VERIFY_ANI_CAST_API(FixedArray_SetRegion_Long),
-    VERIFY_ANI_CAST_API(FixedArray_SetRegion_Float),
-    VERIFY_ANI_CAST_API(FixedArray_SetRegion_Double),
-    VERIFY_ANI_CAST_API(FixedArray_New_Ref),
-    VERIFY_ANI_CAST_API(FixedArray_Set_Ref),
-    VERIFY_ANI_CAST_API(FixedArray_Get_Ref),
+    VERIFY_ANI_CAST_API(ValueArray_New_Boolean),
+    VERIFY_ANI_CAST_API(ValueArray_New_Char),
+    VERIFY_ANI_CAST_API(ValueArray_New_Byte),
+    VERIFY_ANI_CAST_API(ValueArray_New_Short),
+    VERIFY_ANI_CAST_API(ValueArray_New_Int),
+    VERIFY_ANI_CAST_API(ValueArray_New_Long),
+    VERIFY_ANI_CAST_API(ValueArray_New_Float),
+    VERIFY_ANI_CAST_API(ValueArray_New_Double),
+    VERIFY_ANI_CAST_API(ValueArray_GetRegion_Boolean),
+    VERIFY_ANI_CAST_API(ValueArray_GetRegion_Char),
+    VERIFY_ANI_CAST_API(ValueArray_GetRegion_Byte),
+    VERIFY_ANI_CAST_API(ValueArray_GetRegion_Short),
+    VERIFY_ANI_CAST_API(ValueArray_GetRegion_Int),
+    VERIFY_ANI_CAST_API(ValueArray_GetRegion_Long),
+    VERIFY_ANI_CAST_API(ValueArray_GetRegion_Float),
+    VERIFY_ANI_CAST_API(ValueArray_GetRegion_Double),
+    VERIFY_ANI_CAST_API(ValueArray_SetRegion_Boolean),
+    VERIFY_ANI_CAST_API(ValueArray_SetRegion_Char),
+    VERIFY_ANI_CAST_API(ValueArray_SetRegion_Byte),
+    VERIFY_ANI_CAST_API(ValueArray_SetRegion_Short),
+    VERIFY_ANI_CAST_API(ValueArray_SetRegion_Int),
+    VERIFY_ANI_CAST_API(ValueArray_SetRegion_Long),
+    VERIFY_ANI_CAST_API(ValueArray_SetRegion_Float),
+    VERIFY_ANI_CAST_API(ValueArray_SetRegion_Double),
+    VERIFY_ANI_CAST_API(FixedArray_New),
+    VERIFY_ANI_CAST_API(FixedArray_Set),
+    VERIFY_ANI_CAST_API(FixedArray_Get),
     VERIFY_ANI_CAST_API(Enum_GetEnumItemByName),
     VERIFY_ANI_CAST_API(Enum_GetEnumItemByIndex),
     VERIFY_ANI_CAST_API(EnumItem_GetEnum),
@@ -10306,6 +10323,7 @@ const __ani_interaction_api VERIFY_INTERACTION_API = {
     VERIFY_ANI_CAST_API(Primitive_Unbox_Float),
     VERIFY_ANI_CAST_API(Primitive_Box_Double),
     VERIFY_ANI_CAST_API(Primitive_Unbox_Double),
+    VERIFY_ANI_CAST_API(ValueArray_GetLength),
 };
 // clang-format on
 
