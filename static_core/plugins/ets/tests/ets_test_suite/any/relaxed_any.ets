@@ -128,6 +128,12 @@ function testcallthis() {
     // Verify overridden method without overloads resolves correctly
     xassert(((a: any) => a.xyz('xyz'))(y) == 'xyzY');
 
+    // Error: Cannot resolve method of undefined object
+    expectError(() => { ((a: any) => a.xyz('xyz'))(undefined) == 'xyzY'; });
+
+    // Error: Cannot resolve method of null object
+    expectErrorMessage(() => { ((a: any) => a.xyz('xyz'))(null) == 'xyzY'; }, "not found in Lstd/core/Null");
+
     // Error: Cannot resolve overridden method with overload in base class
     expectError(() => { ((a: any) => a.abc('abc'))(z) == 'abc'; });
 

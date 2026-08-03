@@ -80,7 +80,8 @@ ObjectHeader *ETSAnyCall(ManagedThread *mThread, ObjectHeader *func, Span<VMHand
 ObjectHeader *ETSAnyCallThis(ManagedThread *mThread, ObjectHeader *thisObj, panda_file::File::StringData name,
                              Span<VMHandle<ObjectHeader>> args)
 {
-    return ets::EtsCallThis(mThread, ets::EtsObject::FromCoreType(thisObj), name, args)->GetCoreType();
+    auto obj = ets::EtsCallThis(mThread, ets::EtsObject::FromCoreType(thisObj), name, args);
+    return obj != nullptr ? obj->GetCoreType() : nullptr;
 }
 
 ObjectHeader *ETSAnyCallNew(ManagedThread *mThread, ObjectHeader *ctor, Span<VMHandle<ObjectHeader>> args)
