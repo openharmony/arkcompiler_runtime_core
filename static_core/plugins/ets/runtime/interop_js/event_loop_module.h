@@ -19,9 +19,11 @@
 #include <uv.h>
 #include <node_api.h>
 #include <cstdint>
+#include <functional>
 #include <queue>
 
 #include "runtime/include/external_callback_poster.h"
+#include "runtime/include/mem/panda_containers.h"
 #include "libarkbase/os/mutex.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
@@ -85,11 +87,22 @@ private:
     static void CallbackExecutor(uv_async_t *async);
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_BUILD_IN_OHOS_TREE)
     static void TimerCallbackExecutor(uv_timer_t *timer);
+
+    void HandleTimerCallback();
+    void ArmEarliestTimerLocked(uint64_t nowUs) REQUIRES(timerLock_);
 #endif
 
     uv_async_t *async_ = nullptr;
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_BUILD_IN_OHOS_TREE)
+    using DeadlineQueue = PandaPriorityQueue<uint64_t, PandaVector<uint64_t>, std::greater<uint64_t>>;
+
     uv_timer_t *timer_ = nullptr;
+    os::memory::Mutex timerLock_;
+    // Pending scheduler wake-up deadlines in monotonic microseconds, with the earliest deadline at the top.
+    DeadlineQueue deadlines_ GUARDED_BY(timerLock_);
+    // State of the single physical libuv timer used to serve all pending deadlines.
+    uint64_t armedDeadlineUs_ GUARDED_BY(timerLock_) = 0;
+    bool timerArmed_ GUARDED_BY(timerLock_) = false;
 #endif
     WrappedCallback callback_;
 };

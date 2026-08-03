@@ -19,6 +19,9 @@
 #include "runtime/execution/coroutines/stackful/stackful_coroutine_worker.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
+#include "libarkbase/os/time.h"
+
+#include <limits>
 
 // NOTE(konstanting, #23205): A workaround for the hybrid cmake build. Will be removed soon
 // using a separate .cpp file with weak symbols.
@@ -38,6 +41,10 @@ thread_local uint32_t EventLoop::eventCount_ {0};
 
 // No pending backend timeout in the interop event loop.
 static constexpr int64_t NO_PENDING_EVENT_LOOP_TIMEOUT = -1;
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_BUILD_IN_OHOS_TREE)
+// File-local conversion factor shared by the timer scheduling helpers to avoid magic numbers.
+static constexpr uint64_t MICROSECONDS_PER_MILLISECOND = 1000U;
+#endif
 
 /* static */
 void EventLoop::IncrementEventCount()
@@ -286,7 +293,54 @@ void SingleEventPoster::TimerCallbackExecutor([[maybe_unused]] uv_timer_t *timer
         EventLoop::CloseTimer(timer);
         return;
     }
-    eventPoster->callback_();
+    eventPoster->HandleTimerCallback();
+}
+
+void SingleEventPoster::HandleTimerCallback()
+{
+    bool hasExpiredDeadline = false;
+    // Use the precise monotonic clock to verify that libuv did not wake up before the requested deadline.
+    auto nowUs = os::time::GetClockTimeInMicro();
+    {
+        os::memory::LockHolder lock(timerLock_);
+        timerArmed_ = false;
+        // One scheduler run can process all timer events that have already expired.
+        while (!deadlines_.empty() && deadlines_.top() <= nowUs) {
+            deadlines_.pop();
+            hasExpiredDeadline = true;
+        }
+        // Keep the physical timer armed for the next pending wake-up.
+        if (!deadlines_.empty()) {
+            ArmEarliestTimerLocked(nowUs);
+        }
+    }
+
+    // An early libuv wake-up only rearms the timer and must not run the scheduler yet.
+    if (hasExpiredDeadline) {
+        callback_();
+    }
+}
+
+void SingleEventPoster::ArmEarliestTimerLocked(uint64_t nowUs)
+{
+    ASSERT(!deadlines_.empty());
+    armedDeadlineUs_ = deadlines_.top();
+
+    uint64_t timeoutMs = 0;
+    if (armedDeadlineUs_ > nowUs) {
+        auto remainingUs = armedDeadlineUs_ - nowUs;
+        // libuv accepts integer milliseconds, so round up to avoid scheduling before the microsecond deadline.
+        timeoutMs = remainingUs / MICROSECONDS_PER_MILLISECOND;
+        if (remainingUs % MICROSECONDS_PER_MILLISECOND != 0) {
+            timeoutMs++;
+        }
+    }
+
+    auto *loop = EventLoop::GetEventLoop();
+    uv_update_time(loop);
+    [[maybe_unused]] auto timerStatus = uv_timer_start(timer_, TimerCallbackExecutor, timeoutMs, 0);
+    ASSERT(timerStatus == 0);
+    timerArmed_ = true;
 }
 #endif
 
@@ -294,9 +348,21 @@ void SingleEventPoster::PostImpl([[maybe_unused]] int64_t delayMs)
 {
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_BUILD_IN_OHOS_TREE)
     if (delayMs > 0) {
-        auto loop = EventLoop::GetEventLoop();
-        uv_update_time(loop);
-        uv_timer_start(timer_, TimerCallbackExecutor, static_cast<uint64_t>(delayMs), 0);
+        // Only the worker that owns this JS/libuv loop may enter this branch. Cross-thread scheduling uses
+        // delayMs == 0 and uv_async_send(), because uv_timer_start must run on the loop-owning thread.
+        auto nowUs = os::time::GetClockTimeInMicro();
+        auto delay = static_cast<uint64_t>(delayMs);
+        // Saturate an excessively large delay instead of overflowing the absolute deadline.
+        auto maxDelay = (std::numeric_limits<uint64_t>::max() - nowUs) / MICROSECONDS_PER_MILLISECOND;
+        auto deadlineUs =
+            delay > maxDelay ? std::numeric_limits<uint64_t>::max() : nowUs + delay * MICROSECONDS_PER_MILLISECOND;
+
+        os::memory::LockHolder lock(timerLock_);
+        deadlines_.push(deadlineUs);
+        // A later deadline stays queued; only an earlier one needs to replace the currently armed timeout.
+        if (!timerArmed_ || deadlineUs < armedDeadlineUs_) {
+            ArmEarliestTimerLocked(nowUs);
+        }
     } else {
         uv_async_send(async_);
     }
