@@ -311,6 +311,11 @@ public:
     }
 
 private:
+    bool HasCapacity(size_t size) const
+    {
+        return offset_ <= sp_.Size() && size <= sp_.Size() - offset_;
+    }
+
     Span<uint8_t> sp_;
     size_t offset_ {0};
     uint32_t checksum_;

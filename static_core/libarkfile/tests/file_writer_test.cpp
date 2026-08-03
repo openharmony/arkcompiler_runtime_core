@@ -253,6 +253,50 @@ TEST(FileWriter, MemoryBufferWriteWithCheck)
     }
 }
 
+TEST(FileWriter, MemoryBufferWritePastCapacityFails)
+{
+    constexpr size_t BUF_SIZE = 4U;
+    std::array<uint8_t, BUF_SIZE> memBuf {};
+    MemoryBufferWriter writer(memBuf.data(), memBuf.size());
+
+    ASSERT_TRUE(writer.WriteByte(1U));
+    ASSERT_TRUE(writer.WriteByte(2U));
+    ASSERT_TRUE(writer.WriteByte(3U));
+    ASSERT_TRUE(writer.WriteByte(4U));
+
+    ASSERT_FALSE(writer.WriteByte(5U));
+    ASSERT_EQ(writer.GetOffset(), BUF_SIZE);
+    ASSERT_EQ(memBuf, (std::array<uint8_t, BUF_SIZE> {1U, 2U, 3U, 4U}));
+}
+
+TEST(FileWriter, MemoryBufferWriteBytesPastCapacityFails)
+{
+    constexpr size_t BUF_SIZE = 4U;
+    std::array<uint8_t, BUF_SIZE> memBuf {};
+    MemoryBufferWriter writer(memBuf.data(), memBuf.size());
+    const std::vector<uint8_t> bytes {1U, 2U, 3U, 4U, 5U};
+
+    ASSERT_FALSE(writer.WriteBytes(bytes));
+    ASSERT_EQ(writer.GetOffset(), 0U);
+    ASSERT_EQ(memBuf, (std::array<uint8_t, BUF_SIZE> {}));
+}
+
+TEST(FileWriter, MemoryBufferAppendRangePastCapacityFails)
+{
+    constexpr size_t BUF_SIZE = 4U;
+    std::array<uint8_t, BUF_SIZE> memBuf {};
+    MemoryBufferWriter writer(memBuf.data(), memBuf.size());
+    const std::array<uint8_t, 2U> bytes {1U, 2U};
+
+    ASSERT_TRUE(writer.WriteByte(0xffU));
+    ASSERT_TRUE(writer.WriteByte(0xeeU));
+    ASSERT_TRUE(writer.AppendRange(bytes.data(), bytes.size()));
+    ASSERT_FALSE(writer.AppendRange(bytes.data(), 1U));
+
+    ASSERT_EQ(writer.GetOffset(), BUF_SIZE);
+    ASSERT_EQ(memBuf, (std::array<uint8_t, BUF_SIZE> {0xffU, 0xeeU, 1U, 2U}));
+}
+
 TEST(FileWriter, FileWriterRepeatedChecksumToggles)
 {
     // CC-OFFNXT(G.NAM.03-CPP) project code style

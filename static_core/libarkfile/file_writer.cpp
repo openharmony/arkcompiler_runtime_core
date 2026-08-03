@@ -223,12 +223,15 @@ MemoryBufferWriter::MemoryBufferWriter(uint8_t *buffer, size_t size)
 
 bool MemoryBufferWriter::WriteByte(uint8_t byte)
 {
-    if (Unlikely(countChecksum_)) {
-        checksum_ = adler32(checksum_, &byte, 1U);
+    if (!HasCapacity(1U)) {
+        return false;
     }
     auto subSp = sp_.SubSpan(offset_, 1U);
     if (memcpy_s(subSp.data(), subSp.size(), &byte, 1U) != 0) {
         return false;
+    }
+    if (Unlikely(countChecksum_)) {
+        checksum_ = adler32(checksum_, &byte, 1U);
     }
     offset_++;
     return true;
@@ -244,12 +247,15 @@ bool MemoryBufferWriter::WriteBytes(const uint8_t *bytes, size_t size)
     if (size == 0) {
         return true;
     }
-    if (Unlikely(countChecksum_)) {
-        checksum_ = adler32(checksum_, bytes, size);
+    if (!HasCapacity(size)) {
+        return false;
     }
     auto subSp = sp_.SubSpan(offset_, size);
     if (memcpy_s(subSp.data(), subSp.size(), bytes, size) != 0) {
         return false;
+    }
+    if (Unlikely(countChecksum_)) {
+        checksum_ = adler32(checksum_, bytes, size);
     }
     offset_ += size;
     return true;
@@ -265,6 +271,9 @@ bool MemoryBufferWriter::AppendRange(const uint8_t *data, size_t size)
     if (size == 0) {
         return true;
     }
+    if (!HasCapacity(size)) {
+        return false;
+    }
     auto subSp = sp_.SubSpan(offset_, size);
     if (memcpy_s(subSp.data(), subSp.size(), data, size) != 0) {
         return false;
@@ -275,7 +284,8 @@ bool MemoryBufferWriter::AppendRange(const uint8_t *data, size_t size)
 
 bool MemoryBufferWriter::FinalizeChecksum(size_t contentBeginOffset, size_t checksumStoreOffset)
 {
-    if (contentBeginOffset > offset_ || checksumStoreOffset + sizeof(uint32_t) > offset_) {
+    if (contentBeginOffset > offset_ || checksumStoreOffset > offset_ ||
+        sizeof(uint32_t) > offset_ - checksumStoreOffset) {
         return false;
     }
     const size_t len = offset_ - contentBeginOffset;
