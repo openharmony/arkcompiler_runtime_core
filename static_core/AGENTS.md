@@ -1,66 +1,78 @@
 # AGENTS.md
 
-This file provides guidance to AI when working with code in this repository.
+Guidance for AI agents working in `static_core/`. This is the routing hub for the whole subtree: it fixes the
+project's shape, terminology, and source-of-truth files, then hands off to the nearest specialized `AGENTS.md`.
 
 ## Project Metadata
 
-- **name**: Ark Compiler Runtime Core Static Core
-- **purpose**: Virtual machine runtime designed for OpenHarmony, providing bytecode execution, JIT/AOT compilation, and garbage collection for the ArkTS-Sta programming language
-- **primary language**: C++, ArkTS
+- **name**: Ark Runtime Core (`static_core`)
+- **purpose**: Language-agnostic virtual machine — bytecode execution (interpreter), JIT/AOT/LLVM AOT compilation, and
+  garbage collection. Concrete languages are added as plugins; it is **not** tied to a single language.
+- **primary language**: C++ (plus Assembly, the irtoc DSL, and code-generation YAML/templates)
 
 ## About Static Core
 
-This is the **Ark Runtime Core** (`static_core`) for ArkTS-Sta. It contains the runtime, the optimizing compiler, the
-IR-to-Code generator (`irtoc`), language plugins, and the test infrastructure used to validate JIT, OSR, AOT, LLVM AOT,
-intrinsics, and fast paths.
+`static_core` is the **core of a multilanguage VM** (historically "Panda Runtime", shipped as **ArkVM**). The core
+provides the runtime, the optimizing compiler, the IR-to-code generator (`irtoc`), the bytecode/file toolchain, and the
+test infrastructure. Language support is **not** built into the core — each language is a plugin under `plugins/`.
 
-## Current References
+**Terminology (do not conflate):**
 
-Use the current repository sources:
+- **static_core / ArkVM / Panda Runtime** — the language-agnostic VM in this tree.
+- **ArkTS-Sta (a.k.a. ETS)** — the statically-typed ArkTS language. The new changes for ETS VM implementation part
+  (compiler extensions, runtime, stdlib, interop) should be **only** under `plugins/ets/`, not in the core directories.
+- **Panda Bytecode (`.abc`)** — the portable bytecode the core executes, independent of source language.
 
-- `runtime/options.yaml` - runtime CLI defaults such as JIT, OSR, and interpreter selection
-- `compiler/compiler.yaml` and `compiler/tools/paoc/paoc.yaml` - compiler and `ark_aot` option names/defaults
-- `README.md` - current quick-start commands
-- `docs/compiler_intro_current.md` - current compiler-wide notes and caveats
-- `docs/irtoc.md` - current irtoc pipeline, modes, validation, and debugging outputs
-- `docs/flaky_debugging.md` - current checked/URunner/flaky-debug workflows
-- `compiler/docs/performance_workflows.md` and `compiler/docs/aot_pgo.md` - current perf and AOT PGO workflows
-- `tools/es2panda/AGENTS.md` and `tools/es2panda/README.md` - frontend pipeline and spec-first workflow
+Which plugins exist depends on the checkout and on build flags (`-DPANDA_WITH_<LANG>=ON/OFF`); a plugin is auto-enabled
+when its `plugins/<lang>/` folder is present. Do not assume a fixed set of languages. See `plugins/AGENTS.md`.
 
-## Start Here for Compiler Work
+## Source-of-Truth Files
 
-If the task is compiler-related, do not stay only in this root file. Use the nearest specialized guide:
+Read the live sources instead of trusting summaries; option names and defaults change:
 
-- `compiler/AGENTS.md` - core compiler guidance
-- `plugins/ets/compiler/AGENTS.md` - ETS compiler guidance
-- `runtime/AGENTS.md` - runtime/compiler integration guidance
-- `runtime/jit/AGENTS.md` - profiling and `.ap` guidance
-- `irtoc/AGENTS.md` - irtoc guidance
-- `tests/AGENTS.md` - compiler-related test guidance
-
-## irtoc Use Policy
-
-Treat `irtoc` as a specialized tool for short hot paths, not as the default implementation language for intrinsics or
-stdlib helpers.
-
-For detailed selection rules, tradeoffs, and validation expectations, use `irtoc/AGENTS.md` first, then the nearest
-subtree guide such as `compiler/AGENTS.md`, `runtime/AGENTS.md`, or `tests/AGENTS.md`.
+- `runtime/options.yaml` — runtime (`ark`) CLI options and defaults (JIT, OSR, interpreter selection)
+- `compiler/compiler.yaml`, `compiler/tools/paoc/paoc.yaml` — compiler and `ark_aot` option names/defaults
+- `README.md` — build, run, and test commands (the canonical command catalog)
+- `docs/glossary.md` — authoritative terminology
+- `docs/compiler_intro_current.md`, `docs/irtoc.md`, `docs/flaky_debugging.md` — current compiler, irtoc, and
+  flaky-debug workflows
+- `compiler/docs/performance_workflows.md`, `compiler/docs/aot_pgo.md` — perf and AOT PGO workflows
+- `tools/es2panda/AGENTS.md`, `tools/es2panda/README.md` — frontend pipeline and spec-first workflow (`tools/es2panda` is symlink)
 
 ## Repository Shape
 
-Use the owning subtree rather than this root file for detailed guidance:
+Use the owning subtree's `AGENTS.md` for detailed guidance rather than this hub:
 
-- `compiler/` - optimizing compiler, pipeline, AOT toolchain, compiler-owned docs
-- `plugins/ets/compiler/` - ETS compiler plugin, intrinsics, interop, native-call lowering
-- `runtime/` - runtime/compiler boundary, bridges, deopt, OSR, profiling data
-- `irtoc/` - interpreter and fastpath generation
-- `tests/` - checked tests, runners, and benchmark layers
-- `tools/es2panda/` - frontend pipeline and spec-first rules
-- `docs/` - shared architecture notes owned outside `compiler/`
+| Path | Owns |
+|---|---|
+| `runtime/` | Interpreter, GC, threading, class linking, runtime↔compiler boundary, bridges, deopt, OSR |
+| `compiler/` | Language-agnostic optimizing compiler, IR/passes/codegen, AOT/LLVM AOT toolchain |
+| `irtoc/` | Interpreter-handler and fastpath generation from the `.irt` DSL |
+| `plugins/ets/` | **All ArkTS-Sta (ETS)** VM support: compiler extensions, runtime, stdlib, interop, tests |
+| `tools/es2panda/` | (Symlink) Frontend (source → `.abc`) pipeline |
+| `assembler/`, `disassembler/`, `libarkfile/`, `abc2program/`, `bytecode_optimizer/` | `.abc` bytecode/file toolchain |
+| `libarkbase/` | OS/platform abstraction, base containers, low-level utilities |
+| `verification/` | Bytecode verifier |
+| `tests/` | Core checked tests, runners (URunner), benchmarks |
+| `docs/` | Shared architecture notes owned outside `compiler/` |
 
-For build, smoke-run, and quick-start commands, use `README.md`. Keep this file focused on routing and source-of-truth
-decisions rather than duplicating command catalogs.
+## Start Here by Task
+
+Do not stop at this hub. Open the nearest specialized guide first:
+
+- Compiler / JIT / OSR / AOT / codegen → `compiler/AGENTS.md`
+- ArkTS-Sta (ETS) VM part → `plugins/ets/AGENTS.md` (then its `compiler/`, `runtime/`, `stdlib/` sub-guides)
+- Runtime / GC / bridges / deopt / class linker → `runtime/AGENTS.md`
+- Profiling / `.ap` profiles → `runtime/jit/AGENTS.md`
+- irtoc / fastpaths / interpreter handlers → `irtoc/AGENTS.md`
+- Tests / checked / URunner / benchmarks → `tests/AGENTS.md`
+
+## irtoc Use Policy
+
+Treat `irtoc` as a specialized tool for short, hot, clearly-bounded paths — **not** the default implementation language
+for intrinsics or stdlib helpers. Prefer managed code, C++ runtime, a compiler pass, or codegen first. For selection
+rules, tradeoffs, and validation expectations, read `irtoc/AGENTS.md`, then the nearest subtree guide.
 
 ## Code Style
 
-- 4 spaces indent, 120 character line length
+- Code style enforced by `.clang-format` / `.clang-tidy` and `docs/coding-style.md`.

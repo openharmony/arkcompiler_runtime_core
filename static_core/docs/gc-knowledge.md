@@ -9,8 +9,8 @@ This document covers only the error-prone boundaries in garbage collection and m
 | Epsilon | `EPSILON_GC` | No | No | No | Debug/perf baseline measurement |
 | Epsilon-G1 | `EPSILON_G1_GC` | Yes | No | No | G1 allocator without collection |
 | STW | `STW_GC` | No | No | No | Simple mark-sweep |
-| G1 | `G1_GC` | Yes | Yes | Yes | Main production GC |
-| CMC | `CMC_GC` | No | No | Yes | Concurrent mark-sweep (common runtime) |
+| G1 | `G1_GC` | Yes | Yes | Yes | Concurrent mark GC, collect young + top garbage tenured regions on MixedGC |
+| CMC | `CMC_GC` | Yes | Yes | Yes | Concurrent mark-copy (common runtime) |
 
 `--gc-type` selects the GC, but note compatibility with interpreter type (see below).
 
@@ -41,21 +41,17 @@ MemMapSpace
     +-- Non-moving Space
 
 MallocMemSpace
-+-- Humongous Object Space (optional)
++ native malloc/free
 ```
 
 ### Logical GC Spaces
 
 ```
-+--------------+------------+---------------------+
-|  Eden/Young  |  Survivor  |     Tenured/Old      |
-|              |  (optional)|                      |
-+--------------+------------+---------------------+
++--------------+---------------------+
+|  Eden/Young  |     Tenured/Old     |
+|              |                     |
++--------------+---------------------+
 ```
-
-- Survivor space is optional and only for high-end devices
-- When prioritizing throughput, avoid Survivor (most Eden objects die young)
-- Without Survivor, a non-moving generational GC is possible
 
 ## Region Model (G1 GC)
 
@@ -83,14 +79,14 @@ Each region maintains a Remembered Set to track cross-region references:
 
 | Reference direction | Purpose |
 |---------------------|---------|
-| old -> young | Find old-to-young roots during Minor GC |
+| old -> young | Find old-to-young roots during Young GC |
 | old -> old | Cross-region references during Mixed GC |
 
 Remembered Sets can be refined by dedicated threads (`UpdateRemsetWorker`, `update_remset_thread.cpp`).
 
 ## GC Collection Flows
 
-### Minor GC (STW, young regions only)
+### Young GC (STW, young regions only)
 
 ```
 1. Root scan (young gen) + Remembered Set for old gen roots
@@ -100,7 +96,7 @@ Remembered Sets can be refined by dedicated threads (`UpdateRemsetWorker`, `upda
 
 ### Mixed GC
 
-Minor GC + some tenured regions added to the collection set after concurrent marking.
+Young GC + some tenured regions added to the collection set after concurrent marking.
 
 ### Concurrent Marking (triggered when tenured occupancy reaches threshold)
 
@@ -111,58 +107,15 @@ Minor GC + some tenured regions added to the collection set after concurrent mar
 4. Cleanup - reclaim empty regions, decide whether Mixed GC is needed
 ```
 
-### Major GC (CMS-style)
+### Tenured GC
 
 ```
-1. Concurrent scan of static roots
-2. Initial mark - root scan (STW #1)
-3. Concurrent marking + Reference processor
-4. Remark (STW #2)
-5. Concurrent sweep + finalizers
-6. Reset
+1. Initial mark - root scan (STW #1)
+2. Concurrent marking + Reference processor
+3. Remark (STW #2)
+4. Concurrent sweep + finalizers
+5. Reset
 ```
-
-### GC Trigger Selection
-
-G1 GC uses adaptive thresholds to trigger Minor GC, minimizing STW pause. `G1Analytics` and `G1PauseTracker` predict and adjust pause targets.
-
-## Object Header
-
-Object header size depends on the target device:
-
-### 128-bit Object Header (high-end devices, 64-bit pointers)
-
-```
-+---------------------------------------+--------------------------------+
-|          Mark Word (64 bits)          |     Class Word (64 bits)       |
-+---------------------------------------+--------------------------------+
-| nothing:61        | GC:1 | state:00  |     OOP to metadata object     |  Unlock
-| tId:29|Lcount:32  | GC:1 | state:00  |     OOP to metadata object     |  Lightweight Lock
-| Monitor:61        | GC:1 | state:01  |     OOP to metadata object     |  Heavyweight Lock
-| Hash:61           | GC:1 | state:10  |     OOP to metadata object     |  Hashed
-| Forwarding addr:62|      state:11    |     OOP to metadata object     |  GC
-+---------------------------------------+--------------------------------+
-```
-
-### 32-bit Object Header (low-end devices)
-
-```
-+-----------------------+-----------------------+
-|  Mark Word (16 bits)  |  Class Word (16 bits)  |
-+-----------------------+-----------------------+
-```
-
-### State Meanings
-
-| State | state bits | Meaning |
-|-------|------------|---------|
-| Unlock | 00 | Unlocked |
-| Lightweight Lock | 00 | Single-thread lock (tId + Lcount) |
-| Heavyweight Lock | 01 | Contended lock (Monitor pointer) |
-| Hashed | 10 | Object has been hashed; hash stored in Mark Word |
-| GC | 11 | GC has moved the object; contains forwarding address |
-
-Do not confuse Lightweight Lock and Unlock state bits — they share the same encoding. The difference is in the Mark Word content.
 
 ## GC Barriers
 
@@ -283,25 +236,12 @@ Compiled/JIT code
 | Large | 4KB - 4MB | Direct allocation (no run) |
 | Humongous | 4MB+ | Proxied to OS or specialized allocator |
 
-### RunSlots Structure
-
-```
-+--------------------+----------+--------------+-----+----------+
-| header (size X)    | obj sizeX| free sizeX   | ... | obj sizeX|
-+--------------------+----------+--------------+-----+----------+
-```
-
-- Each thread maintains a TLAB cache (at least for Small objects), reducing synchronization overhead
-- Lock policy: protect localized resources by size class; avoid holding locks during mmap and other system calls
-- Profile-Guided Allocation: popular allocation sizes can be added to the segregated size table to reduce fragmentation
-
 ### Main Allocators
 
 | Allocator | Purpose |
 |-----------|---------|
-| `RegionAllocator` | Region-based allocation for G1 GC |
+| `RegionAllocator` | Region-based allocation for G1 GC, a region can contain TLAB |
 | `RunSlotsAllocator` | Fast small object allocation |
-| `TLAB` | Thread-local allocation buffer |
 | `BumpAllocator` | Bump-pointer allocation |
 | `FreelistAllocator` | Free-list allocation |
 | `HumongousObjAllocator` | Large object allocation |
@@ -346,9 +286,9 @@ GC core code can be traced starting from `runtime/mem/gc/`:
 | GC workers | `runtime/mem/gc/workers/` |
 | Object header | `runtime/include/object_header.h`, `runtime/mark_word.h` |
 | Mark Word | `runtime/mark_word.h` |
-| Heap manager | `runtime/mem/heap_manager.h` |
+| Heap manager | `runtime/mem/heap_manager.cpp` |
 | Region Space | `runtime/mem/region_space.h` |
-| Heap verifier | `runtime/mem/heap_verifier.h` |
+| Heap verifier | `runtime/mem/heap_verifier.cpp` |
 | Mutator | `runtime/mutator.cpp`, `runtime/mutator_manager.cpp` |
 | Safepoint | `runtime/include/safepoint_timer.h` |
 | GC task | `runtime/gc_task.cpp` |
