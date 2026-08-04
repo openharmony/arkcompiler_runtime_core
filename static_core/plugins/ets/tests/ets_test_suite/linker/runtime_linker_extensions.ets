@@ -297,10 +297,11 @@ class Test {
         Test.testAdditionalClass1Loaded(linker);
     }
 
-    static testAbcRuntimeLinkerWithInvalidHapFileEntry() {
-        arktest.expectThrow(() => { new AbcRuntimeLinker(undefined, [Test.getAdditionalInvalidHapFile()]) },
-            (e) => e instanceof AbcFileNotFoundError
-        );
+    static testRuntimeLinkerAddAbcFilesWithInvalidHapFileEntry() {
+        const linker = new AbcRuntimeLinker(undefined, []);
+        linker.addAbcFiles([Test.getAdditionalInvalidHapFile(), Test.getAdditionalHapFile()]);
+
+        Test.testAdditionalClass1Loaded(linker);
     }
 
     static testRuntimeLinkerAddHspFile() {
@@ -393,7 +394,7 @@ class Test {
         Test.testRuntimeLinkerAddAbcFiles();
         Test.testRuntimeLinkerAddHapFile();
         Test.testAbcRuntimeLinkerWithHapFile();
-        Test.testAbcRuntimeLinkerWithInvalidHapFileEntry();
+        Test.testRuntimeLinkerAddAbcFilesWithInvalidHapFileEntry();
         Test.testRuntimeLinkerAddHspFile();
         Test.testAbcRuntimeLinkerWithHspFile();
         Test.testMemoryRuntimeLinkerAddAbcFiles();
