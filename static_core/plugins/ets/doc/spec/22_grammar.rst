@@ -65,7 +65,7 @@ Grammar Summary
         ;
 
     unionType:
-        type ('|' type)*
+        type '|' type ('|' type)*
         ;
 
     keyofType:
@@ -881,11 +881,11 @@ Grammar Summary
         | explicitFunctionOverload
         | ambientClassDeclaration
         | ambientInterfaceDeclaration
-        | ambientEnumDeclaration
         | ambientNamespaceDeclaration
         | ambientAnnotationDeclaration
         | ambientAccessorDeclaration
-        | typeAlias        
+        | enumDeclaration
+        | typeAlias
         )
         ;
 
@@ -984,14 +984,6 @@ Grammar Summary
         'default'? identifier signature
         ;
 
-    ambientEnumDeclaration
-        : 'enum' identifier enumBaseType? '{' ambientEnumMemberList? '}'
-        ;
-
-    ambientEnumMemberList:
-        identifier (',' identifier)* ','?
-        ;
-
     ambientNamespaceDeclaration:
         'namespace' qualifiedName '{' ambientNamespaceElement* '}'
         ;
@@ -1009,7 +1001,7 @@ Grammar Summary
         | ambientInterfaceDeclaration
         | ambientNamespaceDeclaration
         | ambientAccessorDeclaration
-        | ambientEnumDeclaration
+        | enumDeclaration
         | typeAlias
         )
         ;

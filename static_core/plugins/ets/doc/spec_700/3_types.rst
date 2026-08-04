@@ -247,7 +247,7 @@ The syntax of *type* is presented below:
 .. code-block:: abnf
 
     type:
-        annotationUsageWithParentheses?
+        annotationUsage?
         ( typeReference
         | 'readonly'? arrayType
         | 'readonly'? tupleType
@@ -2444,7 +2444,6 @@ after another:
    any) are removed.
 #. If one type in a union is ``never``, then type ``never`` is removed.
 
-
    This procedure is performed recursively until none of the above steps can
    can be performed again.
 
@@ -2488,21 +2487,16 @@ is represented by the examples below:
     "1" | string | number /* normalized as  string | number. Literal type value
                              belongs to another type values */
 
-    class Base {}
-    class Derived extends Base {}
-    Base | Derived // normalized as Base | Derived (no change)
-
-The |LANG| compiler applies normalization while processing union types and
-handling type inference for array literals (see
-:ref:`Array Type Inference from Types of Elements`).
+The |LANG| compiler applies normalization and may provide additional
+optimizations while processing union types and handling type inference for
+object literals (see :ref:`Object Literal`).
 
 .. index::
    normalization
    union type
    normalized union type
-   array literal
    type inference
-   array literal
+   object literal
    linearization
    string
    readonly
@@ -2886,7 +2880,7 @@ NonNullable Utility Type
 
 Type ``NonNullable<T>`` constructs a type by excluding ``null`` and ``undefined``
 types (see :ref:`Type null` and :ref:`Type undefined or void`). It can be
-expressed formally as follows (see :ref:`Difference Types`):
+expressed formally as follows:
 
 ``NonNullable<T> = T - null - undefined``.
 
@@ -3275,9 +3269,9 @@ ReturnType Utility Type
     frontend_status: None
 
 Type ``ReturnType<T>`` constructs a new type from the return type of a function
-type ``T`` (see :ref:`Function Types`). A :index:`compile-time error` occurs if
-a non-function type except type ``never`` is provided. The usage is represented
-in the example below:
+type ``T`` (see :ref:`Function Types`) or its subtype ``never`` (see
+:ref:`Type never`). A :index:`compile-time error` occurs if any other type is
+provided. The usage is represented in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -3291,53 +3285,8 @@ in the example below:
 
    foo<()=>number>()  // R is number
 
-   type anAny = ReturnType<Function>  // anAny is Any
-   type aNever = Return Type<never>   // aNever is never
-
-
-|
-
-.. _Utility Type Private Fields:
-
-Utility Type Private Fields
-===========================
-
-.. meta:
-    frontend_status: Done
-
-Utility types are built on top of other types. Private fields of the initial
-type stay in the utility type but they are not accessible (see
-:ref:`Accessible`) and cannot be accessed in any way. It is represented in the
-example below:
-
-.. code-block:: typescript
-   :linenos:
-
-   function foo(): string {  // Potentially some side effect
-      return "private field value"
-   }
-
-   class A {
-      public_field = 444
-      private private_field = foo()
-   }
-
-   function bar (part_a: Readonly<A>) {
-      console.log (part_a)
-   }
-
-   bar ({public_field: 777}) // OK, object literal has no field `private_field`
-   bar ({public_field: 777, private_field: ""}) // Compile-time error, incorrect field name
-
-   bar (new A) // OK, object of type Readonly<A> has field `private_field`
-
-.. index::
-   utility type
-   private field
-   type
-   access
-   accessibility
-   field name
+   type anAny =  ReturnType<Function> // anAny is Any
+   type aNever = ReturnType<never>    // aNever is never
 
 |
 

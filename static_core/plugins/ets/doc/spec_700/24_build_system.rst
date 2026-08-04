@@ -18,6 +18,12 @@ Build System
 .. meta:
     frontend_status: Partly
 
+.. note::
+   The current compiler does not yet implement the explicit-module-based
+   build-system behavior described in this chapter. In particular,
+   module-header-based visibility, module-name-based import-path resolution,
+   and module-name-based runtime-name formation are not yet supported.
+
 
 The Build System of the |LANG| language defines the following:
 

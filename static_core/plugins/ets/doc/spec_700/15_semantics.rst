@@ -216,9 +216,9 @@ operators evaluate ``byte`` and ``short`` operands without
 widening. It is also true for an ``assignment`` operator (considering
 ``assignment`` as a binary operator).
 
-For other numeric operators, the operands of unary and binary numeric expressions
-are widened to a larger numeric
-type. The minimum type is ``int``. None of those operators
+For most other numeric operators, the operands of unary and binary numeric
+expressions are widened to a larger numeric type.
+The minimum type is ``int``. None of those operators
 evaluates values of types ``byte`` and ``short`` without widening. Details of
 specific operators are discussed in corresponding sections of the Specification.
 
@@ -972,26 +972,23 @@ rest parameter ``FPrest`` (if present) and return type ``FR``  is a
 (if present) and return type ``SR`` if **all** of the following conditions
 are met:
 
-- Number of optional and required parameters of ``F`` (``m``) is equal or
-  less than number of optional and required parameters of ``S`` (``n``).
+#. Number of optional and required parameters of ``F`` (``m``) is equal or
+   less than number of optional and required parameters of ``S`` (``n``).
 
-- Number of required parameters of ``F`` is equal or less than number
-  of required parameters of ``S``.
+#. Number of required parameters of ``F`` is equal or less than number
+   of required parameters of ``S``.
 
-- If the rest parameter ``FPrest`` is present then ``SPrest`` is present.
+#. For each ``i <= m``, type of ``SP``:sub:`i` is a subtype of type
+   of ``FP``:sub:`i`.
 
-- For each ``i <= m``, type of ``SP``:sub:`i` is a subtype of type
-  of ``FP``:sub:`i`.
+#. If the rest parameter ``FPrest`` is present:
 
-- If the rest parameter ``FPrest`` is present:
+   - ``SPrest`` is present;
+   - Type of ``SPrest`` is a subtype of type of ``FPrest``.
+   - For each ``i > m``, parameter type ``SP``:sub:`i` is a subtype of the
+     element type of type of ``FPrest``.
 
-  - For each ``i > m``, parameter type ``SP`` must be a subtype of the
-    element type of type of ``FPrest``.
-
-  - Type of ``SPrest`` should be a subtype of type of ``FPrest``.
-
-- The resultant type ``FR`` is a subtype of ``SR``.
-
+#. The resultant type ``FR`` is a subtype of ``SR``.
 
 .. index::
    function type
@@ -1004,6 +1001,8 @@ are met:
    covariance
    return type
    optional parameter
+
+The situation is represented in the following example:
 
 .. code-block:: typescript
    :linenos:
@@ -1049,6 +1048,24 @@ are met:
    supertype
    parameter
    lambda
+
+Subtyping for function types with rest parameters is illustrated in the following example:
+
+.. code-block:: typescript
+   :linenos:
+
+    let x: (...r: number[]) => void = (): void => {}  // OK
+    let x1: () => void = (...r: number[]): void => {} // Compile-time error
+
+    let y: (...r: FixedArray<number>) => void
+        = (...r: FixedArray<Object>): void => {}  // OK
+    let y1: (...r: FixedArray<Object>) => void
+        = (...r: FixedArray<number>): void => {} // Compile-time error
+
+    let z: (x: number, ...r: number[]) => void
+        = (...r: number[]): void => {}  // OK
+    let z1: (x: string, ...r: number[]) => void 
+        = (...r: number[]): void => {} // Compile-time error
 
 |
 
@@ -1105,26 +1122,6 @@ system as represented in the example below:
     let da: FixedArray<D> = [new D()]
 
     foo(da) // leads to runtime error in 'foo'
-
-|
-
-.. _Difference Types:
-.. _Subtyping for Difference Types:
-
-Subtyping for Difference Types
-==============================
-
-Difference type ``A - B`` is a subtype of ``T`` if ``A`` is
-a subtype of ``T``.
-
-Type ``T`` is a subtype of the difference type ``A - B`` if ``T`` is
-a subtype of ``A``, and no value belongs both to ``T`` and ``B``
-(i.e., ``T & B = never``).
-
-.. index::
-   subtype
-   subtyping
-   difference type
 
 |
 
@@ -1698,7 +1695,7 @@ The current version of |LANG| allows inferring return types at least under
 the following conditions:
 
 -  If there is no return statement, or if all return statements have no
-   expressions, then the return type is ``void`` (see
+   expressions, then the return type is ``void`` or ``undefined`` (see
    :ref:`Type undefined or void`). It effectively implies that a call to a
    function, method, or lambda returns the value ``undefined``.
 -  If there are *k* return statements (where *k* is 1 or more) with

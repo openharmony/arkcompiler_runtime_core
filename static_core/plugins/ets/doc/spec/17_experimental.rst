@@ -830,19 +830,75 @@ Iterable Types
 .. meta:
     frontend_status: Done
 
-A class or an interface is *iterable* if it implements the interface ``Iterable``
-defined in the :ref:`Standard Library`, and thus has an accessible parameterless
-method with the name ``$_iterator`` and a return type that is a subtype (see
-:ref:`Subtyping`) of type ``Iterator`` as defined in the :ref:`Standard Library`.
-It guarantees that an object returned by the ``$_iterator`` method is of the
-type which implements ``Iterator``, and thus allows traversing an object of the
-*iterable* type.
+A class or an interface is *iterable* if it implements interface ``Iterable``
+(see :ref:`Iterable Types Definition in Standard Library`),
+and thus has an accessible parameterless method with the name ``$_iterator``
+and a return type that is a subtype (see :ref:`Subtyping`) of interface
+``Iterator``. It guarantees that an object returned by the ``$_iterator``
+method is of the type which implements interface ``Iterator``, and thus
+allows traversing an object of the *iterable* type.
 
 A union of iterable types is also *iterable*. It means that instances of such
 types can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
 
 Array (see :ref:`Array Types`) and string (see :ref:`Type string`) types are
 iterable.
+
+.. _Iterable Types Definition in Standard Library:
+
+Iterable Types Definition in Standard Library
+=============================================
+
+The standard library defines the following types that constitute the iterator
+protocol. This protocol is used by :ref:`For-Of Statements` and
+:ref:`Spread Expression` to traverse iterable objects:
+
+.. code-block:: typescript
+
+    export class IteratorResult<out T> {
+        done: boolean
+        readonly value: T | undefined
+    }
+
+    export interface Iterator<out T> {
+        next(): IteratorResult<T>
+    }
+
+    export interface Iterable<out T> {
+        $_iterator(): Iterator<T>
+    }
+
+    export interface IterableIterator<out T> extends Iterator<T>, Iterable<T> {
+        $_iterator(): IterableIterator<T>
+    }
+
+``IteratorResult`` is a class that represents the result of a single iteration
+step. The field ``done`` indicates whether the traversal is complete. If
+``done`` is ``true``, then ``value`` is ``undefined`` and no further elements
+are available. If ``done`` is ``false``, then ``value`` holds the current
+element of the iteration.
+
+``Iterator`` is an interface that defines the ``next()`` method. Each call to
+``next()`` advances the iterator and returns an ``IteratorResult`` describing
+the state of the traversal.
+
+``Iterable`` is an interface that defines the ``$_iterator()`` method. Any type
+implementing ``Iterable`` can be used in ``for-of`` statements (see
+:ref:`For-Of Statements`) and spread expressions (see :ref:`Spread Expression`).
+The method ``$_iterator()`` must return an ``Iterator`` subtype.
+
+``IterableIterator`` is a convenience interface that combines ``Iterator`` and
+``Iterable``. It extends both interfaces and provides a default implementation
+of ``$_iterator()`` that returns ``this``, allowing an object to be both an
+iterator and iterable in a single entity.
+
+.. index::
+   iterator
+   Iterable
+   Iterator
+   IteratorResult
+   IterableIterator
+   iterable type
 
 An *iterable* class ``C`` is represented in the example below:
 
@@ -886,10 +942,10 @@ An *iterable* class ``C`` is represented in the example below:
           this.base = base
         }
         next(): IteratorResult<string> {
-          return {
-            done: this.index >= this.base.data.length,
-            value: this.index >= this.base.data.length ? "" : this.base.data[this.index++]
-          }
+          return new IteratorResult<string>(
+            this.index >= this.base.data.length,
+            this.index >= this.base.data.length ? "" : this.base.data[this.index++]
+          )
         }
       }
 
@@ -1031,10 +1087,34 @@ A :index:`compile-time error` occurs if:
         static $_instantiate(factory: () => A): A { return factory(); }
     }
 
-Static methods have no access to type parameters of generic in |LANG|. It means
-that the method ``$_instantiate`` cannot be declared for a generic type. The
-method ``$_invoke`` can be declared, but the *type call expression* or explicit
-call of ``$_invoke()`` must not use a type parameter.
+Methods ``$_instantiate`` and ``$_invoke`` can define their own generic
+parameters, which can be utilized within their bodies and at their call sites.
+However, they do not have access to generic parameters of the surrounding class.
+
+..  code-block:: typescript
+    :linenos:
+
+    class A<T> {
+        static $_invoke(p: T) { } /* Compile-time error, as type T is not
+                                     avaialable for the static method */
+    }
+
+    class B<T> {
+        static $_instantiate<U>(factory: () => B<U>): B<U> { return factory() }
+        // ok, as $_instantiate has its own generic parameter
+    }
+  
+    const factory = (): B<number> => {return new B<number>}
+
+    /* All 4 calls below have the same semantics. 
+       The same works for $_invoke as well */
+
+    B<number> (factory)               /* ok, no type inference, number is the
+                                         type arguement for the 
+                                         $_instantiate<U> method */
+    B (factory)                       // ok, with type inference
+    B.$_instantiate (factory)         // ok, with type inference
+    B.$_instantiate<number> (factory) // ok, no type inference
 
 
 .. index::

@@ -116,6 +116,8 @@ A comprehensive list of such scenarios is presented below:
 
        f(i: number, y: T): T { return y }
        g(y: T): T { return y}
+
+       constructor(x: T) { this.x = x }
     }
     class D extends B<number> {
        override g: number = 1.
@@ -209,6 +211,18 @@ Type ``bigint``
 The |LANG| type ``bigint`` is represented in a binary file with the predefined
 :ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches ``RefType`` with
 :ref:`Fully Qualified Name <RT Fully Qualified Name>` ``std.core.BigInt``.
+
+|
+
+.. _RT Error Types:
+
+Error Types
+===========
+
+The |LANG| type ``Error`` (see :ref:`Errors`) is represented in a binary file by
+the predefined :ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this
+:ref:`Class <RT Class>` matches ``RefType`` with :ref:`Fully Qualified Name <RT Fully Qualified Name>`
+``escompat.Error``.
 
 |
 
@@ -585,3 +599,42 @@ Annotation Field
 ----------------
 
 The representation of each *annotation field* and :ref:`Class field <RT Class field>` in bytecode is the same.
+
+|
+
+.. _RT Record Utility Type:
+
+Record Utility Type
+===================
+
+The |LANG| utility type ``Record<K, V>`` (see :ref:`Record Utility Type`) is
+represented in a binary file by the predefined :ref:`Class <RT Class>`. The
+:ref:`Type Descriptor <RT Type Descriptor>` of this :ref:`Class <RT Class>` matches ``RefType`` with
+:ref:`Fully Qualified Name <RT Fully Qualified Name>` ``std.core.Record``.
+
+|
+
+.. _RT Iterable and Iterator Types:
+
+Iterable and Iterator Types
+===========================
+
+The |LANG| type ``IteratorResult`` is represented in a binary file by the
+predefined :ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this
+:ref:`Class <RT Class>` matches ``RefType`` with :ref:`Fully Qualified Name <RT Fully Qualified Name>`
+``std.core.IteratorResult``.
+
+The |LANG| type ``Iterator`` is represented in a binary file by the predefined
+:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this
+:ref:`Class <RT Class>` matches ``RefType`` with :ref:`Fully Qualified Name <RT Fully Qualified Name>`
+``std.core.Iterator``.
+
+The |LANG| type ``Iterable`` is represented in a binary file by the predefined
+:ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this
+:ref:`Class <RT Class>` matches ``RefType`` with :ref:`Fully Qualified Name <RT Fully Qualified Name>`
+``std.core.Iterable``.
+
+The |LANG| type ``IterableIterator`` is represented in a binary file by the
+predefined :ref:`Class <RT Class>`. The :ref:`Type Descriptor <RT Type Descriptor>` of this
+:ref:`Class <RT Class>` matches ``RefType`` with :ref:`Fully Qualified Name <RT Fully Qualified Name>`
+``std.core.IterableIterator``.

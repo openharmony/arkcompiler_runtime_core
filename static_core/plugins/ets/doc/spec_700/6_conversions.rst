@@ -159,10 +159,9 @@ String Operator Contexts
 .. meta:
     frontend_status: Done
 
-*String context* applies only to a non-*string* operand of the binary operator
-``'+'`` if the other operand is ``string``.
+*String context* applies to operands of :ref:`String Concatenation` expressions.
 
-*String conversion* for a non-``string`` operand is evaluated as follows:
+For a non-``string`` operand *string conversion* is applied as follows:
 
 -  An operand of an integer type (see :ref:`Integer Types and Operations`)
    is converted to type ``string`` with a value that represents the operand in
@@ -177,7 +176,7 @@ String Operator Contexts
 
 -  An operand of enumeration type (see :ref:`Enumerations`) is converted to
    type ``string`` with the value of the corresponding enumeration member
-   if values of enumeration are of type ``string``.
+   if the enumeration base type is ``string``.
 
 -  The operand of a nullish type that has a nullish value is converted as
    follows:
@@ -194,6 +193,7 @@ The target type in this context is always ``string``:
 
 .. index::
    string context
+   string concatenation
    non-string operand
    binary operator
    string operand
@@ -203,15 +203,11 @@ The target type in this context is always ``string``:
    integer type
    operand
    floating-point type
-   loss of information
    enumeration type
    string type
    nullish type
    boolean
    decimal
-   string conversion
-   operand null
-   operator undefined
    method call
    context
 
@@ -237,30 +233,7 @@ Numeric Operator Contexts
 .. meta:
     frontend_status: Done
 
-Numeric contexts apply to the operands of an arithmetic operator.
-Numeric contexts use numeric types conversions
-(see :ref:`Widening Numeric Conversions`), and ensure that each argument
-expression can be converted to target type ``T`` while the arithmetic
-operation for the values of type ``T`` is being defined.
-
-An operand of enumeration type (see :ref:`Enumerations`) can be used in
-a numeric context if enumeration
-base type is a numeric type. The type of this operand is assumed to be the same
-as the enumeration base type.
-
-.. index::
-   numeric context
-   arithmetic operator
-   predefined type
-   numeric type
-   conversion
-   argument expression
-   target type
-   string conversion
-   string context
-   type int
-
-Numeric contexts take the following forms:
+Numeric contexts apply to the operands of arithmetic operators, see
 
 -  :ref:`Unary Expressions`;
 -  :ref:`Exponentiation expression`;
@@ -269,100 +242,20 @@ Numeric contexts take the following forms:
 -  :ref:`Shift Expressions`;
 -  :ref:`Relational Expressions`;
 -  :ref:`Equality Expressions`;
--  :ref:`Bitwise and Logical Expressions`;
--  :ref:`Conditional-And Expression`;
--  :ref:`Conditional-Or Expression`.
+-  :ref:`Bitwise and Logical Expressions`.
+
+:ref:`Implicit conversions` are used in numeric contexts.
+Acceptable conversions are listed in the relevant sections.
+
+An operand of enumeration type (see :ref:`Enumerations`) can be used in
+a numeric context if enumeration base type is a numeric type.
+The type of this operand is assumed to be the same as the enumeration
+base type.
 
 .. index::
    numeric context
-   expression
-   unary expression
-   multiplicative expression
-   additive expression
-   shift expression
-   relational expression
-   equality expression
-   bitwise expression
-   logical expression
-   conditional-and expression
-   conditional-or expression
-
-|
-
-.. _Numeric Conversions for Relational and Equality Operands:
-
-Numeric Conversions for Relational and Equality Operands
-========================================================
-
- .. meta:
-     frontend_status: Done
-
-Relational and equality operators (see :ref:`Relational Expressions` and
-:ref:`Equality Expressions`) allow *implicit conversion* of numeric type
-operands of different sizes (see :ref:`Widening numeric conversions`).
-Specific details of such conversions are discussed in
-:ref:`Specifics of Numeric Operator Contexts`.
-  
-The situation for the relational operator ``'<'`` is represented in the example
-below:
-
-.. code-block:: typescript
-   :linenos:
-
-   let a: int = 1
-   let b: long = 0
-
-   if (b<a) { // 'a' converted to 'long' prior to comparison
-      ;
-   }
-
-
-.. index::
-   numeric conversion
-   numeric types conversion
-   widening numeric conversion
-   operand
-   numeric type
+   arithmetic operator
    conversion
-   
-|
-
-.. _char Conversions for Relational and Equality Operands:
-
-``char`` Conversions for Relational and Equality Operands
-=========================================================
-
- .. meta:
-     frontend_status: Done
-
-Relational and equality operators (see :ref:`Relational Expressions` and
-:ref:`Equality Expressions`) allow *implicit conversion* of type ``char`` operand
-if other operand is of a numeric type.
-
-A ``char`` type operand is widened to one of the following: 
-
-- Type ``int`` if the other operand is of types ``byte``, ``char`` or ``int``; or 
-- Type of the other operand.
-
-The situation for the relational operator ``'<'`` is represented in the example
-below:
-
-.. code-block:: typescript
-   :linenos:
-
-    function foo(c: char, b: byte, i: int, l: long, d: double) {
-        c < b // 'c' and 'b' are converted to 'int' prior to comparison
-        c < i // 'c' is converted to 'int' prior to comparison
-        c < l // 'c' is converted to 'long' prior to comparison
-        c < d // 'c' is converted to 'double' prior to comparison
-    }
-
-.. index::
-   char conversion
-   widening numeric conversion
-   operand
-   numeric type
-   conversion   
 
 |
 
@@ -410,7 +303,7 @@ Widening Numeric Conversions
 - Larger numeric type; or
 - Union type (see :ref:`Widening Numeric to a Union Type`).
 
-This conversion never causes a :index:`runtime error`.
+The conversion to larger numeric types never causes a :index:`runtime error`.
 
 .. code-block:: typescript
    :linenos:
@@ -597,6 +490,83 @@ This conversion never causes a :index:`runtime error`.
    conversion
    constant
    runtime error
+
+|
+
+.. _Numeric Conversions for Relational and Equality Operands:
+
+Numeric Conversions for Relational and Equality Operands
+========================================================
+
+ .. meta:
+     frontend_status: Done
+
+Relational and equality operators (see :ref:`Relational Expressions` and
+:ref:`Equality Expressions`) allow *implicit conversion* of numeric type
+operands of different sizes (see :ref:`Widening numeric conversions`).
+Specific details of such conversions are discussed in
+:ref:`Specifics of Numeric Operator Contexts`.
+  
+The situation for the relational operator ``'<'`` is represented in the example
+below:
+
+.. code-block:: typescript
+   :linenos:
+
+   let a: int = 1
+   let b: long = 0
+
+   if (b<a) { // 'a' converted to 'long' prior to comparison
+      ;
+   }
+
+
+.. index::
+   numeric conversion
+   numeric types conversion
+   widening numeric conversion
+   operand
+   numeric type
+   conversion
+   
+|
+
+.. _char Conversions for Relational and Equality Operands:
+
+``char`` Conversions for Relational and Equality Operands
+=========================================================
+
+ .. meta:
+     frontend_status: Done
+
+Relational and equality operators (see :ref:`Relational Expressions` and
+:ref:`Equality Expressions`) allow *implicit conversion* of type ``char`` operand
+if other operand is of a numeric type.
+
+A ``char`` type operand is widened to one of the following: 
+
+- Type ``int`` if the other operand is of types ``byte``, ``char`` or ``int``; or 
+- Type of the other operand.
+
+The situation for the relational operator ``'<'`` is represented in the example
+below:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo(c: char, b: byte, i: int, l: long, d: double) {
+        c < b // 'c' and 'b' are converted to 'int' prior to comparison
+        c < i // 'c' is converted to 'int' prior to comparison
+        c < l // 'c' is converted to 'long' prior to comparison
+        c < d // 'c' is converted to 'double' prior to comparison
+    }
+
+.. index::
+   char conversion
+   widening numeric conversion
+   operand
+   numeric type
+   conversion   
 
 |
 
