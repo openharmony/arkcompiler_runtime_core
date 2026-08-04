@@ -1,6 +1,3 @@
-#34809
-05.generics/01.type_parameters/02.type_parameter_default/generic_type_alias/type_alias_self_referential_default.ets
-
 #34393 es2panda aborts on bigint expression in string interpolation expression
 07.expressions/34.string_interpolation_expressions/bigint_interpolation_conditional.ets
 07.expressions/34.string_interpolation_expressions/bigint_interpolation_enum.ets
