@@ -147,9 +147,6 @@
 05.generics/generic_declarations/generic_type_alias/generic_params_11.ets
 05.generics/generic_declarations/generic_type_alias/generic_params_6.ets
 
-#34809
-05.generics/01.type_parameters/02.type_parameter_default/generic_type_alias/type_alias_self_referential_default.ets
-
 #33818
 06.contexts_and_conversions/02.string_operator_contexts/conversion2_n_0.ets
 06.contexts_and_conversions/02.string_operator_contexts/conversion2_n_1.ets
