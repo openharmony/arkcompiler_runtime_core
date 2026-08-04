@@ -89,14 +89,14 @@ standard library (see :ref:`Standard Library Usage`).
 If a module has at least one top-level ambient declaration (see
 :ref:`Ambient Declarations`), then all other declarations must be ambient,
 and no top-level statement must be present (see :ref:`Top-Level Statements`).
-Otherwise, a :index:`compile-time error` occurs.
+Otherwise, a :index:`compile-time warning` occurs.
 
 .. code-block:: typescript
    :linenos:
 
     declare let x: number
     function main() {}
-    // Compile-time error, ambient and non-ambient declarations are mixed
+    // Compile-time warning, ambient and non-ambient declarations are mixed
 
 
 .. index::
