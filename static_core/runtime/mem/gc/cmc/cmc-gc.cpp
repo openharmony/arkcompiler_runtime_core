@@ -30,7 +30,6 @@
 #include "runtime/mem/gc/cmc/heap/collector/heuristic_gc_policy.h"
 #include "common_interfaces/base/runtime_param.h"
 #include "runtime/mem/gc/cmc/heap/collector/collector_resources.h"
-#include "common_components/mutator/satb_buffer.h"
 
 #include "libarkbase/utils/logger.h"
 #include "libarkbase/utils/math_helpers.h"
@@ -51,7 +50,6 @@ using ark::common_vm::AllocationBuffer;
 using ark::common_vm::MB;
 using ark::common_vm::PriorityMode;
 using ark::common_vm::RegionalHeap;
-using ark::common_vm::SatbBuffer;
 using ark::common_vm::WVerify;
 
 static BaseObject *ReadRefSlot(ObjectPointerType *ref)
@@ -751,7 +749,7 @@ void CmcGC<LanguageConfig>::RemarkYoungCollectionSpace()
     };
     VisitWeakGlobalRoots(weakVisitor);
 
-    SatbBuffer::Instance().ClearBuffer();
+    ClearSatbBuffList();
 }
 
 template <class LanguageConfig>
@@ -768,16 +766,35 @@ void CmcGC<LanguageConfig>::EnqueueRememberedSetRefs(CmcGCEvacuationStack &stack
 }
 
 template <class LanguageConfig>
+void CmcGC<LanguageConfig>::VisitAndForgetEachObjectInMutatorsSatb(const std::function<void(ObjectPointerType)> &func)
+{
+    ASSERT(func != nullptr);
+    ForEachManagedMutator([&func](Mutator *mutator) {
+        const size_t size = mutator->GetSatbBuffSize();
+        auto *buff = mutator->GetSatbBuff();
+        ASSERT(buff != nullptr);
+        for (size_t i = 0U; i < size; i++) {
+            func(buff[i]);
+        }
+        mutator->ClearSatbBuff();
+        return true;
+    });
+}
+
+template <class LanguageConfig>
 void CmcGC<LanguageConfig>::MarkSatbBufferYoung(CmcGCMarkingStack &stack)
 {
     PandaStack<BaseObject *> localStack;
-    ForEachManagedMutator([&localStack](Mutator *mutator) {
-        const SatbBuffer::TreapNode *node = static_cast<const SatbBuffer::TreapNode *>(mutator->GetSatbBufferNode());
-        if (node != nullptr) {
-            const_cast<SatbBuffer::TreapNode *>(node)->GetObjects(localStack);
+    VisitAndForgetEachObjectInMutatorsSatb(
+        [&localStack](ObjectPointerType obj) { localStack.push(reinterpret_cast<ark::common_vm::BaseObject *>(obj)); });
+
+    for (auto [buff, size] : satbBuffList_) {
+        for (size_t i = 0U; i < size; i++) {
+            auto obj = reinterpret_cast<ark::common_vm::BaseObject *>(buff[i]);
+            localStack.push(obj);
         }
-    });
-    SatbBuffer::Instance().GetRetiredObjects(localStack);
+    }
+    ClearSatbBuffList();
 
     while (!localStack.empty()) {
         ObjectHeader *obj = localStack.top();
@@ -800,26 +817,18 @@ void CmcGC<LanguageConfig>::MarkSatbBufferFull(CmcGCMarkingStack &stack)
 {
     mem::GCScope<mem::TRACE_TIMING> gcScope("MarkSatbBufferFull", this);
     auto visitSatbObj = [this, &stack]() {
-        PandaStack<BaseObject *> remarkStack;
-        auto func = [&remarkStack](Mutator *mutator) {
-            const SatbBuffer::TreapNode *node =
-                static_cast<const SatbBuffer::TreapNode *>(mutator->GetSatbBufferNode());
-            if (node != nullptr) {
-                const_cast<SatbBuffer::TreapNode *>(node)->GetObjects(remarkStack);
-            }
-        };
-        ForEachManagedMutator(func);
-        SatbBuffer::Instance().GetRetiredObjects(remarkStack);
-
-        while (!remarkStack.empty()) {  // LCOV_EXCL_BR_LINE
-            BaseObject *obj = remarkStack.top();
-            remarkStack.pop();
+        auto pushToStack = [this, &stack](ObjectPointerType elem) {
+            auto *obj = reinterpret_cast<ark::common_vm::BaseObject *>(elem);
             CHECK(IsAddressInObjectsHeap(obj));
             if (this->MarkObjectIfNotMarked(obj)) {
                 stack.PushToStack(obj);
                 LOG(DEBUG, GC) << "satb buffer add obj " << obj;
             }
-        }
+        };
+
+        VisitAndForgetEachObjectInMutatorsSatb(pushToStack);
+
+        FetchFromSatbBufferToMarkingStack(stack);
     };
 
     visitSatbObj();
@@ -829,13 +838,17 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ProcessEvacuationStack(CmcGCEvacuationStack &stack)
 {
     // NOTE: it is performed concurrently with other GC threads and mutators
-    PandaStack<BaseObject *> remarkStack;
-    auto fetchFromSatbBuffer = [this, &stack, &remarkStack]() {
-        SatbBuffer::Instance().TryFetchOneRetiredNode(remarkStack);
+    auto fetchFromSatbBuffer = [this, &stack]() {
+        auto allocator = this->GetInternalAllocator();
+        os::memory::LockHolder lock(satbBufLock_);
+        if (satbBuffList_.empty()) {
+            return false;
+        }
         bool needProcess = false;
-        while (!remarkStack.empty()) {
-            ObjectHeader *obj = remarkStack.top();
-            remarkStack.pop();
+        auto [buff, size] = satbBuffList_.back();
+        satbBuffList_.pop_back();
+        for (size_t i = 0U; i < size; i++) {
+            auto *obj = reinterpret_cast<ObjectHeader *>(buff[i]);
             CHECK(IsAddressInObjectsHeap(obj));
             if (IsFromObject(obj)) {
                 obj = ForwardObject(obj);
@@ -845,8 +858,10 @@ void CmcGC<LanguageConfig>::ProcessEvacuationStack(CmcGCEvacuationStack &stack)
                 needProcess = true;
             }
         }
+        allocator->DeleteArray(buff);
         return needProcess;
     };
+
     size_t iterationCount = 0;
     const size_t maxIterationCount = 1000;
     // CC-OFFNXT(G.CTL.03): false positive
@@ -1221,6 +1236,9 @@ void CmcGC<LanguageConfig>::OnMutatorTerminate(Mutator *mutator, [[maybe_unused]
 
         UpdateBarrierEntrypoint(mutator, GCPhase::GC_PHASE_IDLE);
         mutator->ResetMutator();
+        size_t satbBuffSize = mutator->GetSatbBuffSize();
+        ObjectPointerType *satbBuff = mutator->MoveSatbBuff();
+        mutator->PushSatbBuff({satbBuff, satbBuffSize});
         return true;
     });
 }
@@ -1232,9 +1250,10 @@ void CmcGC<LanguageConfig>::OnMutatorCreate(Mutator *mutator)
     // Enable pre write barrier for mutators created during concurrent marking and enable read barrier for mutators
     // created during concurrent copy/fix.
     if (phase >= GCPhase::GC_PHASE_INITIAL_MARK) {
-        mutator->HandleGCPhase(phase);
         UpdateBarrierEntrypoint(mutator, phase);
     }
+    mutator->AllocateSatbBuff();
+    mutator->SetSatbBuffList(&satbBuffList_, &satbBufLock_);
     GC::OnMutatorCreate(mutator);
 }
 
@@ -1260,21 +1279,6 @@ template <class LanguageConfig>
 void CmcGC<LanguageConfig>::ProcessMarkStack(CmcGCMarkingStack &stack)
 {
     size_t nNewlyMarked = 0;
-    PandaStack<BaseObject *> remarkStack;
-    auto fetchFromSatbBuffer = [this, &stack, &remarkStack]() {
-        SatbBuffer::Instance().TryFetchOneRetiredNode(remarkStack);
-        bool needProcess = false;
-        while (!remarkStack.empty()) {
-            BaseObject *obj = remarkStack.top();
-            remarkStack.pop();
-            if (IsAddressInObjectsHeap(obj) && (MarkObjectIfNotMarked(obj))) {
-                stack.PushToStack(obj);
-                needProcess = true;
-                LOG(DEBUG, GC) << "tracing take from satb buffer: obj " << obj;
-            }
-        }
-        return needProcess;
-    };
     size_t iterationCnt = 0;
     constexpr size_t maxIterationLoopNum = 1000;
 
@@ -1293,7 +1297,7 @@ void CmcGC<LanguageConfig>::ProcessMarkStack(CmcGCMarkingStack &stack)
         if (++iterationCnt >= maxIterationLoopNum) {
             break;
         }
-        if (!fetchFromSatbBuffer()) {
+        if (!FetchFromSatbBufferToMarkingStack(stack)) {
             break;
         }
     }
@@ -1392,9 +1396,6 @@ void CmcGC<LanguageConfig>::Remark(GCTaskCause reason)
 
     ProcessWeakReferences(GCPhase::GC_PHASE_REMARK, reason);
     PreforwardStaticRoots();
-    // clear satb buffer when gc finish tracing.
-    SatbBuffer::Instance().ClearBuffer();
-
     // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     LOG(DEBUG, GC) << "mark " << markedObjectCount_.load(std::memory_order_relaxed) << " objects";
@@ -1415,8 +1416,6 @@ void CmcGC<LanguageConfig>::ProcessWeakReferences(GCPhase phase, GCTaskCause rea
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::PreGarbageCollection(GCTaskCause reason, [[maybe_unused]] bool isConcurrent)
 {
-    // SatbBuffer should be initialized before concurrent enumeration.
-    SatbBuffer::Instance().Init();
     // prepare thread pool.
 
     gcReason_ = reason;
@@ -1427,7 +1426,7 @@ void CmcGC<LanguageConfig>::PreGarbageCollection(GCTaskCause reason, [[maybe_unu
 template <class LanguageConfig>
 void CmcGC<LanguageConfig>::PostGarbageCollection(uint64_t gcIndex)
 {
-    SatbBuffer::Instance().ReclaimALLPages();
+    ClearSatbBuffList();
     // release pages in PagePool
     ark::common_vm::PagePool::Instance().Trim();
     collectorResources_.MarkGCFinish(gcIndex);
@@ -1881,6 +1880,27 @@ void CmcGC<LanguageConfig>::VisitWeakGlobalRoots(const WeakRefFieldVisitor &visi
 }
 
 template <class LanguageConfig>
+bool CmcGC<LanguageConfig>::FetchFromSatbBufferToMarkingStack(CmcGCMarkingStack &markStack)
+{
+    auto allocator = this->GetInternalAllocator();
+    os::memory::LockHolder lock(satbBufLock_);
+    if (satbBuffList_.empty()) {
+        return false;
+    }
+    auto [buff, size] = satbBuffList_.back();
+    satbBuffList_.pop_back();
+    for (size_t i = 0U; i < size; i++) {
+        auto *obj = reinterpret_cast<ark::common_vm::BaseObject *>(buff[i]);
+        if (IsAddressInObjectsHeap(obj) && MarkObjectIfNotMarked(obj)) {
+            markStack.PushToStack(obj);
+            LOG(DEBUG, GC) << "tracing take from satb buffer: obj " << obj;
+        }
+    }
+    allocator->DeleteArray(buff);
+    return true;
+}
+
+template <class LanguageConfig>
 void CmcGC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unused]] void *workerData)
 {
     common_vm::ScopedGcThreadType scopedGcThreadType;
@@ -1920,6 +1940,17 @@ void CmcGC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_un
             LOG(FATAL, GC) << "Unimplemented for " << GCWorkersTaskTypesToString(task->GetType());
             UNREACHABLE();
     }
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ClearSatbBuffList()
+{
+    auto allocator = this->GetInternalAllocator();
+    os::memory::LockHolder lock(satbBufLock_);
+    for (auto entry : satbBuffList_) {
+        allocator->DeleteArray(entry.first);
+    }
+    satbBuffList_.clear();
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(CmcGC);

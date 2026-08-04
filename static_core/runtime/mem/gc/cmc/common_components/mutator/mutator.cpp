@@ -18,7 +18,6 @@
 
 #include "common_components/common/type_def.h"
 #include "libarkbase/mem/mem.h"
-#include "mutator/satb_buffer.h"
 #include "runtime/include/mutator.h"
 #include "runtime/include/panda_vm.h"
 #include "common_components/mutator/thread_local.h"
@@ -49,59 +48,11 @@ ScopedGcThreadType::~ScopedGcThreadType()
     ThreadLocal::SetThreadType(oldType_);
 }
 
-static SatbBuffer::TreapNode *&CastSatbNode(void *&satbNode)
-{
-    return reinterpret_cast<SatbBuffer::TreapNode *&>(satbNode);
-}
-
-Mutator::~Mutator()
-{
-    if (satbNode_ != nullptr) {
-        SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
-        satbNode_ = nullptr;
-    }
-}
-
-void Mutator::RememberObjectImpl(const BaseObject *obj)
-{
-    if (LIKELY(IsAddressInObjectsHeap(obj))) {
-        if (SatbBuffer::ShouldEnqueue(obj)) {
-            SatbBuffer::Instance().EnsureGoodNode(CastSatbNode(satbNode_));
-            CastSatbNode(satbNode_)->Push(obj);
-        }
-    }
-}
+Mutator::~Mutator() {}
 
 void Mutator::ResetMutator()
 {
-    if (satbNode_ != nullptr) {
-        SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
-        satbNode_ = nullptr;
-    }
     static_cast<ark::Mutator *>(this)->ClearReferencesCleanupRequest();
-}
-
-const void *Mutator::GetSatbBufferNode() const
-{
-    return satbNode_;
-}
-
-void Mutator::ClearSatbBufferNode()
-{
-    if (satbNode_ == nullptr) {
-        return;
-    }
-    CastSatbNode(satbNode_)->Clear();
-}
-
-void Mutator::HandleGCPhase(mem::GCPhase newPhase)
-{
-    if (newPhase == mem::GCPhase::GC_PHASE_REMARK) {
-        if (satbNode_ != nullptr) {
-            SatbBuffer::Instance().RetireNode(CastSatbNode(satbNode_));
-            satbNode_ = nullptr;
-        }
-    }
 }
 
 void Mutator::ReleaseAllocBuffer()

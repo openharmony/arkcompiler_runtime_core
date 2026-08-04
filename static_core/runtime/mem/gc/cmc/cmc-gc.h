@@ -205,7 +205,18 @@ public:
     void Fini() override
     {
         HeapBitmapManager::GetHeapBitmapManager().DestroyHeapBitmap();
-    };
+
+        ClearSatbBuffList();
+
+        auto allocator = this->GetInternalAllocator();
+        this->GetPandaVm()->GetMutatorManager()->ForEachMutator([&allocator](Mutator *mutator) {
+            auto *buff = mutator->MoveSatbBuff();
+            if (buff) {
+                allocator->DeleteArray(buff);
+            }
+            return true;
+        });
+    }
 
     void ProcessMarkStack(CmcGCMarkingStack &stack);
 
@@ -257,10 +268,7 @@ public:
         LOG(DEBUG, GC) << "transition gc phase: " << GCScopedPhase::GetPhaseName(currentPhase) << "("
                        << static_cast<int>(currentPhase) << ") -> " << GCScopedPhase::GetPhaseName(phase) << "("
                        << static_cast<int>(phase) << ")";
-        ForEachManagedMutator([this, phase](Mutator *mutator) {
-            mutator->HandleGCPhase(phase);
-            UpdateBarrierEntrypoint(mutator, phase);
-        });
+        ForEachManagedMutator([this, phase](Mutator *mutator) { UpdateBarrierEntrypoint(mutator, phase); });
         this->FireGCPhaseStarted(phase);
     }
 
@@ -476,6 +484,8 @@ private:
     static void VisitWeakRoots(const WeakRefFieldVisitor &visitor);
     static void VisitGlobalRoots(const GCRootVisitor &visitor);
     static void VisitWeakGlobalRoots(const WeakRefFieldVisitor &visitor);
+    bool FetchFromSatbBufferToMarkingStack(CmcGCMarkingStack &markStack);
+    void VisitAndForgetEachObjectInMutatorsSatb(const std::function<void(ObjectPointerType)> &func);
 
     void VisitRootsI(const RefFieldVisitor &visitor) override
     {
@@ -507,6 +517,8 @@ private:
         return gcReason_ == GCTaskCause::YOUNG_GC_CAUSE;
     }
 
+    void ClearSatbBuffList();
+
     GCTaskCause gcReason_ {GCTaskCause::INVALID_CAUSE};
     uint64_t gcStartTime_ {0};
     size_t targetFootprint_ {0};
@@ -514,6 +526,9 @@ private:
     size_t collectedBytes_ {0};
     double fullGCMeanRate_ {0.0};
     CMCObjectAllocator *cmcAllocator_ {nullptr};
+
+    PandaList<std::pair<ObjectPointerType *, size_t>> satbBuffList_ GUARDED_BY(satbBufLock_) {};
+    os::memory::Mutex satbBufLock_;
 };
 }  // namespace ark::mem
 

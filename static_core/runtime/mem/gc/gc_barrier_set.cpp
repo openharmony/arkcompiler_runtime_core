@@ -293,10 +293,27 @@ extern "C" void *ReadBarrierFuncEntrypoint([[maybe_unused]] ObjectPointerType *f
 extern "C" void PreWriteBarrierFuncEntrypoint([[maybe_unused]] ObjectPointerType preVal)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    if (preVal != 0) {
-        Mutator::GetCurrent()->RememberObjectInSatbBuffer(reinterpret_cast<ark::common_vm::BaseObject *>(preVal));
-        LOG(DEBUG, GC) << "pre-write barrier rememberedObject: " << preVal;
+    if (preVal == 0) {
+        return;
     }
+    auto *obj = reinterpret_cast<ark::common_vm::BaseObject *>(preVal);
+    if (!LIKELY(IsAddressInObjectsHeap(obj))) {
+        return;
+    }
+    if (common_vm::Heap::GetHeap().GetGCReason() == GCTaskCause::YOUNG_GC_CAUSE) {
+        auto *region = common_vm::RegionDesc::GetAliveRegionDescAt(reinterpret_cast<const ObjectHeader *>(obj));
+        if (!region->IsToRegion() && !region->IsInYoungSpace()) {
+            return;
+        }
+    }
+    if (common_vm::RegionalHeap::IsNewObjectSinceMarking(obj)) {
+        return;
+    }
+    if (common_vm::RegionalHeap::IsMarkedObject(obj)) {
+        return;
+    }
+    Mutator::GetCurrent()->AddToSatbBuff(preVal);
+    LOG(DEBUG, GC) << "pre-write barrier rememberedObject: " << preVal;
 #endif
 }
 

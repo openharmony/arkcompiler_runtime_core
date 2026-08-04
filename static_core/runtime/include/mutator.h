@@ -158,6 +158,7 @@ public:
     {
         auto res = satbBuff_;
         satbBuff_ = nullptr;
+        satbBuffSize_ = 0U;
         return res;
     }
 
@@ -173,6 +174,7 @@ public:
             PushSatbBuff({oldSatbBuff, Mutator::PRE_BUFF_CAPACITY});
             AllocateSatbBuff();
         }
+        ASSERT(satbBuff_ != nullptr);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic,-warnings-as-errors)
         satbBuff_[satbBuffSize_++] = elem;
     }

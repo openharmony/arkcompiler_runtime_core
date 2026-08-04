@@ -335,12 +335,6 @@ public:
         return regionInfo->ResurrentObject(obj);
     }
 
-    static bool EnqueueObject(const BaseObject *obj)
-    {
-        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(obj);
-        return regionInfo->EnqueueObject(obj);
-    }
-
     static bool IsSurvivedObject(const BaseObject *obj)
     {
         return IsMarkedObject(obj) || IsResurrectedObject(obj);
@@ -356,12 +350,6 @@ public:
     {
         RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(obj);
         return regionInfo->IsResurrectedObject(obj);
-    }
-
-    static bool IsEnqueuedObject(const BaseObject *obj)
-    {
-        RegionDesc *regionInfo = RegionDesc::GetAliveRegionDescAt(obj);
-        return regionInfo->IsEnqueuedObject(obj);
     }
 
     static bool IsNewObjectSinceMarking(const BaseObject *object)
