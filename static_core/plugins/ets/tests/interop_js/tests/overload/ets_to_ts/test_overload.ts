@@ -114,8 +114,8 @@ function testObjectOverloadMutuallyExclusive(): void {
     let dog = createDog();
     let cat = createCat();
 
-    ASSERT_TRUE(handler.handlePet(dog) === 'dog', 'Expected "dog" but got: ' + handler.handlePet(dog));
-    ASSERT_TRUE(handler.handlePet(cat) === 'cat', 'Expected "cat" but got: ' + handler.handlePet(cat));
+    ASSERT_TRUE(handler.handlePet(dog) === 'pet', 'Expected "pet" but got: ' + handler.handlePet(dog));
+    ASSERT_TRUE(handler.handlePet(cat) === 'pet', 'Expected "pet" but got: ' + handler.handlePet(cat));
 }
 
 function testObjectOverloadSpecificVsObject(): void {

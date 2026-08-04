@@ -320,7 +320,6 @@ function checkSubTypeOfUnion() {
     let f4 = u.getInstanceMethod("f4")!.getReturnType()
 
     let obj = Class.of(new Object)
-    let anyType = Class.from<Any>() 
     arktest.assertTrue(f3.isSubtypeOf(obj))
     arktest.assertTrue(Class.of("").isSubtypeOf(f3))
     arktest.assertTrue(f3.isSubtypeOf(f4))
@@ -330,7 +329,7 @@ function checkSubTypeOfUnion() {
     let gen2 = g.getInstanceMethod("gen2")!.getReturnType()
 
     arktest.assertEQ(gen1, gen2)
-    arktest.assertEQ(gen1, anyType)
+    arktest.assertEQ(gen1, obj)
 }
 
 function checkSubTypeOfMultipleInterfaces() {

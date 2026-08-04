@@ -72,7 +72,7 @@
     f64 bar <access.field=public>
 }
 
-.function std.core.Array std.core.Array.from(Y[] a0) <external, static, access.function=public>
+.function std.core.Array std.core.Array.from(std.core.Object[] a0) <external, static, access.function=public>
 
 .function void test-static.Foo._ctor_(test-static.Foo a0) <ctor, access.function=public> {
     call.short std.core.Object._ctor_:(std.core.Object), a0
@@ -253,7 +253,7 @@ jump_label_1:
     initobj.short std.core.Double._ctor_:(std.core.Double,f64), v3
     movi v1, 0x1
     starr.obj v0, v1
-    call.short std.core.Array.from:(Y[]), v0
+    call.short std.core.Array.from:(std.core.Object[]), v0
     checkcast std.core.Array
     sta.obj v0
     newobj v1, std.core.Int
@@ -276,7 +276,7 @@ jump_label_1:
     initobj.short std.core.Double._ctor_:(std.core.Double,f64), v2
     movi v1, 0x1
     starr.obj v0, v1
-    call.short std.core.Array.from:(Y[]), v0
+    call.short std.core.Array.from:(std.core.Object[]), v0
     checkcast std.core.Array
     sta.obj v0
     fldai.64 0x3ff0000000000000
@@ -297,7 +297,7 @@ jump_label_1:
     initobj.short std.core.Double._ctor_:(std.core.Double,f64), v3
     movi v1, 0x1
     starr.obj v0, v1
-    call.short std.core.Array.from:(Y[]), v0
+    call.short std.core.Array.from:(std.core.Object[]), v0
     checkcast std.core.Array
     sta.obj v0
 
@@ -348,7 +348,7 @@ jump_label_1:
     initobj.short std.core.Double._ctor_:(std.core.Double,f64), v3
     movi v1, 0x1
     starr.obj v0, v1
-    call.short std.core.Array.from:(Y[]), v0
+    call.short std.core.Array.from:(std.core.Object[]), v0
     checkcast std.core.Array
     sta.obj v0
     fmovi.64 v1, 0x3ff0000000000000

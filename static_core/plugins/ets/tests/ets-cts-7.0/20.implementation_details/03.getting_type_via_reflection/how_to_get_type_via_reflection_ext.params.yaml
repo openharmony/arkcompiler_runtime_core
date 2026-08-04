@@ -401,10 +401,10 @@ cases:
   - desc: How to get never via reflection.
     logic: |-
       let type_from_never = Class.from<never>();
-      arktest.assertEQ(type_from_never.getName(), "N");
+      arktest.assertEQ(type_from_never.getName(), "std.core.Object");
   - desc: How to get Any via reflection.
     logic: |-
       let type_from_any = Class.from<Any>();
       let a: Any = 1;
       let type_of_any = Class.of(a);
-      arktest.assertEQ(type_from_any.getName(), "Y");
+      arktest.assertEQ(type_from_any.getName(), "std.core.Object");

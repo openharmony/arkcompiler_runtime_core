@@ -188,8 +188,10 @@ class Test {
     static testClassInitializationFail() {
         // Cut out "additional1.ets" from the ABC files list
         const reducedAbcFiles = Test.getAdditionalFilesList().slice(1);
+        const abcFiles = new string[reducedAbcFiles.length]("");
+        reducedAbcFiles.forEach((path, idx) => { abcFiles[idx.toInt()] = path; });
         // Create linker
-        const linker = new AbcRuntimeLinker(undefined, reducedAbcFiles);
+        const linker = new AbcRuntimeLinker(undefined, abcFiles);
 
         // Load "AdditionalClass2" without initialization
         const cls2 = linker.loadClass(Test.additionalClass2Name, false);

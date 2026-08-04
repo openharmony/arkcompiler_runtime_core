@@ -44,7 +44,7 @@
     TP("Lstd/core/BigInt;", coreBigInt)                                                                                \
     TP("Lstd/core/Error;", coreError)                                                                                  \
     TP("Lstd/core/Function;", coreFunction)                                                                            \
-    IM("Lstd/core/Function;", "unsafeCall", "[LY;:LY;", coreFunctionUnsafeCall)                                        \
+    IM("Lstd/core/Function;", "unsafeCall", "[Lstd/core/Object;:Lstd/core/Object;", coreFunctionUnsafeCall)            \
     TP("Lstd/core/Tuple;", coreTuple)                                                                                  \
     TP("Lstd/core/TupleN;", coreTupleN)                                                                                \
     TP("Lstd/core/BaseEnum;", coreBaseEnum)                                                                            \
@@ -153,7 +153,7 @@
     IM("Lstd/core/String;", "getChars", "II:Lstd/core/Array;", coreStringGetCharsIntInt)                               \
     IM("Lstd/core/String;", "getBytes", "II:Lstd/core/Array;", coreStringGetBytes)                                     \
     IM("Lstd/core/String;", "charAt", "I:C", coreStringCharAt)                                                         \
-    IM("Lstd/core/String;", "equals", "LY;:Z", coreStringEquals)                                                       \
+    IM("Lstd/core/String;", "equals", "Lstd/core/Object;:Z", coreStringEquals)                                         \
     IM("Lstd/core/String;", "toLowerCase", ":Lstd/core/String;", coreStringToLowerCase)                                \
     IM("Lstd/core/String;", "toUpperCase", ":Lstd/core/String;", coreStringToUpperCase)                                \
     IM("Lstd/core/String;", "toLocaleLowerCase", ":Lstd/core/String;", coreStringToLocaleLowerCase)                    \
@@ -201,10 +201,10 @@
     TP("Lstd/core/FinRegNode;", coreFinRegNode)                                                                        \
     /* Containers */                                                                                                   \
     TP("Lstd/core/Array;", coreArray)                                                                                  \
-    IM("Lstd/core/Array;", "pop", ":LY;", coreArrayPop)                                                                \
+    IM("Lstd/core/Array;", "pop", ":Lstd/core/Object;", coreArrayPop)                                                  \
     IM("Lstd/core/Array;", "%%get-length", ":I", coreArrayGetLength)                                                   \
-    IM("Lstd/core/Array;", "$_get", "I:LY;", coreArrayGet)                                                             \
-    IM("Lstd/core/Array;", "$_set", "ILY;:V", coreArraySet)                                                            \
+    IM("Lstd/core/Array;", "$_get", "I:Lstd/core/Object;", coreArrayGet)                                               \
+    IM("Lstd/core/Array;", "$_set", "ILstd/core/Object;:V", coreArraySet)                                              \
     /* ArrayBuffer */                                                                                                  \
     TP("Lstd/core/ArrayBuffer;", coreArrayBuffer)                                                                      \
     TP("Lstd/core/DataView;", coreDataView)                                                                            \
@@ -223,10 +223,12 @@
     TP("Lstd/containers/containers/ArrayAsListInt;", containersArrayAsListInt)                                         \
     TP("Lstd/core/ArrayLike;", coreArrayLike)                                                                          \
     TP("Lstd/core/Record;", coreRecord)                                                                                \
-    IM("Lstd/core/Record;", "$_get", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}:LY;", coreRecordGet)   \
-    IM("Lstd/core/Record;", "$_set", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}LY;:V", coreRecordSet)  \
+    IM("Lstd/core/Record;", "$_get", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}:Lstd/core/Object;",    \
+       coreRecordGet)                                                                                                  \
+    IM("Lstd/core/Record;", "$_set", "{ULstd/core/BaseEnum;Lstd/core/Numeric;Lstd/core/String;}Lstd/core/Object;:V",   \
+       coreRecordSet)                                                                                                  \
     TP("Lstd/core/Map;", coreMap)                                                                                      \
-    IM("Lstd/core/Map;", "get", "LY;:LY;", coreMapGet)                                                                 \
+    IM("Lstd/core/Map;", "get", "Lstd/core/Object;:Lstd/core/Object;", coreMapGet)                                     \
     TP("Lstd/core/Set;", coreSet)                                                                                      \
     /* Iterators */                                                                                                    \
     TP("Lstd/core/MapIteratorImpl;", coreMapIteratorImpl)                                                              \
@@ -260,12 +262,13 @@
     TP("Lstd/core/reflect/Proxy;", coreReflectProxy)                                                                   \
     IM("Lstd/core/reflect/Proxy;", "<ctor>", "Lstd/core/reflect/InvocationHandler;:V", coreReflectProxyConstructor)    \
     IM("Lstd/core/reflect/Proxy;", "getHandler", ":Lstd/core/reflect/InvocationHandler;", coreReflectProxyGetHandler)  \
-    SM("Lstd/core/reflect/Proxy;", "invoke", "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;[LY;:LY;",      \
+    SM("Lstd/core/reflect/Proxy;", "invoke",                                                                           \
+       "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;[Lstd/core/Object;:Lstd/core/Object;",                \
        coreReflectProxyInvoke)                                                                                         \
-    SM("Lstd/core/reflect/Proxy;", "invokeSet", "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;LY;:V",      \
-       coreReflectProxyInvokeSet)                                                                                      \
-    SM("Lstd/core/reflect/Proxy;", "invokeGet", "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;:LY;",       \
-       coreReflectProxyInvokeGet)                                                                                      \
+    SM("Lstd/core/reflect/Proxy;", "invokeSet",                                                                        \
+       "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;Lstd/core/Object;:V", coreReflectProxyInvokeSet)      \
+    SM("Lstd/core/reflect/Proxy;", "invokeGet",                                                                        \
+       "Lstd/core/reflect/Proxy;Lstd/core/reflect/InstanceMethod;:Lstd/core/Object;", coreReflectProxyInvokeGet)       \
     /* Process */                                                                                                      \
     TP("Lstd/core/StdProcess;", coreStdProcess)                                                                        \
     SM("Lstd/core/StdProcess;", "listUnhandledJobs", "Lstd/core/Array;I:V", coreStdProcessListUnhandledJobs)           \
@@ -273,7 +276,7 @@
     SM("Lstd/core/StdProcess;", "HandleUncaughtError", "Lstd/core/Object;:V", coreStdProcessHandleUncaughtError)       \
     /* JSON */                                                                                                         \
     TP("Lstd/core/JSON;", coreJSON)                                                                                    \
-    SM("Lstd/core/JSON;", "stringify", "LY;:Lstd/core/String;", coreJSONStringify)                                     \
+    SM("Lstd/core/JSON;", "stringify", "Lstd/core/Object;:Lstd/core/String;", coreJSONStringify)                       \
     TP("Lstd/core/JsonReplacer;", coreJsonReplacer)                                                                    \
     TP("Lstd/core/jsonx/JsonElementSerializable;", coreJsonElementSerializable)                                        \
     TP("Lstd/core/JsonSerializable;", coreJsonSerializable)                                                            \

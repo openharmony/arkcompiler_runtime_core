@@ -391,7 +391,7 @@ rec_def       := ".record" rec_name rec_add
 rec_add       := def_pair_rec_meta rec_body | def_lonely_rec_meta
 rec_name      := id_prefixed_extended
 rec_body      := "{" fields "}"
-type_def      := "u1" | "u8" | "i8" | "u16" | "i16" | "u32" | "i32" | "i64" | "f32" | "f64" | "any" | rec_name | type_def []
+type_def      := "u1" | "u8" | "i8" | "u16" | "i16" | "u32" | "i32" | "i64" | "f32" | "f64" | "any" | "Y" | "N" | rec_name | type_def []
 
 # Fields of records:
 fields        := fields field_def | E

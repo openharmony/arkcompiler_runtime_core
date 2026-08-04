@@ -23,8 +23,6 @@ set(linker_tests
     itf_resolution
     override_abstract
     override_basic
-    override_any
-    override_never
     variance
     runtime_linker
 )

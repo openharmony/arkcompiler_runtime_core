@@ -18,13 +18,11 @@
 
 #include <string_view>
 
-#include "plugins/ets/runtime/ets_coroutine.h"
-#include "plugins/ets/runtime/types/ets_object.h"
-#include "plugins/ets/runtime/types/ets_primitives.h"
-#include "runtime/include/tooling/pt_thread.h"
-#include "runtime/include/tooling/vreg_value.h"
+#include "include/tooling/pt_thread.h"
+#include "include/tooling/vreg_value.h"
 #include "libarkbase/utils/bit_utils.h"
 #include <libarkfile/include/type.h>
+#include "types/ets_primitives.h"
 
 namespace ark::ets::tooling {
 
@@ -52,7 +50,7 @@ ETS_TYPE_NAME(EtsLong);
 #undef ETS_TYPE_NAME
 
 template <>
-struct EtsTypeName<EtsObject *> {
+struct EtsTypeName<ObjectHeader *> {
     static constexpr std::string_view NAME = "EtsObject";
 };
 
@@ -79,10 +77,10 @@ constexpr EtsDouble VRegValueToEtsValue(ark::tooling::VRegValue value)
     return bit_cast<EtsDouble>(value.GetValue());
 }
 
-template <typename T, typename std::enable_if_t<std::is_same_v<EtsObject *, T>, int> = 0>
-constexpr EtsObject *VRegValueToEtsValue(ark::tooling::VRegValue value)
+template <typename T, typename std::enable_if_t<std::is_same_v<ObjectHeader *, T>, int> = 0>
+constexpr ObjectHeader *VRegValueToEtsValue(ark::tooling::VRegValue value)
 {
-    return reinterpret_cast<EtsObject *>(value.GetValue());
+    return reinterpret_cast<ObjectHeader *>(value.GetValue());
 }
 
 template <typename T, typename std::enable_if_t<std::is_same_v<EtsBoolean, T> || std::is_same_v<EtsByte, T> ||
@@ -106,10 +104,10 @@ constexpr ark::tooling::VRegValue EtsValueToVRegValue(EtsDouble value)
     return ark::tooling::VRegValue(bit_cast<int64_t>(value));
 }
 
-template <typename T, typename std::enable_if_t<std::is_same_v<EtsObject *, T>, int> = 0>
-constexpr ark::tooling::VRegValue EtsValueToVRegValue(EtsObject *value)
+template <typename T, typename std::enable_if_t<std::is_same_v<ObjectHeader *, T>, int> = 0>
+constexpr ark::tooling::VRegValue EtsValueToVRegValue(ObjectHeader *value)
 {
-    return ark::tooling::VRegValue(reinterpret_cast<int64_t>(value->GetCoreType()));
+    return ark::tooling::VRegValue(reinterpret_cast<int64_t>(value));
 }
 
 inline ark::tooling::PtThread CoroutineToPtThread(ManagedThread *mThread)

@@ -509,8 +509,7 @@ export default namespace buffer {
     export function concat(list: Buffer[] | Uint8Array[], totalLength?: int): Buffer {
         const resolvedList = new Array<ArrayBuffer>();
         for (const item of list) {
-            // both casts are necessary because of a bug in union lowering #30654
-            resolvedList.push(getArrayBufferFrom((item as Object) as (buffer.Buffer | Uint8Array)));
+            resolvedList.push(getArrayBufferFrom(item));
         }
         if (totalLength == 0) totalLength = undefined;
         const length: int = totalLength ?? resolvedList.reduce(
@@ -2375,7 +2374,7 @@ It must be >= 0 and <= ${this.length}. Received value is: ${index}`)
         private flattenData(value: ArrayUnionType): ArrayBuffer {
             const resolvedList = new Array<ArrayBuffer>();
             for (const item of value) {
-                resolvedList.push(this.transformToArrayBuffer((item as Object) as ArrayItemType));
+                resolvedList.push(this.transformToArrayBuffer(item));
             }
             const bufferLength = resolvedList.reduce(
                 (acc: number, item: ArrayBuffer): number => acc + item.byteLength, 0);

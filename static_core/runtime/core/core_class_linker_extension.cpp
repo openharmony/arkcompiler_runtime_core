@@ -89,10 +89,8 @@ void CoreClassLinkerExtension::InitializeClassRoots(const LanguageContext &ctx)
     InitializeArrayClassRoot(ClassRoot::ARRAY_STRING, ClassRoot::STRING,
                              utf::Mutf8AsCString(ctx.GetStringArrayClassDescriptor()));
 
-    auto *anyClass = InitializeSyntheticClassRoot(ClassRoot::ANY, "LY;");
-    anyClass->SetAnyClass();
-    auto *neverClass = InitializeSyntheticClassRoot(ClassRoot::NEVER, "LN;");
-    neverClass->SetNeverClass();
+    InitializeSyntheticClassRoot(ClassRoot::ANY, "Y");
+    InitializeSyntheticClassRoot(ClassRoot::NEVER, "N");
 }
 
 void CoreClassLinkerExtension::FillStringClass(Class *strCls, ClassRoot flag)
@@ -210,7 +208,6 @@ bool CoreClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     } else {
         SetClassRoot(ClassRoot::OBJECT, objClass);
     }
-    objClass->SetObjectClass();
     classClass->SetBase(objClass);
     classClass->CalcHaveNoRefsInParents();
 

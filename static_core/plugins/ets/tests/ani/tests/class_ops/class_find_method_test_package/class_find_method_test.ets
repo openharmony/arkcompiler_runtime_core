@@ -289,7 +289,7 @@ class LambdaTypes {
     // }
 }
 
-class Generic0<Type extends Object> {
+class Generic0<Type> {
     public method(a: Type): int {
         return 5
     }

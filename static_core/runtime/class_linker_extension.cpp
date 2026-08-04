@@ -108,10 +108,9 @@ void ClassLinkerExtension::InitializePrimitiveClassRoot(ClassRoot root, panda_fi
     InitializePrimitiveClass(primitiveClass);
     AddClass(primitiveClass);
     SetClassRoot(root, primitiveClass);
-    ASSERT(primitiveClass->GetBase() == nullptr);
 }
 
-Class *ClassLinkerExtension::InitializeSyntheticClassRoot(ClassRoot root, const char *descriptor)
+void ClassLinkerExtension::InitializeSyntheticClassRoot(ClassRoot root, const char *descriptor)
 {
     ASSERT(IsInitialized());
 
@@ -122,7 +121,6 @@ Class *ClassLinkerExtension::InitializeSyntheticClassRoot(ClassRoot root, const 
     InitializeSyntheticClass(synClass);
     AddClass(synClass);
     SetClassRoot(root, synClass);
-    return synClass;
 }
 
 bool ClassLinkerExtension::Initialize(ClassLinker *classLinker, bool compressedStringEnabled)

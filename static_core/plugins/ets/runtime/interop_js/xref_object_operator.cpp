@@ -27,6 +27,8 @@
 
 namespace ark::ets::interop::js {
 
+using JSConvertEtsObject = interop::js::JSConvertEtsObject;
+
 XRefObjectOperator::XRefObjectOperator(EtsHandle<EtsObject> &etsObject) : etsObject_(etsObject) {}
 
 XRefObjectOperator XRefObjectOperator::FromEtsObject(EtsHandle<EtsObject> &etsObject)
@@ -54,7 +56,7 @@ EtsObject *XRefObjectOperator::GetProperty(EtsExecutionContext *executionCtx, co
         ctx->ForwardJSException(executionCtx);
         return {};
     }
-    return JSConvertAny::UnwrapWithNullCheck(ctx, env, result).value();
+    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, result).value();
 }
 
 EtsObject *XRefObjectOperator::GetProperty(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &keyObject) const
@@ -77,7 +79,7 @@ EtsObject *XRefObjectOperator::GetProperty(EtsExecutionContext *executionCtx, Et
         ctx->ForwardJSException(executionCtx);
         return {};
     }
-    return JSConvertAny::UnwrapWithNullCheck(ctx, env, jsVal).value();
+    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsVal).value();
 }
 
 EtsObject *XRefObjectOperator::GetProperty(EtsExecutionContext *executionCtx, const uint32_t index) const
@@ -99,7 +101,7 @@ EtsObject *XRefObjectOperator::GetProperty(EtsExecutionContext *executionCtx, co
         ctx->ForwardJSException(executionCtx);
         return {};
     }
-    return JSConvertAny::UnwrapWithNullCheck(ctx, env, jsVal).value();
+    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsVal).value();
 }
 
 bool XRefObjectOperator::SetProperty(EtsExecutionContext *executionCtx, const std::string &name,
@@ -212,7 +214,7 @@ EtsObject *XRefObjectOperator::Invoke(EtsExecutionContext *executionCtx, Span<VM
     PandaVector<napi_value> dynamicArgs;
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
-        auto dynamicArg = JSConvertAny::WrapWithNullCheck(env, arg);
+        auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
         dynamicArgs.push_back(dynamicArg);
     }
 
@@ -226,7 +228,7 @@ EtsObject *XRefObjectOperator::Invoke(EtsExecutionContext *executionCtx, Span<VM
         ctx->ForwardJSException(executionCtx);
         return nullptr;
     }
-    return JSConvertAny::UnwrapWithNullCheck(ctx, env, jsRet).value();
+    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsRet).value();
 }
 
 EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, const std::string &name,
@@ -243,7 +245,7 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, c
     PandaVector<napi_value> dynamicArgs;
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
-        auto dynamicArg = JSConvertAny::WrapWithNullCheck(env, arg);
+        auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
         dynamicArgs.push_back(dynamicArg);
     }
 
@@ -268,7 +270,7 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, c
         ctx->ForwardJSException(executionCtx);
         return nullptr;
     }
-    return JSConvertAny::UnwrapWithNullCheck(ctx, env, jsRet).value();
+    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsRet).value();
 }
 
 EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &methodObject,
@@ -286,7 +288,7 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, E
     PandaVector<napi_value> dynamicArgs;
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
-        auto dynamicArg = JSConvertAny::WrapWithNullCheck(env, arg);
+        auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
         dynamicArgs.push_back(dynamicArg);
     }
 
@@ -300,7 +302,7 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, E
         ctx->ForwardJSException(executionCtx);
         return nullptr;
     }
-    return JSConvertAny::UnwrapWithNullCheck(ctx, env, jsRet).value();
+    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsRet).value();
 }
 
 bool XRefObjectOperator::HasProperty(EtsExecutionContext *executionCtx, const std::string &name,
@@ -392,7 +394,7 @@ EtsObject *XRefObjectOperator::Instantiate(EtsExecutionContext *executionCtx, Sp
     PandaVector<napi_value> dynamicArgs;
     for (auto &objHeader : args) {
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
-        auto dynamicArg = JSConvertAny::WrapWithNullCheck(env, arg);
+        auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
         dynamicArgs.push_back(dynamicArg);
     }
 
@@ -406,7 +408,7 @@ EtsObject *XRefObjectOperator::Instantiate(EtsExecutionContext *executionCtx, Sp
         ctx->ForwardJSException(executionCtx);
         return nullptr;
     }
-    return JSConvertAny::UnwrapWithNullCheck(ctx, env, jsRet).value();
+    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsRet).value();
 }
 
 napi_valuetype XRefObjectOperator::GetValueType(EtsExecutionContext *executionCtx, EtsObject *obj)

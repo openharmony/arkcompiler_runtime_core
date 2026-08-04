@@ -20,12 +20,12 @@ tags: [negative]
 negative_steps: [verify-new-libs, runtime-with-new-libs.ark]
 expected_error:
     verify-new-libs:
-    - "E/verifier: Cannot link class: Cannot find method 'm (LY;)LY;' in class 'change_generic_method_signature_type_params_n.libr.C'"
+    - "E/verifier: Cannot link class: Cannot find method 'm (Lstd/core/Object;)Lstd/core/Object;' in class 'change_generic_method_signature_type_params_n.libr.C'"
     - "E/verifier: Verifier error 54: Cache miss for method at offset"
     - "E/verifier: Verifier error 62: Cannot resolve method id"
     - "E/verifier: Error: method void change_generic_method_signature_type_params_n.ETSGLOBAL::main() failed to verify"
     runtime-with-new-libs.ark:
-    - "E/verifier: Cannot link class: Cannot find method 'm (LY;)LY;' in class 'change_generic_method_signature_type_params_n.libr.C'"
+    - "E/verifier: Cannot link class: Cannot find method 'm (Lstd/core/Object;)Lstd/core/Object;' in class 'change_generic_method_signature_type_params_n.libr.C'"
     - "E/verifier: Verifier error 54: Cache miss for method at offset"
     - "E/verifier: Verifier error 62: Cannot resolve method id"
     - "E/verifier: Method verification failed: void change_generic_method_signature_type_params_n.ETSGLOBAL::main()"

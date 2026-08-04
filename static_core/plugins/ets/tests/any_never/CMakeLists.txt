@@ -12,12 +12,6 @@
 # limitations under the License.
 
 set(ANY_NEVER_TEST_LIST
-    "any_general"
-    "any_array_general"
-    "never_general"
-    "any_test_1"
-    "any_test_2"
-    "any_test_3"
 )
 
 add_custom_target(ets_tests_any_never)

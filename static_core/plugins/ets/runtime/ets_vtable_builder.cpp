@@ -128,7 +128,6 @@ private:
         for (auto itctx = const_cast<ClassLinkerContext *>(ctx_); itctx != nullptr;
              itctx = EtsClassLinkerExtension::GetParentContext(itctx)) {
             if (auto cls = linker->FindLoadedClass(descriptor_, itctx); cls != nullptr) {
-                ASSERT(!cls->IsArrayClass());
                 pf_ = cls->GetPandaFile();
                 id_ = cls->GetFileId();
                 return true;
@@ -250,20 +249,9 @@ static bool RefIsAssignableToImpl(const ClassLinkerContext *ctx, RefTypeLink sub
     if (IsPrimitveDescriptor(sub.GetDescriptor()) || IsPrimitveDescriptor(super.GetDescriptor())) {
         return false;
     }
-
-    if (utf::IsEqual(super.GetDescriptor(), utf::CStringAsMutf8("LY;"))) {
+    if (utf::IsEqual(super.GetDescriptor(), utf::CStringAsMutf8("Lstd/core/Object;"))) {
         return true;
     }
-    if (utf::IsEqual(sub.GetDescriptor(), utf::CStringAsMutf8("LY;"))) {
-        return false;
-    }
-    if (utf::IsEqual(super.GetDescriptor(), utf::CStringAsMutf8("LN;"))) {
-        return false;
-    }
-    if (utf::IsEqual(sub.GetDescriptor(), utf::CStringAsMutf8("LN;"))) {
-        return true;
-    }
-
     if (ClassHelper::IsArrayDescriptor(super.GetDescriptor())) {
         if (!ClassHelper::IsArrayDescriptor(sub.GetDescriptor())) {
             return false;

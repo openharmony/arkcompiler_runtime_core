@@ -21,14 +21,12 @@
 #include "runtime/handle_scope-inl.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/types/ets_map.h"
 #include "plugins/ets/runtime/ets_stubs.h"
 
-#ifdef PANDA_ETS_INTEROP_JS
-#include "plugins/ets/runtime/interop_js/intrinsics_api_impl.h"
-#endif
 namespace ark::ets::intrinsics {
 
 EtsBoolean StdCoreRuntimeIsLittleEndianPlatform()
@@ -58,6 +56,51 @@ EtsBoolean StdRuntimeSameValueZero(EtsObject *a, EtsObject *b)
     return ToEtsBoolean(ark::ets::intrinsics::helpers::SameValueZero(EtsExecutionContext::GetCurrent(), a, b));
 }
 
+static std::string GetClassName(EtsClass *cls)
+{
+    return cls->GetRuntimeClass()->GetName();
+}
+
+static ObjectHeader *CreateTypeCastException(EtsObject *source, EtsClass *target, bool inclUndefined)
+{
+    auto ctx = EtsExecutionContext::GetCurrent();
+    ASSERT(ctx != nullptr);
+
+    auto message = PandaString(source == nullptr ? "undefined" : GetClassName(source->GetClass()));
+    message.append(" cannot be cast to ");
+
+    if (LIKELY(target != nullptr)) {
+        message.append(GetClassName(target));
+        if (inclUndefined) {
+            message.append(" or undefined");
+        }
+    } else {
+        message.append(inclUndefined ? "undefined" : "never");
+    }
+
+    auto exc = ets::SetupEtsException(ctx, PlatformTypes()->coreClassCastError, message.data());
+    if (UNLIKELY(exc == nullptr)) {
+        ASSERT(ctx->GetMT()->HasPendingException());
+        return nullptr;
+    }
+    return exc->GetCoreType();
+}
+
+ObjectHeader *StdCoreRuntimeFailedTypeCastExclUndefinedStub(EtsObject *source, EtsClass *target)
+{
+    return CreateTypeCastException(source, target, false);
+}
+
+ObjectHeader *StdCoreRuntimeFailedTypeCastInclUndefinedStub(EtsObject *source, EtsClass *target)
+{
+    return CreateTypeCastException(source, target, true);
+}
+
+EtsClass *StdCoreRuntimeGetTypeInfo([[maybe_unused]] EtsObject *header)
+{
+    return nullptr;
+}
+
 ObjectHeader *StdCoreRuntimeAllocSameTypeArray(EtsClass *cls, int32_t length)
 {
     if (UNLIKELY(!cls->IsArrayClass())) {
@@ -66,15 +109,6 @@ ObjectHeader *StdCoreRuntimeAllocSameTypeArray(EtsClass *cls, int32_t length)
         return nullptr;
     }
     return coretypes::Array::Create(cls->GetRuntimeClass(), length);
-}
-
-EtsString *StdCoreRuntimeAnyToString([[maybe_unused]] EtsObject *anyObj)
-{
-    ASSERT(anyObj->GetClass()->GetRuntimeClass()->IsXRefClass());
-#ifdef PANDA_ETS_INTEROP_JS
-    return interop::js::JSValueToString(interop::js::JSValue::FromEtsObject(anyObj));
-#endif
-    UNREACHABLE();
 }
 
 }  // namespace ark::ets::intrinsics
