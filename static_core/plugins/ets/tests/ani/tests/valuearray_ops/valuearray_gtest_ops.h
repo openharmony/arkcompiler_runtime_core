@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef ANI_GTEST_ARRAY_OPS_H
-#define ANI_GTEST_ARRAY_OPS_H
+#ifndef ANI_GTEST_VALUEARRAY_OPS_H
+#define ANI_GTEST_VALUEARRAY_OPS_H
 
 #include "ani_gtest.h"
 
 namespace ark::ets::ani::testing {
 
-class AniGTestArrayOps : public AniTest {
+class AniGTestValueArrayOps : public AniTest {
 public:
     template <typename T, ani_size LENGTH = 5U>
     void CompareArray(const std::array<T, LENGTH> &nativeBuffer1, const std::array<T, LENGTH> &nativeBuffer2)
@@ -31,10 +31,7 @@ public:
     }
 
     static constexpr ani_size OFFSET_0 = 0;
-    static constexpr ani_size OFFSET_1 = 1;
     static constexpr ani_size OFFSET_2 = 2;
-    static constexpr ani_size OFFSET_3 = 3;
-    static constexpr ani_size OFFSET_4 = 4;
     static constexpr ani_size OFFSET_5 = 5;
     static constexpr ani_size LENGTH_1 = 1;
     static constexpr ani_size LENGTH_2 = 2;
@@ -46,4 +43,4 @@ public:
 };
 }  // namespace ark::ets::ani::testing
 
-#endif  // ANI_GTEST_ARRAY_OPS_H
+#endif  // ANI_GTEST_VALUEARRAY_OPS_H

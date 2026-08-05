@@ -20,92 +20,92 @@
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg, readability-magic-numbers)
 namespace ark::ets::ani::verify::testing {
 
-class FixedArrayGetLengthTest : public VerifyAniTest {
+class ValueArrayGetLengthTest : public VerifyAniTest {
 protected:
     static constexpr ani_size LENGTH = 3U;
 };
 
-TEST_F(FixedArrayGetLengthTest, wrong_env)
+TEST_F(ValueArrayGetLengthTest, wrong_env)
 {
-    ani_fixedarray_int array {};
-    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH, &array), ANI_OK);
+    ani_valuearray_int array {};
+    ASSERT_EQ(env_->ValueArray_New_Int(LENGTH, &array), ANI_OK);
 
     ani_size result {};
-    ASSERT_EQ(env_->c_api->FixedArray_GetLength(nullptr, array, &result), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->c_api->ValueArray_GetLength(nullptr, array, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "env is nullptr [ERROR]"},
-        {"array", "ani_fixedarray"},
+        {"array", "ani_valuearray"},
         {"result", "ani_size *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetLength", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("ValueArray_GetLength", testLines);
 }
 
-TEST_F(FixedArrayGetLengthTest, wrong_array)
+TEST_F(ValueArrayGetLengthTest, wrong_array)
 {
     ani_size result {};
-    ASSERT_EQ(env_->FixedArray_GetLength(nullptr, &result), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->ValueArray_GetLength(nullptr, &result), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray", "reference is nullptr [ERROR]"},
+        {"array", "ani_valuearray", "reference is nullptr [ERROR]"},
         {"result", "ani_size *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetLength", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("ValueArray_GetLength", testLines);
 }
 
-TEST_F(FixedArrayGetLengthTest, wrong_result)
+TEST_F(ValueArrayGetLengthTest, wrong_result)
 {
-    ani_fixedarray_int array {};
-    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH, &array), ANI_OK);
+    ani_valuearray_int array {};
+    ASSERT_EQ(env_->ValueArray_New_Int(LENGTH, &array), ANI_OK);
 
-    ASSERT_EQ(env_->FixedArray_GetLength(array, nullptr), ANI_INVALID_ARGS);
+    ASSERT_EQ(env_->ValueArray_GetLength(array, nullptr), ANI_INVALID_ARGS);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray"},
+        {"array", "ani_valuearray"},
         {"result", "ani_size *", "nullptr for storing 'ani_size' [ERROR]"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetLength", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("ValueArray_GetLength", testLines);
 }
 
-TEST_F(FixedArrayGetLengthTest, wrong_reference_type)
+TEST_F(ValueArrayGetLengthTest, wrong_reference_type)
 {
     ani_string string {};
     const char *data = "test";
     ASSERT_EQ(env_->String_NewUTF8(data, strlen(data), &string), ANI_OK);
 
     ani_size result {};
-    ASSERT_EQ(env_->FixedArray_GetLength(reinterpret_cast<ani_fixedarray>(string), &result), ANI_ERROR);
+    ASSERT_EQ(env_->ValueArray_GetLength(reinterpret_cast<ani_valuearray>(string), &result), ANI_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *"},
-        {"array", "ani_fixedarray", "wrong reference type: ani_string, expected: ani_fixedarray [FATAL]"},
+        {"array", "ani_valuearray", "wrong reference type: ani_string, expected: ani_valuearray [FATAL]"},
         {"result", "ani_size *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetLength", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("ValueArray_GetLength", testLines);
 }
 
-TEST_F(FixedArrayGetLengthTest, throw_error)
+TEST_F(ValueArrayGetLengthTest, throw_error)
 {
-    ani_fixedarray_int array {};
-    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH, &array), ANI_OK);
+    ani_valuearray_int array {};
+    ASSERT_EQ(env_->ValueArray_New_Int(LENGTH, &array), ANI_OK);
 
     ThrowError();
 
     ani_size result {};
-    ASSERT_EQ(env_->FixedArray_GetLength(array, &result), ANI_PENDING_ERROR);
+    ASSERT_EQ(env_->ValueArray_GetLength(array, &result), ANI_PENDING_ERROR);
     std::vector<TestLineInfo> testLines {
         {"env", "ani_env *", "has a pending exception [ERROR]"},
-        {"array", "ani_fixedarray"},
+        {"array", "ani_valuearray"},
         {"result", "ani_size *"},
     };
-    ASSERT_ERROR_ANI_ARGS_MSG("FixedArray_GetLength", testLines);
+    ASSERT_ERROR_ANI_ARGS_MSG("ValueArray_GetLength", testLines);
 }
 
-TEST_F(FixedArrayGetLengthTest, success)
+TEST_F(ValueArrayGetLengthTest, success)
 {
-    ani_fixedarray_int array {};
-    ASSERT_EQ(env_->FixedArray_New_Int(LENGTH, &array), ANI_OK);
+    ani_valuearray_int array {};
+    ASSERT_EQ(env_->ValueArray_New_Int(LENGTH, &array), ANI_OK);
 
     ani_size result {};
-    ASSERT_EQ(env_->FixedArray_GetLength(array, &result), ANI_OK);
+    ASSERT_EQ(env_->ValueArray_GetLength(array, &result), ANI_OK);
     ASSERT_EQ(result, LENGTH);
 }
 

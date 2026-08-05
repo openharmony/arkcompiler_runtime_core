@@ -44,15 +44,15 @@ class VError;
 class VArray;
 class VArrayBuffer;
 class VFixedArray;
-class VFixedArrayBoolean;
-class VFixedArrayChar;
-class VFixedArrayByte;
-class VFixedArrayShort;
-class VFixedArrayInt;
-class VFixedArrayLong;
-class VFixedArrayFloat;
-class VFixedArrayDouble;
-class VFixedArrayRef;
+class VValueArray;
+class VValueArrayBoolean;
+class VValueArrayChar;
+class VValueArrayByte;
+class VValueArrayShort;
+class VValueArrayInt;
+class VValueArrayLong;
+class VValueArrayFloat;
+class VValueArrayDouble;
 class VResolver;
 
 namespace internal {
@@ -289,98 +289,98 @@ struct TypeMapping<VFixedArray *> {
 };
 
 template <>
-struct TypeMapping<VFixedArrayBoolean *> {
-    using Type = ani_fixedarray_boolean;
-};
-
-template <>
 struct TypeMapping<VFixedArray **> {
     using Type = ani_fixedarray *;
 };
 
 template <>
-struct TypeMapping<VFixedArrayBoolean **> {
-    using Type = ani_fixedarray_boolean *;
+struct TypeMapping<VValueArray *> {
+    using Type = ani_valuearray;
 };
 
 template <>
-struct TypeMapping<VFixedArrayChar *> {
-    using Type = ani_fixedarray_char;
+struct TypeMapping<VValueArray **> {
+    using Type = ani_valuearray *;
 };
 
 template <>
-struct TypeMapping<VFixedArrayChar **> {
-    using Type = ani_fixedarray_char *;
+struct TypeMapping<VValueArrayBoolean *> {
+    using Type = ani_valuearray_boolean;
 };
 
 template <>
-struct TypeMapping<VFixedArrayByte *> {
-    using Type = ani_fixedarray_byte;
+struct TypeMapping<VValueArrayBoolean **> {
+    using Type = ani_valuearray_boolean *;
 };
 
 template <>
-struct TypeMapping<VFixedArrayByte **> {
-    using Type = ani_fixedarray_byte *;
+struct TypeMapping<VValueArrayChar *> {
+    using Type = ani_valuearray_char;
 };
 
 template <>
-struct TypeMapping<VFixedArrayShort *> {
-    using Type = ani_fixedarray_short;
+struct TypeMapping<VValueArrayChar **> {
+    using Type = ani_valuearray_char *;
 };
 
 template <>
-struct TypeMapping<VFixedArrayShort **> {
-    using Type = ani_fixedarray_short *;
+struct TypeMapping<VValueArrayByte *> {
+    using Type = ani_valuearray_byte;
 };
 
 template <>
-struct TypeMapping<VFixedArrayInt *> {
-    using Type = ani_fixedarray_int;
+struct TypeMapping<VValueArrayByte **> {
+    using Type = ani_valuearray_byte *;
 };
 
 template <>
-struct TypeMapping<VFixedArrayInt **> {
-    using Type = ani_fixedarray_int *;
+struct TypeMapping<VValueArrayShort *> {
+    using Type = ani_valuearray_short;
 };
 
 template <>
-struct TypeMapping<VFixedArrayLong *> {
-    using Type = ani_fixedarray_long;
+struct TypeMapping<VValueArrayShort **> {
+    using Type = ani_valuearray_short *;
 };
 
 template <>
-struct TypeMapping<VFixedArrayLong **> {
-    using Type = ani_fixedarray_long *;
+struct TypeMapping<VValueArrayInt *> {
+    using Type = ani_valuearray_int;
 };
 
 template <>
-struct TypeMapping<VFixedArrayFloat *> {
-    using Type = ani_fixedarray_float;
+struct TypeMapping<VValueArrayInt **> {
+    using Type = ani_valuearray_int *;
 };
 
 template <>
-struct TypeMapping<VFixedArrayFloat **> {
-    using Type = ani_fixedarray_float *;
+struct TypeMapping<VValueArrayLong *> {
+    using Type = ani_valuearray_long;
 };
 
 template <>
-struct TypeMapping<VFixedArrayDouble *> {
-    using Type = ani_fixedarray_double;
+struct TypeMapping<VValueArrayLong **> {
+    using Type = ani_valuearray_long *;
 };
 
 template <>
-struct TypeMapping<VFixedArrayDouble **> {
-    using Type = ani_fixedarray_double *;
+struct TypeMapping<VValueArrayFloat *> {
+    using Type = ani_valuearray_float;
 };
 
 template <>
-struct TypeMapping<VFixedArrayRef *> {
-    using Type = ani_fixedarray_ref;
+struct TypeMapping<VValueArrayFloat **> {
+    using Type = ani_valuearray_float *;
 };
 
 template <>
-struct TypeMapping<VFixedArrayRef **> {
-    using Type = ani_fixedarray_ref *;
+struct TypeMapping<VValueArrayDouble *> {
+    using Type = ani_valuearray_double;
+};
+
+template <>
+struct TypeMapping<VValueArrayDouble **> {
+    using Type = ani_valuearray_double *;
 };
 
 template <>

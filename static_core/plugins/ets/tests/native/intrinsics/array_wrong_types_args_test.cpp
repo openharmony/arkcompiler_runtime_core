@@ -35,8 +35,8 @@ TEST_F(ArrayWrongTypeArgs, getBufferWrongType)
     ASSERT_EQ(env_->FindClass("std.core.Object", &objectCls), ANI_OK);
     ani_ref undefinedRef;
     ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
-    ani_fixedarray_ref wrongObj;
-    ASSERT_EQ(env_->FixedArray_New_Ref(objectCls, 0U, undefinedRef, &wrongObj), ANI_OK);
+    ani_fixedarray wrongObj;
+    ASSERT_EQ(env_->FixedArray_New(objectCls, 0U, undefinedRef, &wrongObj), ANI_OK);
 
     ani_ref result;
     std::array<ani_value, 1U> args = {};
@@ -142,8 +142,8 @@ TEST_F(ArrayWrongTypeArgs, unshiftInternalArrayHeaderWrongType)
 
     // Create a FixedArray to use as buffer header (valid type for A{Y})
     const ani_size valuesLen = 2U;
-    ani_fixedarray_ref buffer;
-    ASSERT_EQ(env_->FixedArray_New_Ref(objectCls, valuesLen + selfLen, undefinedRef, &buffer), ANI_OK);
+    ani_fixedarray buffer;
+    ASSERT_EQ(env_->FixedArray_New(objectCls, valuesLen + selfLen, undefinedRef, &buffer), ANI_OK);
 
     ani_array valuesArray {};
     ASSERT_EQ(env_->Array_New(valuesLen, undefinedRef, &valuesArray), ANI_OK);
@@ -172,8 +172,8 @@ TEST_F(ArrayWrongTypeArgs, unshiftInternalBufferHeaderWrongType)
     ASSERT_EQ(env_->FindClass("std.core.Object", &objectCls), ANI_OK);
 
     const ani_size valuesLen = 2U;
-    ani_fixedarray_ref buffer;
-    ASSERT_EQ(env_->FixedArray_New_Ref(objectCls, valuesLen + selfLen, undefinedRef, &buffer), ANI_OK);
+    ani_fixedarray buffer;
+    ASSERT_EQ(env_->FixedArray_New(objectCls, valuesLen + selfLen, undefinedRef, &buffer), ANI_OK);
 
     ani_array valuesArray {};
     ASSERT_EQ(env_->Array_New(valuesLen, undefinedRef, &valuesArray), ANI_OK);
@@ -203,8 +203,8 @@ TEST_F(ArrayWrongTypeArgs, unshiftInternalValuesWrongType)
 
     // Create a FixedArray to use as buffer header (valid type for A{Y})
     const ani_size valuesLen = 2U;
-    ani_fixedarray_ref buffer;
-    ASSERT_EQ(env_->FixedArray_New_Ref(objectCls, valuesLen + selfLen, undefinedRef, &buffer), ANI_OK);
+    ani_fixedarray buffer;
+    ASSERT_EQ(env_->FixedArray_New(objectCls, valuesLen + selfLen, undefinedRef, &buffer), ANI_OK);
 
     std::array<ani_value, 4U> args = {};
     args[0U].r = buffer;  // arrayHeader A{Y} - valid FixedArray
@@ -228,8 +228,8 @@ TEST_F(ArrayWrongTypeArgs, copyToFastSourceWrongType)
     ani_class objectCls;
     ASSERT_EQ(env_->FindClass("std.core.Object", &objectCls), ANI_OK);
 
-    ani_fixedarray_ref destBuffer;
-    ASSERT_EQ(env_->FixedArray_New_Ref(objectCls, 5U, undefinedRef, &destBuffer), ANI_OK);
+    ani_fixedarray destBuffer;
+    ASSERT_EQ(env_->FixedArray_New(objectCls, 5U, undefinedRef, &destBuffer), ANI_OK);
 
     ani_array srcArray;
     ASSERT_EQ(env_->Array_New(5U, undefinedRef, &srcArray), ANI_OK);
@@ -261,8 +261,8 @@ TEST_F(ArrayWrongTypeArgs, copyToFastDestWrongType)
     ani_class objectCls;
     ASSERT_EQ(env_->FindClass("std.core.Object", &objectCls), ANI_OK);
 
-    ani_fixedarray_ref srcBuffer;
-    ASSERT_EQ(env_->FixedArray_New_Ref(objectCls, 5U, undefinedRef, &srcBuffer), ANI_OK);
+    ani_fixedarray srcBuffer;
+    ASSERT_EQ(env_->FixedArray_New(objectCls, 5U, undefinedRef, &srcBuffer), ANI_OK);
 
     ani_array destArray;
     ASSERT_EQ(env_->Array_New(5U, undefinedRef, &destArray), ANI_OK);
@@ -314,8 +314,8 @@ TEST_F(ArrayWrongTypeArgs, indexOfImplPrimitiveArrayTypeConfusion)
     ani_ref undefinedRef;
     ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
 
-    ani_fixedarray_byte primitiveBuf;
-    ASSERT_EQ(env_->FixedArray_New_Byte(64U, &primitiveBuf), ANI_OK);
+    ani_valuearray_byte primitiveBuf;
+    ASSERT_EQ(env_->ValueArray_New_Byte(64U, &primitiveBuf), ANI_OK);
 
     const ani_int length = 1000U;
 
@@ -340,8 +340,8 @@ TEST_F(ArrayWrongTypeArgs, fillImplPrimitiveArrayTypeConfusion)
     ani_ref undefinedRef;
     ASSERT_EQ(env_->GetUndefined(&undefinedRef), ANI_OK);
 
-    ani_fixedarray_byte primitiveBuf;
-    ASSERT_EQ(env_->FixedArray_New_Byte(64U, &primitiveBuf), ANI_OK);
+    ani_valuearray_byte primitiveBuf;
+    ASSERT_EQ(env_->ValueArray_New_Byte(64U, &primitiveBuf), ANI_OK);
 
     const ani_int length = 1000U;
     const ani_int start = 0U;
@@ -365,8 +365,8 @@ TEST_F(ArrayWrongTypeArgs, reverseImplPrimitiveArrayTypeConfusion)
     ani_static_method method;
     ASSERT_EQ(env_->Class_FindStaticMethod(cls, "reverseImpl", "A{Y}i:", &method), ANI_OK);
 
-    ani_fixedarray_byte primitiveBuf;
-    ASSERT_EQ(env_->FixedArray_New_Byte(64U, &primitiveBuf), ANI_OK);
+    ani_valuearray_byte primitiveBuf;
+    ASSERT_EQ(env_->ValueArray_New_Byte(64U, &primitiveBuf), ANI_OK);
 
     const ani_int length = 1000U;
 
@@ -393,12 +393,12 @@ TEST_F(ArrayWrongTypeArgs, unshiftInternalPrimitiveArrayTypeConfusion)
     ASSERT_EQ(env_->Array_New(2U, undefinedRef, &valuesArray), ANI_OK);
 
     // Primitive buffer for arrayHeader A{Y}
-    ani_fixedarray_byte primitiveArrayHeader;
-    ASSERT_EQ(env_->FixedArray_New_Byte(8U, &primitiveArrayHeader), ANI_OK);
+    ani_valuearray_byte primitiveArrayHeader;
+    ASSERT_EQ(env_->ValueArray_New_Byte(8U, &primitiveArrayHeader), ANI_OK);
 
     // Primitive buffer for bufferHeader A{Y}
-    ani_fixedarray_byte primitiveBufferHeader;
-    ASSERT_EQ(env_->FixedArray_New_Byte(16U, &primitiveBufferHeader), ANI_OK);
+    ani_valuearray_byte primitiveBufferHeader;
+    ASSERT_EQ(env_->ValueArray_New_Byte(16U, &primitiveBufferHeader), ANI_OK);
 
     const ani_int selfLen = 1U;
 
@@ -419,11 +419,11 @@ TEST_F(ArrayWrongTypeArgs, copyToFastPrimitiveArrayTypeConfusion)
     ani_function function;
     ASSERT_EQ(env_->Module_FindFunction(module, "copyToFast", "A{Y}A{Y}iii:", &function), ANI_OK);
 
-    ani_fixedarray_byte srcPrimitive;
-    ASSERT_EQ(env_->FixedArray_New_Byte(64U, &srcPrimitive), ANI_OK);
+    ani_valuearray_byte srcPrimitive;
+    ASSERT_EQ(env_->ValueArray_New_Byte(64U, &srcPrimitive), ANI_OK);
 
-    ani_fixedarray_byte dstPrimitive;
-    ASSERT_EQ(env_->FixedArray_New_Byte(64U, &dstPrimitive), ANI_OK);
+    ani_valuearray_byte dstPrimitive;
+    ASSERT_EQ(env_->ValueArray_New_Byte(64U, &dstPrimitive), ANI_OK);
 
     const ani_int dstStart = 0U;
     const ani_int srcStart = 0U;
@@ -447,11 +447,11 @@ TEST_F(ArrayWrongTypeArgs, copyToFastWithBarriersPrimitiveArrayTypeConfusion)
     ani_function function;
     ASSERT_EQ(env_->Module_FindFunction(module, "copyToFastWithBarriers", "A{Y}A{Y}iii:", &function), ANI_OK);
 
-    ani_fixedarray_byte srcPrimitive;
-    ASSERT_EQ(env_->FixedArray_New_Byte(64U, &srcPrimitive), ANI_OK);
+    ani_valuearray_byte srcPrimitive;
+    ASSERT_EQ(env_->ValueArray_New_Byte(64U, &srcPrimitive), ANI_OK);
 
-    ani_fixedarray_byte dstPrimitive;
-    ASSERT_EQ(env_->FixedArray_New_Byte(64U, &dstPrimitive), ANI_OK);
+    ani_valuearray_byte dstPrimitive;
+    ASSERT_EQ(env_->ValueArray_New_Byte(64U, &dstPrimitive), ANI_OK);
 
     const ani_int dstStart = 0U;
     const ani_int srcStart = 0U;

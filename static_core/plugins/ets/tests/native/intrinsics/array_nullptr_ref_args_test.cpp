@@ -55,8 +55,8 @@ TEST_F(ArrayNullptrRefArgs, unshiftInternalArrayHeaderNullptr)
 
     const ani_size valuesLen = 2U;
 
-    ani_fixedarray_ref buffer;
-    ASSERT_EQ(env_->FixedArray_New_Ref(objectCls, valuesLen + selfLen, undefinedRef, &buffer), ANI_OK);
+    ani_fixedarray buffer;
+    ASSERT_EQ(env_->FixedArray_New(objectCls, valuesLen + selfLen, undefinedRef, &buffer), ANI_OK);
 
     ani_array valuesArray {};
     ASSERT_EQ(env_->Array_New(valuesLen, undefinedRef, &valuesArray), ANI_OK);
@@ -86,8 +86,8 @@ TEST_F(ArrayNullptrRefArgs, unshiftInternalBufferHeaderNullptr)
     ani_class objectCls;
     ASSERT_EQ(env_->FindClass("std.core.Object", &objectCls), ANI_OK);
 
-    ani_fixedarray_ref sourceBuffer;
-    ASSERT_EQ(env_->FixedArray_New_Ref(objectCls, selfLen, undefinedRef, &sourceBuffer), ANI_OK);
+    ani_fixedarray sourceBuffer;
+    ASSERT_EQ(env_->FixedArray_New(objectCls, selfLen, undefinedRef, &sourceBuffer), ANI_OK);
 
     const ani_size valuesLen = 2U;
 
@@ -119,13 +119,13 @@ TEST_F(ArrayNullptrRefArgs, unshiftInternalValuesNullptr)
     ani_class objectCls;
     ASSERT_EQ(env_->FindClass("std.core.Object", &objectCls), ANI_OK);
 
-    ani_fixedarray_ref sourceBuffer;
-    ASSERT_EQ(env_->FixedArray_New_Ref(objectCls, selfLen, undefinedRef, &sourceBuffer), ANI_OK);
+    ani_fixedarray sourceBuffer;
+    ASSERT_EQ(env_->FixedArray_New(objectCls, selfLen, undefinedRef, &sourceBuffer), ANI_OK);
 
     const ani_size valuesLen = 2U;
 
-    ani_fixedarray_ref buffer;
-    ASSERT_EQ(env_->FixedArray_New_Ref(objectCls, valuesLen + selfLen, undefinedRef, &buffer), ANI_OK);
+    ani_fixedarray buffer;
+    ASSERT_EQ(env_->FixedArray_New(objectCls, valuesLen + selfLen, undefinedRef, &buffer), ANI_OK);
 
     ani_array valuesArray {};
     ASSERT_EQ(env_->Array_New(valuesLen, undefinedRef, &valuesArray), ANI_OK);
@@ -271,8 +271,8 @@ TEST_F(ArrayNullptrRefArgs, copyToFastSourceNullptr)
 
     ani_class objectCls;
     ASSERT_EQ(env_->FindClass("std.core.Object", &objectCls), ANI_OK);
-    ani_fixedarray_ref destBuffer;
-    ASSERT_EQ(env_->FixedArray_New_Ref(objectCls, 5U, undefinedRef, &destBuffer), ANI_OK);
+    ani_fixedarray destBuffer;
+    ASSERT_EQ(env_->FixedArray_New(objectCls, 5U, undefinedRef, &destBuffer), ANI_OK);
 
     const ani_int start = 0U;
     const ani_int length = 3U;
@@ -300,8 +300,8 @@ TEST_F(ArrayNullptrRefArgs, copyToFastDestNullptr)
 
     ani_class objectCls;
     ASSERT_EQ(env_->FindClass("std.core.Object", &objectCls), ANI_OK);
-    ani_fixedarray_ref srcBuffer;
-    ASSERT_EQ(env_->FixedArray_New_Ref(objectCls, 5U, undefinedRef, &srcBuffer), ANI_OK);
+    ani_fixedarray srcBuffer;
+    ASSERT_EQ(env_->FixedArray_New(objectCls, 5U, undefinedRef, &srcBuffer), ANI_OK);
 
     const ani_int start = 0U;
     const ani_int length = 3U;

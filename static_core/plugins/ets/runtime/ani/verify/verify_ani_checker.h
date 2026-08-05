@@ -51,15 +51,15 @@
     X(VERIFY_TUPLE_INDEX,                   VerifyTupleIndex)                     \
     X(VERIFY_ARRAYBUFFER,                   VerifyArrayBuffer)                    \
     X(VERIFY_FIXED_ARRAY,                   VerifyFixedArray)                     \
-    X(VERIFY_FIXED_ARRAY_BOOLEAN,           VerifyFixedArrayBoolean)              \
-    X(VERIFY_FIXED_ARRAY_CHAR,              VerifyFixedArrayChar)                 \
-    X(VERIFY_FIXED_ARRAY_BYTE,              VerifyFixedArrayByte)                 \
-    X(VERIFY_FIXED_ARRAY_SHORT,             VerifyFixedArrayShort)                \
-    X(VERIFY_FIXED_ARRAY_INT,               VerifyFixedArrayInt)                  \
-    X(VERIFY_FIXED_ARRAY_LONG,              VerifyFixedArrayLong)                 \
-    X(VERIFY_FIXED_ARRAY_FLOAT,             VerifyFixedArrayFloat)                \
-    X(VERIFY_FIXED_ARRAY_DOUBLE,            VerifyFixedArrayDouble)               \
-    X(VERIFY_FIXED_ARRAY_REF,               VerifyFixedArrayRef)                  \
+    X(VERIFY_VALUE_ARRAY,                   VerifyValueArray)                     \
+    X(VERIFY_VALUE_ARRAY_BOOLEAN,           VerifyValueArrayBoolean)              \
+    X(VERIFY_VALUE_ARRAY_CHAR,              VerifyValueArrayChar)                 \
+    X(VERIFY_VALUE_ARRAY_BYTE,              VerifyValueArrayByte)                 \
+    X(VERIFY_VALUE_ARRAY_SHORT,             VerifyValueArrayShort)                \
+    X(VERIFY_VALUE_ARRAY_INT,               VerifyValueArrayInt)                  \
+    X(VERIFY_VALUE_ARRAY_LONG,              VerifyValueArrayLong)                 \
+    X(VERIFY_VALUE_ARRAY_FLOAT,             VerifyValueArrayFloat)                \
+    X(VERIFY_VALUE_ARRAY_DOUBLE,            VerifyValueArrayDouble)               \
     X(VERIFY_FIXED_ARRAY_INITIAL_REF,       VerifyFixedArrayInitialRef)           \
     X(VERIFY_FIXED_ARRAY_SET_REF,           VerifyFixedArraySetRef)               \
     X(VERIFY_REGION_BUFFER,                 VerifyRegionBuffer)                   \
@@ -150,15 +150,15 @@
     X(VERIFY_RESOLVER,                      VerifyResolver)                       \
     X(VERIFY_ERROR_STORAGE,                 VerifyErrorStorage)                   \
     X(VERIFY_ARRAY_STORAGE,                 VerifyArrayStorage)                   \
-    X(VERIFY_FIXED_ARRAY_BOOLEAN_STORAGE,   VerifyFixedArrayBooleanStorage)       \
-    X(VERIFY_FIXED_ARRAY_CHAR_STORAGE,      VerifyFixedArrayCharStorage)          \
-    X(VERIFY_FIXED_ARRAY_BYTE_STORAGE,      VerifyFixedArrayByteStorage)          \
-    X(VERIFY_FIXED_ARRAY_SHORT_STORAGE,     VerifyFixedArrayShortStorage)         \
-    X(VERIFY_FIXED_ARRAY_INT_STORAGE,       VerifyFixedArrayIntStorage)           \
-    X(VERIFY_FIXED_ARRAY_LONG_STORAGE,      VerifyFixedArrayLongStorage)          \
-    X(VERIFY_FIXED_ARRAY_FLOAT_STORAGE,     VerifyFixedArrayFloatStorage)         \
-    X(VERIFY_FIXED_ARRAY_DOUBLE_STORAGE,    VerifyFixedArrayDoubleStorage)        \
-    X(VERIFY_FIXED_ARRAY_REF_STORAGE,       VerifyFixedArrayRefStorage)           \
+    X(VERIFY_VALUE_ARRAY_BOOLEAN_STORAGE,   VerifyValueArrayBooleanStorage)       \
+    X(VERIFY_VALUE_ARRAY_CHAR_STORAGE,      VerifyValueArrayCharStorage)          \
+    X(VERIFY_VALUE_ARRAY_BYTE_STORAGE,      VerifyValueArrayByteStorage)          \
+    X(VERIFY_VALUE_ARRAY_SHORT_STORAGE,     VerifyValueArrayShortStorage)         \
+    X(VERIFY_VALUE_ARRAY_INT_STORAGE,       VerifyValueArrayIntStorage)           \
+    X(VERIFY_VALUE_ARRAY_LONG_STORAGE,      VerifyValueArrayLongStorage)          \
+    X(VERIFY_VALUE_ARRAY_FLOAT_STORAGE,     VerifyValueArrayFloatStorage)         \
+    X(VERIFY_VALUE_ARRAY_DOUBLE_STORAGE,    VerifyValueArrayDoubleStorage)        \
+    X(VERIFY_FIXED_ARRAY_STORAGE,           VerifyFixedArrayStorage)              \
     X(VERIFY_RESOLVER_STORAGE,              VerifyResolverStorage)                \
 
 // CC-OFFNXT(G.PRE.02-CPP, G.PRE.06) solid logic
@@ -198,15 +198,15 @@
     X(ANI_ARRAY,                        Array,                     VArray *)                 \
     X(ANI_ARRAYBUFFER,                  ArrayBuffer,               VArrayBuffer *)           \
     X(ANI_FIXED_ARRAY,                  FixedArray,                VFixedArray *)            \
-    X(ANI_FIXED_ARRAY_BOOLEAN,          FixedArrayBoolean,         VFixedArrayBoolean *)     \
-    X(ANI_FIXED_ARRAY_CHAR,             FixedArrayChar,            VFixedArrayChar *)        \
-    X(ANI_FIXED_ARRAY_BYTE,             FixedArrayByte,            VFixedArrayByte *)        \
-    X(ANI_FIXED_ARRAY_SHORT,            FixedArrayShort,           VFixedArrayShort *)       \
-    X(ANI_FIXED_ARRAY_INT,              FixedArrayInt,             VFixedArrayInt *)         \
-    X(ANI_FIXED_ARRAY_LONG,             FixedArrayLong,            VFixedArrayLong *)        \
-    X(ANI_FIXED_ARRAY_FLOAT,            FixedArrayFloat,           VFixedArrayFloat *)       \
-    X(ANI_FIXED_ARRAY_DOUBLE,           FixedArrayDouble,          VFixedArrayDouble *)      \
-    X(ANI_FIXED_ARRAY_REF,              FixedArrayRef,             VFixedArrayRef *)         \
+    X(ANI_VALUE_ARRAY,                  ValueArray,                VValueArray *)            \
+    X(ANI_VALUE_ARRAY_BOOLEAN,          ValueArrayBoolean,         VValueArrayBoolean *)     \
+    X(ANI_VALUE_ARRAY_CHAR,             ValueArrayChar,            VValueArrayChar *)        \
+    X(ANI_VALUE_ARRAY_BYTE,             ValueArrayByte,            VValueArrayByte *)        \
+    X(ANI_VALUE_ARRAY_SHORT,            ValueArrayShort,           VValueArrayShort *)       \
+    X(ANI_VALUE_ARRAY_INT,              ValueArrayInt,             VValueArrayInt *)         \
+    X(ANI_VALUE_ARRAY_LONG,             ValueArrayLong,            VValueArrayLong *)        \
+    X(ANI_VALUE_ARRAY_FLOAT,            ValueArrayFloat,           VValueArrayFloat *)       \
+    X(ANI_VALUE_ARRAY_DOUBLE,           ValueArrayDouble,          VValueArrayDouble *)      \
     X(ANI_VALUE_ARGS,                   ValueArgs,                 const ani_value *)        \
     X(ANI_NATIVE_FUNCTIONS,             NativeFunctions,           const ani_native_function *) \
     X(ANI_ENV_STORAGE,                  EnvStorage,                VEnv **)                  \
@@ -248,15 +248,15 @@
     X(METHOD_ARGS,                      MethodArgs,                AniMethodArgs *)          \
     X(ANI_VVA_ARGS,                     VvaArgs,                   va_list *)                \
     X(ANI_ARRAY_STORAGE,                ArrayStorage,              VArray **)                \
-    X(ANI_FIXED_ARRAY_BOOLEAN_STORAGE,  FixedArrayBooleanStorage,  VFixedArrayBoolean **)    \
-    X(ANI_FIXED_ARRAY_CHAR_STORAGE,     FixedArrayCharStorage,     VFixedArrayChar **)       \
-    X(ANI_FIXED_ARRAY_BYTE_STORAGE,     FixedArrayByteStorage,     VFixedArrayByte **)       \
-    X(ANI_FIXED_ARRAY_SHORT_STORAGE,    FixedArrayShortStorage,    VFixedArrayShort **)      \
-    X(ANI_FIXED_ARRAY_INT_STORAGE,      FixedArrayIntStorage,      VFixedArrayInt **)        \
-    X(ANI_FIXED_ARRAY_LONG_STORAGE,     FixedArrayLongStorage,     VFixedArrayLong **)       \
-    X(ANI_FIXED_ARRAY_FLOAT_STORAGE,    FixedArrayFloatStorage,    VFixedArrayFloat **)      \
-    X(ANI_FIXED_ARRAY_DOUBLE_STORAGE,   FixedArrayDoubleStorage,   VFixedArrayDouble **)     \
-    X(ANI_FIXED_ARRAY_REF_STORAGE,      FixedArrayRefStorage,      VFixedArrayRef **)        \
+    X(ANI_VALUE_ARRAY_BOOLEAN_STORAGE,  ValueArrayBooleanStorage,  VValueArrayBoolean **)    \
+    X(ANI_VALUE_ARRAY_CHAR_STORAGE,     ValueArrayCharStorage,     VValueArrayChar **)       \
+    X(ANI_VALUE_ARRAY_BYTE_STORAGE,     ValueArrayByteStorage,     VValueArrayByte **)       \
+    X(ANI_VALUE_ARRAY_SHORT_STORAGE,    ValueArrayShortStorage,    VValueArrayShort **)      \
+    X(ANI_VALUE_ARRAY_INT_STORAGE,      ValueArrayIntStorage,      VValueArrayInt **)        \
+    X(ANI_VALUE_ARRAY_LONG_STORAGE,     ValueArrayLongStorage,     VValueArrayLong **)       \
+    X(ANI_VALUE_ARRAY_FLOAT_STORAGE,    ValueArrayFloatStorage,    VValueArrayFloat **)      \
+    X(ANI_VALUE_ARRAY_DOUBLE_STORAGE,   ValueArrayDoubleStorage,   VValueArrayDouble **)     \
+    X(ANI_FIXED_ARRAY_STORAGE,          FixedArrayStorage,         VFixedArray **)           \
     X(ANI_RESOLVER,                     Resolver,                  VResolver *)              \
     X(ANI_RESOLVER_STORAGE,             ResolverStorage,           VResolver **)             \
     X(CONST_VOID_PTR,                   ConstVoidPtr,              const void *)              \
@@ -348,15 +348,15 @@ class VError;
 class VArray;
 class VArrayBuffer;
 class VFixedArray;
-class VFixedArrayBoolean;
-class VFixedArrayChar;
-class VFixedArrayByte;
-class VFixedArrayShort;
-class VFixedArrayInt;
-class VFixedArrayLong;
-class VFixedArrayFloat;
-class VFixedArrayDouble;
-class VFixedArrayRef;
+class VValueArray;
+class VValueArrayBoolean;
+class VValueArrayChar;
+class VValueArrayByte;
+class VValueArrayShort;
+class VValueArrayInt;
+class VValueArrayLong;
+class VValueArrayFloat;
+class VValueArrayDouble;
 class VResolver;
 
 class ANIArg {
@@ -799,49 +799,49 @@ public:
         return ANIArg(ArgValueByFixedArray(varray), name, Action::VERIFY_FIXED_ARRAY);
     }
 
-    static ANIArg MakeForFixedArrayBoolean(VFixedArrayBoolean *varray, std::string_view name)
+    static ANIArg MakeForValueArray(VValueArray *varray, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayBoolean(varray), name, Action::VERIFY_FIXED_ARRAY_BOOLEAN);
+        return ANIArg(ArgValueByValueArray(varray), name, Action::VERIFY_VALUE_ARRAY);
     }
 
-    static ANIArg MakeForFixedArrayChar(VFixedArrayChar *varray, std::string_view name)
+    static ANIArg MakeForValueArrayBoolean(VValueArrayBoolean *varray, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayChar(varray), name, Action::VERIFY_FIXED_ARRAY_CHAR);
+        return ANIArg(ArgValueByValueArrayBoolean(varray), name, Action::VERIFY_VALUE_ARRAY_BOOLEAN);
     }
 
-    static ANIArg MakeForFixedArrayByte(VFixedArrayByte *varray, std::string_view name)
+    static ANIArg MakeForValueArrayChar(VValueArrayChar *varray, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayByte(varray), name, Action::VERIFY_FIXED_ARRAY_BYTE);
+        return ANIArg(ArgValueByValueArrayChar(varray), name, Action::VERIFY_VALUE_ARRAY_CHAR);
     }
 
-    static ANIArg MakeForFixedArrayShort(VFixedArrayShort *varray, std::string_view name)
+    static ANIArg MakeForValueArrayByte(VValueArrayByte *varray, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayShort(varray), name, Action::VERIFY_FIXED_ARRAY_SHORT);
+        return ANIArg(ArgValueByValueArrayByte(varray), name, Action::VERIFY_VALUE_ARRAY_BYTE);
     }
 
-    static ANIArg MakeForFixedArrayInt(VFixedArrayInt *varray, std::string_view name)
+    static ANIArg MakeForValueArrayShort(VValueArrayShort *varray, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayInt(varray), name, Action::VERIFY_FIXED_ARRAY_INT);
+        return ANIArg(ArgValueByValueArrayShort(varray), name, Action::VERIFY_VALUE_ARRAY_SHORT);
     }
 
-    static ANIArg MakeForFixedArrayLong(VFixedArrayLong *varray, std::string_view name)
+    static ANIArg MakeForValueArrayInt(VValueArrayInt *varray, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayLong(varray), name, Action::VERIFY_FIXED_ARRAY_LONG);
+        return ANIArg(ArgValueByValueArrayInt(varray), name, Action::VERIFY_VALUE_ARRAY_INT);
     }
 
-    static ANIArg MakeForFixedArrayFloat(VFixedArrayFloat *varray, std::string_view name)
+    static ANIArg MakeForValueArrayLong(VValueArrayLong *varray, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayFloat(varray), name, Action::VERIFY_FIXED_ARRAY_FLOAT);
+        return ANIArg(ArgValueByValueArrayLong(varray), name, Action::VERIFY_VALUE_ARRAY_LONG);
     }
 
-    static ANIArg MakeForFixedArrayDouble(VFixedArrayDouble *varray, std::string_view name)
+    static ANIArg MakeForValueArrayFloat(VValueArrayFloat *varray, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayDouble(varray), name, Action::VERIFY_FIXED_ARRAY_DOUBLE);
+        return ANIArg(ArgValueByValueArrayFloat(varray), name, Action::VERIFY_VALUE_ARRAY_FLOAT);
     }
 
-    static ANIArg MakeForFixedArrayRef(VFixedArrayRef *varray, std::string_view name)
+    static ANIArg MakeForValueArrayDouble(VValueArrayDouble *varray, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayRef(varray), name, Action::VERIFY_FIXED_ARRAY_REF);
+        return ANIArg(ArgValueByValueArrayDouble(varray), name, Action::VERIFY_VALUE_ARRAY_DOUBLE);
     }
 
     static ANIArg MakeForFixedArrayInitialRef(VRef *vref, std::string_view name)
@@ -1039,49 +1039,49 @@ public:
         return ANIArg(ArgValueByArrayStorage(arrStorage), name, Action::VERIFY_ARRAY_STORAGE);
     }
 
-    static ANIArg MakeForArrayBooleanStorage(VFixedArrayBoolean **arrStorage, std::string_view name)
+    static ANIArg MakeForArrayBooleanStorage(VValueArrayBoolean **arrStorage, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayBooleanStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_BOOLEAN_STORAGE);
+        return ANIArg(ArgValueByValueArrayBooleanStorage(arrStorage), name, Action::VERIFY_VALUE_ARRAY_BOOLEAN_STORAGE);
     }
 
-    static ANIArg MakeForArrayCharStorage(VFixedArrayChar **arrStorage, std::string_view name)
+    static ANIArg MakeForArrayCharStorage(VValueArrayChar **arrStorage, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayCharStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_CHAR_STORAGE);
+        return ANIArg(ArgValueByValueArrayCharStorage(arrStorage), name, Action::VERIFY_VALUE_ARRAY_CHAR_STORAGE);
     }
 
-    static ANIArg MakeForArrayByteStorage(VFixedArrayByte **arrStorage, std::string_view name)
+    static ANIArg MakeForArrayByteStorage(VValueArrayByte **arrStorage, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayByteStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_BYTE_STORAGE);
+        return ANIArg(ArgValueByValueArrayByteStorage(arrStorage), name, Action::VERIFY_VALUE_ARRAY_BYTE_STORAGE);
     }
 
-    static ANIArg MakeForArrayShortStorage(VFixedArrayShort **arrStorage, std::string_view name)
+    static ANIArg MakeForArrayShortStorage(VValueArrayShort **arrStorage, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayShortStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_SHORT_STORAGE);
+        return ANIArg(ArgValueByValueArrayShortStorage(arrStorage), name, Action::VERIFY_VALUE_ARRAY_SHORT_STORAGE);
     }
 
-    static ANIArg MakeForArrayIntStorage(VFixedArrayInt **arrStorage, std::string_view name)
+    static ANIArg MakeForArrayIntStorage(VValueArrayInt **arrStorage, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayIntStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_INT_STORAGE);
+        return ANIArg(ArgValueByValueArrayIntStorage(arrStorage), name, Action::VERIFY_VALUE_ARRAY_INT_STORAGE);
     }
 
-    static ANIArg MakeForArrayLongStorage(VFixedArrayLong **arrStorage, std::string_view name)
+    static ANIArg MakeForArrayLongStorage(VValueArrayLong **arrStorage, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayLongStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_LONG_STORAGE);
+        return ANIArg(ArgValueByValueArrayLongStorage(arrStorage), name, Action::VERIFY_VALUE_ARRAY_LONG_STORAGE);
     }
 
-    static ANIArg MakeForArrayFloatStorage(VFixedArrayFloat **arrStorage, std::string_view name)
+    static ANIArg MakeForArrayFloatStorage(VValueArrayFloat **arrStorage, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayFloatStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_FLOAT_STORAGE);
+        return ANIArg(ArgValueByValueArrayFloatStorage(arrStorage), name, Action::VERIFY_VALUE_ARRAY_FLOAT_STORAGE);
     }
 
-    static ANIArg MakeForArrayDoubleStorage(VFixedArrayDouble **arrStorage, std::string_view name)
+    static ANIArg MakeForArrayDoubleStorage(VValueArrayDouble **arrStorage, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayDoubleStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_DOUBLE_STORAGE);
+        return ANIArg(ArgValueByValueArrayDoubleStorage(arrStorage), name, Action::VERIFY_VALUE_ARRAY_DOUBLE_STORAGE);
     }
 
-    static ANIArg MakeForArrayRefStorage(VFixedArrayRef **arrStorage, std::string_view name)
+    static ANIArg MakeForFixedArrayStorage(VFixedArray **arrStorage, std::string_view name)
     {
-        return ANIArg(ArgValueByFixedArrayRefStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_REF_STORAGE);
+        return ANIArg(ArgValueByFixedArrayStorage(arrStorage), name, Action::VERIFY_FIXED_ARRAY_STORAGE);
     }
 
     static ANIArg MakeForResolver(VResolver *valueStorage, std::string_view name)

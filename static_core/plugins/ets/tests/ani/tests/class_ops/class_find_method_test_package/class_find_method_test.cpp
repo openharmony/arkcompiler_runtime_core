@@ -236,11 +236,11 @@ TEST_F(ClassFindMethodTest, has_method_C_unusual_types)
         CheckClassFindMethod<true>("C", "imethod_tuple", nullptr, &args, TEST_EXPECTED_VALUE1);
     }
     {
-        ani_fixedarray_int params;
-        ASSERT_EQ(env_->FixedArray_New_Int(2U, &params), ANI_OK);
+        ani_valuearray_int params;
+        ASSERT_EQ(env_->ValueArray_New_Int(2U, &params), ANI_OK);
         ani_int nativeParams[] = {TEST_NATIVE_PARAM1, TEST_NATIVE_PARAM2};
         const ani_size offset = 0;
-        ASSERT_EQ(env_->FixedArray_SetRegion_Int(params, offset, 2U, nativeParams), ANI_OK);
+        ASSERT_EQ(env_->ValueArray_SetRegion_Int(params, offset, 2U, nativeParams), ANI_OK);
 
         args.r = params;
         CheckClassFindMethod<true>("C", "method_rest", nullptr, &args, TEST_EXPECTED_VALUE1);

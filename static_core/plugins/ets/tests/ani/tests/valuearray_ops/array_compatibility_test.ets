@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 /*---
-file_name: ani_test_fixedarray_compatibility
+file_name: ani_test_valuearray_compatibility
 ---*/
 
 function getArray(): int[] {

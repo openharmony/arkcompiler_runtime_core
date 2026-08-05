@@ -203,7 +203,7 @@ static void ReadChildProcessStdOut(ani_env *env, ani_object child)
             ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(child, "outFd", -1));
         }
 
-        ANI_FATAL_IF_ERROR(env->FixedArray_SetRegion_Byte(reinterpret_cast<ani_fixedarray_byte>(outBuffer),
+        ANI_FATAL_IF_ERROR(env->ValueArray_SetRegion_Byte(reinterpret_cast<ani_valuearray_byte>(outBuffer),
                                                           outBytesRead, bytesRead, buffer.data()));
         ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(child, "outBytesRead", outBytesRead + bytesRead));
     }
@@ -259,7 +259,7 @@ static void ReadChildProcessStdErr(ani_env *env, ani_object child)
             ANI_FATAL_IF_ERROR(env->Object_SetFieldByName_Int(child, "errorFd", -1));
         }
 
-        ANI_FATAL_IF_ERROR(env->FixedArray_SetRegion_Byte(reinterpret_cast<ani_fixedarray_byte>(errBuffer),
+        ANI_FATAL_IF_ERROR(env->ValueArray_SetRegion_Byte(reinterpret_cast<ani_valuearray_byte>(errBuffer),
                                                           errBytesRead, bytesRead, buffer.data()));
         ANI_FATAL_IF_ERROR(env->Object_SetField_Int(child, errBytesReadId, errBytesRead + bytesRead));
     }

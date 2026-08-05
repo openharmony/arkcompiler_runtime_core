@@ -766,48 +766,48 @@ napi_value FixedArrayGetImpl(napi_env env, napi_callback_info info)
         case SType::INT: {
             ani_int value = 0;
             status =
-                aniEnv->FixedArray_GetRegion_Int(reinterpret_cast<ani_fixedarray_int>(currentArray), index, 1, &value);
+                aniEnv->ValueArray_GetRegion_Int(reinterpret_cast<ani_valuearray_int>(currentArray), index, 1, &value);
             ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::BOOLEAN: {
             ani_boolean value = ANI_FALSE;
-            status = aniEnv->FixedArray_GetRegion_Boolean(reinterpret_cast<ani_fixedarray_boolean>(currentArray), index,
+            status = aniEnv->ValueArray_GetRegion_Boolean(reinterpret_cast<ani_valuearray_boolean>(currentArray), index,
                                                           1, &value);
             ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::BYTE: {
             ani_byte value = 0;
-            status = aniEnv->FixedArray_GetRegion_Byte(reinterpret_cast<ani_fixedarray_byte>(currentArray), index, 1,
+            status = aniEnv->ValueArray_GetRegion_Byte(reinterpret_cast<ani_valuearray_byte>(currentArray), index, 1,
                                                        &value);
             ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::CHAR: {
             ani_char value = 0;
-            status = aniEnv->FixedArray_GetRegion_Char(reinterpret_cast<ani_fixedarray_char>(currentArray), index, 1,
+            status = aniEnv->ValueArray_GetRegion_Char(reinterpret_cast<ani_valuearray_char>(currentArray), index, 1,
                                                        &value);
             ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::SHORT: {
             ani_short value = 0;
-            status = aniEnv->FixedArray_GetRegion_Short(reinterpret_cast<ani_fixedarray_short>(currentArray), index, 1,
+            status = aniEnv->ValueArray_GetRegion_Short(reinterpret_cast<ani_valuearray_short>(currentArray), index, 1,
                                                         &value);
             ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::LONG: {
             ani_long value = 0;
-            status = aniEnv->FixedArray_GetRegion_Long(reinterpret_cast<ani_fixedarray_long>(currentArray), index, 1,
+            status = aniEnv->ValueArray_GetRegion_Long(reinterpret_cast<ani_valuearray_long>(currentArray), index, 1,
                                                        &value);
             ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
         }
         case SType::FLOAT: {
             ani_float value = 0;
-            status = aniEnv->FixedArray_GetRegion_Float(reinterpret_cast<ani_fixedarray_float>(currentArray), index, 1,
+            status = aniEnv->ValueArray_GetRegion_Float(reinterpret_cast<ani_valuearray_float>(currentArray), index, 1,
                                                         &value);
             ANI_CHECK_ERROR_RETURN(env, status);
             return CreateSTValueInstance(env, value);
@@ -815,7 +815,7 @@ napi_value FixedArrayGetImpl(napi_env env, napi_callback_info info)
         case SType::REFERENCE: {
             ani_ref value {};
             ANI_CHECK_ERROR_RETURN(
-                env, aniEnv->FixedArray_Get_Ref(reinterpret_cast<ani_fixedarray_ref>(currentArray), index, &value));
+                env, aniEnv->FixedArray_Get(reinterpret_cast<ani_fixedarray>(currentArray), index, &value));
             if (value == nullptr) {
                 napi_value jsNull = nullptr;
                 NAPI_CHECK_FATAL(napi_get_null(env, &jsNull));
@@ -877,7 +877,7 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
                 return nullptr;
             }
             ani_int element = valueData->GetAniInt();
-            status = aniEnv->FixedArray_SetRegion_Int(reinterpret_cast<ani_fixedarray_int>(currentArray), index, 1,
+            status = aniEnv->ValueArray_SetRegion_Int(reinterpret_cast<ani_valuearray_int>(currentArray), index, 1,
                                                       &element);
             break;
         }
@@ -887,7 +887,7 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
                 return nullptr;
             }
             ani_boolean element = valueData->GetAniBoolean();
-            status = aniEnv->FixedArray_SetRegion_Boolean(reinterpret_cast<ani_fixedarray_boolean>(currentArray), index,
+            status = aniEnv->ValueArray_SetRegion_Boolean(reinterpret_cast<ani_valuearray_boolean>(currentArray), index,
                                                           1, &element);
             break;
         }
@@ -897,7 +897,7 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
                 return nullptr;
             }
             ani_byte element = valueData->GetAniByte();
-            status = aniEnv->FixedArray_SetRegion_Byte(reinterpret_cast<ani_fixedarray_byte>(currentArray), index, 1,
+            status = aniEnv->ValueArray_SetRegion_Byte(reinterpret_cast<ani_valuearray_byte>(currentArray), index, 1,
                                                        &element);
             break;
         }
@@ -907,7 +907,7 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
                 return nullptr;
             }
             ani_char element = valueData->GetAniChar();
-            status = aniEnv->FixedArray_SetRegion_Char(reinterpret_cast<ani_fixedarray_char>(currentArray), index, 1,
+            status = aniEnv->ValueArray_SetRegion_Char(reinterpret_cast<ani_valuearray_char>(currentArray), index, 1,
                                                        &element);
             break;
         }
@@ -917,7 +917,7 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
                 return nullptr;
             }
             ani_double element = valueData->GetAniDouble();
-            status = aniEnv->FixedArray_SetRegion_Double(reinterpret_cast<ani_fixedarray_double>(currentArray), index,
+            status = aniEnv->ValueArray_SetRegion_Double(reinterpret_cast<ani_valuearray_double>(currentArray), index,
                                                          1, &element);
             break;
         }
@@ -927,7 +927,7 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
                 return nullptr;
             }
             ani_float element = valueData->GetAniFloat();
-            status = aniEnv->FixedArray_SetRegion_Float(reinterpret_cast<ani_fixedarray_float>(currentArray), index, 1,
+            status = aniEnv->ValueArray_SetRegion_Float(reinterpret_cast<ani_valuearray_float>(currentArray), index, 1,
                                                         &element);
             break;
         }
@@ -937,7 +937,7 @@ napi_value FixedArraySetImpl(napi_env env, napi_callback_info info)
                 return nullptr;
             }
             ani_ref element = valueData->GetAniRef();
-            status = aniEnv->FixedArray_Set_Ref(reinterpret_cast<ani_fixedarray_ref>(currentArray), index, element);
+            status = aniEnv->FixedArray_Set(reinterpret_cast<ani_fixedarray>(currentArray), index, element);
             break;
         }
         default: {

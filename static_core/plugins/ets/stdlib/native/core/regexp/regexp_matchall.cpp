@@ -218,8 +218,8 @@ ani_status PopulateFromOvector(ani_env *env, const FieldCache &fields, ani_objec
     const uint32_t totalSlots = meta.ecmaCaptureCount + 1;
     const uint32_t flatSize = totalSlots * OVECTOR_GROUP_SIZE;
     if (flatSize > 0) {
-        ani_fixedarray_int intArray;
-        ANI_RETURN_ON_PENDING_ERROR(env->FixedArray_New_Int(flatSize, &intArray));
+        ani_valuearray_int intArray;
+        ANI_RETURN_ON_PENDING_ERROR(env->ValueArray_New_Int(flatSize, &intArray));
         std::vector<ani_int> flat(flatSize);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         flat[0] = static_cast<ani_int>(ovector[0]);
@@ -248,7 +248,7 @@ ani_status PopulateFromOvector(ani_env *env, const FieldCache &fields, ani_objec
                 flat[OVECTOR_GROUP_SIZE * childIdx + 1] = INVALID_CAPTURE_OFFSET;
             }
         }
-        ANI_FATAL_IF_ERROR(env->FixedArray_SetRegion_Int(intArray, 0, flatSize, flat.data()));
+        ANI_FATAL_IF_ERROR(env->ValueArray_SetRegion_Int(intArray, 0, flatSize, flat.data()));
         ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(obj, fields.result, static_cast<ani_ref>(intArray)));
     }
 
@@ -268,16 +268,16 @@ ani_status PopulateFromOvector(ani_env *env, const FieldCache &fields, ani_objec
         if (!keys.empty()) {
             ani_string firstKey;
             ANI_RETURN_ON_PENDING_ERROR(env->String_NewUTF8(keys[0].c_str(), keys[0].size(), &firstKey));
-            ani_fixedarray_ref keysArray;
-            ANI_RETURN_ON_PENDING_ERROR(env->FixedArray_New_Ref(fields.stringClass, keys.size(), firstKey, &keysArray));
+            ani_fixedarray keysArray;
+            ANI_RETURN_ON_PENDING_ERROR(env->FixedArray_New(fields.stringClass, keys.size(), firstKey, &keysArray));
             for (size_t i = 1; i < keys.size(); ++i) {
                 ani_string key;
                 ANI_RETURN_ON_PENDING_ERROR(env->String_NewUTF8(keys[i].c_str(), keys[i].size(), &key));
-                ANI_FATAL_IF_ERROR(env->FixedArray_Set_Ref(keysArray, i, key));
+                ANI_FATAL_IF_ERROR(env->FixedArray_Set(keysArray, i, key));
             }
-            ani_fixedarray_int valsArray;
-            ANI_RETURN_ON_PENDING_ERROR(env->FixedArray_New_Int(vals.size(), &valsArray));
-            ANI_FATAL_IF_ERROR(env->FixedArray_SetRegion_Int(valsArray, 0, vals.size(), vals.data()));
+            ani_valuearray_int valsArray;
+            ANI_RETURN_ON_PENDING_ERROR(env->ValueArray_New_Int(vals.size(), &valsArray));
+            ANI_FATAL_IF_ERROR(env->ValueArray_SetRegion_Int(valsArray, 0, vals.size(), vals.data()));
             ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(obj, fields.groupKeys, static_cast<ani_ref>(keysArray)));
             ANI_FATAL_IF_ERROR(env->Object_SetField_Ref(obj, fields.groupVals, static_cast<ani_ref>(valsArray)));
         }

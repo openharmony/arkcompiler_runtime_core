@@ -84,13 +84,13 @@ public:
         return AddLocalRef(nullObject, result);
     }
 
-    EtsArray *ToInternalType(ani_fixedarray array)
+    EtsArray *ToInternalType(ani_valuearray array)
     {
         ASSERT(!IsNullishValue(array));
         return reinterpret_cast<EtsArray *>(GetInternalType(array));
     }
 
-    EtsObjectArray *ToInternalType(ani_fixedarray_ref array)
+    EtsObjectArray *ToInternalType(ani_fixedarray array)
     {
         ASSERT(!IsNullishValue(array));
         return reinterpret_cast<EtsObjectArray *>(GetInternalType(array));
