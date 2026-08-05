@@ -958,6 +958,25 @@ InlineCachesWrapper::CallKind InlineCachesWrapper::GetClasses(PandaRuntimeInterf
     return CallKind::POLYMORPHIC;
 }
 
+RuntimeInterface::ClassPtr AnyInstInlineCachesWrapper::GetClass(PandaRuntimeInterface::MethodPtr m, uint32_t icSlot)
+{
+    static_assert(ark::compiler::INVALID_SLOT_ID == AnyInstInlineCache::INVALID_SLOT_ID);
+    auto method = static_cast<Method *>(m);
+    auto profilingData = method->GetProfilingData();
+    if (profilingData == nullptr) {
+        return nullptr;
+    }
+    auto ic = profilingData->FindAnyInstInlineCache(icSlot);
+    if (ic == nullptr) {
+        return nullptr;
+    }
+    auto klass = ic->GetClass();
+    if (AnyInstInlineCache::IsMegamorphic(klass)) {
+        return nullptr;
+    }
+    return klass;
+}
+
 bool UnresolvedTypesWrapper::AddTableSlot(RuntimeInterface::MethodPtr method, uint32_t typeId, SlotKind kind)
 {
     std::pair<uint32_t, UnresolvedTypesInterface::SlotKind> key {typeId, kind};

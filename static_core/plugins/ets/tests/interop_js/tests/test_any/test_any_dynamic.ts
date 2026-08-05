@@ -68,6 +68,10 @@ export class Qux {
     }
 }
 
+export function retX(x: object): object {
+    return x;
+}
+
 export let quxInstance = new Qux();
 
 export class TestNew0 {

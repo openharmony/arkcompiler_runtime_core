@@ -5191,6 +5191,16 @@ public:
         imms_->push_back(imm);
     }
 
+    uint8_t GetSlotId()
+    {
+        return slotId_;
+    }
+
+    void SetSlotId(uint8_t slotId)
+    {
+        slotId_ = slotId;
+    }
+
     bool IsNativeCall() const;
 
     bool HasArgumentsOnStack() const
@@ -5269,6 +5279,7 @@ protected:
 private:
     IntrinsicId intrinsicId_ {RuntimeInterface::IntrinsicId::COUNT};
     ArenaVector<uint32_t> *imms_ {nullptr};  // record imms appeared in intrinsics
+    uint8_t slotId_ {INVALID_SLOT_ID};
 };
 
 #include <get_intrinsics_names.inl>

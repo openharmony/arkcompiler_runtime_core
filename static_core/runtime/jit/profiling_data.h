@@ -29,6 +29,75 @@ namespace ark {
 
 class Class;
 
+class AnyInstInlineCache {
+public:
+    static constexpr uintptr_t MEGAMORPHIC_FLAG = static_cast<uintptr_t>(-1);
+    static constexpr uint8_t INVALID_SLOT_ID = UINT8_MAX;
+
+    // NOLINTNEXTLINE(misc-unused-parameters)
+    static Span<AnyInstInlineCache> From(void *mem, uint8_t anyInstsSize)
+    {
+        auto inlineCaches = reinterpret_cast<AnyInstInlineCache *>(mem);
+        auto ics = Span<AnyInstInlineCache>(inlineCaches, anyInstsSize);
+        for (uint8_t i = 0; i < anyInstsSize; i++) {
+            ics[i].Init();
+        }
+        return ics;
+    }
+
+    void Init()
+    {
+        class_ = nullptr;
+    }
+
+    void UpdateInlineCache(Class *cls)
+    {
+        auto *classAtomic = reinterpret_cast<std::atomic<Class *> *>(&(class_));
+        // Atomic with acquire order reason: data race with class_ with dependecies on reads after the load which
+        // should become visible
+        auto storedClass = classAtomic->load(std::memory_order_acquire);
+        if (storedClass == reinterpret_cast<Class *>(MEGAMORPHIC_FLAG) || storedClass == cls) {
+            return;
+        }
+        if (storedClass == nullptr) {
+            if (!classAtomic->compare_exchange_strong(storedClass, cls, std::memory_order_acq_rel)) {
+                if (storedClass == cls) {
+                    return;
+                }
+                // We only support monomorphic cases at the moment
+                // Atomic with release order reason: data race with class with dependecies on writes before the store
+                // which should become visible acquire
+                classAtomic->store(reinterpret_cast<Class *>(MEGAMORPHIC_FLAG), std::memory_order_release);
+            }
+            return;
+        }
+        // We only support monomorphic cases at the moment
+        // Atomic with release order reason: data race with class with dependecies on writes before the store which
+        // should become visible acquire
+        classAtomic->store(reinterpret_cast<Class *>(MEGAMORPHIC_FLAG), std::memory_order_release);
+    }
+
+    Class *GetClass() const
+    {
+        auto *classAtomic = reinterpret_cast<std::atomic<Class *> const *>(&(class_));
+        // Atomic with acquire order reason: data race with class_ with dependecies on reads after the load which
+        // should become visible
+        auto storedClass = classAtomic->load(std::memory_order_acquire);
+        return storedClass;
+    }
+
+    static bool IsMegamorphic(Class *cls)
+    {
+        auto *classAtomic = reinterpret_cast<std::atomic<Class *> const *>(&(cls));
+        // Atomic with acquire order reason: data race with class_ with dependecies on reads after the load which
+        // should become visible
+        return classAtomic->load(std::memory_order_acquire) == reinterpret_cast<Class *>(MEGAMORPHIC_FLAG);
+    }
+
+private:
+    Class *class_;
+};
+
 class CallSiteInlineCache {
 public:
     static constexpr size_t CLASSES_COUNT = 4;
@@ -251,11 +320,13 @@ public:
     };
 
     explicit ProfilingData(Span<CallSiteInlineCache> inlineCaches, Span<BranchData> branchData,
-                           Span<ThrowData> throwData, Span<BranchLastSaved> branchLastSaved,
-                           Span<uint64_t> throwLastSaved, bool branchProfilingEnabled = false)
+                           Span<ThrowData> throwData, Span<AnyInstInlineCache> anyInstInlineCaches,
+                           Span<BranchLastSaved> branchLastSaved, Span<uint64_t> throwLastSaved,
+                           bool branchProfilingEnabled = false)
         : inlineCaches_(inlineCaches),
           branchData_(branchData),
           throwData_(throwData),
+          anyInstInlineCaches_(anyInstInlineCaches),
           branchLastSaved_(branchLastSaved),
           throwLastSaved_(throwLastSaved),
           branchProfilingEnabled_(branchProfilingEnabled)
@@ -279,6 +350,11 @@ public:
     Span<ThrowData> GetThrowData() const
     {
         return throwData_;
+    }
+
+    Span<AnyInstInlineCache> GetAnyInstInlineCaches() const
+    {
+        return anyInstInlineCaches_;
     }
 
     // Check if branch profiling is enabled
@@ -345,6 +421,26 @@ public:
             return 0;
         }
         return branch->GetNotTakenCounter();
+    }
+
+    AnyInstInlineCache *FindAnyInstInlineCache(size_t icSlot)
+    {
+        auto ics = GetAnyInstInlineCaches();
+        if (icSlot == AnyInstInlineCache::INVALID_SLOT_ID) {
+            // Slot 0xFF is considered invalid
+            return nullptr;
+        }
+        ASSERT(icSlot < ics.size());
+        return &ics[icSlot];
+    }
+
+    void UpdateAnyInstInlineCache(size_t icSlot, Class *cls)
+    {
+        auto ic = FindAnyInstInlineCache(icSlot);
+        if (ic != nullptr) {
+            ic->UpdateInlineCache(cls);
+            isUpdated_ = true;
+        }
     }
 
     void UpdateThrowTaken(uintptr_t pc)
@@ -428,13 +524,15 @@ public:
 
     template <typename Callback>
     static ProfilingData *Make(mem::InternalAllocatorPtr allocator, size_t nInlineCaches, size_t nBranches,
-                               size_t nThrows, Callback &&callback)
+                               size_t nThrows, size_t nAnyInsts, Callback &&callback)
     {
         auto vcallDataOffset = RoundUp(sizeof(ProfilingData), alignof(CallSiteInlineCache));
         auto branchesDataOffset =
             RoundUp(vcallDataOffset + sizeof(CallSiteInlineCache) * nInlineCaches, alignof(BranchData));
         auto throwsDataOffset = RoundUp(branchesDataOffset + sizeof(BranchData) * nBranches, alignof(ThrowData));
-        auto branchLastSavedOffset = RoundUp(throwsDataOffset + sizeof(ThrowData) * nThrows, alignof(BranchLastSaved));
+        auto anyInstsDataOffset = RoundUp(throwsDataOffset + sizeof(ThrowData) * nThrows, alignof(AnyInstInlineCache));
+        auto branchLastSavedOffset =
+            RoundUp(anyInstsDataOffset + sizeof(AnyInstInlineCache) * nAnyInsts, alignof(BranchLastSaved));
         auto throwLastSavedOffset =
             RoundUp(branchLastSavedOffset + sizeof(BranchLastSaved) * nBranches, alignof(uint64_t));
         auto data = allocator->Alloc(throwLastSavedOffset + sizeof(uint64_t) * nThrows);
@@ -446,10 +544,12 @@ public:
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto throwsMem = reinterpret_cast<uint8_t *>(data) + throwsDataOffset;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto anyInstsMem = reinterpret_cast<uint8_t *>(data) + anyInstsDataOffset;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto branchLastSavedMem = reinterpret_cast<uint8_t *>(data) + branchLastSavedOffset;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto throwLastSavedMem = reinterpret_cast<uint8_t *>(data) + throwLastSavedOffset;
-        return callback(data, vcallsMem, branchesMem, throwsMem, branchLastSavedMem, throwLastSavedMem);
+        return callback(data, vcallsMem, branchesMem, throwsMem, anyInstsMem, branchLastSavedMem, throwLastSavedMem);
     }
 
 private:
@@ -480,6 +580,7 @@ private:
     Span<CallSiteInlineCache> inlineCaches_;
     Span<BranchData> branchData_;
     Span<ThrowData> throwData_;
+    Span<AnyInstInlineCache> anyInstInlineCaches_;
     // Save-state metadata only. These arrays mirror branchData_/throwData_ by index.
     // LastSaved state is saver-thread-only.
     Span<BranchLastSaved> branchLastSaved_;

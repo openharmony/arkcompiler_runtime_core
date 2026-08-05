@@ -1212,7 +1212,7 @@ public:
         auto icSlot = this->GetInst().template GetImm<FORMAT, 0>();
         LOG_INST() << "any.call.0 v" << vs1 << ", " << icSlot;
         ObjectHeader *funcObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
-        auto ret = intrinsics::AnyCall0(this->GetThread(), funcObj);
+        auto ret = intrinsics::AnyCall0(this->GetThread(), funcObj, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -1230,7 +1230,7 @@ public:
         uint16_t argStart = this->GetInst().template GetVReg<FORMAT, 0x1>();
         LOG_INST() << "any.call.range v" << vs1 << ", v" << argStart << ", " << argc << ", " << icSlot;
         ObjectHeader *funcObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
-        auto ret = intrinsics::AnyCallRange(this->GetThread(), this->GetFrame(), funcObj, argStart, argc);
+        auto ret = intrinsics::AnyCallRange(this->GetThread(), this->GetFrame(), funcObj, argStart, argc, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -1249,7 +1249,7 @@ public:
         LOG_INST() << "any.call.short v" << vs1 << ", v" << vs2 << ", " << icSlot;
         ObjectHeader *funcObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
         ObjectHeader *arg = this->GetFrame()->GetVReg(vs2).template GetAs<ObjectHeader *>();
-        auto ret = intrinsics::AnyCallShort(this->GetThread(), funcObj, arg);
+        auto ret = intrinsics::AnyCallShort(this->GetThread(), funcObj, arg, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -1266,7 +1266,7 @@ public:
         auto stringId = this->GetInst().template GetId<FORMAT>().AsRawValue();
         LOG_INST() << "any.call.this.0 v" << vs1 << ", " << icSlot << ", " << stringId;
         ObjectHeader *thisObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
-        auto ret = intrinsics::AnyCallThis0(this->GetThread(), this->GetFrame(), thisObj, stringId);
+        auto ret = intrinsics::AnyCallThis0(this->GetThread(), this->GetFrame(), thisObj, stringId, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -1286,7 +1286,8 @@ public:
         LOG_INST() << "any.call.this.range v" << vs1 << ", v" << argStart << ", " << argc << ", " << icSlot << ", "
                    << stringId;
         ObjectHeader *thisObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
-        auto ret = intrinsics::AnyCallThisRange(this->GetThread(), this->GetFrame(), thisObj, stringId, argStart, argc);
+        auto ret = intrinsics::AnyCallThisRange(this->GetThread(), this->GetFrame(), thisObj, stringId, argStart, argc,
+                                                icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -1305,7 +1306,7 @@ public:
         LOG_INST() << "any.call.this.short v" << vs1 << ", v" << vs2 << ", " << icSlot << ", " << stringId;
         ObjectHeader *thisObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
         ObjectHeader *arg = this->GetFrame()->GetVReg(vs2).template GetAs<ObjectHeader *>();
-        auto ret = intrinsics::AnyCallThisShort(this->GetThread(), this->GetFrame(), thisObj, stringId, arg);
+        auto ret = intrinsics::AnyCallThisShort(this->GetThread(), this->GetFrame(), thisObj, stringId, arg, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -1321,7 +1322,7 @@ public:
         auto icSlot = this->GetInst().template GetImm<FORMAT, 0>();
         LOG_INST() << "any.call.new.0 v" << vs1 << ", " << icSlot;
         ObjectHeader *ctor = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
-        auto ret = intrinsics::AnyCallNew0(this->GetThread(), ctor);
+        auto ret = intrinsics::AnyCallNew0(this->GetThread(), ctor, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -1339,7 +1340,7 @@ public:
         uint16_t argStart = this->GetInst().template GetVReg<FORMAT, 0x1>();
         LOG_INST() << "any.call.new.range v" << vs1 << ", v" << argStart << ", " << argc << ", " << icSlot;
         ObjectHeader *ctor = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
-        auto ret = intrinsics::AnyCallNewRange(this->GetThread(), this->GetFrame(), ctor, argStart, argc);
+        auto ret = intrinsics::AnyCallNewRange(this->GetThread(), this->GetFrame(), ctor, argStart, argc, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -1357,7 +1358,7 @@ public:
         LOG_INST() << "any.call.new.short v" << vs1 << ", v" << vs2 << ", " << icSlot;
         ObjectHeader *ctor = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
         ObjectHeader *arg = this->GetFrame()->GetVReg(vs2).template GetAs<ObjectHeader *>();
-        auto ret = intrinsics::AnyCallNewShort(this->GetThread(), ctor, arg);
+        auto ret = intrinsics::AnyCallNewShort(this->GetThread(), ctor, arg, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -1375,7 +1376,7 @@ public:
 
         ObjectHeader *lhsObj = this->GetAcc().template GetAs<ObjectHeader *>();
         ObjectHeader *rhsObj = this->GetFrame()->GetVReg(vs1).template GetAs<ObjectHeader *>();
-        bool ret = intrinsics::AnyIsinstance(this->GetThread(), lhsObj, rhsObj);
+        bool ret = intrinsics::AnyIsinstance(this->GetThread(), lhsObj, rhsObj, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -4002,7 +4003,7 @@ public:
         LOG_INST() << "any.ldbyname v" << vs << ", " << std::hex << "0x" << id << ", " << icSlot;
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
-        auto ret = intrinsics::AnyLdbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue());
+        auto ret = intrinsics::AnyLdbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue(), icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -4022,7 +4023,7 @@ public:
         LOG_INST() << "any.ldbyname.v v" << vd << ", v" << vs << ", " << std::hex << "0x" << id << ", " << icSlot;
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
-        auto ret = intrinsics::AnyLdbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue());
+        auto ret = intrinsics::AnyLdbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue(), icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -4042,7 +4043,7 @@ public:
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs).GetReference();
         ObjectHeader *val = this->GetAccAsVReg().GetReference();
-        intrinsics::AnyStbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue(), val);
+        intrinsics::AnyStbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue(), val, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -4062,7 +4063,7 @@ public:
 
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs2).GetReference();
         ObjectHeader *val = this->GetFrame()->GetVReg(vs1).GetReference();
-        intrinsics::AnyStbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue(), val);
+        intrinsics::AnyStbyname(this->GetThread(), this->GetFrame(), obj, id.AsRawValue(), val, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -4081,7 +4082,7 @@ public:
         ASSERT(!this->GetAccAsVReg().HasObject());
 
         double index = this->GetAccAsVReg().GetDouble();
-        auto ldObj = intrinsics::AnyLdbyidx(this->GetThread(), obj, index);
+        auto ldObj = intrinsics::AnyLdbyidx(this->GetThread(), obj, index, icSlot);
         this->GetAccAsVReg().SetReference(ldObj);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
@@ -4102,7 +4103,7 @@ public:
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs1).GetReference();
         [[maybe_unused]] double index = this->GetFrame()->GetVReg(vs2).GetDouble();
         ObjectHeader *val = this->GetAccAsVReg().GetReference();
-        intrinsics::AnyStbyidx(this->GetThread(), obj, index, val);
+        intrinsics::AnyStbyidx(this->GetThread(), obj, index, val, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -4120,7 +4121,7 @@ public:
         LOG_INST() << "any.ldbyval v" << vs1 << ", v" << vs2 << ", " << std::hex << ", " << icSlot;
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs1).GetReference();
         ObjectHeader *valObj = this->GetFrame()->GetVReg(vs2).GetReference();
-        auto ldObj = intrinsics::AnyLdbyval(this->GetThread(), obj, valObj);
+        auto ldObj = intrinsics::AnyLdbyval(this->GetThread(), obj, valObj, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {
@@ -4141,7 +4142,7 @@ public:
         ObjectHeader *obj = this->GetFrame()->GetVReg(vs1).GetReference();
         ObjectHeader *key = this->GetFrame()->GetVReg(vs2).GetReference();
         ObjectHeader *val = this->GetAccAsVReg().GetReference();
-        intrinsics::AnyStbyval(this->GetThread(), obj, key, val);
+        intrinsics::AnyStbyval(this->GetThread(), obj, key, val, icSlot);
         if (UNLIKELY(this->GetThread()->HasPendingException())) {
             this->MoveToExceptionHandler();
         } else {

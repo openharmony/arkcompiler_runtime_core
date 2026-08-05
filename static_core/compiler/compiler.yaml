@@ -870,6 +870,11 @@ options:
   description: Distance limit between inserted safepoints
   tags: [debug]
 
+- name: compiler-optimize-any-bytecodes
+  type: bool
+  default: true
+  description: Enable optimizations of any.* bytecodes
+
 events:
 - name: branch-elimination
   fields:

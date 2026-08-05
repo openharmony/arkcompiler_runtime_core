@@ -208,6 +208,18 @@ Field *EtsRuntimeInterface::GetFieldPtrByName(ClassPtr klass, std::string_view n
     return etsClass->GetFieldByIndex(fieldIndex)->GetRuntimeField();
 }
 
+compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::GetFieldGetterByName(ClassPtr klass,
+                                                                                std::string_view name) const
+{
+    return GetInstanceMethodByName(klass, (PandaString(GETTER_BEGIN) + PandaString(name)).c_str());
+}
+
+compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::GetFieldSetterByName(ClassPtr klass,
+                                                                                std::string_view name) const
+{
+    return GetInstanceMethodByName(klass, (PandaString(SETTER_BEGIN) + PandaString(name)).c_str());
+}
+
 bool EtsRuntimeInterface::IsMethodStringBuilderConstructorWithStringArg(MethodPtr method) const
 {
     return method == PlatformTypes()->coreStringBuilderConstructorWithStringArg;
@@ -884,6 +896,66 @@ ark::compiler::DataType::Type EtsRuntimeInterface::GetBoxedClassDataType(ClassPt
         return compiler::DataType::FLOAT64;
     }
     return compiler::DataType::NO_TYPE;
+}
+
+EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetDataTypeBoxedClass(ark::compiler::DataType::Type type) const
+{
+    auto platformTypes = PlatformTypes(PandaEtsVM::GetCurrent());
+    if (compiler::DataType::BOOL == type) {
+        return platformTypes->coreBoolean->GetRuntimeClass();
+    }
+    if (compiler::DataType::INT8 == type) {
+        return platformTypes->coreByte->GetRuntimeClass();
+    }
+    if (compiler::DataType::UINT16 == type) {
+        return platformTypes->coreChar->GetRuntimeClass();
+    }
+    if (compiler::DataType::INT16 == type) {
+        return platformTypes->coreShort->GetRuntimeClass();
+    }
+    if (compiler::DataType::INT32 == type) {
+        return platformTypes->coreInt->GetRuntimeClass();
+    }
+    if (compiler::DataType::INT64 == type) {
+        return platformTypes->coreLong->GetRuntimeClass();
+    }
+    if (compiler::DataType::FLOAT32 == type) {
+        return platformTypes->coreFloat->GetRuntimeClass();
+    }
+    if (compiler::DataType::FLOAT64 == type) {
+        return platformTypes->coreDouble->GetRuntimeClass();
+    }
+    return nullptr;
+}
+
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetBoxedClassConstructor(ClassPtr klass) const
+{
+    auto platformTypes = PlatformTypes(PandaEtsVM::GetCurrent());
+    if (platformTypes->coreBoolean->GetRuntimeClass() == klass) {
+        return platformTypes->coreBooleanValueCtor;
+    }
+    if (platformTypes->coreByte->GetRuntimeClass() == klass) {
+        return platformTypes->coreByteValueCtor;
+    }
+    if (platformTypes->coreChar->GetRuntimeClass() == klass) {
+        return platformTypes->coreCharValueCtor;
+    }
+    if (platformTypes->coreShort->GetRuntimeClass() == klass) {
+        return platformTypes->coreShortValueCtor;
+    }
+    if (platformTypes->coreInt->GetRuntimeClass() == klass) {
+        return platformTypes->coreIntValueCtor;
+    }
+    if (platformTypes->coreLong->GetRuntimeClass() == klass) {
+        return platformTypes->coreLongValueCtor;
+    }
+    if (platformTypes->coreFloat->GetRuntimeClass() == klass) {
+        return platformTypes->coreFloatValueCtor;
+    }
+    if (platformTypes->coreDouble->GetRuntimeClass() == klass) {
+        return platformTypes->coreDoubleValueCtor;
+    }
+    return nullptr;
 }
 
 size_t EtsRuntimeInterface::GetTlsNativeApiOffset(Arch arch) const

@@ -961,8 +961,8 @@ public:
     static constexpr uint16_t NUM_VREGS_UNKNOWN = UINT16_MAX;
 
 private:
-    inline void FillVecsByInsts(BytecodeInstruction &inst, PandaVector<uint32_t> &vcalls,
-                                PandaVector<uint32_t> &branches, PandaVector<uint32_t> &throws) const;
+    void FillVecsByInsts(BytecodeInstruction &inst, PandaVector<uint32_t> &vcalls, PandaVector<uint32_t> &branches,
+                         PandaVector<uint32_t> &throws, uint8_t &anyInstsSize) const;
 
     Value InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs, Value *args, CallFlags callFlags);
 

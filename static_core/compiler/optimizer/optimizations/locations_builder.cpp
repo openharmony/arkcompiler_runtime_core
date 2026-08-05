@@ -272,6 +272,7 @@ LOCATIONS_BUILDER(void)::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
         if (IsStackRangeIntrinsic(id, &explicitArgs)) {
             ASSERT(explicitArgs > 0 || !intrinsic->IsMethodFirstInput());
             explicitArgs -= (intrinsic->IsMethodFirstInput() ? 1 : 0);
+            explicitArgs -= (intrinsic->HasImms() ? intrinsic->GetImms().size() : 0);
             static_cast<LocationsBuilder *>(visitor)->ProcessManagedCallStackRange(inst, explicitArgs, pinfo);
         } else {
             static_cast<LocationsBuilder *>(visitor)->ProcessManagedCall(inst, pinfo);

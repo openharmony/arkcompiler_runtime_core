@@ -34,6 +34,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/mutator_status.h"
 #include "runtime/interpreter/frame.h"
+#include "runtime/jit/profiling_data.h"
 
 #include "runtime/execution/coroutines/coroutine_manager.h"
 #include "libarkbase/utils/math_helpers.h"

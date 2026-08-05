@@ -48,6 +48,32 @@ globalThis.LOG_PROTO_CHAIN = function logProtoChain(o) {
 	print('==========');
 };
 
+function createRuntimeOptions(helper) {
+	let stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
+	let jit = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_JIT') === 'true';
+	let jitCantFail = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_JIT_CANT_FAIL') === 'true';
+
+	let runtimeOptions = {
+		'log-level': 'info',
+		'log-components': 'ets_interop_js',
+		'compiler-ignore-failures' : jitCantFail ? 'false' : 'true',
+		'boot-panda-files': stdlibPath,
+		'gc-trigger-type': 'heap-trigger',
+		'compiler-enable-jit': jit ? 'true' : 'false',
+		'interpreter-type': 'irtoc',
+		'taskpool-support-interop': 'true',
+		'interop-support-hybridstack': 'true',
+		'verification-mode': 'disabled',
+	};
+
+	if (jit) {
+		runtimeOptions['compiler-hotness-threshold'] = '1';
+		runtimeOptions['compiler-profiling-threshold'] = '0';
+	}
+
+	return runtimeOptions;
+}
+
 function main() {
     const helper = requireNapiPreview('lib/libinterop_test_helper.so', false);
     if (helper === undefined) {
@@ -62,10 +88,8 @@ function main() {
 	globalThis.gtest.etsVm = requireNapiPreview('lib/ets_interop_js_napi.so', false);
     globalThis.gtest.helper = helper;
 
-	let stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
 	let gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
 	let asmAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ASM_ABC_PATH');
-
 
 	let argv = helper.getArgv();
 	const arkJsNapiCliLastArgIdx = 5;
@@ -85,25 +109,7 @@ function main() {
 		}
 	}
 
-	let jit = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_JIT') === 'true';
-	let jitCantFail = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_JIT_CANT_FAIL') === 'true';
-
-	let createRuntimeOptions = {
-		'log-level': 'info',
-		'log-components': 'ets_interop_js',
-		'compiler-ignore-failures' : jitCantFail ? 'false' : 'true',
-		'boot-panda-files': stdlibPath,
-		'gc-trigger-type': 'heap-trigger',
-		'compiler-enable-jit': jit ? 'true' : 'false',
-		'compiler-hotness-threshold': '0',
-		'interpreter-type': 'irtoc',
-		'taskpool-support-interop': 'true',
-		'interop-support-hybridstack': 'true',
-		'verification-mode': 'disabled',
-	};
-
-	const etsVmRes = globalThis.gtest.etsVm.createRuntime(createRuntimeOptions);
-	if (!etsVmRes) {
+	if (!globalThis.gtest.etsVm.createRuntime(createRuntimeOptions(helper))) {
 		print('Failed to create ETS runtime');
 		return 1;
 	}

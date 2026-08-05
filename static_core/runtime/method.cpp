@@ -515,8 +515,8 @@ bool Method::Verify()
     return true;
 }
 
-inline void Method::FillVecsByInsts(BytecodeInstruction &inst, PandaVector<uint32_t> &vcalls,
-                                    PandaVector<uint32_t> &branches, PandaVector<uint32_t> &throws) const
+void Method::FillVecsByInsts(BytecodeInstruction &inst, PandaVector<uint32_t> &vcalls, PandaVector<uint32_t> &branches,
+                             PandaVector<uint32_t> &throws, uint8_t &anyInstsSize) const
 {
     if (inst.HasFlag(BytecodeInstruction::Flags::CALL_VIRT)) {
         vcalls.push_back(inst.GetAddress() - GetInstructions());
@@ -526,6 +526,14 @@ inline void Method::FillVecsByInsts(BytecodeInstruction &inst, PandaVector<uint3
     }
     if (inst.IsThrow(BytecodeInstruction::Exceptions::X_THROW)) {
         throws.push_back(inst.GetAddress() - GetInstructions());
+    }
+    if (inst.HasFlag(BytecodeInstruction::Flags::IC_SLOT)) {
+        uint8_t icSlot = inst.HasImm(inst.GetFormat(), 1) ? static_cast<uint8_t>(inst.GetImm64(1))
+                                                          : static_cast<uint8_t>(inst.GetImm64(0));
+        // Don't make space for invalid slot id
+        if (icSlot != AnyInstInlineCache::INVALID_SLOT_ID && anyInstsSize < (icSlot + 1U)) {
+            anyInstsSize = icSlot + 1U;
+        }
     }
 }
 
@@ -550,13 +558,14 @@ void Method::StartProfiling()
     PandaVector<uint32_t> vcalls;
     PandaVector<uint32_t> branches;
     PandaVector<uint32_t> throws;
+    uint8_t anyInstsSize = 0;
 
     Span<const uint8_t> instructions(GetInstructions(), GetCodeSize());
     for (BytecodeInstruction inst(instructions.begin()); inst.GetAddress() < instructions.end();
          inst = inst.GetNext()) {
-        FillVecsByInsts(inst, vcalls, branches, throws);
+        FillVecsByInsts(inst, vcalls, branches, throws, anyInstsSize);
     }
-    if (vcalls.empty() && branches.empty() && throws.empty()) {
+    if (vcalls.empty() && branches.empty() && throws.empty() && anyInstsSize == 0) {
         return;
     }
     ASSERT(std::is_sorted(vcalls.begin(), vcalls.end()));
@@ -565,12 +574,12 @@ void Method::StartProfiling()
     bool branchProfilingEnabled = Runtime::GetCurrent()->IsProfileBranches();
 
     auto profilingData = ProfilingData::Make(
-        allocator, vcalls.size(), branches.size(), throws.size(),
-        [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem, void *branchLastSavedMem,
-            void *throwLastSavedMem) {
+        allocator, vcalls.size(), branches.size(), throws.size(), anyInstsSize,
+        [&](void *data, void *vcallsMem, void *branchesMem, void *throwsMem, void *anyInstsMem,
+            void *branchLastSavedMem, void *throwLastSavedMem) {
             return new (data) ProfilingData(
                 CallSiteInlineCache::From(vcallsMem, vcalls), BranchData::From(branchesMem, branches),
-                ThrowData::From(throwsMem, throws),
+                ThrowData::From(throwsMem, throws), AnyInstInlineCache::From(anyInstsMem, anyInstsSize),
                 Span<ProfilingData::BranchLastSaved>(
                     reinterpret_cast<ProfilingData::BranchLastSaved *>(branchLastSavedMem), branches.size()),
                 Span<uint64_t>(reinterpret_cast<uint64_t *>(throwLastSavedMem), throws.size()), branchProfilingEnabled);

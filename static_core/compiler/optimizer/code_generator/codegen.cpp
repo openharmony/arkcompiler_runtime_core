@@ -1665,6 +1665,7 @@ void Codegen::CreateCallIntrinsic(IntrinsicInst *inst)
             ConvertRegister(paramInfo->GetNextLocation(DataType::POINTER).GetRegister(), DataType::POINTER);
         ASSERT(explicitArgs > 0 || !inst->IsMethodFirstInput());
         explicitArgs -= inst->IsMethodFirstInput() ? 1 : 0;
+        explicitArgs -= inst->HasImms() ? inst->GetImms().size() : 0;
         if (inst->GetInputsCount() > explicitArgs + (inst->RequireState() ? 1U : 0U)) {
             auto rangeSpOffs = GetStackOffset(inst->GetLocation(explicitArgs));
             GetEncoder()->EncodeAdd(rangePtrReg, GetTarget().GetStackReg(), Imm(rangeSpOffs));

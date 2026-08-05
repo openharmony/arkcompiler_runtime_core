@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "jit/profiling_data.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/include/class.h"
 #include "runtime/include/class_linker.h"
@@ -64,6 +65,9 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
         LOG(ERROR, VERIFIER) << "Incorrect opcode";
         return false;
     }
+
+    uint8_t icSlotCount = 0;
+
     goto* dispatchTable[inst.GetPrimaryOpcode()];
 
 % dt_non_prefixed_min_minus = (Panda::dispatch_table.invalid_non_prefixed_interval.min - 1).to_s
@@ -108,6 +112,9 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %   end
 %   if i.properties.include?('string_id')
 %       combination_flags += "StringId_"
+%   end
+%   if i.properties.include?('ic_slot')
+%       combination_flags += "SlotId_"
 %   end
 %   # special case for ets.ldnullvalue and ets.movnullvalue
 %   if i.handler_name.include?('LDNULLVALUE') or i.handler_name.include?('MOVNULLVALUE')
@@ -270,6 +277,17 @@ std::array<const void*, DISPATCH_TABLE_HANDLER_NAMES_SIZE> dispatchTable{
 %            AddType(inst.GetOffset(), &cachedStringType);
 %        } else {
 %            LOG(DEBUG, VERIFIER) << "JOBFILL: Cannot resolve string class in method " << method_->GetFullName();
+%        }
+%    }),
+%    "SlotId_" => %({
+%        uint8_t icSlot = inst.HasImm(inst.GetFormat(), 1) ? static_cast<uint8_t>(inst.GetImm64(1))
+%                                                          : static_cast<uint8_t>(inst.GetImm64(0));
+%        if (icSlot != AnyInstInlineCache::INVALID_SLOT_ID) {
+%            if (icSlot != icSlotCount) {
+%                LOG(DEBUG, VERIFIER) << "JOBFILL: Out of order IcSlot " << icSlot << " in " << method_->GetFullName();
+%                return false;
+%            }
+%            icSlotCount++;
 %        }
 %    }),
 %    "ClassId_" => %({

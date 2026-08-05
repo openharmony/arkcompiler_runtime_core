@@ -69,6 +69,7 @@
 #include "optimizer/optimizations/adjust_arefs.h"
 #include "optimizer/optimizations/if_merging.h"
 #include "optimizer/optimizations/string_flat_check.h"
+#include "optimizer/optimizations/any_intrinsics_expansion.h"
 #include "optimizations/string_flat_check_elimination.h"
 
 #include "compiler/generated/pipeline_includes.h"
@@ -179,6 +180,7 @@ bool Pipeline::RunOptimizations()
     if (!g_options.IsCompilerLoopUnroll()) {
         graph->SetUnrollComplete();
     }
+    graph->RunPass<AnyIntrinsicsExpansion>();
     if (graph->RunPass<Peepholes>()) {
         graph->RunPass<Cleanup>(false);
     }

@@ -184,6 +184,7 @@ set(OPTIMIZER_SOURCES
         optimizer/ir/graph_cloner.cpp
         optimizer/ir/loop_unswitcher.cpp
         optimizer/optimizations/adjust_arefs.cpp
+        optimizer/optimizations/any_intrinsics_expansion.cpp
         optimizer/optimizations/balance_expressions.cpp
         optimizer/optimizations/branch_elimination.cpp
         optimizer/optimizations/checks_elimination.cpp

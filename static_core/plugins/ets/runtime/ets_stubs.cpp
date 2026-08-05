@@ -698,13 +698,20 @@ bool EtsStbyname(ManagedThread *mThread, EtsObject *thisObj, panda_file::File::S
         auto fieldIndex = thisObj->GetClass()->GetFieldIndexByName(fieldName);
         EtsField *field = thisObj->GetClass()->GetFieldByIndex(fieldIndex);
         if (field != nullptr) {
+            if (field->GetCoreType()->GetType().IsPrimitive() && value == nullptr) {
+                ThrowClassCastException(field->GetType()->GetRuntimeClass(), nullptr);
+                return false;
+            }
+
             SetPropertyValue(executionCtx, thisObj, field, value);
             return true;
         }
 
         auto setMethod = FindSetterMethod(thisObj->GetClass(), fieldName);
         if (setMethod != nullptr) {
-            std::array args {ark::Value(thisObj->GetCoreType()), ark::Value(value->GetCoreType())};
+            std::array args {ark::Value(thisObj->GetCoreType()), setMethod->GetArgType(1) == EtsType::OBJECT
+                                                                     ? ark::Value(value->GetCoreType())
+                                                                     : GetUnboxedValue(executionCtx, value)};
             setMethod->GetPandaMethod()->Invoke(executionCtx->GetMT(), args.data());
             return true;
         }

@@ -150,6 +150,7 @@ libarkcompiler_sources = [
   "optimizer/ir_builder/inst_builder.cpp",
   "optimizer/ir_builder/ir_builder.cpp",
   "optimizer/optimizations/adjust_arefs.cpp",
+  "optimizer/optimizations/any_intrinsics_expansion.cpp",
   "optimizer/optimizations/balance_expressions.cpp",
   "optimizer/optimizations/branch_elimination.cpp",
   "optimizer/optimizations/checks_elimination.cpp",

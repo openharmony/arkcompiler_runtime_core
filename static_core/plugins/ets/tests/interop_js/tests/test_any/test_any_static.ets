@@ -27,8 +27,45 @@ import { TestArrayOps, testArrayOpsInstance } from 'testDecl';
 import { testTypeChecksInstance } from 'testDecl';
 import { testChainedCallsInstance } from 'testDecl';
 import { testMultipleGettersInstance } from 'testDecl';
+import { retX } from 'testDecl';
 
 native function compileMethod(str: String) : int;
+
+class XS {
+    public prop: number = 42;
+    public prop2: string = "test string";
+    public prop4: number | undefined = 10;
+    public prop5: number = 10;
+}
+
+class XSS {
+    public _prop: number = 42;
+    public prop_: string = "test string";
+
+    get prop(): number {
+        return this._prop
+    }
+
+    set prop(a: number) {
+        this._prop = a;
+    }
+
+    get prop2(): string {
+        return this.prop_;
+    }
+
+    set prop2(a: string) {
+        this.prop_ = a;
+    }
+
+    set prop4(a: number | undefined) {
+        if (a === undefined) {
+            this._prop = 0;
+        } else {
+            this._prop = a;
+        }
+    }
+}
 
 function testIsInstance(): void {
     let res = fooInstance instanceof Foo;
@@ -249,6 +286,88 @@ function testMultipleGetters(): void {
     arktest.assertEQ(fullName, 'John Doe');
 }
 
+function testStaticLdbyname(): void {
+    let x = new XS();
+    let jsX = retX(x);
+    let prop = jsX.prop;
+    arktest.assertEQ(prop, 42);
+
+    x.prop = 24;
+    let prop2 = jsX.prop;
+    arktest.assertEQ(prop2, 24);
+
+    let prop3 = jsX.prop2;
+    arktest.assertEQ(prop3, "test string");
+}
+
+function testStaticStbyname(): void {
+    let x = new XS();
+    let jsX = retX(x);
+    jsX.prop = 21;
+    arktest.assertEQ(x.prop, 21);
+
+    jsX.prop2 = "string test"
+    arktest.assertEQ(x.prop2, "string test");
+
+    jsX.prop4 = undefined;
+    arktest.assertEQ(x.prop4, undefined);
+
+    let res = false;
+    try {
+        jsX.prop5 = undefined;
+    }
+    catch(e) {
+        res = e instanceof ClassCastError;
+    }
+    arktest.assertTrue(res);
+}
+
+function testStaticLdbynameGetter(): void {
+    let x = new XSS();
+    let jsX = retX(x);
+    let prop = jsX.prop;
+    arktest.assertEQ(prop, 42);
+
+    x.prop = 24;
+    let prop2 = jsX.prop;
+    arktest.assertEQ(prop2, 24);
+
+    let prop3 = jsX.prop2;
+    arktest.assertEQ(prop3, "test string");
+    let res = false;
+    try {
+        jsX.prop3 == 100;
+    }
+    catch(e) {
+        res = e instanceof TypeError;
+    }
+    arktest.assertTrue(res);
+}
+
+function testStaticStbynameSetter(): void {
+    let x = new XSS();
+    let jsX = retX(x);
+    jsX.prop = 21;
+    arktest.assertEQ(x.prop, 21);
+
+    jsX.prop2 = "string test"
+    arktest.assertEQ(x.prop2, "string test");
+
+    let res = false;
+    try {
+        jsX.prop3 == 100;
+    }
+    catch(e) {
+        res = e instanceof TypeError;
+    }
+    arktest.assertTrue(res);
+
+    jsX.prop4 = undefined;
+    arktest.assertEQ(x.prop, 0);
+    jsX.prop4 = 54;
+    arktest.assertEQ(x.prop, 54);
+}
+
 function testAll(): void {
     loadLibrary("jitinterface");
     compileMethod("test_any_static.ETSGLOBAL::testIsInstance");
@@ -311,4 +430,18 @@ function testAll(): void {
     testTypeOf();
     testChainedMethodCalls();
     testMultipleGetters();
+
+    // For Inline Cache
+    testStaticLdbyname();
+    testStaticStbyname();
+    testStaticLdbynameGetter();
+    testStaticStbynameSetter();
+    compileMethod("test_any_static.ETSGLOBAL::testStaticLdbyname");
+    compileMethod("test_any_static.ETSGLOBAL::testStaticStbyname");
+    compileMethod("test_any_static.ETSGLOBAL::testStaticLdbynameGetter");
+    compileMethod("test_any_static.ETSGLOBAL::testStaticStbynameSetter");
+    testStaticLdbyname();
+    testStaticStbyname();
+    testStaticLdbynameGetter();
+    testStaticStbynameSetter();
 }
