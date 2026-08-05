@@ -108,6 +108,7 @@ public:
     MethodPtr GetStringBuilderConstructorWithCharArrayArg() const override;
     uint32_t GetMethodId([[maybe_unused]] MethodPtr method) const override;
     MethodPtr GetInstanceMethodByName(ClassPtr klass, std::string_view name) const override;
+    MethodPtr GetUniqueInstanceMethodByName(ClassPtr klass, std::string_view name) const override;
     bool IsFieldBooleanFalse(FieldPtr field) const override;
     bool IsFieldBooleanTrue(FieldPtr field) const override;
     bool IsFieldBooleanValue(FieldPtr field) const override;

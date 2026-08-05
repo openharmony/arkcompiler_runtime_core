@@ -1,0 +1,190 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#! CHECKER      Static Any Call This INT
+#! SKIP_IF      @architecture == "arm32"
+#! RUN          options: "--compiler-enable-jit=false", entry: "_GLOBAL::main"
+
+#! CHECKER      Static Any Call This JIT
+#! SKIP_IF      @architecture == "arm32"
+#! RUN          force_jit: true, options: "--compiler-regex='.*testCallThis.*'", entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::testCallThis0"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallThis0/
+#! METHOD       "_GLOBAL::testCallThisRange"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallThisRange/
+#! METHOD       "_GLOBAL::testCallThisShort"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallThisShort/
+
+#! CHECKER      Static Any Call This JIT with IC slot
+#! SKIP_IF      @architecture == "arm32"
+#! RUN          options: "--compiler-hotness-threshold=1 --compiler-profiling-threshold=0 --no-async-jit=true --compiler-enable-jit=true --compiler-regex='.*testCallThis.*'", entry: "_GLOBAL::main"
+#! METHOD       "_GLOBAL::testCallThis0"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallThis0/
+#! PASS_AFTER   "AnyIntrinsicsExpansion"
+#! INST         /DeoptimizeIf/
+#! INST_NEXT    /CallVirtual.*TestCallThis::testFunction0.*/
+#! INST_NOT     /Intrinsic.CompilerAnyCallThis0/
+#! PASS_AFTER   "Inline"
+#! INST_NOT     /Call.*TestCallThis::testFunction0.*/
+#! METHOD       "_GLOBAL::testCallThisRange"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallThisRange/
+#! PASS_AFTER   "AnyIntrinsicsExpansion"
+#! INST         /DeoptimizeIf/
+#! INST_NEXT    /CallVirtual.*TestCallThis::testFunctionRange.*/
+#! INST_NOT     /Intrinsic.CompilerAnyCallThisRange/
+#! PASS_AFTER   "Inline"
+#! INST_NOT     /Call.*TestCallThis::testFunctionRange.*/
+#! METHOD       "_GLOBAL::testCallThisShort"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallThisShort/
+#! PASS_AFTER   "AnyIntrinsicsExpansion"
+#! INST         /DeoptimizeIf/
+#! INST_NEXT    /CallVirtual.*TestCallThis::testFunctionShort.*/
+#! INST_NOT     /Intrinsic.CompilerAnyCallThisShort/
+#! PASS_AFTER   "Inline"
+#! INST_NOT     /Call.*TestCallThis::testFunctionShort.*/
+
+#! CHECKER      Static Any Call This AOT
+#! SKIP_IF      @architecture == "arm32"
+#! RUN_PAOC     options: "--compiler-regex='.*testCallThis.*'"
+#! METHOD       "_GLOBAL::testCallThis0"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallThis0/
+#! METHOD       "_GLOBAL::testCallThisRange"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallThisRange/
+#! METHOD       "_GLOBAL::testCallThisShort"
+#! PASS_AFTER   "IrBuilder"
+#! INST         /Intrinsic.CompilerAnyCallThisShort/
+#! RUN          entry: "_GLOBAL::main"
+
+.language eTS
+
+.record std.core.Int <external>
+
+.record std.core.Object <external>
+
+.record TestCallThis {}
+
+.function i32 TestCallThis.testFunction0(TestCallThis a0) <access.function=public> {
+    ldai 42
+    return
+}
+
+.function i32 TestCallThis.testFunctionShort(TestCallThis a0, i32 a1) <access.function=public> {
+    lda a1
+    sta v1
+    mul v1, a1
+    return
+}
+
+.function i32 TestCallThis.testFunctionRange(TestCallThis a0, i32 a1, i32 a2) <access.function=public> {
+    lda a1
+    sta v1
+    mul v1, a2
+    return
+}
+
+.function void TestCallThis._ctor_(TestCallThis a0) <ctor, access.function=public> {
+    return.void
+}
+
+.function i32 testCallThis0() {
+    initobj.short TestCallThis._ctor_:(TestCallThis)
+    sta.obj v0
+    any.call.this.0 "testFunction0", v0, 0x0
+    sta.obj v2
+    ldai 42
+    sta v1
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
+    sta.obj v1
+    ets.equals v1, v2
+    return
+}
+
+.function i32 testCallThisRange() {
+    initobj.short TestCallThis._ctor_:(TestCallThis)
+    sta.obj v0
+    ldai 10
+    sta v1
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
+    sta.obj v1
+    ldai -3
+    sta v2
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v2
+    sta.obj v2
+    any.call.this.range "testFunctionRange", v0, v1, 2, 0x0
+    sta.obj v2
+    ldai -30
+    sta v1
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
+    sta.obj v1
+    ets.equals v1, v2
+    return
+}
+
+.function i32 testCallThisShort() {
+    initobj.short TestCallThis._ctor_:(TestCallThis)
+    sta.obj v0
+    ldai 6
+    sta v1
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
+    sta.obj v1
+    any.call.this.short "testFunctionShort", v0, v1, 0x0
+    sta.obj v2
+    ldai 36
+    sta v1
+    initobj.short std.core.Int._ctor_:(std.core.Int,i32), v1
+    sta.obj v1
+    ets.equals v1, v2
+    return
+}
+
+.function i32 testAnyCallThis() <static, access.function=public> {
+    call.short testCallThis0
+    jeqz exit_0
+    call.short testCallThisRange
+    jeqz exit_range
+    call.short testCallThisShort
+    jeqz exit_short
+    ldai 0
+    return
+exit_0:
+    ldai -1
+    return
+exit_range:
+    ldai -2
+    return
+exit_short:
+    ldai -3
+    return
+}
+
+.function i32 main() <static, access.function=public> {
+    call.short testAnyCallThis
+    jnez exit
+    call.short testAnyCallThis
+exit:
+    return
+}
+
+.function void std.core.Int._ctor_(std.core.Int a0, i32 a1) <ctor, external, access.function=public>
+
+.function i32 std.core.Int.toInt(std.core.Int a0) <external, access.function=public>
+
+.function void std.core.Object._ctor_(std.core.Object a0) <ctor, external, access.function=public>

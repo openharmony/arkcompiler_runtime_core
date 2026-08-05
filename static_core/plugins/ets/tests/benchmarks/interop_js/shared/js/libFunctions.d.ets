@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,13 @@
  * limitations under the License.
  */
 
-export const jsArr = [];
-export const jsArrCopy = jsArr;
-export const jsArrOther = [];
-export const jsArrowFoo = () => { };
-export const jsArrowFooCopy = jsArrowFoo;
-export const jsArrowFooOther = () => { };
-
-export function jsFoo() { }
-export function jsFooOther() { }
-
-// export const keyOne = 'one';
-// export const keyTwo = 'two';
-
-export let jsVoid = (a, b) => {};
-export let returnAnonymous = () => (a, b) => {};
-
-export function retHolder(x) {
-    return x;
+export class ValueHolder {
+    jsMethodArg0(): number;
+    jsMethodArg1(arg1: number): number;
+    jsMethodArg2(arg1: number, arg2: number): number;
+    jsMethodArg0V(): void;
+    jsMethodArg1V(arg1: number): void;
+    jsMethodArg2V(arg1: number, arg2: number): void;
 }
+
+export declare function retHolder(x: object): ValueHolder;

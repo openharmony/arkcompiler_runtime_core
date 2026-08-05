@@ -36,6 +36,38 @@ class XS {
     public prop2: string = "test string";
     public prop4: number | undefined = 10;
     public prop5: number = 10;
+    methodArg0(): number {
+        return this.prop;
+    }
+    methodArg1(arg1: number): number {
+        return this.prop * arg1;
+    }
+    methodArg2(arg1: number, arg2: number): number {
+        return arg1 * arg2;
+    }
+
+    methodArg0Void(): void {
+        this.prop = 32;
+    }
+
+    methodArg1Void(arg1: number): void {
+        this.prop = this.prop * arg1;
+    }
+    methodArg2Void(arg1: number, arg2: number): void {
+        this.prop = arg1 * arg2;
+    }
+
+    methodArgString(arg1: string): string {
+        return this.prop2 + arg1;
+    }
+
+    methodArgString2(arg1: int, arg2: string): string {
+        return arg2 + arg1.toString();
+    }
+
+    methodArgObject(arg1: string): string {
+        return this.prop2 + arg1;
+    }
 }
 
 class XSS {
@@ -368,6 +400,40 @@ function testStaticStbynameSetter(): void {
     arktest.assertEQ(x.prop, 54);
 }
 
+function testStaticCallThis(): void {
+    let x = new XS();
+    let jsX = retX(x);
+
+    let val0 = jsX.methodArg0();
+    arktest.assertEQ(val0, 42);
+    let val1 = jsX.methodArg1(2);
+    arktest.assertEQ(val1, 84);
+    let val2 = jsX.methodArg2(3, 21);
+    arktest.assertEQ(val2, 63);
+
+    jsX.methodArg0Void();
+    arktest.assertEQ(x.prop, 32);
+    jsX.methodArg1Void(2);
+    arktest.assertEQ(x.prop, 64);
+    jsX.methodArg2Void(2, 5);
+    arktest.assertEQ(x.prop, 10);
+
+    let valS = jsX.methodArgString(" plus")
+    arktest.assertEQ(valS, "test string plus")
+
+    let valS2 = jsX.methodArgString2(42, "Test ")
+    arktest.assertEQ(valS2, "Test 42")
+
+    let res = false;
+    try {
+        jsX.methodArgObject(x);
+    }
+    catch(e) {
+        res = e instanceof TypeError;
+    }
+    arktest.assertTrue(res);
+}
+
 function testAll(): void {
     loadLibrary("jitinterface");
     compileMethod("test_any_static.ETSGLOBAL::testIsInstance");
@@ -436,12 +502,15 @@ function testAll(): void {
     testStaticStbyname();
     testStaticLdbynameGetter();
     testStaticStbynameSetter();
+    testStaticCallThis();
     compileMethod("test_any_static.ETSGLOBAL::testStaticLdbyname");
     compileMethod("test_any_static.ETSGLOBAL::testStaticStbyname");
     compileMethod("test_any_static.ETSGLOBAL::testStaticLdbynameGetter");
     compileMethod("test_any_static.ETSGLOBAL::testStaticStbynameSetter");
+    compileMethod("test_any_static.ETSGLOBAL::testStaticCallThis");
     testStaticLdbyname();
     testStaticStbyname();
     testStaticLdbynameGetter();
     testStaticStbynameSetter();
+    testStaticCallThis();
 }

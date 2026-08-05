@@ -26,6 +26,15 @@ export class X {
     public prop3: int;
     public prop4: number | undefined;
     public prop5: number | undefined;
+    methodArg0(): number;
+    methodArg1(arg1: number): number;
+    methodArg2(arg1: number, arg2: number): number;
+    methodArg0Void(): void;
+    methodArg1Void(arg1: number): void;
+    methodArg2Void(arg1: number, arg2: number): void;
+    methodArgString(arg1: string) : string;
+    methodArgString2(arg1: int, arg2: string) : string;
+    methodArgObject(arg1: object) : string;
 }
 
 export declare let fooInstance: Foo;

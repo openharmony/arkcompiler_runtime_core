@@ -22,8 +22,11 @@ namespace ark::intrinsics {
 
 ObjectHeader *ETSAnyLdbyname(ManagedThread *mThread, ObjectHeader *thisObj, panda_file::File::StringData name)
 {
-    auto ldObj = ets::EtsLdbyname(mThread, ets::EtsObject::FromCoreType(thisObj), name)->GetCoreType();
-    return ldObj;
+    auto ldObj = ets::EtsLdbyname(mThread, ets::EtsObject::FromCoreType(thisObj), name);
+    if (ldObj == nullptr) {
+        return nullptr;
+    }
+    return ldObj->GetCoreType();
 }
 
 void ETSAnyStbyname(ManagedThread *mThread, ObjectHeader *thisObj, panda_file::File::StringData name, ObjectHeader *val)

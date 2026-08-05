@@ -373,7 +373,7 @@ if (is_llvmbackend) {
 
   action("libllvmbackend_pipeline_irtoc_gen_inc") {
     script = "$llvmbackend_templates_dir/pipeline.rb"
-    outputs = [ "$target_gen_dir/pipeline_iroc_gen.inc" ]
+    outputs = [ "$target_gen_dir/pipeline_irtoc_gen.inc" ]
     args = [
       "-d",
       rebase_path("$llvmbackend_dir/transforms/pipeline_irtoc.cfg"),

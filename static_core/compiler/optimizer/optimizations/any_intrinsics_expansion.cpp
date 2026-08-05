@@ -52,10 +52,9 @@ Inst *AnyIntrinsicsExpansion::CreateLoadClassWithGuard(Inst *inst, Inst *objInst
     return nullCheck;
 }
 
-Inst *AnyIntrinsicsExpansion::BoxValue(Inst *inst, Inst *val)
+Inst *AnyIntrinsicsExpansion::BoxValue(Inst *inst, Inst *val, Inst *saveState)
 {
     auto pc = inst->GetPc();
-    auto saveState = inst->GetSaveState();
     auto runtime = GetGraph()->GetRuntime();
     auto type = val->GetType();
     auto boxedClass = runtime->GetDataTypeBoxedClass(type);
@@ -73,6 +72,10 @@ Inst *AnyIntrinsicsExpansion::BoxValue(Inst *inst, Inst *val)
                                                      TypeIdMixin {boxedClassId, GetGraph()->GetMethod()});
     initBoxedClass->SetInput(0, saveState);
 
+    auto saveStateInst = saveState->CastToSaveState();
+    auto ctorSaveState = CopySaveState(GetGraph(), saveStateInst);
+    ctorSaveState->AppendBridge(newObject);
+
     auto callCctor = GetGraph()->CreateInstCallStatic(runtime->GetMethodReturnType(cctor, cctorId), pc, cctorId, cctor);
     callCctor->ReserveInputs(3U);
     callCctor->AllocateInputTypes(GetGraph()->GetAllocator(), 3U);
@@ -80,12 +83,13 @@ Inst *AnyIntrinsicsExpansion::BoxValue(Inst *inst, Inst *val)
     callCctor->AddInputType(DataType::REFERENCE);
     callCctor->AppendInput(val);
     callCctor->AddInputType(type);
-    callCctor->AppendInput(saveState);
+    callCctor->AppendInput(ctorSaveState);
     callCctor->AddInputType(DataType::NO_TYPE);
 
     auto bb = inst->GetBasicBlock();
     bb->InsertBefore(initBoxedClass, inst);
     bb->InsertBefore(newObject, inst);
+    bb->InsertBefore(ctorSaveState, inst);
     bb->InsertBefore(callCctor, inst);
     return newObject;
 }
@@ -115,7 +119,7 @@ void AnyIntrinsicsExpansion::HandleAnyLdbyname(IntrinsicInst *inst)
                                              field, runtime->IsFieldVolatile(field));
 
         inst->GetBasicBlock()->InsertBefore(loadField, inst);
-        auto boxedValue = BoxValue(inst, loadField);
+        auto boxedValue = BoxValue(inst, loadField, inst->GetSaveState());
         inst->ReplaceUsers(boxedValue);
     } else {
         auto gId = runtime->GetMethodId(getter);
@@ -129,7 +133,7 @@ void AnyIntrinsicsExpansion::HandleAnyLdbyname(IntrinsicInst *inst)
         callGetter->AddInputType(DataType::NO_TYPE);
 
         inst->GetBasicBlock()->InsertBefore(callGetter, inst);
-        auto boxedValue = BoxValue(inst, callGetter);
+        auto boxedValue = BoxValue(inst, callGetter, inst->GetSaveState());
         inst->ReplaceUsers(boxedValue);
     }
 
@@ -220,6 +224,157 @@ void AnyIntrinsicsExpansion::HandleAnyStbyname(IntrinsicInst *inst)
     toRemove_.push_back(inst);
 }
 
+std::optional<std::vector<Inst *>> AnyIntrinsicsExpansion::GetBoxedArgs(IntrinsicInst *inst,
+                                                                        RuntimeInterface::MethodPtr method)
+{
+    auto runtime = GetGraph()->GetRuntime();
+    auto methodId = runtime->GetMethodId(method);
+    std::vector<Inst *> boxedArgs;
+    if (inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_SHORT) {
+        // Input 1 is the arg
+        boxedArgs.push_back(inst->GetInput(1).GetInst());
+    }
+    if (inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_RANGE) {
+        // Input 1 is argc, last input is SaveState, between them are actual args.
+        for (size_t i = 2U; i < inst->GetInputsCount() - 1U; i++) {
+            boxedArgs.push_back(inst->GetInput(i).GetInst());
+        }
+    }
+    if (runtime->GetMethodArgumentsCount(method, methodId) != boxedArgs.size()) {
+        return std::nullopt;
+    }
+    // Run checks here so we don't generate code if we can't
+    for (size_t i = 0; i < boxedArgs.size(); i++) {
+        auto argType = runtime->GetMethodArgumentType(method, methodId, i);
+        if (argType != DataType::REFERENCE) {
+            auto boxedClass = runtime->GetDataTypeBoxedClass(argType);
+            ASSERT(boxedClass != nullptr);
+            auto boxedClassField = runtime->GetFieldPtrByName(boxedClass, "value");
+            if (boxedClassField == nullptr) {
+                ASSERT_PRINT(false, "Expected box class to have `value` property");
+                return std::nullopt;
+            }
+        }
+    }
+
+    return boxedArgs;
+}
+
+Inst *AnyIntrinsicsExpansion::UnboxValue(IntrinsicInst *inst, Inst *boxedValue, DataType::Type valueType)
+{
+    ASSERT(valueType != DataType::REFERENCE);
+    // This method doesn't do static checks as it assumes that they were done beforehand
+    auto runtime = GetGraph()->GetRuntime();
+    auto boxedClass = runtime->GetDataTypeBoxedClass(valueType);
+    ASSERT(boxedClass != nullptr);
+    auto boxedClassId = runtime->GetClassIdWithinFile(GetGraph()->GetMethod(), boxedClass);
+    auto boxedClassField = runtime->GetFieldPtrByName(boxedClass, "value");
+    ASSERT(boxedClassField != nullptr);
+
+    // Guard that checks that we're loading from the correct box class
+    auto nullCheck = CreateLoadClassWithGuard(inst, boxedValue, boxedClass);
+    nullCheck->SetFlag(inst_flags::CAN_DEOPTIMIZE);
+    auto unboxedValue = GetGraph()->CreateInstLoadObject(valueType, inst->GetPc(), boxedValue,
+                                                         TypeIdMixin {boxedClassId, GetGraph()->GetMethod()},
+                                                         boxedClassField, runtime->IsFieldVolatile(boxedClassField));
+    inst->GetBasicBlock()->InsertBefore(unboxedValue, inst);
+    return unboxedValue;
+}
+
+Inst *AnyIntrinsicsExpansion::CreateCallThis(IntrinsicInst *inst, Inst *thisObject, std::vector<Inst *> boxedArgs,
+                                             RuntimeInterface::MethodPtr method)
+{
+    auto runtime = GetGraph()->GetRuntime();
+    auto saveState = inst->GetSaveState();
+    auto methodId = runtime->GetMethodId(method);
+    auto retType = runtime->GetMethodReturnType(method, methodId);
+    ASSERT(!runtime->IsMethodStatic(method));
+    CallInst *call = GetGraph()->CreateInstCallVirtual(retType, inst->GetPc(), methodId, method);
+    call->ReserveInputs(2U + boxedArgs.size());
+    call->AllocateInputTypes(GetGraph()->GetAllocator(), 2U + boxedArgs.size());
+    call->AppendInput(thisObject);
+    call->AddInputType(DataType::REFERENCE);
+    auto refCounter = retType == DataType::REFERENCE ? 1U : 0;
+    for (size_t i = 0; i < boxedArgs.size(); i++) {
+        auto arg = boxedArgs[i];
+        auto argType = runtime->GetMethodArgumentType(method, methodId, i);
+        if (argType != DataType::REFERENCE) {
+            arg = UnboxValue(inst, arg, argType);
+        } else {
+            // Create a guard that this reference is assignable to argument type
+            auto refTypeId = runtime->GetMethodArgReferenceTypeId(method, refCounter++);
+            auto refClass = runtime->ResolveType(method, refTypeId);
+            auto loadClass = GetGraph()->CreateInstLoadClass(DataType::REFERENCE, inst->GetPc(), saveState,
+                                                             TypeIdMixin {refTypeId, method}, refClass);
+
+            auto isInstance =
+                GetGraph()->CreateInstIsInstance(DataType::BOOL, inst->GetPc(), arg, loadClass, saveState,
+                                                 TypeIdMixin {refTypeId, method}, runtime->GetClassType(refClass));
+            // IsInstance returns `false` if input is `nullptr`, so handle this separately
+            auto isNull =
+                GetGraph()->CreateInstCompare(DataType::BOOL, inst->GetPc(), arg, GetGraph()->GetOrCreateNullPtr(),
+                                              DataType::REFERENCE, ConditionCode::CC_EQ);
+            auto isInstanceOrNull = GetGraph()->CreateInstOr(DataType::BOOL, inst->GetPc(), isInstance, isNull);
+            auto isNotInstanceAndNotNull = GetGraph()->CreateInstNot(DataType::BOOL, inst->GetPc(), isInstanceOrNull);
+            auto deoptInst = GetGraph()->CreateInstDeoptimizeIf(inst->GetPc(), isNotInstanceAndNotNull, saveState,
+                                                                DeoptimizeType::ANY_IC);
+
+            inst->GetBasicBlock()->InsertBefore(loadClass, inst);
+            inst->GetBasicBlock()->InsertBefore(isInstance, inst);
+            inst->GetBasicBlock()->InsertBefore(isNull, inst);
+            inst->GetBasicBlock()->InsertBefore(isInstanceOrNull, inst);
+            inst->GetBasicBlock()->InsertBefore(isNotInstanceAndNotNull, inst);
+            inst->GetBasicBlock()->InsertBefore(deoptInst, inst);
+        }
+        call->AppendInput(arg);
+        call->AddInputType(argType);
+    }
+    call->AppendInput(inst->GetSaveState());
+    call->AddInputType(DataType::NO_TYPE);
+    inst->GetBasicBlock()->InsertBefore(call, inst);
+    return call;
+}
+
+void AnyIntrinsicsExpansion::HandleAnyCallThis(IntrinsicInst *inst)
+{
+    auto runtime = GetGraph()->GetRuntime();
+    auto cls = runtime->GetAnyInstInlineCaches()->GetClass(GetGraph()->GetMethod(), inst->GetSlotId());
+    if (cls == nullptr) {
+        return;
+    }
+
+    auto methodName = runtime->GetStringValue(GetGraph()->GetMethod(), inst->GetImm(0));
+    auto method = runtime->GetUniqueInstanceMethodByName(cls, methodName);
+    if (method == nullptr) {
+        return;
+    }
+    auto methodId = runtime->GetMethodId(method);
+    auto argsOpt = GetBoxedArgs(inst, method);
+    if (argsOpt == std::nullopt) {
+        return;
+    }
+    auto boxedArgs = argsOpt.value();
+
+    auto nullCheck = CreateLoadClassWithGuard(inst, inst->GetInput(0).GetInst(), cls);
+    auto call = CreateCallThis(inst, nullCheck, boxedArgs, method);
+
+    auto retType = runtime->GetMethodReturnType(method, methodId);
+    if (retType == DataType::VOID) {
+        inst->ReplaceUsers(GetGraph()->GetOrCreateNullPtr());
+    } else {
+        // We've made a call, so we need a new savestate
+        auto afterCallSaveState = CopySaveState(GetGraph(), inst->GetSaveState());
+        if (retType == DataType::REFERENCE) {
+            afterCallSaveState->AppendBridge(call);
+        }
+        inst->GetBasicBlock()->InsertBefore(afterCallSaveState, inst);
+        auto boxedValue = BoxValue(inst, call, afterCallSaveState);
+        inst->ReplaceUsers(boxedValue);
+    }
+
+    toRemove_.push_back(inst);
+}
+
 void AnyIntrinsicsExpansion::VisitIntrinsic(GraphVisitor *v, Inst *inst)
 {
     auto intrinsic = inst->CastToIntrinsic();
@@ -232,6 +387,11 @@ void AnyIntrinsicsExpansion::VisitIntrinsic(GraphVisitor *v, Inst *inst)
             return;
         case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_STBYNAME:
             visitor->HandleAnyStbyname(intrinsic);
+            return;
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS0:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_SHORT:
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_RANGE:
+            visitor->HandleAnyCallThis(intrinsic);
             return;
     }
 }

@@ -1714,7 +1714,7 @@ void InstBuilder::BuildStoreFromAnyByName(const BytecodeInstruction *bcInst)
     auto icSlot = static_cast<uint32_t>(bcInst->GetImm64(0));
 
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
-    auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr,
+    auto intrinsic = graph_->CreateInstIntrinsic(DataType::VOID, bcAddr,
                                                  RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_STBYNAME);
 
     intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3U);
@@ -1766,7 +1766,7 @@ void InstBuilder::BuildStoreFromAnyByIdx(const BytecodeInstruction *bcInst)
     auto saveState = CreateSaveState(Opcode::SaveState, bcAddr);
 
     const auto intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_STBYIDX;
-    auto intrinsic = graph_->CreateInstIntrinsic(DataType::REFERENCE, bcAddr, intrinsicId);
+    auto intrinsic = graph_->CreateInstIntrinsic(DataType::VOID, bcAddr, intrinsicId);
     intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 4U);
 
     intrinsic->AppendInput(GetArgDefinition(bcInst, 0, false));
@@ -1839,10 +1839,9 @@ void InstBuilder::BuildAnyCallHelper(const BytecodeInstruction *bcInst, RuntimeI
     auto bcAddr = GetPc(bcInst->GetAddress());
 
     // Technically `any.call.range v0, v2, 1` would be a legal usage
-    auto isRange = argc > 1;
-    ASSERT(!isRange || intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_RANGE ||
-           intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_RANGE ||
-           intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_NEW_RANGE);
+    auto isRange = intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_RANGE ||
+                   intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_THIS_RANGE ||
+                   intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ANY_CALL_NEW_RANGE;
 
     // For range opcodes the bytecode carries (imm0=argc, imm1=ic_slot); for non-range the only imm is ic_slot.
     auto icSlot = static_cast<uint32_t>(bcInst->GetImm64(isRange ? 1 : 0));

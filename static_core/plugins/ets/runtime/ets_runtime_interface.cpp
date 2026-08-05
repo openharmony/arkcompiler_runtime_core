@@ -433,6 +433,33 @@ EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetInstanceMethodByName(Clas
     return nullptr;
 }
 
+EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetUniqueInstanceMethodByName(ClassPtr klass,
+                                                                                  std::string_view name) const
+{
+    if (klass == nullptr) {
+        return nullptr;
+    }
+    auto vtable = ClassCast(klass)->GetVTable();
+    const MethodNameComp comp;
+    const uint8_t *mutf8Name = utf::CStringAsMutf8(name.data());
+    panda_file::File::StringData key = {static_cast<uint32_t>(ark::utf::MUtf8ToUtf16Size(mutf8Name, name.length())),
+                                        mutf8Name};
+
+    MethodPtr selectedMethod = nullptr;
+    for (auto *method : vtable) {
+        if (!method->IsPublic() || !comp.equal(*method, key)) {
+            continue;
+        }
+        if (selectedMethod == nullptr) {
+            selectedMethod = method;
+        } else {
+            return nullptr;
+        }
+    }
+
+    return selectedMethod;
+}
+
 bool EtsRuntimeInterface::IsFieldBooleanFalse([[maybe_unused]] FieldPtr field) const
 {
     return IsClassBoxedBoolean((FieldCast(field)->GetClass())) && GetFieldName(field) == FIELDS_BOOLEAN_FALSE;
