@@ -259,6 +259,8 @@ class Runtime:
         cwd: Path | None = None,
         debug: bool = True,
         profile: bool = False,
+        aot: bool = False,
+        aot_file: Path | None = None,
         additional_options: Options | None = None,
     ) -> AsyncIterator[RuntimeProcess]:
         module.check_exists()
@@ -276,6 +278,11 @@ class Runtime:
             "--load-in-boot",
         ]
         debugger_library_option: str = f"--debugger-library-path={str(o.debugger_library_path)}"
+        if aot:
+            if aot_file is None:
+                raise ValueError("aot_file must be provided when aot=True")
+            command.append("--enable-an")
+            command.append(f"--aot-files={aot_file}")
         if profile:
             command.append("--sampling-profiler-create")
             command.append("--workers-type=threadpool")

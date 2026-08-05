@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,7 +19,7 @@ import json
 import subprocess  # noqa: S404
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal, Protocol
+from typing import Any, List, Literal, Protocol
 
 from pytest import fixture
 
@@ -284,3 +284,83 @@ def code_compiler(
         tmp_path=tmp_path,
         ark_compiler=ark_compiler,
     )
+
+
+@dataclass
+class AotOptions:
+    app_path: Path = Path("bin", "ark_aot")
+
+
+class AotCompiler:
+    """
+    Controls the aot compiler.
+    """
+
+    def __init__(self, options: AotOptions) -> None:
+        self.options = options
+
+    @staticmethod
+    def _compile(
+        args: list[str],
+        cwd: Path = Path(),
+    ) -> tuple[str, str]:
+        LOG.info("AotCompiler command: %s", " ".join(args))
+        proc = subprocess.run(  # noqa: S603
+            args=args,
+            cwd=cwd,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        return proc.stdout, proc.stderr
+
+    def aot_compile(
+        self,
+        boot_panda_files: List[Path],
+        entry_abc: Path,
+        output_file: Path,
+        cwd: Path = Path(),
+    ) -> tuple[str, str]:
+        boot_panda_files_str = ":".join(str(f).strip() for f in boot_panda_files)
+        entry_abc_str = str(entry_abc).strip()
+        output_file_str = str(output_file).strip()
+        args = [
+            str(self.options.app_path),
+            f"--boot-panda-files={boot_panda_files_str}",
+            "--load-runtimes=ets",
+            "--paoc-use-cha=true",
+            "--paoc-panda-files",
+            f"{entry_abc_str}",
+            "--paoc-output",
+            f"{output_file_str}",
+        ]
+        return AotCompiler._compile(args=args, cwd=cwd)
+
+
+def ark_aot_compile(
+    boot_panda_files: List[Path],
+    entry_abc: Path,
+    output_file: Path,
+    aot_compiler: AotCompiler,
+    cwd: Path = Path(),
+) -> tuple[str, str]:
+    if not entry_abc.exists():
+        raise FileNotFoundError(entry_abc)
+    return aot_compiler.aot_compile(
+        boot_panda_files=boot_panda_files,
+        entry_abc=entry_abc,
+        output_file=output_file,
+        cwd=cwd,
+    )
+
+
+@fixture
+def ark_aot_compiler_options() -> AotOptions:
+    return AotOptions(app_path=Path("bin", "ark_aot"))
+
+
+@fixture
+def ark_aot_compiler(
+    ark_aot_compiler_options: AotOptions,
+) -> AotCompiler:
+    return AotCompiler(ark_aot_compiler_options)
