@@ -16,7 +16,9 @@
 /*---
 desc: Test using Partial<Readonly<A>> object literal with private field, expecting compile error
 tags: [compile-only, negative]
-expected_out: "Semantic error ESE0293: Property private_field is not visible here."
+expected_out:
+    - "Semantic error ESE0127: No matching call signature for bar(Partial<A>)"
+    - "Semantic error ESE0065: type Partial<A> has no property named private_field"
 ---*/
 
 function foo(): string {

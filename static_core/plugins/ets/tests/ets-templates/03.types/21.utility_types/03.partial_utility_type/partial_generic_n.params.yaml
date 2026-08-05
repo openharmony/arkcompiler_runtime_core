@@ -15,17 +15,6 @@
 cases:
   - decl: |-
       class A<T> {
-        value: T
-      }
-    use: |-
-      let partial: Partial<A<string>> = {}
-      partial.value = "string"
-      arktest.assertEQ(partial.value, "string", "expect string")
-    expected_out: |-
-      "Semantic error ESE0318: Type '\"string\"' cannot be assigned to type 'T|undefined'"
-
-  - decl: |-
-      class A<T> {
         value: T | undefined
       }
     use: |-
@@ -33,4 +22,4 @@ cases:
       partial.value = 0 // wrong type
       arktest.assertEQ(partial.value, 0, "this avoids compiler optimization")
     expected_out: |-
-      "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'undefined|T'"
+      "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'undefined|String'"

@@ -20,7 +20,7 @@ types:
 cases:
   - argument: "{i: 1.9, j: 42}"
     doc: "extra parameter"
-    out: "Semantic error ESE0065: type C has no property named i"
+    out: "Semantic error ESE0065: type Required<C> has no property named i"
 
   - argument: "{j: false}"
     doc: "invalid parameter type"
