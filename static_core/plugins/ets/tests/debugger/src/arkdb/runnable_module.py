@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -55,6 +55,7 @@ class ScriptFile(RunnableModule):
         self.panda_file = panda_file
         self._ast: dict[str, Any] | None = ast
         self._disasm_file: Path | None = None
+        self._aot_file: Path | None = None
 
     @property
     def ast(self) -> dict[str, Any]:
@@ -83,6 +84,18 @@ class ScriptFile(RunnableModule):
     @property
     def boot_abc(self):
         return []
+
+    @property
+    def aot_file(self) -> Path:
+        if self._aot_file is None:
+            raise ValueError("aot_file is not set")
+        if not self._aot_file.exists():
+            raise FileNotFoundError(self._aot_file)
+        return self._aot_file
+
+    @aot_file.setter
+    def aot_file(self, file: Path):
+        self._aot_file = file
 
     def read_text(self) -> str:
         if not self.source_file.exists():
