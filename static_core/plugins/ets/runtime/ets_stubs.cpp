@@ -1120,7 +1120,7 @@ EtsObject *EtsCallThis(ManagedThread *mThread, EtsObject *thisObj, panda_file::F
             INTEROP_TRACE();
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
             std::string methodName = utf::Mutf8AsCString(name.data);
-            return xRefObjectOperator.InvokeMethod(executionCtx, methodName, args);
+            return xRefObjectOperator.InvokeMethod(executionCtx, methodName, args).GetPtr();
         });
         UNREACHABLE();
     } else {

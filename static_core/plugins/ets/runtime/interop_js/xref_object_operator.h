@@ -49,8 +49,8 @@ public:
     EtsObject *InvokeMethod(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &methodObject,
                             Span<VMHandle<ObjectHeader>> args) const;
 
-    EtsObject *InvokeMethod(EtsExecutionContext *executionCtx, const std::string &name,
-                            Span<VMHandle<ObjectHeader>> args) const;
+    EtsHandle<EtsObject> InvokeMethod(EtsExecutionContext *executionCtx, const std::string &name,
+                                      Span<VMHandle<ObjectHeader>> args) const;
 
     bool HasProperty(EtsExecutionContext *executionCtx, const std::string &name, bool isOwnProperty = false) const;
 
