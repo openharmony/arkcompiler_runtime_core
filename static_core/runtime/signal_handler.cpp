@@ -23,7 +23,6 @@
 #include <sys/ucontext.h>
 #include "compiler_options.h"
 #include "code_info/code_info.h"
-#include "include/stack_walker.h"
 #include "tooling/pt_thread_info.h"
 #include "tooling/sampler/sampling_profiler.h"
 #include "runtime/include/mutator.h"
@@ -37,7 +36,8 @@ namespace ark {
 
 static void UseDebuggerdSignalHandler(int sig)
 {
-    LOG(WARNING, RUNTIME) << "panda vm can not handle sig " << sig << ", call next handler";
+    // LOG is not async-signal-safe. Keep DEBUG level only to suppress logs in release builds.
+    LOG(DEBUG, RUNTIME) << "panda vm can not handle sig " << sig << ", call next handler";
 }
 
 static bool CallSignalActionHandler(int sig, siginfo_t *info, void *context)
@@ -151,15 +151,16 @@ void SignalManager::GetMethodAndReturnPcAndSp([[maybe_unused]] const siginfo_t *
 
 void SignalManager::DeleteHandlersArray()
 {
+    for (auto tmp : compiledCodeHandler_) {
+        allocator_->Delete(tmp);
+    }
+    compiledCodeHandler_.clear();
+    for (auto tmp : otherHandlers_) {
+        allocator_->Delete(tmp);
+    }
+    otherHandlers_.clear();
+
     if (isInit_) {
-        for (auto tmp : compiledCodeHandler_) {
-            allocator_->Delete(tmp);
-        }
-        compiledCodeHandler_.clear();
-        for (auto tmp : otherHandlers_) {
-            allocator_->Delete(tmp);
-        }
-        otherHandlers_.clear();
         RemoveSpecialSignalHandlerFn(SIGSEGV, CallSignalActionHandler);
 #if defined(PANDA_TARGET_OHOS)
         RemoveSpecialSignalHandlerFn(SIGABRT, CallSignalActionHandler);
@@ -233,7 +234,7 @@ static uintptr_t FindCompilerEntrypoint(const uintptr_t *fp)
     }
 
     if (!InAllocatedCodeRange(entrypoint)) {
-        LOG(INFO, RUNTIME) << "Runtime SEGV handler: the entrypoint is not from JIT code";
+        LOG(DEBUG, RUNTIME) << "Runtime SEGV handler: the entrypoint is not from JIT code";
         return 0;
     }
 
@@ -304,10 +305,10 @@ static std::optional<NullCheckEPInfo> LookupNullCheckEntrypoint(uintptr_t pc, ui
         }
     }
 
-    LOG(INFO, RUNTIME) << "SEGV can't be handled. No matching entry found in the NullCheck table.\n"
-                       << "PC: " << std::hex << pc;
+    LOG(DEBUG, RUNTIME) << "SEGV can't be handled. No matching entry found in the NullCheck table.\n"
+                        << "PC: " << std::hex << pc;
     for (auto const &icheck : codeinfo.GetImplicitNullChecksTable()) {
-        LOG(INFO, RUNTIME) << "nullcheck: " << std::hex << (entrypoint + icheck.GetInstNativePc());
+        LOG(DEBUG, RUNTIME) << "nullcheck: " << std::hex << (entrypoint + icheck.GetInstNativePc());
     }
     return std::nullopt;
 }
@@ -438,25 +439,29 @@ bool CrashFallbackDumpHandler::Action(int sig, [[maybe_unused]] siginfo_t *sigin
     if (thread == nullptr) {
         auto vmThread = Mutator::GetCurrent();
         if (vmThread == nullptr) {
-            LOG(ERROR, RUNTIME) << "SIGSEGV in unknown thread";
+            LOG(DEBUG, RUNTIME) << "SIGSEGV in unknown thread";
             return false;
         }
-        LOG(ERROR, RUNTIME) << "SIGSEGV in runtime thread: threadType="
+        LOG(DEBUG, RUNTIME) << "SIGSEGV in runtime thread: threadType="
                             << helpers::ToUnderlying(vmThread->GetMutatorType());
+#ifndef NDEBUG
         PrintStack(Logger::Message(Logger::Level::ERROR, Logger::Component::RUNTIME, false).GetStream());
+#endif
         return false;
     }
     if (thread->IsInNativeCode()) {
-        LOG(ERROR, RUNTIME) << "SIGSEGV in managed thread (native code)";
+        LOG(DEBUG, RUNTIME) << "SIGSEGV in managed thread (native code)";
         return false;
     }
     if (InAllocatedCodeRange(signalContext.GetPC())) {
-        LOG(ERROR, RUNTIME) << "SIGSEGV in managed thread (managed compiled code)";
+        LOG(DEBUG, RUNTIME) << "SIGSEGV in managed thread (managed compiled code)";
     } else {
-        LOG(ERROR, RUNTIME) << "SIGSEGV in managed thread (managed code)";
+        LOG(DEBUG, RUNTIME) << "SIGSEGV in managed thread (managed code)";
     }
+#ifndef NDEBUG
     ark::PrintStackTrace();
     PrintStack(Logger::Message(Logger::Level::ERROR, Logger::Component::RUNTIME, false).GetStream());
+#endif
     return false;
 }
 

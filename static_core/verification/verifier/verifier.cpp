@@ -337,6 +337,7 @@ static int RunThreads(Options &cliOptions, RuntimeOptions &runtimeOptions)
         std::cerr << "Error: cannot create runtime" << std::endl;
         return -1;
     }
+    Runtime::GetCurrent()->InitSignalHandlers();
 
     int ret = RunVerifier(cliOptions) ? 0 : -1;
 

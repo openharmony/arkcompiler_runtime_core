@@ -179,6 +179,7 @@ private:
             std::cerr << "Failed to create runtime!\n";
             return -1;
         }
+        Runtime::GetCurrent()->InitSignalHandlers();
         paoc_->runtime_ = Runtime::GetCurrent()->GetPandaVM()->GetCompilerRuntimeInterface();
         return 0;
     }

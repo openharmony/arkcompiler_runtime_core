@@ -474,6 +474,9 @@ void PandaEtsVM::PostZygoteFork()
     ASSERT(mm_ != nullptr);
     ASSERT(jobManager_ != nullptr);
 
+    auto runtime = Runtime::GetCurrent();
+    runtime->InitSignalHandlers();
+
     if (taskmanager::TaskManager::IsUsed()) {
         taskmanager::TaskManager::SetWorkersCount(preForkWorkerCount_);
         taskmanager::TaskManager::EnableTimerThread();
@@ -485,7 +488,6 @@ void PandaEtsVM::PostZygoteFork()
         saverWorker_->PostZygoteFork();
     }
 
-    auto runtime = Runtime::GetCurrent();
     runtime->StartCoverageListener();
 
     // stop GCtask for application start-up

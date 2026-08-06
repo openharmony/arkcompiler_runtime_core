@@ -1025,6 +1025,16 @@ static void RegisterSignalHandler(SignalManager *manager, bool inCompiledCode)
 
 void Runtime::HandleJitOptions()
 {
+    if (GetClassLinker()->GetAotManager()->HasAotFiles()) {
+        ASSERT(GetPandaVM()->GetCompiler()->IsNoAsyncJit() == options_.IsNoAsyncJit());
+        if (GetPandaVM()->GetCompiler()->IsNoAsyncJit()) {
+            LOG(FATAL, AOT) << "We can't use the option --no-async-jit=true with AOT";
+        }
+    }
+}
+
+void Runtime::InitSignalHandlers()
+{
 #ifndef PANDA_TARGET_WINDOWS
     auto signalManagerFlag = DfxController::GetOptionValue(DfxOptionHandler::SIGNAL_HANDLER);
     if (signalManagerFlag == 1) {
@@ -1032,18 +1042,10 @@ void Runtime::HandleJitOptions()
     } else {
         LOG(ERROR, DFX) << "signal handler disabled, setprop ark.dfx.options to restart";
     }
-#endif
 
-    bool enableNpHandler = options_.IsCompilerEnableJit() && ark::compiler::g_options.IsCompilerImplicitNullCheck();
-    if (GetClassLinker()->GetAotManager()->HasAotFiles()) {
-        ASSERT(GetPandaVM()->GetCompiler()->IsNoAsyncJit() == options_.IsNoAsyncJit());
-        if (GetPandaVM()->GetCompiler()->IsNoAsyncJit()) {
-            LOG(FATAL, AOT) << "We can't use the option --no-async-jit=true with AOT";
-        }
-        enableNpHandler = true;
-    }
+    bool enableNpHandler = (options_.IsCompilerEnableJit() && ark::compiler::g_options.IsCompilerImplicitNullCheck()) ||
+                           GetClassLinker()->GetAotManager()->HasAotFiles();
 
-#ifndef PANDA_TARGET_WINDOWS
     RegisterSignalHandler<SamplingProfilerHandler>(signalManager_, true);
     if (signalManager_->IsInitialized() && enableNpHandler) {
         RegisterSignalHandler<NullPointerHandler>(signalManager_, true);
