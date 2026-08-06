@@ -274,8 +274,8 @@ EtsObject *XRefObjectOperator::Invoke(EtsExecutionContext *executionCtx, Span<VM
     return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsRet).value();
 }
 
-EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, const std::string &name,
-                                            Span<VMHandle<ObjectHeader>> args) const
+EtsHandle<EtsObject> XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, const std::string &name,
+                                                      Span<VMHandle<ObjectHeader>> args) const
 {
     INTEROP_TRACE();
     auto ctx = InteropCtx::Current(executionCtx);
@@ -284,7 +284,7 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, c
     NapiScope jsHandleScope(env);
     napi_value jsThis = this->GetNapiValue(executionCtx);
     if (UNLIKELY(jsThis == nullptr)) {
-        return nullptr;
+        return EtsHandle<EtsObject>();
     }
 
     // convert static args to dynamic args
@@ -294,7 +294,7 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, c
         auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
         if (UNLIKELY(dynamicArg == nullptr)) {
             ctx->ForwardJSException(executionCtx);
-            return nullptr;
+            return EtsHandle<EtsObject>();
         }
         dynamicArgs.push_back(dynamicArg);
     }
@@ -308,7 +308,7 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, c
     }
     if (jsStatus != napi_ok) {
         ctx->ForwardJSException(executionCtx);
-        return nullptr;
+        return EtsHandle<EtsObject>();
     }
 
     napi_value jsRet = nullptr;
@@ -318,9 +318,9 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, c
     }
     if (jsStatus != napi_ok) {
         ctx->ForwardJSException(executionCtx);
-        return nullptr;
+        return EtsHandle<EtsObject>();
     }
-    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsRet).value();
+    return EtsHandle<EtsObject>(executionCtx, JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsRet).value());
 }
 
 EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &methodObject,
