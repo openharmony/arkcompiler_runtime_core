@@ -92,8 +92,6 @@ static bool GetPackagePath(const std::string &pathStr, EtsExecutionContext *exec
     auto safeData = isHsp ? extractor->GetSafeDataForHsp(abcPath) : extractor->GetSafeData(PACKAGE_ABC_ENTRY);
     if (safeData == nullptr) {
         LOG(ERROR, RUNTIME) << "Failed to get safe data from ABC package: " << abcPath;
-        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->arkruntimeAbcFileNotFoundError,
-                               "Failed to get abc file from package: " + abcPath);
         return false;
     }
     pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), abcPath);
