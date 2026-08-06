@@ -294,6 +294,8 @@ public:
     void RemarkYoungCollectionSpace();
     void MarkEvacuationStack(CmcGCMarkingStack &stack);
 
+    void ConcurrentTaskProcessing(GCConcurrentCopyTask *task);
+
     void MarkObject(ObjectHeader *object) override;
     bool MarkObjectIfNotMarked(ObjectHeader *object) override;
     bool IsMarked(const ark::ObjectHeader *object) const override;

@@ -18,11 +18,13 @@
 #include "runtime/mem/gc/cmc/heap/space/old_space.h"
 #include "runtime/mem/gc/cmc/heap/collector/collector_resources.h"
 #include "common_components/taskpool/taskpool.h"
+#include "mem/gc/workers/gc_workers_tasks.h"
 #if defined(COMMON_SANITIZER_SUPPORT)
 #include "common_components/base/asan_interface.h"
 #endif
 
 namespace ark::common_vm {
+
 void FromSpace::DumpRegionStats() const
 {
     size_t fromRegions = fromRegionList_.GetRegionCount();
@@ -76,32 +78,6 @@ void FromSpace::ExemptFromRegions()
                    << " B, " << floatingGarbage << " B floating garbage, " << forwardBytes << " B to forward";
 }
 
-class CopyTask : public Task {
-public:
-    CopyTask(int32_t id, FromSpace &fromSpace, RegionDesc *region, size_t regionCnt, TaskPackMonitor &monitor)
-        : Task(id), fromSpace_(fromSpace), startRegion_(region), regionCount_(regionCnt), monitor_(monitor)
-    {
-    }
-
-    ~CopyTask() override = default;
-
-    bool Run([[maybe_unused]] uint32_t threadIndex) override
-    {
-        // set current thread as a gc thread.
-        ThreadLocal::SetThreadType(ThreadType::GC_THREAD);
-        fromSpace_.ParallelCopyFromRegions(startRegion_, regionCount_);
-        monitor_.NotifyFinishOne();
-        ThreadLocal::SetThreadType(ThreadType::ARK_PROCESSOR);
-        return true;
-    }
-
-private:
-    FromSpace &fromSpace_;
-    RegionDesc *startRegion_ {nullptr};
-    size_t regionCount_;
-    TaskPackMonitor &monitor_;
-};
-
 void FromSpace::ParallelCopyFromRegions(RegionDesc *startRegion, size_t regionCnt)
 {
     RegionDesc *currentRegion = startRegion;
@@ -117,7 +93,7 @@ void FromSpace::ParallelCopyFromRegions(RegionDesc *startRegion, size_t regionCn
     }
 }
 
-void FromSpace::CopyFromRegions()
+void FromSpace::CopyFromRegionsOnSingleThread()
 {
     // iterate each region in fromRegionList
     RegionDesc *fromRegion = fromRegionList_.GetHeadRegion();
@@ -136,32 +112,43 @@ void FromSpace::CopyFromRegions()
     }
 }
 
-void FromSpace::CopyFromRegions(Taskpool *threadPool)
+void FromSpace::CopyFromRegionsOnGCWorkerTaskPool(mem::GCWorkersTaskPool *pool)
 {
-    if (threadPool != nullptr) {
-        uint32_t parallel = Heap::GetHeap().GetCollectorResources().GetGCThreadCount(true) - 1;
-        uint32_t threadNum = parallel + 1;
-        // We won't change fromRegionList during gc, so we can use it without lock.
-        size_t totalRegionCount = fromRegionList_.GetRegionCount();
-        if (UNLIKELY(totalRegionCount == 0)) {
-            return;
+    // We won't change fromRegionList during gc, so we can use it without lock.
+    const size_t totalRegionCount = fromRegionList_.GetRegionCount();
+    if (UNLIKELY(totalRegionCount == 0)) {
+        return;
+    }
+
+    RegionDesc *region = fromRegionList_.GetHeadRegion();
+    PandaVector<mem::GCConcurrentCopyTask::TaskInfo> taskInfoVector;
+    const size_t taskCount = (totalRegionCount + mem::GCConcurrentCopyTask::MAX_REGION_COUNT - 1) /
+                             mem::GCConcurrentCopyTask::MAX_REGION_COUNT;
+    taskInfoVector.reserve(taskCount);
+
+    ScopedGcThreadType scopedGcThreadType;
+
+    while (region != nullptr) {
+        RegionDesc *startRegion = region;
+        size_t regionCount = 0;
+        while ((regionCount < mem::GCConcurrentCopyTask::MAX_REGION_COUNT) && (region != nullptr)) {
+            region = region->GetNextRegion();
+            ++regionCount;
         }
-        size_t regionCntEachTask = totalRegionCount / static_cast<size_t>(threadNum);
-        size_t leftRegionCnt = totalRegionCount - regionCntEachTask * parallel;
-        RegionDesc *region = fromRegionList_.GetHeadRegion();
-        TaskPackMonitor monitor(parallel, parallel);
-        for (uint32_t i = 0; i < parallel; ++i) {
-            ASSERT_PRINT(region != nullptr, "from region list records wrong region info");
-            RegionDesc *startRegion = region;
-            for (size_t count = 0; count < regionCntEachTask; ++count) {
-                region = region->GetNextRegion();
-            }
-            threadPool->PostTask(MakePandaUnique<CopyTask>(0, *this, startRegion, regionCntEachTask, monitor));
-        }
-        ParallelCopyFromRegions(region, leftRegionCnt);
-        monitor.WaitAllFinished();
+        taskInfoVector.emplace_back(this, startRegion, regionCount);
+        [[maybe_unused]] bool added = pool->AddTask(mem::GCConcurrentCopyTask(&taskInfoVector.back()));
+        ASSERT_PRINT(added, "failed to add concurrent copy task");
+    }
+
+    pool->WaitUntilTasksEnd();
+}
+
+void FromSpace::CopyFromRegions(mem::GCWorkersTaskPool *pool)
+{
+    if (pool != nullptr) {
+        CopyFromRegionsOnGCWorkerTaskPool(pool);
     } else {
-        CopyFromRegions();
+        CopyFromRegionsOnSingleThread();
     }
 }
 

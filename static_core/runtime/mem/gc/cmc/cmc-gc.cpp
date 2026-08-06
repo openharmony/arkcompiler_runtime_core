@@ -1613,7 +1613,7 @@ void CmcGC<LanguageConfig>::CopyFromSpace()
         TransitionToGCPhase(GCPhase::GC_PHASE_COPY);
     }
     RegionalHeap &space = reinterpret_cast<RegionalHeap &>(theAllocator_);
-    space.CopyFromSpace(GetThreadPool());
+    space.CopyFromSpace(this->GetWorkersTaskPool());
 
     collectedBytes_ += space.FromRegionSize() - space.ToSpaceSize();
 }
@@ -1936,6 +1936,10 @@ void CmcGC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_un
             PostClearTask(result);
             break;
         }
+        case GCWorkersTaskTypes::TASK_CONCURRENT_COPY: {
+            ConcurrentTaskProcessing(task->Cast<GCConcurrentCopyTask>());
+            break;
+        }
         default:
             LOG(FATAL, GC) << "Unimplemented for " << GCWorkersTaskTypesToString(task->GetType());
             UNREACHABLE();
@@ -1951,6 +1955,17 @@ void CmcGC<LanguageConfig>::ClearSatbBuffList()
         allocator->DeleteArray(entry.first);
     }
     satbBuffList_.clear();
+}
+
+template <class LanguageConfig>
+void CmcGC<LanguageConfig>::ConcurrentTaskProcessing(GCConcurrentCopyTask *task)
+{
+    // set current thread as a gc thread.
+    common_vm::ThreadLocal::SetThreadType(common_vm::ThreadType::GC_THREAD);
+    auto *fromSpace = static_cast<common_vm::FromSpace *>(task->GetFromSpacePtr());
+    auto *startRegion = static_cast<RegionDesc *>(task->GetStartRegionPtr());
+    fromSpace->ParallelCopyFromRegions(startRegion, task->GetRegionCount());
+    common_vm::ThreadLocal::SetThreadType(common_vm::ThreadType::ARK_PROCESSOR);
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(CmcGC);

@@ -37,7 +37,8 @@ enum class GCWorkersTaskTypes : uint32_t {
     TASK_EVACUATE_REGIONS,
     TASK_MARK_WHOLE_REGION,
     TASK_CONCURRENT_FIX,
-    TASK_CONCURRENT_POST_FIX
+    TASK_CONCURRENT_POST_FIX,
+    TASK_CONCURRENT_COPY,
 };
 
 constexpr const char *GCWorkersTaskTypesToString(GCWorkersTaskTypes type)
@@ -71,6 +72,8 @@ constexpr const char *GCWorkersTaskTypesToString(GCWorkersTaskTypes type)
             return "Fix whole region task";
         case GCWorkersTaskTypes::TASK_CONCURRENT_POST_FIX:
             return "Post fix whole region task";
+        case GCWorkersTaskTypes::TASK_CONCURRENT_COPY:
+            return "Concurrent copy task";
         default:
             return "Unknown task";
     }
@@ -194,6 +197,66 @@ public:
     Region *GetRegion() const
     {
         return static_cast<Region *>(storage_);
+    }
+};
+
+class GCConcurrentCopyTask : public GCWorkersTask {
+public:
+    static constexpr size_t MAX_REGION_COUNT = 32;
+    class TaskInfo {
+    public:
+        TaskInfo(void *fromSpace, void *startRegion, size_t regionCount)
+            : fromSpace_(fromSpace), startRegion_(startRegion), regionCount_(regionCount)
+        {
+            ASSERT(regionCount <= MAX_REGION_COUNT);
+            ASSERT(regionCount > 0);
+        }
+
+        void *GetFromSpacePtr() const
+        {
+            return fromSpace_;
+        }
+
+        void *GetStartRegionPtr() const
+        {
+            return startRegion_;
+        }
+
+        size_t GetRegionCount() const
+        {
+            return regionCount_;
+        }
+
+    private:
+        void *fromSpace_ {nullptr};
+        void *startRegion_ {nullptr};
+        size_t regionCount_ {0UL};
+    };
+
+    explicit GCConcurrentCopyTask(TaskInfo *info) : GCWorkersTask(GCWorkersTaskTypes::TASK_CONCURRENT_COPY, info) {}
+
+    DEFAULT_COPY_SEMANTIC(GCConcurrentCopyTask);
+    DEFAULT_MOVE_SEMANTIC(GCConcurrentCopyTask);
+    ~GCConcurrentCopyTask() = default;
+    void *GetFromSpacePtr() const
+    {
+        return GetTaskInfo()->GetFromSpacePtr();
+    }
+
+    void *GetStartRegionPtr() const
+    {
+        return GetTaskInfo()->GetStartRegionPtr();
+    }
+
+    size_t GetRegionCount() const
+    {
+        return GetTaskInfo()->GetRegionCount();
+    }
+
+private:
+    TaskInfo *GetTaskInfo() const
+    {
+        return reinterpret_cast<TaskInfo *>(storage_);
     }
 };
 
