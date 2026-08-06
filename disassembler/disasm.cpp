@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,13 +28,15 @@ void PrintHelp(panda::PandArgParser &pa_parser)
     std::cerr << pa_parser.GetHelpString() << std::endl;
 }
 
-void Disassemble(const std::string &input_file, const std::string &output_file, const bool verbose, const bool quiet,
-                 const bool skip_strings)
+static bool Disassemble(const std::string &inputFile, const std::string &outputFile, const bool verbose,
+                        const bool quiet, const bool skipStrings)
 {
-    LOG(DEBUG, DISASSEMBLER) << "[initializing disassembler]\nfile: " << input_file << "\n";
+    LOG(DEBUG, DISASSEMBLER) << "[initializing disassembler]\nfile: " << inputFile << "\n";
 
     panda::disasm::Disassembler disasm {};
-    disasm.Disassemble(input_file, quiet, skip_strings);
+    if (!disasm.Disassemble(inputFile, quiet, skipStrings)) {
+        return false;
+    }
     if (verbose) {
         disasm.CollectInfo();
     }
@@ -42,9 +44,10 @@ void Disassemble(const std::string &input_file, const std::string &output_file, 
     LOG(DEBUG, DISASSEMBLER) << "[serializing results]\n";
 
     std::ofstream res_pa;
-    res_pa.open(output_file, std::ios::trunc | std::ios::out);
+    res_pa.open(outputFile, std::ios::trunc | std::ios::out);
     disasm.Serialize(res_pa, true, verbose);
     res_pa.close();
+    return true;
 }
 
 bool ProcessArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::string> &input_file,
@@ -119,8 +122,11 @@ int main(int argc, const char **argv)
         return 1;
     }
 
-    Disassemble(input_file.GetValue(), output_file.GetValue(), verbose.GetValue(), quiet.GetValue(),
-                skip_strings.GetValue());
+    if (!Disassemble(input_file.GetValue(), output_file.GetValue(), verbose.GetValue(), quiet.GetValue(),
+                     skip_strings.GetValue())) {
+        pa_parser.DisableTail();
+        return 1;
+    }
 
     pa_parser.DisableTail();
 
