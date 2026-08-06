@@ -222,6 +222,7 @@ int Main(int argc, const char **argv)
     }
 
     auto &runtime = *Runtime::GetCurrent();
+    runtime.InitSignalHandlers();
 
     int ret = ExecutePandaFile(runtime, file.GetValue(), entrypoint.GetValue(), paParser.GetRemainder());
     PrintStatistics(runtimeOptions, runtime);

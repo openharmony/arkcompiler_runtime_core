@@ -480,6 +480,8 @@ public:
         }
     }
 
+    void InitSignalHandlers();
+
 private:
     void NotifyAboutLoadedModules();
 
