@@ -41,6 +41,10 @@ EtsObject *XRefObjectOperator::GetProperty(EtsExecutionContext *executionCtx, co
 {
     INTEROP_TRACE();
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return {};
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -66,6 +70,10 @@ EtsObject *XRefObjectOperator::GetProperty(EtsExecutionContext *executionCtx, Et
 {
     INTEROP_TRACE();
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return {};
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -95,6 +103,10 @@ EtsObject *XRefObjectOperator::GetProperty(EtsExecutionContext *executionCtx, co
 {
     INTEROP_TRACE();
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return {};
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -121,6 +133,10 @@ bool XRefObjectOperator::SetProperty(EtsExecutionContext *executionCtx, const st
 {
     INTEROP_TRACE();
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return false;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -152,6 +168,10 @@ bool XRefObjectOperator::SetProperty(EtsExecutionContext *executionCtx, EtsHandl
 {
     INTEROP_TRACE();
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return false;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -186,6 +206,10 @@ bool XRefObjectOperator::SetProperty(EtsExecutionContext *executionCtx, uint32_t
 {
     INTEROP_TRACE();
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return false;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -214,6 +238,10 @@ bool XRefObjectOperator::SetProperty(EtsExecutionContext *executionCtx, uint32_t
 bool XRefObjectOperator::IsInstanceOf(EtsExecutionContext *executionCtx, const XRefObjectOperator &rhsObject) const
 {
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return false;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -241,6 +269,10 @@ EtsObject *XRefObjectOperator::Invoke(EtsExecutionContext *executionCtx, Span<VM
 {
     INTEROP_TRACE();
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return nullptr;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -279,6 +311,10 @@ EtsHandle<EtsObject> XRefObjectOperator::InvokeMethod(EtsExecutionContext *execu
 {
     INTEROP_TRACE();
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return EtsHandle<EtsObject>();
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -328,6 +364,10 @@ EtsObject *XRefObjectOperator::InvokeMethod(EtsExecutionContext *executionCtx, E
 {
     INTEROP_TRACE();
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return nullptr;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -369,6 +409,10 @@ bool XRefObjectOperator::HasProperty(EtsExecutionContext *executionCtx, const st
                                      bool isOwnProperty) const
 {
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return false;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -401,6 +445,10 @@ bool XRefObjectOperator::HasProperty(EtsExecutionContext *executionCtx, EtsHandl
                                      bool isOwnProperty) const
 {
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return false;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -433,6 +481,10 @@ bool XRefObjectOperator::HasProperty(EtsExecutionContext *executionCtx, EtsHandl
 bool XRefObjectOperator::HasProperty(EtsExecutionContext *executionCtx, const uint32_t index) const
 {
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return false;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -457,6 +509,10 @@ bool XRefObjectOperator::HasProperty(EtsExecutionContext *executionCtx, const ui
 EtsObject *XRefObjectOperator::Instantiate(EtsExecutionContext *executionCtx, Span<VMHandle<ObjectHeader>> args) const
 {
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return nullptr;
+    }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
@@ -557,6 +613,10 @@ napi_value XRefObjectOperator::GetNapiValue(EtsExecutionContext *executionCtx) c
     // NOTE(MockMockBlack): will just get from shared_refenece_table
     // after jsvalue it put into shared_reference_table
     auto ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return nullptr;
+    }
     auto env = ctx->GetJSEnv();
 
     // 1. If it is undefiend(nullptr in native),
@@ -612,6 +672,10 @@ napi_value XRefObjectOperator::ConvertStaticObjectToDynamic(EtsExecutionContext 
 {
     INTEROP_TRACE();
     auto ctx = interop::js::InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
+        return nullptr;
+    }
 
     // static undefined is nullptr in runtime
     // handle undefined case
