@@ -27,9 +27,12 @@ ark_subsystem_name = "arkcompiler"
 ark_part_name = "runtime_core"
 
 hiviewdfx_ext_deps = []
-enable_hilog =
-    !ark_standalone_build && is_standard_system && current_os == "ohos" &&
-    (current_cpu == "arm64" || current_cpu == "arm")
+if (!ark_standalone_build && !ark_static_standalone_build) {
+  import("//build/config/components/runtime_core/hilog_config.gni")
+  enable_hilog = enable_hilog_device
+} else {
+  enable_hilog = false
+}
 
 enable_hitrace =
     !ark_standalone_build && is_standard_system && current_os == "ohos" &&
