@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import buffer from "@ohos.buffer";
-import { BusinessError } from "@ohos.base";
+import buffer from '@ohos.buffer';
+import { BusinessError } from '@ohos.base';
 
 function testCopy0160() {
 	let buf = buffer.alloc(10);
@@ -74,7 +74,7 @@ function testCopy0148() {
 	let num = buf.copy(uint8array, 0, 3);
 	arktest.assertEQ(String(num), '4');
 	let str = uint8array.toString();
-	arktest.assertEQ(str, "4,5,6,7,0,0,0,0,0,0");
+	arktest.assertEQ(str, '4,5,6,7,0,0,0,0,0,0');
 }
 function testCopy0149() {
 	let uint8array = new Uint8Array(10).fill(0);
@@ -82,7 +82,7 @@ function testCopy0149() {
 	let num = buf.copy(uint8array, 0, 3, 255);
 	arktest.assertEQ(String(num), '4');
 	let str = uint8array.toString();
-	arktest.assertEQ(str, "4,5,6,7,0,0,0,0,0,0");
+	arktest.assertEQ(str, '4,5,6,7,0,0,0,0,0,0');
 }
 
 function testBufferCopy0018() {
@@ -101,21 +101,21 @@ function testBufferCopy0018() {
 function testBufferWrite0004() {
 	arktest.expectError(() => {
 		let buf = buffer.alloc(5);
-		let len = buf.write("abcd", -1);
+		let len = buf.write('abcd', -1);
 	}, 'The value of "offset" is out of range. It must be >= 0 and <= 4. Received value is: -1');
 }
 
 function testBufferWrite0005() {
 	arktest.expectError(() => {
 		let buf = buffer.alloc(10);
-		const result = buf.write("test", Infinity.toInt());
+		const result = buf.write('test', Infinity.toInt());
 	}, 'The value of "offset" is out of range. It must be >= 0 and <= 9. Received value is: 2147483647');
 }
 
 function testBufferWrite0006() {
 	arktest.expectError(() => {
 		let buf = buffer.alloc(10);
-		const result = buf.write("test", (-Infinity).toInt());
+		const result = buf.write('test', (-Infinity).toInt());
 	}, 'The value of "offset" is out of range. It must be >= 0 and <= 9. Received value is: -2147483648');
 
 
@@ -123,43 +123,43 @@ function testBufferWrite0006() {
 function testBufferWrite0020() {
 	arktest.expectError(() => {
 		let buf = buffer.alloc(5);
-		const res = buf.write("abc", 6, 1, 'utf8');
+		const res = buf.write('abc', 6, 1, 'utf8');
 	}, 'The value of "offset" is out of range. It must be >= 0 and <= 4. Received value is: 6');
 }
 
 function testBufferWrite0024() {
 	arktest.expectError(() => {
 		let buf = buffer.alloc(10);
-		const res = buf.write("abc", Infinity.toInt(), Infinity.toInt(), 'utf8');
+		const res = buf.write('abc', Infinity.toInt(), Infinity.toInt(), 'utf8');
 	}, 'The value of "offset" is out of range. It must be >= 0 and <= 9. Received value is: 2147483647');
 }
 
 function testBufferWrite0026() {
 	arktest.expectError(() => {
 		let buf = buffer.alloc(10);
-		const res = buf.write("abc", (-Infinity).toInt(), (-Infinity).toInt(), 'utf8');
+		const res = buf.write('abc', (-Infinity).toInt(), (-Infinity).toInt(), 'utf8');
 	}, 'The value of "offset" is out of range. It must be >= 0 and <= 9. Received value is: -2147483648');
 }
 
 function testBufferConcat0005() {
-	let buf1 = buffer.from("1234");
-	let buf2 = buffer.from("abcd");
+	let buf1 = buffer.from('1234');
+	let buf2 = buffer.from('abcd');
 	arktest.expectError(() => {
 		buffer.concat([buf1, buf2], -1);
 	}, 'The value of "totalLength" is out of range. It must be >= 0 and <= 2147483647. Received value is: -1');
 }
 
 function testBufferConcat0006() {
-	let buf1 = buffer.from("1234");
-	let buf2 = buffer.from("abcd");
+	let buf1 = buffer.from('1234');
+	let buf2 = buffer.from('abcd');
 	arktest.expectError(() => {
 		buffer.concat([buf1, buf2], Infinity.toInt() + 1);
 	}, 'The value of "totalLength" is out of range. It must be >= 0 and <= 2147483647. Received value is: -2147483648');
 }
 
 function testBufferConcat0007() {
-	let buf1 = buffer.from("1234");
-	let buf2 = buffer.from("abcd");
+	let buf1 = buffer.from('1234');
+	let buf2 = buffer.from('abcd');
 	arktest.expectError(() => {
 		buffer.concat([buf1, buf2], (-Infinity).toInt());
 	}, 'The value of "totalLength" is out of range. It must be >= 0 and <= 2147483647. Received value is: -2147483648');
@@ -175,6 +175,92 @@ function testBufferConcat0009() {
 	}, 'The value of "totalLength" is out of range. It must be >= 0 and <= 2147483647. Received value is: -1');
 }
 
+function testBufferConcatBasic() {
+	const result = buffer.concat([buffer.from('hello'), buffer.from('world')]);
+	arktest.assertEQ(result.length, 10);
+	arktest.assertEQ(result.toString('utf8'), 'helloworld');
+}
+
+function testBufferConcatWithTotalLength() {
+	const result = buffer.concat([buffer.from('hello'), buffer.from('world')], 7);
+	arktest.assertEQ(result.length, 7);
+	arktest.assertEQ(result.toString('utf8'), 'hellowo');
+}
+
+function testBufferConcatTotalLengthLarger() {
+	const result = buffer.concat([buffer.from('hello'), buffer.from('world')], 15);
+	arktest.assertEQ(result.length, 15);
+	arktest.assertEQ(result.toString('utf8').substring(0, 10), 'helloworld');
+	arktest.assertEQ(result[10], 0);
+	arktest.assertEQ(result[11], 0);
+	arktest.assertEQ(result[12], 0);
+	arktest.assertEQ(result[13], 0);
+	arktest.assertEQ(result[14], 0);
+}
+
+function testBufferConcatEmptyList() {
+	const result = buffer.concat([] as buffer.Buffer[]);
+	arktest.assertEQ(result.length, 0);
+}
+
+function testBufferConcatSingleBuffer() {
+	const result = buffer.concat([buffer.from('hello')]);
+	arktest.assertEQ(result.length, 5);
+	arktest.assertEQ(result.toString('utf8'), 'hello');
+}
+
+function testBufferConcatBufferWithByteOffset() {
+	const ab1 = new ArrayBuffer(10);
+	const u1 = new Uint8Array(ab1);
+	for (let i = 0; i < 10; i++) { u1[i] = i + 1 }
+	const buf1 = buffer.from(ab1, 3, 2);
+
+	const ab2 = new ArrayBuffer(10);
+	const u2 = new Uint8Array(ab2);
+	for (let i = 0; i < 10; i++) { u2[i] = i + 11 }
+	const buf2 = buffer.from(ab2, 2, 3);
+
+	const result = buffer.concat([buf1, buf2]);
+	arktest.assertEQ(result.length, 5);
+	arktest.assertEQ(result[0], 4);
+	arktest.assertEQ(result[1], 5);
+	arktest.assertEQ(result[2], 13);
+	arktest.assertEQ(result[3], 14);
+	arktest.assertEQ(result[4], 15);
+}
+
+function testBufferConcatUint8Array() {
+	const result = buffer.concat([new Uint8Array([1, 2, 3]), new Uint8Array([4, 5, 6])]);
+	arktest.assertEQ(result.length, 6);
+	arktest.assertEQ(result[0], 1);
+	arktest.assertEQ(result[1], 2);
+	arktest.assertEQ(result[2], 3);
+	arktest.assertEQ(result[3], 4);
+	arktest.assertEQ(result[4], 5);
+	arktest.assertEQ(result[5], 6);
+}
+
+function testBufferConcatUint8ArrayWithByteOffset() {
+	const ab = new ArrayBuffer(10);
+	const u8 = new Uint8Array(ab);
+	for (let i = 0; i < 10; i++) { u8[i] = i + 1 }
+	const view = new Uint8Array(ab, 3, 2);
+	arktest.assertEQ(view[0], 4);
+	arktest.assertEQ(view[1], 5);
+
+	const result = buffer.concat([view]);
+	arktest.assertEQ(result.length, 2);
+	arktest.assertEQ(result[0], 4);
+	arktest.assertEQ(result[1], 5);
+}
+
+function testBufferConcatResultNotShared() {
+	const buf = buffer.from('hello');
+	const result = buffer.concat([buf]);
+	arktest.assertEQ(buf[0], 104);
+	result[0] = 72;
+	arktest.assertEQ(buf[0], 104);
+}
 
 function testBufferFill0007() {
 	const buf = buffer.alloc(6);
@@ -205,31 +291,31 @@ function testBufferFill0018() {
 function testFill0091() {
 	const buf1 = buffer.alloc(10).fill('F1刘FG', 0, 10, 'hex');
 	let str = buf1.toString('hex');
-	arktest.assertEQ(str, "f1f1f1f1f1f1f1f1f1f1");
+	arktest.assertEQ(str, 'f1f1f1f1f1f1f1f1f1f1');
 
 	let buf2 = buffer.alloc(10).fill('F1刘FG', 0, 10, 'ascii');
-	str = buf2.toString("hex");
-	arktest.assertEQ(str, "46311846474631184647");
+	str = buf2.toString('hex');
+	arktest.assertEQ(str, '46311846474631184647');
 
 	let buf3 = buffer.alloc(10).fill('F1FG', 0, 10, 'base64');
-	str = buf3.toString("hex");
-	arktest.assertEQ(str, "17514617514617514617");
+	str = buf3.toString('hex');
+	arktest.assertEQ(str, '17514617514617514617');
 
 	let buf4 = buffer.alloc(10).fill('F1刘FG', 0, 10, 'binary');
-	str = buf4.toString("hex");
-	arktest.assertEQ(str, "46311846474631184647");
+	str = buf4.toString('hex');
+	arktest.assertEQ(str, '46311846474631184647');
 
 	let buf5 = buffer.alloc(10).fill('F1刘FG', 0, 10, 'latin1');
-	str = buf5.toString("hex");
-	arktest.assertEQ(str, "46311846474631184647");
+	str = buf5.toString('hex');
+	arktest.assertEQ(str, '46311846474631184647');
 
 	let buf6 = buffer.alloc(10).fill('F1刘FG', 0, 10, 'ucs2');
-	str = buf6.toString("hex");
-	arktest.assertEQ(str, "46003100185246004700");
+	str = buf6.toString('hex');
+	arktest.assertEQ(str, '46003100185246004700');
 
 	let buf7 = buffer.alloc(10).fill('F1刘FG', 0, 10, 'utf8');
-	str = buf7.toString("hex");
-	arktest.assertEQ(str, "4631e5889846474631e5");
+	str = buf7.toString('hex');
+	arktest.assertEQ(str, '4631e5889846474631e5');
 }
 
 
@@ -240,31 +326,40 @@ function testBufferTranscode0003() {
 }
 
 function main(): int {
-	let suite = new arktest.ArkTestsuite("URL UT tests");
-	suite.addTest("testCopy0160", testCopy0160);
-	suite.addTest("testCopy0161", testCopy0161);
-	suite.addTest("testBufferCopy0002", testBufferCopy0002);
-	suite.addTest("testBufferCopy0006", testBufferCopy0006);
-	suite.addTest("testBufferCopy0012", testBufferCopy0012);
-	suite.addTest("testCopy0148", testCopy0148);
-	suite.addTest("testCopy0149", testCopy0149);
-	suite.addTest("testBufferCopy0018", testBufferCopy0018);
-	suite.addTest("testBufferWrite0004", testBufferWrite0004);
-	suite.addTest("testBufferWrite0005", testBufferWrite0005);
-	suite.addTest("testBufferWrite0006", testBufferWrite0006);
-	suite.addTest("testBufferWrite0020", testBufferWrite0020);
-	suite.addTest("testBufferWrite0024", testBufferWrite0024);
-	suite.addTest("testBufferWrite0026", testBufferWrite0026);
-	suite.addTest("testBufferConcat0005", testBufferConcat0005);
-	suite.addTest("testBufferConcat0006", testBufferConcat0006);
-	suite.addTest("testBufferConcat0007", testBufferConcat0007);
-	suite.addTest("testBufferConcat0009", testBufferConcat0009);
-	suite.addTest("testBufferFill0007", testBufferFill0007);
-	suite.addTest("testBufferFill0016", testBufferFill0016);
-	suite.addTest("testBufferFill0017", testBufferFill0017);
-	suite.addTest("testBufferFill0018", testBufferFill0018);
-	suite.addTest("testFill0091", testFill0091);
-	suite.addTest("testBufferTranscode0003", testBufferTranscode0003);
+	let suite = new arktest.ArkTestsuite('URL UT tests');
+	suite.addTest('testCopy0160', testCopy0160);
+	suite.addTest('testCopy0161', testCopy0161);
+	suite.addTest('testBufferCopy0002', testBufferCopy0002);
+	suite.addTest('testBufferCopy0006', testBufferCopy0006);
+	suite.addTest('testBufferCopy0012', testBufferCopy0012);
+	suite.addTest('testCopy0148', testCopy0148);
+	suite.addTest('testCopy0149', testCopy0149);
+	suite.addTest('testBufferCopy0018', testBufferCopy0018);
+	suite.addTest('testBufferWrite0004', testBufferWrite0004);
+	suite.addTest('testBufferWrite0005', testBufferWrite0005);
+	suite.addTest('testBufferWrite0006', testBufferWrite0006);
+	suite.addTest('testBufferWrite0020', testBufferWrite0020);
+	suite.addTest('testBufferWrite0024', testBufferWrite0024);
+	suite.addTest('testBufferWrite0026', testBufferWrite0026);
+	suite.addTest('testBufferConcat0005', testBufferConcat0005);
+	suite.addTest('testBufferConcat0006', testBufferConcat0006);
+	suite.addTest('testBufferConcat0007', testBufferConcat0007);
+	suite.addTest('testBufferConcat0009', testBufferConcat0009);
+	suite.addTest('testBufferConcatBasic', testBufferConcatBasic);
+	suite.addTest('testBufferConcatWithTotalLength', testBufferConcatWithTotalLength);
+	suite.addTest('testBufferConcatTotalLengthLarger', testBufferConcatTotalLengthLarger);
+	suite.addTest('testBufferConcatEmptyList', testBufferConcatEmptyList);
+	suite.addTest('testBufferConcatSingleBuffer', testBufferConcatSingleBuffer);
+	suite.addTest('testBufferConcatBufferWithByteOffset', testBufferConcatBufferWithByteOffset);
+	suite.addTest('testBufferConcatUint8Array', testBufferConcatUint8Array);
+	suite.addTest('testBufferConcatUint8ArrayWithByteOffset', testBufferConcatUint8ArrayWithByteOffset);
+	suite.addTest('testBufferConcatResultNotShared', testBufferConcatResultNotShared);
+	suite.addTest('testBufferFill0007', testBufferFill0007);
+	suite.addTest('testBufferFill0016', testBufferFill0016);
+	suite.addTest('testBufferFill0017', testBufferFill0017);
+	suite.addTest('testBufferFill0018', testBufferFill0018);
+	suite.addTest('testFill0091', testFill0091);
+	suite.addTest('testBufferTranscode0003', testBufferTranscode0003);
 
 	return suite.run();
 }

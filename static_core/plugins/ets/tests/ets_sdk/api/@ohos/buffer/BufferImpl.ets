@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,110 +13,133 @@
  * limitations under the License.
  */
 
-import buffer from "@ohos.buffer"
-import { jsonx } from "std/core"
+import buffer from '@ohos.buffer'
+import { jsonx } from 'std/core'
 import { BusinessError } from '@ohos.base';
 
 
 function main(): int {
-    const suite = new arktest.ArkTestsuite("Buffer API tests")
+    const suite = new arktest.ArkTestsuite('Buffer API tests')
 
-    suite.addTest("Test basic string encodings", testBasicStringEncodings)
-    suite.addTest("Test Unicode string handling", testUnicodeString)
-    suite.addTest("Test partial buffer reading", testPartialBufferReading)
-    suite.addTest("Test mixed content handling", testMixedContent)
-    suite.addTest("Test numbers handling", testNumbersHandling)
-    suite.addTest("Test special characters", testSpecialCharacters)
-    suite.addTest("Test edge cases", testEdgeCases)
-    suite.addTest("Test all supported encodings", testAllSupportedEncodings)
+    suite.addTest('Test basic string encodings', testBasicStringEncodings)
+    suite.addTest('Test Unicode string handling', testUnicodeString)
+    suite.addTest('Test partial buffer reading', testPartialBufferReading)
+    suite.addTest('Test mixed content handling', testMixedContent)
+    suite.addTest('Test numbers handling', testNumbersHandling)
+    suite.addTest('Test special characters', testSpecialCharacters)
+    suite.addTest('Test edge cases', testEdgeCases)
+    suite.addTest('Test all supported encodings', testAllSupportedEncodings)
 
-    suite.addTest("Test byteLength with ASCII string", testByteLengthAscii)
-    suite.addTest("Test byteLength with UTF8 string", testByteLengthUtf8)
-    suite.addTest("Test byteLength with special characters", testByteLengthSpecialChars)
-    suite.addTest("Test byteLength with TypedArrays", testByteLengthTypedArrays)
-    suite.addTest("Test byteLength with Buffer and Views", testByteLengthBufferAndViews)
-    suite.addTest("Test byteOffset", testByteOffset)
+    suite.addTest('Test byteLength with ASCII string', testByteLengthAscii)
+    suite.addTest('Test byteLength with UTF8 string', testByteLengthUtf8)
+    suite.addTest('Test byteLength with special characters', testByteLengthSpecialChars)
+    suite.addTest('Test byteLength with TypedArrays', testByteLengthTypedArrays)
+    suite.addTest('Test byteLength with Buffer and Views', testByteLengthBufferAndViews)
+    suite.addTest('Test byteOffset', testByteOffset)
+    suite.addTest('Test constructor negative byteLength', testConstructorNegativeByteLength)
+    suite.addTest('Test constructor byteLength overflow', testConstructorByteLengthOverflow)
+    suite.addTest('Test constructor empty buffer byteOffset', testConstructorEmptyBufferByteOffset)
 
-    suite.addTest("Test buffer.from with number array", testFromArray)
-    suite.addTest("Test buffer.from with ArrayBuffer", testFromArrayBuffer)
-    suite.addTest("Test buffer.from with Uint8Array", testFromUint8Array)
-    suite.addTest("Test buffer.from with Buffer/Uint8Array", testFromBufferOrUint8Array)
-    suite.addTest("Test buffer.from with string", testFromString)
-    suite.addTest("Test buffer.from with string and base64 encoding", testFromStringWithBase64Encoding)
-    suite.addTest("Test buffer.from with string with invalid length", testFromStringWithInvalidLength)
-    suite.addTest("Test buffer.from with invalid base64 chars", testFromStringWithInvalidBase64Chars)
-    suite.addTest("Test buffer.from with invalid base64url chars", testFromStringWithInvalidBase64UrlChars)
-    suite.addTest("Test buffer.from with invalid hex chars", testFromStringWithInvalidHexChars)
-    suite.addTest("Test buffer.from with invalid ascii chars", testFromStringWithInvalidAsciiChars)
-    suite.addTest("Test buffer.from with invalid utf8 chars", testFromStringWithInvalidUtf8Chars)
-    suite.addTest("Test buffer.from with invalid latin1 chars", testFromStringWithInvalidLatin1Chars)
+    suite.addTest('Test buffer.from with number array', testFromArray)
+    suite.addTest('Test buffer.from with ArrayBuffer', testFromArrayBuffer)
+    suite.addTest('Test buffer.from with Uint8Array', testFromUint8Array)
+    suite.addTest('Test buffer.from with Buffer/Uint8Array', testFromBufferOrUint8Array)
+    suite.addTest('Test buffer.from with string', testFromString)
+    suite.addTest('Test buffer.from with string and base64 encoding', testFromStringWithBase64Encoding)
+    suite.addTest('Test buffer.from with string with invalid length', testFromStringWithInvalidLength)
+    suite.addTest('Test buffer.from with invalid base64 chars', testFromStringWithInvalidBase64Chars)
+    suite.addTest('Test buffer.from with invalid base64url chars', testFromStringWithInvalidBase64UrlChars)
+    suite.addTest('Test buffer.from with invalid hex chars', testFromStringWithInvalidHexChars)
+    suite.addTest('Test buffer.from with invalid ascii chars', testFromStringWithInvalidAsciiChars)
+    suite.addTest('Test buffer.from with invalid utf8 chars', testFromStringWithInvalidUtf8Chars)
+    suite.addTest('Test buffer.from with invalid latin1 chars', testFromStringWithInvalidLatin1Chars)
 
-    suite.addTest("Test alloc", testAlloc)
-    suite.addTest("Test allocUninitialized", testAllocUninitialized)
-    suite.addTest("Test allocUninitializedFromPool", testAllocUninitializedFromPool)
-    suite.addTest("Test compare", testCompare)
-    suite.addTest("Test concat", testConcat)
-    suite.addTest("Test isBuffer", testIsBuffer)
-    suite.addTest("Test isEncoding", testIsEncoding)
-    suite.addTest("Test transcode", testTranscode)
-    suite.addTest("Test Buffer.compare", testBufferCompare)
-    suite.addTest("Test Buffer.compare with Buffer/Uint8Array", testBufferCompareUint8Array)
-    suite.addTest("Test Buffer.copy", testBufferCopy)
-    suite.addTest("Test Buffer.copy with params", testBufferCopyWithParams)
-    suite.addTest("Test Buffer.copy with params 1", testBufferCopyWithParams1)
-    suite.addTest("Test Buffer.copy with params 2", testBufferCopyWithParams2)
-    suite.addTest("Test Buffer.copy with undefined", testBufferCopyWithUndefined)
-    suite.addTest("Test entries", testEntries)
-    suite.addTest("Test equals", testEquals)
-    suite.addTest("Test fill", testFill)
-    suite.addTest("Test fill hex", testFillHex);
-    suite.addTest("Test fill empty", testFillEmpty);
-    suite.addTest("Test fill ascii with unicode", testFillAsciiWithUnicode)
-    suite.addTest("Test fill utf8 with unicode", testFillUtf8WithUnicode)
-    suite.addTest("Test fill base64 with unicode", testFillBase64WithUnicode)
-    suite.addTest("Test fill base64url with unicode", testFillBase64UrlWithUnicode)
-    suite.addTest("Test fill ucs2 with unicode", testFillUcs2WithUnicode)
-    suite.addTest("Test fill utf16le with unicode", testFillUtf16leWithUnicode);
-    suite.addTest("Test includes hex", testIncludesHex);
-    suite.addTest("Test from hex", testFromHex);
-    suite.addTest("Test keys", testKeys)
-    suite.addTest("Test subarray", testSubarray)
-    suite.addTest("Test swap16", testSwap16)
-    suite.addTest("Test swap32", testSwap32)
-    suite.addTest("Test swap64", testSwap64)
-    suite.addTest("Test values", testValues)
+    suite.addTest('Test alloc', testAlloc)
+    suite.addTest('Test allocUninitialized', testAllocUninitialized)
+    suite.addTest('Test allocUninitializedFromPool', testAllocUninitializedFromPool)
+    suite.addTest('Test compare', testCompare)
+    suite.addTest('Test compare different length', testCompareDifferentLength)
+    suite.addTest('Test compare unsigned byte', testCompareUnsignedByte)
+    suite.addTest('Test compare with byteOffset', testCompareWithByteOffset)
+    suite.addTest('Test concat', testConcat)
+    suite.addTest('Test isBuffer', testIsBuffer)
+    suite.addTest('Test isEncoding', testIsEncoding)
+    suite.addTest('Test transcode', testTranscode)
+    suite.addTest('Test Buffer.compare', testBufferCompare)
+    suite.addTest('Test Buffer.compare with Buffer/Uint8Array', testBufferCompareUint8Array)
+    suite.addTest('Test Buffer.compare unsigned byte', testBufferCompareUnsignedByte)
+    suite.addTest('Test Buffer.compare with byteOffset', testBufferCompareWithByteOffset)
+    suite.addTest('Test Buffer.compare Uint8Array target byteOffset', testBufferCompareUint8ArrayTargetByteOffset)
+    suite.addTest('Test Buffer.copy', testBufferCopy)
+    suite.addTest('Test Buffer.copy with params', testBufferCopyWithParams)
+    suite.addTest('Test Buffer.copy with params 1', testBufferCopyWithParams1)
+    suite.addTest('Test Buffer.copy with params 2', testBufferCopyWithParams2)
+    suite.addTest('Test Buffer.copy with undefined', testBufferCopyWithUndefined)
+    suite.addTest('Test Buffer.copy target bounds with byteOffset', testBufferCopyTargetBoundsWithByteOffset)
+    suite.addTest('Test Buffer.copy sourceEnd clamp with byteOffset', testBufferCopySourceEndClampWithByteOffset)
+    suite.addTest('Test Buffer.copy self overlap', testBufferCopySelfOverlap)
+    suite.addTest('Test Buffer.copy self forward', testBufferCopySelfForward)
+    suite.addTest('Test entries', testEntries)
+    suite.addTest('Test equals', testEquals)
+    suite.addTest('Test fill', testFill)
+    suite.addTest('Test write with byteOffset', testWriteWithByteOffset)
+    suite.addTest('Test write with byteOffset and offset', testWriteWithByteOffsetAndOffset)
+    suite.addTest('Test writeUInt32LE with byteOffset', testWriteUInt32LEWithByteOffset)
+    suite.addTest('Test writeUInt32LE with byteOffset and offset', testWriteUInt32LEWithByteOffsetAndOffset)
+    suite.addTest('Test fill hex', testFillHex);
+    suite.addTest('Test fill empty', testFillEmpty);
+    suite.addTest('Test fill ascii with unicode', testFillAsciiWithUnicode)
+    suite.addTest('Test fill utf8 with unicode', testFillUtf8WithUnicode)
+    suite.addTest('Test fill base64 with unicode', testFillBase64WithUnicode)
+    suite.addTest('Test fill base64url with unicode', testFillBase64UrlWithUnicode)
+    suite.addTest('Test fill ucs2 with unicode', testFillUcs2WithUnicode)
+    suite.addTest('Test fill utf16le with unicode', testFillUtf16leWithUnicode);
+    suite.addTest('Test fill with byteOffset', testFillWithByteOffset);
+    suite.addTest('Test fill with byteOffset and offset/end', testFillWithByteOffsetAndOffset);
+    suite.addTest('Test includes hex', testIncludesHex);
+    suite.addTest('Test from hex', testFromHex);
+    suite.addTest('Test keys', testKeys)
+    suite.addTest('Test subarray', testSubarray)
+    suite.addTest('Test subarray shared', testSubarrayShared)
+    suite.addTest('Test subarray with byteOffset', testSubarrayWithByteOffset)
+    suite.addTest('Test subarray negative with byteOffset', testSubarrayNegativeWithByteOffset)
+    suite.addTest('Test subarray undefined with byteOffset', testSubarrayUndefinedWithByteOffset)
+    suite.addTest('Test swap16', testSwap16)
+    suite.addTest('Test swap32', testSwap32)
+    suite.addTest('Test swap64', testSwap64)
+    suite.addTest('Test values', testValues)
 
-    suite.addTest("Test Int8 read/write", testInt8ReadWrite)
-    suite.addTest("Test Int16 BE/LE read/write", testInt16ReadWrite)
-    suite.addTest("Test Int32 BE/LE read/write", testInt32ReadWrite)
-    suite.addTest("Test UInt8 read/write", testUInt8ReadWrite)
-    suite.addTest("Test UInt16 BE/LE read/write", testUInt16ReadWrite)
-    suite.addTest("Test UInt32 BE/LE read/write", testUInt32ReadWrite)
-    suite.addTest("Test Float BE/LE read/write", testFloatReadWrite)
-    suite.addTest("Test Double BE/LE read/write", testDoubleReadWrite)
-    suite.addTest("Test BigInt64 BE/LE read/write", testBigInt64ReadWrite)
-    suite.addTest("Test BigUInt64 BE/LE read/write", testBigUInt64ReadWrite)
-    suite.addTest("Test variable length Int BE/LE read/write", testVarLengthIntReadWrite)
-    suite.addTest("Test variable length UInt BE/LE read/write", testVarLengthUIntReadWrite)
-    suite.addTest("Test string write", testStringWrite)
-    suite.addTest("Test string write with invalid encoding", testBufferWrite0022)
-    suite.addTest("Test string write base64", testBufferWriteStringBase64)
-    suite.addTest("Test string write single parameter", testBufferWriteStringSingleParam)
-    suite.addTest("Test string write with infinity length",  testBufferWriteStringInfinity)
-    suite.addTest("Test string write wrong offset", testBufferWriteStringWrongOffset)
-    suite.addTest("Test string write out range offset", testBufferWriteStringOutRangeOffset)
-    suite.addTest("Test string write out range length", testBufferWriteStringOutRangeLength)
-    suite.addTest("Test buffer from string in base64", testBufferFrom40002)
-    suite.addTest("Test buffer from string in utf8", testBufferFrom30006)
-    suite.addTest("Test buffer from Uint8Array in base64url", testBufferBase64Url)
-    suite.addTest("Test UInt32 BE write", testUInt32BEWrite)
-    suite.addTest("Test UInt32 LE write", testUInt32LEWrite)
-    suite.addTest("Test UInt BE write", testUIntBEWrite)
-    suite.addTest("Test UInt LE write", testUIntLEWrite)
+    suite.addTest('Test Int8 read/write', testInt8ReadWrite)
+    suite.addTest('Test Int16 BE/LE read/write', testInt16ReadWrite)
+    suite.addTest('Test Int32 BE/LE read/write', testInt32ReadWrite)
+    suite.addTest('Test UInt8 read/write', testUInt8ReadWrite)
+    suite.addTest('Test UInt16 BE/LE read/write', testUInt16ReadWrite)
+    suite.addTest('Test UInt32 BE/LE read/write', testUInt32ReadWrite)
+    suite.addTest('Test Float BE/LE read/write', testFloatReadWrite)
+    suite.addTest('Test Double BE/LE read/write', testDoubleReadWrite)
+    suite.addTest('Test BigInt64 BE/LE read/write', testBigInt64ReadWrite)
+    suite.addTest('Test BigUInt64 BE/LE read/write', testBigUInt64ReadWrite)
+    suite.addTest('Test variable length Int BE/LE read/write', testVarLengthIntReadWrite)
+    suite.addTest('Test variable length UInt BE/LE read/write', testVarLengthUIntReadWrite)
+    suite.addTest('Test string write', testStringWrite)
+    suite.addTest('Test string write with invalid encoding', testBufferWrite0022)
+    suite.addTest('Test string write base64', testBufferWriteStringBase64)
+    suite.addTest('Test string write single parameter', testBufferWriteStringSingleParam)
+    suite.addTest('Test string write with infinity length',  testBufferWriteStringInfinity)
+    suite.addTest('Test string write wrong offset', testBufferWriteStringWrongOffset)
+    suite.addTest('Test string write out range offset', testBufferWriteStringOutRangeOffset)
+    suite.addTest('Test string write out range length', testBufferWriteStringOutRangeLength)
+    suite.addTest('Test buffer from string in base64', testBufferFrom40002)
+    suite.addTest('Test buffer from string in utf8', testBufferFrom30006)
+    suite.addTest('Test buffer from Uint8Array in base64url', testBufferBase64Url)
+    suite.addTest('Test UInt32 BE write', testUInt32BEWrite)
+    suite.addTest('Test UInt32 LE write', testUInt32LEWrite)
+    suite.addTest('Test UInt BE write', testUIntBEWrite)
+    suite.addTest('Test UInt LE write', testUIntLEWrite)
 
-    suite.addTest("Test buffer toJSON", testBufferToJSON)
-    suite.addTest("Test readIntLE, readUIntLE, readIntBE, readUIntBE", testReadIntUintLEBE)
-    suite.addTest("Test buffer.from, toString, transcode", testBufferToString00001)
+    suite.addTest('Test buffer toJSON', testBufferToJSON)
+    suite.addTest('Test readIntLE, readUIntLE, readIntBE, readUIntBE', testReadIntUintLEBE)
+    suite.addTest('Test buffer.from, toString, transcode', testBufferToString00001)
     return suite.run()
 }
 
@@ -151,37 +174,37 @@ function testByteLengthSpecialChars() {
 
 function testByteLengthTypedArrays() {
     const int8Array = new Int8Array([1, 2, 3, 4])
-    arktest.assertEQ(buffer.byteLength(int8Array), 4, "int8Array byteLength is not 4")
+    arktest.assertEQ(buffer.byteLength(int8Array), 4, 'int8Array byteLength is not 4')
 
     const uint8Array = new Uint8Array([1, 2, 3, 4])
-    arktest.assertEQ(buffer.byteLength(uint8Array), 4, "uint8Array byteLength is not 4")
+    arktest.assertEQ(buffer.byteLength(uint8Array), 4, 'uint8Array byteLength is not 4')
 
     const uint8ClampedArray = new Uint8ClampedArray([1, 2, 3, 4])
-    arktest.assertEQ(buffer.byteLength(uint8ClampedArray), 4, "uint8ClampedArray byteLength is not 4")
+    arktest.assertEQ(buffer.byteLength(uint8ClampedArray), 4, 'uint8ClampedArray byteLength is not 4')
 
     const int16Array = new Int16Array([1, 2, 3, 4])
-    arktest.assertEQ(buffer.byteLength(int16Array), 8, "int16Array byteLength is not 8")
+    arktest.assertEQ(buffer.byteLength(int16Array), 8, 'int16Array byteLength is not 8')
 
     const uint16Array = new Uint16Array([1, 2, 3, 4])
-    arktest.assertEQ(buffer.byteLength(uint16Array), 8, "uint16Array byteLength is not 8")
+    arktest.assertEQ(buffer.byteLength(uint16Array), 8, 'uint16Array byteLength is not 8')
 
     const int32Array = new Int32Array([1, 2, 3, 4])
-    arktest.assertEQ(buffer.byteLength(int32Array), 16, "int32Array byteLength is not 16")
+    arktest.assertEQ(buffer.byteLength(int32Array), 16, 'int32Array byteLength is not 16')
 
     const uint32Array = new Uint32Array([1, 2, 3, 4])
-    arktest.assertEQ(buffer.byteLength(uint32Array), 16, "uint32Array byteLength is not 16")
+    arktest.assertEQ(buffer.byteLength(uint32Array), 16, 'uint32Array byteLength is not 16')
 
     const float32Array = new Float32Array([1, 2, 3, 4])
-    arktest.assertEQ(buffer.byteLength(float32Array), 16, "float32Array byteLength is not 16")
+    arktest.assertEQ(buffer.byteLength(float32Array), 16, 'float32Array byteLength is not 16')
 
     const float64Array = new Float64Array([1, 2, 3, 4])
-    arktest.assertEQ(buffer.byteLength(float64Array), 32, "float64Array byteLength is not 32")
+    arktest.assertEQ(buffer.byteLength(float64Array), 32, 'float64Array byteLength is not 32')
 
     const bigInt64Array = new BigInt64Array([1, 2, 3, 4])
-    arktest.assertEQ(buffer.byteLength(bigInt64Array), 32, "bigInt64Array byteLength is not 32")
+    arktest.assertEQ(buffer.byteLength(bigInt64Array), 32, 'bigInt64Array byteLength is not 32')
 
     const bigUint64Array = new BigUint64Array([1, 2, 3, 4])
-    arktest.assertEQ(buffer.byteLength(bigUint64Array), 32, "bigUint64Array byteLength is not 32")
+    arktest.assertEQ(buffer.byteLength(bigUint64Array), 32, 'bigUint64Array byteLength is not 32')
 }
 
 function testByteLengthBufferAndViews() {
@@ -200,7 +223,7 @@ function testFromArray() {
     const arr: number[] = [72, 101, 108, 108, 111] // "Hello" in ASCII
     const buf = buffer.from(arr)
     arktest.assertEQ(buf.length, 5)
-    arktest.assertEQ(buf.toString('ascii'), "Hello")
+    arktest.assertEQ(buf.toString('ascii'), 'Hello')
 
     const singular: number[] = [256, 300, -1, 255]
     const truncatedBuf = buffer.from(singular)
@@ -218,15 +241,15 @@ function testFromArrayBuffer() {
 
     const buf1 = buffer.from(arrayBuffer)
     arktest.assertEQ(buf1.length, 5)
-    arktest.assertEQ(buf1.toString('ascii'), "Hello")
+    arktest.assertEQ(buf1.toString('ascii'), 'Hello')
 
     const buf2 = buffer.from(arrayBuffer, 1)
     arktest.assertEQ(buf2.length, 4)
-    arktest.assertEQ(buf2.toString('ascii'), "ello")
+    arktest.assertEQ(buf2.toString('ascii'), 'ello')
 
     const buf3 = buffer.from(arrayBuffer as Object, 1 as int, 2 as int)
     arktest.assertEQ(buf3.length, 2)
-    arktest.assertEQ(buf3.toString('ascii'), "el")
+    arktest.assertEQ(buf3.toString('ascii'), 'el')
 }
 
 function testFromBufferOrUint8Array() {
@@ -238,7 +261,7 @@ function testFromBufferOrUint8Array() {
     const uint8Arr = new Uint8Array([72, 101, 108, 108, 111])
     const bufFromUint8 = buffer.from(uint8Arr)
     arktest.assertEQ(bufFromUint8.length, uint8Arr.length)
-    arktest.assertEQ(bufFromUint8.toString('ascii'), "Hello")
+    arktest.assertEQ(bufFromUint8.toString('ascii'), 'Hello')
 
     let b: ArrayBuffer = new ArrayBuffer(7);
     for (let i: int = 0; i < b.getByteLength(); ++i) {
@@ -250,12 +273,12 @@ function testFromBufferOrUint8Array() {
     arktest.assertEQ(bufOffset.at(2), 5)
     arktest.assertEQ(bufOffset.at(3), 6)
     arktest.assertEQ(bufOffset.length, 4)
-    arktest.assertEQ(bufOffset.byteOffset, 0)
+    arktest.assertEQ(bufOffset.byteOffset, 3)
 
-    let ab1 = ArrayBuffer.from("1236", "utf-8")
+    let ab1 = ArrayBuffer.from('1236', 'utf-8')
     arktest.assertEQ(ab1.byteLength, 4)
 
-    let buf = buffer.from("1236")
+    let buf = buffer.from('1236')
     let ab = buf.buffer
     arktest.assertEQ(ab.byteLength, 4)
     arktest.assertEQ(buf.length, 4)
@@ -263,7 +286,7 @@ function testFromBufferOrUint8Array() {
     arktest.assertEQ(arr.length, 4)
 
     let a = new Uint8Array(buf.buffer, buf.byteOffset, buf.length);
-    arktest.assertEQ(a.toString(), "49,50,51,54")
+    arktest.assertEQ(a.toString(), '49,50,51,54')
 }
 
 function testFromUint8Array() {
@@ -276,7 +299,7 @@ function testFromUint8Array() {
 }
 
 function testFromString() {
-    const str = "Hello, World!"
+    const str = 'Hello, World!'
     const buf1 = buffer.from(str)
     arktest.assertEQ(buf1.toString(), str)
 
@@ -302,42 +325,42 @@ function testFromStringWithInvalidLength() {
 }
 
 function testFromStringWithInvalidBase64Chars() {
-    const raw = "S G V sb G8="
+    const raw = 'S G V sb G8='
     const buf = buffer.from(raw, 'base64')
     arktest.assertEQ(buf.toString('utf8'), 'Hello')
 }
 
 function testFromStringWithInvalidBase64UrlChars() {
-    const raw = "V G V zd DE yMw?"
+    const raw = 'V G V zd DE yMw?'
     const buf = buffer.from(raw, 'base64url')
     arktest.assertEQ(buf.toString('utf8'), 'Test123')
 }
 
 function testFromStringWithInvalidHexChars() {
-    const buf = buffer.from("ffffhj", "hex")
-    const buf2 = buffer.from("hjffff", "hex")
+    const buf = buffer.from('ffffhj', 'hex')
+    const buf2 = buffer.from('hjffff', 'hex')
     arktest.assertEQ(buf.length, 2)
-    arktest.assertEQ(buf.toString("hex"), "ffff")
+    arktest.assertEQ(buf.toString('hex'), 'ffff')
     arktest.assertEQ(buf2.length, 0)
-    arktest.assertEQ(buf2.toString("hex"), "")
+    arktest.assertEQ(buf2.toString('hex'), '')
 }
 
 function testFromStringWithInvalidAsciiChars() {
-    const buf = buffer.from("Héllo", "ascii")
+    const buf = buffer.from('Héllo', 'ascii')
     arktest.assertEQ(buf.length, 5)
-    arktest.assertEQ(buf.toString("ascii"), "Hillo")
+    arktest.assertEQ(buf.toString('ascii'), 'Hillo')
 }
 
 function testFromStringWithInvalidUtf8Chars() {
     const raw = '\uD800'
-    const buf = buffer.from(raw, "utf8")
+    const buf = buffer.from(raw, 'utf8')
     arktest.assertEQ(buf.length, 3)
-    arktest.assertEQ(buf.toString("utf8"), '\uFFFD')
+    arktest.assertEQ(buf.toString('utf8'), '\uFFFD')
 }
 
 function testFromStringWithInvalidLatin1Chars() {
-    const raw = "F1FG刘"
-    const buf = buffer.from(raw, "latin1");
+    const raw = 'F1FG刘'
+    const buf = buffer.from(raw, 'latin1');
     const bufLength = buf.length.toInt();
     arktest.assertEQ(bufLength, 5);
     arktest.assertEQ(buf.at(0), 70);
@@ -450,6 +473,48 @@ function testCompare() {
     arktest.assertEQ(buffer.compare(buf1, buf1), 0);
 }
 
+function testCompareDifferentLength() {
+    const short1 = buffer.from([1]);
+    const long1 = buffer.from([1, 2]);
+    arktest.assertEQ(buffer.compare(short1, long1), -1);
+    arktest.assertEQ(buffer.compare(long1, short1), 1);
+
+    const short2 = buffer.from([2]);
+    const long2 = buffer.from([1, 2]);
+    arktest.assertEQ(buffer.compare(short2, long2), 1);
+    arktest.assertEQ(buffer.compare(long2, short2), -1);
+}
+
+function testCompareUnsignedByte() {
+    const buf1 = buffer.from([0x80])
+    const buf2 = buffer.from([0x7F])
+    arktest.assertEQ(buffer.compare(buf1, buf2), 1)
+
+    const buf3 = buffer.from([0xFF])
+    const buf4 = buffer.from([0x00])
+    arktest.assertEQ(buffer.compare(buf3, buf4), 1)
+}
+
+function testCompareWithByteOffset() {
+    const ab1 = new ArrayBuffer(10)
+    const u8_1 = new Uint8Array(ab1)
+    for (let i = 0; i < 10; i++) { u8_1[i] = i + 1 }
+    const buf1 = buffer.from(ab1, 3, 4)
+
+    const ab2 = new ArrayBuffer(10)
+    const u8_2 = new Uint8Array(ab2)
+    for (let i = 0; i < 10; i++) { u8_2[i] = i + 1 }
+    const buf2 = buffer.from(ab2, 3, 4)
+
+    arktest.assertEQ(buffer.compare(buf1, buf2), 0)
+
+    buf2[2] = 99
+    arktest.assertEQ(buffer.compare(buf1, buf2), -1)
+
+    buf1[2] = 100
+    arktest.assertEQ(buffer.compare(buf1, buf2), 1)
+}
+
 function testConcat() {
     const buf1 = buffer.alloc(5, 'a');
     const buf2 = buffer.alloc(5, 'b');
@@ -482,64 +547,64 @@ function testTranscode() {
     }
 
     // 1. ascii → hex
-    let b1 = buffer.from("Hello, World!", "ascii");
-    let b1_hex = buffer.transcode(b1, "ascii", "hex");
-    arktest.assertEQ(b1_hex.toString("hex"), "", "Case (1) failed: ascii -> hex");
+    let b1 = buffer.from('Hello, World!', 'ascii');
+    let b1_hex = buffer.transcode(b1, 'ascii', 'hex');
+    arktest.assertEQ(b1_hex.toString('hex'), '', 'Case (1) failed: ascii -> hex');
 
     // 2. hex → base64
-    let b2 = buffer.from("48656c6c6f2c20576f726c6421", "hex");
-    let b2_b64 = buffer.transcode(b2, "hex", "base64");
-    arktest.assertEQ(b2_b64.toString("base64"), "48656c6c6f2c20576f726c642w==", "Case (2) failed: hex -> base64");
+    let b2 = buffer.from('48656c6c6f2c20576f726c6421', 'hex');
+    let b2_b64 = buffer.transcode(b2, 'hex', 'base64');
+    arktest.assertEQ(b2_b64.toString('base64'), '48656c6c6f2c20576f726c642w==', 'Case (2) failed: hex -> base64');
 
     // 3. base64 → utf8
-    let b3 = buffer.from("SGVsbG8sIFdvcmxkIQ==", "base64");
-    let b3_utf8 = buffer.transcode(b3, "base64", "utf8");
-    arktest.assertEQ(b3_utf8.toString("utf8"), "SGVsbG8sIFdvcmxkIQ==", "Case (3) failed: base64 -> utf8");
-    checkInvariant(b3, "base64", "utf8");
+    let b3 = buffer.from('SGVsbG8sIFdvcmxkIQ==', 'base64');
+    let b3_utf8 = buffer.transcode(b3, 'base64', 'utf8');
+    arktest.assertEQ(b3_utf8.toString('utf8'), 'SGVsbG8sIFdvcmxkIQ==', 'Case (3) failed: base64 -> utf8');
+    checkInvariant(b3, 'base64', 'utf8');
 
     // 4. utf8 → hex
-    let b4 = buffer.from("Привет", "utf8");
-    let b4_hex = buffer.transcode(b4, "utf8", "hex");
-    arktest.assertEQ(b4_hex.toString("hex"), "", "Case (4) failed: utf8 -> hex");
+    let b4 = buffer.from('Привет', 'utf8');
+    let b4_hex = buffer.transcode(b4, 'utf8', 'hex');
+    arktest.assertEQ(b4_hex.toString('hex'), '', 'Case (4) failed: utf8 -> hex');
 
     // 5. latin1 → utf8
-    let b5 = buffer.from("abc", "latin1");
-    let b5_utf8 = buffer.transcode(b5, "latin1", "utf8");
-    arktest.assertEQ(b5_utf8.toString("utf8"), "abc", "Case (5) failed: latin1 -> utf8");
-    checkInvariant(b5, "latin1", "utf8");
+    let b5 = buffer.from('abc', 'latin1');
+    let b5_utf8 = buffer.transcode(b5, 'latin1', 'utf8');
+    arktest.assertEQ(b5_utf8.toString('utf8'), 'abc', 'Case (5) failed: latin1 -> utf8');
+    checkInvariant(b5, 'latin1', 'utf8');
 
     // 6. ascii → base64url
-    let b6 = buffer.from("Hello-World_", "ascii");
-    let b6_b64url = buffer.transcode(b6, "ascii", "base64url");
-    arktest.assertEQ(b6_b64url.toString("base64url"), "Hello-World_", "Case (6) failed: ascii -> base64url");
-    checkInvariant(b6, "ascii", "base64url");
+    let b6 = buffer.from('Hello-World_', 'ascii');
+    let b6_b64url = buffer.transcode(b6, 'ascii', 'base64url');
+    arktest.assertEQ(b6_b64url.toString('base64url'), 'Hello-World_', 'Case (6) failed: ascii -> base64url');
+    checkInvariant(b6, 'ascii', 'base64url');
 
     // 7. base64url → base64
-    let b7 = buffer.from("SGVsbG8tV29ybGRf", "base64url");
-    let b7_b64 = buffer.transcode(b7, "base64url", "base64");
-    arktest.assertEQ(b7_b64.toString("base64"), "SGVsbG8tV29ybGRf", "Case (7) failed: base64url -> base64");
-    checkInvariant(b7, "base64url", "base64");
+    let b7 = buffer.from('SGVsbG8tV29ybGRf', 'base64url');
+    let b7_b64 = buffer.transcode(b7, 'base64url', 'base64');
+    arktest.assertEQ(b7_b64.toString('base64'), 'SGVsbG8tV29ybGRf', 'Case (7) failed: base64url -> base64');
+    checkInvariant(b7, 'base64url', 'base64');
 
     // 8. hex → ascii
-    let b8 = buffer.from("48656c6c6f", "hex");
-    let b8_ascii = buffer.transcode(b8, "hex", "ascii");
-    arktest.assertEQ(b8_ascii.toString("ascii"), "48656c6c6f", "Case (8) failed: hex -> ascii");
-    checkInvariant(b8, "hex", "ascii");
+    let b8 = buffer.from('48656c6c6f', 'hex');
+    let b8_ascii = buffer.transcode(b8, 'hex', 'ascii');
+    arktest.assertEQ(b8_ascii.toString('ascii'), '48656c6c6f', 'Case (8) failed: hex -> ascii');
+    checkInvariant(b8, 'hex', 'ascii');
 
     // 9. base64 → hex
-    let b9 = buffer.from("4pyTIMOgIGV4YW1wbGU=", "base64");
-    let b9_hex = buffer.transcode(b9, "base64", "hex");
-    arktest.assertEQ(b9_hex.toString("hex"), "", "Case (9) failed: base64 -> hex");
+    let b9 = buffer.from('4pyTIMOgIGV4YW1wbGU=', 'base64');
+    let b9_hex = buffer.transcode(b9, 'base64', 'hex');
+    arktest.assertEQ(b9_hex.toString('hex'), '', 'Case (9) failed: base64 -> hex');
 
     //10. utf-8 → ascii
     {
         let newBuf = buffer.transcode(buffer.from('€'), 'utf-8', 'ascii')
-        arktest.assertEQ(newBuf.toString(), '?', "Case (10) failed: utf-8 -> ascii")
+        arktest.assertEQ(newBuf.toString(), '?', 'Case (10) failed: utf-8 -> ascii')
     }
 
     {
         let newBuf = buffer.transcode(buffer.from('ab€gg£'), 'utf-8', 'ascii')
-        arktest.assertEQ(newBuf.toString(), 'ab?gg?', "Case (10) failed: utf-8 -> ascii")
+        arktest.assertEQ(newBuf.toString(), 'ab?gg?', 'Case (10) failed: utf-8 -> ascii')
     }
 }
 
@@ -587,14 +652,66 @@ function testBufferCompareUint8Array() {
     arktest.assertEQ(bufOffset.at(2), 5)
     arktest.assertEQ(bufOffset.at(3), 6)
     arktest.assertEQ(bufOffset.length, 4)
-    arktest.assertEQ(bufOffset.byteOffset, 0)
+    arktest.assertEQ(bufOffset.byteOffset, 3)
     arktest.assertEQ(buffer.compare(u2, bufOffset), 1)
     arktest.assertEQ(buffer.compare(bufOffset, u2), -1)
 
     arktest.expectError(() => {
         let set = new Set<number>([97, 98, 99, 100, 101, 102, 103]);
         let buf = buffer.from(set as Object, 3, 4);
-    }, 'Parameter error. The type of \"input\" must be Buffer or ArrayBuffer, Array, Array-like');
+    }, 'Parameter error. The type of "input" must be Buffer or ArrayBuffer, Array, Array-like');
+}
+
+function testBufferCompareUnsignedByte() {
+    const buf1 = buffer.from([0x80])
+    const buf2 = buffer.from([0x7F])
+    arktest.assertEQ(buf1.compare(buf2), 1)
+
+    const buf3 = buffer.from([0xFF])
+    const buf4 = buffer.from([0x00])
+    arktest.assertEQ(buf3.compare(buf4), 1)
+}
+
+function testBufferCompareWithByteOffset() {
+    const ab1 = new ArrayBuffer(10)
+    const u8_1 = new Uint8Array(ab1)
+    for (let i = 0; i < 10; i++) { u8_1[i] = i + 1 }
+    const buf1 = buffer.from(ab1, 3, 4)
+
+    const ab2 = new ArrayBuffer(10)
+    const u8_2 = new Uint8Array(ab2)
+    for (let i = 0; i < 10; i++) { u8_2[i] = i + 1 }
+    const buf2 = buffer.from(ab2, 3, 4)
+
+    arktest.assertEQ(buf1.byteOffset, 3)
+    arktest.assertEQ(buf1.length, 4)
+    arktest.assertEQ(buf1.compare(buf2), 0)
+
+    buf2[2] = 99
+    arktest.assertEQ(buf1.compare(buf2), -1)
+
+    buf1[2] = 100
+    arktest.assertEQ(buf1.compare(buf2), 1)
+}
+
+function testBufferCompareUint8ArrayTargetByteOffset() {
+    const ab1 = new ArrayBuffer(10)
+    const u8_1 = new Uint8Array(ab1)
+    for (let i = 0; i < 10; i++) { u8_1[i] = i + 1 }
+    const src = buffer.from(ab1, 3, 4)
+
+    const ab2 = new ArrayBuffer(10)
+    const u8_2 = new Uint8Array(ab2)
+    for (let i = 0; i < 10; i++) { u8_2[i] = i + 1 }
+    const tgt = new Uint8Array(ab2, 3, 4)
+
+    arktest.assertEQ(src.compare(tgt), 0)
+
+    tgt[2] = 99
+    arktest.assertEQ(src.compare(tgt), -1)
+
+    src[2] = 100
+    arktest.assertEQ(src.compare(tgt), 1)
 }
 
 function testBufferCopy() {
@@ -640,7 +757,44 @@ function testBufferCopyWithUndefined() {
         buf1.writeInt8(i + 97, i);
     }
     buf1.copy(buf2, undefined, 1);
-    arktest.assertEQ(buf2.toString(), "bcdefghijklmnopqrstuvwxyz!")
+    arktest.assertEQ(buf2.toString(), 'bcdefghijklmnopqrstuvwxyz!')
+}
+
+function testBufferCopyTargetBoundsWithByteOffset() {
+    const src = buffer.from([1, 2, 3, 4, 5, 6, 7, 8])
+    const tgt = buffer.from(new ArrayBuffer(10), 2, 4)
+
+    arktest.assertEQ(tgt.toString('hex'), '00000000')
+
+    const copied = src.copy(tgt)
+    arktest.assertEQ(copied, 4)
+    arktest.assertEQ(tgt.toString('hex'), '01020304')
+}
+
+function testBufferCopySourceEndClampWithByteOffset() {
+    const srcAb = ArrayBuffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    const src = buffer.from(srcAb, 3, 4)
+
+    const tgt = buffer.alloc(10)
+    arktest.assertEQ(tgt.toString('hex'), '00000000000000000000')
+
+    const copied = src.copy(tgt, 0, 0, 100)
+    arktest.assertEQ(copied, 4)
+    arktest.assertEQ(tgt.toString('hex'), '04050607000000000000')
+}
+
+function testBufferCopySelfOverlap() {
+    const buf = buffer.from([1, 2, 3, 4, 5, 6, 7, 8])
+    const copied = buf.copy(buf, 2, 0, 4)
+    arktest.assertEQ(copied, 4)
+    arktest.assertEQ(buf.toString('hex'), '0102010203040708')
+}
+
+function testBufferCopySelfForward() {
+    const buf = buffer.from([1, 2, 3, 4, 5, 6, 7, 8])
+    const copied = buf.copy(buf, 0, 2, 6)
+    arktest.assertEQ(copied, 4)
+    arktest.assertEQ(buf.toString('hex'), '0304050605060708')
 }
 
 function testEntries() {
@@ -729,6 +883,70 @@ function testSubarray() {
     buf = buffer.from(arr1.buffer, 1);
     subBuf = buf.subarray(2, 5)
     arktest.assertEQ(subBuf.toString(), "def")
+}
+
+function testSubarrayShared() {
+    const buf = buffer.from([1, 2, 3, 4, 5])
+    const subBuf = buf.subarray(1, 4)
+    arktest.assertEQ(subBuf.buffer, buf.buffer)
+    arktest.assertEQ(subBuf.byteOffset, buf.byteOffset + 1)
+    arktest.assertEQ(subBuf.length, 3)
+    arktest.assertEQ(buf[1], 2)
+    arktest.assertEQ(subBuf[0], 2)
+    subBuf[0] = 99
+    arktest.assertEQ(buf[1], 99)
+}
+
+function testSubarrayWithByteOffset() {
+    const ab = new ArrayBuffer(10)
+    const u8 = new Uint8Array(ab)
+    for (let i = 0; i < 10; i++) { u8[i] = i + 1 }
+    const buf = buffer.from(ab, 3, 4)
+    const subBuf = buf.subarray(1, 3)
+    arktest.assertEQ(subBuf.length, 2)
+    arktest.assertEQ(subBuf[0], 5)
+    arktest.assertEQ(subBuf[1], 6)
+    arktest.assertEQ(u8[4], 5)
+    subBuf[0] = 99
+    arktest.assertEQ(u8[4], 99)
+}
+
+function testSubarrayNegativeWithByteOffset() {
+    const ab = new ArrayBuffer(10)
+    const u8 = new Uint8Array(ab)
+    for (let i = 0; i < 10; i++) { u8[i] = i + 1 }
+    const buf = buffer.from(ab, 3, 4)
+
+    let subBuf = buf.subarray(-1, 2)
+    arktest.assertEQ(subBuf.length, 0)
+
+    subBuf = buf.subarray(-1)
+    arktest.assertEQ(subBuf.length, 0)
+
+    subBuf = buf.subarray(1, -1)
+    arktest.assertEQ(subBuf.length, 0)
+
+    subBuf = buf.subarray(-1, -1)
+    arktest.assertEQ(subBuf.length, 0)
+}
+
+function testSubarrayUndefinedWithByteOffset() {
+    const ab = new ArrayBuffer(10)
+    const u8 = new Uint8Array(ab)
+    for (let i = 0; i < 10; i++) { u8[i] = i + 1 }
+    const buf = buffer.from(ab, 3, 4)
+
+    let subBuf = buf.subarray(undefined)
+    arktest.assertEQ(subBuf.length, 4)
+    arktest.assertEQ(subBuf[0], 4)
+
+    subBuf = buf.subarray(undefined, undefined)
+    arktest.assertEQ(subBuf.length, 4)
+    arktest.assertEQ(subBuf[0], 4)
+
+    subBuf = buf.subarray(1, undefined)
+    arktest.assertEQ(subBuf.length, 3)
+    arktest.assertEQ(subBuf[0], 5)
 }
 
 function testSwap16() {
@@ -1154,7 +1372,7 @@ function testByteOffset() {
     arktest.expectError((): void => {
                                         byteOffset = -1;
                                         let f = new buffer.Buffer(a, byteOffset) });
-    arktest.expectError((): void => {
+    arktest.expectNoThrow((): void => {
                                         byteOffset = a.getByteLength();
                                         let f = new buffer.Buffer(a, byteOffset)
                         });
@@ -1162,6 +1380,56 @@ function testByteOffset() {
                                         byteOffset = a.getByteLength() + 1;
                                         let f = new buffer.Buffer(a, byteOffset)
                         });
+}
+
+function testConstructorNegativeByteLength() {
+    arktest.expectError(() => {
+        new buffer.Buffer(new ArrayBuffer(5), 0, -1)
+    })
+}
+
+function testConstructorByteLengthOverflow() {
+    arktest.expectError(() => {
+        new buffer.Buffer(new ArrayBuffer(5), 3, 3)
+    })
+}
+
+function testConstructorEmptyBufferByteOffset() {
+    arktest.expectError(() => {
+        new buffer.Buffer(new ArrayBuffer(0), 1)
+    })
+}
+
+function testWriteWithByteOffset() {
+    const ab = new ArrayBuffer(10)
+    const buf = buffer.from(ab, 3, 4)
+    const n = buf.write('AB', 0, 2, 'ascii')
+    arktest.assertEQ(n, 2)
+    arktest.assertEQ(buf.subarray(0, 2).toString('ascii'), 'AB')
+    arktest.assertEQ(buf.toString('hex'), '41420000')
+}
+
+function testWriteWithByteOffsetAndOffset() {
+    const ab = new ArrayBuffer(10)
+    const buf = buffer.from(ab, 3, 4)
+    const n = buf.write('AB', 1, 2, 'ascii')
+    arktest.assertEQ(n, 2)
+    arktest.assertEQ(buf.subarray(1, 3).toString('ascii'), 'AB')
+    arktest.assertEQ(buf.toString('hex'), '00414200')
+}
+
+function testWriteUInt32LEWithByteOffset() {
+    const ab = new ArrayBuffer(10)
+    const buf = buffer.from(ab, 3, 4)
+    buf.writeUInt32LE(0x12345678, 0)
+    arktest.assertEQ(buf.toString('hex'), '78563412')
+}
+
+function testWriteUInt32LEWithByteOffsetAndOffset() {
+    const ab = new ArrayBuffer(12)
+    const buf = buffer.from(ab, 3, 8)
+    buf.writeUInt32LE(0x12345678, 2)
+    arktest.assertEQ(buf.toString('hex'), '0000785634120000')
 }
 
 function testFillHex() {
@@ -1275,6 +1543,62 @@ function testFillEmpty(){
         buf.fill('', 0, buf.length, encode);
         arktest.assertEQ(buf.length, 20, encode);
     }
+}
+
+function testFillWithByteOffset() {
+    const ab = new ArrayBuffer(10)
+    const buf = buffer.from(ab, 3, 4)
+
+    buf.fill(9)
+    arktest.assertEQ(buf.toString('hex'), '09090909')
+    arktest.assertEQ(new Uint8Array(ab).toString(), '0,0,0,9,9,9,9,0,0,0')
+
+    const fillBuf = buffer.from([5, 6])
+    buf.fill(fillBuf)
+    arktest.assertEQ(buf.toString('hex'), '05060506')
+    arktest.assertEQ(new Uint8Array(ab).toString(), '0,0,0,5,6,5,6,0,0,0')
+
+    const fillU8 = new Uint8Array([7, 8])
+    buf.fill(fillU8)
+    arktest.assertEQ(buf.toString('hex'), '07080708')
+    arktest.assertEQ(new Uint8Array(ab).toString(), '0,0,0,7,8,7,8,0,0,0')
+
+    const fillU8Odd = new Uint8Array([7, 8, 9])
+    buf.fill(fillU8Odd)
+    arktest.assertEQ(buf.toString('hex'), '07080907')
+    arktest.assertEQ(new Uint8Array(ab).toString(), '0,0,0,7,8,9,7,0,0,0')
+
+    buf.fill('a', 0, undefined, 'ascii')
+    arktest.assertEQ(buf.toString('hex'), '61616161')
+    arktest.assertEQ(new Uint8Array(ab).toString(), '0,0,0,97,97,97,97,0,0,0')
+}
+
+function testFillWithByteOffsetAndOffset() {
+    const ab1 = new ArrayBuffer(10)
+    const buf1 = buffer.from(ab1, 3, 4)
+    buf1.fill(9, 1, 3)
+    arktest.assertEQ(buf1.toString('hex'), '00090900')
+    arktest.assertEQ(new Uint8Array(ab1).toString(), '0,0,0,0,9,9,0,0,0,0')
+
+    const ab2 = new ArrayBuffer(10)
+    const buf2 = buffer.from(ab2, 3, 4)
+    const fillBuf = buffer.from([5, 6])
+    buf2.fill(fillBuf, 0, 3)
+    arktest.assertEQ(buf2.toString('hex'), '05060500')
+    arktest.assertEQ(new Uint8Array(ab2).toString(), '0,0,0,5,6,5,0,0,0,0')
+
+    const ab3 = new ArrayBuffer(10)
+    const buf3 = buffer.from(ab3, 3, 4)
+    const fillU8 = new Uint8Array([7, 8])
+    buf3.fill(fillU8, 1, 4)
+    arktest.assertEQ(buf3.toString('hex'), '00070807')
+    arktest.assertEQ(new Uint8Array(ab3).toString(), '0,0,0,0,7,8,7,0,0,0')
+
+    const ab4 = new ArrayBuffer(10)
+    const buf4 = buffer.from(ab4, 3, 4)
+    buf4.fill('a', 1, 3, 'ascii')
+    arktest.assertEQ(buf4.toString('hex'), '00616100')
+    arktest.assertEQ(new Uint8Array(ab4).toString(), '0,0,0,0,97,97,0,0,0,0')
 }
 
 function testBufferToString00001() {
