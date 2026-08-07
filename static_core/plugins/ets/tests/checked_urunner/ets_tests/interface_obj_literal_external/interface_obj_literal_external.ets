@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-//! CHECKER      interface.interface$MyNamespace$Data$ObjectLiteral is external
+//! CHECKER      interface_obj_literal_external.interface$MyNamespace$Data$ObjectLiteral is local
 //! RUN_FRONTEND options: "--dump-assembly --gen-stdlib=false --stdlib=#{File.expand_path('plugins/ets/stdlib', (@options.source[%r{.*static_core}] || (ENV['ARKCOMPILER_RUNTIME_CORE_PATH'].to_s + '/static_core')))} --arktsconfig=#{File.expand_path('arktsconfig.json', File.dirname(@options.source))}", output: "interface_obj_literal_external.frontend.abc"
 //! BC_METHOD    "interface._obj_literal_external.ETSGLOBAL.main"
-//! INST         "interface.interface$MyNamespace$Data$ObjectLiteral"
-//! INST_NOT     "interface._obj_literal_external.interface$MyNamespace$Data$ObjectLiteral"
+//! INST         "interface._obj_literal_external.interface$MyNamespace$Data$ObjectLiteral"
+//! INST_NOT     "interface.interface$MyNamespace$Data$ObjectLiteral"
 
 import MyNamespace from './interface';
 
