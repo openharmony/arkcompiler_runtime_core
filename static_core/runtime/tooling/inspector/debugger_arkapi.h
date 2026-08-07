@@ -36,8 +36,8 @@ class PANDA_DEBUGGER_PUBLIC_API ArkDebugNativeAPI final {
 public:
     using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
     static bool StartDebuggerForSocketPair(int tid, int socketfd = -1);
-    static bool NotifyDebugMode(int tid, int32_t instanceId, bool debugApp, void *vm,
-                                DebuggerPostTask &debuggerPostTask);
+    static bool NotifyDebugMode(int tid, int32_t instanceId, bool isStartWithDebug, void *vm,
+                                DebuggerPostTask &debuggerPostTask, bool isDebugApp);
     static bool StopDebugger(void *vm);
     static bool IsDebugModeEnabled();
 

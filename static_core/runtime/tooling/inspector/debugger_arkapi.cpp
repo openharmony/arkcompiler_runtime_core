@@ -56,15 +56,19 @@ static void *ResolveSymbol(void *handle, std::string_view symbol)
 #endif
 
 bool ArkDebugNativeAPI::NotifyDebugMode([[maybe_unused]] int tid, [[maybe_unused]] int32_t instanceId,
-                                        [[maybe_unused]] bool debugApp, [[maybe_unused]] void *vm,
-                                        [[maybe_unused]] DebuggerPostTask &debuggerPostTask)
+                                        [[maybe_unused]] bool isStartWithDebug, [[maybe_unused]] void *vm,
+                                        [[maybe_unused]] DebuggerPostTask &debuggerPostTask,
+                                        [[maybe_unused]] bool isDebugApp)
 {
-    LOG(INFO, DEBUGGER) << "ArkDebugNativeAPI::NotifyDebugMode, tid = " << tid << ", debugApp = " << debugApp
-                        << ", instanceId = " << instanceId;
-    if ((!debugApp) || (!Runtime::GetOptions().IsDebuggerEnable())) {
-        LOG(ERROR, DEBUGGER) << "Runtime::GetOptions().IsDebuggerEnable()" << Runtime::GetOptions().IsDebuggerEnable();
+    LOG(INFO, DEBUGGER) << "ArkDebugNativeAPI::NotifyDebugMode, tid = " << tid
+                        << ", isStartWithDebug = " << isStartWithDebug << ", instanceId = " << instanceId
+                        << ", isDebugApp = " << isDebugApp;
+
+    if (!isDebugApp) {
+        LOG(INFO, DEBUGGER) << "ArkDebugNativeAPI::NotifyDebugMode, not debug app, return directly.";
         return true;
     }
+
     if (!debuggerPostTask) {
         LOG(ERROR, DEBUGGER) << "ArkDebugNativeAPI::NotifyDebugMode, debuggerPostTask is nullptr";
         return false;
@@ -140,6 +144,7 @@ bool ArkDebugNativeAPI::StartDebuggerForSocketPair([[maybe_unused]] int tid, [[m
         reinterpret_cast<StartDebuggerForSocketpair>(ResolveSymbol(gHybridDebuggerHandle_, "StartDebugForSocketpair"));
     if (sym == nullptr) {
         LOG(ERROR, DEBUGGER) << "g_initializeInspectorForStatic load error:%{public}s" << dlerror();
+        ark::Runtime::GetCurrent()->SetDebugMode(false);
         return false;
     }
     bool ret = sym(tid, socketfd, true);
