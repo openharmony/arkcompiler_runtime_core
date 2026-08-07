@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-{% for mod in modifiers %}
+{% for mod in ['public', 'protected'] %}
 
 /*---
 desc: Static accessors of a superclass are accessible via superclass name qualification.

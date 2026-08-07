@@ -20,15 +20,15 @@ expected_out: "Semantic error ESE1324203: Class member age with type Int in B ca
 ---*/
 
 class A {
-  private _age: int = 5;
+    protected _age: int = 5;
 
-  final get age(): int {
-    return this._age;
-  }
+    final get age(): int {
+        return this._age;
+    }
 }
 
 class B extends A {
-  override get age(): int {
-    return this._age + 5;
-  }
+    get age(): int {
+        return this._age + 5;
+    }
 }
