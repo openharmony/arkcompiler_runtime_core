@@ -31,6 +31,8 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/rendezvous.h"
 #include "runtime/thread_manager.h"
+#include "plugins/ets/runtime/tooling/hprof/heap_dump_coordinator.h"
+#include "hybrid/ecma_vm_interface.h"
 #include "runtime/tooling/hprof/heap_dump.h"
 
 namespace ark::ets::interop::js {
@@ -374,36 +376,54 @@ arkplatform::NodeInfo STSVMInterfaceImpl::GetEtsNodeInfo(uint64_t etsAddr)
     return HeapDump::ObjectToNodeInfo(object);
 }
 
-void STSVMInterfaceImpl::GetXRefMaps(uintptr_t ecmaVM, std::unordered_map<uint64_t, uint64_t> &jsToEts,
-                                     std::unordered_map<uint64_t, uint64_t> &etsToJs)
+void STSVMInterfaceImpl::GetXRefMaps(uintptr_t ecmaVM, XRefMap &jsToEts, XRefMap &etsToJs)
 {
     auto *storage = ets_proxy::SharedReferenceStorage::GetCurrent();
     if (storage == nullptr) {
         return;
     }
+
     auto collectXRef = [&](ets_proxy::SharedReference *ref) {
         napi_ref jsRef = ref->GetJsRef();
         EtsObject *etsObj = ref->GetEtsObject();
         if (jsRef == nullptr || etsObj == nullptr) {
             return;
         }
-        uintptr_t refVm = 0;
-        if (napi_ref_get_vm(jsRef, refVm) != napi_ok || refVm != ecmaVM) {
-            return;
+        if (ecmaVM != 0) {
+            uintptr_t refVm = 0;
+            if (napi_ref_get_vm(jsRef, refVm) != napi_ok || refVm != ecmaVM) {
+                return;
+            }
         }
         uintptr_t jsAddr = 0;
-        if (napi_ref_get_value(jsRef, jsAddr) != napi_ok || jsAddr == 0) {
+        if (napi_ref_get_heap_object_address(jsRef, jsAddr) != napi_ok || jsAddr == 0) {
             return;
         }
         auto etsAddr = reinterpret_cast<uint64_t>(etsObj->GetCoreType());
         if (ref->HasETSFlag()) {
-            jsToEts[jsAddr] = etsAddr;
+            jsToEts.emplace(jsAddr, etsAddr);
         }
         if (ref->HasJSFlag()) {
-            etsToJs[etsAddr] = jsAddr;
+            etsToJs.emplace(etsAddr, jsAddr);
         }
     };
     storage->VisitAllRefs(collectXRef);
+}
+
+bool STSVMInterfaceImpl::ExecuteHeapDump(const DumpRequest &request, arkplatform::EcmaVMInterface *ecmaInterface,
+                                         bool dumpStaticHeap)
+{
+    auto &coordinator = tooling::hprof::HeapDumpCoordinator::GetInstance();
+    if (request.reason != common::dump::DumpReason::NORMAL && !coordinator.TryBeginOOMDump()) {
+        LOG(INFO, RUNTIME) << "[HybDump][Sta] OOM dump skipped: already triggered";
+        return true;
+    }
+    auto dynamicDumper = ecmaInterface == nullptr ? nullptr : ecmaInterface->CreateHeapDumper(request);
+    if (ecmaInterface != nullptr && dynamicDumper == nullptr) {
+        LOG(ERROR, RUNTIME) << "[HybDump][Sta] Dynamic dumper creation failed";
+        return false;
+    }
+    return coordinator.Dump(request, vm_, std::move(dynamicDumper), this, dumpStaticHeap);
 }
 
 bool STSVMInterfaceImpl::AttachCurrentThread()

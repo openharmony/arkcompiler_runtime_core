@@ -468,6 +468,11 @@ public:
         return ecmaInterface_;
     }
 
+    // Pins the process-wide ETS interop state while a dump uses its dynamic participant.
+    // Returns nullptr when interop has not been initialized or has already shut down.
+    static std::shared_ptr<void> TryAcquireSharedEtsVmState();
+    static InteropCtx *GetMainInteropContext(PandaEtsVM *vm);
+
     bool GetInteropHybridStackEnabled()
     {
         std::call_once(initStackFlag_, [this]() {
@@ -506,6 +511,7 @@ private:
         NO_MOVE_SEMANTIC(SharedEtsVmState);
 
         static std::shared_ptr<SharedEtsVmState> GetInstance(PandaEtsVM *vm);
+        static std::shared_ptr<SharedEtsVmState> TryAcquireInstance();
         // should be called when we would like to check if there are no more InteropCtx instances left
         static void TryReleaseInstance();
         ~SharedEtsVmState();

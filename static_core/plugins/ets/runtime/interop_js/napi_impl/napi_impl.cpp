@@ -153,6 +153,13 @@ napi_ref_get_value([[maybe_unused]] napi_ref ref, [[maybe_unused]] uintptr_t &re
     return napi_ok;
 }
 
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
+napi_ref_get_heap_object_address([[maybe_unused]] napi_ref ref, uintptr_t &result)
+{
+    result = 0;
+    return napi_generic_failure;
+}
+
 // NOLINTEND(readability-identifier-naming)
 #endif  // PANDA_JS_ETS_HYBRID_MODE
 

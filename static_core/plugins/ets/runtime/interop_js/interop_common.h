@@ -62,6 +62,8 @@ napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_ref_get_vm(napi_ref ref, uintptr_t &result);
 napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
 napi_ref_get_value(napi_ref ref, uintptr_t &result);
+napi_status __attribute__((weak))  // CC-OFF(G.FMT.07) project code style
+napi_ref_get_heap_object_address(napi_ref ref, uintptr_t &result);
 // NOLINTEND(readability-identifier-naming, modernize-use-using)
 #endif
 

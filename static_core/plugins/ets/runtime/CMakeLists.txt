@@ -135,6 +135,14 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_entrypoints.cpp
     ${ETS_EXT_SOURCES}/tooling/internal_api.cpp
     ${ETS_EXT_SOURCES}/tooling/pt_ets_extension.cpp
+    ${ETS_EXT_SOURCES}/tooling/hprof/static_dump.cpp
+    ${ETS_EXT_SOURCES}/tooling/hprof/static_writer.cpp
+    ${ETS_EXT_SOURCES}/tooling/hprof/heap_dump_coordinator.cpp
+    ${ETS_EXT_SOURCES}/tooling/hprof/session/abstract_writer.cpp
+    ${ETS_EXT_SOURCES}/tooling/hprof/session/common_writer.cpp
+    ${ETS_EXT_SOURCES}/tooling/hprof/session/object_id_map.cpp
+    ${ETS_EXT_SOURCES}/tooling/hprof/session/output_stream.cpp
+    ${ETS_EXT_SOURCES}/tooling/hprof/session/string_id_pool.cpp
     ${ETS_EXT_SOURCES}/types/ets_class.cpp
     ${ETS_EXT_SOURCES}/types/ets_arraybuffer.cpp
     ${ETS_EXT_SOURCES}/types/ets_std_core_array.cpp
@@ -245,6 +253,7 @@ panda_target_include_directories(arkruntime_obj PUBLIC
     # The line below needed only for stdlib. It must be removed after stdlib separation from runtime is implemented(#18135).
     ${PANDA_ETS_PLUGIN_SOURCE}/runtime/ani/
     ${PANDA_ROOT}/runtime/mem/gc/cmc
+    ${PANDA_ROOT}/../common_interfaces
 )
 panda_target_link_libraries(arkruntime_obj arkassembler)
 

@@ -18,6 +18,11 @@
 
 #include "runtime/include/runtime_notification.h"
 
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+
 namespace ark::ets {
 
 class PandaEtsVM;
@@ -25,12 +30,18 @@ class PandaEtsVM;
 /// Forwards OOM / allocation-failed notifications from RuntimeNotificationManager to DFX (HiSysEvent, etc.).
 class EtsVmOutOfMemoryListener final : public RuntimeListener {
 public:
-    explicit EtsVmOutOfMemoryListener(PandaEtsVM *vm) : vm_(vm) {}
+    explicit EtsVmOutOfMemoryListener(PandaEtsVM *vm);
 
     void OutOfMemory(size_t size, SpaceType spaceType) override;
 
 private:
+    static constexpr size_t OOM_DUMP_RESERVE_SIZE = 1024U * 1024U;
+    using OOMDumpReserve = std::array<uint8_t, OOM_DUMP_RESERVE_SIZE>;
+
+    void TriggerOOMDump();
+
     PandaEtsVM *vm_;
+    std::unique_ptr<OOMDumpReserve> oomDumpReserve_;
 };
 
 }  // namespace ark::ets
