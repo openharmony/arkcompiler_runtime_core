@@ -13,6 +13,8 @@
 
 include(cmake/tooling_tests.cmake)
 
+add_subdirectory(hprof)
+
 if (NOT TARGET es2panda OR PANDA_TARGET_ARM32)
     return()
 endif()

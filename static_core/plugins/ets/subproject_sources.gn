@@ -93,6 +93,14 @@ arkruntime_deps = [
 arkcompiler_deps += [ "$_plugin_dir/runtime/interop_js:interop_intrinsic_kinds_h(${default_toolchain})" ]
 
 srcs_runtime = [
+  "runtime/tooling/hprof/static_dump.cpp",
+  "runtime/tooling/hprof/static_writer.cpp",
+  "runtime/tooling/hprof/heap_dump_coordinator.cpp",
+  "runtime/tooling/hprof/session/abstract_writer.cpp",
+  "runtime/tooling/hprof/session/common_writer.cpp",
+  "runtime/tooling/hprof/session/object_id_map.cpp",
+  "runtime/tooling/hprof/session/output_stream.cpp",
+  "runtime/tooling/hprof/session/string_id_pool.cpp",
   "dfx/heap_helpers.cpp",
   "runtime/ani/ani_interaction_api.cpp",
   "runtime/ani/ani_mangle.cpp",
@@ -397,6 +405,8 @@ if (current_cpu == "amd64" || current_cpu == "x64" || current_cpu == "x86_64") {
 
 # Tests list
 unittests_list = [
+  "tests/runtime/tooling/hprof/:arkruntime_heap_dump_session_test",
+  "tests/runtime/tooling/hprof/:arkruntime_static_dump_test",
   "tests/runtime/:array_reverse_gc_test",
 ]
 

@@ -33,6 +33,8 @@ class PandaEtsVM;
 
 namespace ark::ets::interop::js {
 
+using common::dump::DumpRequest;
+
 namespace testing {
 class STSVMInterfaceImplTest;
 }  // namespace testing
@@ -80,11 +82,12 @@ public:
     PANDA_PUBLIC_API arkplatform::NodeInfo GetEtsNodeInfo(uint64_t etsAddr) override;
     PANDA_PUBLIC_API std::vector<arkplatform::NodeInfo> GetAllEtsObjects() override;
     PANDA_PUBLIC_API void IterateEtsObjects(const std::function<void(uint64_t)> &callback) override;
-    PANDA_PUBLIC_API void GetXRefMaps(uintptr_t ecmaVM, std::unordered_map<uint64_t, uint64_t> &jsToEts,
-                                      std::unordered_map<uint64_t, uint64_t> &etsToJs) override;
+    PANDA_PUBLIC_API void GetXRefMaps(uintptr_t ecmaVM, XRefMap &jsToEts, XRefMap &etsToJs) override;
     PANDA_PUBLIC_API bool AttachCurrentThread() override;
     PANDA_PUBLIC_API bool DetachCurrentThread() override;
     PANDA_PUBLIC_API bool IsCurrentThreadAttached() override;
+    PANDA_PUBLIC_API bool ExecuteHeapDump(const DumpRequest &request, arkplatform::EcmaVMInterface *ecmaInterface,
+                                          bool dumpStaticHeap) override;
 
 private:
     enum class XGCSyncState { NONE, CONCURRENT_PHASE, CONCURRENT_FINISHED, REMARK_PHASE };

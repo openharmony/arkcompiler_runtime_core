@@ -18,8 +18,10 @@
 
 #include "hybrid/vm_interface.h"
 #include "hybrid/hybrid_frame_info.h"
+#include "profiler/heap_dump.h"
 #include <cstdint>
 #include <functional>
+#include <memory>
 
 namespace arkplatform {
 using TaggedType = uint64_t;
@@ -69,6 +71,15 @@ public:
     {
         return nullptr;
     }
+
+    /**
+     * @brief Create the dynamic participant for one heap dump session.
+     *
+     * The implementation retains its VM-specific behavior and owns all
+     * dynamic-side output resources.
+     */
+    virtual std::unique_ptr<common::dump::AbstractDumper> CreateHeapDumper(
+        const common::dump::DumpRequest &request) = 0;
 };
 
 }  // namespace arkplatform

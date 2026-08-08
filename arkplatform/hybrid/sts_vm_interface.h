@@ -19,18 +19,23 @@
 #include "hybrid/vm_interface.h"
 #include "hybrid/hybrid_heap_snapshot_info.h"
 #include "hybrid/hybrid_frame_info.h"
+#include "profiler/heap_dump.h"
 #include <cstdint>
 #include <cstddef>
 #include <functional>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
 namespace arkplatform {
 
+class EcmaVMInterface;
+
 class STSVMInterface : public VMInterface {
 public:
     static constexpr size_t DEFAULT_XGC_EXECUTORS_COUNT = 2U;
     using NoWorkPred = std::function<bool()>;
+    using XRefMap = std::unordered_multimap<uint64_t, uint64_t>;
 
     STSVMInterface() = default;
 
@@ -122,16 +127,19 @@ public:
     virtual void IterateEtsObjects(const std::function<void(uint64_t)> &callback) = 0;
     /**
      * @brief Get JS<->ETS cross-VM reference mappings in a single traversal
-     * @param ecmaVM pointer to EcmaVM, only refs belonging to this VM are collected
+     * @param ecmaVM pointer to EcmaVM; zero collects refs from every dynamic VM
      */
-    virtual void GetXRefMaps(uintptr_t ecmaVM, std::unordered_map<uint64_t, uint64_t> &jsToEts,
-                             std::unordered_map<uint64_t, uint64_t> &etsToJs) = 0;
+    virtual void GetXRefMaps(uintptr_t ecmaVM, XRefMap &jsToEts, XRefMap &etsToJs) = 0;
     /// @brief Attach current thread to the VM
     virtual bool AttachCurrentThread() = 0;
     /// @brief Detach current thread from the VM
     virtual bool DetachCurrentThread() = 0;
     /// @brief Check if the current thread is attached to the VM
     virtual bool IsCurrentThreadAttached() = 0;
+
+    /** Route a hybrid dump request to the ETS-owned coordinator. */
+    virtual bool ExecuteHeapDump(const common::dump::DumpRequest &request, EcmaVMInterface *ecmaInterface,
+                                 bool dumpStaticHeap) = 0;
 
     virtual bool UnionStackIsEmpty(bool *isEmpty) = 0;
     virtual bool ForEachFrameInUnionStack(

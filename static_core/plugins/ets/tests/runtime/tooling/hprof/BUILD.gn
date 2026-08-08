@@ -1,0 +1,69 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/runtime_core/static_core/ark_config.gni")
+import("${ark_root}/runtime/tests/unittest_helper.gni")
+
+module_ets_tests_out_path = "runtime_core/static_core/plugins/ets"
+
+config("static_dump_test_config") {
+  defines =
+      [ "STATIC_DUMP_TEST_ABC_DIR=\"" + rebase_path(target_gen_dir) + "\"" ]
+}
+
+ark_runtime_unittest("arkruntime_static_dump_test") {
+  sources = [
+    "rawheap_format_contract_test.cpp",
+    "static_dump_test.cpp",
+  ]
+  configs = [ ":static_dump_test_config" ]
+  deps = [
+    ":static_dump_test_abc",
+    "${ark_root}/plugins/ets:etsstdlib",
+  ]
+  external_deps = [
+    "cJSON:cjson_static",
+    "ets_runtime:rawheap_translate_static",
+  ]
+  env = [ "PANDA_STD_LIB=" + rebase_path(
+              "${root_gen_dir}/arkcompiler/runtime_core/static_core/plugins/ets/etsstdlib.abc") ]
+  no_cores = true
+  module_out_path = module_ets_tests_out_path
+}
+
+ark_runtime_unittest("arkruntime_heap_dump_session_test") {
+  sources = [
+    "session/abstract_writer_test.cpp",
+    "session/common_writer_test.cpp",
+    "session/heap_dump_coordinator_test.cpp",
+    "session/object_id_map_test.cpp",
+    "session/output_stream_test.cpp",
+    "session/string_id_pool_test.cpp",
+    "session/test_common.cpp",
+  ]
+  deps = [ "${ark_root}/plugins/ets:etsstdlib" ]
+  module_out_path = module_ets_tests_out_path
+}
+
+static_dump_test_abc = "${target_gen_dir}/StaticDumpTest.abc"
+
+es2panda_gen("static_dump_test_abc") {
+  inputs = [ "StaticDumpTest.ets" ]
+  outputs = [ static_dump_test_abc ]
+  args = [
+    "--extension=ets",
+    "--opt-level=0",
+    "--output=" + rebase_path(static_dump_test_abc),
+    rebase_path(inputs[0]),
+  ]
+}

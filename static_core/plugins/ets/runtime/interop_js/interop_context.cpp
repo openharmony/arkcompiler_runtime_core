@@ -324,6 +324,12 @@ std::shared_ptr<InteropCtx::SharedEtsVmState> InteropCtx::SharedEtsVmState::GetI
     return instance_;
 }
 
+std::shared_ptr<InteropCtx::SharedEtsVmState> InteropCtx::SharedEtsVmState::TryAcquireInstance()
+{
+    os::memory::LockHolder lock(mutex_);
+    return instance_;
+}
+
 // should be called when we would like to check if there are no more InteropCtx instances left
 void InteropCtx::SharedEtsVmState::TryReleaseInstance()
 {
@@ -485,6 +491,27 @@ InteropCtx::~InteropCtx()
 {
     etsClassWrappersCache_.EnumerateWrappers([this](ets_proxy::EtsClassWrapper *wrapper) { wrapper->Destroy(jsEnv_); });
     Refstor()->Remove(jsvalueFregistryRef_);
+}
+
+std::shared_ptr<void> InteropCtx::TryAcquireSharedEtsVmState()
+{
+    return SharedEtsVmState::TryAcquireInstance();
+}
+
+InteropCtx *InteropCtx::GetMainInteropContext(PandaEtsVM *vm)
+{
+    if (vm == nullptr) {
+        return nullptr;
+    }
+
+    auto *jobManager = vm->GetJobManager();
+    auto *mainThread = jobManager == nullptr ? nullptr : jobManager->GetMainThread();
+    if (mainThread == nullptr) {
+        return nullptr;
+    }
+
+    auto *mainWorker = JobExecutionContext::CastFromMutator(mainThread)->GetWorker();
+    return mainWorker == nullptr ? nullptr : Current(mainWorker);
 }
 
 void InteropCtx::InitJsValueFinalizationRegistry(EtsExecutionContext *executionCtx)

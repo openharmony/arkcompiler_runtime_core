@@ -457,8 +457,8 @@ TEST_F(STSVMInterfaceImplTest, GetXRefMaps)
 {
     STSVMInterfaceImpl stsVm(GetEtsVm());
     auto ecmaVM = reinterpret_cast<uintptr_t>(GetJsEnv());
-    std::unordered_map<uint64_t, uint64_t> jsToEts;
-    std::unordered_map<uint64_t, uint64_t> etsToJs;
+    arkplatform::STSVMInterface::XRefMap jsToEts;
+    arkplatform::STSVMInterface::XRefMap etsToJs;
     stsVm.GetXRefMaps(ecmaVM, jsToEts, etsToJs);
     // Verify all collected mappings have valid addresses
     for (const auto &[jsAddr, etsAddr] : jsToEts) {
@@ -472,15 +472,20 @@ TEST_F(STSVMInterfaceImplTest, GetXRefMaps)
     // Cross-VM refs may be empty if no interop objects were created in this test
 }
 
-TEST_F(STSVMInterfaceImplTest, GetXRefMapsZeroEcmaVM)
+TEST_F(STSVMInterfaceImplTest, GetXRefMapsWithoutVmFilter)
 {
     STSVMInterfaceImpl stsVm(GetEtsVm());
-    std::unordered_map<uint64_t, uint64_t> jsToEts;
-    std::unordered_map<uint64_t, uint64_t> etsToJs;
+    arkplatform::STSVMInterface::XRefMap jsToEts;
+    arkplatform::STSVMInterface::XRefMap etsToJs;
     stsVm.GetXRefMaps(0, jsToEts, etsToJs);
-    // Zero ecmaVM should not match any ref's VM
-    EXPECT_EQ(jsToEts.size(), 0);
-    EXPECT_EQ(etsToJs.size(), 0);
+    for (const auto &[jsAddr, etsAddr] : jsToEts) {
+        EXPECT_NE(jsAddr, 0);
+        EXPECT_NE(etsAddr, 0);
+    }
+    for (const auto &[etsAddr, jsAddr] : etsToJs) {
+        EXPECT_NE(etsAddr, 0);
+        EXPECT_NE(jsAddr, 0);
+    }
 }
 
 TEST_F(STSVMInterfaceImplTest, EtsForceFullGC)
