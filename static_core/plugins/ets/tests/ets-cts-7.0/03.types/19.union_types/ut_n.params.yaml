@@ -289,4 +289,4 @@ cases:
       use: |-
         runner.check({tag: 'tag', list: nsglob.glob})
       stdout: |-
-        "Semantic error ESE0127: No matching call signature for log(...)\nSemantic error ESE0252: Indexed access is not supported for such expression type."
+        "Semantic error ESE0252: Indexed access is not supported for such expression type."

@@ -65,9 +65,8 @@ cases:
   - use: |-
       let v: A<A<X>[]> = new A<A<X>[]>(new A<Y>[0](new A<Y>())) // A<X>[] is not A<Y>[]
     stdout:
-       - "Semantic error ESE0127: No matching construct signature for class_args_neg_8.A(...)"
+       - "Semantic error ESE0127: No matching construct signature for class_args_neg_8.A(Array<A<Y>>)"
        - "Semantic error ESE0124: Expected 1 arguments, got 0."
-       - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
        - "Semantic error ESE0127: No matching construct signature for class_args_neg_8.A()"
   #9
   - use: |-
@@ -85,9 +84,8 @@ cases:
   - use: |-
       let v: A<A<I>[]> = new A<A<I>[]>(new A<Y>[0](new A<Y>()))  // Y doesn't implement I
     stdout:
-      - "Semantic error ESE0127: No matching construct signature for class_args_neg_11.A(...)"
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_11.A(Array<A<Y>>)"
       - "Semantic error ESE0124: Expected 1 arguments, got 0."
-      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
       - "Semantic error ESE0127: No matching construct signature for class_args_neg_11.A()"
   #12
   - use: |-
@@ -99,17 +97,15 @@ cases:
   - use: |-
       let v: A<Color[]> = new A<Color[]>(new Size[0](new Size()))  // Size is not Color
     stdout:
-      - "Semantic error ESE0127: No matching construct signature for class_args_neg_13.A(...)"
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_13.A(Array<Size>)"
       - "Semantic error ESE0124: Expected 2 arguments, got 0."
-      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
       - "Semantic error ESE0127: No matching construct signature for class_args_neg_13.Size()"
   #14
   - use: |-
       let v: A<A<Color[]>[]> = new A<A<Color[]>[]>(new A<Size[]>[0](new A<Size[]>()))  // Size[] is not Color[]
     stdout:
-      - "Semantic error ESE0127: No matching construct signature for class_args_neg_14.A(...)"
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_14.A(Array<A<Array<Size>>>)"
       - "Semantic error ESE0124: Expected 1 arguments, got 0."
-      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
       - "Semantic error ESE0127: No matching construct signature for class_args_neg_14.A()"
 
   # type argument is alias
@@ -140,9 +136,8 @@ cases:
     decl: |-
       type B = A<Y>[]
     stdout:
-      - "Semantic error ESE0127: No matching construct signature for class_args_neg_18.A(...)"
+      - "Semantic error ESE0127: No matching construct signature for class_args_neg_18.A(Array<A<X>>)"
       - "Semantic error ESE0124: Expected 1 arguments, got 0."
-      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
       - "Semantic error ESE0127: No matching construct signature for class_args_neg_18.A()"
   #19
   - use: |-
@@ -165,17 +160,13 @@ cases:
   - use: |-
       let v: A<I[]> = new A<I[]>(new I[0](new I())) // Cannot use array creation expression with interfaces.
     stdout:
-      - "Semantic error ESE0127: No matching construct signature for class_args_neg_21.A(...)"
       - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
-      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
 
   #22
   - use: |-
       let v: A<A<I[]>[]> = new A<A<I[]>[]>([new A<I[]>(new I[0](new I()))]) // Cannot use array creation expression with interfaces.
     stdout:
-      - "Semantic error ESE0127: No matching construct signature for class_args_neg_22.A(...)"
       - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
-      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
 
   # type argument is tuple
   #23

@@ -76,7 +76,8 @@ cases:
       }
     stdout:
       - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
-      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
+      - "Semantic error ESE0127: No matching call signature for meth(Array<I>, Array<X>)"
+      - "Semantic error ESE0046: Type 'Array<I>' is not compatible with type 'Array<X>' at index 1"
 
   #7
   - use: |-
@@ -133,7 +134,6 @@ cases:
     decl: |-
       type B = X[]|null
     stdout:
-      - "Semantic error ESE0127: No matching call signature for assertEQ(..., Array<X>)"
       - "Semantic error ESE0127: No matching call signature for meth(Array<X>, Y<X>)"
       - "Semantic error ESE0046: Type 'Y<X>' is not compatible with type 'Array<X>|null' at index 2"
       - "Syntax error ESY63526: Expression to initialize array element is missed."
@@ -147,7 +147,6 @@ cases:
       }
     stdout:
       - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
-      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
 
   #14
   - use: |-
@@ -157,6 +156,3 @@ cases:
       }
     stdout:
       - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
-      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
-      - "Semantic error ESE0127: No matching call signature for meth(Array<I>|null, Array<I>|null)"
-      - "Semantic error ESE0046: Type 'Array<I>|null' is not compatible with type 'Array<I>' at index 1"

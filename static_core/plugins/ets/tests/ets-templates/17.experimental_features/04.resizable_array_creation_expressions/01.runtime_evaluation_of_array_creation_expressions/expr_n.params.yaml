@@ -40,7 +40,6 @@ cases:
           return 1
       expected_out:
         - "Semantic error ESE0124: Expected 1 arguments, got 0."
-        - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
         - "Semantic error ESE0127: No matching construct signature for expr_n_1.A()"
 
     - defs: |-

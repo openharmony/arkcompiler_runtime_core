@@ -22,7 +22,6 @@ files:
 tags: [compile-only, negative]
 expected_out: |-
     Semantic error ESE0349: Namespace 'Transit1' is already defined.
-    Semantic error ESE0127: No matching call signature for assertEQ(..., "A foo")
     Semantic error ESE0087: Property 'foo' does not exist on type 'Transit1'
 ---*/
 

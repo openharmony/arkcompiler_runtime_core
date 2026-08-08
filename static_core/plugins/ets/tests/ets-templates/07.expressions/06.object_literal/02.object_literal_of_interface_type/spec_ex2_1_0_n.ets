@@ -19,7 +19,6 @@ desc: >-
 tags: [negative, compile-only]
 expected_out: |-
     Semantic error ESE0065: type ILiteral has no property named foo
-    Semantic error ESE0127: No matching call signature for assertEQ(Int, ...)
     Semantic error ESE0087: Property 'foo' does not exist on type 'ILiteral'
 ---*/
 

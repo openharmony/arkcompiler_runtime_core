@@ -77,7 +77,6 @@ cases:
       }
     stdout:
       - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
-      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"
       - "Semantic error ESE0127: No matching call signature for meth(X, Array<I>)"
       - "Semantic error ESE0046: Type 'Array<I>' is not compatible with type 'Array<Y>' at index 2"
   #7
@@ -131,4 +130,3 @@ cases:
       }
     stdout:
       - "Semantic error ESE0275: I is an interface therefore cannot be instantiated."
-      - "Semantic error ESE0127: No matching call signature for create(Int, ...)"

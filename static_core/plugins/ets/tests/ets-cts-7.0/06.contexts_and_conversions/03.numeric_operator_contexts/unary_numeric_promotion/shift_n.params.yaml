@@ -14,7 +14,7 @@
 ---
 cases:
   - { vtype: boolean, vval: 'true', rtype: int, rval: 1, expected: "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type." }
-  - { vtype: Boolean, vval: new Boolean(false), rtype: int, rval: 1, expected: "Semantic error ESE0127: No matching call signature for assertEQ(..., Int)" }
+  - { vtype: Boolean, vval: new Boolean(false), rtype: int, rval: 1, expected: "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type." }
   - { vtype: String, vval: '0', rtype: int, rval: 1, expected: "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type." }
   - { vtype: int, vval: 1, rtype: boolean, rval: 'true', expected: "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type." }
   - { vtype: int, vval: 1, rtype: Boolean, rval: new Boolean(true), expected: "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type." }

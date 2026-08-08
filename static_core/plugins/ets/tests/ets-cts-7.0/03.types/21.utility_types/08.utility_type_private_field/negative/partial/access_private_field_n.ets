@@ -18,7 +18,6 @@ desc: Private fields of the initial type stay in the utility type but they are n
       accessible and cannot be accessed in any way
 tags: [compile-only, negative]
 expected_out:
-    - "Semantic error ESE0127: No matching call signature for foo(Partial<Sample>)"
     - "Semantic error ESE0065: type Partial<Sample> has no property named description"
 ---*/
 

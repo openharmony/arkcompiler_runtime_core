@@ -17,7 +17,6 @@
 desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'myNamespace'
 tags: [compile-only, negative]
 expected_out: |-
-    Semantic error ESE0127: No matching call signature for assertEQ(Int, Int)
     Semantic error ESE0206: 'returnConst' is not exported in 'myNamespace'
 ---*/
 

@@ -15,4 +15,4 @@
 cases:
   - { type: boolean, val: 'true', rt: byte, rv: 1 as byte, op: '+', expected: "Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String."}
   - { type: Boolean, val: new Boolean(false), rt: short, rv: 1, op: '-', expected: "Semantic error ESE0108: Bad operand type, the types of the operands must be numeric type, enum or String."}
-  - { type: string, val: '"99"', rt: char, rv: "c'0'", op: '*', expected: "Semantic error ESE0127: No matching call signature for foo(...)"}
+  - { type: string, val: '"99"', rt: char, rv: "c'0'", op: '*', expected: "Semantic error ESE0107: Bad operand type, the types of the operands must be numeric type."}
