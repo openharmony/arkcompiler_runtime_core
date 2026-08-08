@@ -152,7 +152,7 @@ public:
         return notificationManager_;
     }
 
-    static const RuntimeOptions &GetOptions()
+    static RuntimeOptions &GetOptions()
     {
         return options_;
     }
@@ -189,6 +189,10 @@ public:
     static void SetRuntimeOptions(RuntimeOptions &options);
 
     static void SetDebuggerOptions(RuntimeOptions &options);
+
+    static void SetDebuggerLaunchOption(RuntimeOptions &options);
+
+    static void ResetDebuggerLaunchOption(RuntimeOptions &options);
 
     static void SetInterpreterTypeOptions(RuntimeOptions &options);
 
@@ -368,6 +372,13 @@ public:
         return debugSession_.use_count() > 0;
     }
 
+    /**
+     * @brief Unload debugger library and destroy debug session.
+     * As side effect, `Debugger` instance will be destroyed. Hence the method must be called
+     * during runtime destruction after sending `VmDeath` event and before uninitializing threads.
+     */
+    void UnloadDebugger();
+
     void DumpForSigQuit(std::ostream &os);
 
     bool IsDumpNativeCrash()
@@ -514,13 +525,6 @@ private:
     void CheckBootPandaFiles();
 
     bool IsEnableMemoryHooks() const;
-
-    /**
-     * @brief Unload debugger library and destroy debug session.
-     * As side effect, `Debugger` instance will be destroyed. Hence the method must be called
-     * during runtime destruction after sending `VmDeath` event and before uninitializing threads.
-     */
-    void UnloadDebugger();
 
     static void CreateDfxController(const RuntimeOptions &options);
 
