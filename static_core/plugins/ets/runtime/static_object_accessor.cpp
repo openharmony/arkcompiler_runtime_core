@@ -87,7 +87,7 @@ ark::mem::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] ark:
         return nullptr;
     }
     EtsObject *etsObject = const_cast<EtsObject *>(etsObj);  // NOLINT(modernize-use-auto)
-    EtsMethod *method = etsObj->GetClass()->GetDirectMethod(GET_INDEX_METHOD, "I:LY;");
+    EtsMethod *method = etsObj->GetClass()->GetDirectMethod(GET_INDEX_METHOD, "I:Lstd/core/Object;");
     std::array args {ark::Value(reinterpret_cast<ObjectHeader *>(etsObject)), ark::Value(index)};
     ark::Value value = method->GetPandaMethod()->Invoke(mThread, args.data());
     return reinterpret_cast<ark::mem::BoxedValue>(EtsObject::FromCoreType(value.GetAs<ObjectHeader *>()));
@@ -103,7 +103,7 @@ bool StaticObjectAccessor::SetElementByIdx([[maybe_unused]] ark::common_vm::Muta
     if (etsObj == nullptr) {
         return false;
     }
-    EtsMethod *method = etsObj->GetClass()->GetDirectMethod(SET_INDEX_METHOD, "ILY;:V");
+    EtsMethod *method = etsObj->GetClass()->GetDirectMethod(SET_INDEX_METHOD, "ILstd/core/Object;:V");
 
     std::array args {ark::Value(reinterpret_cast<ObjectHeader *>(etsObj)), ark::Value(index),
                      ark::Value(reinterpret_cast<ObjectHeader *>(value))};

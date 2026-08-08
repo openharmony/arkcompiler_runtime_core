@@ -15,27 +15,9 @@
 
 /*---
 desc: >-
-    If the Effective Type of the one Method or Function declaration, field
-    or variable is not affected, the change does not affect binary compatibility.
-tags: [negative]
-negative_steps: [verify-new-libs, runtime-with-new-libs.ark]
-expected_error:
-    verify-new-libs:
-    - "E/verifier: Cannot link class: Cannot find method 'a (Lstd/core/Object;)LY;' in class 'effective_type_function_n.libr.ETSGLOBAL'"
-    - "E/verifier: Verifier error 54: Cache miss for method at offset"
-    - "E/verifier: Verifier error 62: Cannot resolve method id"
-    - "E/verifier: Error: method void effective_type_function_n.ETSGLOBAL::main() failed to verify"
-    runtime-with-new-libs.ark:
-    - "E/verifier: Cannot link class: Cannot find method 'a (Lstd/core/Object;)LY;' in class 'effective_type_function_n.libr.ETSGLOBAL'"
-    - "E/verifier: Verifier error 54: Cache miss for method at offset"
-    - "E/verifier: Verifier error 62: Cannot resolve method id"
-    - "E/verifier: Method verification failed: void effective_type_function_n.ETSGLOBAL::main()"
-    - "E/verifier: Class verification failed: 'effective_type_function_n.ETSGLOBAL' method: void effective_type_function_n.ETSGLOBAL::main()"
-    - "E/runtime: Cannot initialize class 'effective_type_function_n.ETSGLOBAL'"
-    - "Unhandled exception: std.core.LinkerVerificationError"
-    - "LinkerVerificationError: Leffective_type_function_n/ETSGLOBAL;"
-    - "at std.core.LinkerError.<ctor>"
-    - "at std.core.LinkerVerificationError.<ctor>"
+    After reverting Any bytecode support, Any and Object have the same effective
+    type at the bytecode level. Changing a parameter from Object to Any no longer
+    affects binary compatibility.
 files: ['./effective_type_function_n.libr.ets']
 ---*/
 

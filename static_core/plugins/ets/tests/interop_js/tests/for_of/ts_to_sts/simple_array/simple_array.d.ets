@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 
-export declare let emptyArray: Any[];
+export declare let emptyArray: Object[];
 export declare let numberArray: number[];
 export declare let stringArray: string[];

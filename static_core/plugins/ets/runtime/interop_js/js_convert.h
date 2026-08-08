@@ -18,7 +18,6 @@
 
 #include <variant>
 #include "plugins/ets/runtime/ets_execution_context.h"
-#include "plugins/ets/runtime/ets_class_root.h"
 #include "plugins/ets/runtime/interop_js/js_convert_base.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/interop_js/js_convert_stdlib.h"
@@ -356,29 +355,6 @@ JSCONVERT_UNWRAP(JSValue)
     return JSValue::Create(EtsExecutionContext::GetCurrent(), ctx, jsVal);
 }
 
-JSCONVERT_DEFINE_TYPE(Any, EtsObject *);
-JSCONVERT_WRAP(Any)
-{
-    auto executionCtx = EtsExecutionContext::GetCurrent();
-    auto ctx = InteropCtx::Current(executionCtx);
-    if (ctx == nullptr) {
-        ThrowNoInteropContextException();
-        return {};
-    }
-    auto objConv = JSRefConvertResolve(ctx, etsVal->GetClass()->GetRuntimeClass());
-    if (objConv == nullptr) {
-        ctx->ForwardEtsException(executionCtx);
-        return nullptr;
-    }
-    return objConv->Wrap(ctx, etsVal);
-}
-JSCONVERT_UNWRAP(Any)
-{
-    auto *anyClass = EtsExecutionContext::GetCurrent()->GetPandaVM()->GetClassLinker()->GetClassRoot(EtsClassRoot::ANY);
-    auto objectConverter = ctx->GetEtsClassWrappersCache()->Lookup(anyClass);
-    return objectConverter->Unwrap(ctx, jsVal);
-}
-
 JSCONVERT_DEFINE_TYPE(EtsObject, EtsObject *);
 JSCONVERT_WRAP(EtsObject)
 {
@@ -462,7 +438,7 @@ JSCONVERT_UNWRAP(ESError)
         auto jsValueObj = JSValue::Create(executionCtx, ctx, jsVal);
         etsObject = jsValueObj->AsObject();
     } else {
-        etsObject = JSConvertAny::UnwrapWithNullCheck(ctx, env, jsVal).value();
+        etsObject = JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsVal).value();
     }
 
     if (UNLIKELY(etsObject == nullptr)) {
@@ -600,12 +576,9 @@ ALWAYS_INLINE inline bool CheckArgMatchObject(napi_env env, EtsClass *cls, napi_
     if (cls == PlatformTypes()->coreBigInt) {
         return JSConvertBigInt::MatchType(env, jsArg);
     }
-
-    if (cls->GetRuntimeClass()->IsObjectClass() || cls->GetRuntimeClass()->IsAnyClass() ||
-        cls == PlatformTypes()->interopJSValue) {
+    if (cls->GetRuntimeClass()->IsObjectClass() || cls == PlatformTypes()->interopJSValue) {
         return true;
     }
-
     if (cls == PlatformTypes()->coreArray || cls == PlatformTypes()->coreSet || cls == PlatformTypes()->coreMap) {
         InteropCtx::ThrowJSTypeError(env, "Overload resolution for Array, Map and Set is not supported");
         return false;

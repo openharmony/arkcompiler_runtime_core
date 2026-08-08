@@ -16,9 +16,10 @@
 package std.interop.js;
 
 export final class JSValue {
-    private native constructor();
     private __internal_field_0: long;
     private __internal_field_1: long;
+
+    public native toString(): String;
 }
 
 // NOTE: vpukhov. decide what to do with nullish JSValues

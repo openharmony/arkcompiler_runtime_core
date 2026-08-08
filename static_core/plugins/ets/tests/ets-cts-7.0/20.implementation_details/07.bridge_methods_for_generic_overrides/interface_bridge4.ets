@@ -113,7 +113,7 @@ function main(): int {
 
     suite.addTest("Bridge method expects String", () => {
         tmp = new SiblingString();
-        let a: SiblingBase<Object> = tmp as SiblingBase<Object>;
+        let a: SiblingBase<Any> = tmp as SiblingBase<Any>;
         arktest.expectError(
             () => { a.process(1) },
             "std.core.Int cannot be cast to std.core.String"
@@ -124,10 +124,7 @@ function main(): int {
         tmp = new SiblingObject();
         let a: SiblingBase<Any> = tmp as SiblingBase<Any>;
         arktest.assertEQ(a.process(1), 1)
-        arktest.expectError(
-            () => { a.process(null) },
-            "std.core.Null cannot be cast to std.core.Object"
-        )
+        arktest.assertTrue(a.process(null) === null)
     });
 
     suite.addTest("CCE on casting to sibling with different specialization", () => {

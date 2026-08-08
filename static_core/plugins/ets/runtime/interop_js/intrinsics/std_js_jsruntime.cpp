@@ -301,6 +301,11 @@ EtsLong JSRuntimeXgcStartIntrinsic()
     return static_cast<EtsLong>(id);
 }
 
+EtsString *JSValueToStringIntrinsic(JSValue *object)
+{
+    return JSValueToString(object);
+}
+
 EtsString *JSONStringifyIntrinsic(JSValue *obj)
 {
     return JSONStringify(obj);

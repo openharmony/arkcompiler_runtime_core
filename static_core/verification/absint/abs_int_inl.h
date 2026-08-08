@@ -3637,7 +3637,7 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3661,7 +3661,7 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3685,7 +3685,7 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3708,7 +3708,7 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3732,7 +3732,7 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3756,7 +3756,7 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3779,7 +3779,7 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3803,7 +3803,7 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3827,7 +3827,7 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3945,7 +3945,7 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -3969,7 +3969,7 @@ public:
             return false;
         }
 
-        SetReg(vd, refType_);
+        SetReg(vd, objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -4037,7 +4037,7 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -4084,7 +4084,7 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -4156,7 +4156,10 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        /*
+         * NOTE(knazarov): Workaround until Any in runtime is not merged
+         */
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -4176,7 +4179,10 @@ public:
             return false;
         }
 
-        SetAcc(refType_);
+        /*
+         * NOTE(knazarov): Workaround until Any in runtime is not merged
+         */
+        SetAcc(objectType_);
         MoveToNextInst<FORMAT>();
         return true;
     }
@@ -4820,7 +4826,8 @@ private:
             return false;
         }
         LOG_VERIFIER_DEBUG_TYPE(ToString(cachedType));
-        if (!IsSubtype(cachedType, refType_, GetTypeSystem()) && !IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
+        if (!IsSubtype(cachedType, objectType_, GetTypeSystem()) &&
+            !IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
             LOG_VERIFIER_CHECK_CAST_TO_NON_OBJECT_TYPE(ToString(cachedType));
             SET_STATUS_FOR_MSG(CheckCastToNonObjectType, WARNING);
             return false;
@@ -4850,7 +4857,8 @@ private:
             return false;
         }
         LOG_VERIFIER_DEBUG_TYPE(ToString(cachedType));
-        if (!IsSubtype(cachedType, refType_, GetTypeSystem()) && !IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
+        if (!IsSubtype(cachedType, objectType_, GetTypeSystem()) &&
+            !IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
             // !(type <= Types().ArrayType()) is redundant, because all arrays
             // are subtypes of either panda.Object <: ObjectType or java.lang.Object <: ObjectType
             // depending on selected language context

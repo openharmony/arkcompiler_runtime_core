@@ -16,5 +16,11 @@
 package std.core;
 
 export final class Null {
-    private native constructor();
+    private constructor() { };
+
+    public override toString(): String { return "null"; }
+
+    public equals(to: Any): boolean {
+        throw new Error("Internal error: null.equals was called!")
+    }
 }

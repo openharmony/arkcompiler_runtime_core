@@ -372,7 +372,7 @@ function JSON_stringify_jsv(x: JSValue) {
 }
 
 function JSON_stringify_obj(x: JSValue) {
-    let y = x as Any
+    let y = x as Object
     return JSON.stringify(y)
 }
 

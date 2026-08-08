@@ -169,7 +169,7 @@ static bool ConvertNativeReferences(EtsExecutionContext *executionCtx, InteropCt
 
     std::vector<ani_ref> localResults(values.size(), nullptr);
     for (size_t i = 0, end = values.size(); i < end; ++i) {
-        auto optAnyRef = JSConvertAny::UnwrapWithNullCheck(ctx, env, values[i]);
+        auto optAnyRef = JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, values[i]);
         if (UNLIKELY(!optAnyRef)) {
             return false;
         }
@@ -225,7 +225,7 @@ static bool ConvertAniReferences(EtsExecutionContext *executionCtx, InteropCtx *
     for (size_t i = 0, end = values.size(); i < end; ++i) {
         auto *etsObject = s.ToInternalType(values[i]);
         EtsHandle<EtsObject> etsHandle(executionCtx, etsObject);
-        localResults[i] = JSConvertAny::WrapWithNullCheck(napiEnv, etsHandle.GetPtr());
+        localResults[i] = JSConvertEtsObject::WrapWithNullCheck(napiEnv, etsHandle.GetPtr());
         if (UNLIKELY(localResults[i] == nullptr)) {
             return false;
         }

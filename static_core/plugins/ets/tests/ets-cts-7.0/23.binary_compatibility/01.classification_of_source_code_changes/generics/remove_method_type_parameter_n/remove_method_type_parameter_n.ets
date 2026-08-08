@@ -14,27 +14,11 @@
  */
 
 /*---
-desc: Test for binary compatibility. Adding an annotation on a class is compatible.
+desc: >-
+    After reverting Any bytecode support, removing a method type parameter changes
+    the effective type from T(=Any) to Object, but both produce the same bytecode
+    signature, so this change no longer affects binary compatibility.
 files: ['./remove_method_type_parameter_n.libr.ets']
-tags: [negative]
-negative_steps: [verify-new-libs, runtime-with-new-libs.ark]
-expected_error:
-    verify-new-libs:
-    - "E/verifier: Cannot link class: Cannot find method 'convert (LY;)LY;' in class 'remove_method_type_parameter_n.libr.Util'"
-    - "E/verifier: Verifier error 54: Cache miss for method at offset"
-    - "E/verifier: Verifier error 62: Cannot resolve method id"
-    - "E/verifier: Error: method void remove_method_type_parameter_n.ETSGLOBAL::main() failed to verify"
-    runtime-with-new-libs.ark:
-    - "E/verifier: Cannot link class: Cannot find method 'convert (LY;)LY;' in class 'remove_method_type_parameter_n.libr.Util'"
-    - "E/verifier: Verifier error 54: Cache miss for method at offset"
-    - "E/verifier: Verifier error 62: Cannot resolve method id"
-    - "E/verifier: Method verification failed: void remove_method_type_parameter_n.ETSGLOBAL::main()"
-    - "E/verifier: Class verification failed: 'remove_method_type_parameter_n.ETSGLOBAL' method: void remove_method_type_parameter_n.ETSGLOBAL::main()"
-    - "E/runtime: Cannot initialize class 'remove_method_type_parameter_n.ETSGLOBAL'"
-    - "Unhandled exception: std.core.LinkerVerificationError"
-    - "LinkerVerificationError: Lremove_method_type_parameter_n/ETSGLOBAL;"
-    - "at std.core.LinkerError.<ctor> (RuntimeLinkerErrors.ets:20:0)"
-    - "at std.core.LinkerVerificationError.<ctor> (RuntimeLinkerErrors.ets:30:0)"
 ---*/
 
 import * as LIB from './remove_method_type_parameter_n.libr.ets'
