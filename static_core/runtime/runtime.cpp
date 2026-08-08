@@ -519,9 +519,29 @@ void Runtime::SetEnableClassLinkerTraceOptions(RuntimeOptions &options)
         options.SetEnableClassLinkerTrace(true);
     }
 }
+
+void Runtime::SetDebuggerLaunchOption(RuntimeOptions &options)
+{
+    options.SetDebuggerEnable(true);
+    const std::string debugLibraryPathMode = default_target_options::GetDebuggerLibraryPath();
+    if (!debugLibraryPathMode.empty()) {
+        options.SetDebuggerLibraryPath(debugLibraryPathMode);
+    } else {
+        LOG(ERROR, RUNTIME) << "Debug mode enabled but debugger library path is not set for this platform";
+    }
+    options.SetDebuggerBreakOnStart(true);
+}
+
+void Runtime::ResetDebuggerLaunchOption(RuntimeOptions &options)
+{
+    options.SetDebuggerEnable(false);
+    options.SetDebuggerBreakOnStart(false);
+}
 #else
 void Runtime::SetRuntimeOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetDebuggerOptions([[maybe_unused]] RuntimeOptions &options) {}
+void Runtime::SetDebuggerLaunchOption([[maybe_unused]] RuntimeOptions &options) {}
+void Runtime::ResetDebuggerLaunchOption([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetInterpreterTypeOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetUseLargerYoungSpaceOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetEnableClassLinkerTraceOptions([[maybe_unused]] RuntimeOptions &options) {}
