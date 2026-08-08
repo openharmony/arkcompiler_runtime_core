@@ -133,6 +133,15 @@ bool Backtrace::StepArkByNativeFrame(void *ctx, ReadMemFuncStatic readMem, ArkSt
         return ret;
     }
 
+    constexpr uintptr_t ARK_INTERPRETER_APPFREEZE = UINTPTR_MAX;
+    // For the topmost ark frame: if the signal interrupted inside the interpreter, pc holds the exact bytecode
+    // PC captured from the register at the signal moment, which is more precise than the stack-stored value.
+    if (currentFrameIndex == 0 && *arkStepParam->pc != 0 && *arkStepParam->sp == ARK_INTERPRETER_APPFREEZE) {
+        *arkStepParam->pc = *arkStepParam->pc;
+        *arkStepParam->isArkFrame = true;
+        return true;
+    }
+
     uint64_t currentFrameNum = static_cast<uint64_t>(arkFrameNum) - currentFrameIndex;
     uint64_t pcOffset = arkFrameNumOffset + ARKFRAME_SIZE * currentFrameNum - ARKPC_OFFSET;
     ret = readMem(ctx, *arkStepParam->fp - pcOffset, arkStepParam->pc);
