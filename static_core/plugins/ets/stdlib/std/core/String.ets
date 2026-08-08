@@ -398,6 +398,34 @@ export final class String extends Object implements Comparable<String>, Iterable
     private native getCharsImpl(begin: int, end: int): ValueArray<char>;
 
     /**
+     * Gets the ValueArray<char> sequence that is representing this string.
+     *
+     * @returns { ValueArray<char> } ValueArray<char> array
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public getValueArrayChars(): ValueArray<char> {
+        return this.getValueArrayChars(0, this.getLength());
+    }
+
+    /**
+     * Gets the ValueArray<char> sequence that is representing the part of
+     *     this string between begin and end indexes. The range is
+     *     a half-interview [begin, end).
+     *
+     * @param { int } begin index to start from
+     * @param { int } end past the ending index
+     * @throws { StringIndexOutOfBoundsError } if begin > end, if begin is negative or >= length
+     *     if end > length
+     * @returns { ValueArray<char> } ValueArray<char> array
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
+    public getValueArrayChars(begin: int, end: int): ValueArray<char> {
+        return this.getCharsImpl(begin, end);
+    }
+
+    /**
      * Gets the byte sequence that is representing the part of
      *     this string between begin and end indexes. The range is
      *     a half-interview [begin, end).
