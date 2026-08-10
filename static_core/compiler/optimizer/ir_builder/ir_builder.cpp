@@ -104,11 +104,11 @@ bool IrBuilder::BuildIrImpl(InstBuilder &instBuilder, size_t vregsCount)
         ConnectThrowBlocks();
         if (GetGraph()->IsThrowApplied()) {
             InvalidateBlocksOrderAnalyzes(GetGraph());
+            GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
+            GetGraph()->RunPass<LoopAnalyzer>();
         }
     }
     GetGraph()->RunPass<DominatorsTree>();
-    GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
-    GetGraph()->RunPass<LoopAnalyzer>();
     instBuilder.FixInstructions();
     if (GetGraph()->GetRuntime()->IsMemoryBarrierRequired(GetMethod())) {
         SetMemoryBarrierFlag();
