@@ -34,12 +34,12 @@ enum class StepFrameType : uint8_t {
 };
 
 struct ArkStepParam {
-    uintptr_t *fp;
-    uintptr_t *sp;
-    uintptr_t *pc;
-    bool *isArkFrame;
-    StepFrameType *frameType;
-    uint64_t frameIndex;
+    uintptr_t *fp {nullptr};
+    uintptr_t *sp {nullptr};
+    uintptr_t *pc {nullptr};
+    bool *isArkFrame {nullptr};
+    StepFrameType *frameType {nullptr};
+    uint64_t frameIndex {0};
 };
 
 class Backtrace {
