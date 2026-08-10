@@ -996,6 +996,42 @@ void InspectorServer::OnCallProfilerStop(std::function<Expected<Profile, std::st
     });
 }
 
+void InspectorServer::OnCallHeapProfilerEnable()
+{
+    server_.OnCall("HeapProfiler.enable", [](auto &, auto &) { return std::unique_ptr<JsonSerializable>(); });
+}
+
+void InspectorServer::OnCallHeapProfilerDisable()
+{
+    server_.OnCall("HeapProfiler.disable", [](auto &, auto &) { return std::unique_ptr<JsonSerializable>(); });
+}
+
+void InspectorServer::OnCallHeapProfilerTakeHeapSnapshot(std::function<HeapSnapshotModel()> &&handler)
+{
+    server_.OnCall(
+        "HeapProfiler.takeHeapSnapshot",
+        [this, handler = std::move(handler)](auto &sessionId, const JsonObject &params) -> Server::MethodResponse {
+            bool reportProgress = false;
+            if (auto *prop = params.GetValue<JsonObject::BoolT>("reportProgress")) {
+                reportProgress = *prop;
+            }
+            HeapSnapshotModel model = handler();
+            if (reportProgress) {
+                server_.Call(sessionId, "HeapProfiler.reportHeapSnapshotProgress", [&](JsonObjectBuilder &params) {
+                    params.AddProperty("done", 1);
+                    params.AddProperty("total", 1);
+                    params.AddProperty("finished", true);
+                });
+            }
+
+            HeapSnapshotSerializer::Serialize(model, [this, &sessionId](std::string_view chunk) {
+                server_.Call(sessionId, "HeapProfiler.addHeapSnapshotChunk",
+                             [&](JsonObjectBuilder &params) { params.AddProperty("chunk", std::string(chunk)); });
+            });
+            return std::unique_ptr<JsonSerializable>();
+        });
+}
+
 void InspectorServer::OnCallTargetAttachToTarget()
 {
     class Response : public JsonSerializable {

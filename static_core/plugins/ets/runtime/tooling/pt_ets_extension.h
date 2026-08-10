@@ -38,6 +38,8 @@ public:
                                uint32_t *bcOffset) override;
 
     bool IsSupportHybridStack() override;
+
+    bool IsWeakReferentField(ObjectHeader *object, const Field &field) override;
 };
 }  // namespace ark::ets
 

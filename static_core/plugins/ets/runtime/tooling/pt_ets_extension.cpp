@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
+#include "runtime/include/field.h"
 #include "plugins/ets/runtime/tooling/pt_ets_extension.h"
+#include "plugins/ets/runtime/types/ets_object.h"
+#include "plugins/ets/runtime/types/ets_weak_reference.h"
 
 #ifdef PANDA_ETS_INTEROP_JS
 #include "runtime/execution/coroutines/coroutine.h"
@@ -22,6 +25,12 @@
 #endif
 
 namespace ark::ets {
+
+bool PtEtsExtension::IsWeakReferentField(ObjectHeader *object, const Field &field)
+{
+    return EtsObject::FromCoreType(object)->GetClass()->IsWeakReference() &&
+           field.GetOffset() == EtsWeakReference::GetReferentOffset();
+}
 
 // clang-format off
 bool PtEtsExtension::CollectHybridStackFrames([[maybe_unused]] const std::function<

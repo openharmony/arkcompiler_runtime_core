@@ -26,6 +26,11 @@ ObjectRepository::ObjectRepository() : extension_(nullptr), scope_(ManagedThread
     extension_ = thread->GetLanguageContext().CreatePtLangExt();
 }
 
+PtLangExt *ObjectRepository::GetPtLangExt() const
+{
+    return extension_.get();
+}
+
 RemoteObject ObjectRepository::CreateGlobalObject()
 {
     return RemoteObject::Object("[Global]", GLOBAL_OBJECT_ID, "Global object");

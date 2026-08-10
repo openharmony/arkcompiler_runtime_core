@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "include/tooling/pt_thread.h"
 
 #include "common.h"
+#include "hprof/heap_snapshot_serializer.h"
 #include "session_manager.h"
 #include "source_manager.h"
 #include "debugger/thread_state.h"
@@ -121,6 +122,9 @@ public:
     void OnCallProfilerSetSamplingInterval(std::function<void(uint32_t)> &&handler);
     void OnCallProfilerStart(std::function<Expected<bool, std::string>()> &&handler);
     void OnCallProfilerStop(std::function<Expected<Profile, std::string>()> &&handler);
+    void OnCallHeapProfilerEnable();
+    void OnCallHeapProfilerDisable();
+    void OnCallHeapProfilerTakeHeapSnapshot(std::function<HeapSnapshotModel()> &&handler);
 
     SourceManager &GetSourceManager()
     {

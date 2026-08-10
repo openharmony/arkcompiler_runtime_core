@@ -1037,6 +1037,67 @@
       ]
     },
     {
+      "domain": "HeapProfiler",
+      "dependencies": ["Runtime"],
+      "commands": [
+        {
+          "name": "enable"
+        },
+        {
+          "name": "disable"
+        },
+        {
+          "name": "takeHeapSnapshot",
+          "parameters": [
+            {
+              "name": "reportProgress",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "captureNumericValue",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "exposeInternals",
+              "type": "boolean",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "name": "addHeapSnapshotChunk",
+          "parameters": [
+            {
+              "name": "chunk",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "reportHeapSnapshotProgress",
+          "parameters": [
+            {
+              "name": "done",
+              "type": "integer"
+            },
+            {
+              "name": "total",
+              "type": "integer"
+            },
+            {
+              "name": "finished",
+              "type": "boolean",
+              "optional": true
+            }
+          ]
+        }
+      ]
+    },
+    {
       "domain": "Target",
       "types": [
         {

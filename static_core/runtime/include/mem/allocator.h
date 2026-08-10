@@ -662,7 +662,7 @@ public:
 
     void VisitAndRemoveFreePools(const MemVisitor &memVisitor) final;
 
-    void IterateOverObjects(const ObjectVisitor &objectVisitor) final;
+    void IterateOverObjects(const ObjectVisitor &objectVisitor) override;
 
     /// @brief iterates all objects in object allocator
     void IterateRegularSizeObjects(const ObjectVisitor &objectVisitor) final;

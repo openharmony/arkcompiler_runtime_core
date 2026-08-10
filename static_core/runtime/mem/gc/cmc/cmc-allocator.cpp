@@ -24,6 +24,7 @@
 #include "runtime/mem/gc/cmc/heap/heap.h"
 #include "common_components/common/page_pool.h"
 #include "common_components/common_runtime/base_runtime_param.h"
+#include "runtime/mem/gc/cmc/heap/allocator/allocator.h"
 #include "runtime/mem/gc/cmc/heap/heap_manager.h"
 #endif
 
@@ -108,6 +109,14 @@ void *CMCObjectAllocator::AllocateNonMovable([[maybe_unused]] size_t size, [[may
 #else
     return nullptr;
 #endif
+}
+
+void CMCObjectAllocator::IterateOverObjects([[maybe_unused]] const ObjectVisitor &objectVisitor)
+{
+#if defined(ARK_USE_COMMON_RUNTIME)
+    auto visitor = [&](ark::common_vm::BaseObject *obj) { objectVisitor(reinterpret_cast<ObjectHeader *>(obj)); };
+    ark::common_vm::Heap::GetHeap().GetAllocator().ForEachObject(visitor, false);
+#endif  // ARK_USE_COMMON_RUNTIME
 }
 
 void CMCObjectAllocator::IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor)

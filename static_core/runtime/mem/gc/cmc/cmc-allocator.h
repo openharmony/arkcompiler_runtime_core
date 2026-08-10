@@ -44,6 +44,8 @@ public:
     [[nodiscard]] void *AllocateNonMovable(size_t size, Alignment align, ark::ManagedThread *thread,
                                            ObjectAllocatorBase::ObjMemInitPolicy objInit) override;
 
+    void IterateOverObjects(const ObjectVisitor &objectVisitor) override;
+
     void IterateOverObjectsSafe([[maybe_unused]] const ObjectVisitor &objectVisitor) override;
 
     bool IsNonMovable([[maybe_unused]] const ObjectHeader *obj) override
