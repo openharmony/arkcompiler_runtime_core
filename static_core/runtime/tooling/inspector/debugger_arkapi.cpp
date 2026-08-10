@@ -19,6 +19,8 @@
 #include "libarkbase/os/mutex.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/include/runtime.h"
+#include "runtime/include/runtime_notification.h"
+#include "runtime/include/thread.h"
 #include "runtime/tooling/sampler/samples_record.h"
 #include "runtime/tooling/sampler/sampling_profiler.h"
 #include "types/profile_result.h"
@@ -79,7 +81,8 @@ bool ArkDebugNativeAPI::NotifyDebugMode([[maybe_unused]] int tid, [[maybe_unused
         LOG(ERROR, DEBUGGER) << "[NotifyDebugMode] gHybridDebuggerHandle_ load fail";
         return false;
     }
-    Runtime::GetCurrent()->SetDebugMode(true);
+    Runtime::GetCurrent()->SetDebugMode(isStartWithDebug);
+    Runtime::SetDebuggerLaunchOption(Runtime::GetOptions());
 
     // store debugger postTask in inspector.
     using StoreDebuggerInfo = void (*)(int, void *, const DebuggerPostTask &);
@@ -103,15 +106,17 @@ bool ArkDebugNativeAPI::NotifyDebugMode([[maybe_unused]] int tid, [[maybe_unused
         LOG(ERROR, DEBUGGER) << "[NotifyDebugMode] InitializeDebuggerForSocketpair fail";
         return false;
     }
-
-    using WaitForDebugger = void (*)(void *);
-    auto symOfWaitForDebugger =
-        reinterpret_cast<WaitForDebugger>(ResolveSymbol(gHybridDebuggerHandle_, "WaitForDebugger"));
-    if (symOfWaitForDebugger == nullptr) {
-        LOG(ERROR, DEBUGGER) << "Resolve symbol WaitForDebugger fail: " << dlerror();
-        return false;
+    DebuggerLaunchSetup();
+    if (isStartWithDebug) {
+        using WaitForDebugger = void (*)(void *);
+        auto symOfWaitForDebugger =
+            reinterpret_cast<WaitForDebugger>(ResolveSymbol(gHybridDebuggerHandle_, "WaitForDebugger"));
+        if (symOfWaitForDebugger == nullptr) {
+            LOG(ERROR, DEBUGGER) << "Resolve symbol WaitForDebugger fail: " << dlerror();
+            return false;
+        }
+        symOfWaitForDebugger(vm);
     }
-    symOfWaitForDebugger(vm);
 
     return true;
 }
@@ -129,16 +134,26 @@ bool ArkDebugNativeAPI::StopDebugger([[maybe_unused]] void *vm)
 
     sym(vm);
     ark::Runtime::GetCurrent()->SetDebugMode(false);
+    ark::Runtime::GetCurrent()->UnloadDebugger();
+    ark::Runtime::ResetDebuggerLaunchOption(Runtime::GetOptions());
     return true;
+}
+
+void ArkDebugNativeAPI::DebuggerLaunchSetup()
+{
+    if (Runtime::GetCurrent()->IsDebuggerAttached()) {
+        LOG(ERROR, DEBUGGER) << "ArkDebugNativeAPI::DebuggerLaunchSetup: debug session already running, skip";
+        return;
+    }
+    Runtime::GetCurrent()->StartDebugSession();
+    Runtime::GetCurrent()->GetPandaVM()->LoadDebuggerAgent();
+    Runtime::GetCurrent()->GetNotificationManager()->ThreadStartEvent(ManagedThread::GetCurrent());
 }
 
 bool ArkDebugNativeAPI::StartDebuggerForSocketPair([[maybe_unused]] int tid, [[maybe_unused]] int socketfd)
 {
     LOG(INFO, DEBUGGER) << "ArkDebugNativeAPI::StartDebugForSocketPair, tid = " << tid << " socketfd is " << socketfd;
-    if (!Runtime::GetOptions().IsDebuggerEnable()) {
-        LOG(ERROR, DEBUGGER) << "Runtime::GetOptions().IsDebuggerEnable() " << Runtime::GetOptions().IsDebuggerEnable();
-        return false;
-    }
+    Runtime::GetCurrent()->SetDebugMode(true);
     using StartDebuggerForSocketpair = bool (*)(int, int, bool);
     auto sym =
         reinterpret_cast<StartDebuggerForSocketpair>(ResolveSymbol(gHybridDebuggerHandle_, "StartDebugForSocketpair"));
