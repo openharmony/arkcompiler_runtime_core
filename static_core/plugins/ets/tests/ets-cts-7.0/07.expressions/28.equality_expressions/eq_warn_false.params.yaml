@@ -60,7 +60,6 @@ cases:
           arktest.assertFalse(a == null) // instance of class and null
 
     - warning: |-
-          Semantic error ESE0127: No matching call signature for assertFalse(Boolean)
           Semantic error ESE0105: Operator '==' cannot be applied to types 'String' and 'Char'.
       tags: [negative, compile-only]
       decl: |-
@@ -92,7 +91,6 @@ cases:
           arktest.assertFalse(a === c) // different enumeration types with different values
 
     - warning: |-
-          Semantic error ESE0127: No matching call signature for assertFalse(Boolean)
           Semantic error ESE0105: Operator '===' cannot be applied to types 'Double|Boolean|undefined' and 'String|null'.
       tags: [negative, compile-only]
       decl: |-
@@ -102,7 +100,6 @@ cases:
           arktest.assertFalse(a === b) // non-overlapping union types
 
     - warning: |-
-          Semantic error ESE0127: No matching call signature for assertFalse(Boolean)
           Semantic error ESE0105: Operator '==' cannot be applied to types 'Double' and '""'.
       tags: [negative, compile-only]
       main: |-

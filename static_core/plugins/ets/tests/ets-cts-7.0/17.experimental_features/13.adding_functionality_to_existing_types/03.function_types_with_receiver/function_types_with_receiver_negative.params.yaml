@@ -50,9 +50,8 @@ cases:
       f2 = foo
       arktest.assertTrue(new A().f2())
     out: |
-      Semantic error ESE0127: No matching call signature for assertFalse(...)\n
+      Semantic error ESE0087: Property 'f1' does not exist on type 'A'\n
       Semantic error ESE0087: Property 'f2' does not exist on type 'A'\n
-      Semantic error ESE0127: No matching call signature for assertTrue(...)\n
       Semantic error ESE0087: Property 'f2' does not exist on type 'A'\n
   - decl: |
       function foo<T extends Object>(this: T, functor: (this: T)=> void): void {
@@ -70,9 +69,8 @@ cases:
       let z = x.bar
       let y = x.bar<int>
     out: |
-      Semantic error ESE0127: No matching call signature for foo(Int, x.bar)\n
+      Semantic error ESE0087: Property 'functor' does not exist on type 'Object'\n
       Semantic error ESE655063: Generic function bar requires explicit type arguments when used as a value.\n
-      Semantic error ESE0127: No matching call signature for foo(Int, ...)\n
       Semantic error ESE0087: Property 'bar' does not exist on type 'Int'\n
       Semantic error ESE0087: Property 'bar' does not exist on type 'Int'\n
       Semantic error ESE0087: Property 'bar' does not exist on type 'Int'\n

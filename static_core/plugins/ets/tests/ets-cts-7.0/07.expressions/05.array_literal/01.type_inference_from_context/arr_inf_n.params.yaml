@@ -39,6 +39,5 @@ cases:
       use: |-
           arktest.assertEQ( foo([new B(), new C()] as A[]), 2 ) // A[] is super type of B[]
       expected_out: |-
-          Semantic error ESE0127: No matching call signature for assertEQ(..., Int)
           Semantic error ESE0127: No matching call signature for foo(Array<A>)
           Semantic error ESE0046: Type 'Array<A>' is not compatible with type 'Array<B>' at index 1

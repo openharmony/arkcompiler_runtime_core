@@ -17,7 +17,6 @@
 desc: Pass partial object literal with private field to Partial<Readonly> type, expect compile error
 tags: [compile-only, negative]
 expected_out:
-    - "Semantic error ESE0127: No matching call signature for test(Partial<A>)"
     - "Semantic error ESE0065: type Partial<A> has no property named w"
 ---*/
 
