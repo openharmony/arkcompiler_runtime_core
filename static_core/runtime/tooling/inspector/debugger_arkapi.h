@@ -53,6 +53,7 @@ public:
     ArkDebugNativeAPI &operator=(ArkDebugNativeAPI &&) = delete;
 
 private:
+    static void DebuggerLaunchSetup();
     static void *gHybridDebuggerHandle_;
     static constexpr uint32_t DEFAULT_SAMPLE_INTERVAL_US = 500;
 };
