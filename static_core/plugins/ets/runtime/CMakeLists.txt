@@ -92,6 +92,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_StringBuilder.cpp
     ${ETS_EXT_SOURCES}/intrinsics/gc_task_tracker.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_gc.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_gc_lifecycle.cpp
     ${ETS_GC_INTRINSICS_SRC}
     ${ETS_EXT_SOURCES}/intrinsics/std_core_weak_reference.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_finalization_registry.cpp

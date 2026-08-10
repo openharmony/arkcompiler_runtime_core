@@ -271,10 +271,12 @@ void CmcGC<LanguageConfig>::MarkingHeap(const CArrayList<ObjectHeader *> &collec
     // Atomic with relaxed order reason: data race with markedObjectCount_ with no synchronization or ordering
     // constraints imposed on other reads or writes
     markedObjectCount_.store(0, std::memory_order_relaxed);
+    constexpr auto phase = GCPhase::GC_PHASE_MARK;
     {
         ScopedStopTheWorld stw;
-        TransitionToGCPhase(GCPhase::GC_PHASE_MARK);
+        TransitionToGCPhase(phase, false);
     }
+    this->FireGCPhaseStarted(phase);
 
     MarkingRoots(collectedRoots, reason);
     ExemptFromSpace();
