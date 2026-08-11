@@ -591,6 +591,32 @@ if (NOT PANDA_USE_PREBUILT_TARGETS)
     add_dependencies(arkruntime arkruntime_static)
 endif ()
 
+# Version script that controls the exported symbols of libarkruntime.so.
+set(ARKRUNTIME_VERSION_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/../plugins/ets/arkruntime.version)
+# Debug-oriented builds use a separate configuration. For now no version script
+# is applied to debug builds (some internal symbols are referenced differently
+# under -O0), so only non-debug builds apply ARKRUNTIME_VERSION_SCRIPT.
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR
+    "${CMAKE_BUILD_TYPE}" STREQUAL "DebugDetailed" OR
+    "${CMAKE_BUILD_TYPE}" STREQUAL "FastVerify" OR
+    "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    set(ARKRUNTIME_DEBUG_BUILD ON)
+endif()
+# NOTE: macOS is excluded because ld64 does not support the GNU ld
+# `--version-script` option (it uses `-exported_symbols_list` instead). Only
+# GNU ld based Unix targets (Linux, OHOS) are covered here.
+if (PANDA_TARGET_UNIX AND NOT PANDA_TARGET_WINDOWS AND NOT PANDA_TARGET_MACOS AND NOT ARKRUNTIME_DEBUG_BUILD)
+    set_target_properties(arkruntime PROPERTIES
+        LINK_FLAGS "-Wl,--version-script=${ARKRUNTIME_VERSION_SCRIPT} -Wl,--gc-sections"
+    )
+    set_target_properties(arkruntime PROPERTIES
+        LINK_DEPENDS ${ARKRUNTIME_VERSION_SCRIPT}
+    )
+    # Per-function/per-data section granularity so --gc-sections can discard
+    # unreferenced code/data that the version script has hidden (local symbols).
+    panda_target_compile_options(arkruntime_obj PRIVATE -ffunction-sections -fdata-sections)
+endif ()
+
 add_subdirectory(asm_defines)
 
 add_dependencies(arkruntime_obj

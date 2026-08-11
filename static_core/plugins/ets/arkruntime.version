@@ -1,0 +1,100 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * GNU ld version script for libarkruntime.so.
+ *
+ * Controls the set of symbols exported by the shared library. Everything is
+ * exported by default via the `*` wildcard in `global`, while selected
+ * implementation-internal symbols are explicitly hidden in `local`.
+ *
+ * NOTE: exact names in `local` take precedence over the `*` wildcard in
+ * `global`, so only the listed symbols are hidden. An anonymous version block
+ * is used because only visibility (not symbol versioning) is needed.
+ */
+
+{
+    global:
+        /* Explicit exceptions: referenced by name from in-repo gtests and from
+           cross-module assembly (e.g. i2c_bridge_test, ETS ani/plugin .S files)
+           that link libarkruntime.so, so they must stay exported despite the
+           *Bridge local rule below. An exact name here takes precedence over
+           the local wildcards. */
+        InterpreterToCompiledCodeBridge;
+        InterpreterToCompiledCodeBridgeDyn;
+        ThrowNativeExceptionBridge;
+        *;
+
+    local:
+        /* ================================================================
+         * Low risk: clearly internal, never referenced from outside
+         * ================================================================ */
+
+        /* Safe C function wrappers (SecVsnprintfImpl, etc.) */
+        Sec*;
+
+        /* String concatenation helpers (internal) */
+        StringConcat*;
+
+        /* ================================================================
+         * Medium risk: entrypoint mechanism (index-based, not dlsym)
+         * ================================================================ */
+
+        /* Entrypoint functions (resolved at link time into EntrypointsTable,
+           called by compiled code via ThreadReg + table offset + enum index) */
+        *EntryPoint;
+        *Entrypoint;
+
+        /* Bridge functions (interpreter-compiled transitions, same mechanism) */
+        *Bridge;
+
+        /* Compiled ABI wrappers (called via entrypoint table) */
+        *CompiledAbi;
+
+        /* NOTE: ETS stdlib intrinsic base names (StdCore*, EtsStdCore*,
+           EtsEscompat*, EtsAtomic*) are intentionally NOT hidden here.
+           In-repo gtests reference these base names directly (e.g.
+           EtsStdCoreArrayReverse, StdCoreToStringChar). Their entrypoint
+           variants are still hidden by the *Bridge / *CompiledAbi /
+           *EntryPoint suffix rules above. */
+
+        /* JS interop entrypoints (registered in entrypoint table) */
+        JSRuntime*;
+        CallJS*;
+
+        /* ETS async/proxy runtime (registered in entrypoint table) */
+        EtsAsync*;
+        EtsProxy*;
+
+        /* Abstract method stub */
+        AbstractMethod*;
+
+        /* Allocation intrinsics */
+        Allocate*;
+
+        /* ANI helper functions (not the public CAPI ANI_*) */
+        Ani*;
+
+        /* ================================================================
+         * NOTE: ark namespace C++ internals (_ZN3ark* / _ZNK3ark*) are
+         * intentionally NOT hidden here. Many are marked PANDA_PUBLIC_API
+         * (explicitly exported, e.g. ark::hotreload::ArkHotreloadBase::*) and
+         * are referenced by name from in-repo tools/tests and external plugins
+         * that link libarkruntime.so. Prefix wildcards like _ZN3ark9hotreload*
+         * would hide those public symbols and break consumers, for negligible
+         * gain (only ~24 symbols across all ark subsystems). The real hiding
+         * value is in the entrypoint/Bridge/CompiledAbi rules above.
+         * ================================================================ */
+};
