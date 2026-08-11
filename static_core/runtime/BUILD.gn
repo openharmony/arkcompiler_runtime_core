@@ -687,6 +687,14 @@ ohos_shared_library("libarkruntime") {
     ldflags += [ "-Wl,--exclude-libs,libpcre2_static_8.a:libpcre2_static_16.a" ]
   }
 
+  # Version script that controls the exported symbols of libarkruntime.so.
+  # GNU ld only: macOS and Windows linkers do not support --version-script.
+  # Skipped for debug builds (internal symbols are referenced differently
+  # under -O0).
+  if (current_cpu == "arm64" && !is_mac && !is_mingw && !is_win && !is_debug) {
+    version_script = "//arkcompiler/runtime_core/static_core/plugins/ets/arkruntime.version"
+  }
+
   deps = []
   deps += [ runtime_static_target ]
 
