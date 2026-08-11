@@ -752,6 +752,8 @@ export class TypeConversionTraverser extends VisitorTraverser<PrevState, LocalSt
 
       if (ts.isNumericLiteral(node.initializer)) {
         typeNode = this.context.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword);
+      } else if (ts.isStringLiteral(node.initializer)) {
+        typeNode = this.context.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword);
       }
 
       if (typeNode) {
