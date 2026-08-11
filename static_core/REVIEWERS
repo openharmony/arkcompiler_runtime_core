@@ -170,7 +170,7 @@ static_core/plugins/ets/runtime/intrinsics/*concurrency* ^dmitriitr ^konstanting
 static_core/plugins/ets/runtime/intrinsics/arkruntime_AbcFile.cpp             @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof @chernykhsergey
 static_core/plugins/ets/runtime/intrinsics/std_*                              ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @chernykhsergey ^slynkodenis ^vpukhov
-static_core/plugins/ets/runtime/intrinsics/std_concurrency_taskpool.cpp       ^dmitriitr ^konstanting @ipetrov ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/runtime/intrinsics/std_concurrency_taskpool.cpp       ^dmitriitr ^konstanting ^ipetrov ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/runtime/intrinsics/std_core_AbcRuntimeLinker.cpp      @vpukhov @slynkodenis @shilei123
 static_core/plugins/ets/runtime/intrinsics/std_core_ExclusiveLauncher.cpp     ^dmitriitr ^konstanting ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/runtime/intrinsics/std_core_Promise.cpp               ^dmitriitr ^konstanting ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
@@ -238,7 +238,7 @@ static_core/plugins/ets/tests/ets-common-tests/atomics/                       ^k
 static_core/plugins/ets/tests/ets-common-tests/gc/                              @artemu
 static_core/plugins/ets/tests/ets-common-tests/gc/*finalization*                @artemu ^shemetovphilip
 static_core/plugins/ets/tests/ets-common-tests/gc/*finreg*                      @artemu ^shemetovphilip
-static_core/plugins/ets/tests/ets-common-tests/taskpool/                        ^konstanting ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @ipetrov ^tanglu100 @MofengMa ^weixin_41079876
+static_core/plugins/ets/tests/ets-common-tests/taskpool/                        ^konstanting ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg ^ipetrov ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/ets-templates/03.types/                         ^Prof ^igelhaus ^fotograf ^zsw_zhushiwei ^amate ^sergeyandreev ^lindvladimir_f9b8 @tengtengh
 static_core/plugins/ets/tests/ets-templates/04.names_declarations_and_scopes/ ^Prof ^igelhaus ^fotograf ^zsw_zhushiwei ^amate ^sergeyandreev ^lindvladimir_f9b8 @fanglou
 static_core/plugins/ets/tests/ets-templates/06.contexts_and_conversions/      ^Prof ^igelhaus ^fotograf ^zsw_zhushiwei ^amate ^sergeyandreev ^lindvladimir_f9b8 @tengtengh
