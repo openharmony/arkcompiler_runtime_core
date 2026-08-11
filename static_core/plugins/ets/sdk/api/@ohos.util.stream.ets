@@ -1373,7 +1373,8 @@ export namespace stream {
             stream.isReading = false;
             if (stream.readableDecoder && !encoding) {
                 if (chunkIsBuffer) {
-                    chunkString = stream.stringDecoderInner.write(new Uint8Array(chunkBuffer!.buffer));
+                    const view = new Uint8Array(chunkBuffer!.buffer, chunkBuffer!.byteOffset, chunkBuffer!.length);
+                    chunkString = stream.stringDecoderInner.write(view);
                     chunkIsBuffer = false;
                 }
                 if (chunkString!.length === 0) {
@@ -1454,49 +1455,50 @@ export namespace stream {
                         buf[num++] = null;
                     }
                 }
-            } else if (size < (buf[num] as buffer.Buffer).length) {
-                res = (buf[num] as buffer.Buffer).subarray(0, size.toInt());
-                buf[num] = (buf[num] as buffer.Buffer).subarray(size.toInt());
-            } else if (size === (buf[num] as buffer.Buffer).length) {
-                res = buf[num];
-                buf[num++] = null;
             } else if (this.readableDecoder) {
-                res = '';
+                let result: string = '';
                 while (num < len) {
-                    const str: buffer.Buffer | string | null = buf[num];
-                    if (size > (str as string).length.toInt()) {
-                        res = (res as string) + (str as string);
-                        size -= (str as string).length.toInt();
+                    const str = buf[num] as string;
+                    if (size > str.length) {
+                        result = result.concat(str);
+                        size -= str.length;
                         buf[num++] = null;
                     } else {
-                        if (size === (buf[num] as string).length.toInt()) {
-                            res = (res as string) + (str as string);
+                        if (size === str.length) {
+                            result = result.concat(str);
                             buf[num++] = null;
                         } else {
-                            res = (res as string) + (str as buffer.Buffer).subarray(0, size.toInt());
-                            buf[num] = (str as buffer.Buffer).subarray(size.toInt());
+                            result = result.concat(str.substring(0, size));
+                            buf[num] = str.substring(size);
                         }
                         break;
                     }
                 }
+                res = result;
+            } else if (size < (buf[num] as buffer.Buffer).length) {
+                res = (buf[num] as buffer.Buffer).subarray(0, size);
+                buf[num] = (buf[num] as buffer.Buffer).subarray(size);
+            } else if (size === (buf[num] as buffer.Buffer).length) {
+                res = buf[num];
+                buf[num++] = null;
             } else {
-                res = buffer.allocUninitializedFromPool(size.toInt()) as buffer.Buffer
+                res = buffer.allocUninitializedFromPool(size);
 
-                const nRetLen = size.toInt();
+                const nRetLen = size;
                 while (num < len) {
-                    const data = buf[num];
-                    const dataLength = (data as buffer.Buffer).length
+                    const data = buf[num] as buffer.Buffer;
+                    const dataLength = data.length
                     if (size > dataLength) {
-                        (data as buffer.Buffer).copy(res, nRetLen - size.toInt(), 0, dataLength);
+                        data.copy(res, nRetLen - size, 0, dataLength);
                         size -= dataLength
                         buf[num++] = null;
                     } else {
-                        (data as buffer.Buffer).copy(res, nRetLen - size.toInt(), 0, size.toInt());
+                        data.copy(res, nRetLen - size, 0, size);
                         if (size === dataLength) {
                             buf[num++] = null;
                         } else {
-                            let remainBuf = buffer.allocUninitializedFromPool(dataLength - size.toInt());
-                            (data as buffer.Buffer).copy(remainBuf, nRetLen - size.toInt(), 0, size.toInt());
+                            let remainBuf = buffer.allocUninitializedFromPool(dataLength - size);
+                            data.copy(remainBuf, nRetLen - size, 0, size);
                             buf[num] = remainBuf;
                         }
                         break;
@@ -1704,7 +1706,9 @@ export namespace stream {
                         if (this.buf[i] instanceof string) {
                             currentBuffer += decoder.write(this.buf[i] as string);
                         } else {
-                            currentBuffer += decoder.write(new Uint8Array((this.buf[i] as buffer.Buffer).buffer));
+                            const bufItem = this.buf[i] as buffer.Buffer;
+                            const view = new Uint8Array(bufItem.buffer, bufItem.byteOffset, bufItem.length);
+                            currentBuffer += decoder.write(view);
                         }
                     }
                     this.buf.length = 0;
@@ -1814,10 +1818,14 @@ export namespace stream {
                 }
             };
 
-            const dataCallback = (data: Any): void => {
-                const writeData = new Uint8Array((data as buffer.Buffer).buffer);
-                const res = destination.write(writeData);
-                if (res === false) {
+            const dataCallback = (data: buffer.Buffer | string): void => {
+                let writeData: string | Uint8Array;
+                if (data instanceof string) {
+                    writeData = data;
+                } else {
+                    writeData = new Uint8Array(data.buffer, data.byteOffset, data.length);
+                }
+                if (!destination.write(writeData)) {
                     pause();
                 }
             };
