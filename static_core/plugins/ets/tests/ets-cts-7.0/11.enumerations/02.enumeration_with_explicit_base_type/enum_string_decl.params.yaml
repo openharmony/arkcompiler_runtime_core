@@ -90,7 +90,7 @@ cases:
         using different values types
     decl_variants:
       - |-
-        enum Enum: string { first = "11", second = "12", third = "13" as string }
+        enum Enum: string { first = "11", second = "12", third = "13" }
     sub_cases_logic:
       - |-
         arktest.assertTrue(Enum.first instanceof Enum)
