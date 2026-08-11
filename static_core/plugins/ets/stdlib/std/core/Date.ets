@@ -576,11 +576,14 @@ export class Date {
      * @FaAndStageModel
      */
     constructor(year: int, monthIndex: int, day?: int, hours?: int, minutes?: int, seconds?: int, ms?: int) {
-        this.ms = ecmaMakeDate(
+        let localTimeMs = ecmaMakeDate(
             ecmaMakeDay(ecmaMakeFullYear(year), monthIndex, day ?? 1),
             ecmaMakeTime(hours ?? 0, minutes ?? 0, seconds ?? 0, ms ?? 0)
         );
-        this.ms += this.TZOffset * msPerMinute
+        let offset1 = Date.getLocalTimezoneOffset(Date.now());
+        let guessUtc = localTimeMs + offset1 * msPerMinute;
+        let offset2 = Date.getLocalTimezoneOffset(guessUtc);
+        this.ms = localTimeMs + offset2 * msPerMinute;
     }
 
     /**
@@ -777,6 +780,7 @@ export class Date {
 
     /**
      * Gets a string with a language-sensitive representation of this date with respect to locale.
+     * Because ICU has specification issues, toLocaleString has problems in countries with daylight saving time.
      *
      * @param { Intl.LocalesArgument } [ locales ] A string with a BCP 47 language tag, or an
      *     array of such strings
@@ -1928,22 +1932,25 @@ export class Date {
     private timeZoneString(tzOffset: long): String {
         let sb = new StringBuilder();
         sb.append("GMT");
-        let offset = -tzOffset;
-        let hours = offset / 60;
-        if (hours < 0) {
+        let offset = -this.TZOffset;
+        if (offset < 0) {
             sb.append("-");
         } else {
             sb.append("+")
         }
-        if (abs(hours) < 10) {
+        let absOffset = abs(offset);
+        let absHours = absOffset / 60;
+        let absMinutes = absOffset % 60;
+
+        if (absHours < 10) {
             sb.append("0");
         }
-        sb.append(abs(hours));
-        let minutes = abs(offset % 60);
-        if (minutes < 10) {
+        sb.append(absHours);
+
+        if (absMinutes < 10) {
             sb.append("0");
         }
-        sb.append(minutes);
+        sb.append(absMinutes);
 
         return sb.toString();
     }

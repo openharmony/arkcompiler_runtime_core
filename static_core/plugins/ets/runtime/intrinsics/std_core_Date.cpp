@@ -22,7 +22,8 @@
 
 namespace ark::ets::intrinsics {
 
-constexpr const int32_t MS_IN_MINUTES = 60000;
+static constexpr int32_t MS_PER_SEC = 1000;
+static constexpr int32_t SEC_PER_MIN = 60;
 
 extern "C" int64_t StdCoreDateNow()
 {
@@ -33,13 +34,13 @@ extern "C" int64_t StdCoreDateNow()
 
 extern "C" int64_t StdCoreDateGetLocalTimezoneOffset(int64_t ms)
 {
-    UErrorCode success = U_ZERO_ERROR;
-    int32_t stdOffset;
-    int32_t dstOffset;
-    icu::TimeZone *tzlocal = icu::TimeZone::createDefault();
-    tzlocal->getOffset(ms, 1, stdOffset, dstOffset, success);
-    delete tzlocal;
-    return -(stdOffset + dstOffset) / MS_IN_MINUTES;
+    auto utcSeconds = static_cast<time_t>(ms / MS_PER_SEC);
+    struct tm localTm = {};
+
+    if (localtime_r(&utcSeconds, &localTm) == nullptr) {
+        return 0;
+    }
+    return static_cast<int64_t>(-localTm.tm_gmtoff / SEC_PER_MIN);
 }
 
 extern "C" EtsString *StdCoreDateGetTimezoneName(int64_t ms)
