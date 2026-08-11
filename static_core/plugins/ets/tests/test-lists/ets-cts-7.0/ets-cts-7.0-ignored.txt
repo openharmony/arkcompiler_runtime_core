@@ -3,9 +3,6 @@
 07.expressions/34.string_interpolation_expressions/bigint_interpolation_enum.ets
 07.expressions/34.string_interpolation_expressions/bigint_interpolation_local.ets
 
-#33978
-11.enumerations/01.enumeration_base_type/enum_str_1.ets
-
 #34323 No verifier error on abstract method call
 23.binary_compatibility/01.classification_of_source_code_changes/abstract_interpretation/access_method/make_method_abstract_n.ets
 
