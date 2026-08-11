@@ -142,25 +142,56 @@ function sanitizeAscii(str: string): string {
 }
 
 function sanitizeUtf8(str: string): string {
-    const sb = new StringBuilder();
-    for (let i = 0; i < str.length; i++) {
-        const cu = str.charCodeAt(i).toChar();
-        if (Char.isHighSurrogate(cu) && i + 1 < str.length) {
-            const cu2 = str.charCodeAt(i + 1).toChar();
-            if (Char.isLowSurrogate(cu2)) {
-                sb.append(str.charAt(i));
-                sb.append(str.charAt(i + 1));
-                i++;
-                continue;
+    const len = str.length
+
+    if (len === 0) {
+        return str
+    }
+
+    let needsSanitizing = false
+    let finalSize = 0
+
+    for (let i = 0; i < len; i++) {
+        const code = str.charCodeAt(i)
+        if (Char.isHighSurrogate(code.toChar())) {
+            if (i + 1 < len && Char.isLowSurrogate(str.charCodeAt(i + 1).toChar())) {
+                finalSize += 2
+                i++
+            } else {
+                needsSanitizing = true
+                finalSize += 1
             }
-        }
-        if (Char.isHighSurrogate(cu) || Char.isLowSurrogate(cu)) {
-            sb.append('\uFFFD');
+        } else if (Char.isLowSurrogate(code.toChar())) {
+            needsSanitizing = true
+            finalSize += 1
         } else {
-            sb.append(str.charAt(i));
+            finalSize += 1
         }
     }
-    return sb.toString();
+    if (!needsSanitizing) {
+        return str
+    }
+
+    const chars = new ValueArray<char>(finalSize)
+    let charIndex = 0
+
+    for (let i = 0; i < len; i++) {
+        const code = str.charCodeAt(i)
+        if (Char.isHighSurrogate(code.toChar())) {
+            if (i + 1 < len && Char.isLowSurrogate(str.charCodeAt(i + 1).toChar())) {
+                chars[charIndex++] = str.charAt(i)
+                chars[charIndex++] = str.charAt(i + 1)
+                i++
+            } else {
+                chars[charIndex++] = 0xFFFD.toChar()
+            }
+        } else if (Char.isLowSurrogate(code.toChar())) {
+            chars[charIndex++] = 0xFFFD.toChar()
+        } else {
+            chars[charIndex++] = str.charAt(i)
+        }
+    }
+    return new String(chars)
 }
 
 function sanitizeLatin1(str: string): string {
