@@ -76,7 +76,7 @@ cases:
                 is_subtype_of_diff: "false",
                 check_value_1: "123",
                 check_value_1_is_subtype_of_A: "false",
-                check_value_2: "45.6",
+                check_value_2: "45.6f",
                 check_value_2_is_subtype_of_A: "false" }
             - { check_type_T:  "bigint",
                 is_subtype_of_diff: "false",
