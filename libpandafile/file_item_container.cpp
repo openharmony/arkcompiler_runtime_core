@@ -578,6 +578,29 @@ void ItemContainer::ReorderItems(panda::panda_file::pgo::ProfileOptimizer *profi
 #endif
 }
 
+static void LogIndexOverflow(BaseItem *item, const std::vector<IndexedItem *> &item_deps)
+{
+    ASSERT(item->GetName() == "method_item");
+    auto *method_item = static_cast<MethodItem *>(item);
+    std::string method_name;
+    std::string source_file;
+    if (method_item->GetClassItem() != nullptr) {
+        auto *class_item = static_cast<ClassItem *>(method_item->GetClassItem());
+        auto *sf_item = class_item->GetSourceFile();
+        if (sf_item != nullptr) {
+            source_file = sf_item->GetData();
+            source_file.pop_back();
+        }
+    }
+    method_name = method_item->GetNameItem()->GetData();
+    method_name.pop_back();
+    std::cerr << item_deps.size() << " index dependencies exceed the maximum of " << MAX_INDEX_16;
+    if (!source_file.empty()) {
+        std::cerr << " at '" << source_file << "'";
+    }
+    std::cerr << ". The function '" << method_name << "' is too large. Please split it and retry." << std::endl;
+}
+
 void ItemContainer::AddIndexDependecies(BaseItem *item)
 {
     if (index_section_item_.IsEmpty()) {
@@ -595,8 +618,8 @@ void ItemContainer::AddIndexDependecies(BaseItem *item)
         index_section_item_.AddHeader();
         index_section_item_.GetCurrentHeader()->SetStart(item);
         if (!index_section_item_.GetCurrentHeader()->Add(item_deps)) {
-            LOG(FATAL, PANDAFILE) << "Cannot add " << item_deps.size() << " items to index";
-            UNREACHABLE();
+            LogIndexOverflow(item, item_deps);
+            std::abort();
         }
     }
     if (item->GetName() == "method_item") {

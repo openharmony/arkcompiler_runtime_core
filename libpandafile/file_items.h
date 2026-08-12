@@ -1046,6 +1046,11 @@ public:
         source_file_ = item;
     }
 
+    StringItem *GetSourceFile() const
+    {
+        return source_file_;
+    }
+
     size_t CalculateSizeWithoutFieldsAndMethods() const;
 
     size_t CalculateSize() const override;
