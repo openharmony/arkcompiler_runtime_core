@@ -25,6 +25,9 @@
 //! PASS_AFTER  "IrBuilder"
 //! INST        /Intrinsic.StdCoreStringGet/
 
+//! CHECKER     Test StringGet INT
+//! RUN         options: "--use-string-caches=false", entry: "ets_string_get.ETSGLOBAL::main"
+
 function main(): void {
     let str = 'abcdefg';
     arktest.assertEQ(str[0], 'a', 'Wrong str.get(0)');

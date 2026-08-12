@@ -648,9 +648,11 @@ EtsString *StdCoreStringGet(EtsString *str, EtsInt index)
     if (executionCtx->GetMT()->HasPendingException()) {
         return nullptr;
     }
-    if (strData < EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE && coretypes::String::IsASCIICharacter(strData)) {
-        auto *cache = PlatformTypes()->GetAsciiCacheTable();
-        return static_cast<EtsString *>(cache->Get(strData));
+    if (LIKELY(Runtime::GetOptions().IsUseStringCaches())) {
+        if (strData < EtsPlatformTypes::ASCII_CHAR_TABLE_SIZE && coretypes::String::IsASCIICharacter(strData)) {
+            auto *cache = PlatformTypes()->GetAsciiCacheTable();
+            return static_cast<EtsString *>(cache->Get(strData));
+        }
     }
     return EtsString::CreateFromUtf16(&strData, 1);
 }
