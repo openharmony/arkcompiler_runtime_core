@@ -159,8 +159,11 @@ void RegionSpace::FreeRegion(Region *region, const F &onRegionDestroy)
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (REGIONS_RELEASE_POLICY == ReleaseRegionsPolicy::NoRelease) {
         if (region->IsYoung()) {
-            size_t maxYoungRegions = regionPool_->GetInitialMaxYoungSize() / DEFAULT_REGION_SIZE;
-            if (emptyYoungRegions_.size() < maxYoungRegions) {
+            size_t maxEmptyYoungRegions = 0;
+            if (Runtime::GetOptions().IsG1EmptyYoungRegionsCacheEnabled()) {
+                maxEmptyYoungRegions = regionPool_->GetInitialMaxYoungSize() / DEFAULT_REGION_SIZE;
+            }
+            if (emptyYoungRegions_.size() < maxEmptyYoungRegions) {
                 emptyYoungRegions_.push_back(region->AsListNode());
                 return;
             }

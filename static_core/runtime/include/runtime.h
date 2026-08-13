@@ -200,6 +200,8 @@ public:
 
     static void SetEnableClassLinkerTraceOptions(RuntimeOptions &options);
 
+    static void SetG1EmptyYoungRegionsCacheOptions(RuntimeOptions &options);
+
     uintptr_t GetPointerToConstArrayData(const panda_file::File &pf, uint32_t id) const;
 
     coretypes::Array *ResolveLiteralArray(PandaVM *vm, const Method &caller, uint32_t id);
