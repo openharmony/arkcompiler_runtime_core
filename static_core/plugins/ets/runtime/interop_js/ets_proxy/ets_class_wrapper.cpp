@@ -722,6 +722,12 @@ void EtsClassWrapper::BuildGetterSetterFieldProperties(GetterSetterPropsMap &pro
 {
     auto ptr = reinterpret_cast<uintptr_t>(method->GetName());
     const char *fieldName = reinterpret_cast<char *>(ptr + strlen(SETTER_BEGIN));
+    if (method->IsStatic() && IsReservedJSBuiltin(fieldName)) {
+        INTEROP_LOG(ERROR) << "Static getter/setter field '" << fieldName << "' of class " << etsClass_->GetDescriptor()
+                           << " conflicts with JS Function built-in property '" << fieldName << "'";
+        hasReservedConflict_ = true;
+        return;
+    }
     const std::string key(fieldName);
     auto result = propMap.find(key);
     if (result != propMap.end()) {

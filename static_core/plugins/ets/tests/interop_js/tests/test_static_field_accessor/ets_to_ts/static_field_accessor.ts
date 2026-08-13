@@ -134,6 +134,108 @@ function testNormalClassesStillWorkAfterReservedRejection(): void {
     ASSERT_TRUE(typeof cls.label === 'string');
 }
 
+// The reserved name 'name' in static getter/setter conflicts with Function.name
+function testStaticGetterSetterReservedNameRejected(): void {
+    let cls;
+    let threw = false;
+    try {
+        cls = etsVm.getClass('Lstatic_field_accessor/ClassWithStaticGetterSetterReservedName;');
+    } catch (e) {
+        threw = true;
+    }
+    ASSERT_TRUE(threw || cls === undefined);
+}
+
+// The reserved name 'length' in static getter/setter conflicts with Function.length
+function testStaticGetterSetterReservedLengthRejected(): void {
+    let cls;
+    let threw = false;
+    try {
+        cls = etsVm.getClass('Lstatic_field_accessor/ClassWithStaticGetterSetterReservedLength;');
+    } catch (e) {
+        threw = true;
+    }
+    ASSERT_TRUE(threw || cls === undefined);
+}
+
+// 'prototype' is caught at compile-time by ETS compiler, no runtime test needed
+
+// Static getter-only with reserved name 'name' should also be rejected
+function testStaticGetterReservedNameRejected(): void {
+    let cls;
+    let threw = false;
+    try {
+        cls = etsVm.getClass('Lstatic_field_accessor/ClassWithStaticGetterReservedName;');
+    } catch (e) {
+        threw = true;
+    }
+    ASSERT_TRUE(threw || cls === undefined);
+}
+
+// Static setter-only with reserved name 'name' should also be rejected
+function testStaticSetterReservedNameRejected(): void {
+    let cls;
+    let threw = false;
+    try {
+        cls = etsVm.getClass('Lstatic_field_accessor/ClassWithStaticSetterReservedName;');
+    } catch (e) {
+        threw = true;
+    }
+    ASSERT_TRUE(threw || cls === undefined);
+}
+
+// Instance getter/setter with reserved name 'name': placed on prototype, should work
+function testInstanceGetterSetterReservedNameWorks(): void {
+    let cls = etsVm.getClass('Lstatic_field_accessor/ClassWithInstanceGetterSetterReservedName;');
+    ASSERT_TRUE(cls !== undefined);
+    ASSERT_TRUE(typeof cls === 'function');
+
+    let obj = new cls();
+    ASSERT_TRUE(obj !== undefined);
+    // Instance getter/setter 'name' is on prototype, should NOT be filtered
+    ASSERT_EQ(obj.name, 'instance_name_value');
+
+    obj.name = 'modified_name';
+    ASSERT_EQ(obj.name, 'modified_name');
+}
+
+// Instance getter/setter with reserved name 'length': placed on prototype, should work
+function testInstanceGetterSetterReservedLengthWorks(): void {
+    let cls = etsVm.getClass('Lstatic_field_accessor/ClassWithInstanceGetterSetterReservedLength;');
+    ASSERT_TRUE(cls !== undefined);
+    ASSERT_TRUE(typeof cls === 'function');
+
+    let obj = new cls();
+    ASSERT_TRUE(obj !== undefined);
+    ASSERT_EQ(obj.length, 50);
+
+    obj.length = 200;
+    ASSERT_EQ(obj.length, 200);
+}
+
+// Static getter/setter with non-reserved name 'data': should work normally
+function testStaticGetterSetterNonReservedWorks(): void {
+    let cls = etsVm.getClass('Lstatic_field_accessor/ClassWithStaticGetterSetterNonReserved;');
+    ASSERT_TRUE(cls !== undefined);
+    ASSERT_TRUE(typeof cls === 'function');
+
+    // Static getter/setter 'data' is on constructor, should work for non-reserved names
+    ASSERT_EQ(cls.data, 'exported_data');
+
+    cls.data = 'updated_data';
+    ASSERT_EQ(cls.data, 'updated_data');
+}
+
+// After all reserved rejections, the JS Function built-in name property
+// should still be accessible on a non-reserved class constructor
+function testJSFunctionBuiltinNameStillAccessible(): void {
+    let cls = etsVm.getClass('Lstatic_field_accessor/ClassWithStaticFields;');
+    ASSERT_TRUE(typeof cls.name === 'string');
+    ASSERT_TRUE(cls.name.length > 0);
+    ASSERT_TRUE(typeof cls.length === 'number');
+    ASSERT_TRUE(typeof cls.prototype === 'object');
+}
+
 function main(): void {
     testClassCtorIsValid();
     testStaticFieldRead();
@@ -147,6 +249,15 @@ function main(): void {
     testReservedStaticLengthRejected();
     testReservedStaticMethodNameRejected();
     testNormalClassesStillWorkAfterReservedRejection();
+    // Getter/setter reserved name tests
+    testStaticGetterSetterReservedNameRejected();
+    testStaticGetterSetterReservedLengthRejected();
+    testStaticGetterReservedNameRejected();
+    testStaticSetterReservedNameRejected();
+    testInstanceGetterSetterReservedNameWorks();
+    testInstanceGetterSetterReservedLengthWorks();
+    testStaticGetterSetterNonReservedWorks();
+    testJSFunctionBuiltinNameStillAccessible();
 }
 
 main();
