@@ -141,3 +141,50 @@ cases:
                           v instanceof C && v.meth_c(1) != 'C1' ? 1 :
                               v instanceof D && v.meth_d(1) != 'D1' ? 1 : 0
           })(new C())
+
+    # class-typed variable instanceof interface (class A does not implement K,
+    # but subclass D does — smart cast must narrow to K, not never)
+    # function parameter
+    - decl: |-
+          function foo(v: A|null): int {
+              return v == null ? 0 :
+                  v.meth_i(1) != 'I1' ? 1 :
+                      v.meth_a(1) != 'A1' ? 1 :
+                          v instanceof C && v.meth_c(1) != 'C1' ? 1 :
+                              v instanceof D && v.meth_d(1) != 'D1' ? 1 :
+                                  v instanceof K && v.meth_k(1) != 'K1' ? 1 : 0
+          }
+      code: |-
+          return foo(new C()) + foo(new D()) + foo(new A())
+
+    # method parameter
+    - decl: |-
+          class X {
+              meth(v: A|null): int {
+                  return v == null ? 0 :
+                      v.meth_i(1) != 'I1' ? 1 :
+                          v.meth_a(1) != 'A1' ? 1 :
+                              v instanceof C && v.meth_c(1) != 'C1' ? 1 :
+                                  v instanceof D && v.meth_d(1) != 'D1' ? 1 :
+                                      v instanceof K && v.meth_k(1) != 'K1' ? 1 : 0
+              }
+          }
+      code: |-
+          let x: X = new X()
+          return x.meth(new C()) + x.meth(new D()) + x.meth(new A())
+
+    # constructor parameter
+    - decl: |-
+          class X {
+              res: int = 5
+              constructor(v: A|null) {
+                  this.res = v == null ? 0 :
+                      v.meth_i(1) != 'I1' ? 1 :
+                          v.meth_a(1) != 'A1' ? 1 :
+                              v instanceof C && v.meth_c(1) != 'C1' ? 1 :
+                                  v instanceof D && v.meth_d(1) != 'D1' ? 1 :
+                                      v instanceof K && v.meth_k(1) != 'K1' ? 1 : 0
+              }
+          }
+      code: |-
+          return new X(new C()).res + new X(new D()).res + new X(new A()).res
