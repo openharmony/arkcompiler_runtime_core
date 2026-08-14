@@ -50,7 +50,7 @@ function simple(): int {
 
 function willThrow(): int {
     let i0 = 1
-    const i1 = 0
+    let i1 = 0
     try {
 	    let result : int = i0 / i1
     } catch(e) {
