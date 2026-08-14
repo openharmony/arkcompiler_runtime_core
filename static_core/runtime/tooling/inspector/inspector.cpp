@@ -870,7 +870,7 @@ HeapSnapshotModel Inspector::HeapProfilerTakeSnapshot()
         };
         vm->GetHeapManager()->IterateOverObjects([&nodes, &edges, &weakChecker](ObjectHeader *obj) {
             nodes.push_back(hprof::HeapDump::ObjectToNodeInfo(obj));
-            hprof::HeapDump::DumpReferences(reinterpret_cast<uint64_t>(obj), edges, weakChecker);
+            hprof::HeapDump::DumpReferences(reinterpret_cast<uint64_t>(obj), edges, weakChecker, true, false);
         });
         GCRootVisitor collectRoot = [&roots](mem::GCRoot root) {
             auto *obj = root.GetObjectHeader();

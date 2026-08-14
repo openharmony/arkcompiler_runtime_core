@@ -295,7 +295,7 @@ public:
     {
         return {};
     }
-    void GetEtsNodeEdges(uint64_t, std::vector<arkplatform::EdgeInfo> &) override {}
+    void GetEtsNodeEdges(uint64_t, std::vector<arkplatform::EdgeInfo> &, bool, bool) override {}
     arkplatform::NodeInfo GetEtsNodeInfo(uint64_t) override
     {
         return {};

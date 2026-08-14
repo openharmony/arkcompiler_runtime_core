@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include <iomanip>
+#include <limits>
+#include <locale>
+#include <sstream>
 #include <string>
 
 #include "runtime/tooling/hprof/heap_dump.h"
@@ -22,6 +26,144 @@
 #include "runtime/mem/object_helpers.h"
 
 namespace ark::tooling::hprof {
+
+namespace {
+
+template <class T>
+std::string FormatIntegerPrimitive(T value)
+{
+    return "Int:" + std::to_string(value);
+}
+
+template <class T>
+std::string FormatFloatingPrimitive(T value)
+{
+    std::ostringstream stream;
+    stream.imbue(std::locale::classic());
+    stream << std::setprecision(std::numeric_limits<T>::max_digits10) << value;
+    return "Double:" + stream.str();
+}
+
+struct PrimitiveFieldEdgeContext {
+    std::vector<arkplatform::EdgeInfo> &edges;
+    uint64_t addr;
+    bool isSimplify;
+    bool captureNumericValue;
+};
+
+template <class Owner>
+bool FillPrimitiveFieldInfo(Owner *owner, const Field &field, arkplatform::EdgeInfo &edge, bool isSimplify,
+                            bool captureNumericValue)
+{
+    using TypeId = panda_file::Type::TypeId;
+    if (isSimplify) {
+        return false;
+    }
+    if (field.GetTypeId() == TypeId::U1) {
+        edge.primitiveType = arkplatform::StaticPrimitiveType::BOOLEAN;
+        edge.primitiveValue = owner->template GetFieldPrimitive<bool>(field) ? "Boolean:true" : "Boolean:false";
+        return true;
+    }
+    if (!captureNumericValue) {
+        return false;
+    }
+    switch (field.GetTypeId()) {
+        case TypeId::I8:
+            edge.primitiveValue = FormatIntegerPrimitive(owner->template GetFieldPrimitive<int8_t>(field));
+            break;
+        case TypeId::U8:
+            edge.primitiveValue = FormatIntegerPrimitive(owner->template GetFieldPrimitive<uint8_t>(field));
+            break;
+        case TypeId::I16:
+            edge.primitiveValue = FormatIntegerPrimitive(owner->template GetFieldPrimitive<int16_t>(field));
+            break;
+        case TypeId::U16:
+            edge.primitiveValue = FormatIntegerPrimitive(owner->template GetFieldPrimitive<uint16_t>(field));
+            break;
+        case TypeId::I32:
+            edge.primitiveValue = FormatIntegerPrimitive(owner->template GetFieldPrimitive<int32_t>(field));
+            break;
+        case TypeId::U32:
+            edge.primitiveValue = FormatIntegerPrimitive(owner->template GetFieldPrimitive<uint32_t>(field));
+            break;
+        case TypeId::I64:
+            edge.primitiveValue = FormatIntegerPrimitive(owner->template GetFieldPrimitive<int64_t>(field));
+            break;
+        case TypeId::U64:
+            edge.primitiveValue = FormatIntegerPrimitive(owner->template GetFieldPrimitive<uint64_t>(field));
+            break;
+        case TypeId::F32:
+            edge.primitiveValue = FormatFloatingPrimitive(owner->template GetFieldPrimitive<float>(field));
+            break;
+        case TypeId::F64:
+            edge.primitiveValue = FormatFloatingPrimitive(owner->template GetFieldPrimitive<double>(field));
+            break;
+        default:
+            return false;
+    }
+    edge.primitiveType = arkplatform::StaticPrimitiveType::NUMBER;
+    return true;
+}
+
+template <class Owner>
+void AddPrimitiveFieldEdge(Owner *owner, const Field &field, const PrimitiveFieldEdgeContext &context)
+{
+    arkplatform::EdgeInfo edge {arkplatform::StaticEdgeType::PROPERTY, context.addr, 0, "", 0};
+    if (!FillPrimitiveFieldInfo(owner, field, edge, context.isSimplify, context.captureNumericValue)) {
+        return;
+    }
+    edge.name = mem::GetFieldName(field);
+    context.edges.push_back(std::move(edge));
+}
+
+bool FillPrimitiveArrayInfo(coretypes::Array *array, panda_file::Type::TypeId typeId, size_t offset,
+                            arkplatform::EdgeInfo &edge)
+{
+    using TypeId = panda_file::Type::TypeId;
+    if (typeId == TypeId::U1) {
+        edge.primitiveType = arkplatform::StaticPrimitiveType::BOOLEAN;
+        edge.primitiveValue = array->GetPrimitive<bool>(offset) ? "Boolean:true" : "Boolean:false";
+        return true;
+    }
+    switch (typeId) {
+        case TypeId::I8:
+            edge.primitiveValue = FormatIntegerPrimitive(array->GetPrimitive<int8_t>(offset));
+            break;
+        case TypeId::U8:
+            edge.primitiveValue = FormatIntegerPrimitive(array->GetPrimitive<uint8_t>(offset));
+            break;
+        case TypeId::I16:
+            edge.primitiveValue = FormatIntegerPrimitive(array->GetPrimitive<int16_t>(offset));
+            break;
+        case TypeId::U16:
+            edge.primitiveValue = FormatIntegerPrimitive(array->GetPrimitive<uint16_t>(offset));
+            break;
+        case TypeId::I32:
+            edge.primitiveValue = FormatIntegerPrimitive(array->GetPrimitive<int32_t>(offset));
+            break;
+        case TypeId::U32:
+            edge.primitiveValue = FormatIntegerPrimitive(array->GetPrimitive<uint32_t>(offset));
+            break;
+        case TypeId::I64:
+            edge.primitiveValue = FormatIntegerPrimitive(array->GetPrimitive<int64_t>(offset));
+            break;
+        case TypeId::U64:
+            edge.primitiveValue = FormatIntegerPrimitive(array->GetPrimitive<uint64_t>(offset));
+            break;
+        case TypeId::F32:
+            edge.primitiveValue = FormatFloatingPrimitive(array->GetPrimitive<float>(offset));
+            break;
+        case TypeId::F64:
+            edge.primitiveValue = FormatFloatingPrimitive(array->GetPrimitive<double>(offset));
+            break;
+        default:
+            return false;
+    }
+    edge.primitiveType = arkplatform::StaticPrimitiveType::NUMBER;
+    return true;
+}
+
+}  // namespace
 
 bool HeapDump::IsWeakReferentEdge(ObjectHeader *object, const Field &field, const WeakEdgeChecker &checker)
 {
@@ -129,10 +271,17 @@ static const Field *FindStaticFieldByOffset(Class *cls, uint32_t offset)
 }
 
 void HeapDump::DumpObjectFields(ObjectHeader *object, std::vector<arkplatform::EdgeInfo> &edges,
-                                const WeakEdgeChecker &checker)
+                                const WeakEdgeChecker &checker, bool isSimplify, bool captureNumericValue)
 {
     auto addr = reinterpret_cast<uint64_t>(object);
+    const PrimitiveFieldEdgeContext primitiveContext {edges, addr, isSimplify, captureNumericValue};
     for (auto *cls = object->ClassAddr<Class>(); cls != nullptr; cls = cls->GetBase()) {
+        for (auto &field : cls->GetInstanceFields()) {
+            if (field.GetTypeId() != panda_file::Type::TypeId::REFERENCE) {
+                AddPrimitiveFieldEdge(object, field, primitiveContext);
+            }
+        }
+
         uint32_t refNum = cls->GetRefFieldsNum<false>();
         if (refNum == 0) {
             continue;
@@ -156,13 +305,29 @@ void HeapDump::DumpObjectFields(ObjectHeader *object, std::vector<arkplatform::E
     }
 }
 
-void HeapDump::DumpArrayElements(ObjectHeader *object, Class *cls, std::vector<arkplatform::EdgeInfo> &edges)
+void HeapDump::DumpArrayElements(ObjectHeader *object, Class *cls, std::vector<arkplatform::EdgeInfo> &edges,
+                                 bool isSimplify, bool captureNumericValue)
 {
-    if (!cls->IsObjectArrayClass()) {
-        return;
-    }
     auto addr = reinterpret_cast<uint64_t>(object);
     auto *array = coretypes::Array::Cast(object);
+    if (!cls->IsObjectArrayClass()) {
+        auto typeId = cls->GetComponentType()->GetType().GetId();
+        if (isSimplify || (!captureNumericValue && typeId != panda_file::Type::TypeId::U1)) {
+            return;
+        }
+        auto arrayLength = array->GetLength();
+        auto componentSize = cls->GetComponentSize();
+        edges.reserve(edges.size() + arrayLength);
+        for (ArraySizeT arrIndex = 0; arrIndex < arrayLength; ++arrIndex) {
+            auto offset = arrIndex * componentSize;
+            arkplatform::EdgeInfo edge {arkplatform::StaticEdgeType::ELEMENT, addr, 0, "",
+                                        static_cast<uint32_t>(arrIndex)};
+            if (FillPrimitiveArrayInfo(array, typeId, offset, edge)) {
+                edges.push_back(std::move(edge));
+            }
+        }
+        return;
+    }
     for (ArraySizeT arrIndex = 0; arrIndex < array->GetLength(); ++arrIndex) {
         auto offset = arrIndex * cls->GetComponentSize();
         ObjectHeader *targetObject = array->GetObject(offset);
@@ -175,7 +340,7 @@ void HeapDump::DumpArrayElements(ObjectHeader *object, Class *cls, std::vector<a
 }
 
 void HeapDump::DumpClassStaticFields(ObjectHeader *object, std::vector<arkplatform::EdgeInfo> &edges,
-                                     const WeakEdgeChecker &checker)
+                                     const WeakEdgeChecker &checker, bool isSimplify, bool captureNumericValue)
 {
     auto *runtimeCls = Class::FromClassObject(object);
     if (runtimeCls == nullptr) {
@@ -185,6 +350,13 @@ void HeapDump::DumpClassStaticFields(ObjectHeader *object, std::vector<arkplatfo
         return;
     }
     auto addr = reinterpret_cast<uint64_t>(object);
+    const PrimitiveFieldEdgeContext primitiveContext {edges, addr, isSimplify, captureNumericValue};
+    for (auto &field : runtimeCls->GetStaticFields()) {
+        if (field.GetTypeId() != panda_file::Type::TypeId::REFERENCE) {
+            AddPrimitiveFieldEdge(runtimeCls, field, primitiveContext);
+        }
+    }
+
     uint32_t refNum = runtimeCls->GetRefFieldsNum<true>();
     if (refNum == 0) {
         return;
@@ -208,7 +380,7 @@ void HeapDump::DumpClassStaticFields(ObjectHeader *object, std::vector<arkplatfo
 }
 
 void HeapDump::DumpReferences(uint64_t etsAddr, std::vector<arkplatform::EdgeInfo> &edges,
-                              const WeakEdgeChecker &checker)
+                              const WeakEdgeChecker &checker, bool isSimplify, bool captureNumericValue)
 {
     auto *object = reinterpret_cast<ObjectHeader *>(etsAddr);
     if (object == nullptr) {
@@ -220,11 +392,11 @@ void HeapDump::DumpReferences(uint64_t etsAddr, std::vector<arkplatform::EdgeInf
     }
 
     if (cls->IsArrayClass()) {
-        DumpArrayElements(object, cls, edges);
+        DumpArrayElements(object, cls, edges, isSimplify, captureNumericValue);
     } else if (cls->IsClassClass()) {
-        DumpClassStaticFields(object, edges, checker);
+        DumpClassStaticFields(object, edges, checker, isSimplify, captureNumericValue);
     } else {
-        DumpObjectFields(object, edges, checker);
+        DumpObjectFields(object, edges, checker, isSimplify, captureNumericValue);
     }
 }
 

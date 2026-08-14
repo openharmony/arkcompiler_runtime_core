@@ -424,10 +424,15 @@ TEST_F(STSVMInterfaceImplTest, GetEtsNodeEdges)
     // Find an object with edges
     for (const auto &obj : allObjs) {
         std::vector<arkplatform::EdgeInfo> edges;
-        stsVm.GetEtsNodeEdges(obj.addr, edges);
+        stsVm.GetEtsNodeEdges(obj.addr, edges, false, true);
         for (const auto &edge : edges) {
             EXPECT_EQ(edge.fromAddr, obj.addr);
-            EXPECT_NE(edge.toAddr, 0);
+            if (edge.primitiveType == arkplatform::StaticPrimitiveType::NONE) {
+                EXPECT_NE(edge.toAddr, 0);
+            } else {
+                EXPECT_EQ(edge.toAddr, 0);
+                EXPECT_FALSE(edge.primitiveValue.empty());
+            }
             bool isValidType = (edge.edgeType == arkplatform::StaticEdgeType::ELEMENT ||
                                 edge.edgeType == arkplatform::StaticEdgeType::PROPERTY ||
                                 edge.edgeType == arkplatform::StaticEdgeType::WEAK);
@@ -449,7 +454,7 @@ TEST_F(STSVMInterfaceImplTest, GetEtsNodeEdgesZeroAddr)
 {
     STSVMInterfaceImpl stsVm(GetEtsVm());
     std::vector<arkplatform::EdgeInfo> edges;
-    stsVm.GetEtsNodeEdges(0, edges);
+    stsVm.GetEtsNodeEdges(0, edges, false, true);
     EXPECT_EQ(edges.size(), 0);
 }
 

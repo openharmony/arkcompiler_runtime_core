@@ -78,7 +78,8 @@ public:
     PANDA_PUBLIC_API void SuspendEtsThreads() override;
     PANDA_PUBLIC_API void ResumeEtsThreads() override;
     PANDA_PUBLIC_API std::vector<arkplatform::NodeInfo> GetEtsVMRoots() override;
-    PANDA_PUBLIC_API void GetEtsNodeEdges(uint64_t etsAddr, std::vector<arkplatform::EdgeInfo> &edges) override;
+    PANDA_PUBLIC_API void GetEtsNodeEdges(uint64_t etsAddr, std::vector<arkplatform::EdgeInfo> &edges, bool isSimplify,
+                                          bool captureNumericValue) override;
     PANDA_PUBLIC_API arkplatform::NodeInfo GetEtsNodeInfo(uint64_t etsAddr) override;
     PANDA_PUBLIC_API std::vector<arkplatform::NodeInfo> GetAllEtsObjects() override;
     PANDA_PUBLIC_API void IterateEtsObjects(const std::function<void(uint64_t)> &callback) override;
