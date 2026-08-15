@@ -118,7 +118,8 @@ public:
     /// @brief Get ETS VM root objects as NodeInfo vector
     virtual std::vector<arkplatform::NodeInfo> GetEtsVMRoots() = 0;
     /// @brief Get all outgoing edges of a given static node
-    virtual void GetEtsNodeEdges(uint64_t etsAddr, std::vector<arkplatform::EdgeInfo> &edges) = 0;
+    virtual void GetEtsNodeEdges(uint64_t etsAddr, std::vector<arkplatform::EdgeInfo> &edges, bool isSimplify,
+                                 bool captureNumericValue) = 0;
     /// @brief Get NodeInfo for a single static object by address
     virtual arkplatform::NodeInfo GetEtsNodeInfo(uint64_t etsAddr) = 0;
     /// @brief Get all static heap objects

@@ -361,13 +361,14 @@ void STSVMInterfaceImpl::IterateEtsObjects(const std::function<void(uint64_t)> &
     HeapDump::IterateAllObjects(vm_, callback);
 }
 
-void STSVMInterfaceImpl::GetEtsNodeEdges(uint64_t etsAddr, std::vector<arkplatform::EdgeInfo> &edges)
+void STSVMInterfaceImpl::GetEtsNodeEdges(uint64_t etsAddr, std::vector<arkplatform::EdgeInfo> &edges, bool isSimplify,
+                                         bool captureNumericValue)
 {
     auto checker = [](ObjectHeader *obj, const Field &field) -> bool {
         return EtsObject::FromCoreType(obj)->GetClass()->IsWeakReference() &&
                field.GetOffset() == EtsWeakReference::GetReferentOffset();
     };
-    HeapDump::DumpReferences(etsAddr, edges, checker);
+    HeapDump::DumpReferences(etsAddr, edges, checker, isSimplify, captureNumericValue);
 }
 
 arkplatform::NodeInfo STSVMInterfaceImpl::GetEtsNodeInfo(uint64_t etsAddr)

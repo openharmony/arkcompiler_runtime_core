@@ -46,14 +46,18 @@ public:
     using WeakEdgeChecker = std::function<bool(ObjectHeader *, const Field &)>;
 
     static void DumpReferences(uint64_t etsAddr, std::vector<arkplatform::EdgeInfo> &edges,
-                               const WeakEdgeChecker &checker = nullptr);
+                               const WeakEdgeChecker &checker = nullptr, bool isSimplify = false,
+                               bool captureNumericValue = true);
 
     // Edge extraction helpers
     static void DumpObjectFields(ObjectHeader *object, std::vector<arkplatform::EdgeInfo> &edges,
-                                 const WeakEdgeChecker &checker = nullptr);
-    static void DumpArrayElements(ObjectHeader *object, Class *cls, std::vector<arkplatform::EdgeInfo> &edges);
+                                 const WeakEdgeChecker &checker = nullptr, bool isSimplify = false,
+                                 bool captureNumericValue = true);
+    static void DumpArrayElements(ObjectHeader *object, Class *cls, std::vector<arkplatform::EdgeInfo> &edges,
+                                  bool isSimplify = false, bool captureNumericValue = true);
     static void DumpClassStaticFields(ObjectHeader *object, std::vector<arkplatform::EdgeInfo> &edges,
-                                      const WeakEdgeChecker &checker = nullptr);
+                                      const WeakEdgeChecker &checker = nullptr, bool isSimplify = false,
+                                      bool captureNumericValue = true);
 
     // Type helpers (public for use by plugin layer)
     static arkplatform::StaticNodeType MapToStaticNodeType(Class *cls);

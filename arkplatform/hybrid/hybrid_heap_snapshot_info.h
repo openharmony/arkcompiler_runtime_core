@@ -40,6 +40,12 @@ enum class StaticEdgeType {
     DEFAULT = PROPERTY
 };
 
+enum class StaticPrimitiveType {
+    NONE,
+    BOOLEAN,
+    NUMBER
+};
+
 struct NodeInfo {
     std::string name;
     StaticNodeType nodeType;
@@ -54,6 +60,8 @@ struct EdgeInfo {
     uint64_t toAddr;
     std::string name;   // for property edges
     uint32_t index;     // for element edges
+    StaticPrimitiveType primitiveType {StaticPrimitiveType::NONE};
+    std::string primitiveValue {};  // ArkTS-Dyn compatible node name, e.g. Int:1 or Boolean:true
 };
 
 }  // namespace arkplatform
