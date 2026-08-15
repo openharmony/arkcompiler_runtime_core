@@ -16,13 +16,15 @@
 /*
  * GNU ld version script for libarkruntime.so.
  *
- * Controls the set of symbols exported by the shared library. Everything is
- * exported by default via the `*` wildcard in `global`, while selected
+ * Controls the set of symbols exported by the shared library. Symbols not
+ * matched by any pattern below are exported by default, while selected
  * implementation-internal symbols are explicitly hidden in `local`.
  *
- * NOTE: exact names in `local` take precedence over the `*` wildcard in
- * `global`, so only the listed symbols are hidden. An anonymous version block
- * is used because only visibility (not symbol versioning) is needed.
+ * NOTE: there is intentionally no `*` wildcard in `global`: a global
+ * catch-all conflicts with the `local` hiding rules below (linker pattern
+ * precedence) and was the root cause of a symbol visibility regression.
+ * An anonymous version block is used because only visibility (not symbol
+ * versioning) is needed.
  */
 
 {
@@ -35,7 +37,6 @@
         InterpreterToCompiledCodeBridge;
         InterpreterToCompiledCodeBridgeDyn;
         ThrowNativeExceptionBridge;
-        *;
 
     local:
         /* ================================================================
