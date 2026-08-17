@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,4 +99,46 @@ HWTEST(StringUtilUnitTest, string_util_test_003, TestSize.Level4)
 
     result = StringUtil::IsAnonymousFunctionName("^gg");
     EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: string_util_test_004
+ * @tc.desc: test RemoveSlashFromBothEnds, including a single slash that is not a delimiter pair
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST(StringUtilUnitTest, string_util_test_004, TestSize.Level4)
+{
+    std::string str = "/";
+    StringUtil::RemoveSlashFromBothEnds(str);
+    EXPECT_EQ(str, "/");
+    EXPECT_EQ(str.size(), 1U);
+
+    str = "//";
+    StringUtil::RemoveSlashFromBothEnds(str);
+    EXPECT_EQ(str, "");
+
+    str = "/a/";
+    StringUtil::RemoveSlashFromBothEnds(str);
+    EXPECT_EQ(str, "a");
+
+    str = "/abc/";
+    StringUtil::RemoveSlashFromBothEnds(str);
+    EXPECT_EQ(str, "abc");
+
+    str = "/a";
+    StringUtil::RemoveSlashFromBothEnds(str);
+    EXPECT_EQ(str, "/a");
+
+    str = "a/";
+    StringUtil::RemoveSlashFromBothEnds(str);
+    EXPECT_EQ(str, "a/");
+
+    str = "a";
+    StringUtil::RemoveSlashFromBothEnds(str);
+    EXPECT_EQ(str, "a");
+
+    str = "";
+    StringUtil::RemoveSlashFromBothEnds(str);
+    EXPECT_EQ(str, "");
 }
