@@ -52,6 +52,77 @@ export class ClassWithReservedStaticMethodName {
     }
 }
 
+export class ClassWithStaticGetterSetterReservedName {
+    public static cName: string = 'hidden_by_getter';
+    public static get name(): string {
+        return ClassWithStaticGetterSetterReservedName.cName;
+    }
+    public static set name(v: string) {
+        ClassWithStaticGetterSetterReservedName.cName = v;
+    }
+}
+
+export class ClassWithStaticGetterSetterReservedLength {
+    public static cLength: int = 100;
+    public static get length(): int {
+        return ClassWithStaticGetterSetterReservedLength.cLength;
+    }
+    public static set length(v: int) {
+        ClassWithStaticGetterSetterReservedLength.cLength = v;
+    }
+}
+
+// 'prototype' is caught at compile-time by ETS compiler (error 2699),
+// matching TypeScript behavior. No runtime test needed.
+
+export class ClassWithInstanceGetterSetterReservedName {
+    public cName: string = 'instance_name_value';
+    public get name(): string {
+        return this.cName;
+    }
+    public set name(v: string) {
+        this.cName = v;
+    }
+}
+
+// Instance getter/setter with reserved name 'length': should work
+export class ClassWithInstanceGetterSetterReservedLength {
+    public cLength: int = 50;
+    public get length(): int {
+        return this.cLength;
+    }
+    public set length(v: int) {
+        this.cLength = v;
+    }
+}
+
+// Static getter/setter with non-reserved name 'data': should work
+export class ClassWithStaticGetterSetterNonReserved {
+    public static cData: string = 'exported_data';
+    public static get data(): string {
+        return ClassWithStaticGetterSetterNonReserved.cData;
+    }
+    public static set data(v: string) {
+        ClassWithStaticGetterSetterNonReserved.cData = v;
+    }
+}
+
+// Static getter-only with reserved name 'name': also rejected
+export class ClassWithStaticGetterReservedName {
+    public static cName: string = 'getter_only';
+    public static get name(): string {
+        return ClassWithStaticGetterReservedName.cName;
+    }
+}
+
+// Static setter-only with reserved name 'name': also rejected
+export class ClassWithStaticSetterReservedName {
+    public static cName: string = 'setter_only';
+    public static set name(v: string) {
+        ClassWithStaticSetterReservedName.cName = v;
+    }
+}
+
 export function createClassWithStaticFields(): ClassWithStaticFields {
     return new ClassWithStaticFields();
 }
