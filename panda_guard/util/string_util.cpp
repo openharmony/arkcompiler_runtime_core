@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ const std::regex ANONYMOUS_FUNCTION_NAME_REG = std::regex("\\^[\\da-f]+$");
 const std::regex ANONYMOUS_NAMESPACE_NAME_REG = std::regex("=ens\\d+");
 
 const char REGEX_DELIMITER = '/';
+constexpr size_t SLASH_PAIR_LEN = 2U;
 }  // namespace
 
 std::vector<std::string> panda::guard::StringUtil::Split(const std::string &str, const std::string &delimiter)
@@ -158,7 +159,7 @@ std::string panda::guard::StringUtil::UnicodeEscape(std::string_view string)
 
 void panda::guard::StringUtil::RemoveSlashFromBothEnds(std::string &str)
 {
-    if (!str.empty() && str.front() == REGEX_DELIMITER && str.back() == REGEX_DELIMITER) {
+    if (str.size() >= SLASH_PAIR_LEN && str.front() == REGEX_DELIMITER && str.back() == REGEX_DELIMITER) {
         str.erase(str.begin());
         str.pop_back();
     }
