@@ -466,6 +466,7 @@ void Runtime::SetRuntimeOptions(RuntimeOptions &options)
     SetDebuggerOptions(options);
     SetUseLargerYoungSpaceOptions(options);
     SetEnableClassLinkerTraceOptions(options);
+    SetG1EmptyYoungRegionsCacheOptions(options);
 }
 
 void Runtime::SetDebuggerOptions(RuntimeOptions &options)
@@ -537,6 +538,12 @@ void Runtime::ResetDebuggerLaunchOption(RuntimeOptions &options)
     options.SetDebuggerEnable(false);
     options.SetDebuggerBreakOnStart(false);
 }
+
+void Runtime::SetG1EmptyYoungRegionsCacheOptions(RuntimeOptions &options)
+{
+    bool enabled = OHOS::system::GetBoolParameter("persist.sta.gc.SetG1EmptyYoungRegionsCacheEnabled", true);
+    options.SetG1EmptyYoungRegionsCacheEnabled(enabled);
+}
 #else
 void Runtime::SetRuntimeOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetDebuggerOptions([[maybe_unused]] RuntimeOptions &options) {}
@@ -545,6 +552,7 @@ void Runtime::ResetDebuggerLaunchOption([[maybe_unused]] RuntimeOptions &options
 void Runtime::SetInterpreterTypeOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetUseLargerYoungSpaceOptions([[maybe_unused]] RuntimeOptions &options) {}
 void Runtime::SetEnableClassLinkerTraceOptions([[maybe_unused]] RuntimeOptions &options) {}
+void Runtime::SetG1EmptyYoungRegionsCacheOptions([[maybe_unused]] RuntimeOptions &options) {}
 #endif
 
 Runtime *Runtime::GetCurrent()

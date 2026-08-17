@@ -348,6 +348,11 @@ options:
   default: 524288
   description: How much space in young-gen are shared (this space is not used for tlabs)
 
+- name: g1-empty-young-regions-cache-enabled
+  type: bool
+  default: true
+  description: Cache empty young regions for reuse. Disable (false) for memory-leak detection tests to release them immediately.
+
 - name: min-extra-heap-size
   type: uint64_t
   default: 5242880
