@@ -15,6 +15,7 @@ limitations under the License.
 
 /*---
 desc: First match for overload. Classes selected first 
+tags: [compile-only, negative]
 ---*/
 
 /* Case scenario:
