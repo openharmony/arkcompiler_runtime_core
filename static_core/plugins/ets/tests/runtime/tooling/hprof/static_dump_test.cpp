@@ -983,6 +983,23 @@ TEST(StaticDumpUtilTest, EncodeTaggedValueUsesRuntimeTypeAndLiveNodeId)
     EXPECT_EQ(special.value, coretypes::TaggedValue::VALUE_UNDEFINED);
 }
 
+TEST(StaticDumpUtilTest, AcquireOutputUsesRequestPath)
+{
+    constexpr const char *OUTPUT_PATH = "StaticDumpUtilTest_request_path.rawheap";
+    StringIdPool stringPool;
+    ObjectIdMap objectIdMap;
+    DumpRequest request;
+    request.output.staticPath = OUTPUT_PATH;
+
+    {
+        StaticDump dump(nullptr, &stringPool, &objectIdMap, request);
+        EXPECT_TRUE(dump.AcquireOutput());
+        EXPECT_TRUE(dump.AcquireOutput());
+    }
+
+    EXPECT_EQ(unlink(OUTPUT_PATH), 0);
+}
+
 // DeriveFromDescriptorChars parses an array descriptor string to infer the element type.
 // Directly tests the extracted function (no longer needs Class* mock).
 TEST(StaticDumpUtilTest, DeriveFromDescriptorChars_DescriptorParsing)

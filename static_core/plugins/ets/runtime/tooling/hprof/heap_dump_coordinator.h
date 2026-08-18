@@ -102,7 +102,7 @@ private:
     void PrepareParticipants(DumpParticipants &participants);
     XRefSnapshot CollectXRefs(const DumpRequest &request, const DumpParticipants &participants);
 
-    bool ExecuteDumpWithFork(DumpParticipants &participants, const XRefSnapshot &xrefs);
+    bool ExecuteDumpWithFork(const DumpRequest &request, DumpParticipants &participants, const XRefSnapshot &xrefs);
     bool ExecuteSeparateDumpParallel(DumpParticipants &participants, const XRefSnapshot &xrefs);
     bool ExecuteSeparateDumpSequential(DumpParticipants &participants, const XRefSnapshot &xrefs);
     bool CompleteSeparateDump(DumpParticipants &participants, const DumpResult &dynamicResult, DumpResult staticResult,

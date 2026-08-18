@@ -83,6 +83,10 @@ public:
     void TriggerGC() override;
     void PrepareSession() override;
     bool AcquireOutput() override;
+    int GetOutputFd() const override
+    {
+        return outputFd_;
+    }
     DumpResult Dump() override;
 
     /**
@@ -324,6 +328,7 @@ private:
     StringIdPool *stringPool_;
     ObjectIdMap *objectIdMap_;
     DumpIdentity identity_ {};
+    std::string outputPath_;
     std::unique_ptr<RuntimeStateScope> runtimeStateScope_;
     uint32_t classSerialNumber_ = 0;
     // Unique classes collected during Prepare - reused by DumpClass to avoid a redundant WalkHeap

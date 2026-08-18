@@ -60,6 +60,8 @@ inline ScopedFile OpenWriteOnlyFile(const std::string &path)
     return {fopen(path.c_str(), "we"), &fclose};
 }
 
+ScopedFile CreateTestFile();
+
 // ===========================================================================
 // Temp-file helpers - create temp path, read back binary content
 // ===========================================================================
@@ -145,6 +147,16 @@ class MockDumperBehavior {
 public:
     explicit MockDumperBehavior(FactoryState *state = nullptr) : state_(state) {}
 
+    bool AcquireOutput() const
+    {
+        return output_ != nullptr;
+    }
+
+    int GetOutputFd() const
+    {
+        return output_ == nullptr ? -1 : fileno(output_.get());
+    }
+
     void TriggerGC()
     {
         if (state_ != nullptr) {
@@ -169,6 +181,7 @@ public:
     }
 
 private:
+    ScopedFile output_ {CreateTestFile()};
     FactoryState *state_ = nullptr;
     bool dumpResult_ = true;
 };
@@ -196,7 +209,12 @@ public:
 
     bool AcquireOutput() override
     {
-        return true;
+        return behavior_.AcquireOutput();
+    }
+
+    int GetOutputFd() const override
+    {
+        return behavior_.GetOutputFd();
     }
 
     DumpResult Dump() override
@@ -237,7 +255,12 @@ public:
 
     bool AcquireOutput() override
     {
-        return true;
+        return behavior_.AcquireOutput();
+    }
+
+    int GetOutputFd() const override
+    {
+        return behavior_.GetOutputFd();
     }
 
     DumpResult Dump() override

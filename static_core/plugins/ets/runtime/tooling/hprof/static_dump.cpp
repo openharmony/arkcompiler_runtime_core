@@ -164,7 +164,11 @@ void VisitObjectReferences(ark::ObjectHeader *object, const ReferenceVisitor &vi
 
 StaticDump::StaticDump(ark::PandaVM *pandaVm, StringIdPool *stringPool, ObjectIdMap *objectIdMap,
                        const DumpRequest &request)
-    : pandaVm_(pandaVm), stringPool_(stringPool), objectIdMap_(objectIdMap), identity_(request.identity)
+    : pandaVm_(pandaVm),
+      stringPool_(stringPool),
+      objectIdMap_(objectIdMap),
+      identity_(request.identity),
+      outputPath_(request.output.staticPath)
 {
 }
 
@@ -936,10 +940,20 @@ void StaticDump::PrepareSession()
 
 bool StaticDump::AcquireOutput()
 {
-#if defined(ENABLE_DUMP_IN_FAULTLOG)
     if (staticStream_ != nullptr || outputFd_ >= 0) {
         return true;
     }
+    if (!outputPath_.empty()) {
+        staticStream_ = new (std::nothrow) OutputStream(outputPath_);
+        if (staticStream_ == nullptr || !staticStream_->Good()) {
+            delete staticStream_;
+            staticStream_ = nullptr;
+            LOG(ERROR, RUNTIME) << "[HybDump][Sta] Output file open failed";
+            return false;
+        }
+        return true;
+    }
+#if defined(ENABLE_DUMP_IN_FAULTLOG)
     if (!identity_.IsValid()) {
         LOG(ERROR, RUNTIME) << "[HybDump][Sta] Output fd acquire failed: invalid dump identity";
         return false;
@@ -967,16 +981,22 @@ bool StaticDump::AcquireOutput()
 
 bool StaticDump::CreateOutputWriter()
 {
-    if (staticStream_ != nullptr) {
+    if (writer_ != nullptr) {
         return true;
     }
-    if (outputFd_ < 0) {
-        LOG(ERROR, RUNTIME) << "[HybDump][Sta] Output writer creation failed: fd unavailable";
-        return false;
+    if (staticStream_ == nullptr) {
+        if (outputFd_ < 0) {
+            LOG(ERROR, RUNTIME) << "[HybDump][Sta] Output writer creation failed: fd unavailable";
+            return false;
+        }
+        staticStream_ = new (std::nothrow) OutputStream(outputFd_, OutputStream::DEFAULT_BUFFER_SIZE, true);
+        if (staticStream_ == nullptr) {
+            return false;
+        }
+        outputFd_ = -1;
     }
-    staticStream_ = new OutputStream(outputFd_, OutputStream::DEFAULT_BUFFER_SIZE, true);
-    writer_ = new StaticWriter(staticStream_);
-    return true;
+    writer_ = new (std::nothrow) StaticWriter(staticStream_);
+    return writer_ != nullptr;
 }
 
 DumpResult StaticDump::Dump()
