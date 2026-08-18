@@ -15,15 +15,18 @@ limitations under the License.
 
 {% for c in cases %}
 /*---
-desc: A compile-time error occurs, if a qualified name refers to a function with overload signature.
-tags: [compile-only, negative] 
-expected_out: "Semantic error ESE0017: Only abstract or native methods can't have body."
+desc: A compile-time error occurs if an identifier in an explicit overload list refers to an implicitly overloaded
+      function name.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0389: The overloaded name 'bar' can't refer to a function with overload signatures."
 ---*/
 
-function bar (i: int): string
-function bar (n: number): string
-function bar(...a: Any[]): Any {
-  return 'bar';
+function bar(i: int): string {
+  return 'bar int';
+}
+
+function bar(n: number): string {
+  return 'bar number';
 }
 
 function foo1 (i: int): string {

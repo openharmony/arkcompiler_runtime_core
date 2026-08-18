@@ -15,6 +15,7 @@ limitations under the License.
 
 /*---
 desc: First match for overload. Checks for case with 3 classes and 8 interfaces 
+tags: [compile-only, negative]
 ---*/
 
 /* Case scenario:
