@@ -881,40 +881,6 @@ export namespace url {
             }
         }
 
-        private parsingHostAndPath(input: string, pos: int) {
-            let special: boolean = true;
-            let inputLen: int = input.length;
-            for (pos = 0; pos < inputLen; pos++) {
-                if (input.charAt(pos) == c'/' || input.charAt(pos) == c'\\') {
-                    break;
-                }
-            }
-            let strHost: string = input.substring(0, pos);
-            let strPath: string = input.substring(pos + 1);
-            if (strHost.indexOf('@') != -1) {
-                strHost = this.analysizeUsernameAndPasswd(strHost);
-            }
-            if (strHost.length == 0) {
-                this.flags[INDEX_INVALID] = true;
-                return;
-            }
-            if (strHost.charAt(strHost.length - 1) != c']' && (strHost.lastIndexOf(':') != -1)) {
-                pos = strHost.lastIndexOf(':');
-                if (pos != -1) {
-                    let port: string = strHost.substring(pos + 1);
-                    strHost = strHost.substring(0, pos);
-                    this.analysizePort(port);
-                }
-            }
-            if (strHost.charAt(strHost.length - 1) != c']' && strHost.lastIndexOf(':') != -1 &&
-                this.flags[INDEX_INVALID]) 
-            {
-                return;
-            }
-            this.analysizeHost(strHost, special);
-            this.analysizePath(strPath, special);
-        }
-
         private analysizeOnlyHost(input: string, pos: int) {
             let strHost: string = input;
             if (strHost.indexOf('@') != -1) {
@@ -2120,15 +2086,6 @@ export namespace url {
         }
     }
 
-    function removeKeyValuePairs(str: string, key: string): string {
-        const regexStr = `\\b${key}=[^&]*&?`
-        let result = str.replaceAll(regexStr, "");
-        if (result.endsWith("&")) {
-            result = result.slice(0, -1);
-        }
-        return result;
-    }
-
     class ParamNode {
         element: [string, string];
         prev?: ParamNode;
@@ -2394,13 +2351,14 @@ export namespace url {
             let current = this.head;
             while (current != undefined) {
                 if (current!.element[0] == deleteName) {
-                    this.cacheMap.set(deleteName, val - 1);
+                    val = val! - 1;
+                    this.cacheMap.set(deleteName, val!);
                     if (current == this.head && current == this.tail) {
                         this.head = undefined;
                         this.tail = undefined;
                         current = undefined;
-                        if ((val - 1) == 0) {
-                            return;
+                        if (val == 0) {
+                            break;
                         } else {
                            continue;
                         }
@@ -2408,8 +2366,8 @@ export namespace url {
                         this.head = current!.next;
                         this.head!.prev = undefined;
                         current = this.head;
-                        if ((val - 1) == 0) {
-                            return;
+                        if (val == 0) {
+                            break;
                         } else {
                            continue;
                         }
@@ -2417,25 +2375,24 @@ export namespace url {
                         this.tail = current!.prev;
                         this.tail!.next = undefined;
                         current = undefined;
-                        if ((val - 1) == 0) {
-                            return;
+                        if (val == 0) {
+                            break;
                         } else {
                            continue;
                         }
                     } else {
                         current!.prev!.next = current!.next;
                         current!.next!.prev = current!.prev;
-                        if ((val - 1) == 0) {
-                            return;
+                        if (val == 0) {
+                            break;
                         }
                     }
                 }
                 current = current!.next;
             }
             if (this.parentUrl != null) {
-                let searchStr: string = removeKeyValuePairs(this.parentUrl!.urlInner.getSearch(), deleteName);
-                this.parentUrl!.urlInner.setSearch(searchStr);
-                this.parentUrl!.cSearch = searchStr;
+                this.parentUrl!.urlInner.setSearch(this.toString());
+                this.parentUrl!.cSearch = this.parentUrl!.urlInner.getSearch();
                 this.parentUrl!.setHref();
             }
         }
