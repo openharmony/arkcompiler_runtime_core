@@ -34,6 +34,11 @@ ohos_fuzztest("AniTextDecoderFuzzTest") {
   configs = [ "$ark_root:ark_config" ]
   deps = [ "$ark_root:ark_packages" ]
 
+  external_deps = [
+    "icu:shared_icuuc",
+    "bounds_checking_function:libsec_shared",
+  ]
+
   cflags = [
     "-g",
     "-O0",
