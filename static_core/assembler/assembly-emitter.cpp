@@ -54,6 +54,9 @@ using ark::panda_file::TypeItem;
 using ark::panda_file::ValueItem;
 using ark::panda_file::Writer;
 
+// When the 'this' type is erased by gradual typing, it becomes the global root object type.
+constexpr std::string_view ERASED_THIS_TYPE = "std.core.Object";
+
 std::unordered_map<Type::TypeId, PrimitiveTypeItem *> CreatePrimitiveTypes(ItemContainer *container)
 {
     auto res = std::unordered_map<Type::TypeId, PrimitiveTypeItem *> {};
@@ -1389,8 +1392,13 @@ bool AsmEmitter::MakeFunctionItems(
         auto params = std::vector<MethodParamItem> {};
 
         ASSERT(func.IsStatic() == isStatic);
-        if (func.params.empty() || func.params[0].type.GetName() != GetOwnerName(func.name) ||
-            func.metadata->IsCctor()) {
+        bool shouldAutoStatic = func.params.empty() || func.metadata->IsCctor();
+        if (!shouldAutoStatic && func.params[0].type.GetName() != GetOwnerName(func.name)) {
+            if (func.params[0].type.GetName() != ERASED_THIS_TYPE) {
+                shouldAutoStatic = true;
+            }
+        }
+        if (shouldAutoStatic) {
             ASSERT(func.IsStatic());
         }
 
@@ -1425,7 +1433,13 @@ bool AsmEmitter::MakeFunctionItems(
 {
     std::vector<std::string> funcsShouldBeStatic;
     for (auto &[name, func] : program.functionInstanceTable) {
-        if (func.params.empty() || func.params[0].type.GetName() != GetOwnerName(name) || func.metadata->IsCctor()) {
+        bool shouldAutoStatic = func.params.empty() || func.metadata->IsCctor();
+        if (!shouldAutoStatic && func.params[0].type.GetName() != GetOwnerName(name)) {
+            if (func.params[0].type.GetName() != ERASED_THIS_TYPE) {
+                shouldAutoStatic = true;
+            }
+        }
+        if (shouldAutoStatic) {
             func.metadata->SetAccessFlags(func.metadata->GetAccessFlags() | ACC_STATIC);
             funcsShouldBeStatic.push_back(name);
         }
