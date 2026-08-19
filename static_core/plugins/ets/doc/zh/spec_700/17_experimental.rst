@@ -542,23 +542,6 @@ char 字面量的类型为 ``char``。
    optional parameter
    default value
 
-如果 ``arrayElementType`` 是类型参数，则会发生 :index:`compile-time error`：
-
-.. code-block:: typescript
-   :linenos:
-
-      class A<T> {
-         foo(element: T) {
-            new T[2] (element) // Compile-time error, 'T' is a type parameter
-         }
-      }
-
-.. index::
-   compile-time error
-   constructor
-   type parameter
-   array
-
 下面给出了创建已知元素个数数组的示例：
 
 .. code-block:: typescript

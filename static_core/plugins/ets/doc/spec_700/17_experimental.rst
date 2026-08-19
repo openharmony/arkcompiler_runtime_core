@@ -566,24 +566,6 @@ Otherwise, a :index:`compile-time error` occurs.
    optional parameter
    default value
 
-A :index:`compile-time error` occurs if ``arrayElementType`` is a type
-parameter:
-
-.. code-block:: typescript
-   :linenos:
-
-      class A<T> {
-         foo(element: T) {
-            new T[2] (element) // Compile-time error, 'T' is a type parameter
-         }
-      }
-
-.. index::
-   compile-time error
-   constructor
-   type parameter
-   array
-
 The creation of an array with a known number of elements is presented below:
 
 .. code-block:: typescript
