@@ -561,6 +561,43 @@ export class Date {
         }
     }
 
+    private static localTimeFromUTC(utcMs: long): long {
+        return utcMs - Date.getLocalTimezoneOffset(utcMs) * msPerMinute;
+    }
+
+    private static utcFromLocalTime(localTimeMs: long): long {
+        let offsetBefore = Date.getLocalTimezoneOffset(localTimeMs - msPerDay);
+        let offsetAt = Date.getLocalTimezoneOffset(localTimeMs);
+        let offsetAfter = Date.getLocalTimezoneOffset(localTimeMs + msPerDay);
+
+        let resolvedUtcMs: long = 0;
+        let hasResolved = false;
+
+        let candidateUtcMs = localTimeMs + offsetBefore * msPerMinute;
+        if (Date.localTimeFromUTC(candidateUtcMs) === localTimeMs) {
+            resolvedUtcMs = candidateUtcMs;
+            hasResolved = true;
+        }
+
+        candidateUtcMs = localTimeMs + offsetAt * msPerMinute;
+        if (Date.localTimeFromUTC(candidateUtcMs) === localTimeMs && (!hasResolved || candidateUtcMs < resolvedUtcMs)) {
+            resolvedUtcMs = candidateUtcMs;
+            hasResolved = true;
+        }
+
+        candidateUtcMs = localTimeMs + offsetAfter * msPerMinute;
+        if (Date.localTimeFromUTC(candidateUtcMs) === localTimeMs && (!hasResolved || candidateUtcMs < resolvedUtcMs)) {
+            resolvedUtcMs = candidateUtcMs;
+            hasResolved = true;
+        }
+
+        if (hasResolved) {
+            return resolvedUtcMs;
+        }
+
+        return localTimeMs + offsetBefore * msPerMinute;
+    }
+
     /**
      * `Date` constructor. NOTE: Dates before `1921-01-01T00:00:00 GMT`
      * can be represented as UTC milliseconds in different ways then TS do.
@@ -580,10 +617,7 @@ export class Date {
             ecmaMakeDay(ecmaMakeFullYear(year), monthIndex, day ?? 1),
             ecmaMakeTime(hours ?? 0, minutes ?? 0, seconds ?? 0, ms ?? 0)
         );
-        let offset1 = Date.getLocalTimezoneOffset(Date.now());
-        let guessUtc = localTimeMs + offset1 * msPerMinute;
-        let offset2 = Date.getLocalTimezoneOffset(guessUtc);
-        this.ms = localTimeMs + offset2 * msPerMinute;
+        this.ms = Date.utcFromLocalTime(localTimeMs);
     }
 
     /**

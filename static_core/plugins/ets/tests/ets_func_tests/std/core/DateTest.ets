@@ -489,6 +489,160 @@ function testToStringInvalidDate() {
     arktest.assertEQ(invalidDate.toString(), 'Invalid Date');
 }
 
+function testConstructorNonIsoSlashFormats() {
+    let date = new Date('2024/06/15');
+    let expected = new Date(2024, 5, 15);
+    arktest.assertEQ(date.valueOf(), expected.valueOf());
+    arktest.assertEQ(date.getFullYear(), 2024);
+    arktest.assertEQ(date.getMonth(), 5);
+    arktest.assertEQ(date.getDate(), 15);
+    arktest.assertEQ(date.getHours(), 0);
+    arktest.assertEQ(date.getMinutes(), 0);
+    arktest.assertEQ(date.getSeconds(), 0);
+
+    date = new Date('06/15/2025');
+    expected = new Date(2025, 5, 15);
+    arktest.assertEQ(date.valueOf(), expected.valueOf());
+    arktest.assertEQ(date.getFullYear(), 2025);
+    arktest.assertEQ(date.getMonth(), 5);
+    arktest.assertEQ(date.getDate(), 15);
+
+    date = new Date('2024/06/15 12:30:45');
+    expected = new Date(2024, 5, 15, 12, 30, 45);
+    arktest.assertEQ(date.valueOf(), expected.valueOf());
+    arktest.assertEQ(date.getHours(), 12);
+    arktest.assertEQ(date.getMinutes(), 30);
+    arktest.assertEQ(date.getSeconds(), 45);
+    arktest.assertEQ(date.getMilliseconds(), 0);
+}
+
+function testConstructorNonIsoAllMonthAbbr() {
+    let monthAbbr: string[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    for (let i = 0; i < 12; i++) {
+        let date = new Date('15 ' + monthAbbr[i] + ' 2024 GMT');
+        arktest.assertEQ(date.getUTCFullYear(), 2024);
+        arktest.assertEQ(date.getUTCMonth(), i);
+        arktest.assertEQ(date.getUTCDate(), 15);
+    }
+}
+
+function testConstructorNonIsoGmtExact() {
+    let date = new Date('15 Jun 2024 12:30:45 GMT');
+    arktest.assertEQ(date.getTime(), 1718454645000);
+    arktest.assertEQ(date.getUTCFullYear(), 2024);
+    arktest.assertEQ(date.getUTCMonth(), 5);
+    arktest.assertEQ(date.getUTCDate(), 15);
+    arktest.assertEQ(date.getUTCHours(), 12);
+    arktest.assertEQ(date.getUTCMinutes(), 30);
+    arktest.assertEQ(date.getUTCSeconds(), 45);
+
+    let rfc = new Date('Sat, 15 Jun 2024 12:30:45 GMT');
+    arktest.assertEQ(rfc.getTime(), 1718454645000);
+
+    let dateOnly = new Date('2024/06/15 GMT');
+    arktest.assertEQ(dateOnly.getTime(), 1718409600000);
+    arktest.assertEQ(dateOnly.getUTCHours(), 0);
+    arktest.assertEQ(dateOnly.getUTCMinutes(), 0);
+    arktest.assertEQ(dateOnly.getUTCSeconds(), 0);
+}
+
+function testConstructorNonIsoGmtUtcEquivalence() {
+    let gmt = new Date('15 Jun 2024 12:30:45 GMT');
+    let utc = new Date('15 Jun 2024 12:30:45 UTC');
+    arktest.assertEQ(gmt.valueOf(), utc.valueOf());
+    arktest.assertEQ(gmt.getTime(), 1718454645000);
+}
+
+function testConstructorNonIsoTimezoneOffsets() {
+    let plus8 = new Date('15 Jun 2024 12:30:45 +08:00');
+    arktest.assertEQ(plus8.getTime(), 1718425845000);
+    arktest.assertEQ(plus8.getUTCHours(), 4);
+    arktest.assertEQ(plus8.getUTCMinutes(), 30);
+    arktest.assertEQ(plus8.getUTCSeconds(), 45);
+
+    let a = new Date('15 Jun 2024 20:00:00 +08:00');
+    let b = new Date('15 Jun 2024 07:00:00 -05:00');
+    arktest.assertEQ(a.valueOf(), b.valueOf());
+    arktest.assertEQ(a.getTime(), 1718452800000);
+}
+
+function testConstructorNonIsoTwoDigitYear() {
+    arktest.assertEQ(new Date('06/15/25').getFullYear(), 2025);
+    arktest.assertEQ(new Date('06/15/49').getFullYear(), 2049);
+    arktest.assertEQ(new Date('06/15/50').getFullYear(), 1950);
+    arktest.assertEQ(new Date('06/15/99').getFullYear(), 1999);
+}
+
+function testConstructorNonIsoInvalid() {
+    let invalid: string[] = [
+        '2024/13/01',
+        '2024/06/32',
+        '2024/06/15/25',
+        '32/15/2024',
+        'Foo 15 2024',
+        '15 Foo 2024',
+        '2024/06/15 25:00:00',
+        '2024/06/15 12:60:00',
+        '2024/06/15 12:30:99',
+        '15 Jun 2024 12:30:45 +25:00',
+    ];
+    for (let i = 0; i < invalid.length; i++) {
+        arktest.expectThrow((): void => { new Date(invalid[i]); });
+    }
+}
+
+function testConstructorNonIsoEqualsParse() {
+    let formats: string[] = [
+        '2024/06/15',
+        '06/15/2025',
+        '15 Jun 2024 12:30:45 GMT',
+        'Sat, 15 Jun 2024 12:30:45 GMT',
+        '15 Jun 2024 12:30:45 +08:00',
+    ];
+    for (let i = 0; i < formats.length; i++) {
+        arktest.assertEQ(new Date(formats[i]).getTime(), Date.parse(formats[i]));
+    }
+}
+
+function testConstructorNonIsoEqualsNumericAllMonths() {
+    let months: string[] = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+    for (let m = 0; m < 12; m++) {
+        let parsed = new Date('2024/' + months[m] + '/15');
+        let numeric = new Date(2024, m, 15);
+        arktest.assertEQ(parsed.valueOf(), numeric.valueOf());
+        arktest.assertEQ(parsed.getMonth(), m);
+        arktest.assertEQ(parsed.getDate(), 15);
+    }
+}
+
+function testConstructorNonIsoEqualsNumericSeasons() {
+    let summer = new Date('2024/06/15 12:30:45');
+    arktest.assertEQ(summer.valueOf(), new Date(2024, 5, 15, 12, 30, 45).valueOf());
+    arktest.assertEQ(summer.getHours(), 12);
+
+    let winter = new Date('2024/01/15 09:15:30');
+    arktest.assertEQ(winter.valueOf(), new Date(2024, 0, 15, 9, 15, 30).valueOf());
+    arktest.assertEQ(winter.getHours(), 9);
+}
+
+function testConstructorNonIsoParseStability() {
+    let base = new Date('15 Jun 2024 12:30:45 GMT').getTime();
+    for (let i = 0; i < 100; i++) {
+        arktest.assertEQ(new Date('15 Jun 2024 12:30:45 GMT').getTime(), base);
+    }
+}
+
+function testConstructorNonIsoIsoReversibility() {
+    let date = new Date('15 Jun 2024 12:30:45 GMT');
+    arktest.assertEQ(date.toISOString(), '2024-06-15T12:30:45.000Z');
+}
+
+function testConstructorNonIsoMilliseconds() {
+    let date = new Date('15 Jun 2024 12:30:45.123 GMT');
+    arktest.assertEQ(date.getTime(), 1718454645123);
+    arktest.assertEQ(date.getUTCMilliseconds(), 123);
+}
+
 function main() {
     let myTestsuite = new arktest.ArkTestsuite('DateTest');
     myTestsuite.addTest('testDateToUTCString', testDateToUTCString);
@@ -528,5 +682,18 @@ function main() {
     myTestsuite.addTest('testToStringBasic', testToStringBasic);
     myTestsuite.addTest('testToStringWithFixedTimestamp', testToStringWithFixedTimestamp);
     myTestsuite.addTest('testToStringInvalidDate', testToStringInvalidDate);
+    myTestsuite.addTest('testConstructorNonIsoSlashFormats', testConstructorNonIsoSlashFormats);
+    myTestsuite.addTest('testConstructorNonIsoAllMonthAbbr', testConstructorNonIsoAllMonthAbbr);
+    myTestsuite.addTest('testConstructorNonIsoGmtExact', testConstructorNonIsoGmtExact);
+    myTestsuite.addTest('testConstructorNonIsoGmtUtcEquivalence', testConstructorNonIsoGmtUtcEquivalence);
+    myTestsuite.addTest('testConstructorNonIsoTimezoneOffsets', testConstructorNonIsoTimezoneOffsets);
+    myTestsuite.addTest('testConstructorNonIsoTwoDigitYear', testConstructorNonIsoTwoDigitYear);
+    myTestsuite.addTest('testConstructorNonIsoInvalid', testConstructorNonIsoInvalid);
+    myTestsuite.addTest('testConstructorNonIsoEqualsParse', testConstructorNonIsoEqualsParse);
+    myTestsuite.addTest('testConstructorNonIsoEqualsNumericAllMonths', testConstructorNonIsoEqualsNumericAllMonths);
+    myTestsuite.addTest('testConstructorNonIsoEqualsNumericSeasons', testConstructorNonIsoEqualsNumericSeasons);
+    myTestsuite.addTest('testConstructorNonIsoParseStability', testConstructorNonIsoParseStability);
+    myTestsuite.addTest('testConstructorNonIsoIsoReversibility', testConstructorNonIsoIsoReversibility);
+    myTestsuite.addTest('testConstructorNonIsoMilliseconds', testConstructorNonIsoMilliseconds);
     return myTestsuite.run();
 }
