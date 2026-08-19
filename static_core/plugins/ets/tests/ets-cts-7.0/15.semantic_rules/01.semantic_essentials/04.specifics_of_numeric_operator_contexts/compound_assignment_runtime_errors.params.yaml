@@ -16,11 +16,13 @@ cases:
   - description: "Cannot divide by zero in compound assignment"
     declarations:
       - "let a: int = 10"
-    operation: "a /= 0"
+      - "let zero = 0"
+    operation: "a /= zero"
     expected_error: "/ by zero"
 
   - description: "Cannot modulo by zero in compound assignment"
     declarations:
       - "let a: int = 10"
-    operation: "a %= 0"
+      - "let zero = 0"
+    operation: "a %= zero"
     expected_error: "/ by zero"

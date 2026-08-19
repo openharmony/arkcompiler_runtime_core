@@ -25,8 +25,9 @@ const suite = new arktest.ArkTestsuite("ArithmeticError order of evaluation")
 suite.addTest("Division: lhs RangeError takes precedence over rhs division by zero", () => {
     let a = new int[2](0);
     let x: int = 37;
+    let zero: int = 0;
     try {
-        x = a[2] / 0;
+        x = a[2] / zero;
     } catch (e) {
         arktest.assertTrue(e instanceof RangeError);
     }
@@ -36,8 +37,9 @@ suite.addTest("Division: lhs RangeError takes precedence over rhs division by ze
 suite.addTest("Remainder: lhs RangeError takes precedence over rhs remainder by zero", () => {
     let a = new int[2](0);
     let x: int = 37;
+    let zero: int = 0;
     try {
-        x = a[2] % 0;
+        x = a[2] % zero;
     } catch (e) {
         arktest.assertTrue(e instanceof RangeError);
     }

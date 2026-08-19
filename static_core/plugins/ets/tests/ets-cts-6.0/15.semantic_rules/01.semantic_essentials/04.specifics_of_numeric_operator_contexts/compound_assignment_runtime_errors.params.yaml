@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,11 +16,13 @@ cases:
   - description: "Cannot divide by zero in compound assignment"
     declarations:
       - "let a: int = 10"
-    operation: "a /= 0"
+      - "let zero = 0"
+    operation: "a /= zero"
     expected_error: "/ by zero"
 
   - description: "Cannot modulo by zero in compound assignment"
     declarations:
       - "let a: int = 10"
-    operation: "a %= 0"
+      - "let zero = 0"
+    operation: "a %= zero"
     expected_error: "/ by zero"
