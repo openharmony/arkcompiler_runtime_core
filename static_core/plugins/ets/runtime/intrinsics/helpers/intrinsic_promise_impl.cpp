@@ -152,7 +152,12 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t pr
         return nullptr;
     }
     auto refStor = EtsExecutionContext::FromMT(executionCtx)->GetPandaAniEnv()->GetEtsReferenceStorage();
-    auto *aCtxRef = EtsReference::CastToReference(refStor->NewEtsRef(asyncCtx, EtsReference::EtsObjectType::LOCAL));
+    auto *etsAsyncCtxRef = refStor->NewEtsRef(asyncCtx, EtsReference::EtsObjectType::LOCAL);
+    if UNLIKELY (etsAsyncCtxRef == nullptr) {
+        ThrowOutOfMemoryError(etsCtx->GetMT(), "Cannot allocate async context reference");
+        return nullptr;
+    }
+    auto *aCtxRef = EtsReference::CastToReference(etsAsyncCtxRef);
     auto *asyncMethod = StackWalker::Create(etsCtx->GetMT()).GetMethod();
     auto args = FillEntrypointArgs(asyncMethod);
     auto epInfo = Job::ManagedEntrypointInfo {nullptr, asyncMethod, std::move(args)};

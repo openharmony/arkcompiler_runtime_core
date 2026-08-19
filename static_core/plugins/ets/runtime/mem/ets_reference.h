@@ -123,6 +123,9 @@ public:
     {
         ASSERT(obj != nullptr);
         mem::Reference *ref = NewRef(obj->GetCoreType(), objType);
+        if (ref == nullptr) {
+            return nullptr;
+        }
         return EtsReference::CastFromReference(ref);
     }
 

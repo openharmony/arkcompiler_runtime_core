@@ -21,6 +21,14 @@ namespace ark::ets::ani::testing {
 
 class GlobalReferenceCreateTest : public AniTest {};
 
+class GlobalReferenceCreateOutOfRefTest : public AniTest {
+protected:
+    std::vector<ani_option> GetExtraAniOptions() override
+    {
+        return {ani_option {"--ext:max-global-ref-size=3000", nullptr}};
+    }
+};
+
 TEST_F(GlobalReferenceCreateTest, from_null_ref)
 {
     auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "GetNull");
@@ -135,6 +143,28 @@ TEST_F(GlobalReferenceCreateTest, global_reference_create_under_pending_error)
 
     ani_ref gref {};
     ASSERT_EQ(env_->GlobalReference_Create(strRef, &gref), ANI_OK);
+}
+
+TEST_F(GlobalReferenceCreateOutOfRefTest, storage_is_full)
+{
+    auto ref = CallEtsFunction<ani_ref>("global_reference_create_test", "getObject");
+    std::vector<ani_ref> globalRefs;
+    ani_status status = ANI_OK;
+
+    constexpr size_t MAX_GLOBAL_REF_SIZE = 3000U;
+    for (size_t i = 0; i <= MAX_GLOBAL_REF_SIZE; ++i) {
+        ani_ref globalRef {};
+        status = env_->GlobalReference_Create(ref, &globalRef);
+        if (status != ANI_OK) {
+            break;
+        }
+        globalRefs.push_back(globalRef);
+    }
+
+    ASSERT_EQ(status, ANI_OUT_OF_REF);
+    for (auto globalRef : globalRefs) {
+        ASSERT_EQ(env_->GlobalReference_Delete(globalRef), ANI_OK);
+    }
 }
 
 }  // namespace ark::ets::ani::testing
