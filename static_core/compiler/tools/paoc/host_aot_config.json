@@ -20,6 +20,32 @@
       "defaultAotMode": "full"
     },
     {
+      "componentsName": "etssdk",
+      "enableHostAot": true,
+      "abcPath": "/system/framework/ets2abc_commonsdk_api.abc",
+      "hapPath": "",
+      "modulePath": "",
+      "isFramework": true,
+      "anOutPath": "/system/framework/ets2abc_commonsdk_api.an",
+      "abcInstallDir": "/system/framework/",
+      "anInstallPath": "/system/framework/ets2abc_commonsdk_api.an",
+      "arkProfilePath": "",
+      "defaultAotMode": "full"
+    },
+    {
+      "componentsName": "etssdk",
+      "enableHostAot": true,
+      "abcPath": "/system/framework/ets2abc_commonsdk_arkts.abc",
+      "hapPath": "",
+      "modulePath": "",
+      "isFramework": true,
+      "anOutPath": "/system/framework/ets2abc_commonsdk_arkts.an",
+      "abcInstallDir": "/system/framework/",
+      "anInstallPath": "/system/framework/ets2abc_commonsdk_arkts.an",
+      "arkProfilePath": "",
+      "defaultAotMode": "full"
+    },
+    {
       "componentsName": "arkoala",
       "enableHostAot": false,
       "abcPath": "/system/framework/arkoala.abc",
