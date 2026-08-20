@@ -7516,7 +7516,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @FaAndStageModel
      */
     public includes(searchElement: BigInt, fromIndex?: int): boolean {
-        if (searchElement < 0 || searchElement > BigUint64Array.unsignedLongMax) {
+        if (searchElement < 0n || searchElement > BigUint64Array.unsignedLongMax) {
             return false;
         }
         return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1

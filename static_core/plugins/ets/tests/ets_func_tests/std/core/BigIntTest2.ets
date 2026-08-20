@@ -201,7 +201,7 @@ function testBigIntNumberMax(): void {
   );
   arktest.assertTrue(bi1 != Number.MAX_VALUE);
   arktest.assertTrue(bi1.doubleValue() == Number.MAX_VALUE);
-  arktest.assertFalse(bi1 > Number.MAX_VALUE);
+  arktest.assertFalse(bi1.doubleValue() > Number.MAX_VALUE);
 }
 
 function testBigIntWithLongMax(): void {

@@ -282,7 +282,7 @@ operations:
       - type1: ["bigint", "1n"]
         type2: ["boolean", "true"]
         expected_out: |-
-          "Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type."
+          "Semantic error ESE0105: Operator '<' cannot be applied to types 'BigInt' and 'Boolean'."
 
   - op: { sign: "<=", name: "leq" }
     pairs:
@@ -309,7 +309,7 @@ operations:
       - type1: ["bigint", "1n"]
         type2: ["boolean", "true"]
         expected_out: |-
-          "Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type."
+          "Semantic error ESE0105: Operator '<=' cannot be applied to types 'BigInt' and 'Boolean'."
 
   - op: { sign: ">", name: "greater" }
     pairs:
@@ -336,7 +336,7 @@ operations:
       - type1: ["bigint", "1n"]
         type2: ["boolean", "true"]
         expected_out: |-
-          "Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type."
+          "Semantic error ESE0105: Operator '>' cannot be applied to types 'BigInt' and 'Boolean'."
 
   - op: { sign: ">=", name: "geq" }
     pairs:
@@ -363,7 +363,7 @@ operations:
       - type1: ["bigint", "1n"]
         type2: ["boolean", "true"]
         expected_out: |-
-          "Semantic error ESE0114: Bad operand type, the types of the operands must be numeric, same enumeration, or boolean type."
+          "Semantic error ESE0105: Operator '>=' cannot be applied to types 'BigInt' and 'Boolean'."
 
   - op: { sign: "==", name: "eq" }
     pairs:

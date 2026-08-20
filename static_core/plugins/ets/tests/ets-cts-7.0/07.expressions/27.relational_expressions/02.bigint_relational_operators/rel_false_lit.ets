@@ -13,16 +13,24 @@
  * limitations under the License.
  */
 {% yaml 'rel_false.params.yaml' as yaml_file %}
+
+{%- for c in yaml_file.cases %}
+
 /*---
-desc: Case of if not both operands are bigint
+desc: CTE - BigInt vs numeric relational comparison with {{c.op}}
+tags: [compile-only, negative]
+{% if 'Double.' in c.exp %}
+expected_error: "Semantic error ESE0105: Operator '{{c.op}}' cannot be applied to types 'BigInt' and 'Double'."
+{% elif 'Float.' in c.exp %}
+expected_error: "Semantic error ESE0105: Operator '{{c.op}}' cannot be applied to types 'BigInt' and 'Float'."
+{% elif '.' in c.exp %}
+expected_error: "Semantic error ESE0105: Operator '{{c.op}}' cannot be applied to types 'BigInt' and 'Double'."
+{% else %}
+expected_error: "Semantic error ESE0105: Operator '{{c.op}}' cannot be applied to types 'BigInt' and 'Int'."
+{% endif %}
 ---*/
 
-function main(): int {
-    let tests = new arktest.ArkTestsuite('BigInt relational operations with numeric')
-{%- for c in yaml_file.cases %}
-    tests.addTest('{{loop.index}}', () => {
-        arktest.assertFalse({{c.b}} {{c.op}} {{c.exp}}, 'Failed: {{c.b}} {{c.op}} {{c.exp}}')
-    })
-{% endfor %}
-    return tests.run()
+function main() {
+    let _ = {{c.b}} {{c.op}} {{c.exp}}
 }
+{%- endfor %}

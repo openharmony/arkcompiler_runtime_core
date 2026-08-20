@@ -1444,14 +1444,14 @@ Received value is: ${value}`)
         }
 
         private checkValue(value: bigint, start: long , end: bigint, startText: string, endText: string): void {
-            if (value < start || value > end) {
+            if (value < new BigInt(start) || value > end) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
                     `It must be >= ${startText} and <= ${endText}. Received value is: ${value}`)
             }
         }
 
         private checkValue(value: bigint, start: long , end: long, startText: string, endText: string): void {
-            if (value < start || value > end) {
+            if (value < new BigInt(start) || value > new BigInt(end)) {
                 throw createBusinessError(OutOfBoundsErrorCodeId, `The value of "value" is out of range. ` +
                     `It must be >= ${startText} and <= ${endText}. Received value is: ${value}`)
             }

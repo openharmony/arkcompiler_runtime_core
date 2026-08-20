@@ -1415,7 +1415,7 @@ export final class BigInt {
             exp = exp >> one
         }
 
-        for (let i = 0; i < trailingZeros; i++) {
+        for (let i = 0; BigInt(i) < trailingZeros; i++) {
             result = result * result
         }
 
