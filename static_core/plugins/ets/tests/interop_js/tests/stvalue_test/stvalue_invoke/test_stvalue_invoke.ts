@@ -22,6 +22,10 @@ let nsp = STValue.findNamespace('stvalue_invoke.Invoke');
 let studentCls = STValue.findClass('stvalue_invoke.Student');
 let subStudentCls = STValue.findClass('stvalue_invoke.SubStudent');
 
+const GLOBAL_REFERENCE_CREATION_ATTEMPTS = 40000;
+const GLOBAL_REFERENCE_TABLE_FULL_ERROR =
+    'Failed to create global reference for STValue: the global reference table is full';
+
 // functionalObjectInvoke(args: Array<STValue>): STValue
 function testFunctionalObjectInvoke(): void {
     let getNumberFn = nsp.namespaceGetVariable('getNumberFn', SType.REFERENCE);
@@ -882,6 +886,36 @@ function testExceptionHandling(): void {
     ASSERT_TRUE(normalResult.unwrapToNumber() === 5);
 }
 
+function testGlobalReferenceStorageFull(): void {
+    const retainedReferences: Array<typeof studentCls> = [];
+    let tableFullErrorCaught = false;
+
+    try {
+        for (let i = 0; i < GLOBAL_REFERENCE_CREATION_ATTEMPTS; i++) {
+            retainedReferences.push(STValue.findClass('stvalue_invoke.Student'));
+        }
+    } catch (e: Error) {
+        tableFullErrorCaught = e.message.includes(GLOBAL_REFERENCE_TABLE_FULL_ERROR);
+    }
+
+    ASSERT_TRUE(tableFullErrorCaught);
+}
+
+function testSetAniRefGlobalReferenceStorageFull(): void {
+    const retainedReferences: Array<typeof studentCls> = [];
+    let tableFullErrorCaught = false;
+
+    try {
+        for (let i = 0; i < GLOBAL_REFERENCE_CREATION_ATTEMPTS; i++) {
+            retainedReferences.push(STValue.newArray(0, studentCls));
+        }
+    } catch (e: Error) {
+        tableFullErrorCaught = e.message.includes(GLOBAL_REFERENCE_TABLE_FULL_ERROR);
+    }
+
+    ASSERT_TRUE(tableFullErrorCaught);
+}
+
 function main(): void {
     testFunctionalObjectInvoke();
     testObjectInvokeMethod();
@@ -893,6 +927,8 @@ function main(): void {
     testBoundaryValues();
     testNullUndefinedHandling();
     testExceptionHandling();
+    testGlobalReferenceStorageFull();
+    testSetAniRefGlobalReferenceStorageFull();
 }
 
 main();
