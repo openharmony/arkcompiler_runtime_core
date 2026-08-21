@@ -12,54 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+{% for c in cases %}
 /*---
 desc: >-
-    Cases where a method and a function have the same name
+    When the receiver type contains an accessible instance method (see Accessible)
+    with the same name as the function with receiver, the instance method has
+    a priority over the implicitly called function with receiver. The function with
+    receiver still can be called explicitly.
+    {{c.description}}
 ---*/
 
-// base cases
-class A {
-    foo (): string { return "the instance method"; }
+{{c.decl}}
+
+function main() {
+    {{c.main | indent}}
 }
-function foo(this: A): string { return "the function"; }
-
-// both with generic
-class B {
-    bar<T> (): string { return "the instance method"; }
-}
-function bar<T>(this: B): string { return "the function"; }
-
-// with generic and not 
-class C {
-    func(): C { return this; }
-}
-function func<T extends Object>(this: T): T { return this }
-
-function main(): int {
-    let testsuite = new arktest.ArkTestsuite("Method and function with same name");
-    
-    testsuite.addTest("The instance method has a priority over the implicitly called function with receiver", () => {
-        arktest.assertEQ(
-            (new A).foo(), "the instance method"
-        );
-    });
-
-    testsuite.addTest("The function with receiver still can be called explicitly", () => {
-        arktest.assertEQ(
-            foo(new A), "the function"
-        );
-    });
-
-    testsuite.addTest("The method and the function with generics", () => {
-        arktest.assertEQ(bar<boolean>(new B), "the function");
-        arktest.assertEQ((new B).bar<int>(), "the instance method");
-    });
-
-    testsuite.addTest("The function with generics", () => {
-        arktest.assertTrue(func(new C) instanceof C);
-        arktest.assertTrue((new C).func<C>() instanceof C);
-    });
-
-    return testsuite.run();
-}
+{% endfor %}
