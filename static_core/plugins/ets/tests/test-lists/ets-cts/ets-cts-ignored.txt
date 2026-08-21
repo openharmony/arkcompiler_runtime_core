@@ -155,6 +155,9 @@
 06.contexts_and_conversions/02.string_operator_contexts/conversion_n_0.ets
 06.contexts_and_conversions/02.string_operator_contexts/conversion_n_1.ets
 
+#35573 Need CTW while converting undefined as TypeParameter
+07.expressions/17.cast_expressions/cast_w_0.ets
+
 #30340 &&= ||= ??= still not supported in code
 07.expressions/32.assignment/02.compound_assignment_operators/ops_12.ets
 07.expressions/32.assignment/02.compound_assignment_operators/ops_13.ets
