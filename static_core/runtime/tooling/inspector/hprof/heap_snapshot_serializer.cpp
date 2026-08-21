@@ -161,6 +161,25 @@ private:
         buf_.push_back(HEX[byte & 0xFU]);
     }
 
+    static bool IsValidSequence(uint8_t leadByte, uint8_t secondByte)
+    {
+        if (leadByte == 0xC0U || leadByte == 0xC1U || leadByte > 0xF4U) {
+            return false;
+        }
+        uint8_t minSecondByte = 0x80U;
+        uint8_t maxSecondByte = 0xBFU;
+        if (leadByte == 0xE0U) {
+            minSecondByte = 0xA0U;
+        } else if (leadByte == 0xEDU) {
+            maxSecondByte = 0x9FU;
+        } else if (leadByte == 0xF0U) {
+            minSecondByte = 0x90U;
+        } else if (leadByte == 0xF4U) {
+            maxSecondByte = 0x8FU;
+        }
+        return secondByte >= minSecondByte && secondByte <= maxSecondByte;
+    }
+
     size_t AppendUtf8OrReplace(const std::string &str, size_t i, size_t strSize)
     {
         auto c = static_cast<uint8_t>(str[i]);
@@ -183,7 +202,7 @@ private:
             }
         }
 
-        if (c == 0xC0U || c == 0xC1U || (c == 0xEDU && static_cast<uint8_t>(str[i + 1]) >= 0xA0U)) {
+        if (!IsValidSequence(c, static_cast<uint8_t>(str[i + 1]))) {
             buf_.push_back('?');
             return len;
         }
