@@ -110,6 +110,7 @@ static_core/runtime/tooling/                             @slynkodenis ^kurnevich
 static_core/scripts/clang-tidy/                          @igelhaus @nazarovkonstantin
 static_core/scripts/code_style/                          @igelhaus @nazarovkonstantin
 static_core/scripts/llvm/                                @urandon ^chernykhsergey @sukhikhalexander
+static_core/scripts/mem/                                 @ipetrov ^artemu ^shemetovphilip
 static_core/scripts/sdk/                                 ^igelhaus ^Prof @Nojpg ^trubachevilya @dsilakov
 static_core/tests/benchmarks/                            @igelhaus
 static_core/tests/checked/                               @Prof ^wanzixuan330 ^chernykhsergey ^LeechyLiang
@@ -162,6 +163,7 @@ static_core/plugins/ets/verification/                    ^igelhaus @oatuwwutao ^
 static_core/runtime/include/mem/                         ^dmitriitr @artemu ^gitee-dakeQI @lizheng89 ^shemetovphilip
 static_core/runtime/include/tooling/                     @slynkodenis ^kurnevichstanislav
 static_core/runtime/tests/tooling/                       @slynkodenis ^kurnevichstanislav
+static_core/scripts/mem/memmem/                          @nazarovkonstantin ^ipetrov
 static_core/plugins/ets/runtime/ani/ani_helpers*                              @wanzixuan330 @v-cherkashin ^slynkodenis ^asidorov @zengmanyi @LeechyLiang
 static_core/plugins/ets/runtime/finalreg/*                                    ^dmitriitr @artemu @ipetrov ^shemetovphilip
 static_core/plugins/ets/runtime/interop_js/                                   @igelhaus ^nazarovkonstantin @vpukhov @slynkodenis @benzunfu ^molotkovmikhail ^ipetrov ^atremu
