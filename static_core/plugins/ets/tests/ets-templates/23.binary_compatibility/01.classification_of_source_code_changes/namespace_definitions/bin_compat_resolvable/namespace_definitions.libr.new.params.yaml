@@ -37,8 +37,8 @@ libs:
     - desc: |-
           Renaming a non-exported member of a namespace is a binary-compatible change
       body: |-
-          let b: number = 42
-          function foo(): Any {
+          let b_renamed: number = 42
+          function foo_renamed(): Any {
               return null
           }
 
