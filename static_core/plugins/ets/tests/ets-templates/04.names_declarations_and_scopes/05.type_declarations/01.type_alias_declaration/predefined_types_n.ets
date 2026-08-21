@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,19 @@
  * limitations under the License.
  */
 
-
+{% for p in cases %}
 /*---
-desc: Resizable array types
-tags: [compile-only, negative]
-expected_out: "Semantic error ESE0024: Setting the length of an array is not permitted"
+desc: >-
+    Names and aliases of the Predefined Types are hard keywords. They
+    cannot be used as identifiers. Type aliases are identifiers.
+tags: [negative, compile-only]
+expected_out: |-
+    {{p.expected or ("Syntax error ESY0295: " + p.type + " is a predefined type, cannot be used as an identifier")}}
 ---*/
 
-function main() {
-    let SyntaxFormOne: FixedArray<String> = ["Hello", "World", "Of", "ArkTS"];
-    SyntaxFormOne.length = 5;
-}
+class A {}
+
+type {{p.type}} = Array<A>;
+
+function main() {}
+{%- endfor %}

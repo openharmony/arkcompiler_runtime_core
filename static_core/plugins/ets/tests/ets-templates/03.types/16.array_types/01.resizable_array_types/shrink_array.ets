@@ -20,16 +20,40 @@ desc: Shrinking array by setting length for both T[] and Array<T> forms.
 function main(): int {
   let suite = new arktest.ArkTestsuite("Shrink Array");
 
-  suite.addTest("Shrink T[] form by setting length", () => {
+  suite.addTest("Shrink T[] form by setting the same length", () => {
+    let arr: String[] = ["Hello", "World", "Of", "ArkTS"]
+    arr.length = 4
+    arktest.assertEQ(arr.length, 4)
+  });
+
+  suite.addTest("Shrink T[] form by reducing length", () => {
     let arr: String[] = ["Hello", "World", "Of", "ArkTS"]
     arr.length = 2
     arktest.assertEQ(arr.length, 2)
   });
 
-  suite.addTest("Shrink Array<T> form by setting length", () => {
+  suite.addTest("Shrink T[] form by reducing length to 0", () => {
+    let arr: String[] = ["Hello", "World", "Of", "ArkTS"]
+    arr.length = 0
+    arktest.assertEQ(arr.length, 0)
+  });
+
+  suite.addTest("Shrink Array<T> form by setting the same length", () => {
+    let arr: Array<String> = ["Hello", "World", "Of", "ArkTS"]
+    arr.length = 4
+    arktest.assertEQ(arr.length, 4)
+  });
+
+  suite.addTest("Shrink Array<T> form by reducing length", () => {
     let arr: Array<String> = ["Hello", "World", "Of", "ArkTS"]
     arr.length = 2
     arktest.assertEQ(arr.length, 2)
+  });
+
+  suite.addTest("Shrink Array<T> form by reducing length to 0", () => {
+    let arr: Array<String> = ["Hello", "World", "Of", "ArkTS"]
+    arr.length = 0
+    arktest.assertEQ(arr.length, 0)
   });
 
   return suite.run()

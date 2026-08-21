@@ -1,0 +1,78 @@
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - type: Any
+
+    - type: bigint
+
+    - type: BigInt
+
+    - type: boolean
+      expected: "Syntax error ESY0227: Unexpected token 'boolean'."
+
+    - type: Boolean
+
+    - type: byte
+      expected: "Syntax error ESY0227: Unexpected token 'byte'."
+
+    - type: Byte
+
+    - type: char
+      expected: "Syntax error ESY0227: Unexpected token 'char'."
+
+    - type: Char
+
+    - type: double
+      expected: "Syntax error ESY0227: Unexpected token 'double'."
+
+    - type: Double
+
+    - type: float
+      expected: "Syntax error ESY0227: Unexpected token 'float'."
+
+    - type: Float
+
+    - type: int
+      expected: "Syntax error ESY0227: Unexpected token 'int'."
+
+    - type: Int
+
+    - type: long
+      expected: "Syntax error ESY0227: Unexpected token 'long'."
+
+    - type: Long
+
+    - type: never
+      expected: "Semantic error ESE0350: Class 'never' is already defined with different type."
+
+    - type: number
+
+    - type: Number
+
+    - type: Object
+
+    - type: object
+
+    - type: short
+      expected: "Syntax error ESY0227: Unexpected token 'short'."
+
+    - type: Short
+
+    - type: string
+
+    - type: String
+
+    - type: void
+      expected: "Syntax error ESY0227: Unexpected token 'void'."

@@ -18,10 +18,10 @@
 /*---
 desc: >-
     A value of type Function cannot be called directly. A developer must use the unsafeCall method instead.
-    This method checks the arguments of type Function, and calls the underlying function value
-    if the number and types of the arguments are valid.
+tags: [compile-only, negative]
+expected_out: "{{c.expected_out}}"
 ---*/
 
-{{c}}
+{{c.code}}
 
 {%- endfor %}

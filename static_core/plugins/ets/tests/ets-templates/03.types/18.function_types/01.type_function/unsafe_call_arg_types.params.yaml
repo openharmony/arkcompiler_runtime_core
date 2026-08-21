@@ -1,0 +1,114 @@
+# Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - type: byte
+      arg: 1 as byte
+      return_type: byte
+
+    - type: short
+      arg: 1 as short
+      return_type: short
+
+    - type: int
+      arg: 1
+      return_type: int
+
+    - type: long
+      arg: 1 as long
+      return_type: long
+
+    - type: float
+      arg: 1.0f
+      return_type: float
+
+    - type: double
+      arg: 1.0
+      return_type: double
+
+    - type: char
+      arg: "c'1'"
+      return_type: char
+
+    - type: boolean
+      arg: 'true'
+      return_type: boolean
+
+    - type: Object
+      arg: new Object()
+      return_type: Object
+
+    - type: String
+      arg: "'abc'"
+      return_type: String
+
+    - type: 'Any'
+      arg: '1'
+      return_type: 'Any'
+
+    - type: 'null'
+      arg: 'null'
+      return_type: 'null'
+
+    - type: 'undefined'
+      arg: 'undefined'
+      return_type: 'undefined'
+
+    - type: 'int | string'
+      arg: '1'
+      return_type: int
+
+    - type: 'int | string'
+      arg: "'abc'"
+      return_type: string
+
+    - type: 'FixedArray<number|undefined> | FixedArray<string|undefined>'
+      arg: "['abc'] as FixedArray<string|undefined>"
+      return_type: FixedArray<string|undefined>
+
+    - type: 'FixedArray<number|undefined> | FixedArray<string|undefined>'
+      arg: '[1] as FixedArray<number|undefined> '
+      return_type: FixedArray<number|undefined>
+
+    - type: 'Array<number> | Array<string>'
+      arg: "['abc']"
+      return_type: Array
+
+    - type: 'Array<number> | Array<string>'
+      arg: '[1]'
+      return_type: Array
+
+    - type: 'int[]'
+      arg: '[1, 0]'
+      return_type: 'Array'
+
+    - type: 'Array<int>'
+      arg: '[1]'
+      return_type: Array
+
+    - type: '() => void'
+      arg: '(): void => {}'
+      return_type: Function
+
+    - type: '() => int'
+      arg: '(): int => { return 1 }'
+      return_type: Function
+
+    - type: '(p: int) => void'
+      arg: '(p: int): void => {}'
+      return_type: Function
+
+    - type: "'abc' | 'def'"
+      arg: "'abc'"
+      return_type: string

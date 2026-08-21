@@ -13,55 +13,58 @@
 
 ---
 cases:
-  # most basic usage
-  - decl: |-
-      type foo1_o = (x?: int) => int
-    use: |-
-      let func1: foo1_o = (x?: int) => { 
-        return 1
-      }
-      const f: Function = func1
-      f.unsafeCall()
+    # most basic usage
+    - decl: |-
+          type foo1_o = (x?: int) => int
+      use: |-
+          let func1: foo1_o = (x?: int) => { 
+              return 1
+          }
+          const f: Function = func1
+          arktest.assertEQ(f.unsafeCall(), 1)
 
-  - decl: |-
-      type foo1_o = (x?: int) => int
-    use: |-
-      let func1: foo1_o = (x?: int) => { 
-        return 1
-      }
-      const f: Function = func1
-      f.unsafeCall(0)
+    - decl: |-
+          type foo1_o = (x?: int) => int
+      use: |-
+          let func1: foo1_o = (x?: int) => { 
+              return 1
+          }
+          const f: Function = func1
+          arktest.assertEQ(f.unsafeCall(0), 1)
 
-  # non-trivial variations
-  - decl: |-
-      type foo2_o = (x1: int, x2?: int) => int
-      type foo2_oo = (x1?: int, x2?: int) => int
-      type foo3_oo = (x1: int, x2?: int, x3?: int) => int
-      type foo3_o = (x1: int, x2: int, x3?: int) => int
-    use: |-
-      let func2: foo2_o = (x1: int, x2?: int) => { 
-        return 1
-      }
-      const f2: Function = func2
-      f2.unsafeCall(1)
-      f2.unsafeCall(1, 0)
-      let func3: foo2_oo = (x1?: int, x2?: int) => { 
-        return 1
-      }
-      const f3: Function = func3
-      f3.unsafeCall()
-      f3.unsafeCall(0)
-      f3.unsafeCall(0, 0)
-      let func4: foo3_oo = (x1: int, x2?: int, x3?: int) => { 
-        return 1
-      }
-      const f4: Function = func4
-      f4.unsafeCall(1)
-      f4.unsafeCall(1, 0)
-      f4.unsafeCall(1, 0, 0)
-      let func5: foo3_o = (x1: int, x2: int, x3?: int) => { 
-        return 1
-      }
-      const f5: Function = func5
-      f5.unsafeCall(1, 2)
-      f5.unsafeCall(1, 2, 0)
+    # non-trivial variations
+    - decl: |-
+          type foo2_mo = (x1: int, x2?: int) => int
+          type foo2_oo = (x1?: int, x2?: int) => int
+          type foo3_moo = (x1: int, x2?: int, x3?: int) => int
+          type foo3_mmo = (x1: int, x2: int, x3?: int) => int
+      use: |-
+          let func2: foo2_mo = (x1: int, x2?: int) => { 
+              return 1
+          }
+          const f2: Function = func2
+          arktest.assertEQ(f2.unsafeCall(1), 1)
+          arktest.assertEQ(f2.unsafeCall(1, 0), 1)
+
+          let func3: foo2_oo = (x1?: int, x2?: int) => { 
+              return 1
+          }
+          const f3: Function = func3
+          arktest.assertEQ(f3.unsafeCall(), 1)
+          arktest.assertEQ(f3.unsafeCall(0), 1)
+          arktest.assertEQ(f3.unsafeCall(0, 0), 1)
+
+          let func4: foo3_moo = (x1: int, x2?: int, x3?: int) => { 
+              return 1
+          }
+          const f4: Function = func4
+          arktest.assertEQ(f4.unsafeCall(1), 1)
+          arktest.assertEQ(f4.unsafeCall(1, 0), 1)
+          arktest.assertEQ(f4.unsafeCall(1, 0, 0), 1)
+
+          let func5: foo3_mmo = (x1: int, x2: int, x3?: int) => { 
+              return 1
+          }
+          const f5: Function = func5
+          arktest.assertEQ(f5.unsafeCall(1, 2), 1)
+          arktest.assertEQ(f5.unsafeCall(1, 2, 0), 1)

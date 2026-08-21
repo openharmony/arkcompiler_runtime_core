@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
-
+{% for c in cases %}
 /*---
-desc: >-
-    A value of type Function cannot be called directly. A developer must use the unsafeCall method instead.
-    This method checks the arguments of type Function, and calls the underlying function value
-    if the number and types of the arguments are valid.
+desc: An array is an object which contains elements of a similar data type
 ---*/
 
-function foo(n: {{c.type}}) { return n }
-const f: Function = foo
-let res = f.unsafeCall({{c.use}})
-arktest.assertTrue(res instanceof ({{c.assert}}))
+{{c.decl}}
 
-{%- endfor %}
+function main(): void {
+    let arr: {{c.type}} = {{c.vals}}
+    arr[0] = {{c.val}}
+    arktest.assertTrue({{c.assert}})
+}
+{% endfor %}

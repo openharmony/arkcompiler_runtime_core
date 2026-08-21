@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,15 @@
  * limitations under the License.
  */
 
-{%- for c in cases %}
-
 /*---
 desc: >-
-    Function type can be used to express the expected signature of a function. A function type consists
-    of the following: Optional type parameters... A type alias can set a name for a function type...
-    The actual type of the parameter is... a union of the parameter type and type undefined.
+    Array length is a non-negative integer number.
+    Shrinking array by setting length for T[] array.
+tags: [compile-only, negative]
+expected_out: "Semantic error ESE0318: Type 'Double' cannot be assigned to type 'Int'"
 ---*/
 
-{{c.decl}}
-
 function main() {
-    {{c.use|indent}}
+    let arr: Object[] = ['a']
+    arr.length = 0.0000000001
 }
-
-{%- endfor %}

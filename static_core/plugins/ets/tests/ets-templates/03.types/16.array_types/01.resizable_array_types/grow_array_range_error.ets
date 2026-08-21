@@ -22,27 +22,50 @@ function grow(seed: int): int {
 }
 
 function main(): int {
-  let suite = new arktest.ArkTestsuite("Grow Array RangeError");
-  let checkRangeError = (e: Error): boolean => { return (e instanceof RangeError) }
+  let suite = new arktest.ArkTestsuite('Grow Array RangeError');
+  let checkRangeError = (e: Error): boolean =>
+      e instanceof RangeError && e.message == 'can\'t change length to bigger or negative'
 
-  suite.addTest("T[] form with literal length throws RangeError", () => {
-    let arr: String[] = ["Hello", "World", "Of", "ArkTS"]
+  suite.addTest('T[] form with literal length throws RangeError', () => {
+    let arr: String[] = ['Hello', 'World', 'Of', 'ArkTS']
     arktest.expectThrow(() => { arr.length = 5 }, checkRangeError)
   });
 
-  suite.addTest("T[] form with computed length throws RangeError", () => {
-    let arr: String[] = ["Hello", "World", "Of", "ArkTS"]
+  suite.addTest('T[] form with computed length throws RangeError', () => {
+    let arr: String[] = ['Hello', 'World', 'Of', 'ArkTS']
     arktest.expectThrow(() => { arr.length = grow(0) }, checkRangeError)
   });
 
-  suite.addTest("Array<T> form with literal length throws RangeError", () => {
-    let arr: Array<String> = ["Hello", "World", "Of", "ArkTS"]
+  suite.addTest('Array<T> form with literal length throws RangeError', () => {
+    let arr: Array<String> = ['Hello', 'World', 'Of', 'ArkTS']
     arktest.expectThrow(() => { arr.length = 5 }, checkRangeError)
   });
 
-  suite.addTest("Array<T> form with computed length throws RangeError", () => {
-    let arr: Array<String> = ["Hello", "World", "Of", "ArkTS"]
+  suite.addTest('Array<T> form with computed length throws RangeError', () => {
+    let arr: Array<String> = ['Hello', 'World', 'Of', 'ArkTS']
     arktest.expectThrow(() => { arr.length = grow(0) }, checkRangeError)
+  });
+
+  suite.addTest('T[] form with literal negative length throws RangeError', () => {
+    let arr: String[] = ['Hello', 'World', 'Of', 'ArkTS']
+    arktest.expectThrow(() => { arr.length = -1 }, checkRangeError)
+  });
+
+  suite.addTest('T[] form with computed negative length throws RangeError', () => {
+    let arr: String[] = ['Hello', 'World', 'Of', 'ArkTS']
+    arktest.expectThrow(() => { arr.length = grow(-6) }, checkRangeError)
+  });
+
+  suite.addTest('T[] form grow back to initial size after shrinking with literal length throws RangeError', () => {
+    let arr: String[] = ['Hello', 'World', 'Of', 'ArkTS']
+    arr.length = 3
+    arktest.expectThrow(() => { arr.length = 4 }, checkRangeError)
+  });
+
+  suite.addTest('Array<T> form grow to less than initial size after shrinking with computed length throws RangeError', () => {
+    let arr: Array<String> = ['Hello', 'World', 'Of', 'ArkTS']
+    arr.length = 1
+    arktest.expectThrow(() => { arr.length = grow(-3) }, checkRangeError)
   });
 
   return suite.run()

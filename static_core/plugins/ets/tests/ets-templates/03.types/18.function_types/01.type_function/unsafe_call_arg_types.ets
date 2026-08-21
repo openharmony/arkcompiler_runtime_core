@@ -17,15 +17,16 @@
 
 /*---
 desc: >-
-    Function type can be used to express the expected signature of a function. A function type consists
-    of the following: Optional type parameters... A type alias can set a name for a function type...
-    The actual type of the parameter is... a union of the parameter type and type undefined.
+    A value of type Function cannot be called directly. A developer must use the unsafeCall method instead.
+    This method checks the arguments of type Function, and calls the underlying function value
+    if the number and types of the arguments are valid.
 ---*/
 
-{{c.decl}}
+function foo(n: {{c.type}}) { return n }
+const f: Function = foo
 
 function main() {
-    {{c.use|indent}}
+    let res = f.unsafeCall({{c.arg}})
+    arktest.assertTrue(res instanceof ({{c.return_type}}))
 }
-
 {%- endfor %}

@@ -18,11 +18,12 @@
 /*---
 desc: {{case.desc}}
 tags: [compile-only, negative]
+expected_out: "{{case.expected_out}}"
 ---*/
 
-{{case.dec1|indent}}
+{{case.decl or ''}}
 
 function main() {
-  {{case.check|indent}}
+    {{case.check|indent}}
 }
 {% endfor %}
