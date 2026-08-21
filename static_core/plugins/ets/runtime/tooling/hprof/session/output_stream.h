@@ -76,6 +76,11 @@ public:
 
     void Close();
 
+    bool Good() const
+    {
+        return fd_ >= 0;
+    }
+
     /**
      * Flush remaining buffer data to the file descriptor.
      *

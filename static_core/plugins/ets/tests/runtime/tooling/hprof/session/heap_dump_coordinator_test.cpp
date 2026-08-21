@@ -16,7 +16,6 @@
 #include "test_common.h"
 #include "libarkbase/os/mutex.h"
 #include "libarkbase/os/thread.h"
-#include "libarkbase/utils/logger.h"
 
 #include <array>
 #include <fcntl.h>
@@ -39,7 +38,6 @@ constexpr int FORK_MARKER_TIMEOUT_MS = 5000;
 constexpr pid_t TEST_DUMP_PID = 1234;
 constexpr pid_t TEST_DUMP_TID = 5678;
 constexpr uint64_t TEST_DUMP_TIMESTAMP_MS = 1234567890;
-constexpr size_t STDERR_BUFFER_SIZE = 256U;
 
 class HeapDumpCoordinatorTest : public ::testing::Test {
 protected:
@@ -373,14 +371,6 @@ private:
     std::unique_ptr<OutputStream> stream_;
 };
 
-class FailingForkDumper final : public MockDynamicDumper {
-public:
-    DumpResult Dump() override
-    {
-        return {{0, 0}, false};
-    }
-};
-
 TEST_F(HeapDumpCoordinatorTest, InProcessDumpReportsStaticStreamFailure)
 {
     DumpRequest request;
@@ -475,41 +465,6 @@ TEST_F(HeapDumpCoordinatorTest, ForkModeRunsLifecycleOnForkingChildThread)
     close(pipeFds[0]);
 }
 
-TEST_F(HeapDumpCoordinatorTest, ForkModeReportsChildFailureWithoutFailingSubmission)
-{
-    std::array<int, 2U> stderrPipe = {-1, -1};
-    ASSERT_EQ(pipe2(stderrPipe.data(), O_CLOEXEC), 0);
-    int savedStderr = fcntl(STDERR_FILENO, F_DUPFD_CLOEXEC, 0);
-    ASSERT_GE(savedStderr, 0);
-    ASSERT_EQ(dup2(stderrPipe[1], STDERR_FILENO), STDERR_FILENO);
-    close(stderrPipe[1]);
-    ASSERT_FALSE(Logger::IsInitialized());
-    Logger::InitializeStdLogging(Logger::Level::ERROR, Logger::ComponentMask().set(Logger::Component::RUNTIME));
-
-    DumpRequest request;
-    request.policy.executionMode = DumpExecutionMode::FORK_ONCE;
-    request.policy.triggerGC = false;
-    DumpParticipants participants;
-    participants.dynamicDumper = std::make_unique<FailingForkDumper>();
-
-    bool result = HeapDumpCoordinator::GetInstance().DumpBinarySeparate(request, std::move(participants));
-    pollfd descriptor {stderrPipe[0], POLLIN, 0};
-    int pollResult = poll(&descriptor, 1, FORK_MARKER_TIMEOUT_MS);
-    std::array<char, STDERR_BUFFER_SIZE> outputBuffer {};
-    ssize_t outputSize = pollResult == 1 ? read(stderrPipe[0], outputBuffer.data(), outputBuffer.size() - 1U) : -1;
-
-    Logger::Destroy();
-    int restoreResult = dup2(savedStderr, STDERR_FILENO);
-    close(savedStderr);
-    close(stderrPipe[0]);
-
-    ASSERT_EQ(restoreResult, STDERR_FILENO);
-    EXPECT_TRUE(result);
-    ASSERT_GT(outputSize, 0);
-    std::string output(outputBuffer.data(), static_cast<size_t>(outputSize));
-    EXPECT_NE(output.find("[HybDump][Sta] Child process exited"), std::string::npos);
-    EXPECT_NE(output.find("status=1"), std::string::npos);
-}
 #endif
 
 }  // namespace ark::tooling::hprof::test

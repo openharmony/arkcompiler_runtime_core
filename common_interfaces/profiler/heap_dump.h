@@ -17,6 +17,7 @@
 #define COMMON_INTERFACES_PROFILER_HEAP_DUMP_H
 
 #include <cstdint>
+#include <functional>
 #include <string>
 
 namespace common::dump {
@@ -81,6 +82,11 @@ struct DumpPolicy {
     bool triggerGC = true;
 };
 
+struct DumpOutputOptions {
+    std::string dynamicPath;
+    std::string staticPath;
+};
+
 struct OOMContext {
     std::string spaceType;
     std::string heapType;
@@ -91,6 +97,8 @@ struct DumpRequest {
     DumpPolicy policy {};
     OOMContext oom {};
     DumpIdentity identity {};
+    DumpOutputOptions output {};
+    std::function<void(uint8_t)> completionCallback;
 };
 
 struct DumpStatistics {
@@ -137,10 +145,15 @@ public:
 
     /**
      * Acquire the runtime-specific output. The operation must be idempotent:
-     * the coordinator calls it before fork, while in-process dumps call it
-     * immediately before writing.
+     * the coordinator may call it before execution, while each dumper also
+     * calls it immediately before writing.
      */
     virtual bool AcquireOutput() = 0;
+
+    virtual int GetOutputFd() const
+    {
+        return -1;
+    }
 
     virtual void CompleteCrossRuntimeGC() {}
 

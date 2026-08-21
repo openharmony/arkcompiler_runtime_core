@@ -17,6 +17,21 @@
 
 namespace ark::tooling::hprof::test {
 
+ScopedFile CreateTestFile()
+{
+    std::string path = "panda_dump_test_XXXXXX";
+    int fd = mkstemp(path.data());
+    if (fd < 0) {
+        return {nullptr, &fclose};
+    }
+    unlink(path.c_str());
+    FILE *file = fdopen(fd, "w+b");
+    if (file == nullptr) {
+        close(fd);
+    }
+    return {file, &fclose};
+}
+
 RecordInfo ParseRecord(const std::vector<uint8_t> &data, size_t offset)
 {
     if (offset + RECORD_HEADER_SIZE > data.size()) {

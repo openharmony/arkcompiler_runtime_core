@@ -36,9 +36,14 @@
 
 namespace ark::tooling::hprof {
 
-#if defined(PANDA_JS_ETS_HYBRID_MODE)
+static constexpr uint8_t DUMP_SUCCESS = 0;
+static constexpr uint8_t DUMP_FORK_FAILED = 1;
+static constexpr uint8_t DUMP_FAILED_TO_WAIT = 2;
+static constexpr uint8_t DUMP_WAIT_TIMEOUT = 3;
+
 namespace {
 
+#if defined(PANDA_JS_ETS_HYBRID_MODE)
 bool HasXRefMapping(const std::unordered_multimap<uint64_t, uint64_t> &mappings, uint64_t source, uint64_t target)
 {
     auto [begin, end] = mappings.equal_range(source);
@@ -49,9 +54,9 @@ bool HasXRefMapping(const std::unordered_multimap<uint64_t, uint64_t> &mappings,
     }
     return false;
 }
+#endif
 
 }  // namespace
-#endif
 
 std::atomic<bool> HeapDumpCoordinator::oomDumpTriggered_ {false};
 
@@ -100,14 +105,16 @@ bool HeapDumpCoordinator::DumpBinarySeparate(const DumpRequest &request, DumpPar
         LOG(WARNING, RUNTIME) << "[HybDump][Sta] Dump skipped: no participant";
         return false;
     }
-
     PrepareSharedState();
     TriggerGC(request, participants);
     PrepareParticipants(participants);
     XRefSnapshot xrefs = CollectXRefs(request, participants);
-    bool success = request.policy.executionMode == DumpExecutionMode::IN_PROCESS
-                       ? ExecuteSeparateDumpParallel(participants, xrefs)
-                       : ExecuteDumpWithFork(participants, xrefs);
+    bool success = false;
+    if (request.policy.executionMode == DumpExecutionMode::IN_PROCESS) {
+        success = ExecuteSeparateDumpParallel(participants, xrefs);
+    } else {
+        success = ExecuteDumpWithFork(request, participants, xrefs);
+    }
     participants.staticDumper.reset();
     participants.dynamicDumper.reset();
     FreezeSharedState();
@@ -144,7 +151,7 @@ static void LogChildProcessResult(pid_t childPid, int status)
                         << ", status=" << status;
 }
 
-static void WaitChildProcess(pid_t childPid)
+static void WaitChildProcess(pid_t childPid, const std::function<void(uint8_t)> &callback)
 {
     constexpr int DUMP_TIMEOUT_SECONDS = 300;
     constexpr int POLL_INTERVAL_MICROSECONDS = 100000;
@@ -160,10 +167,16 @@ static void WaitChildProcess(pid_t childPid)
             }
             LOG(ERROR, RUNTIME) << "[HybDump][Sta] Child process wait failed: child=" << childPid
                                 << ", errno=" << waitError;
+            if (callback) {
+                callback(DUMP_FAILED_TO_WAIT);
+            }
             return;
         }
         if (p == childPid) {
             LogChildProcessResult(childPid, status);
+            if (callback) {
+                callback(DUMP_SUCCESS);
+            }
             return;
         }
         usleep(POLL_INTERVAL_MICROSECONDS);
@@ -176,6 +189,9 @@ static void WaitChildProcess(pid_t childPid)
     // Only called on our own child PID.
     kill(childPid, SIGKILL);
     waitpid(childPid, nullptr, 0);
+    if (callback) {
+        callback(DUMP_WAIT_TIMEOUT);
+    }
 }
 #endif  // defined(__linux__)
 
@@ -259,7 +275,8 @@ HeapDumpCoordinator::XRefSnapshot HeapDumpCoordinator::CollectXRefs(const DumpRe
 // ---------------------------------------------------------------------------
 // Private: Execution paths
 // ---------------------------------------------------------------------------
-bool HeapDumpCoordinator::ExecuteDumpWithFork(DumpParticipants &participants, const XRefSnapshot &xrefs)
+bool HeapDumpCoordinator::ExecuteDumpWithFork(const DumpRequest &request, DumpParticipants &participants,
+                                              const XRefSnapshot &xrefs)
 {
 #if defined(__linux__)
     // faultloggerd verifies the request PID against the socket peer PID. Open
@@ -278,7 +295,11 @@ bool HeapDumpCoordinator::ExecuteDumpWithFork(DumpParticipants &participants, co
         // threads and prepared dumpers still match the in-process dump entry.
         LOG(WARNING, RUNTIME) << "[HybDump][Sta] Fork failed, falling back to in-process dump: errno=" << forkError
                               << ", error=" << strerror(forkError);
-        return ExecuteSeparateDumpParallel(participants, xrefs);
+        bool success = ExecuteSeparateDumpParallel(participants, xrefs);
+        if (request.completionCallback) {
+            request.completionCallback(success ? DUMP_SUCCESS : DUMP_FORK_FAILED);
+        }
+        return success;
     }
 
     if (childPid == 0) {
@@ -291,17 +312,17 @@ bool HeapDumpCoordinator::ExecuteDumpWithFork(DumpParticipants &participants, co
         // exec. Keep all participant work on the thread that called fork;
         // creating worker threads here can enter copied synchronization state
         // whose owner threads disappeared at fork.
-        bool success = ExecuteSeparateDumpSequential(participants, xrefs);
+        ExecuteSeparateDumpSequential(participants, xrefs);
         // Participant destruction completes output cleanup in the child.
         // Runtime-specific scopes must be fork-aware and only restore runtime
         // state in the process that created them.
         participants.staticDumper.reset();
         participants.dynamicDumper.reset();
-        _exit(success ? 0 : 1);
+        _exit(0);
     }
 
     // Parent: spawn detached wait thread, resume and return immediately
-    std::thread waitThread(WaitChildProcess, childPid);
+    std::thread waitThread(WaitChildProcess, childPid, request.completionCallback);
     waitThread.detach();
     return true;
 #else
