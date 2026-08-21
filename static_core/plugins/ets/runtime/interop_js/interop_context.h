@@ -181,6 +181,7 @@ public:
     NO_MOVE_SEMANTIC(InteropCtx);
 
     PANDA_PUBLIC_API static void Init(EtsExecutionContext *executionCtx, napi_env env,
+                                      bool deferBuiltinJSRefConvertorsRegistration = false,
                                       bool isJsEnvCreatedExternally = false);
     ~InteropCtx();
 
