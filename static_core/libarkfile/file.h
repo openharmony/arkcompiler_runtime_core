@@ -55,6 +55,7 @@ public:
     static constexpr size_t VERSION_SIZE = 4;
     static constexpr size_t METADATA_FLAG_SIZE = 4;
     static const std::array<uint8_t, MAGIC_SIZE> MAGIC;
+    static inline const std::array<uint8_t, VERSION_SIZE> METADATA_SINCE_VERSION = {0, 0, 0, 7};
 
     struct Header {
         std::array<uint8_t, MAGIC_SIZE> magic;
@@ -493,8 +494,6 @@ private:
     std::unique_ptr<PandaCache> pandaCache_;
     const uint32_t uniqId_;
     mutable ark::Span<const ark::panda_file::EntityPairHeader> classHashTable_;
-
-    static inline const std::array<uint8_t, VERSION_SIZE> METADATA_SINCE_VERSION = {0, 0, 0, 7};
 };
 
 static_assert(File::GetFileBaseOffset() == 0);

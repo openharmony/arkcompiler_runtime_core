@@ -286,6 +286,25 @@ void ItemContainer::CreateMetadataItem(std::vector<uint8_t> metadata)
     metadataItem_ = std::make_unique<MetadataItem>(std::move(metadata));
 }
 
+bool ItemContainer::IsMetadataEnabled() const
+{
+    return GetCurrentVersion() >= File::METADATA_SINCE_VERSION;
+}
+
+const std::array<uint8_t, File::VERSION_SIZE> &ItemContainer::GetCurrentVersion() const
+{
+    return bytecodeVersion_.has_value() ? *bytecodeVersion_ : VERSION;
+}
+
+uint32_t ItemContainer::GetMetadataSize() const
+{
+    if (!IsMetadataEnabled()) {
+        return 0;
+    }
+    return File::METADATA_FLAG_SIZE +
+           (MetadataItem::IsNullOrEmpty(metadataItem_) ? 0 : metadataItem_->Size() + ID_SIZE);
+}
+
 LiteralArrayItem *ItemContainer::GetOrCreateLiteralArrayItem(const std::string &id)
 {
     [[maybe_unused]] auto item = GetOrInsert<LiteralArrayItem>(literalarrayMap_, items_, itemsEnd_, id, false);
@@ -661,10 +680,14 @@ uint32_t ItemContainer::ComputeLayout(bool rebuildRegionSection, bool updateOrde
     uint32_t numLiteralarrays = literalarrayMap_.size();
     uint32_t numExportClasses = exportMap_.size();
     uint32_t classIdxOffset = sizeof(File::Header);
-    uint32_t exportDataOffset = classIdxOffset + numClasses * ID_SIZE;  // immediately after class table
-    uint32_t metadataSize =
-        File::METADATA_FLAG_SIZE + (MetadataItem::IsNullOrEmpty(metadataItem_) ? 0 : metadataItem_->Size() + ID_SIZE);
-    uint32_t curOffset = exportDataOffset + (numExportClasses + numLiteralarrays) * ID_SIZE + metadataSize;
+    uint32_t exportIdxOffset = classIdxOffset + numClasses * ID_SIZE;
+    uint32_t curOffset;
+    uint32_t metadataSize = GetMetadataSize();
+    if (metadataSize > 0) {
+        curOffset = exportIdxOffset + (numExportClasses + numLiteralarrays) * ID_SIZE + metadataSize;
+    } else {
+        curOffset = exportIdxOffset + (numExportClasses + numLiteralarrays) * ID_SIZE;
+    }
 
     if (updateOrderIndexes) {
         UpdateOrderIndexes();
@@ -880,14 +903,13 @@ bool ItemContainer::WriteHeaderIndexInfo(Writer *writer)
         return false;
     }
 
-    uint32_t metadataSize =
-        File::METADATA_FLAG_SIZE + (MetadataItem::IsNullOrEmpty(metadataItem_) ? 0 : metadataItem_->Size() + ID_SIZE);
+    uint32_t classMapSize = classMap_.size() * ID_SIZE;
+    uint32_t metadataSize = GetMetadataSize();
     uint32_t exportDataSize = exportMap_.size() * ID_SIZE + metadataSize;
-    if (!writer->Write<uint32_t>(exportDataSize)) {
+    if (!writer->Write<uint32_t>(IsMetadataEnabled() ? exportDataSize : exportMap_.size())) {
         return false;
     }
 
-    uint32_t classMapSize = classMap_.size() * ID_SIZE;
     uint32_t exportMapOffset = headerSize + classMapSize;
     if (!writer->Write<uint32_t>(exportMapOffset)) {
         return false;
@@ -936,7 +958,7 @@ bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksumOffset, bool re
     }
     writer->CountChecksum(true);
 
-    const auto &version = bytecodeVersion_.has_value() ? bytecodeVersion_.value() : VERSION;
+    const auto &version = GetCurrentVersion();
     if (!writer->WriteBytes(version.data(), version.size())) {
         return false;
     }
@@ -1118,9 +1140,7 @@ bool ItemContainer::WriteItemsParallel(Writer *writer, const std::vector<BaseIte
 
 bool ItemContainer::WriteExportData(Writer *writer)
 {
-    // Write export class idx and metadata
-    auto isMetadataSkipped = MetadataItem::IsNullOrEmpty(
-        metadataItem_);  // If metadata emitting is disabled (e.g. by compilation option), it'd be empty
+    auto isMetadataSkipped = MetadataItem::IsNullOrEmpty(metadataItem_);
     // NOLINTNEXTLINE(readability-implicit-bool-conversion)
     if (!writer->Write<uint32_t>(!isMetadataSkipped)) {
         return false;
@@ -1164,8 +1184,16 @@ bool ItemContainer::WriteBody(Writer *writer)
         }
     }
 
-    if (!WriteExportData(writer)) {
-        return false;
+    if (!IsMetadataEnabled()) {
+        for (auto &entry : exportMap_) {
+            if (!writer->Write(entry.second->GetOffset())) {
+                return false;
+            }
+        }
+    } else {
+        if (!WriteExportData(writer)) {
+            return false;
+        }
     }
 
     // Write literal array index table.

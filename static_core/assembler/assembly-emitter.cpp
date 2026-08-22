@@ -1856,11 +1856,11 @@ bool AsmEmitter::Emit(Writer *writer, Program &program, std::map<std::string, si
                       std::optional<ItemContainer::BytecodeVersion> bytecodeVersion)
 {
     auto items = ItemContainer {};
-    if (!Emit(&items, program, maps, debugInfo, profileOpt)) {
-        return false;
-    }
     if (bytecodeVersion.has_value()) {
         items.SetBytecodeVersion(*bytecodeVersion);
+    }
+    if (!Emit(&items, program, maps, debugInfo, profileOpt)) {
+        return false;
     }
 
     if (stat != nullptr) {

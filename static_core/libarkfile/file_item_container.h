@@ -58,6 +58,12 @@ public:
 
     PANDA_PUBLIC_API void CreateMetadataItem(std::vector<uint8_t> metadata);
 
+    bool IsMetadataEnabled() const;
+
+    const std::array<uint8_t, File::VERSION_SIZE> &GetCurrentVersion() const;
+
+    uint32_t GetMetadataSize() const;
+
     PANDA_PUBLIC_API LiteralArrayItem *GetOrCreateLiteralArrayItem(const std::string &id);
 
     PANDA_PUBLIC_API ClassItem *GetOrCreateClassItem(const std::string &str);

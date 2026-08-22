@@ -230,6 +230,48 @@ static std::unique_ptr<const File> GetPandaFile(std::vector<uint8_t> &data)
     return File::OpenFromMemory(std::move(ptr));
 }
 
+TEST(ItemContainer, TestMetadataVersionIsolationOldVersion)
+{
+    ItemContainer container;
+    auto version = ItemContainer::BytecodeVersion(MIN_VERSION);
+    container.SetBytecodeVersion(version);
+
+    container.CreateMetadataItem({0x01, 0x02, 0x03});
+    ClassItem *classItem = container.GetOrCreateClassItem("TestOldVersion");
+    classItem->SetAccessFlags(ACC_PUBLIC);
+
+    MemoryWriter memWriter;
+    ASSERT_TRUE(container.Write(&memWriter));
+
+    auto data = memWriter.GetData();
+    auto pandaFile = GetPandaFile(data);
+    ASSERT_NE(pandaFile, nullptr);
+
+    EXPECT_EQ(pandaFile->GetHeader()->numExportTable, 0U);
+    EXPECT_FALSE(pandaFile->IsMetadataUsed());
+    EXPECT_EQ(pandaFile->GetMetadata().size(), 0U);
+}
+
+TEST(ItemContainer, TestMetadataVersionIsolationNewVersion)
+{
+    ItemContainer container;
+
+    container.CreateMetadataItem({0x01, 0x02, 0x03});
+    ClassItem *classItem = container.GetOrCreateClassItem("TestNewVersion");
+    classItem->SetAccessFlags(ACC_PUBLIC);
+
+    MemoryWriter memWriter;
+    ASSERT_TRUE(container.Write(&memWriter));
+
+    auto data = memWriter.GetData();
+    auto pandaFile = GetPandaFile(data);
+    ASSERT_NE(pandaFile, nullptr);
+
+    EXPECT_GT(pandaFile->GetHeader()->numExportTable, 0U);
+    EXPECT_TRUE(pandaFile->IsMetadataUsed());
+    EXPECT_EQ(pandaFile->GetMetadata().size(), 3U);
+}
+
 // CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(ItemContainer, TestClasses)
 {
