@@ -699,7 +699,8 @@ PandaFileType GetFileType(const uint8_t *data, int32_t size)
         return PandaFileType::FILE_FORMAT_INVALID;
     }
 
-    if (header->version == File::STATIC_VERSION) {
+    if (header->version[File::FILE_TYPE_OFFSET] == File::FILE_TYPE_STATIC_FLAG ||
+        header->version == File::OLD_STATIC_VERSION) {
         return PandaFileType::FILE_STATIC;
     }
     return PandaFileType::FILE_DYNAMIC;
