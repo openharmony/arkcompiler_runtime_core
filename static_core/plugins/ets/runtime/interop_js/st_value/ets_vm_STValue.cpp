@@ -151,7 +151,13 @@ STValueData::STValueData([[maybe_unused]] napi_env env, ani_ref refData)
     auto *aniEnv = GetAniEnv();
 
     ani_ref globalRef {nullptr};
-    AniCheckAndThrowToDynamic(env, aniEnv->GlobalReference_Create(refData, &globalRef));
+    ani_status status = aniEnv->GlobalReference_Create(refData, &globalRef);
+    if (status == ANI_OUT_OF_REF) {
+        AniCheckAndThrowToDynamic(env, status,
+                                  "Failed to create global reference for STValue: the global reference table is full");
+    } else {
+        AniCheckAndThrowToDynamic(env, status);
+    }
 
     this->dataRef_ = globalRef;
 }
@@ -200,6 +206,9 @@ STValueData::~STValueData()
 {
     if (IsAniRef()) {
         auto dataReference = this->GetAniRef();
+        if (dataReference == nullptr) {
+            return;
+        }
         auto *aniEnv = GetAniEnv<false>();
         if (aniEnv == nullptr) {
             return;

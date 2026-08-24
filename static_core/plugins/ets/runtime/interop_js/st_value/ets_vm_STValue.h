@@ -48,6 +48,7 @@ ani_env *GetAniEnv();
 bool AniCheckAndThrowToDynamic(napi_env env, ani_status status);
 bool AniCheckAndThrowToDynamic(napi_env env, ani_status status, const std::string &errorMsg);
 void AniExpectOK(ani_status status);
+void STValueThrowJSError(napi_env env, const std::string &msg);
 
 class AniLocalScope {
 public:
@@ -146,7 +147,13 @@ public:
     {
         auto *aniEnv = GetAniEnv<true>();
         ani_ref globalRef {nullptr};
-        AniCheckAndThrowToDynamic(env, aniEnv->GlobalReference_Create(dataRef, &globalRef));
+        ani_status status = aniEnv->GlobalReference_Create(dataRef, &globalRef);
+        if (status == ANI_OUT_OF_REF) {
+            AniCheckAndThrowToDynamic(
+                env, status, "Failed to create global reference for STValue: the global reference table is full");
+        } else {
+            AniCheckAndThrowToDynamic(env, status);
+        }
         this->dataRef_ = globalRef;
     }
 
@@ -232,7 +239,6 @@ SType GetTypeFromType(napi_env env, napi_value stNapiType);
 bool GetAniValueFromSTValue(napi_env env, napi_value element, ani_value &value);
 bool IsSTValueInstance(napi_env env, napi_value value);
 bool CheckNapiIsArray(napi_env env, napi_value jsObject);
-void STValueThrowJSError(napi_env env, const std::string &msg);
 
 void ThrowJSBadArgCountError(napi_env env, size_t jsArgc, size_t expectedArgc);
 std::string GetSTypeName(SType stype);
@@ -319,6 +325,10 @@ napi_value CreateSTValueInstance(napi_env env, T &&arg, size_t bindingSize = COM
 {
     INTEROP_TRACE();
     auto *data = new STValueData(env, std::forward<T>(arg));
+    if (NapiIsExceptionPending(env)) {
+        delete data;
+        return nullptr;
+    }
     napi_value stvalueCtor = GetSTValueClassCached(env);
     auto ptr = static_cast<uint64_t>(reinterpret_cast<uintptr_t>(data));
     napi_value ptrLow;
