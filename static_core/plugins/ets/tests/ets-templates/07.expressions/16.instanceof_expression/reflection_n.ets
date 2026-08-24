@@ -34,7 +34,7 @@ function main() {
     {{decl_mod}} value: {{type.0}} = {{type.1}}
     {{decl_mod}} value_other: {{type.0}} = {{type.1}}
 
-    arktest.assertTrue(value_let instanceof value_other, "expect CTE here")
+    arktest.assertTrue(value instanceof value_other, "expect CTE here")
 }
 {% endfor %}
 {% endfor %}

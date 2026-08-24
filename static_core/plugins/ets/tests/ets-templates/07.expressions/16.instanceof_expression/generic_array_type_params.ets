@@ -32,9 +32,8 @@ type my_type = Array<{{c.type}}>
 {%- endif %}
 
 function main() {
-    {{c.decl}}
+    {{(c.decl or '')|indent}}
     let v: my_type = {{c.init}}
-    // Note #738 spec is not quite clear yet if type param throws CTE or is ignored
     arktest.assertTrue(v instanceof Array, "Fail at Array")
 }
 {% endfor %}

@@ -18,12 +18,13 @@
 desc: >-
     If an instanceof expression is known at compile time to always evaluate
     to false or true at runtime, then a compile-time warning is issued.
-expected_out: '{{c.expected}}'
+expected_out:
+    compile.es2panda: ["{{c.expected}}"]
 ---*/
 
 {{c.decl}}
 
 function main(): void {
-    {{c.check}}
+    {{(c.check or '')|indent}}
 }
 {% endfor %}

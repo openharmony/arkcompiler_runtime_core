@@ -18,7 +18,6 @@ cases:
       use: |-
           arktest.assertTrue(a instanceof Array<int>)
       expected_out: |-
-          Warning W1001506: the value of the instanceof expression is known at compile-time as true
           Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression.
 
     - decl: |-
@@ -27,7 +26,6 @@ cases:
       use: |-
           arktest.assertTrue(a instanceof int[])
       expected_out: |-
-          Warning W1001506: the value of the instanceof expression is known at compile-time as true
           Syntax error ESY18871: Type parameter is erased from type 'Array' when used in instanceof expression.
 
     - decl: |-
@@ -36,7 +34,6 @@ cases:
       use: |-
           arktest.assertTrue(a instanceof A<int>)
       expected_out: |-
-          Warning W1001506: the value of the instanceof expression is known at compile-time as true
           Syntax error ESY18871: Type parameter is erased from type 'A' when used in instanceof expression.
 
     - decl: |-
@@ -49,5 +46,4 @@ cases:
       use: |-
           foo(a)
       expected_out: |-
-          Warning W1001506: the value of the instanceof expression is known at compile-time as true
           Syntax error ESY18871: Type parameter is erased from type 'A' when used in instanceof expression.

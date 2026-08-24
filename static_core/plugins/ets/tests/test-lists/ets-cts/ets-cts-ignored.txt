@@ -161,6 +161,21 @@
 06.contexts_and_conversions/02.string_operator_contexts/conversion_n_0.ets
 06.contexts_and_conversions/02.string_operator_contexts/conversion_n_1.ets
 
+#35526 Wrong CTW on instanceof
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_1.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_5.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_7.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_9.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_11.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_12.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_14.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_19.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_20.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_24.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_26.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_27.ets
+07.expressions/16.instanceof_expression/instanceof_warning_trivially_true_false_28.ets
+
 #35573 Need CTW while converting undefined as TypeParameter
 07.expressions/17.cast_expressions/cast_w_0.ets
 
