@@ -23,7 +23,7 @@ namespace ark::ets::intrinsics::helpers {
 
 static void ThrowEtsInvalidType(EtsExecutionContext *executionCtx, EtsClass *cls)
 {
-    PandaString message = "Invalid operand type: " + cls->GetName()->GetMutf8();
+    auto message = "Invalid operand type: " + cls->GetRuntimeClass()->GetName();
     ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
 }
 
@@ -128,6 +128,7 @@ EtsObject *InvokeAndResolveReturnValue(EtsMethod *method, EtsExecutionContext *e
 
 EtsMethod *ValidateAndResolveInstanceMethod(EtsExecutionContext *executionCtx, EtsObject *thisObj, EtsMethod *method)
 {
+    ASSERT(method != nullptr);
     // For instance methods, thisObj validation is required
     if (thisObj == nullptr) {
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError,

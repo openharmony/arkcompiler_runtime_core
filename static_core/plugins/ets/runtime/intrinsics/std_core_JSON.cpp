@@ -25,6 +25,7 @@
 #include "helpers/json_helper.h"
 #include "libarkfile/method_data_accessor-inl.h"
 #include "runtime/common_interfaces/objects/string/base_string-inl.h"
+#include "runtime/include/exceptions.h"
 
 #include <array>
 #include <limits>
@@ -91,7 +92,7 @@ static bool NeedsShortEscape(uint16_t ch)
 // Single-chunk scanner: accumulates escaped length for [chunkStart, chunkEnd)
 // into the caller-provided counter. Does not touch the managed heap; the caller
 // is responsible for safepoint polling and re-fetching the data pointer.
-static void EscapedStringLengthUtf8Chunk(const uint8_t *data, uint32_t chunkStart, uint32_t chunkEnd, uint32_t *result)
+static void EscapedStringLengthUtf8Chunk(const uint8_t *data, uint32_t chunkStart, uint32_t chunkEnd, uint64_t *result)
 {
     for (uint32_t i = chunkStart; i < chunkEnd; i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -111,7 +112,7 @@ static void EscapedStringLengthUtf8Chunk(const uint8_t *data, uint32_t chunkStar
 // surrogate is deferred to the next chunk), therefore the i + 1U >= chunkEnd
 // check correctly detects dangling surrogates within a chunk.
 static void EscapedStringLengthUtf16Chunk(const uint16_t *data, uint32_t chunkStart, uint32_t chunkEnd,
-                                          uint32_t *result, bool *canBeCompressed)
+                                          uint64_t *result, bool *canBeCompressed)
 {
     for (uint32_t i = chunkStart; i < chunkEnd;) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -334,8 +335,15 @@ EtsInt StdCoreJSONGetIntFieldFast(EtsReflectField *reflectField, EtsObject *obj)
     ASSERT(executionCtx != nullptr);
     EtsHandleScope scope(executionCtx);
     EtsHandle<EtsObject> objHandle(executionCtx, obj);
+    if (UNLIKELY(reflectField == nullptr)) {
+        ThrowNullPointerException();
+        return 0;
+    }
     auto *field = reflectField->GetEtsField();
-    ASSERT(field != nullptr);
+    if (UNLIKELY(field == nullptr)) {
+        ThrowNullPointerException();
+        return 0;
+    }
     if (!field->IsStatic() && !helpers::ValidateInstanceField(executionCtx, objHandle.GetPtr(), field)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return 0;
@@ -349,8 +357,15 @@ EtsLong StdCoreJSONGetLongFieldFast(EtsReflectField *reflectField, EtsObject *ob
     ASSERT(executionCtx != nullptr);
     EtsHandleScope scope(executionCtx);
     EtsHandle<EtsObject> objHandle(executionCtx, obj);
+    if (UNLIKELY(reflectField == nullptr)) {
+        ThrowNullPointerException();
+        return 0;
+    }
     auto *field = reflectField->GetEtsField();
-    ASSERT(field != nullptr);
+    if (UNLIKELY(field == nullptr)) {
+        ThrowNullPointerException();
+        return 0;
+    }
     if (!field->IsStatic() && !helpers::ValidateInstanceField(executionCtx, objHandle.GetPtr(), field)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return 0;
@@ -364,8 +379,15 @@ EtsDouble StdCoreJSONGetDoubleFieldFast(EtsReflectField *reflectField, EtsObject
     ASSERT(executionCtx != nullptr);
     EtsHandleScope scope(executionCtx);
     EtsHandle<EtsObject> objHandle(executionCtx, obj);
+    if (UNLIKELY(reflectField == nullptr)) {
+        ThrowNullPointerException();
+        return 0.0;
+    }
     auto *field = reflectField->GetEtsField();
-    ASSERT(field != nullptr);
+    if (UNLIKELY(field == nullptr)) {
+        ThrowNullPointerException();
+        return 0.0;
+    }
     if (!field->IsStatic() && !helpers::ValidateInstanceField(executionCtx, objHandle.GetPtr(), field)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return 0.0;
@@ -408,7 +430,7 @@ extern "C" EtsString *StdCoreJSONStringifyStringFast(EtsString *str)
 
     if (strHandle->IsUtf16()) {
         // ---------- Pass 1: compute escaped length (chunked + safepoint) ----------
-        uint32_t resultLength = 2U;  // reserve space for both surrounding quotes
+        uint64_t resultLength = 2U;  // reserve space for both surrounding quotes
         bool canBeCompressed = true;
         uint32_t i = 0U;
         while (i < len) {
@@ -428,8 +450,17 @@ extern "C" EtsString *StdCoreJSONStringifyStringFast(EtsString *str)
         }
 
         // ---------- Allocate result (may trigger GC, hence handled below) ----------
-        resultHandle =
-            EtsHandle<EtsString>(executionCtx, EtsString::AllocateNonInitializedString(resultLength, canBeCompressed));
+        if (UNLIKELY(resultLength > ark::mem::BaseString::MAX_STRING_LENGTH)) {
+            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreRangeError,
+                              "String too large to stringify");
+            return nullptr;
+        }
+        auto *newStr = EtsString::AllocateNonInitializedString(static_cast<uint32_t>(resultLength), canBeCompressed);
+        if (UNLIKELY(newStr == nullptr)) {
+            ThrowOutOfMemoryError(executionCtx->GetMT(), "Cannot allocate string for JSON stringify");
+            return nullptr;
+        }
+        resultHandle = EtsHandle<EtsString>(executionCtx, newStr);
 
         // ---------- Pass 2: fill buffer (chunked + safepoint) ----------
         flat16Buf.clear();
@@ -465,7 +496,7 @@ extern "C" EtsString *StdCoreJSONStringifyStringFast(EtsString *str)
         }
     } else {
         // ---------- Pass 1: compute escaped length (chunked + safepoint) ----------
-        uint32_t resultLength = 2U;
+        uint64_t resultLength = 2U;
         uint32_t i = 0U;
         while (i < len) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -477,7 +508,17 @@ extern "C" EtsString *StdCoreJSONStringifyStringFast(EtsString *str)
         }
 
         // ---------- Allocate result (may trigger GC, hence handled below) ----------
-        resultHandle = EtsHandle<EtsString>(executionCtx, EtsString::AllocateNonInitializedString(resultLength, true));
+        if (UNLIKELY(resultLength > ark::mem::BaseString::MAX_STRING_LENGTH)) {
+            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreRangeError,
+                              "String too large to stringify");
+            return nullptr;
+        }
+        auto *newStr = EtsString::AllocateNonInitializedString(static_cast<uint32_t>(resultLength), true);
+        if (UNLIKELY(newStr == nullptr)) {
+            ThrowOutOfMemoryError(executionCtx->GetMT(), "Cannot allocate string for JSON stringify");
+            return nullptr;
+        }
+        resultHandle = EtsHandle<EtsString>(executionCtx, newStr);
 
         // ---------- Pass 2: fill buffer (chunked + safepoint) ----------
         flat8Buf.clear();
