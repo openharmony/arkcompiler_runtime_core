@@ -473,6 +473,7 @@ export class Date {
 
     /** Stored value of Date, milliseconds */
     private ms: long;
+
     private get TZOffset(): long {
         return Date.getLocalTimezoneOffset(this.ms);
     }
@@ -690,6 +691,8 @@ export class Date {
      * @FaAndStageModel
      */
     public static native getLocalTimezoneOffset(ms: long): long;
+
+    private static native formatTimeString(ms: long, tzOffset: long): String;
 
     /**
      * Gets time zone name.
@@ -1882,9 +1885,8 @@ export class Date {
         if (!this.isDateValid()) {
             throw new Error('Invalid Date');
         }
-        let tzOffset = this.TZOffset;
-        let localTime = this.ms - tzOffset * 60 * msPerSecond;
-        return this.timeString(localTime) + ' ' + this.timeZoneString(tzOffset);
+        let tzOffset = this.TZOffset;	 
+        return Date.formatTimeString(this.ms, tzOffset);
     }
 
     /**
@@ -1985,7 +1987,6 @@ export class Date {
             sb.append("0");
         }
         sb.append(absMinutes);
-
         return sb.toString();
     }
     /**
