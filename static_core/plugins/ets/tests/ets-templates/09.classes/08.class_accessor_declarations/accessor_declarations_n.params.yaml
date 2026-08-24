@@ -18,16 +18,16 @@ cases:
   - decl: |-
       class A {
           _age: int = 0;
-        
+
           set age(value: int) {
             this._age = value;
           }
-        
+
           get age(): int {
             return this._age;
           }
       }
-      
+
       class B extends A {
           override set age1(value: int) {
             this._age = value + 5;
@@ -39,16 +39,16 @@ cases:
   - decl: |-
       class A {
           _age: int = 0;
-      
+
           set age(value: int) {
             this._age = value;
           }
-      
+
           get age(): int {
             return this._age;
           }
       }
-      
+
       class B extends A {
           override get age1(): int {
             return this._age;
@@ -60,16 +60,16 @@ cases:
   - decl: |-
       class A {
           _age: int = 0;
-      
+
           set age(value: int) {
             this._age = value;
           }
-      
+
           get age(): int {
             return this._age;
           }
       }
-      
+
       class B extends A {
           override set age1(value: int) {
             this._age = value + 5;
@@ -85,11 +85,11 @@ cases:
   - decl: |-
       class A {
           _age: int = 0;
-      
+
           set age() {
             this._age = 1;
           }
-      
+
           get age(): int {
             return this._age;
           }
@@ -101,11 +101,11 @@ cases:
   - decl: |-
       class A {
           _age: int = 0;
-      
+
           set age(value: int, value1: int) {
             this._age = value + value1;
           }
-      
+
           get age(): int {
             return this._age;
           }
@@ -117,11 +117,11 @@ cases:
   - decl: |-
       class A {
           _age: int = 0;
-      
+
           set age(value: int = 1) {
             this._age = value;
           }
-      
+
           get age(): int {
             return this._age;
           }
@@ -133,9 +133,9 @@ cases:
   - decl: |-
       class A {
           _age: int = 0;
-      
+
           set age(value?: int) { }
-      
+
           get age(): int {
             return this._age;
           }
@@ -146,43 +146,15 @@ cases:
   # name of an accessor is the same as that of a non-static field of same class
   - decl: |-
       class A {
-          age: int = 0; 
+          age: int = 0;
           _age: int = 0;
-      
+
           set age(value: int) {
             this._age = value;
           }
       }
     exp_out: |-
       Semantic error ESE0351: Variable 'age' has already been declared.
-
-  - decl: |-
-      class A {
-          get age: int = 0;
-          _age: int = 0;
-      
-          get age(): int {
-            return this._age;
-          }
-      }
-    exp_out: |-
-      Syntax error ESY0058: Getter must not have formal parameters.
-
-  - decl: |-
-      class A {
-          get age: int = 0;
-          _age: int = 0;
-      
-          set age(value: int) {
-            this._age = value;
-          }
-      
-          get age(): int {
-            return this._age;
-          }
-      }
-    exp_out: |-
-      Syntax error ESY0058: Getter must not have formal parameters.
 
   # name of an accessor is the same as that of a non-static field of parent class
   - decl: |-
@@ -191,7 +163,7 @@ cases:
       }
       class A extends Base {
           _age: int = 0;
-      
+
           set age(value: int) {
             this._age = value;
           }
@@ -205,7 +177,7 @@ cases:
       }
       class A extends Base {
           _age: int = 0;
-      
+
           get age(): int {
             return this._age;
           }
@@ -219,49 +191,80 @@ cases:
       }
       class A extends Base {
           _age: int = 0;
-      
+
           set age(value: int) {
             this._age = value;
           }
-      
+
           get age(): int {
             return this._age;
           }
       }
     exp_out: |-
       Semantic error ESE45073: 'age' is defined as a property in class 'Base', but is overridden here in 'A' as an accessor.
+
+  # name of a non-static field is the same as that of a accessor of parent class
+  - decl: |-
+      class Base {
+          _age: int = 0;
+
+          set age(value: int) {
+            this._age = value;
+          }
+      }
+      class A extends Base {
+          age: int = 0;
+      }
+    exp_out: |-
+      Semantic error ESE129829: 'age' is defined as an accessor in class 'Base', but is overridden here in 'A' as an instance property.
+
+  - decl: |-
+      class Base {
+          _age: int = 0;
+
+          get age(): int {
+            return this._age;
+          }
+      }
+      class A extends Base {
+          age: int = 0;
+      }
+    exp_out: |-
+      Semantic error ESE129829: 'age' is defined as an accessor in class 'Base', but is overridden here in 'A' as an instance property.
+
+  - decl: |-
+      class Base {
+          _age: int = 0;
+
+          set age(value: int) {
+            this._age = value;
+          }
+
+          get age(): int {
+            return this._age;
+          }
+      }
+      class A extends Base {
+          age: int = 0;
+      }
+    exp_out: |-
+      Semantic error ESE129829: 'age' is defined as an accessor in class 'Base', but is overridden here in 'A' as an instance property.
 
   # name of an accessor is the same as that of a method of same class
   - decl: |-
       class A {
           _age: int = 0;
-      
+
           set age(value: int) {
             this._age = value;
           }
-      
+
           get age(): int {
             return this._age;
           }
-      
+
           age(value: int): void {
             this._age = value;
-          }
-      }
-
-      class A {
-          _age: int = 0;
-      
-          set age(value: int) {
-            this._age = value;
-          }
-      
-          get age(): int {
-            return this._age;
-          }
-      
-          age(): int {
-            return this._age;
           }
       }
     exp_out: |-
@@ -274,11 +277,11 @@ cases:
       }
       class A extends Base {
           _age: int = 0;
-      
+
           set age(value: int) {
             this._age = value;
           }
-      
+
           get age(): int {
             return this._age;
           }
@@ -294,11 +297,11 @@ cases:
       }
       class A extends Base {
           _age: int = 0;
-      
+
           set age(value: int) {
             this._age = value;
           }
-      
+
           get age(): int {
             return this._age;
           }
@@ -313,11 +316,11 @@ cases:
       }
       class A implements Base {
           _age: int = 0;
-      
+
           set age(value: int) {
             this._age = value;
           }
-      
+
           get age(): int {
             return this._age;
           }
@@ -331,11 +334,11 @@ cases:
       }
       class A implements Base {
           _age: int = 0;
-      
+
           set age(value: int) {
             this._age = value;
           }
-      
+
           get age(): int {
             return this._age;
           }
@@ -347,11 +350,11 @@ cases:
   - decl: |-
       class A {
           static _age: int = 0;
-      
+
           static set age() {
             A._age = 1;
           }
-      
+
           static get age(): int {
             return A._age;
           }
@@ -363,11 +366,11 @@ cases:
   - decl: |-
       class A {
           static _age: int = 0;
-      
+
           static set age(value: int, value1: int) {
             A._age = value + value1;
           }
-      
+
           static get age(): int {
             return A._age;
           }
@@ -379,11 +382,11 @@ cases:
   - decl: |-
       class A {
           static _age: int = 0;
-      
+
           static set age(value: int = 1) {
             A._age = value;
           }
-      
+
           static get age(): int {
             return A._age;
           }
@@ -395,9 +398,9 @@ cases:
   - decl: |-
       class A {
           static _age: int = 0;
-      
+
           static set age(value?: int) { }
-      
+
           static get age(): int {
             return A._age;
           }
@@ -409,11 +412,11 @@ cases:
   - decl: |-
       class A {
           static _age: int = 0;
-      
+
           static get age(): int {
             return A._age;
           }
-      
+
           static age(value: int): void {
             A._age = value;
           }
@@ -424,11 +427,11 @@ cases:
   - decl: |-
       class A {
           static _age: int = 0;
-      
+
           static set age(value: int) {
             A._age = value;
           }
-      
+
           static age(): int {
             return A._age;
           }
@@ -439,18 +442,85 @@ cases:
   - decl: |-
       class A {
           static _age: int = 0;
-      
+
           static set age(value: int) {
             A._age = value;
           }
-      
+
           static get age(): int {
             return A._age;
           }
-      
+
           static age(): int {
             return A._age;
           }
       }
     exp_out: |-
       Semantic error ESE0218: Method cannot use the same name as age accessor property
+
+  # (static case) name of an accessor is the same as that of a static field of same class
+  - decl: |-
+      class A {
+          static age: int = 0
+
+          static get age(): int {
+            return 42;
+          }
+      }
+    exp_out: |-
+      Semantic error ESE0351: Variable 'age' has already been declared.
+
+  - decl: |-
+      class A {
+          static age: int = 0;
+
+          static set age(value: int) {
+          }
+      }
+    exp_out: |-
+      Semantic error ESE0351: Variable 'age' has already been declared.
+
+  - decl: |-
+      class A {
+          static age: int = 0;
+
+          static set age(value: int) {
+          }
+
+          static get age(): int {
+            return 42;
+          }
+      }
+    exp_out: |-
+      Semantic error ESE0351: Variable 'age' has already been declared.
+
+  # CTE if getter return type cannot be inferred
+  - decl: |-
+      class A {
+          private _val: Object[] = []
+
+          get val() {  // return type cannot be inferred
+              return []
+          }
+
+          set val(p: Object[]) {
+              this._val = p;
+          }
+      }
+    exp_out: |-
+      Semantic error ESE0301: Can't resolve array type
+
+  - decl: |-
+      class A {
+          private _val: Object = {}
+
+          get val() {  // return type cannot be inferred
+              return {}
+          }
+
+          set val(p: Object) {
+              this._val = p;
+          }
+      }
+    exp_out: |-
+      Semantic error ESE0062: need to specify target type for class composite

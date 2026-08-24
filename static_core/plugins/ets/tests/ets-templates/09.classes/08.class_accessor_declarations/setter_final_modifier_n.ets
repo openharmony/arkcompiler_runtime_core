@@ -20,15 +20,15 @@ expected_out: "Semantic error ESE1324203: Class member age with type undefined i
 ---*/
 
 class A {
-  private _age: int = 0;
+    protected _age: int = 0;
 
-  final set age(value: int){
-    this._age = value;
-  }
+    final set age(value: int) {
+        this._age = value;
+    }
 }
 
 class B extends A {
-  override set age(value: int) {
-    this._age = value + 5;
-  }
+    set age(value: int) {
+        this._age = value + 5;
+    }
 }

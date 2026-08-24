@@ -11,17 +11,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
+{% for c in cases %}
 /*---
-desc: CTE expected if setter has more than one formal parameter
-tags: [compile-only, negative]
-expected_out: "Syntax error ESY0063: Setter must have exactly one formal parameter."
+desc: >-
+    Class accessors are often used instead of fields to add additional control
+    for operations of getting or setting a field value. An accessor can be either
+    a getter or a setter.
+    {{c.desc}}
 ---*/
 
-class A {
-  private _f: int = 0
-  set f(i: int, j: int) {
-    this._f = i
-  }
+{{c.decl}}
+
+function main() {
+    {{c.main|indent}}
 }
+{% endfor %}

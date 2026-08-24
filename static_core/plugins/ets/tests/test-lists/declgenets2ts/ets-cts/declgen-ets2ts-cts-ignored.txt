@@ -25,6 +25,10 @@
 05.generics/01.type_parameters/02.type_parameter_default/generic_interfaces/interface_type_parameter_default_n_4.ets
 05.generics/02.generic_instantiations/02.explicit_generic_instantiations/meth_n_2.ets
 09.classes/05.access_modifiers/03.public_access_modifier/public_class_declaration_n.ets
+09.classes/08.class_accessor_declarations/accessor_declarations_2.ets
+09.classes/08.class_accessor_declarations/accessor_declarations_3.ets
+09.classes/08.class_accessor_declarations/accessor_declarations_4.ets
+09.classes/08.class_accessor_declarations/accessor_declarations_5.ets
 18.annotations/01.declaring_annotations/declaration_coincide_name_n_0.ets
 #FailKind.DECLGEN_ETS2TS_TIMEOUT - 9 tests:
 04.names_declarations_and_scopes/07.function_declarations/05.rest_parameter/rest_parameter_n_1.ets
