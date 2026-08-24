@@ -456,7 +456,7 @@ void InteropCtx::InitExternalInterfaces()
             auto env = static_cast<napi_env>(jsEnv);
             {
                 ScopedManagedCodeThread managedScope(executionCtx->GetMT());
-                InteropCtx::Init(executionCtx, env, isJsEnvCreatedExternally);
+                InteropCtx::Init(executionCtx, env, false, isJsEnvCreatedExternally);
             }
 #if defined(PANDA_TARGET_OHOS) && defined(PANDA_ETS_INTEROP_JS)
             INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
@@ -477,8 +477,6 @@ InteropCtx::InteropCtx(EtsExecutionContext *executionCtx, napi_env env, bool isJ
 {
     stackInfoManager_.InitStackInfoIfNeeded();
     ecmaVMIterfaceAdaptor_ = MakePandaUnique<XGCVmAdaptor>(env, nullptr);
-    // the per-EtsVM part has to be initialized first
-    RegisterBuiltinJSRefConvertors(this);
 
     InitExternalInterfaces();
     InitJsValueFinalizationRegistry(executionCtx);
@@ -874,7 +872,8 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     std::abort();
 }
 
-void InteropCtx::Init(EtsExecutionContext *executionCtx, napi_env env, bool isJsEnvCreatedExternally)
+void InteropCtx::Init(EtsExecutionContext *executionCtx, napi_env env, bool deferBuiltinJSRefConvertorsRegistration,
+                      bool isJsEnvCreatedExternally)
 {
     auto *ctx =
         Runtime::GetCurrent()->GetInternalAllocator()->New<InteropCtx>(executionCtx, env, isJsEnvCreatedExternally);
@@ -882,6 +881,11 @@ void InteropCtx::Init(EtsExecutionContext *executionCtx, napi_env env, bool isJs
     auto *worker = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetWorker();
     worker->GetLocalStorage().Set<JobWorkerThread::DataIdx::INTEROP_CTX_PTR>(ctx, Destroy);
     worker->GetLocalStorage().Set<JobWorkerThread::DataIdx::EXTERNAL_IFACES>(&ctx->interfaceTable_);
+    if (!deferBuiltinJSRefConvertorsRegistration) {
+        if (!RegisterBuiltinJSRefConvertorsForInterop(executionCtx)) {
+            INTEROP_LOG(ERROR) << "Cannot register builtin JS refconvertors";
+        }
+    }
 #ifdef PANDA_JS_ETS_HYBRID_MODE
     Handshake::VmHandshake(env, ctx);
     XGC::GetInstance()->OnAttach(ctx);
@@ -966,7 +970,8 @@ bool TryInitInteropInJsEnv(void *napiEnv)
 }
 
 // The external interface for ANI
-bool CreateMainInteropContext(ark::ets::EtsExecutionContext *executionCtx, void *napiEnv)
+bool CreateMainInteropContext(ark::ets::EtsExecutionContext *executionCtx, void *napiEnv,
+                              bool deferBuiltinJSRefConvertorsRegistration)
 {
     auto *mThread = executionCtx->GetMT();
     ASSERT(JobExecutionContext::CastFromMutator(mThread)->GetManager()->GetMainThread() == mThread);
@@ -980,7 +985,7 @@ bool CreateMainInteropContext(ark::ets::EtsExecutionContext *executionCtx, void 
     AppStateManager::Create();
     {
         ScopedManagedCodeThread sm(mThread);
-        InteropCtx::Init(executionCtx, static_cast<napi_env>(napiEnv));
+        InteropCtx::Init(executionCtx, static_cast<napi_env>(napiEnv), deferBuiltinJSRefConvertorsRegistration);
     }
 
     // NOTE(konstanting): support instantiation in the TimerModule and move this code to the InteropCtx constructor.
@@ -1006,6 +1011,17 @@ bool CreateMainInteropContext(ark::ets::EtsExecutionContext *executionCtx, void 
 #else
     return true;
 #endif
+}
+
+bool RegisterBuiltinJSRefConvertorsForInterop(ark::ets::EtsExecutionContext *executionCtx)
+{
+    auto *interopCtx = InteropCtx::Current(executionCtx);
+    if (interopCtx == nullptr) {
+        INTEROP_LOG(ERROR) << "RegisterBuiltinJSRefConvertorsForInterop: InteropCtx is null";
+        return false;
+    }
+    RegisterBuiltinJSRefConvertors(interopCtx);
+    return true;
 }
 
 bool SetInteropContextHybridVMFlag([[maybe_unused]] ark::ets::EtsExecutionContext *executionCtx,

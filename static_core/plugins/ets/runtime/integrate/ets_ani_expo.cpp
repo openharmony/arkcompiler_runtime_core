@@ -35,7 +35,7 @@ PANDA_PUBLIC_API void ETSAni::Prefork(ani_env *env, [[maybe_unused]] void *napie
     vm->PreZygoteFork();
 #ifdef PANDA_ETS_INTEROP_JS
     auto *executionCtx = EtsExecutionContext::GetCurrent();
-    if (!interop::js::CreateMainInteropContext(executionCtx, napienv)) {
+    if (!interop::js::CreateMainInteropContext(executionCtx, napienv, true)) {
         LOG(ERROR, RUNTIME) << "Cannot create interop context";
     }
     // Need use isHybridVM to distinguish between pure JS and ETS/JS interop.
@@ -53,6 +53,9 @@ PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_optio
         if (option == INTEROP_OPTION_PREFIX) {
 #ifdef PANDA_ETS_INTEROP_JS
             auto *executionCtx = EtsExecutionContext::GetCurrent();
+            if (!interop::js::RegisterBuiltinJSRefConvertorsForInterop(executionCtx)) {
+                LOG(ERROR, RUNTIME) << "Cannot register builtin JS refconvertors";
+            }
             auto *napiEnv = interop::js::InteropCtx::Current()->GetJSEnv();
             interop::js::SetInteropContextHybridVMFlag(executionCtx, napiEnv, true);
 #else

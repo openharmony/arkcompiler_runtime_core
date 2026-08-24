@@ -33,9 +33,11 @@ namespace interop::js {
  * @param mainCoro The main coroutine instance
  * @param napiEnv The napi_env for the main JSVM instance
  */
-PANDA_PUBLIC_API bool CreateMainInteropContext(ark::ets::EtsExecutionContext *mainCoro, void *napiEnv);
+PANDA_PUBLIC_API bool CreateMainInteropContext(ark::ets::EtsExecutionContext *mainCoro, void *napiEnv,
+                                               bool deferBuiltinJSRefConvertorsRegistration = false);
 PANDA_PUBLIC_API bool SetInteropContextHybridVMFlag(ark::ets::EtsExecutionContext *executionCtx, void *napiEnv,
                                                     bool isHybrid);
+PANDA_PUBLIC_API bool RegisterBuiltinJSRefConvertorsForInterop(ark::ets::EtsExecutionContext *executionCtx);
 
 }  // namespace interop::js
 
