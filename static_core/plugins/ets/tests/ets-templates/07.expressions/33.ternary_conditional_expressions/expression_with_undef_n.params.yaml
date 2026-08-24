@@ -1,0 +1,48 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - main: |-
+          let s: string = ((): string => 'hello')()
+          new A<string>().fld = trueVar ? s : undefined
+      expected_out: |-
+          Semantic error ESE0318: Type 'String|undefined' cannot be assigned to type 'String'
+
+    - main: |-
+          let s: string = ((): string => 'hello')()
+          new A<string|undefined>().fld = trueVar ? s : null
+      expected_out: |-
+          Semantic error ESE0318: Type 'String|null' cannot be assigned to type 'String|undefined'
+
+    - main: |-
+          new A<string|null>().fld = !trueVar ? null : undefined
+      expected_out: |-
+          Semantic error ESE0318: Type 'null|undefined' cannot be assigned to type 'String|null'
+
+    - main: |-
+          let s: string = ((): string => 'hello')()
+          let a: A<string> = { fld: trueVar ? s : undefined }
+      expected_out: |-
+          Semantic error ESE0319: Type 'String|undefined' is not compatible with type 'String' at property 'fld'
+
+    - main: |-
+          let s: string = ((): string => 'hello')()
+          let a: A<string|undefined> = { fld: trueVar ? s : null }
+      expected_out: |-
+          Semantic error ESE0319: Type 'String|null' is not compatible with type 'String|undefined' at property 'fld'
+
+    - main: |-
+          let a: A<string|null> = { fld: !trueVar ? null : undefined }
+      expected_out: |-
+          Semantic error ESE0319: Type 'null|undefined' is not compatible with type 'String|null' at property 'fld'

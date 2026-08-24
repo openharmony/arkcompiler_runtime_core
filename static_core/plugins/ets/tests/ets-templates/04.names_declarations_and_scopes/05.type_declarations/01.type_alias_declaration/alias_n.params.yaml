@@ -19,7 +19,7 @@ cases:
 
     - defs: |-
           type .X = Long;
-      expected_out: "Syntax error ESY0318: Class cannot be used as object."
+      expected_out: 'Syntax error ESY0318: Class cannot be used as object.'
 
     - defs: |-
           type null = byte;
@@ -41,7 +41,9 @@ cases:
 
     - defs: |-
           type self = this;
-      expected_out: "Syntax error ESY0044: A 'this' type is available only as return type in a non-static method of a class or struct and extension functions."
+      expected_out:
+          "Syntax error ESY0044: A 'this' type is available only as return type in a non-static method of a class or
+          struct and extension functions."
 
     - defs: |-
           class A<T, V> {}
@@ -52,43 +54,44 @@ cases:
 
     - defs: |-
           type E = E
-      expected_out: "Semantic error ESE0311: Circular type alias reference"
+      expected_out: 'Semantic error ESE0311: Circular type alias reference'
 
     - defs: |-
           type E = string | E
-      expected_out: "Semantic error ESE0311: Circular type alias reference"
+      expected_out: 'Semantic error ESE0311: Circular type alias reference'
 
     - defs: |-
           type A<T> = Array<A>
-      expected_out: "Semantic error ESE0155: Type alias declaration is generic, but too few type arguments were provided"
+      expected_out:
+          'Semantic error ESE0155: Type alias declaration is generic, but too few type arguments were provided'
 
     - defs: |-
           type A<T> = A<T>
-      expected_out: "Semantic error ESE0311: Circular type alias reference"
+      expected_out: 'Semantic error ESE0311: Circular type alias reference'
 
     - defs: |-
           type A = C
           type B = A
           type C = B
-      expected_out: "Semantic error ESE0311: Circular type alias reference"
+      expected_out: 'Semantic error ESE0311: Circular type alias reference'
 
     # recursive cases
     - defs: |-
           type RU = number | string | RU // TypeError: Circular type alias reference
       use: |-
           let v1: RU = 1.0
-      expected_out: "Semantic error ESE0311: Circular type alias reference"
+      expected_out: 'Semantic error ESE0311: Circular type alias reference'
 
     - defs: |-
           type RF = (p: RF) => RF
       use: |-
           let v1: RF = (p: RF): RF => { return p }
-      expected_out: "Semantic error ESE0311: Circular type alias reference"
+      expected_out: 'Semantic error ESE0311: Circular type alias reference'
 
     - defs: |-
-        { class ClassNestedInBlock{} }
-        type TAlias = ClassNestedInBlock;
-      expected_out: "Syntax error ESY0040: Illegal start of CLASS expression."
+          { class ClassNestedInBlock{} }
+          type TAlias = ClassNestedInBlock;
+      expected_out: 'Syntax error ESY0040: Illegal start of CLASS expression.'
 
     - defs: |-
           enum Axis { X, Y, Z };
@@ -96,190 +99,232 @@ cases:
       use: |-
           let v: Fields = new Axis[6];
           let ok = v.length == 6;
-      expected_out: "Semantic error ESE0124: Expected 2 arguments, got 0."
+      expected_out: 'Semantic error ESE0124: Expected 2 arguments, got 0.'
 
     - defs: |-
-        type TStringAlias? = String | undefined
+          type TStringAlias? = String | undefined
       expected_out: "Syntax error ESY0230: Expected '=', got '?'."
 
     - defs: |-
-        @interface ClassAuthor {}
-        type A = ClassAuthor
-      expected_out: "Semantic error ESE0159: Annotations cannot be used as a type."
+          @interface ClassAuthor {}
+          type A = ClassAuthor
+      expected_out: 'Semantic error ESE0159: Annotations cannot be used as a type.'
 
     - defs: |-
-        @interface ClassAuthor {}
-        type A = ClassAuthor | String
-      expected_out: "Semantic error ESE0159: Annotations cannot be used as a type."
+          @interface ClassAuthor {}
+          type A = ClassAuthor | String
+      expected_out: 'Semantic error ESE0159: Annotations cannot be used as a type.'
 
     - defs: |-
-        type A = class MyClassDec {}
-      expected_out: "Syntax error ESY0138: Invalid Type."
+          type A = class MyClassDec {}
+      expected_out: 'Syntax error ESY0138: Invalid Type.'
 
     - defs: |-
-        class AliasMe {}
-        type Alias = AliasMe<X> // CTE:  TypeError: Type 'AliasMe' is not generic.
+          class AliasMe {}
+          type Alias = AliasMe<X> // CTE:  TypeError: Type 'AliasMe' is not generic.
       expected_out: "Semantic error ESE0169: Type 'AliasMe' is not generic."
 
     - defs: |-
-        class AliasMe<X> {}
-        type Alias = AliasMe<X> // CTE: TypeError: Cannot find type 'X'.
+          class AliasMe<X> {}
+          type Alias = AliasMe<X> // CTE: TypeError: Cannot find type 'X'.
       expected_out: "Semantic error ESE0371: Cannot find type 'X'."
 
     - defs: |-
-        type A<T, U> = T | A<U, T>[]
+          type A<T, U> = T | A<U, T>[]
       use: |-
-        let xx: A<Boolean, String> = new A<Boolean, String>()  //CTE: TypeError: The union type is not constructible.
-      expected_out: "Semantic error ESE0300: The union type is not constructible."
+          let xx: A<Boolean, String> = new A<Boolean, String>()  //CTE: TypeError: The union type is not constructible.
+      expected_out: 'Semantic error ESE0300: The union type is not constructible.'
 
     - defs: |-
-        final class FinitaLaComedia {}
-        type Alias<T extends FinitaLaComedia> = T
+          final class FinitaLaComedia {}
+          type Alias<T extends FinitaLaComedia> = T
       use: |-
-        let x: Alias<number> = '1'  //CTE: TypeError: Type '"1"' cannot be assigned to type 'Double'
+          let x: Alias<number> = '1'  //CTE: TypeError: Type '"1"' cannot be assigned to type 'Double'
       expected_out: "Semantic error ESE0228: Type argument 'Double' should be a subtype of 'FinitaLaComedia' constraint"
 
     - defs: |-
-        class FinitaLaComedia {}
-        type Alias<T = FinitaLaComedia> = T
+          class FinitaLaComedia {}
+          type Alias<T = FinitaLaComedia> = T
       use: |-
-        let x: Alias<number> = '1'  //CTE: TypeError: Type '"1"' cannot be assigned to type 'Double'
+          let x: Alias<number> = '1'  //CTE: TypeError: Type '"1"' cannot be assigned to type 'Double'
       expected_out: "Semantic error ESE0318: Type '\\\"1\\\"' cannot be assigned to type 'Double'"
 
     - defs: |-
-        class FinitaLaComedia {}
-        type Alias<T = FinitaLaComedia> = T
+          class FinitaLaComedia {}
+          type Alias<T = FinitaLaComedia> = T
       use: |-
-        let x: Alias = 1  //CTE: TypeError: Type 'Int' cannot be assigned to type 'FinitaLaComedia'
+          let x: Alias = 1  //CTE: TypeError: Type 'Int' cannot be assigned to type 'FinitaLaComedia'
       expected_out: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'FinitaLaComedia'"
 
     - defs: |-
-        type Alias<T extends string> = T
+          type Alias<T extends string> = T
 
       use: |-
-        let xx: Alias<Number> = 1
-        let ok = xx == 1;
+          let xx: Alias<Number> = 1
+          let ok = xx == 1;
       expected_out: "Semantic error ESE0228: Type argument 'Double' should be a subtype of 'String' constraint"
 
     - defs: |-
-        final class FinitaLaComedia {}
-        type Alias<T extends FinitaLaComedia> = T
+          final class FinitaLaComedia {}
+          type Alias<T extends FinitaLaComedia> = T
 
       use: |-
-        let xx: Alias<Number> = 1
-        let ok = xx == 1;
+          let xx: Alias<Number> = 1
+          let ok = xx == 1;
       expected_out: "Semantic error ESE0228: Type argument 'Double' should be a subtype of 'FinitaLaComedia' constraint"
 
     - defs: |-
-        final class FinitaLaComedia {}
-        type Alias<T extends FinitaLaComedia> = T
+          final class FinitaLaComedia {}
+          type Alias<T extends FinitaLaComedia> = T
 
       use: |-
-        let xx: Alias<String> = "Divine"
-        let ok = xx instanceof String && xx instanceof Alias<String>;
+          let xx: Alias<String> = "Divine"
+          let ok = xx instanceof String && xx instanceof Alias<String>;
       expected_out: "Semantic error ESE0228: Type argument 'String' should be a subtype of 'FinitaLaComedia' constraint"
 
     - defs: |-
-        type TSStyleAlias<T> = { value: T } // SyntaxError: Using object literals to declare types in place is not supported
+          type TSStyleAlias<T> = { value: T } // SyntaxError: Using object literals to declare types in place is not supported
       use: |-
-        let xx: TSStyleAlias<String>;
-      expected_out: "Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare types and interfaces explicitly!"
+          let xx: TSStyleAlias<String>;
+      expected_out:
+          'Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare
+          types and interfaces explicitly!'
 
     - defs: |-
-        class MC {}
-        type TSStyleAlias = MC | { } // SyntaxError: Using object literals to declare types in place is not supported
+          class MC {}
+          type TSStyleAlias = MC | { } // SyntaxError: Using object literals to declare types in place is not supported
       use: |-
-        let xx: TSStyleAlias
-      expected_out: "Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare types and interfaces explicitly!"
+          let xx: TSStyleAlias
+      expected_out:
+          'Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare
+          types and interfaces explicitly!'
 
     - defs: |-
-        class MC {}
-        type TSStyleAlias = MC | undefined | { } // SyntaxError: Using object literals to declare types in place is not supported
+          class MC {}
+          type TSStyleAlias = MC | undefined | { } // SyntaxError: Using object literals to declare types in place is not supported
       use: |-
-        let xx: TSStyleAlias
-      expected_out: "Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare types and interfaces explicitly!"
+          let xx: TSStyleAlias
+      expected_out:
+          'Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare
+          types and interfaces explicitly!'
 
     - defs: |-
-        type IsString<T> = T extends string ? true : false; // TypeError: Conditional type aliases are not supported.
-        type A = IsString<string>; // true
-        type B = IsString<number>; // false
+          type IsString<T> = T extends string ? true : false; // TypeError: Conditional type aliases are not supported.
+          type A = IsString<string>; // true
+          type B = IsString<number>; // false
       use: |-
-        let xx: IsString<string>;
-      expected_out: "Semantic error ESE136365: Conditional type aliases are not supported. Introduce a new type with constraints explicitly, or rewrite logic using Object!"
+          let xx: IsString<string>;
+      expected_out:
+          'Semantic error ESE136365: Conditional type aliases are not supported. Introduce a new type with constraints
+          explicitly, or rewrite logic using Object!'
 
     - defs: |-
-        interface Named { name: string; }        
-        interface Aged { age: number; }
-        type Person = Named & Aged // SyntaxError: Intersection types are not supported
+          interface Named { name: string; }        
+          interface Aged { age: number; }
+          type Person = Named & Aged // SyntaxError: Intersection types are not supported
       use: |-
-        let xx: Person;
-      expected_out: "Syntax error ESY145527: Intersection types are not supported, use inheritance instead!"
+          let xx: Person;
+      expected_out: 'Syntax error ESY145527: Intersection types are not supported, use inheritance instead!'
 
     - defs: |-
-        type CustomReturnType<T> = T extends (...args: Any[]) => infer P ? P : Any // TypeError: Conditional type aliases are not supported
+          type CustomReturnType<T> = T extends (...args: Any[]) => infer P ? P : Any // TypeError: Conditional type aliases are not supported
       use: |-
-        let xx: CustomReturnType<Long>;
-      expected_out: "Semantic error ESE136365: Conditional type aliases are not supported. Introduce a new type with constraints explicitly, or rewrite logic using Object!"
+          let xx: CustomReturnType<Long>;
+      expected_out:
+          'Semantic error ESE136365: Conditional type aliases are not supported. Introduce a new type with constraints
+          explicitly, or rewrite logic using Object!'
 
     - defs: |-
-        type CArrayType<T> = T extends (infer Item)[] ? Item : T  // TypeError: Conditional type aliases are not supported
+          type CArrayType<T> = T extends (infer Item)[] ? Item : T  // TypeError: Conditional type aliases are not supported
       use: |-
-        let xx: CArrayType<Long>;
-      expected_out: "Semantic error ESE136365: Conditional type aliases are not supported. Introduce a new type with constraints explicitly, or rewrite logic using Object!"
+          let xx: CArrayType<Long>;
+      expected_out:
+          'Semantic error ESE136365: Conditional type aliases are not supported. Introduce a new type with constraints
+          explicitly, or rewrite logic using Object!'
 
     - defs: |-
-        type CCT = [string, string, string?]  // TypeError: Conditional type aliases are not supported
+          type CCT = [string, string, string?]  // TypeError: Conditional type aliases are not supported
       use: |-
-        let xx: CCT
-      expected_out: "Semantic error ESE136365: Conditional type aliases are not supported. Introduce a new type with constraints explicitly, or rewrite logic using Object!"
+          let xx: CCT
+      expected_out:
+          'Semantic error ESE136365: Conditional type aliases are not supported. Introduce a new type with constraints
+          explicitly, or rewrite logic using Object!'
 
     - defs: |-
-        type Rec<T extends string | number> = T | Rec<T>  // TypeError: Circular type alias reference
+          type Rec<T extends string | number> = T | Rec<T>  // TypeError: Circular type alias reference
       use: |-
-        let xx: Rec<String>
-      expected_out: "Semantic error ESE0311: Circular type alias reference"
+          let xx: Rec<String>
+      expected_out: 'Semantic error ESE0311: Circular type alias reference'
 
     - defs: |-
-        type NESA<X> = [X, ...X[]] // Syntax Error: Invalid Type
+          type NESA<X> = [X, ...X[]] // Syntax Error: Invalid Type
       use: |-
-        let xx: NESA<String>
-      expected_out: "Syntax error ESY0138: Invalid Type."
+          let xx: NESA<String>
+      expected_out: 'Syntax error ESY0138: Invalid Type.'
 
     - defs: |-
-        type ELP = | string  // Syntax Error: Invalid Type
+          type ELP = | string  // Syntax Error: Invalid Type
       use: |-
-        let xx: ELP
-      expected_out: "Syntax error ESY0138: Invalid Type."
+          let xx: ELP
+      expected_out: 'Syntax error ESY0138: Invalid Type.'
 
     - defs: |-
-        type C<T> = T
-        type A = C<A>
+          type C<T> = T
+          type A = C<A>
       use: |-
-        let aa: A
-      expected_out: "Semantic error ESE0311: Circular type alias reference"
+          let aa: A
+      expected_out: 'Semantic error ESE0311: Circular type alias reference'
 
     - defs: |-
-        class TLX<T extends {}> {}
-      expected_out: "Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare types and interfaces explicitly!"
+          class TLX<T extends {}> {}
+      expected_out:
+          'Syntax error ESY177354: Using object literals to declare types in place is not supported. Please declare
+          types and interfaces explicitly!'
 
     - defs: |-
-        type LongArray = Long[];
+          type LongArray = Long[];
       use: |-
-        let v: LongArray[] = new Long[1][1];
-        let ok = v.length == 1;
+          let v: LongArray[] = new Long[1][1];
+          let ok = v.length == 1;
       expected_out: "Semantic error ESE0318: Type 'Long' cannot be assigned to type 'Array<Array<Long>>'"
 
     - defs: |-
-        type Matrix3D = Byte[][][];
+          type Matrix3D = Byte[][][];
       use: |-
-        let v: Matrix3D = new Byte[1][1][1];
-        let ok = v.length == 1;
+          let v: Matrix3D = new Byte[1][1][1];
+          let ok = v.length == 1;
       expected_out: "Semantic error ESE0318: Type 'Byte' cannot be assigned to type 'Array<Array<Array<Byte>>>'"
 
     - defs: |-
-        type NumArray1 = Number[]
-        type NumArray2 = NumArray1[]
+          type NumArray1 = Number[]
+          type NumArray2 = NumArray1[]
       use: |-
-        let v: NumArray2[] = new Number[1][1][1]
-        let ok = v.length == 1
+          let v: NumArray2[] = new Number[1][1][1]
+          let ok = v.length == 1
       expected_out: "Semantic error ESE0318: Type 'Double' cannot be assigned to type 'Array<Array<Array<Double>>>'"
+
+    - defs: |-
+          type Alias = 'String' + ' literal'
+      use: |-
+          let v: Alias = 'String literal'
+      expected_out: "TODO: Syntax error: type cannot be an expression"
+
+    - defs: |-
+          type Alias = `${'ABC'}`
+      use: |-
+          let v: Alias = "${'ABC'}"    
+      expected_out: "TODO: Syntax error: type cannot be an expression"
+
+    - defs: |-
+          class Base<T> {}
+          type Alias = Base<`${'String literal'}`>
+      use: |-
+          let v: Alias = new Alias()
+      expected_out: "TODO: Syntax error: generic argument cannot be an expression"
+
+    - defs: |-
+          class Base<T> {}
+          type Alias<T extends `${'String literal'}`> = Base<`${'String literal'}`>
+      use: |-
+          let v: Alias<`${'String literal'}`> = new Alias<`${'String literal'}`>()
+      expected_out: "TODO: Syntax error: generic constraint cannot be an expression"

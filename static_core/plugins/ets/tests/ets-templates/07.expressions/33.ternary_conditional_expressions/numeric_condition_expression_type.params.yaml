@@ -11,11 +11,57 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # List of operands
-operands:
- - {first: "true", second: "10", third: "20", type: ": int", check: "x == 10" }
- - {first: "false", second: "10", third: "20", type: ": int", check: "x == 20" }
- - {first: "true", second: "new Int(10)", third: "new Int(20)", type: "", check: "x instanceof Int" }
- - {first: "true", second: "new Int(10)", third: "20", type: "", check: "x instanceof Int" }
- - {first: "true", second: "10 as short", third: "5 as byte", type: "", check: "(x + (5 as short)) == 15" }
- - {first: "true", second: "new Short(10 as short)", third: "new Byte(5 as byte)", type: "", check: "x instanceof Short" } 
+---
+cases:
+
+    - type: int
+      whenTrue: '10'
+      whenFalse: '20'
+      check: |-
+          arktest.assertTrue(x instanceof Int)
+          arktest.assertEQ(x, 10)
+          x = 42
+          arktest.assertTrue(x instanceof Int)
+          arktest.assertEQ(x, 42)
+
+    - type: byte|short
+      whenTrue: '10 as byte'
+      whenFalse: '20 as short'
+      check: |-
+          arktest.assertTrue(x instanceof Byte)
+          arktest.assertEQ(x, 10)
+          x = 2 as short
+          arktest.assertTrue(x instanceof Short)
+          arktest.assertEQ(x, 2)
+
+    - type: float|long
+      whenTrue: 1.0f
+      whenFalse: 42 as long
+      check: |-
+          arktest.assertTrue(x instanceof Float)
+          arktest.assertEQ(x, 1.0f)
+          x = 2 as long
+          arktest.assertTrue(x instanceof Long)
+          arktest.assertEQ(x, 2)
+
+    - type: double|byte
+      not_op: '!'
+      whenTrue: '42.0'
+      whenFalse: 127 as byte
+      check: |-
+          arktest.assertTrue(x instanceof Byte)
+          arktest.assertEQ(x, 127)
+          x = 2.0
+          arktest.assertTrue(x instanceof Double)
+          arktest.assertEQ(x, 2.0)
+
+    - type: float|number
+      not_op: '!'
+      whenTrue: '42.0f'
+      whenFalse: '1.0'
+      check: |-
+          arktest.assertTrue(x instanceof Number)
+          arktest.assertEQ(x, 1.0)
+          x = 33.0f
+          arktest.assertTrue(x instanceof Float)
+          arktest.assertEQ(x, 33.0f)
