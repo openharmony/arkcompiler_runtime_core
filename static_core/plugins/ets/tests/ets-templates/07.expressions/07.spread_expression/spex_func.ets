@@ -555,7 +555,7 @@ function main(): int {
     })
 
     suite.addTest("FixedArray new expression in expression", () => {
-        arktest.assertEQ(f61FANewExpr(...new FixedArray<number>(256)), 0)
+        arktest.assertEQ(f61FANewExpr(...new FixedArray<number>(256, 0)), 0)
     })
 
     suite.addTest("FixedArray array index expression", () => {

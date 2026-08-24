@@ -12,4 +12,4 @@
 # limitations under the License.
 ---
 cases:
-  - { type: FixedArray<number>, init: 'new FixedArray<number>(5)', call: [0], expected: 5 }
+  - { type: FixedArray<number>, init: 'new FixedArray<number>(5, 5)', call: [0], expected: 5 }

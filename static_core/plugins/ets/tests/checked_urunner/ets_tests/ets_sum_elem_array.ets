@@ -46,7 +46,7 @@ function sum2(a: ValueArray<int>): int {
 }
 
 function main1(): int {
-    let a: ValueArray<int> = new ValueArray<int>(2);
+    let a: ValueArray<int> = new ValueArray<int>(2, 0);
     a[0] = 2;
     a[1] = 3;
     return sum2(a);

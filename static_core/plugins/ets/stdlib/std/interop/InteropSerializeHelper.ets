@@ -40,14 +40,14 @@ export class InteropArgRecord {
 export class InteropSerializeHelper {
     constructor(args: FixedArray<Any>) {
         this.argsHolder = args;
-        this.argRecords = new FixedArray<InteropArgRecord>(args.length);
+        this.argRecords = new FixedArray<InteropArgRecord>(args.length, new InteropArgRecord());
         for (let i = 0; i < args.length; i++) {
             this.argRecords[i] = this.classifyAndSerializeArg(args[i]);
         }
     }
 
     public deserialize(): FixedArray<Any> {
-        let res: FixedArray<Any> = new FixedArray<Any>(this.argRecords.length);
+        let res: FixedArray<Any> = new FixedArray<Any>(this.argRecords.length, undefined);
         for (let i = 0; i < this.argRecords.length; i++) {
             let type = this.argRecords[i].type;
             let value = this.argRecords[i].value;

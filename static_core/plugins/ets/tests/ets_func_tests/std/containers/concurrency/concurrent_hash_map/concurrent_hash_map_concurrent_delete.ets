@@ -78,7 +78,7 @@ function testConcurrentDelete2() {
 
 	let deleteJobs: Job<FixedArray<int>>[] = [];
 	let deleteF: ()=>FixedArray<int> = () => {
-		let arr: FixedArray<int> = new FixedArray<int>(SET_COUNT);
+		let arr: FixedArray<int> = new FixedArray<int>(SET_COUNT, 0);
 		for (let i = 0; i < SET_COUNT; ++ i) {
 			if (map.delete(i)) {
 				arr[i] = 1;

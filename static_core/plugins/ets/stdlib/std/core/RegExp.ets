@@ -44,7 +44,7 @@ export class RegExpResultArray extends Array<String | undefined> {
      */
     readonly isCorrect: boolean
 
-    private resultRaw_: ValueArray<int> = new ValueArray<int>(0)
+    private resultRaw_: ValueArray<int> = new ValueArray<int>(0, 0)
     /** The 0-based index of the match in the string */
     protected index_: int = 0
     /** The original string that was matched against */
@@ -56,10 +56,10 @@ export class RegExpResultArray extends Array<String | undefined> {
     protected indices_: Array<Array<int>> = []
 
     /** named groups names */
-    protected groupKeysRaw_: FixedArray<String> = new FixedArray<String>(0)
+    protected groupKeysRaw_: FixedArray<String> = new FixedArray<String>(0, new String())
 
     /** named groups [start0, end0, start1, end1, ...] */
-    protected groupValsRaw_: ValueArray<int> = new ValueArray<int>(0)
+    protected groupValsRaw_: ValueArray<int> = new ValueArray<int>(0, 0)
 
     /** named groups names and indeces */
     public groups: RegExpGroupsContainer | undefined = undefined

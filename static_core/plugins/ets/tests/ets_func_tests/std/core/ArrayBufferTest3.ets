@@ -53,7 +53,7 @@ function checkCreatedArrayBuffer(a: ArrayBuffer, bytes: FixedArray<byte>): void 
  * Check ArrayBuffer created using various factory methods
  */
 function createArrayBufferFrom(): void {
-    let bytes : FixedArray<byte> = new FixedArray<byte>(0)
+    let bytes : FixedArray<byte> = new FixedArray<byte>(0, 0)
     let a = ArrayBuffer.from(bytes)
     checkCreatedArrayBuffer(a, bytes)
 

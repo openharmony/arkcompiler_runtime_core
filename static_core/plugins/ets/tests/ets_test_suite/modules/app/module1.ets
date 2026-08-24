@@ -105,7 +105,7 @@ function testStdCoreType() {
 }
 
 function testArrayClass() {
-    const arr: FixedArray<foo.Dummy> = new FixedArray<foo.Dummy>(0);
+    const arr: FixedArray<foo.Dummy> = new FixedArray<foo.Dummy>(0, new foo.Dummy());
     const arrClass = Class.of(arr);
     arktest.assertNE(arrClass, undefined);
 

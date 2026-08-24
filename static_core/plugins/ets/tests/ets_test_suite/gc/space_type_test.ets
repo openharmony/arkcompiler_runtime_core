@@ -28,7 +28,7 @@ function AllocateAndMoveTest(): void {
 }
 
 function HumongousObjectTest(): void {
-    let h_obj: FixedArray<long> = new FixedArray<long>(1024 * 1024);
+    let h_obj: FixedArray<long> = new FixedArray<long>(1024 * 1024, 0);
     arktest.assertEQ(GC.getObjectSpaceType(h_obj), GC.ObjectSpaceType.HUMONGOUS, "Must be humongous space");
 }
 

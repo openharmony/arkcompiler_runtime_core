@@ -117,7 +117,7 @@ class Test {
     }
 
     private static loadRawFiles(paths: string[]): Array<ValueArray<byte>> {
-        const rawFiles = Array.create<ValueArray<byte>>(paths.length, new ValueArray<byte>(0));
+        const rawFiles = Array.create<ValueArray<byte>>(paths.length, new ValueArray<byte>(0, 0));
         for (let i = 0; i < rawFiles.length; i++) {
             const raw = Test.loadFile(paths[i]);
             arktest.assertNE(raw, undefined, "failed to load file " + paths[i]);

@@ -99,7 +99,7 @@ export class Method extends Object {
         if (thisType.getParametersNum() != args.length) {
             throw new Error("arguments length mismatch " + thisType.getParametersNum() + " != " + args.length)
         }
-        let convertedArgs: FixedArray<Any> = new FixedArray<Any>(args.length)
+        let convertedArgs: FixedArray<Any> = new FixedArray<Any>(args.length, undefined)
         for (let i = 0; i < convertedArgs.length; i++) {
             if (args[i] === null && thisType.getParameter(i).getType().equals(ObjectType)) {
                 convertedArgs[i] = args[i]

@@ -687,11 +687,11 @@ function jscallOverridden(): int {
 
 function testRehash(): int {
     let count = 40
-    let jsValues: FixedArray<JSValue> = new FixedArray<JSValue>(count)
+    let jsValues: FixedArray<JSValue> = new FixedArray<JSValue>(count, null)
     for (let i = 0; i < count; i++) {
         jsValues[i] = (i as Int).toString() as JSValue
     }
-    let jsValues2: FixedArray<JSValue> = new FixedArray<JSValue>(count)
+    let jsValues2: FixedArray<JSValue> = new FixedArray<JSValue>(count, null)
     for (let i = 0; i < count; i++) {
         jsValues2[i] = (i as Int).toString() as JSValue
     }

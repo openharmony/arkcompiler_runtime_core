@@ -12,12 +12,12 @@
 # limitations under the License.
 
 cases:
-    - decl: FixedArray<number>(3.14)
+    - decl: FixedArray<number>(3.14, 0)
       exp_out: "Semantic error ESE0236: Type 'Double' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
     - decl: FixedArray<string>("5", "a")
       exp_out: "Semantic error ESE0236: Type '\"5\"' cannot be used as an index type. Only primitive or unboxable integral types can be used as index."
 
-    - decl: FixedArray<float>(-1)
+    - decl: FixedArray<float>(-1, 0)
       exp_out: "Semantic error ESE0247: Index value cannot be less than zero."
     - decl: FixedArray<string>(-20, 'a')
       exp_out: "Semantic error ESE0247: Index value cannot be less than zero."
@@ -32,10 +32,10 @@ cases:
       exp_out: "Semantic error ESE0277: FixedArray<T> must have only one type parameter."
 
     - decl: FixedArray<boolean>(5,0)
-      exp_out: "Semantic error ESE0318: Type 'Int' cannot be assigned to type 'Boolean'"
+      exp_out: "Semantic error ESE0046: Type 'Int' is not compatible with type 'Boolean' at index 1"
 
     - decl: "FixedArray<Function>(30, () => '')"
-      exp_out: "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces."
+      exp_out: "Semantic error ESE17070: Lambda expression is not supported as fixed size array argument."
 
     - decl: "FixedArray<MyAbstractClass>(30, new IImpl)"
-      exp_out: "Semantic error ESE0050: Cannot use array creation expression with abstract classes and interfaces."
+      exp_out: "Semantic error ESE0046: Type 'IImpl' is not compatible with type 'MyAbstractClass' at index 1"

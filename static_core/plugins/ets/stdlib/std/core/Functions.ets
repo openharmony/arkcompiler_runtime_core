@@ -38,7 +38,7 @@ function toStrHelper(val: long, radix: int): String {
         digitsNum++
     }
 
-    const data: FixedArray<char> = new FixedArray<char>(digitsNum)
+    const data: FixedArray<char> = new FixedArray<char>(digitsNum, new Char())
     let i: int = digitsNum - 1
     if (negative) {
         let remainder: long = -(val % radix)

@@ -21,7 +21,7 @@ function main(): int {
     let arrayType : ArrayType;
     let obj : FixedArray<{{.item.name}}>;
     {% for array_size in item.array_sizes %}
-      arrayVar = new FixedArray<{{.item.name}}>({{.array_size}});
+      arrayVar = new FixedArray<{{.item.name}}>({{.array_size}}, {{.item.init_value}});
       for (let i = 0; i < {{.array_size}}; ++i) {
         arrayVar[i] = {{.item.init_value}};
       }

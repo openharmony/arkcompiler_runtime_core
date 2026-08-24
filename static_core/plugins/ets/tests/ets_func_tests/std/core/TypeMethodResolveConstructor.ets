@@ -61,7 +61,7 @@ function test(args: FixedArray<Any>, exp: int): int {
 }
 
 function mk(num: int, fn: (idx: int) => Any): FixedArray<Any> {
-    const arr : FixedArray<Any> = new FixedArray<Any>(num)
+    const arr : FixedArray<Any> = new FixedArray<Any>(num, undefined)
     for (let i = 0; i < num; i++) {
         arr[i] = fn(i)
     }
@@ -69,14 +69,14 @@ function mk(num: int, fn: (idx: int) => Any): FixedArray<Any> {
 }
 
 function from(x: Any): FixedArray<Any> {
-    const ret :FixedArray<Any> = new FixedArray<Any>(1)
+    const ret :FixedArray<Any> = new FixedArray<Any>(1, undefined)
     ret[0] = x
     return ret
 }
 
 function main(): int {
     let f = 0
-    f += test(new FixedArray<Any>(0), 0)
+    f += test(new FixedArray<Any>(0, undefined), 0)
     f += test(mk(2, (idx: int): Any => { return idx as Int }), 2)
     f += test(from(new B()), 12)
     f += test(from(new D()), 11)

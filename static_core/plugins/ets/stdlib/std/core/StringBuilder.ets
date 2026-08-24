@@ -29,7 +29,7 @@ import { stub } from "arkruntime";
 export final class StringBuilder {
     private static readonly INITIAL_BUF_SIZE: int = 16;
 
-    private buf: FixedArray<(Object|undefined)> = new FixedArray<Object|undefined>(StringBuilder.INITIAL_BUF_SIZE); // array with pointers to strings or char[]
+    private buf: FixedArray<(Object|undefined)> = new FixedArray<Object|undefined>(StringBuilder.INITIAL_BUF_SIZE, undefined); // array with pointers to strings or char[]
     private index: int = 0;                                             // index of the current free element in the buf
     private length: int = 0;                                            // length of the resulting string
     private compress: boolean = true;                                   // compress or not the resulting string.

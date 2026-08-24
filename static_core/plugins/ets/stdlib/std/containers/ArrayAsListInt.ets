@@ -20,7 +20,7 @@ export namespace containers {
     export class ArrayAsListInt implements ListInt {
 
         private init(capacity: int, val: Int): void {
-            this.data = new ValueArray<int>(capacity);
+            this.data = new ValueArray<int>(capacity, 0);
             for (let i = 0; i < this.data.length; ++i) {
                 this.data[i] = val;
             }
@@ -61,7 +61,7 @@ export namespace containers {
         */
         public reserve(capacity: int): void {
             if (this.data.length < capacity) {
-                let newData : ValueArray<int> = new ValueArray<int>(capacity);
+                let newData : ValueArray<int> = new ValueArray<int>(capacity, 0);
                 for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i];
                 }
@@ -102,7 +102,7 @@ export namespace containers {
         public override pushFront(e: Int): void {
             let dst = this.data;
             if (this.curSize == this.data.length) {
-                dst = new ValueArray<int>(ArrayAsListInt.getNewCapacity(this.data.length));
+                dst = new ValueArray<int>(ArrayAsListInt.getNewCapacity(this.data.length), 0);
             }
             for (let i = this.curSize; i != 0; --i) {
                 dst[i] = this.data[i-1];
@@ -136,7 +136,7 @@ export namespace containers {
         */
         public override pushBack(e: Int): void {
             if (this.curSize == this.data.length) {
-                let newData : ValueArray<int> = new ValueArray<int>(ArrayAsListInt.getNewCapacity(this.data.length));
+                let newData : ValueArray<int> = new ValueArray<int>(ArrayAsListInt.getNewCapacity(this.data.length), 0);
                 for (let i = 0; i < this.curSize; ++i) {
                     newData[i] = this.data[i];
                 }

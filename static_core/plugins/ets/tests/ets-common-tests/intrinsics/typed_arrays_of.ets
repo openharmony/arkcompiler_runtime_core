@@ -14,9 +14,9 @@
  */
 
 function testIU8OfInt() {
-    checkIntArray(new ValueArray<int>(0), Int8Array.of());
-    checkIntArray(new ValueArray<int>(0), Uint8Array.of());
-    checkIntArray(new ValueArray<int>(0), Uint8ClampedArray.of());
+    checkIntArray(new ValueArray<int>(0, 0), Int8Array.of());
+    checkIntArray(new ValueArray<int>(0, 0), Uint8Array.of());
+    checkIntArray(new ValueArray<int>(0, 0), Uint8ClampedArray.of());
 
     let arr = prepareTestData(127, 1);
     checkIntArray(arr, Int8Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
@@ -48,8 +48,8 @@ function testIU8OfInt() {
 }
 
 function testIU16OfInt() {
-    checkIntArray(new ValueArray<int>(0), Int16Array.of());
-    checkIntArray(new ValueArray<int>(0), Uint16Array.of());
+    checkIntArray(new ValueArray<int>(0, 0), Int16Array.of());
+    checkIntArray(new ValueArray<int>(0, 0), Uint16Array.of());
 
     let arr = prepareTestData16(127, 1);
     checkIntArray(arr, makeInt16Array(127, 1));
@@ -72,8 +72,8 @@ function testIU16OfInt() {
 }
 
 function testIU32OfInt() {
-    checkIntArray(new ValueArray<int>(0), Int32Array.of());
-    checkIntArray(new ValueArray<int>(0), Uint32Array.of());
+    checkIntArray(new ValueArray<int>(0, 0), Int32Array.of());
+    checkIntArray(new ValueArray<int>(0, 0), Uint32Array.of());
 
     let arr = prepareTestData32(127, 1);
     checkIntArray(arr, makeInt32Array(127, 1));
@@ -124,7 +124,7 @@ function testIU32OfNumber() {
 }
 
 function testF32OfNumber() {
-    checkNumberArray(new ValueArray<double>(0), Float32Array.of());
+    checkNumberArray(new ValueArray<double>(0, 0), Float32Array.of());
 
     let arr = prepareTestData(127, 1.0);
     checkNumberArray(arr, Float32Array.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
@@ -148,7 +148,7 @@ function testF32OfNumber() {
 }
 
 function testF64OfNumber() {
-    checkNumberArray(new ValueArray<double>(0), Float64Array.of());
+    checkNumberArray(new ValueArray<double>(0, 0), Float64Array.of());
 
     let arr = prepareTestData(127, 1.0);
     checkNumberArray(arr, Float64Array.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0,
@@ -166,10 +166,10 @@ function testF64OfNumber() {
 }
 
 function testIU64OfBigInt() {
-    checkBigIntArray(new FixedArray<bigint>(0), BigInt64Array.of());
+    checkBigIntArray(new FixedArray<bigint>(0, 0n), BigInt64Array.of());
 
     const length: int = 127;
-    let arr: FixedArray<bigint> = new FixedArray<bigint>(length);
+    let arr: FixedArray<bigint> = new FixedArray<bigint>(length, 0n);
     for (let i = 0; i < length; i++) {
         const v = new BigInt(i + 1);
         arr[i] = v;
@@ -204,7 +204,7 @@ function testIU64OfBigInt() {
 }
 
 function prepareTestData(length: int, from: int): ValueArray<int> {
-    let fixarr: ValueArray<int> = new ValueArray<int>(length);
+    let fixarr: ValueArray<int> = new ValueArray<int>(length, 0);
     let v: int = from;
     for (let i = 0; i < length; i++) {
         fixarr[i] = v++;
@@ -213,7 +213,7 @@ function prepareTestData(length: int, from: int): ValueArray<int> {
 }
 
 function prepareTestData(length: int, from: number): ValueArray<double> {
-    let fixarr: ValueArray<double> = new ValueArray<double>(length);
+    let fixarr: ValueArray<double> = new ValueArray<double>(length, 0);
     let v: number = from;
     for (let i = 0; i < length; i++) {
         fixarr[i] = v++;
@@ -222,7 +222,7 @@ function prepareTestData(length: int, from: number): ValueArray<double> {
 }
 
 function prepareTestData16(length: int, from: int): ValueArray<int> {
-    let fixarr: ValueArray<int> = new ValueArray<int>(length);
+    let fixarr: ValueArray<int> = new ValueArray<int>(length, 0);
     let v: int = from;
     for (let i = 0; i < length; i++) {
         fixarr[i] = ((v << 16) >> 16);
@@ -232,7 +232,7 @@ function prepareTestData16(length: int, from: int): ValueArray<int> {
 }
 
 function prepareTestData32(length: int, from: int): ValueArray<int> {
-    let fixarr: ValueArray<int> = new ValueArray<int>(length);
+    let fixarr: ValueArray<int> = new ValueArray<int>(length, 0);
     let v: int = from;
     for (let i = 0; i < length; i++) {
         fixarr[i] = (v << 0) >> 0;

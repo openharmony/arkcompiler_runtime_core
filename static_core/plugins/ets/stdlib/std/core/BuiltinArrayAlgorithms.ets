@@ -147,7 +147,7 @@ export function upperBoundSearch(arr: FixedArray<boolean>, key: boolean): int {
  * @FaAndStageModel
  */
 export function copyOf(src: FixedArray<boolean>): FixedArray<boolean> {
-    const r : FixedArray<boolean> = new FixedArray<boolean>(src.length);
+    const r : FixedArray<boolean> = new FixedArray<boolean>(src.length, new Boolean());
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -316,7 +316,7 @@ export function upperBoundSearch(arr: FixedArray<byte>, key: byte): int {
  * @FaAndStageModel
  */
 export function copyOf(src: FixedArray<byte>): FixedArray<byte> {
-    const r : FixedArray<byte> = new FixedArray<byte>(src.length);
+    const r : FixedArray<byte> = new FixedArray<byte>(src.length, new Byte());
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -485,7 +485,7 @@ export function upperBoundSearch(arr: FixedArray<short>, key: short): int {
  * @FaAndStageModel
  */
 export function copyOf(src: FixedArray<short>): FixedArray<short> {
-    const r : FixedArray<short> = new FixedArray<short>(src.length);
+    const r : FixedArray<short> = new FixedArray<short>(src.length, new Short());
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -654,7 +654,7 @@ export function upperBoundSearch(arr: FixedArray<int>, key: int): int {
  * @FaAndStageModel
  */
 export function copyOf(src: FixedArray<int>): FixedArray<int> {
-    const r : FixedArray<int> = new FixedArray<int>(src.length);
+    const r : FixedArray<int> = new FixedArray<int>(src.length, new Int());
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -823,7 +823,7 @@ export function upperBoundSearch(arr: FixedArray<long>, key: long): int {
  * @FaAndStageModel
  */
 export function copyOf(src: FixedArray<long>): FixedArray<long> {
-    const r : FixedArray<long> = new FixedArray<long>(src.length);
+    const r : FixedArray<long> = new FixedArray<long>(src.length, new Long());
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -992,7 +992,7 @@ export function upperBoundSearch(arr: FixedArray<float>, key: float): int {
  * @FaAndStageModel
  */
 export function copyOf(src: FixedArray<float>): FixedArray<float> {
-    const r : FixedArray<float> = new FixedArray<float>(src.length);
+    const r : FixedArray<float> = new FixedArray<float>(src.length, new Float());
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -1161,7 +1161,7 @@ export function upperBoundSearch(arr: FixedArray<double>, key: double): int {
  * @FaAndStageModel
  */
 export function copyOf(src: FixedArray<double>): FixedArray<double> {
-    const r : FixedArray<double> = new FixedArray<double>(src.length);
+    const r : FixedArray<double> = new FixedArray<double>(src.length, new Double());
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -1330,7 +1330,7 @@ export function upperBoundSearch(arr: FixedArray<char>, key: char): int {
  * @FaAndStageModel
  */
 export function copyOf(src: FixedArray<char>): FixedArray<char> {
-    const r : FixedArray<char> = new FixedArray<char>(src.length);
+    const r : FixedArray<char> = new FixedArray<char>(src.length, new Char());
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {
@@ -1389,7 +1389,7 @@ export function copyTo(src: FixedArray<char>, dst: FixedArray<char>, dstStart: i
  * @FaAndStageModel
  */
 export function copyOf(src: FixedArray<Any>): FixedArray<Any> {
-    const r : FixedArray<Any> = new FixedArray<Any>(src.length);
+    const r : FixedArray<Any> = new FixedArray<Any>(src.length, undefined);
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {

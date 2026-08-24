@@ -77,7 +77,7 @@ class TestBailout {
 
     static mayAlias_ref(): int {
         let src: FixedArray<string> = ['6', '7', '8'];
-        let dst: FixedArray<object> = new FixedArray<object>(3);
+        let dst: FixedArray<object> = new FixedArray<object>(3, {});
         return check(TestBailout.__noinline__mayAlias_ref(src, dst), ['6', '7', '8']);
     }
 

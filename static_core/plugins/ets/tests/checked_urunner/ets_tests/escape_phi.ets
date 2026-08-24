@@ -465,7 +465,7 @@ function testDominateObjects(flag: boolean): int {
     return a.valA_;
 }
 
-// no apply, objects are temporary, 
+// no apply, objects are temporary,
 function testDominateObjectsSeparateObjUsage(flag: boolean): int {
     let a1 = new A(0);
     let a2 = new A(1);
