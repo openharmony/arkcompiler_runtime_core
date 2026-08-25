@@ -208,7 +208,12 @@ bool JsRegExpPreParser::ParseDecimalEscapeUnicode(PandaString &errorMsg)
     Advance();
     auto backrefValue = static_cast<uint32_t>(c - '0');
     while (HasMore() && IsDigit(Peek())) {
-        backrefValue = backrefValue * DIG_COUNT + static_cast<uint32_t>(Peek() - '0');
+        auto digit = static_cast<uint32_t>(Peek() - '0');
+        if (backrefValue > (UINT32_MAX - digit) / DIG_COUNT) {
+            errorMsg = "SyntaxError: Invalid decimal escape";
+            return false;
+        }
+        backrefValue = backrefValue * DIG_COUNT + digit;
         Advance();
     }
     backrefs_.push_back(backrefValue);

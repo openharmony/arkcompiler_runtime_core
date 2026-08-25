@@ -29,7 +29,9 @@ static std::optional<Span<Class *>> CheckAndTransformInterfaces(EtsObjectArray *
 
     uint32_t intfNum = interfaces->GetLength();
     if (intfNum > 0) {
-        proxyInterfaces = Span(allocator->AllocArray<Class *>(intfNum), intfNum);
+        auto *data = allocator->AllocArray<Class *>(intfNum);
+        ASSERT(data != nullptr);
+        proxyInterfaces = Span(data, intfNum);
         for (uint32_t idx = 0; idx < intfNum; ++idx) {
             EtsObject *iface = interfaces->Get(idx);
             ASSERT(iface != nullptr);

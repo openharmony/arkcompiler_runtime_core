@@ -177,7 +177,7 @@ extern "C" EtsInt EtsStdCoreArrayInternalLastIndexOf(ObjectHeader *bufferObject,
         return -1;
     }
 
-    if (actualLength == 0) {
+    if (actualLength <= 0) {
         return -1;
     }
 
@@ -816,15 +816,30 @@ extern "C" void EtsStdCoreArrayUnshiftInternal(ObjectHeader *arrayHeader, EtsInt
     }
 
     auto *buffer = EtsArray::FromEtsObject(EtsObject::FromCoreType(bufferHeader));
-    auto dstLen = buffer->GetLength() * sizeof(ObjectPointerType);
     auto *dst = buffer->GetData<ObjectPointerType>();
     auto *array = EtsArray::FromEtsObject(EtsObject::FromCoreType(arrayHeader));
     auto *arraySrc = array->GetData<ObjectPointerType>();
-    auto arraySrcLen = arrayLen * sizeof(ObjectPointerType);
-    auto valuesSrcLen = values->GetActualLengthFromStdCoreArray() * sizeof(ObjectPointerType);
+
+    auto valuesLen = values->GetActualLengthFromStdCoreArray();
+    if (UNLIKELY(arrayLen < 0 || valuesLen < 0)) {
+        auto ctx = EtsExecutionContext::GetCurrent();
+        ThrowEtsException(ctx, PlatformTypes(ctx)->coreRangeError, "Negative length in array unshift");
+        return;
+    }
+
+    auto dstLen = buffer->GetLength() * sizeof(ObjectPointerType);
+    auto arraySrcLen = static_cast<size_t>(arrayLen) * sizeof(ObjectPointerType);
+    auto valuesSrcLen = static_cast<size_t>(valuesLen) * sizeof(ObjectPointerType);
+
+    if (UNLIKELY(valuesSrcLen > dstLen || arraySrcLen > dstLen - valuesSrcLen)) {
+        auto ctx = EtsExecutionContext::GetCurrent();
+        ThrowEtsException(ctx, PlatformTypes(ctx)->coreRangeError, "Buffer size exceeded in array unshift");
+        return;
+    }
+
     [[maybe_unused]] auto error0 =
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        memmove_s(dst + values->GetActualLengthFromStdCoreArray(), dstLen - valuesSrcLen, arraySrc, arraySrcLen);
+        memmove_s(dst + static_cast<size_t>(valuesLen), dstLen - valuesSrcLen, arraySrc, arraySrcLen);
     ASSERT(error0 == 0);
     auto *valuesSrc = values->GetDataFromStdCoreArray()->GetData<ObjectPointerType>();
     [[maybe_unused]] auto error1 = memmove_s(dst, dstLen, valuesSrc, valuesSrcLen);
