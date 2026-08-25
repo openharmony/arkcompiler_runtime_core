@@ -31,7 +31,7 @@ cases:
       use: |-
           console.log(u.s)  // compile-time error, field types are not equal
       stdout: |-
-          "Semantic error ESE0244: Member type must be the same for all union objects."  
+          "Semantic error ESE0244: Member type must be the same for all union objects."
 
     - decl: |-
           class A {
@@ -50,4 +50,23 @@ cases:
       use: |-
           u.goo()  // compile-time error, signatures are not equal
       stdout: |-
-          "Semantic error ESE0244: Member type must be the same for all union objects."  
+          "Semantic error ESE0244: Member type must be the same for all union objects."
+
+    - decl: |-
+          class A {
+              n = 1
+              s = "aa"
+              goo(n: number) {}
+              static foo() {}
+          }
+          class B {
+              n = 2
+              s = 3.14
+              goo() {}
+              static foo() {}
+          }
+          type AB = A|B
+      use: |-
+          AB.foo()  // compile-time error, foo() is a static method
+      stdout: |-
+          "Semantic error ESE0335: Static union member expression cannot be interpreted."

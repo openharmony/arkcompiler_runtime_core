@@ -890,6 +890,18 @@
 15.semantic_rules/08.smart_casts_and_smart_types/06.type_expression_simplification/simpl_8.ets
 15.semantic_rules/08.smart_casts_and_smart_types/06.type_expression_simplification/simpl_0.ets
 
+#35682 CTE is missed while overriding
+15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_neg_3.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_neg_4.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_neg_5.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_neg_6.ets
+15.semantic_rules/09.overriding/01.overriding_in_classes/class_method_over_neg_7.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_n_11.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_n_12.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_n_13.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_n_14.ets
+15.semantic_rules/09.overriding/02.overriding_in_interfaces/overriding_n_15.ets
+
 #33245 Wrong CTE for generic extends union type (spec 15.9.3)
 15.semantic_rules/09.overriding/03.override-compatible_signatures/override_generic_extends_union.ets
 
