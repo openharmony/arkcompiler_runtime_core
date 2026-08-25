@@ -188,6 +188,10 @@
 07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_13.ets
 07.expressions/32.assignment/02.compound_assignment_operators/ops_boxed_14.ets
 
+#35946 Wrong type inferred for a ternary expression
+07.expressions/33.ternary_conditional_expressions/expression_with_optional_3.ets
+07.expressions/33.ternary_conditional_expressions/expression_with_optional_4.ets
+
 #35799 Incorrect type of a ternary expression is inferred when both expressions are of numeric type
 07.expressions/33.ternary_conditional_expressions/numeric_condition_expression_type.ets
 
