@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,6 +86,9 @@ bool ParseInt(const char *str, T *num, T min = std::numeric_limits<T>::min(), T 
     char *end = nullptr;
     // NOLINTNEXTLINE(google-runtime-int)
     long long int result = strtoll(str, &end, base);
+    if (errno == ERANGE) {
+        return false;
+    }
     if (str == end || *end != '\0') {
         errno = EINVAL;
         return false;

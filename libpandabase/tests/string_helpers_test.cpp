@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,6 +107,18 @@ TEST(StringHelpers, ParseIntRange)
     i = 123;
     ASSERT_FALSE(ParseInt("456x", &i));
     ASSERT_EQ(123, i);
+}
+
+TEST(StringHelpers, ParseIntOverflow)
+{
+    auto value = 42LL;
+    ASSERT_FALSE(ParseInt("9223372036854775808", &value));
+    ASSERT_EQ(ERANGE, errno);
+    ASSERT_EQ(42LL, value);
+
+    ASSERT_FALSE(ParseInt("-9223372036854775809", &value));
+    ASSERT_EQ(ERANGE, errno);
+    ASSERT_EQ(42LL, value);
 }
 
 }  // namespace panda::helpers::string::test
