@@ -1863,6 +1863,15 @@ intrinsics:
       args: [ i64 ]
     impl: ark::ets::intrinsics::StdCoreDateGetLocalTimezoneOffset
 
+  - name: StdCoreDateFormatTimeString
+    space: ets
+    class_name: std.core.Date
+    method_name: formatTimeString
+    static: true
+    signature:
+      ret: std.core.String
+      args: [ i64, i64 ]
+    impl: ark::ets::intrinsics::StdCoreDateFormatTimeString
   - name: StdCoreDateGetTimezoneName
     space: ets
     class_name: std.core.Date
