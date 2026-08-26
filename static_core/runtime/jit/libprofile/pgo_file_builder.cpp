@@ -395,8 +395,10 @@ uint32_t AotPgoFile::Save(const PandaString &fileName, AotProfilingData *profObj
     auto tmpFileName = fileName + "." + counter + ".tmp";
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    umask(S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+    auto oldUmask = umask(S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
     std::ofstream fd(tmpFileName.data(), std::ios::binary | std::ios::out);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    umask(oldUmask);
     if (!fd.is_open()) {
         LOG(ERROR, RUNTIME) << "Failed to open temp file for writing: " << tmpFileName;
         return 0;

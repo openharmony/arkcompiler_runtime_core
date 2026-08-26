@@ -419,6 +419,69 @@ private:
     Graph *graph_ {nullptr};
 };
 
+TEST_F(ChecksEliminationTest, GroupedBoundsChecksPreserveBothBounds)
+{
+    // The loop bounds prove the upper bound for i, but i - 1 still needs both checks due to possible underflow.
+    // Both sentinel-initialized group bounds must therefore be updated for the derived index.
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(2U, 0U).ref();  // array
+        PARAMETER(3U, 1U).s32();  // initial index
+
+        BASIC_BLOCK(2U, 3U, 6U)
+        {
+            INST(4U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(5U, Opcode::NullCheck).ref().Inputs(2U, 4U);
+            INST(6U, Opcode::LenArray).s32().Inputs(5U);
+            INST(7U, Opcode::SaveStateDeoptimize).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(8U, Opcode::Compare).b().CC(CC_LT).Inputs(3U, 6U);
+            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
+        }
+        BASIC_BLOCK(3U, 3U, 6U)
+        {
+            INST(10U, Opcode::Phi).s32().Inputs(3U, 18U);  // i
+            INST(11U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+            INST(12U, Opcode::BoundsCheck).s32().Inputs(6U, 10U, 11U);
+            INST(13U, Opcode::LoadArray).s32().Inputs(5U, 12U);
+            INST(14U, Opcode::Sub).s32().Inputs(10U, 1U);  // i - 1
+            INST(15U, Opcode::BoundsCheck).s32().Inputs(6U, 14U, 11U);
+            INST(16U, Opcode::LoadArray).s32().Inputs(5U, 15U);
+            INST(17U, Opcode::Add).s32().Inputs(13U, 16U);
+            INST(18U, Opcode::Add).s32().Inputs(10U, 1U);
+            INST(19U, Opcode::Compare).b().CC(CC_LT).Inputs(18U, 6U);
+            INST(20U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(19U);
+        }
+        BASIC_BLOCK(6U, 1U)
+        {
+            INST(21U, Opcode::Return).s32().Inputs(0U);
+        }
+    }
+
+    ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
+
+    size_t boundsChecks = 0;
+    bool hasLowerBoundOffset = false;
+    for (auto block : GetGraph()->GetBlocksRPO()) {
+        for (auto inst : block->AllInsts()) {
+            boundsChecks += inst->GetOpcode() == Opcode::BoundsCheck ? 1U : 0U;
+            if (inst->GetOpcode() != Opcode::DeoptimizeIf) {
+                continue;
+            }
+            auto condition = inst->GetInput(0U).GetInst();
+            if (condition->GetOpcode() == Opcode::Compare && condition->CastToCompare()->GetCc() == CC_LT) {
+                auto lowerIndex = condition->GetInput(0U).GetInst();
+                hasLowerBoundOffset |=
+                    lowerIndex->GetOpcode() == Opcode::Add && lowerIndex->GetInput(1U).GetInst()->IsConst() &&
+                    static_cast<int64_t>(lowerIndex->GetInput(1U).GetInst()->CastToConstant()->GetIntValue()) == -1L;
+            }
+        }
+    }
+    ASSERT_EQ(boundsChecks, 0U);
+    ASSERT_TRUE(hasLowerBoundOffset);
+}
+
 TEST_F(ChecksEliminationTest, NullCheckTest)
 {
     // Check Elimination for NullCheck is applied.

@@ -215,9 +215,9 @@ bool Pointer::IsEscapingAlias(const Inst *inst)
             case Opcode::Cast:
                 return true;
             case Opcode::CallNative:
-                if (inst->IsRuntimeCall()) {
-                    return true;
-                }
+                // Reference arguments must be converted to pointers by WrapObjectNative.
+                ASSERT_DO(false, (std::cerr << "CallNative cannot have reference inputs: " << *userInst << std::endl,
+                                  inst->GetBasicBlock()->GetGraph()->Dump(&std::cerr)));
                 break;
             case Opcode::Intrinsic:
                 // if intrinsic has no side effects and has primitive type, it

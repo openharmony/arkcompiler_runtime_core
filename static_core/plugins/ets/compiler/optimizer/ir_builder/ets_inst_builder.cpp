@@ -179,6 +179,7 @@ static std::pair<RuntimeInterface::IntrinsicId, DataType::Type> ExtractIntrinsic
         case DataType::UINT64:
         case DataType::INT64:
             return {RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I64, DataType::INT64};
+        case DataType::BOOL:
         case DataType::UINT8:
         case DataType::INT8:
             return {RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I8, DataType::INT8};

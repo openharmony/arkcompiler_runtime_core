@@ -276,7 +276,7 @@ TEST_F(AotTest, PaocLocation)
 
 class AotTestBuildAndCheck : public AsmTest {
 public:
-    void BuildAot(const char *tmpfilePn, mem::GCType gcType)
+    void BuildAot(const char *tmpfilePn, mem::GCType gcType, int expectedWriteResult = 0)
     {
         AotBuilder aotBuilder;
         aotBuilder.SetArch(RUNTIME_ARCH);
@@ -331,7 +331,7 @@ public:
         aotBuilder.InsertClassHashTableSize(1U);
         aotBuilder.EndFile();
 
-        aotBuilder.Write(cmdline_, tmpfilePn);
+        ASSERT_EQ(aotBuilder.Write(cmdline_, tmpfilePn), expectedWriteResult);
     }
 
     void DoChecks(AotManager *aotManager, const char *tmpfilePn)
@@ -617,6 +617,20 @@ TEST_F(AotTestBuildAndCheck, BuildAndLoad)
     }
     DoChecks(&aotManager, tmpfilePn);
 }
+
+TEST_F(AotTestBuildAndCheck, OpenFailureIsReported)
+{
+    TmpFile nonDirectory("aot_output_not_directory");
+    auto invalidFileName = std::string(nonDirectory.GetFileName()) + "/test.an";
+    BuildAot(invalidFileName.c_str(), mem::GCType::STW_GC, 1);
+}
+
+#ifdef PANDA_TARGET_LINUX
+TEST_F(AotTestBuildAndCheck, WriteFailureIsReported)
+{
+    BuildAot("/dev/full", mem::GCType::STW_GC, 1);
+}
+#endif
 
 TEST_F(AotTestBuildAndCheck, BuildAndLoadAn)
 {

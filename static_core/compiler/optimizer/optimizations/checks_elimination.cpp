@@ -686,7 +686,8 @@ void ChecksElimination::PushNewBoundsCheckAtExistingIndexes(GroupedBoundsChecks 
             auto &min = std::get<4U>(*parentIndexIt);
             if (val > max && checkUpper) {
                 max = val;
-            } else if (val < min && checkLower) {
+            }
+            if (val < min && checkLower) {
                 min = val;
             }
             dominateVec.push_back(inst);

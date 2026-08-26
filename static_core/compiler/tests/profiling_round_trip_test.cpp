@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <string_view>
+#include <sys/stat.h>
 #include <utility>
 #include "include/class.h"
 #include "jit/profiling_data.h"
@@ -494,6 +495,22 @@ TEST_F(ProfilingRoundTripTest, HeaderOnlyMethodProfileRoundTrip)
     {
         CheckHeaderOnlyMethodProfile(METHOD_IDX, CLASS_IDX);
     }
+
+    Runtime::Destroy();
+}
+
+TEST_F(ProfilingRoundTripTest, SaveRestoresUmask)
+{
+    InitPGOFilePath();
+    CreateRunner();
+    CollectProfile();
+    constexpr mode_t TEST_UMASK = S_IWGRP | S_IWOTH | S_IXOTH;
+    auto originalUmask = umask(TEST_UMASK);
+
+    SaveHeaderOnlyMethodProfile(42U, 7U);
+
+    auto actualUmask = umask(originalUmask);
+    EXPECT_EQ(actualUmask, TEST_UMASK);
 
     Runtime::Destroy();
 }
