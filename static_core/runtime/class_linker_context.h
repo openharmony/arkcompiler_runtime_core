@@ -156,6 +156,32 @@ public:
         return loadedClasses_.size();
     }
 
+    /// @brief Count one load that starts executing against this context.
+    void BeginPendingLoad()
+    {
+        // Atomic with relaxed order reason: the counter publishes no data, it is bookkeeping only.
+        // The reload quiesce gate re-reads it under stop-the-world, where the world-stop handshake
+        // already orders the updates.
+        pendingLoads_.fetch_add(1, std::memory_order_relaxed);
+    }
+
+    /// @brief Count one load that finished (in any outcome) against this context.
+    void EndPendingLoad()
+    {
+        // Atomic with relaxed order reason: same as BeginPendingLoad -- pure bookkeeping, the
+        // authoritative read happens under STW and needs no ordering from the counter itself.
+        pendingLoads_.fetch_sub(1, std::memory_order_relaxed);
+    }
+
+    /// @brief How many loads are in flight against this context right now (relaxed; see GetPendingLoads in ClassLinker)
+    uint32_t GetPendingLoads() const
+    {
+        // Atomic with relaxed order reason: the reload reads this under stop-the-world, where the
+        // safepoint handshake makes every completed update visible; outside STW the value is
+        // advisory only (a load may start or finish right after the read).
+        return pendingLoads_.load(std::memory_order_relaxed);
+    }
+
     void VisitLoadedClasses(size_t flag)
     {
         os::memory::LockHolder lock(classesLock_);
@@ -208,6 +234,28 @@ public:
         return &mutexTable_.at(cls);
     }
 
+    /**
+     * @brief Give @a klass an initialization mutex without publishing it under its descriptor.
+     *
+     * `InsertClass` is the normal way to get an entry in the mutex table, but it refuses to do
+     * anything once a class with the same descriptor is already published. Hotreload's obsolete
+     * classes are exactly that case: they share the descriptor of the class that replaced them and
+     * must NOT be resolvable by name, yet they stay reachable through the methods still executing
+     * on them, so `ClassLock` can be taken on them and would otherwise throw `std::out_of_range`.
+     */
+    void RegisterClassMutex(Class *klass)
+    {
+        os::memory::LockHolder<os::memory::Mutex> lockHolder(mapLock_);
+        mutexTable_[klass];
+    }
+
+    /// @brief Drop the entry added by `RegisterClassMutex`, before @a klass is freed.
+    void UnregisterClassMutex(Class *klass)
+    {
+        os::memory::LockHolder<os::memory::Mutex> lockHolder(mapLock_);
+        mutexTable_.erase(klass);
+    }
+
     ClassLinkerContext() = default;
     virtual ~ClassLinkerContext() = default;
 
@@ -222,6 +270,8 @@ private:
     os::memory::Mutex mapLock_;
     PandaUnorderedMap<Class *, ClassMutexHandler> mutexTable_;
     PandaVector<ObjectHeader *> roots_;
+    // Diagnostic only, see `GetPendingLoads`
+    std::atomic<uint32_t> pendingLoads_ {0};
     panda_file::SourceLang lang_ {panda_file::SourceLang::PANDA_ASSEMBLY};
 };
 

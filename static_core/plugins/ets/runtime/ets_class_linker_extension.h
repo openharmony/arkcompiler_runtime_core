@@ -131,6 +131,24 @@ public:
 
     std::optional<PandaVector<Method *>> BuildProxyClassMethodsSpan(ITable itable) override;
 
+    /**
+     * Record that @a pf is no longer the current target of its hot-reload lineage.
+     *
+     * Superseded files remain owned by the class linker and may still own published classes that
+     * could not be swapped. The registry therefore identifies target authority; it is not a
+     * lifetime or publication list.
+     *
+     * The writer runs INSIDE stop-the-world, so this mutex must never be held by a thread that a
+     * commit can suspend, or the commit deadlocks waiting for it --- the shape of defect B2. Today
+     * that holds because the only readers are in a reload's own Prepare phase and `ReloadGate`
+     * admits one reload at a time, so no suspended mutator can be inside either function. Reading
+     * the registry from a path a mutator can reach --- class loading is the tempting one --- would
+     * break that, and needs a lock-free structure instead.
+     */
+    void MarkPandaFileSuperseded(const panda_file::File *pf);
+
+    bool IsPandaFileSuperseded(const panda_file::File *pf) const;
+
     NO_COPY_SEMANTIC(EtsClassLinkerExtension);
     NO_MOVE_SEMANTIC(EtsClassLinkerExtension);
 
@@ -154,6 +172,9 @@ private:
     mem::HeapManager *heapManager_ {nullptr};
 
     PandaUniquePtr<EtsPlatformTypes> plaformTypes_ {nullptr};
+
+    mutable os::memory::Mutex supersededPandaFilesLock_;
+    PandaUnorderedSet<const panda_file::File *> supersededPandaFiles_ GUARDED_BY(supersededPandaFilesLock_);
 };
 
 }  // namespace ark::ets

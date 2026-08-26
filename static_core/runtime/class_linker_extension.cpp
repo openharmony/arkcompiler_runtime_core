@@ -16,6 +16,7 @@
 #include "runtime/include/class_linker_extension.h"
 
 #include "libarkbase/utils/utf.h"
+#include "runtime/hotreload/redirect.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/class_linker.h"
 #include "runtime/include/coretypes/class.h"
@@ -359,11 +360,27 @@ size_t ClassLinkerExtension::GetClassObjectSizeFromClassSize(uint32_t size)
 
 void ClassLinkerExtension::FreeObsoleteData()
 {
+    /*
+     * The ANI / reflection redirect table maps live entities onto the methods and fields that are
+     * about to be freed with these classes. It has to go first, or a later VM in the same process
+     * could be handed a `Method *` at a recycled address and have it redirected into freed memory.
+     */
+    hotreload::ResetRedirects();
+
     os::memory::LockHolder lock(obsoleteClassesLock_);
     for (auto &cls : obsoleteClasses_) {
         ASSERT(cls != nullptr);
+        // Drop the entry hotreload added via `RegisterClassMutex`, so the table holds no key
+        // pointing at freed memory
+        auto *ctx = cls->GetLoadContext();
+        if (ctx != nullptr) {
+            ctx->UnregisterClassMutex(cls);
+        }
         GetClassLinker()->FreeClass(cls);
     }
+    // Must be idempotent: teardown paths may call this more than once, and the freed pointers
+    // must not be visited again by class enumeration.
+    obsoleteClasses_.clear();
 }
 
 void ClassLinkerExtension::AddObsoleteClass(const PandaVector<Class *> &classes)

@@ -15,15 +15,21 @@
 
 #include "ets_platform_types.h"
 #include "runtime/include/managed_thread.h"
+#include "runtime/include/stack_walker.h"
 #include "libarkfile/file.h"
 #include "include/object_header.h"
 #include "intrinsics.h"
 #include "libarkbase/os/mutex.h"
 #include "plugins/ets/runtime/coldreload/ets_coldreload.h"
 #include "plugins/ets/runtime/ets_class_linker_context.h"
+#include "plugins/ets/runtime/ets_execution_context.h"
+#include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
+#include "plugins/ets/runtime/hotreload/ets_hotreload.h"
+#include "runtime/include/thread_scopes.h"
 #include "plugins/ets/runtime/types/ets_abc_file.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_array.h"
@@ -135,6 +141,90 @@ extern "C" EtsInt EtsAbcRuntimeLinkerColdReload(EtsAbcRuntimeLinker *runtimeLink
         LOG(ERROR, COLDRELOAD) << "coldReload failed: " << ets::coldreload::GetErrorString(err);
     } else {
         LOG(INFO, COLDRELOAD) << "coldReload succeeded: patch '" << patch << "'";
+    }
+    return static_cast<EtsInt>(err);
+}
+
+/**
+ * @brief `std.core.AbcRuntimeLinker.hotReload(targetPath: string, patchPath: string): int`
+ *
+ * The entry the application framework calls: validate arguments, copy the paths out of managed
+ * memory, and hand over to `EtsHotreload`. Errors come back as the return value; an OOM during
+ * preparation stays pending and propagates.
+ *
+ * @returns 0 on success, otherwise the ordinal of `ark::hotreload::Error`.
+ */
+extern "C" EtsInt EtsAbcRuntimeLinkerHotReload(EtsAbcRuntimeLinker *runtimeLinker, EtsString *targetPath,
+                                               EtsString *patchPath)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro != nullptr);
+
+    if (UNLIKELY(targetPath == nullptr || patchPath == nullptr)) {
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError,
+                          "targetPath or patchPath is null");
+        return static_cast<EtsInt>(ark::hotreload::Error::INVALID_INPUT_ARG);
+    }
+
+    /*
+     * Root the managed arguments before anything below that may move objects (the stack walk of
+     * the caller check, the string reads): a moving GC would leave the raw argument pointers
+     * stale, while the handles are updated in place.
+     */
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    [[maybe_unused]] EtsHandleScope hs(executionCtx);
+    EtsHandle<EtsString> targetPathHandle(executionCtx, targetPath);
+    EtsHandle<EtsString> patchPathHandle(executionCtx, patchPath);
+    EtsHandle<EtsAbcRuntimeLinker> runtimeLinkerHandle(executionCtx, runtimeLinker);
+
+    /*
+     * Authorization: ANI by-name invocation does not check access modifiers, so a protected entry
+     * is still reachable from an arbitrary native bridge with a managed frame below it. Only a
+     * boot-context managed caller may run the transaction; a pure native entry (the framework's
+     * shape, no managed frames at all) passes.
+     */
+    for (auto stack = StackWalker::Create(coro); stack.HasFrame(); stack.NextFrame()) {
+        auto *method = stack.GetMethod();
+        if (method == nullptr) {
+            continue;
+        }
+        auto *ctx = method->GetClass()->GetLoadContext();
+        if (ctx == nullptr || !ctx->IsBootContext()) {
+            LOG(ERROR, HOTRELOAD) << "hotReload reached from a non-boot caller " << method->GetFullName();
+            return static_cast<EtsInt>(ark::hotreload::Error::CALLER_NOT_BOOT);
+        }
+        break;
+    }
+
+    /*
+     * Read everything that lives in managed memory NOW, while still in managed state: the
+     * transaction below runs with no handle on these objects. The handle slots are checked
+     * explicitly: the raw arguments were null-checked above, but `operator->` cannot prove
+     * non-nullness of the slot to the static analyzer.
+     */
+    auto *targetStr = targetPathHandle.GetPtr();
+    auto *patchStr = patchPathHandle.GetPtr();
+    auto *linkerPtr = runtimeLinkerHandle.GetPtr();
+    if (UNLIKELY(targetStr == nullptr || patchStr == nullptr || linkerPtr == nullptr)) {
+        return static_cast<EtsInt>(ark::hotreload::Error::INVALID_INPUT_ARG);
+    }
+    PandaString target = targetStr->GetMutf8();
+    PandaString patch = patchStr->GetMutf8();
+    auto *expectedContext = linkerPtr->GetClassLinkerContext();
+
+    ark::hotreload::Error err;
+    {
+        // `ArkHotreloadBase` must be constructed in NATIVE state; its own managed scope switches back
+        ScopedNativeCodeThread nativeScope(coro);
+        ets::hotreload::EtsHotreload reload(coro);
+        err = reload.ReplaceAbc(target, patch, expectedContext);
+    }
+
+    if (err != ark::hotreload::Error::NONE) {
+        LOG(ERROR, HOTRELOAD) << "hotReload failed: " << ark::hotreload::GetErrorString(err);
+    } else {
+        LOG(INFO, HOTRELOAD) << "hotReload succeeded: '" << target << "' -> '" << patch << "'";
     }
     return static_cast<EtsInt>(err);
 }

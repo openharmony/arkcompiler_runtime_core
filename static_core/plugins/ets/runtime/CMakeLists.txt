@@ -60,6 +60,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_vtable_builder.cpp
     ${ETS_EXT_SOURCES}/integrate/ark_vm_api.cpp
     ${ETS_EXT_SOURCES}/integrate/ets_ani_expo.cpp
+    ${ETS_EXT_SOURCES}/hotreload/ets_hotreload.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Array.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_ArrayBuffer.cpp

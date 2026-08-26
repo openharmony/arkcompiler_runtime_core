@@ -200,6 +200,7 @@ _libarkruntime_calculated_sources = [
   "global_object_lock.cpp",
   "handle_scope.cpp",
   "hotreload/hotreload.cpp",
+  "hotreload/redirect.cpp",
   "imtable_builder.cpp",
   "init_icu.cpp",
   "interpreter/interpreter.cpp",

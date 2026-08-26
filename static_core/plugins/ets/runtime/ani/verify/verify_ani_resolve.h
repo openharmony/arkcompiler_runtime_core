@@ -16,6 +16,8 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_ANI_RESOLVE_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ANI_VERIFY_ANI_RESOLVE_H
 
+#include "plugins/ets/runtime/ani/ani_converters.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ani/verify/env_ani_verifier.h"
 #include "plugins/ets/runtime/ani/verify/types/vfield.h"
 #include "plugins/ets/runtime/ani/verify/types/vmethod.h"
@@ -137,12 +139,17 @@ inline internal::AniType<VTy> ResolveToAniEtsFieldHandle(VTy *maybe)
     return ResolveToAniEtsFieldHandle(maybe, GetCurrentEnvANIVerifier());
 }
 
+/*
+ * Redirect a handle that may predate a hot reload. The caller's ownership checks (in
+ * verify_ani_checker.cpp) must run in the same managed scope as this resolution, so that a
+ * commit cannot land between the two.
+ */
 inline EtsMethod *ResolveToEtsMethod(impl::VMethod *maybe, EnvANIVerifier *verifier)
 {
     if (verifier->IsValidRawEtsMethod(reinterpret_cast<void *>(maybe))) {
-        return reinterpret_cast<EtsMethod *>(maybe);
+        return RedirectAcrossHotreload(reinterpret_cast<EtsMethod *>(maybe));
     }
-    return maybe->GetEtsMethod();
+    return RedirectAcrossHotreload(maybe->GetEtsMethod());
 }
 
 inline EtsMethod *ResolveToEtsMethod(impl::VMethod *maybe)
@@ -153,9 +160,9 @@ inline EtsMethod *ResolveToEtsMethod(impl::VMethod *maybe)
 inline EtsField *ResolveToEtsField(impl::VField *maybe, EnvANIVerifier *verifier)
 {
     if (verifier->IsValidRawEtsField(reinterpret_cast<void *>(maybe))) {
-        return reinterpret_cast<EtsField *>(maybe);
+        return RedirectAcrossHotreload(reinterpret_cast<EtsField *>(maybe));
     }
-    return maybe->GetEtsField();
+    return RedirectAcrossHotreload(maybe->GetEtsField());
 }
 
 inline EtsField *ResolveToEtsField(impl::VField *maybe)

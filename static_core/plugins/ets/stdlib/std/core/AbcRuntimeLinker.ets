@@ -132,4 +132,41 @@ export class AbcRuntimeLinker extends RuntimeLinker {
      *          other failure comes back as the return code.
      */
     protected final native coldReload(patchPath: string): int
+
+    /**
+     * Replaces an ABC file already loaded in this linker's context by a new version of the same
+     * file (hot reload).
+     *
+     * This is the production entry point: it is addressed by the application framework from
+     * native code, never called from arbitrary ArkTS, so it is not part of the public ArkTS
+     * API. Bytecode-driven tests use the `std.debug.RuntimeDebug.hotReload` probe,
+     * which shares all of the logic below the target resolution.
+     *
+     * The capability is disabled by default: the process must have been started with the
+     * `enable-hotreload` runtime option (the framework passes it when it creates a debug
+     * session), and the entry must not be reached from managed code outside the boot context.
+     *
+     * Only method bodies may differ between the two versions. Any structural change (fields,
+     * method set, signatures, hierarchy, modifiers) is rejected, and so is a class that is loaded
+     * from the target but missing from the patch. Objects, field values and running calls are all
+     * preserved: only the code executed by subsequent calls changes.
+     *
+     * The whole call is a transaction. On any error nothing in the VM has been modified and the
+     * call may simply be retried. A concurrent class load or an `addAbcFiles` writer racing the
+     * transaction is not a patch problem: re-issue the SAME call once it completes.
+     *
+     * The process must run without JIT and without AOT files, otherwise the call is refused.
+     *
+     * @param targetPath path the ABC to be replaced was loaded with, exactly the string that was
+     *                   passed to `addAbcFiles`. A `.hap` / `.hsp` package path is accepted.
+     *
+     * @param patchPath path of the new version. May be a plain `.abc` file or a `.hqf` / `.hap` /
+     *                  `.hsp` package containing `ets/modules_static.abc`.
+     *
+     * @returns 0 on success, otherwise a non-zero error code.
+     *          Throws NullPointerException when targetPath or patchPath is null; every
+     *          other failure comes back as the return code, with the detail reported
+     *          through the `hotreload` log component.
+     */
+    protected final native hotReload(targetPath: string, patchPath: string): int
 }

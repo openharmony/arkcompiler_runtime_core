@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -204,6 +204,20 @@ public:
         // Atomic with release order reason: fixes a data race with class_cache_
         pairPtr->store(pair, std::memory_order_release);
 #endif
+    }
+
+    /**
+     * @brief Whether anything has been cached since construction or the last `Clear()`.
+     *
+     * `Clear()` is not free --- it re-materialises three full-size tables --- so a sweeper that
+     * clears the caches of many files can use this to skip the ones that have not been written
+     * to again since their last clear.
+     */
+    bool HasCachedEntries() const
+    {
+        // Atomic with acquire order reason: pairs with the ready_ store(release) of each table
+        return methodCacheReady_.load(std::memory_order_acquire) || fieldCacheReady_.load(std::memory_order_acquire) ||
+               classCacheReady_.load(std::memory_order_acquire);
     }
 
     void Clear()
