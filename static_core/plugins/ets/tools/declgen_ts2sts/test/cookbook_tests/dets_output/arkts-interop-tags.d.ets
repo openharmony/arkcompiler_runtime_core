@@ -16,6 +16,10 @@
 export declare type AnyClass = Any;
 export declare type AnyInterface = Any;
 export declare type AnyEnum = Any;
+export declare type AnyGenericClass<T> = Any;
+export declare type AnyGenericInterface<T, U> = Any;
+export declare type AnyConstrainedClass<T extends Base> = Any;
+export declare type AnyDefaultClass<T = Base> = Any;
 export declare function retFunc(x: number): string;
 export declare function paramFunc(x: string): void;
 export declare enum PartialEnum {

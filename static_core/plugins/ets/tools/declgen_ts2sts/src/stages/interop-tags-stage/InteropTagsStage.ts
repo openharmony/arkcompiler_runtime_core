@@ -138,10 +138,14 @@ class InteropTagsTraverser extends VisitorTraverser<PrevState, LocalState> {
       return node;
     }
     const modifiers = filterTypeAliasInheritableModifiers(node.modifiers);
+    const typeParameters =
+      ts.isClassDeclaration(node) || ts.isInterfaceDeclaration(node)
+        ? typeUtils.cloneTypeParameters(this.context, node.typeParameters)
+        : undefined;
     return this.context.factory.createTypeAliasDeclaration(
       modifiers,
       name,
-      undefined,
+      typeParameters,
       typeUtils.createJSValueTypeNode(this.context)
     );
   }
