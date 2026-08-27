@@ -651,7 +651,8 @@ EtsObject *EtsLdbyname(ManagedThread *mThread, EtsObject *thisObj, panda_file::F
             [[maybe_unused]] EtsHandleScope s(executionCtx);
             EtsHandle<EtsObject> thisObjHandle(executionCtx, thisObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
-            return xRefObjectOperator.GetProperty(executionCtx, fieldName);
+            auto result = xRefObjectOperator.GetProperty(executionCtx, fieldName);
+            return result.GetPtr();
         });
     } else {
         auto fieldIndex = thisObj->GetClass()->GetFieldIndexByName(fieldName);
@@ -729,7 +730,8 @@ EtsObject *EtsLdbyidx(ManagedThread *mThread, EtsObject *thisObj, [[maybe_unused
             [[maybe_unused]] EtsHandleScope s(executionCtx);
             EtsHandle<EtsObject> thisObjHandle(executionCtx, thisObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
-            return xRefObjectOperator.GetProperty(executionCtx, index);
+            auto result = xRefObjectOperator.GetProperty(executionCtx, index);
+            return result.GetPtr();
         });
     } else {
         auto getMethod = FindGetMethod(executionCtx, thisObj->GetClass());
@@ -782,10 +784,12 @@ EtsObject *EtsLdbyval(ManagedThread *mThread, EtsObject *thisObj, EtsObject *val
                 EtsString *valObjStr = EtsString::FromEtsObject(valObj);
                 auto nameView = valObjStr->ConvertToStringView(&tree8Buf);
                 PandaString str(nameView);
-                return xRefObjectThis.GetProperty(executionCtx, str);
+                auto result = xRefObjectThis.GetProperty(executionCtx, str);
+                return result.GetPtr();
             }
             EtsHandle<EtsObject> valObjHandle(executionCtx, valObj);
-            return xRefObjectThis.GetProperty(executionCtx, valObjHandle);
+            auto result = xRefObjectThis.GetProperty(executionCtx, valObjHandle);
+            return result.GetPtr();
         });
     } else {
         // ASSERTION. LHS is not a JSValue
@@ -908,7 +912,8 @@ EtsObject *EtsCall([[maybe_unused]] ManagedThread *mThread, EtsObject *funcObj,
             [[maybe_unused]] EtsHandleScope s(executionCtx);
             EtsHandle<EtsObject> funcObjHandle(executionCtx, funcObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(funcObjHandle);
-            return xRefObjectOperator.Invoke(executionCtx, args);
+            auto result = xRefObjectOperator.Invoke(executionCtx, args);
+            return result.GetPtr();
         });
     } else {
         if (!funcObj->GetClass()->IsFunction()) {
@@ -1146,7 +1151,8 @@ EtsObject *EtsCallThis(ManagedThread *mThread, EtsObject *thisObj, [[maybe_unuse
             EtsHandle<EtsObject> thisObjHandle(executionCtx, thisObj);
             EtsHandle<EtsObject> funcObjHandle(executionCtx, funcObj);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(thisObjHandle);
-            return xRefObjectOperator.InvokeMethod(executionCtx, funcObjHandle, args);
+            auto result = xRefObjectOperator.InvokeMethod(executionCtx, funcObjHandle, args);
+            return result.GetPtr();
         });
     } else {
         // Not supported yet, need rethink for overload case

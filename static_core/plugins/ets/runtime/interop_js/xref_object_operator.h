@@ -28,11 +28,11 @@ class XRefObjectOperator {
 public:
     static XRefObjectOperator FromEtsObject(EtsHandle<EtsObject> &etsObject);
 
-    EtsObject *GetProperty(EtsExecutionContext *executionCtx, const PandaString &name) const;
+    EtsHandle<EtsObject> GetProperty(EtsExecutionContext *executionCtx, const PandaString &name) const;
 
-    EtsObject *GetProperty(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &keyObject) const;
+    EtsHandle<EtsObject> GetProperty(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &keyObject) const;
 
-    EtsObject *GetProperty(EtsExecutionContext *executionCtx, const uint32_t index) const;
+    EtsHandle<EtsObject> GetProperty(EtsExecutionContext *executionCtx, const uint32_t index) const;
 
     bool SetProperty(EtsExecutionContext *executionCtx, const std::string &name,
                      EtsHandle<EtsObject> &valueObject) const;
@@ -44,10 +44,10 @@ public:
 
     bool IsInstanceOf(EtsExecutionContext *executionCtx, const XRefObjectOperator &rhsObject) const;
 
-    EtsObject *Invoke(EtsExecutionContext *executionCtx, Span<VMHandle<ObjectHeader>> args) const;
+    EtsHandle<EtsObject> Invoke(EtsExecutionContext *executionCtx, Span<VMHandle<ObjectHeader>> args) const;
 
-    EtsObject *InvokeMethod(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &methodObject,
-                            Span<VMHandle<ObjectHeader>> args) const;
+    EtsHandle<EtsObject> InvokeMethod(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &methodObject,
+                                      Span<VMHandle<ObjectHeader>> args) const;
 
     EtsHandle<EtsObject> InvokeMethod(EtsExecutionContext *executionCtx, const std::string &name,
                                       Span<VMHandle<ObjectHeader>> args) const;
