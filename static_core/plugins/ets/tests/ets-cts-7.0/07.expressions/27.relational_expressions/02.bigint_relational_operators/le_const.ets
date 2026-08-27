@@ -17,8 +17,7 @@
 /*---
 desc: |-
     Relational operators can be applied to bigint values (see Type bigint) if:
-    - both operands are of bigint type; or
-    - one operand is of bigint type and other is of a numeric type.
+    - both operands are of bigint type.
 ---*/
 
 function main(): int {

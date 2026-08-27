@@ -17,8 +17,7 @@
 /*---
 desc: |-
     Relational operators can be applied to bigint values (see Type bigint) if:
-    - both operands are of bigint type; or
-    - one operand is of bigint type and other is of a numeric type.
+    - both operands are of bigint type.
 ---*/
 
 function lt_1(a: bigint, b: bigint, diff: bigint) {
@@ -26,68 +25,8 @@ function lt_1(a: bigint, b: bigint, diff: bigint) {
     arktest.assertFalse(a < b)
     arktest.assertTrue(a - diff < b)
 }
-function lt_1(a: bigint, b: byte, diff: bigint) {
-    arktest.assertFalse(a + diff < b)
-    arktest.assertFalse(a < b)
-    arktest.assertTrue(a - diff < b)
-}
-function lt_1(a: bigint, b: short, diff: bigint) {
-    arktest.assertFalse(a + diff < b)
-    arktest.assertFalse(a < b)
-    arktest.assertTrue(a - diff < b)
-}
-function lt_1(a: bigint, b: int, diff: bigint) {
-    arktest.assertFalse(a + diff < b)
-    arktest.assertFalse(a < b)
-    arktest.assertTrue(a - diff < b)
-}
-function lt_1(a: bigint, b: long, diff: bigint) {
-    arktest.assertFalse(a + diff < b)
-    arktest.assertFalse(a < b)
-    arktest.assertTrue(a - diff < b)
-}
-function lt_1(a: bigint, b: float, diff: bigint) {
-    arktest.assertFalse(a + diff < b)
-    arktest.assertFalse(a < b)
-    arktest.assertTrue(a - diff < b)
-}
-function lt_1(a: bigint, b: double, diff: bigint) {
-    arktest.assertFalse(a + diff < b)
-    arktest.assertFalse(a < b)
-    arktest.assertTrue(a - diff < b)
-}
 
 function lt_2(a: BigInt, b: BigInt, diff: BigInt) {
-    arktest.assertFalse(a + diff < b)
-    arktest.assertFalse(a < b)
-    arktest.assertTrue(a - diff < b)
-}
-function lt_2(a: BigInt, b: Byte, diff: BigInt) {
-    arktest.assertFalse(a + diff < b)
-    arktest.assertFalse(a < b)
-    arktest.assertTrue(a - diff < b)
-}
-function lt_2(a: BigInt, b: Short, diff: BigInt) {
-    arktest.assertFalse(a + diff < b)
-    arktest.assertFalse(a < b)
-    arktest.assertTrue(a - diff < b)
-}
-function lt_2(a: BigInt, b: Int, diff: BigInt) {
-    arktest.assertFalse(a + diff < b)
-    arktest.assertFalse(a < b)
-    arktest.assertTrue(a - diff < b)
-}
-function lt_2(a: BigInt, b: Long, diff: BigInt) {
-    arktest.assertFalse(a + diff < b)
-    arktest.assertFalse(a < b)
-    arktest.assertTrue(a - diff < b)
-}
-function lt_2(a: BigInt, b: Float, diff: BigInt) {
-    arktest.assertFalse(a + diff < b)
-    arktest.assertFalse(a < b)
-    arktest.assertTrue(a - diff < b)
-}
-function lt_2(a: BigInt, b: Double, diff: BigInt) {
     arktest.assertFalse(a + diff < b)
     arktest.assertFalse(a < b)
     arktest.assertTrue(a - diff < b)

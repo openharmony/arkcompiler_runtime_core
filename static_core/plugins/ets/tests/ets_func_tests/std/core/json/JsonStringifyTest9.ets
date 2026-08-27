@@ -907,7 +907,7 @@ function bigintValidation(): void {
         arktest.assertEQ(actual.length, expectedLen[i])
 
         const containsDash: boolean = actual.indexOf('-') >= 0
-        arktest.assertEQ(containsDash, input < 0)
+        arktest.assertEQ(containsDash, input < 0n)
     }
 }
 
@@ -966,7 +966,7 @@ function bigintLargeValidation(): void {
         arktest.assertEQ(actual, expected)
 
         const containsDash: boolean = actual.indexOf('-') >= 0
-        arktest.assertEQ(containsDash, input < 0)
+        arktest.assertEQ(containsDash, input < 0n)
     }
 }
 

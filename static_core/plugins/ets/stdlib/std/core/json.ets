@@ -4562,7 +4562,7 @@ function createLongFromJSONValue(json: JSONValue): Long {
     if (json instanceof JSONNumber) {
         let num = json.value
         let value = json.bigintValue
-        if (Double.isInteger(num) && Long.MIN_VALUE <= value && value <= Long.MAX_VALUE) {
+        if (Double.isInteger(num) && new BigInt(Long.MIN_VALUE) <= value && value <= new BigInt(Long.MAX_VALUE)) {
             return value.getLong()
         }
     }

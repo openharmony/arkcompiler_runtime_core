@@ -12,14 +12,38 @@
 # limitations under the License.
 ---
 cases:
-    - { b: '0n', exp: '"0"', op: '<' }
-    - { b: '0n', exp: '"0"', op: '<=' }
+    - b: '0n'
+      exp: '"0"'
+      op: '<'
+      out: "Semantic error ESE0105: Operator '<' cannot be applied to types 'BigInt' and 'String'."
+    - b: '0n'
+      exp: '"0"'
+      op: '<='
+      out: "Semantic error ESE0105: Operator '<=' cannot be applied to types 'BigInt' and 'String'."
 
-    - { b: '0n', exp: 'false', op: '<' }
-    - { b: '0n', exp: 'false', op: '<=' }
+    - b: '0n'
+      exp: 'false'
+      op: '<'
+      out: "Semantic error ESE0105: Operator '<' cannot be applied to types 'BigInt' and 'Boolean'."
+    - b: '0n'
+      exp: 'false'
+      op: '<='
+      out: "Semantic error ESE0105: Operator '<=' cannot be applied to types 'BigInt' and 'Boolean'."
 
-    - { b: '0n', exp: 'new Error()', op: '>' }
-    - { b: '0n', exp: 'new Error()', op: '>=' }
+    - b: '0n'
+      exp: 'new Error()'
+      op: '>'
+      out: "Semantic error ESE0105: Operator '>' cannot be applied to types 'BigInt' and 'Error'."
+    - b: '0n'
+      exp: 'new Error()'
+      op: '>='
+      out: "Semantic error ESE0105: Operator '>=' cannot be applied to types 'BigInt' and 'Error'."
 
-    - { b: 'new BigInt(0)', exp: '"0"', op: '>' }
-    - { b: 'new BigInt(0)', exp: '"0"', op: '>=' }
+    - b: 'new BigInt(0)'
+      exp: '"0"'
+      op: '>'
+      out: "Semantic error ESE0105: Operator '>' cannot be applied to types 'BigInt' and 'String'."
+    - b: 'new BigInt(0)'
+      exp: '"0"'
+      op: '>='
+      out: "Semantic error ESE0105: Operator '>=' cannot be applied to types 'BigInt' and 'String'."

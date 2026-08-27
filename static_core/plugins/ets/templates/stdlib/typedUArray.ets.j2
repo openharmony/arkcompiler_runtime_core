@@ -1145,7 +1145,7 @@ export final class {{element['name']}}Array implements Iterable<{{element['subse
      */
     public includes(searchElement: {{element['subsetType']}}, fromIndex?: int): boolean {
         {%- if element['name'] == 'BigUint64' %}
-        if (searchElement < 0 || searchElement > BigUint64Array.unsignedLongMax) {
+        if (searchElement < 0n || searchElement > BigUint64Array.unsignedLongMax) {
             return false;
         }
         return this.indexOf(searchElement, asIntOrDefault(fromIndex, 0)) != -1
