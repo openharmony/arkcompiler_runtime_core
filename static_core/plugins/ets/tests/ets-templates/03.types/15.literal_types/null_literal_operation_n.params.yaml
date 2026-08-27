@@ -1,0 +1,30 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+  - suffix: null_literal
+    literal_type: 'null'
+    literal_value: 'null'
+    gap: GAP-03-0085
+    grc: GRC-03-0111
+    ci: CI-03-15-002-01
+    desc: The null literal type exposes no member operation.
+    observation: Compilation rejects a member operation on a value whose static type is null.
+  - suffix: undefined_literal
+    literal_type: 'undefined'
+    literal_value: 'undefined'
+    gap: GAP-03-0086
+    grc: GRC-03-0112
+    ci: CI-03-15-002-02
+    desc: The undefined literal type exposes no member operation.
+    observation: Compilation rejects a member operation on a value whose static type is undefined.

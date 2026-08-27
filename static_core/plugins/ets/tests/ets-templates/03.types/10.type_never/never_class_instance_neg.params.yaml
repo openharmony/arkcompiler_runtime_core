@@ -43,6 +43,10 @@ types:
           let x: never = undefined
       stdout: |-
           "Semantic error ESE0318: Type 'undefined' cannot be assigned to type 'never'"
+    - use: |-
+          let x: never = 0
+      stdout: |-
+          'Semantic error ESE0318: Type ''Int'' cannot be assigned to type ''never'''
     #6
     - use: |-
           let x: never = ((): never => { return never })()
