@@ -1581,13 +1581,13 @@ export namespace taskpool {
                     throw new Error("taskpool:: missing execution record");
                 }
                 initGlobalTaskQueues();
+                this.addTaskRegistryReference();
+                const newWaitingTasksNum = waitingTasksNum.fetchAdd(1) + 1;
                 while (!globalTaskQueue?.get(normalizeTaskQueuePriority(priority))?.add(
                     new QueuedExecution(this.task, executionRecord, priority)
                 )) {
                     Coroutine.Schedule();
                 }
-                this.addTaskRegistryReference();
-                const newWaitingTasksNum = waitingTasksNum.fetchAdd(1) + 1;
                 if (newWaitingTasksNum > workers.size * 2) {
                     tryTriggerExpand();
                 }
@@ -1641,6 +1641,7 @@ export namespace taskpool {
                         this.currentExecutionRecord = this.pendingExecutionRecords.shift();
                     } else if (this.isPeriodicTask &&
                         this.state.load() != InternalState.CANCELED.valueOf() &&
+                        this.timerId != -1 &&
                         this.periodicPendingExecutionRecords.length > 0) {
                         nextPeriodicExecutionRecord = this.periodicPendingExecutionRecords.shift();
                         this.currentExecutionRecord = nextPeriodicExecutionRecord;
@@ -1653,8 +1654,20 @@ export namespace taskpool {
                 }
             });
             if (nextPeriodicExecutionRecord !== undefined) {
-                taskSubmitted(this.task);
-                this.enqueue(this.periodicPriority, nextPeriodicExecutionRecord);
+                if (this.state.load() == InternalState.CANCELED.valueOf()) {
+                    nextPeriodicExecutionRecord!.markCanceled();
+                    nextPeriodicExecutionRecord!.rejectPromise(
+                        new Error(TASKPOOL_ERROR_TASK_CANCELED, "taskpool:: task has been canceled")
+                    );
+                    ConcurrencyHelpers.lockGuard(this.taskMutex, () => {
+                        if (this.currentExecutionRecord === nextPeriodicExecutionRecord) {
+                            this.currentExecutionRecord = undefined;
+                        }
+                    });
+                } else {
+                    taskSubmitted(this.task);
+                    this.enqueue(this.periodicPriority, nextPeriodicExecutionRecord);
+                }
             }
         }
 
@@ -3211,17 +3224,17 @@ export namespace taskpool {
         if (InternalTask.of(task).timerId !== -1) {
             timerId = InternalTask.of(task).timerId;
             if (InternalTask.of(task).isPeriodicTask) {
-                clearInterval(InternalTask.of(task).timerId);
+                clearInterval(timerId);
                 periodicTasks.delete(task.taskId);
             }
-            InternalTask.of(task).timerId = -1;
         }
         if (timerId != -1) {
             ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
+                InternalTask.of(task).timerId = -1;
                 InternalTask.of(task).clearPeriodicPendingExecutionRecordsUnsafe();
+                // canceled task set state to canceled, avoid duplicate execution
+                InternalTask.of(task).state.store(State.CANCELED.valueOf());
             });
-            // canceled task set state to canceled, avoid duplicate execution
-            InternalTask.of(task).state.store(State.CANCELED.valueOf());
             return;
         }
         while(true) {
@@ -3243,6 +3256,9 @@ export namespace taskpool {
             }
             if (InternalTask.of(task).state.compareAndSwap(curState, InternalState.CANCELED) == curState) {
                 cleanupCanceledPendingDependencyTask(task);
+                if (curState == InternalState.RUNNING.valueOf()) {
+                    cleanupCanceledRunningTask(task);
+                }
                 return;
             }
         }
@@ -3484,6 +3500,12 @@ export namespace taskpool {
                 executionRecord?.rejectPromise(cancelError);
             }
         });
+        internalTask.notifyDependencies();
+    }
+
+    function cleanupCanceledRunningTask(task: Task): void {
+        let internalTask = InternalTask.of(task);
+        internalTask.removeTaskRegistryReference();
     }
 
     function takePendingDependencyQueuedExecution(task: Task): QueuedExecution | undefined {

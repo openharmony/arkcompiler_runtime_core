@@ -1066,6 +1066,75 @@ async function cancelPeriodicTaskByIdAfterExecution(): Promise<void> {
     await verifyCancelPeriodicTaskAfterExecution(true);
 }
 
+async function cancelPeriodicTaskNoRegistryLeak(): Promise<void> {
+    if (CoroutineExtras.isTaskpoolUsingLaunchMode()) {
+        return;
+    }
+    const taskCount: int = 5;
+    const periodMs: int = 1;
+    const runMs: number = 20.0;
+    const drainAfterCancelMs: number = 80.0;
+    let tasks: taskpool.Task[] = [];
+    let taskIds: long[] = [];
+
+    for (let i: int = 0; i < taskCount; i++) {
+        let task = new taskpool.Task(delay, 20);
+        tasks.push(task);
+        taskIds.push(task.taskId);
+        taskpool.executePeriodically(periodMs, task);
+    }
+
+    await dependencyStressAsyncSleep(runMs);
+
+    for (let i: int = 0; i < taskCount; i++) {
+        taskpool.cancel(tasks[i]);
+    }
+
+    await dependencyStressAsyncSleep(drainAfterCancelMs);
+
+    let info = taskpool.getTaskPoolInfo();
+    let leakedCount: int = 0;
+    for (let i: int = 0; i < info.taskInfos.length; i++) {
+        if (taskIds.includes(info.taskInfos[i].taskId)) {
+            leakedCount++;
+        }
+    }
+
+    arktest.assertEQ(leakedCount, 0, 'periodic tasks should be removed from registry after cancel');
+}
+
+async function cancelDelayedDependencyChainNoLeak(): Promise<void> {
+    let taskA = new taskpool.Task(delay, 50);
+    let taskB = new taskpool.Task(delay, 50);
+    let taskC = new taskpool.Task(delay, 50);
+    taskB.addDependency(taskA);
+    taskC.addDependency(taskB);
+    let taskIds: long[] = [taskA.taskId, taskB.taskId, taskC.taskId];
+
+    let promises: Promise<Any>[] = [
+        taskpool.executeDelayed(10, taskA).catch((err: Error) => err),
+        taskpool.executeDelayed(10, taskB).catch((err: Error) => err),
+        taskpool.executeDelayed(10, taskC).catch((err: Error) => err),
+    ];
+
+    await dependencyStressAsyncSleep(30.0);
+    taskpool.cancel(taskC);
+    taskpool.cancel(taskB);
+    taskpool.cancel(taskA);
+
+    await Promise.allSettled(promises);
+    await dependencyStressAsyncSleep(150.0);
+
+    let info = taskpool.getTaskPoolInfo();
+    let leakedCount: int = 0;
+    for (let i: int = 0; i < info.taskInfos.length; i++) {
+        if (taskIds.includes(info.taskInfos[i].taskId)) {
+            leakedCount++;
+        }
+    }
+    arktest.assertEQ(leakedCount, 0, 'dependency chain tasks should be removed from registry after cancel');
+}
+
 async function testNoEAWorker() {
     // --taskpool-mode=launch
     if (CoroutineExtras.isTaskpoolUsingLaunchMode()) {
@@ -1139,6 +1208,8 @@ function main(): int {
     commonTaskSuite.addAsyncTest('cancelPeriodicTaskStopsExecution', cancelPeriodicTaskStopsExecution);
     commonTaskSuite.addAsyncTest('cancelPeriodicTaskByTaskAfterExecution', cancelPeriodicTaskByTaskAfterExecution);
     commonTaskSuite.addAsyncTest('cancelPeriodicTaskByIdAfterExecution', cancelPeriodicTaskByIdAfterExecution);
+    commonTaskSuite.addAsyncTest('cancelPeriodicTaskNoRegistryLeak', cancelPeriodicTaskNoRegistryLeak);
+    commonTaskSuite.addAsyncTest('cancelDelayedDependencyChainNoLeak', cancelDelayedDependencyChainNoLeak);
     commonTaskSuite.addAsyncTest('testNoEAWorker', testNoEAWorker);
 
     let res = commonTaskSuite.run();
