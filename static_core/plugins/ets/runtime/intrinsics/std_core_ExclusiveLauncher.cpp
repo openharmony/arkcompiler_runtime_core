@@ -172,6 +172,10 @@ static uint64_t ConvertEventLoopTimeoutToMicroseconds(int64_t timeoutMs)
     return std::min(static_cast<uint64_t>(timeoutMs) * MILLISECONDS_TO_MICROSECONDS, ASYNC_WORK_WAITING_TIME);
 }
 
+static thread_local bool g_gInteropPumpStopRequested = false;
+static thread_local bool g_gInteropPumpRunning = false;
+static thread_local JobEvent *g_gInteropPumpExitWaiter = nullptr;
+
 static void SetInteropPumpWakeEvent(JobWorkerThread *worker, JobEvent *event)
 {
     worker->GetLocalStorage().Set<JobWorkerThread::DataIdx::INTEROP_PUMP_EVENT>(event);
@@ -192,13 +196,31 @@ static void AwaitInteropPumpDelay(JobWorkerThread *worker, JobManager *jobMan, u
     AwaitInteropPumpEvent(worker, &timerEvt);
 }
 
-static void StopInteropEventLoopPump(JobWorkerThread *worker)
+static void WakeInteropPump(JobWorkerThread *worker)
 {
-    worker->DestroyCallbackPoster();
     auto *event = worker->GetLocalStorage().Get<JobWorkerThread::DataIdx::INTEROP_PUMP_EVENT, JobEvent *>();
     if (event != nullptr) {
         event->Happen();
     }
+}
+
+static void WaitInteropPumpExit(JobWorkerThread *worker, JobManager *jobMan)
+{
+    if (!g_gInteropPumpRunning) {
+        return;
+    }
+    GenericEvent exitEvent(jobMan);
+    exitEvent.Lock();
+    g_gInteropPumpExitWaiter = &exitEvent;
+    WakeInteropPump(worker);
+    jobMan->Await(&exitEvent);
+}
+
+static void StopInteropEventLoopPump(JobWorkerThread *worker, JobManager *jobMan)
+{
+    g_gInteropPumpStopRequested = true;
+    WaitInteropPumpExit(worker, jobMan);
+    worker->DestroyCallbackPoster();
 }
 
 static void InteropEventLoopPumpEntrypoint([[maybe_unused]] void *param)
@@ -209,8 +231,12 @@ static void InteropEventLoopPumpEntrypoint([[maybe_unused]] void *param)
     auto *etsVM = EtsExecutionContext::FromMT(executionCtx)->GetPandaVM();
     uint32_t immediatePumpCount = 0;
 
-    while (worker->IsExternalSchedulingEnabled()) {
+    g_gInteropPumpRunning = true;
+    while (worker->IsExternalSchedulingEnabled() && !g_gInteropPumpStopRequested) {
         [[maybe_unused]] auto hasEventLoopWork = etsVM->RunEventLoop(ark::EventLoopRunMode::RUN_NOWAIT);
+        if (g_gInteropPumpStopRequested) {
+            break;
+        }
         auto timeoutMs = etsVM->GetEventLoopBackendTimeout();
         if (timeoutMs == 0 && immediatePumpCount++ < INTEROP_PUMP_IMMEDIATE_LIMIT) {
             continue;
@@ -225,12 +251,18 @@ static void InteropEventLoopPumpEntrypoint([[maybe_unused]] void *param)
         }
     }
     SetInteropPumpWakeEvent(worker, nullptr);
+    g_gInteropPumpRunning = false;
+    if (g_gInteropPumpExitWaiter != nullptr) {
+        g_gInteropPumpExitWaiter->Happen();
+        g_gInteropPumpExitWaiter = nullptr;
+    }
 }
 
 static bool StartInteropEventLoopPump()
 {
     auto *executionCtx = JobExecutionContext::GetCurrent();
     auto *jobMan = executionCtx->GetManager();
+    g_gInteropPumpStopRequested = false;
     auto epInfo = Job::NativeEntrypointInfo {InteropEventLoopPumpEntrypoint, nullptr};
     auto *job =
         jobMan->CreateJob("interop event loop pump", epInfo, JobPriority::DEFAULT_PRIORITY, Job::Type::MUTATOR, true);
@@ -251,9 +283,10 @@ static void EAWorkerLoop(PandaEtsVM *etsVM, mem::Reference *taskRef, [[maybe_unu
     auto *refStorage = etsVM->GetGlobalObjectStorage();
     RunExclusiveTask(taskRef, refStorage);
 
-    auto *worker = JobExecutionContext::GetCurrent()->GetWorker();
+    auto *executionCtx = JobExecutionContext::GetCurrent();
+    auto *worker = executionCtx->GetWorker();
     if (supportInterop) {
-        StopInteropEventLoopPump(worker);
+        StopInteropEventLoopPump(worker, executionCtx->GetManager());
     }
 
     worker->ExecuteJobsUntilIdle();
