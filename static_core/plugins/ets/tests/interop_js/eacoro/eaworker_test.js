@@ -42,6 +42,9 @@ function runTest() {
     RunSetTimeoutTest();
     let RunNewCoroInSetTimeoutTest = etsVm.getFunction('Leaworker_test/ETSGLOBAL;', 'RunNewCoroInSetTimeoutTest');
     RunNewCoroInSetTimeoutTest();
+    let RunInteropPumpStopLifecycleTest =
+        etsVm.getFunction('Leaworker_test/ETSGLOBAL;', 'runInteropPumpStopLifecycleTest');
+    RunInteropPumpStopLifecycleTest();
 }
 
 runTest();

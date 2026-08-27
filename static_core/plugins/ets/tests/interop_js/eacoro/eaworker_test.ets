@@ -154,3 +154,23 @@ function RunNewCoroInSetTimeoutTest(): void {
 
     job.Await();
 }
+
+function runInteropPumpStopLifecycleTest(): void {
+    let job = new CompletableJob<void>();
+
+    let w = new EAWorker(true);
+    w.start();
+    let p = w.run<int>(() => {
+        let p1 = asyncCall(() => {});
+        let p2 = p1.then<Any, Any>((value: Any) => {
+            setTimeout(() => {
+                job.finish();
+            }, 10);
+        });
+        return 42;
+    });
+    w.join();
+
+    arktest.assertEQ(p.Await(), 42);
+    job.Await();
+}
