@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,10 @@ let ns = STValue.findNamespace("stvalue_unwrap.Unwrap");
 let stvalueWrap;
 const epsilon = 1e-5;
 let SType = etsVm.SType;
+
+let userInfoCls = STValue.findClass('stvalue_unwrap.UserInfo');
+let baseAnimalCls = STValue.findClass('stvalue_unwrap.BaseAnimal');
+let dogBreedCls = STValue.findClass('stvalue_unwrap.DogBreed');
 
 function testUnwrapToNumber(): void {
     stvalueWrap = STValue.wrapByte(1);
@@ -340,12 +344,304 @@ function testUnwrapToBoolean(): void {
     print('UnwrapToBoolean Test SUCCESS!')
 }
 
+// ============================================================================
+// JSON serialization tests (via classInvokeStaticMethod on std.core.JSON)
+// ============================================================================
+
+let JSONCls = STValue.findClass('std.core.JSON');
+
+function stringifySTValue(stValue): string {
+    return JSONCls.classInvokeStaticMethod('stringify',
+        'C{std.core.Object}:C{std.core.String}', [stValue]).unwrapToString();
+}
+
+// Serialize flat objects with various property types
+function testJSONStringifyFlatObjects(): void {
+    let userInfo = ns.namespaceGetVariable('userInfo', SType.REFERENCE);
+    let jsonStr = stringifySTValue(userInfo);
+    ASSERT_TRUE(typeof jsonStr === 'string');
+    ASSERT_TRUE(jsonStr.includes('Alice'));
+    ASSERT_TRUE(jsonStr.includes('30'));
+    ASSERT_TRUE(jsonStr.includes('95.5'));
+    print('UserInfo JSON: ', jsonStr);
+
+    let product = ns.namespaceGetVariable('productInfo', SType.REFERENCE);
+    let productJson = stringifySTValue(product);
+    ASSERT_TRUE(productJson.includes('Laptop'));
+    ASSERT_TRUE(productJson.includes('1001'));
+
+    let customUser = ns.namespaceGetVariable('customUserInfo', SType.REFERENCE);
+    let customJson = stringifySTValue(customUser);
+    ASSERT_TRUE(customJson.includes('Charlie'));
+    ASSERT_TRUE(customJson.includes('28'));
+}
+
+// Serialize nested object (Person contains Address)
+function testJSONStringifyNestedObject(): void {
+    let person = ns.namespaceGetVariable('personInfo', SType.REFERENCE);
+    let jsonStr = stringifySTValue(person);
+    ASSERT_TRUE(typeof jsonStr === 'string');
+    ASSERT_TRUE(jsonStr.includes('Bob'));
+    ASSERT_TRUE(jsonStr.includes('25'));
+    ASSERT_TRUE(jsonStr.includes('Shanghai'));
+    ASSERT_TRUE(jsonStr.includes('200000'));
+    print('Person JSON: ', jsonStr);
+}
+
+// Serialize empty class
+function testJSONStringifyEmptyClass(): void {
+    let emptyObj = ns.namespaceGetVariable('emptyObj', SType.REFERENCE);
+    let jsonStr = stringifySTValue(emptyObj);
+    ASSERT_TRUE(typeof jsonStr === 'string');
+    print('EmptyClass JSON: ', jsonStr);
+}
+
+// Serialize object with array fields
+function testJSONStringifyWithArrays(): void {
+    let holder = ns.namespaceGetVariable('collectionHolder', SType.REFERENCE);
+    let jsonStr = stringifySTValue(holder);
+    ASSERT_TRUE(jsonStr.includes('tag1'));
+    ASSERT_TRUE(jsonStr.includes('tag2'));
+    ASSERT_TRUE(jsonStr.includes('42'));
+    print('CollectionHolder JSON: ', jsonStr);
+
+    let intArray = ns.namespaceGetVariable('intArray', SType.REFERENCE);
+    let arrayJson = stringifySTValue(intArray);
+    ASSERT_TRUE(arrayJson.includes('1'));
+    ASSERT_TRUE(arrayJson.includes('5'));
+
+    let emptyArray = ns.namespaceGetVariable('emptyArray', SType.REFERENCE);
+    let emptyJson = stringifySTValue(emptyArray);
+    ASSERT_TRUE(typeof emptyJson === 'string');
+}
+
+// Serialize object with all primitive field types (byte/short/int/long/float/double/char/boolean)
+function testJSONStringifyPrimitiveFields(): void {
+    let primitive = ns.namespaceGetVariable('primitiveFields', SType.REFERENCE);
+    let jsonStr = stringifySTValue(primitive);
+    ASSERT_TRUE(typeof jsonStr === 'string');
+    ASSERT_TRUE(jsonStr.includes('100000'));
+    ASSERT_TRUE(jsonStr.includes('1000'));
+    print('PrimitiveFields JSON: ', jsonStr);
+}
+
+// Serialize object with nullable fields
+function testJSONStringifyNullableFields(): void {
+    let nullable = ns.namespaceGetVariable('nullableFields', SType.REFERENCE);
+    let jsonStr = stringifySTValue(nullable);
+    ASSERT_TRUE(typeof jsonStr === 'string');
+    ASSERT_TRUE(jsonStr.includes('default'));
+    print('NullableFields JSON: ', jsonStr);
+
+    nullable.objectSetProperty('name', STValue.wrapString('SetNullable'), SType.REFERENCE);
+    let afterSet = stringifySTValue(nullable);
+    ASSERT_TRUE(afterSet.includes('SetNullable'));
+
+    nullable.objectSetProperty('name', STValue.getNull(), SType.REFERENCE);
+}
+
+// Serialize object with enum field
+function testJSONStringifyEnumField(): void {
+    let enumHolder = ns.namespaceGetVariable('enumHolder', SType.REFERENCE);
+    let jsonStr = stringifySTValue(enumHolder);
+    ASSERT_TRUE(typeof jsonStr === 'string');
+    ASSERT_TRUE(jsonStr.includes('holder'));
+    print('EnumHolder JSON: ', jsonStr);
+}
+
+// Serialize object created via classInstantiate (not from namespace)
+function testJSONStringifyClassInstantiate(): void {
+    let instance = userInfoCls.classInstantiate('C{std.core.String}i:',
+        [STValue.wrapString('David'), STValue.wrapInt(35)]);
+    let jsonStr = stringifySTValue(instance);
+    ASSERT_TRUE(jsonStr.includes('David'));
+    ASSERT_TRUE(jsonStr.includes('35'));
+
+    let defaultInstance = userInfoCls.classInstantiate(':', []);
+    let defaultJson = stringifySTValue(defaultInstance);
+    ASSERT_TRUE(defaultJson.includes('Alice'));
+    ASSERT_TRUE(defaultJson.includes('30'));
+}
+
+// Serialize array created via newArray
+function testJSONStringifyNewArray(): void {
+    let intClass = STValue.findClass('std.core.Int');
+    let intObj1 = intClass.classInstantiate('i:', [STValue.wrapInt(1)]);
+    let intObj2 = intClass.classInstantiate('i:', [STValue.wrapInt(2)]);
+    let newArray = STValue.newArray(2, intObj1);
+    newArray.arraySet(1, intObj2);
+    let jsonStr = stringifySTValue(newArray);
+    ASSERT_TRUE(typeof jsonStr === 'string');
+    print('NewArray JSON: ', jsonStr);
+}
+
+// Same object serialized twice produces identical result
+function testJSONStringifyConsistency(): void {
+    let userInfo = ns.namespaceGetVariable('userInfo', SType.REFERENCE);
+    let json1 = stringifySTValue(userInfo);
+    let json2 = stringifySTValue(userInfo);
+    ASSERT_TRUE(json1 === json2);
+
+    let sameObj = ns.namespaceGetVariable('userInfo', SType.REFERENCE);
+    let json3 = stringifySTValue(sameObj);
+    ASSERT_TRUE(json1 === json3);
+}
+
+// Different objects produce different JSON
+function testJSONStringifyMultipleObjects(): void {
+    let names = ['Alice', 'Bob', 'Charlie'];
+    let ages = [30, 25, 28];
+    let jsonStrings = [];
+    for (let i = 0; i < names.length; i++) {
+        let obj = userInfoCls.classInstantiate('C{std.core.String}i:',
+            [STValue.wrapString(names[i]), STValue.wrapInt(ages[i])]);
+        jsonStrings.push(stringifySTValue(obj));
+    }
+    for (let i = 0; i < names.length; i++) {
+        ASSERT_TRUE(jsonStrings[i].includes(names[i]));
+        ASSERT_TRUE(jsonStrings[i].includes(ages[i].toString()));
+    }
+    ASSERT_TRUE(jsonStrings[0] !== jsonStrings[1]);
+    ASSERT_TRUE(jsonStrings[1] !== jsonStrings[2]);
+}
+
+// Modify object properties and verify JSON reflects changes
+function testJSONStringifyAfterModification(): void {
+    let userInfo = ns.namespaceGetVariable('userInfo', SType.REFERENCE);
+    let jsonBefore = stringifySTValue(userInfo);
+    ASSERT_TRUE(jsonBefore.includes('Alice'));
+
+    userInfo.objectSetProperty('name', STValue.wrapString('ModifiedName'), SType.REFERENCE);
+    userInfo.objectSetProperty('age', STValue.wrapInt(99), SType.INT);
+
+    let jsonAfter = stringifySTValue(userInfo);
+    ASSERT_TRUE(jsonAfter.includes('ModifiedName'));
+    ASSERT_TRUE(jsonAfter.includes('99'));
+    ASSERT_TRUE(!jsonAfter.includes('Alice'));
+    ASSERT_TRUE(jsonBefore !== jsonAfter);
+
+    userInfo.objectSetProperty('name', STValue.wrapString('Alice'), SType.REFERENCE);
+    userInfo.objectSetProperty('age', STValue.wrapInt(30), SType.INT);
+    let jsonRestored = stringifySTValue(userInfo);
+    ASSERT_TRUE(jsonRestored.includes('Alice'));
+    ASSERT_TRUE(jsonRestored.includes('30'));
+}
+
+// Call void method (setName) then verify state change in JSON
+function testJSONStringifyAfterVoidMethod(): void {
+    let userInfo = ns.namespaceGetVariable('userInfo', SType.REFERENCE);
+    let jsonBefore = stringifySTValue(userInfo);
+    ASSERT_TRUE(jsonBefore.includes('Alice'));
+
+    userInfo.objectInvokeMethod('setName', 'C{std.core.String}:', [STValue.wrapString('VoidMethod')]);
+    let jsonAfter = stringifySTValue(userInfo);
+    ASSERT_TRUE(jsonAfter.includes('VoidMethod'));
+    ASSERT_TRUE(!jsonAfter.includes('Alice'));
+
+    userInfo.objectInvokeMethod('setName', 'C{std.core.String}:', [STValue.wrapString('Alice')]);
+    let jsonRestored = stringifySTValue(userInfo);
+    ASSERT_TRUE(jsonRestored.includes('Alice'));
+}
+
+// Serialize inherited object (DogBreed extends BaseAnimal)
+function testJSONStringifyInheritance(): void {
+    let dogObj = ns.namespaceGetVariable('dogObj', SType.REFERENCE);
+    let jsonStr = stringifySTValue(dogObj);
+    ASSERT_TRUE(typeof jsonStr === 'string');
+    ASSERT_TRUE(jsonStr.includes('Labrador') || jsonStr.includes('animal'));
+
+    let dogInstance = dogBreedCls.classInstantiate(':', []);
+    ASSERT_TRUE(dogInstance.objectInstanceOf(dogBreedCls));
+    ASSERT_TRUE(dogInstance.objectInstanceOf(baseAnimalCls));
+    let dogJson = stringifySTValue(dogInstance);
+    ASSERT_TRUE(typeof dogJson === 'string');
+}
+
+// Verify method return value matches JSON state
+function testJSONStringifyWithMethodResult(): void {
+    let person = ns.namespaceGetVariable('personInfo', SType.REFERENCE);
+    let nameResult = person.objectInvokeMethod('getName', ':C{std.core.String}', []);
+    ASSERT_TRUE(nameResult.unwrapToString() === 'Bob');
+    let jsonStr = stringifySTValue(person);
+    ASSERT_TRUE(jsonStr.includes('Bob'));
+}
+
+// Parse JSON result and verify structure
+function testJSONStringifyParsedResult(): void {
+    let userInfo = ns.namespaceGetVariable('userInfo', SType.REFERENCE);
+    let jsonStr = stringifySTValue(userInfo);
+    let parsed = JSON.parse(jsonStr);
+    ASSERT_TRUE(parsed !== null && parsed !== undefined);
+    ASSERT_TRUE(parsed.name === 'Alice');
+    ASSERT_TRUE(parsed.age === 30);
+    ASSERT_TRUE(parsed.active === true);
+}
+
+// ============================================================================
+// toJSON (static) tests — works with proxy objects (shared references)
+// ============================================================================
+
+// toJSON with all three builtin proxy types
+function testToJSONWithAllProxyTypes(): void {
+    let stArr = STValue.newSTArray();
+    let arrJson = STValue.toJSON(stArr);
+    ASSERT_TRUE(typeof arrJson === 'string');
+    print('st.Array toJSON: ', arrJson);
+
+    let stMap = STValue.newSTMap();
+    let mapJson = STValue.toJSON(stMap);
+    ASSERT_TRUE(typeof mapJson === 'string');
+    print('st.Map toJSON: ', mapJson);
+
+    let stSet = STValue.newSTSet();
+    let setJson = STValue.toJSON(stSet);
+    ASSERT_TRUE(typeof setJson === 'string');
+    print('st.Set toJSON: ', setJson);
+}
+
+// toJSON arg count errors
+function testToJSONInvalidParamCount(): void {
+    let checkRes = false;
+    try {
+        STValue.toJSON();
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 1 args, but got 0 args');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        let userInfo = ns.namespaceGetVariable('userInfo', SType.REFERENCE);
+        STValue.toJSON(userInfo, userInfo);
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 1 args, but got 2 args');
+    }
+    ASSERT_TRUE(checkRes);
+}
 
 function main(): void {
     testUnwrapToNumber();
     testUnwrapToString();
     testUnwrapToBigInt();
     testUnwrapToBoolean();
+    testJSONStringifyFlatObjects();
+    testJSONStringifyNestedObject();
+    testJSONStringifyEmptyClass();
+    testJSONStringifyWithArrays();
+    testJSONStringifyPrimitiveFields();
+    testJSONStringifyNullableFields();
+    testJSONStringifyEnumField();
+    testJSONStringifyClassInstantiate();
+    testJSONStringifyNewArray();
+    testJSONStringifyConsistency();
+    testJSONStringifyMultipleObjects();
+    testJSONStringifyAfterModification();
+    testJSONStringifyAfterVoidMethod();
+    testJSONStringifyInheritance();
+    testJSONStringifyWithMethodResult();
+    testJSONStringifyParsedResult();
+    testToJSONWithAllProxyTypes();
+    testToJSONInvalidParamCount();
 }
 
 main();

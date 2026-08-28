@@ -349,12 +349,109 @@ function testClassInstantiate(): void {
     ASSERT_TRUE(res);
 }
 
+// ============================================================================
+// newSTArray / newSTMap / newSTSet tests
+// ============================================================================
+
+function testNewSTBuiltinCreation(): void {
+    let stArr = STValue.newSTArray();
+    let stMap = STValue.newSTMap();
+    let stSet = STValue.newSTSet();
+
+    ASSERT_TRUE(stArr !== null && stArr !== undefined && typeof stArr === 'object');
+    ASSERT_TRUE(stMap !== null && stMap !== undefined && typeof stMap === 'object');
+    ASSERT_TRUE(stSet !== null && stSet !== undefined && typeof stSet === 'object');
+
+    ASSERT_TRUE(STValue.isSTArray(stArr) === true);
+    ASSERT_TRUE(STValue.isSTMap(stMap) === true);
+    ASSERT_TRUE(STValue.isSTSet(stSet) === true);
+}
+
+function testNewSTBuiltinDistinctInstances(): void {
+    let arr1 = STValue.newSTArray();
+    let arr2 = STValue.newSTArray();
+    let arr3 = STValue.newSTArray();
+    ASSERT_TRUE(arr1 !== arr2);
+    ASSERT_TRUE(arr2 !== arr3);
+    ASSERT_TRUE(arr1 !== arr3);
+    ASSERT_TRUE(STValue.isSTArray(arr1) && STValue.isSTArray(arr2) && STValue.isSTArray(arr3));
+
+    let map1 = STValue.newSTMap();
+    let map2 = STValue.newSTMap();
+    ASSERT_TRUE(map1 !== map2);
+    ASSERT_TRUE(STValue.isSTMap(map1) && STValue.isSTMap(map2));
+
+    let set1 = STValue.newSTSet();
+    let set2 = STValue.newSTSet();
+    ASSERT_TRUE(set1 !== set2);
+    ASSERT_TRUE(STValue.isSTSet(set1) && STValue.isSTSet(set2));
+}
+
+function testNewSTBuiltinCrossType(): void {
+    let stArr = STValue.newSTArray();
+    let stMap = STValue.newSTMap();
+    let stSet = STValue.newSTSet();
+
+    ASSERT_TRUE(!STValue.isSTMap(stArr) && !STValue.isSTSet(stArr));
+    ASSERT_TRUE(!STValue.isSTArray(stMap) && !STValue.isSTSet(stMap));
+    ASSERT_TRUE(!STValue.isSTArray(stSet) && !STValue.isSTMap(stSet));
+}
+
+function testNewSTBuiltinInvalidParam(): void {
+    let funcs = [
+        { name: 'newSTArray', fn: (n) => STValue.newSTArray(n) },
+        { name: 'newSTMap', fn: (n) => STValue.newSTMap(n) },
+        { name: 'newSTSet', fn: (n) => STValue.newSTSet(n) },
+    ];
+    let badInputs = [1, 'hello', null, undefined, {}, []];
+    for (let f = 0; f < funcs.length; f++) {
+        for (let i = 0; i < badInputs.length; i++) {
+            let checkRes = false;
+            try {
+                funcs[f].fn(badInputs[i]);
+            } catch (e: Error) {
+                checkRes = e.message.includes('bad args');
+            }
+            ASSERT_TRUE(checkRes);
+        }
+        let checkRes = false;
+        try {
+            if (funcs[f].name === 'newSTArray') {
+                STValue.newSTArray(1, 2);
+            } else if (funcs[f].name === 'newSTMap') {
+                STValue.newSTMap(1, 2);
+            } else {
+                STValue.newSTSet(1, 2);
+            }
+        } catch (e: Error) {
+            checkRes = e.message.includes('bad args');
+        }
+        ASSERT_TRUE(checkRes);
+    }
+}
+
+function testNewSTBuiltinReturnType(): void {
+    let stArr = STValue.newSTArray();
+    let result = STValue.isSTArray(stArr);
+    ASSERT_TRUE(typeof result === 'boolean');
+    ASSERT_TRUE(result === true);
+
+    let falseResult = STValue.isSTMap(stArr);
+    ASSERT_TRUE(typeof falseResult === 'boolean');
+    ASSERT_TRUE(falseResult === false);
+}
+
 function main(): void {
     testNewFixedArrayPrimitive();
     testNewFixedArrayReference();
     testNewArray();
     testNewTwoDimensionalArray();
     testClassInstantiate();
+    testNewSTBuiltinCreation();
+    testNewSTBuiltinDistinctInstances();
+    testNewSTBuiltinCrossType();
+    testNewSTBuiltinInvalidParam();
+    testNewSTBuiltinReturnType();
 }
 
 main();
