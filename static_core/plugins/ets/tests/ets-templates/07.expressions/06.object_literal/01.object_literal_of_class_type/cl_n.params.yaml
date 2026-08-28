@@ -88,7 +88,7 @@ cases:
       use: |-
           let a: A = { name: "John", age: 42, name: "James" } // CTE, duplicate field
       expected_out: |-
-          Semantic error ESE0280: Property 'name' might not have been initialized.
+          Semantic error ESE0100: An object literal cannot have multiple properties with the same name.
 
     - decl: |-
           class A {
