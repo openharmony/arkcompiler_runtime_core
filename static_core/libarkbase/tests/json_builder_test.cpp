@@ -74,6 +74,25 @@ TEST(JsonBuilderTest, StringifiesStrings)
     EXPECT_THAT("foo\tbar\n\21\1", StringifiesAs(R"("foo\tbar\n\u0011\u0001")"));
 }
 
+TEST(JsonBuilderTest, StringifiesHighByteStrings)
+{
+    // Regression: on platforms where plain `char` is signed, bytes >= 0x80
+    // (e.g. UTF-8 multibyte sequences) used to be mistaken for control
+    // characters and escaped as "\uFFFFFFXX". They must pass through as-is.
+    // UTF-8 "中" = "\xE4\xB8\xAD"; UTF-8 "é" = "\xC3\xA9".
+    EXPECT_THAT("\xE4\xB8\xAD", StringifiesAs("\"\xE4\xB8\xAD\""));
+    EXPECT_THAT("\xC3\xA9", StringifiesAs("\"\xC3\xA9\""));
+    EXPECT_THAT("foo \xE4\xB8\xAD bar", StringifiesAs("\"foo \xE4\xB8\xAD bar\""));
+
+    // Boundaries: 0x7F (DEL) and 0x80 (first byte with the high bit set) are
+    // not control characters and must be kept verbatim.
+    EXPECT_THAT("\x7F\x80", StringifiesAs("\"\x7F\x80\""));
+
+    // Control characters (<= 0x1F) are still escaped, high bytes are not:
+    // 0x1F -> "\u001F", 0x80 kept as-is.
+    EXPECT_THAT("\x1F\x80", StringifiesAs("\"\\u001F\x80\""));
+}
+
 TEST(JsonBuilderTest, StringifiesArrays)
 {
     EXPECT_THAT([](JsonArrayBuilder &) {}, StringifiesAs("[]"));
