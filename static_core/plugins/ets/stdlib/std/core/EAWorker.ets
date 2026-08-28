@@ -35,6 +35,8 @@ export enum WorkerPriority {
 
 const INVALID_WORKER_ID = -1;
 const MAIN_WORKER_ID = 0;
+// Keep in sync with AffinityMask::MAX_WORKERS_COUNT in the runtime.
+const MAX_WORKERS_COUNT = 128;
 
 /**
  * This class is needed to run Task in exclusive mode:
@@ -55,6 +57,19 @@ class ExclusiveLauncher {
     static native elaunch(task: Object, joiningPromise: Promise<void>, name: string, needInterop: boolean): int;
 };
 
+final class EAWorkerRegistrySlot {
+    private worker: AtomicReference<EAWorker | undefined> =
+        new AtomicReference<EAWorker | undefined>(undefined);
+
+    load(): EAWorker | undefined {
+        return this.worker.load();
+    }
+
+    compareAndSwap(expected: EAWorker | undefined, worker: EAWorker | undefined): EAWorker | undefined {
+        return this.worker.compareAndSwap(expected, worker);
+    }
+}
+
 /**
  * Helper class for ExclusiveLauncher that allows to use
  * the same exclusive worker for several tasks
@@ -65,7 +80,9 @@ export class EAWorker {
     private loopStarted = new AtomicFlag(false);
     private loopJoined = new AtomicFlag(false);
     private initialTask: Task = () => {};
-    private static workers = new containers.ConcurrentHashMap<int, EAWorker>();
+    // Avoid coroutine switches during the synchronous start phase as much as possible.
+    // Use per-worker atomic slots instead of a concurrent container for the worker registry.
+    private static workerSlots = EAWorker.createWorkerSlots();
     private static activeUserWorkers = new AtomicInt(0);
     private isTaskpool = false;
     private userWorkerSlotReserved = new AtomicInt(0);
@@ -123,7 +140,7 @@ export class EAWorker {
     protected constructor(worker: MainWorker) {
         this.worker = worker;
         this.loopStarted.set(true);
-        EAWorker.workers.set(this.worker.getWorkerId(), this);
+        EAWorker.registerWorker(this.worker.getWorkerId(), this);
     }
 
     /**
@@ -144,15 +161,52 @@ export class EAWorker {
         this.initialTask = task as Task;
     }
 
-    /**
-     * Get all registered EAWorker instances.
-     *
-     * @returns { containers.ConcurrentHashMap<int, EAWorker> }
-     *   A concurrent hash map containing all EAWorker instances,
-     *   keyed by their integer identifiers.
-     */
-    private static getWorkers(): containers.ConcurrentHashMap<int, EAWorker> {
-        return EAWorker.workers;
+    private static createWorkerSlots(): FixedArray<EAWorkerRegistrySlot> {
+        return new FixedArray<EAWorkerRegistrySlot>(
+            MAX_WORKERS_COUNT,
+            new EAWorkerRegistrySlot()
+        );
+    }
+
+    private static getWorkerSlot(workerId: int): EAWorkerRegistrySlot | undefined {
+        if (workerId < MAIN_WORKER_ID || workerId >= MAX_WORKERS_COUNT) {
+            return undefined;
+        }
+        return EAWorker.workerSlots[workerId];
+    }
+
+    private static getWorker(workerId: int): EAWorker | undefined {
+        if (workerId < MAIN_WORKER_ID || workerId >= MAX_WORKERS_COUNT) {
+            return undefined;
+        }
+        return EAWorker.workerSlots[workerId].load();
+    }
+
+    private static registerWorker(workerId: int, worker: EAWorker): void {
+        const slot = EAWorker.getWorkerSlot(workerId);
+        if (slot === undefined) {
+            return;
+        }
+
+        let currentWorker = slot.load();
+        while (currentWorker !== worker) {
+            const observedWorker = slot.compareAndSwap(currentWorker, worker);
+            if (observedWorker === currentWorker) {
+                return;
+            }
+            // A concurrent registration changed this slot; retry using the observed worker.
+            currentWorker = observedWorker;
+        }
+    }
+
+    private static unregisterWorker(workerId: int, worker: EAWorker): void {
+        const slot = EAWorker.getWorkerSlot(workerId);
+        if (slot === undefined) {
+            return;
+        }
+        // Remove the entry only if it still belongs to this worker. If the worker id
+        // has been reused, the CAS fails and preserves the replacement worker.
+        slot.compareAndSwap(worker, undefined);
     }
 
     /**
@@ -184,7 +238,7 @@ export class EAWorker {
         try {
             this.worker.start(() => {
                 try {
-                    EAWorker.getWorkers().set(CoroutineExtras.getWorkerId(), this);
+                    EAWorker.registerWorker(CoroutineExtras.getWorkerId(), this);
                     let wrappedInitialTask = this.worker.wrapTaskInternal<void>(this.initialTask, true);
                     wrappedInitialTask();
                 } catch (e) {
@@ -197,7 +251,7 @@ export class EAWorker {
             throw e;
         }
         if (this.worker.getWorkerId() != INVALID_WORKER_ID) {
-            EAWorker.getWorkers().set(this.worker.getWorkerId(), this);
+            EAWorker.registerWorker(this.worker.getWorkerId(), this);
         }
         this.worker.setPriority(this.priority);
         this.loopStarted.set(true);
@@ -267,7 +321,7 @@ export class EAWorker {
      * @returns { EAWorker } The current worker instance
      */
     public static current(): EAWorker | undefined {
-        let currentWorker = EAWorker.getWorkers().get(CoroutineExtras.getWorkerId());
+        let currentWorker = EAWorker.getWorker(CoroutineExtras.getWorkerId());
         if (currentWorker !== undefined && currentWorker.isTaskpool) {
             throw new Error('EAWorker:: Cannot get current worker in taskpool');
         }
@@ -323,7 +377,7 @@ export class EAWorker {
         }
         let finalTask = () => {
             cleanupWorkerState(this.worker.getWorkerId());
-            EAWorker.getWorkers().delete(this.worker.getWorkerId());
+            EAWorker.unregisterWorker(this.worker.getWorkerId(), this);
             this.releaseUserWorkerSlot();
         };
         let joinJob = this.worker.join(finalTask);
@@ -387,7 +441,7 @@ export class EAWorker {
         this.loopStarted.set(false);
         this.loopJoined.set(true);
         cleanupWorkerState(this.worker.getWorkerId());
-        EAWorker.getWorkers().delete(this.worker.getWorkerId());
+        EAWorker.unregisterWorker(this.worker.getWorkerId(), this);
         this.releaseUserWorkerSlot();
         this.worker.handleCreateInteropEnvError();
         EAWorker.postToMain<void>(() => {
