@@ -61,3 +61,4 @@ values:
 - { left: '.0078125f', right: '.01171875f', result: '.01953125f' }
 - { left: '.0078125f', right: -0.01171875f, result: -0.00390625f }
 - { left: 1.1754942E-38f, right: 1.1754942E-38f, result: 2.3509884E-38f } # max subnormal
+- { left: 1.0f, right: 0.000000059604644775390625f, result: 1.0f } # float half-ULP tie rounds to even

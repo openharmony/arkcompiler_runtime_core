@@ -25,3 +25,4 @@ cases:
     - {lit: '123n_',         exp_out: "Syntax error ESY0227: Unexpected token '_'."}
     - {lit: '1N',            exp_out: "Syntax error ESY0227: Unexpected token 'N'."}
     - {lit: '123456789abcn', exp_out: "Syntax error ESY0227: Unexpected token 'abcn'."}
+    - {lit: '1__2n',         exp_out: 'Syntax error ESY0254: Invalid numeric separator.'}
