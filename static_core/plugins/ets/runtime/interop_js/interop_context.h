@@ -403,9 +403,9 @@ public:
         pendingNewInstance_ = handle;
     }
 
-    EtsObject *AcquirePendingNewInstance()
+    EtsHandle<EtsObject> AcquirePendingNewInstance()
     {
-        auto res = pendingNewInstance_.GetPtr();
+        auto res = pendingNewInstance_;
         pendingNewInstance_ = EtsHandle<EtsObject>();
         return res;
     }

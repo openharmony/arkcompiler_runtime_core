@@ -1096,9 +1096,10 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
     auto etsClassWrapper = reinterpret_cast<EtsClassWrapper *>(data);
 
     ScopedManagedCodeThread managedScope(executionCtx->GetMT());
-    EtsObject *etsObject = ctx->AcquirePendingNewInstance();
+    [[maybe_unused]] EtsHandleScope s(executionCtx);
+    EtsHandle<EtsObject> objHandle = ctx->AcquirePendingNewInstance();
 
-    if (LIKELY(etsObject != nullptr)) {
+    if (LIKELY(objHandle.GetPtr() != nullptr)) {
         // proxy $get and $set
         napi_value jsObject = nullptr;
         if (etsClassWrapper->needProxy_) {
@@ -1107,8 +1108,6 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
             jsObject = jsThis;
         }
 
-        [[maybe_unused]] EtsHandleScope s(executionCtx);
-        EtsHandle<EtsObject> objHandle(executionCtx, etsObject);
         // Create shared reference for existing ets object
         SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
         if (UNLIKELY(!storage->CreateETSObjectRef(ctx, objHandle, jsObject))) {

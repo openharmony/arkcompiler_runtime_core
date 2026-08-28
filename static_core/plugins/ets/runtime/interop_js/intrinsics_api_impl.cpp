@@ -2066,7 +2066,8 @@ EtsObject *JSRuntimeInvokeDynamicFunction(EtsObject *functionObject, EtsObjectAr
 
     EtsHandle<EtsObject> functionHandle(executionCtx, functionObject);
     auto xRefObjectOperator = XRefObjectOperator::FromEtsObject(functionHandle);
-    return xRefObjectOperator.Invoke(executionCtx, Span<VMHandle<ObjectHeader>>(argsVec.data(), argsVec.size()));
+    auto result = xRefObjectOperator.Invoke(executionCtx, Span<VMHandle<ObjectHeader>>(argsVec.data(), argsVec.size()));
+    return result.GetPtr();
 }
 
 }  // namespace ark::ets::interop::js
