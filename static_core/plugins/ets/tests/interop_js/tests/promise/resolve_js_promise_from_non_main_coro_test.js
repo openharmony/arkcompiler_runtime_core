@@ -15,7 +15,7 @@
 
 const helper = requireNapiPreview('libinterop_test_helper.so', false);
 
-async function runTest(test) {
+function runTest(test) {
     const gtestAbcPath = helper.getEnvironmentVar('ARK_ETS_INTEROP_JS_GTEST_ABC_PATH');
     const stdlibPath = helper.getEnvironmentVar('ARK_ETS_STDLIB_PATH');
     const packageName = helper.getEnvironmentVar('PACKAGE_NAME');
@@ -41,24 +41,41 @@ async function runTest(test) {
     }
     let valueToResolveWith = 42;
     const runTestImpl = etsVm.getFunction(globalName, test);
+    const signalPromiseInJs = etsVm.getFunction(globalName, 'signalPromiseInJs');
+
+    // Keep the libuv loop alive before starting the pending ETS Promise. The trigger is called
+    // only after its JS Promise reaction runs on the completion coroutine.
+    let failure = null;
+    const triggerEventLoopCallback = helper.createEventLoopCallbackTrigger((stackInfoRestored) => {
+        if (failure !== null) {
+            throw failure;
+        }
+        if (!stackInfoRestored) {
+            throw Error('ETS-to-JS scope did not restore the previous stack boundary');
+        }
+        print('Promise stack boundary restoration test passed');
+    });
+
     let promise = runTestImpl(valueToResolveWith);
     if (promise == null) {
         throw Error('Function returned null');
     }
-    const signalPromiseInJs = etsVm.getFunction(globalName, 'signalPromiseInJs');
-    signalPromiseInJs();
-    try {
-        let result = await promise;
+    promise.then((result) => {
         if (result !== valueToResolveWith) {
-            throw Error('Promise was not resolved correctly: result: ', result, ' expected: ', valueToResolveWith);
+            failure = Error('Promise was not resolved correctly: result: ' + result +
+                            ' expected: ' + valueToResolveWith);
         }
-    } catch (error) {
-        throw Error('Promise was rejected with error:', error);
-    }
+        // Do not invoke JS directly here: this reaction can still run inside napi_resolve_deferred().
+        triggerEventLoopCallback();
+    }, (error) => {
+        failure = Error('Promise was rejected with error: ' + error);
+        triggerEventLoopCallback();
+    });
+    signalPromiseInJs();
 }
 
 let args = helper.getArgv();
 if (args.length !== 6) {
     throw Error('Expected test name');
 }
-runTest(args[4]);
+runTest(args[5]);

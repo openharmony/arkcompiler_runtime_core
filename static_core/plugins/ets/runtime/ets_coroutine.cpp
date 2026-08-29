@@ -26,6 +26,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "runtime/include/panda_vm.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/interop_js/stack_info.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
 #include "intrinsics.h"
@@ -253,8 +254,17 @@ void EtsCoroutine::UpdateCachedObjects()
     }
 }
 
+void EtsCoroutine::OnStatusChanged(Status oldStatus, Status newStatus)
+{
+    Coroutine::OnStatusChanged(oldStatus, newStatus);
+    if (oldStatus == Status::RUNNING && newStatus != Status::RUNNING) {
+        interop::js::DeactivateInteropStackInfoForExecutionContext(&executionCtx_);
+    }
+}
+
 void EtsCoroutine::OnContextSwitchedTo()
 {
+    interop::js::ActivateInteropStackInfoForExecutionContext(&executionCtx_);
     if ((GetPriority() == CoroutinePriority::MEDIUM_PRIORITY) && (GetType() == Coroutine::Type::MUTATOR)) {
         executionCtx_.ProcessUnhandledRejectedPromises(false);
     }

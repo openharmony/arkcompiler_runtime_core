@@ -1400,6 +1400,7 @@ EtsString *JSValueToString(JSValue *object)
         ThrowNoInteropContextException();
         return nullptr;
     }
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     napi_env env = ctx->GetJSEnv();
 
     NapiScope jsHandleScope(env);
@@ -1747,6 +1748,7 @@ EtsString *JSONStringify(JSValue *jsvalue)
         ThrowNoInteropContextException();
         return nullptr;
     }
+    INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     auto global = GetGlobal(env);

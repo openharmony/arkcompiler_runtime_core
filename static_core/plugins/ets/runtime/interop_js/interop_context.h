@@ -441,6 +441,26 @@ public:
         stackInfoManager_.UpdateStackInfoIfNeeded();
     }
 
+    PANDA_PUBLIC_API bool PushAndUpdateInteropStackInfoIfNeeded(EtsExecutionContext *executionCtx)
+    {
+        return stackInfoManager_.PushAndUpdateStackInfoIfNeeded(executionCtx);
+    }
+
+    PANDA_PUBLIC_API bool RestoreInteropStackInfoIfNeeded(EtsExecutionContext *executionCtx)
+    {
+        return stackInfoManager_.RestoreStackInfoIfNeeded(executionCtx);
+    }
+
+    PANDA_PUBLIC_API void DeactivateInteropStackInfoIfNeeded(EtsExecutionContext *executionCtx)
+    {
+        stackInfoManager_.DeactivateStackInfoIfNeeded(executionCtx);
+    }
+
+    PANDA_PUBLIC_API void ActivateInteropStackInfoIfNeeded(EtsExecutionContext *executionCtx)
+    {
+        stackInfoManager_.ActivateStackInfoIfNeeded(executionCtx);
+    }
+
     XGCVmAdaptor *GetXGCVmAdaptor() const
     {
         return ecmaVMIterfaceAdaptor_.get();

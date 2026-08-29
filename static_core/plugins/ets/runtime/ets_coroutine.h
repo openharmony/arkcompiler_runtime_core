@@ -101,6 +101,7 @@ public:
     void ProcessUnhandledFailedJobs();
 
     // event handlers
+    void OnStatusChanged(Status oldStatus, Status newStatus) override;
     void OnContextSwitchedTo() override;
     void OnChildCoroutineCreated(Coroutine *child) override;
 

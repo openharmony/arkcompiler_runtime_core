@@ -16,10 +16,22 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_OHOS_STACK_INFO_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_OHOS_STACK_INFO_H
 
+#include <cstddef>
 #include <memory>
+#include <vector>
+
 #include "libarkbase/macros.h"
 
-struct NapiStackInfo;
+#if defined(PANDA_JS_ETS_HYBRID_MODE)
+#include "interfaces/inner_api/napi/native_node_hybrid_api.h"
+#else
+// Keep this layout compatible with the JS N-API stack information structure.
+// NOLINTNEXTLINE(readability-identifier-naming)
+struct NapiStackInfo {
+    size_t stackStart;
+    size_t stackSize;
+};
+#endif
 
 namespace ark::ets {
 class EtsExecutionContext;
@@ -28,6 +40,19 @@ class EtsExecutionContext;
 namespace ark::ets::interop::js {
 
 class InteropCtx;
+
+#if defined(PANDA_ETS_INTEROP_JS)
+PANDA_PUBLIC_API void DeactivateInteropStackInfoForExecutionContext(EtsExecutionContext *executionCtx);
+PANDA_PUBLIC_API void ActivateInteropStackInfoForExecutionContext(EtsExecutionContext *executionCtx);
+#else
+inline void DeactivateInteropStackInfoForExecutionContext([[maybe_unused]] EtsExecutionContext *executionCtx) {}
+inline void ActivateInteropStackInfoForExecutionContext([[maybe_unused]] EtsExecutionContext *executionCtx) {}
+#endif
+
+// Allocated in an execution context only after it enters an ETS-to-JS scope.
+struct InteropStackInfoState {
+    std::vector<NapiStackInfo> savedStackInfos {};
+};
 
 class StackInfoManagerBase {
 public:
@@ -41,6 +66,16 @@ public:
     PANDA_PUBLIC_API void InitStackInfoIfNeeded() {};
     // NOTE(konstanting, #23205): revert to ALWAYS_INLINE once the migration of ets_vm_plugin.cpp to ANI is completed
     PANDA_PUBLIC_API void UpdateStackInfoIfNeeded() {};
+    PANDA_PUBLIC_API bool PushAndUpdateStackInfoIfNeeded([[maybe_unused]] EtsExecutionContext *executionCtx)
+    {
+        return true;
+    }
+    PANDA_PUBLIC_API bool RestoreStackInfoIfNeeded([[maybe_unused]] EtsExecutionContext *executionCtx)
+    {
+        return true;
+    }
+    PANDA_PUBLIC_API void DeactivateStackInfoIfNeeded([[maybe_unused]] EtsExecutionContext *executionCtx) {}
+    PANDA_PUBLIC_API void ActivateStackInfoIfNeeded([[maybe_unused]] EtsExecutionContext *executionCtx) {}
     ~StackInfoManagerBase() = default;
 
     NO_MOVE_SEMANTIC(StackInfoManagerBase);
@@ -58,12 +93,21 @@ public:
     PANDA_PUBLIC_API void InitStackInfoIfNeeded();
     // NOTE(konstanting, #23205): revert to ALWAYS_INLINE once the migration of ets_vm_plugin.cpp to ANI is completed
     PANDA_PUBLIC_API void UpdateStackInfoIfNeeded();
+    PANDA_PUBLIC_API bool PushAndUpdateStackInfoIfNeeded(EtsExecutionContext *executionCtx);
+    PANDA_PUBLIC_API bool RestoreStackInfoIfNeeded(EtsExecutionContext *executionCtx);
+    PANDA_PUBLIC_API void DeactivateStackInfoIfNeeded(EtsExecutionContext *executionCtx);
+    PANDA_PUBLIC_API void ActivateStackInfoIfNeeded(EtsExecutionContext *executionCtx);
     ~StackInfoManagerOhos();
 
     NO_MOVE_SEMANTIC(StackInfoManagerOhos);
     NO_COPY_SEMANTIC(StackInfoManagerOhos);
 
 private:
+    bool SetCurrentStackInfo(EtsExecutionContext *executionCtx);
+    InteropStackInfoState *GetStackInfoState(EtsExecutionContext *executionCtx) const;
+    InteropStackInfoState *GetOrCreateStackInfoState(EtsExecutionContext *executionCtx) const;
+    bool SetStackInfo(NapiStackInfo &stackInfo) const;
+
     std::unique_ptr<NapiStackInfo> mainStackInfo_ {};
 };
 

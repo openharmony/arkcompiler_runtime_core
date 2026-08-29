@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/interop_js/code_scopes-inl.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/logger.h"
 #include "plugins/ets/runtime/interop_js/native_api/arkts_interop_js_api_impl.h"
 
 namespace ark::ets::interop::js {
@@ -35,14 +36,16 @@ ScopedInteropCallStackRecord::~ScopedInteropCallStackRecord()
 InteropETSToJSCodeScope::InteropETSToJSCodeScope(EtsExecutionContext *executionCtx, char const *descr)
     : executionCtx_(executionCtx)
 {
-    [[maybe_unused]] auto status = OpenETSToJSScope(executionCtx_, descr);
-    ASSERT(status);
+    if (UNLIKELY(!OpenETSToJSScope(executionCtx_, descr))) {
+        INTEROP_LOG(ERROR) << "Failed to open ETS-to-JS scope";
+    }
 }
 
 InteropETSToJSCodeScope::~InteropETSToJSCodeScope()
 {
-    [[maybe_unused]] auto status = CloseETSToJSScope(executionCtx_);
-    ASSERT(status);
+    if (UNLIKELY(!CloseETSToJSScope(executionCtx_))) {
+        INTEROP_LOG(ERROR) << "Failed to close ETS-to-JS scope";
+    }
 }
 
 InteropJSToETSCodeScope::InteropJSToETSCodeScope(EtsExecutionContext *executionCtx, char const *descr)

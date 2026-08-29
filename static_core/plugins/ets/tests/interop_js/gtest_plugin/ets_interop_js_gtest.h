@@ -30,6 +30,7 @@
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "libarkbase/utils/span.h"
 
+#if !defined(PANDA_JS_ETS_HYBRID_MODE)
 // NOLINTBEGIN(readability-identifier-naming)
 // CC-OFFNXT(G.FMT.10) project code style
 __attribute__((weak)) napi_status napi_load_module_with_module_request(
@@ -37,6 +38,7 @@ __attribute__((weak)) napi_status napi_load_module_with_module_request(
     [[maybe_unused]] napi_env env, [[maybe_unused]] const char *request_name, [[maybe_unused]] napi_value *result,
     [[maybe_unused]] const char *abcFilePath = nullptr);
 // NOLINTEND(readability-identifier-naming)
+#endif
 
 namespace ark::ets::interop::js::testing {
 

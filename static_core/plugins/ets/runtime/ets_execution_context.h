@@ -31,7 +31,13 @@ public:
     NO_COPY_SEMANTIC(EtsExecutionContext);
     NO_MOVE_SEMANTIC(EtsExecutionContext);
 
-    enum class DataIdx { ETS_PLATFORM_TYPES_PTR, INTEROP_CTX_PTR, INTEROP_CALL_STACK_PTR, LAST_ID };
+    enum class DataIdx {
+        ETS_PLATFORM_TYPES_PTR,
+        INTEROP_CTX_PTR,
+        INTEROP_CALL_STACK_PTR,
+        INTEROP_STACK_INFO_STATE_PTR,
+        LAST_ID
+    };
     using LocalStorage = StaticLocalStorage<DataIdx>;
 
     explicit EtsExecutionContext(ManagedThread *mThread);
