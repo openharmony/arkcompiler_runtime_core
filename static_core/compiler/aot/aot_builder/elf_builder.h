@@ -402,7 +402,7 @@ public:
 
     void SettleSection(Section *section);
 
-    void Write(const std::string &fileName);
+    bool Write(const std::string &fileName);
     bool Write(int anFd);
     void Write(Span<uint8_t> stream);
 
@@ -922,14 +922,23 @@ void ElfBuilder<ARCH, IS_JIT_MODE>::SettleSection(Section *section)
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>
-void ElfBuilder<ARCH, IS_JIT_MODE>::Write(const std::string &fileName)
+bool ElfBuilder<ARCH, IS_JIT_MODE>::Write(const std::string &fileName)
 {
     std::vector<uint8_t> data(GetFileSize());
     auto dataSpan {Span(data)};
     Write(dataSpan);
 
     std::ofstream elfFile(fileName, std::ios::binary);
+    if (!elfFile.is_open()) {
+        LOG(ERROR, COMPILER) << "Failed to open file: " << fileName;
+        return false;
+    }
     elfFile.write(reinterpret_cast<char *>(dataSpan.Data()), dataSpan.Size());
+    if (!elfFile.good()) {
+        LOG(ERROR, COMPILER) << "Failed to write file: " << fileName;
+        return false;
+    }
+    return true;
 }
 
 template <Arch ARCH, bool IS_JIT_MODE>

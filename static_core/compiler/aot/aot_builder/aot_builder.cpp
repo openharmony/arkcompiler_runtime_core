@@ -163,7 +163,10 @@ int AotBuilder::WriteImpl(const std::string &cmdline, const std::string &fileNam
             return 1;
         }
     } else {
-        builder.Write(fileName);
+        if (!builder.Write(fileName)) {
+            LOG(ERROR, COMPILER) << "Failed to write ELF to file=" << fileName;
+            return 1;
+        }
     }
 
     return 0;
