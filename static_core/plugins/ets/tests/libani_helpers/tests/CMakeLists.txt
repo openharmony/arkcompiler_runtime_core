@@ -12,6 +12,7 @@
 # limitations under the License.
 
 add_custom_target(ani_helpers_tests COMMENT "Common target to run libani_helpers tests")
+add_dependencies(ets_gtests ani_helpers_tests)
 
 function(ani_helpers_add_gtest TARGET)
     cmake_parse_arguments(
