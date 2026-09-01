@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -455,6 +455,118 @@ function testTypeIsAssignableFrom(): void {
     ASSERT_TRUE(res);
 }
 
+// ============================================================================
+// isSTArray / isSTMap / isSTSet tests
+// ============================================================================
+
+function testIsSTBuiltinPositive(): void {
+    let stArr = STValue.newSTArray();
+    let stMap = STValue.newSTMap();
+    let stSet = STValue.newSTSet();
+
+    ASSERT_TRUE(STValue.isSTArray(stArr) === true);
+    ASSERT_TRUE(STValue.isSTMap(stMap) === true);
+    ASSERT_TRUE(STValue.isSTSet(stSet) === true);
+
+    ASSERT_TRUE(typeof STValue.isSTArray(stArr) === 'boolean');
+    ASSERT_TRUE(typeof STValue.isSTMap(stMap) === 'boolean');
+    ASSERT_TRUE(typeof STValue.isSTSet(stSet) === 'boolean');
+}
+
+function testIsSTBuiltinCrossType(): void {
+    let stArr = STValue.newSTArray();
+    let stMap = STValue.newSTMap();
+    let stSet = STValue.newSTSet();
+
+    ASSERT_TRUE(STValue.isSTArray(stMap) === false);
+    ASSERT_TRUE(STValue.isSTArray(stSet) === false);
+    ASSERT_TRUE(STValue.isSTMap(stArr) === false);
+    ASSERT_TRUE(STValue.isSTMap(stSet) === false);
+    ASSERT_TRUE(STValue.isSTSet(stArr) === false);
+    ASSERT_TRUE(STValue.isSTSet(stMap) === false);
+}
+
+function testIsSTBuiltinWithNonProxy(): void {
+    let nonProxy = [{}, new Object(), [], new Array(), 123, 'hello', true, 3.14, null, undefined];
+    for (let i = 0; i < nonProxy.length; i++) {
+        ASSERT_TRUE(STValue.isSTArray(nonProxy[i]) === false);
+        ASSERT_TRUE(STValue.isSTMap(nonProxy[i]) === false);
+        ASSERT_TRUE(STValue.isSTSet(nonProxy[i]) === false);
+    }
+}
+
+function testIsSTBuiltinWithSTValue(): void {
+    let stValues = [
+        STValue.wrapString('hello'),
+        STValue.wrapInt(42),
+        STValue.wrapBoolean(true),
+        STValue.wrapBigInt(123n),
+        STValue.wrapNumber(3.14),
+        STValue.wrapByte(0x0A),
+        STValue.wrapShort(1000),
+        STValue.wrapLong(1024),
+        STValue.wrapFloat(3.14),
+        STValue.wrapChar('A'),
+        STValue.getNull(),
+        STValue.getUndefined(),
+    ];
+    for (let i = 0; i < stValues.length; i++) {
+        ASSERT_TRUE(STValue.isSTArray(stValues[i]) === false);
+        ASSERT_TRUE(STValue.isSTMap(stValues[i]) === false);
+        ASSERT_TRUE(STValue.isSTSet(stValues[i]) === false);
+    }
+}
+
+function testIsSTBuiltinInvalidParamCount(): void {
+    let checkRes = false;
+    try {
+        STValue.isSTArray();
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 1 args, but got 0 args');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        STValue.isSTArray({}, {});
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 1 args, but got 2 args');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        STValue.isSTMap();
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 1 args, but got 0 args');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        STValue.isSTMap({}, {});
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 1 args, but got 2 args');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        STValue.isSTSet();
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 1 args, but got 0 args');
+    }
+    ASSERT_TRUE(checkRes);
+
+    checkRes = false;
+    try {
+        STValue.isSTSet({}, {});
+    } catch (e: Error) {
+        checkRes = e.message.includes('Expect 1 args, but got 2 args');
+    }
+    ASSERT_TRUE(checkRes);
+}
+
 function main(): void {
     testIsString();
     testIsBigInt();
@@ -471,6 +583,11 @@ function main(): void {
     testIsStrictlyEqualTo();
     testTypeIsAssignableFrom();
     testObjectInstanceOf();
+    testIsSTBuiltinPositive();
+    testIsSTBuiltinCrossType();
+    testIsSTBuiltinWithNonProxy();
+    testIsSTBuiltinWithSTValue();
+    testIsSTBuiltinInvalidParamCount();
 }
 
 main();
