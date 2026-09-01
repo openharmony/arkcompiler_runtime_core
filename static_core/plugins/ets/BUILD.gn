@@ -165,7 +165,6 @@ if (!is_host_product &&
     ]
     external_deps = [
       "bounds_checking_function:libsec_shared",
-      "c_utils:utils",
       "ets_utils:console",
       "hilog:libhilog",
       "libuv:uv",
