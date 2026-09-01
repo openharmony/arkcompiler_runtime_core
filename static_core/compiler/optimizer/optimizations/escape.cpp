@@ -1693,9 +1693,9 @@ void EscapeAnalysis::VisitGetInstanceClass(Inst *inst)
     if (auto vstate = blockState->GetState(input)) {
         auto newObj = vstate->GetInst();
         auto loadClass = newObj->GetInput(0).GetInst();
-        if (!loadClass->IsClassInst() && loadClass->GetOpcode() != Opcode::GetInstanceClass) {
-            return;
-        }
+        // We do not expect Phis and Selects here since they appear only after EscapeAnalysis
+        ASSERT(loadClass->IsClassInst() || loadClass->GetOpcode() == Opcode::GetInstanceClass ||
+               (loadClass->GetOpcode() == Opcode::LoadImmediate && loadClass->CastToLoadImmediate()->IsClass()));
         aliases_[inst] = loadClass;
     }
 }

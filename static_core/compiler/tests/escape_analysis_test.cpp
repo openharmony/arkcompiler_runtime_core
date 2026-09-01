@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "optimizer/ir/ir_constructor.h"
 #include "unit_test.h"
 #include "optimizer/optimizations/escape.h"
 #include "optimizer/analysis/loop_analyzer.h"
@@ -4129,5 +4130,41 @@ TEST_F(EscapeAnalysisTest, PhiAndPhiInputMaterialization)
     out_graph::PhiAndPhiInputMaterialization::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+TEST_F(EscapeAnalysisTest, LoadImmediateAsClassSource)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).b();
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(1U, Opcode::SaveState).NoVregs();
+            INST(2U, Opcode::LoadImmediate).ref().Class(CUSTOM_CLASS);
+            INST(3U, Opcode::NewObject).ref().Inputs(2U, 1U);
+
+            INST(4U, Opcode::SaveState).Inputs(3U).SrcVregs({0U});
+            INST(5U, Opcode::LoadImmediate).ref().Class(CUSTOM_CLASS);
+            INST(6U, Opcode::NewObject).ref().Inputs(5U, 4U);
+            INST(7U, Opcode::StoreObject).ref().Inputs(3U, 6U).ObjField(OBJ_FIELD);
+            INST(8U, Opcode::LoadObject).ref().Inputs(3U).ObjField(OBJ_FIELD);
+            INST(9U, Opcode::SaveState).Inputs(3U, 8U).SrcVregs({0U, 1U});
+            INST(10U, Opcode::NullCheck).ref().Inputs(8U, 9U);
+            INST(11U, Opcode::GetInstanceClass).ref().Inputs(10U);
+            INST(12U, Opcode::If).CC(CC_NE).Inputs(11U, 2U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(13U, Opcode::LoadObject).ref().Inputs(3U).ObjField(OBJ_FIELD);
+            INST(14U, Opcode::Return).ref().Inputs(13U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(15U, Opcode::Return).ref().Inputs(6U);
+        }
+    }
+
+    // Don't check transformed graph as the test intended to only reproduce a crash.
+    ASSERT_TRUE(Run());
 }
 }  // namespace ark::compiler
