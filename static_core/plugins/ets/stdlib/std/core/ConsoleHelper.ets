@@ -190,8 +190,8 @@ export class Formatter {
     }
 
     private static getName(obj: Object): string {
-        let subObj = Formatter.getValue("name", obj)
-        return subObj ? subObj! as string : 'null'
+        let name = getFunctionObjectNameFromAnnotation(obj)
+        return name !== '' ? name : 'null'
     }
 
     private static getLength(obj: Object): int {
@@ -206,7 +206,7 @@ export class Formatter {
         let cls = Class.of(obj)
         for (const field of reflect.getInstanceFieldsRecursive(cls)) {
             if (field.getName() == key) {
-                return field.getValue(key)
+                return field.getValue(obj)
             }
         }
         return null
