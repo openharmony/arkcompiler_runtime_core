@@ -39,7 +39,7 @@ cases:
           }
       use: |-
           foo([[]])  // type cannot be determined
-      out: "Semantic error ESE0227: Array element at index 0 with type 'Array<Int>' is not compatible with the target array element type 'Array<Object>'"
+      out: "Semantic error ESE146473: Cannot infer a specific type of the Array Expression, ambiguous between type `Array<Array<Int>>` and type `Array<Array<Object>>`."
 
     - use: |-
         let src = [1, 2, 3]
