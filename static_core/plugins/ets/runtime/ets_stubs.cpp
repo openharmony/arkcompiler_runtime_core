@@ -1085,6 +1085,10 @@ static EtsObject *InvokeMethod(EtsExecutionContext *executionCtx, EtsMethod *met
         return nullptr;
     }
     EtsClass *returnType = method->ResolveReturnType();
+    if (UNLIKELY(returnType == nullptr)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return nullptr;
+    }
     if (returnType->IsPrimitive() && !returnType->IsVoid()) {
         return GetBoxedValue(executionCtx, result, method->GetReturnValueType());
     }
@@ -1123,6 +1127,7 @@ static EtsObject *EtsCallThisStatic(EtsExecutionContext *executionCtx, EtsHandle
 EtsObject *EtsCallThis(ManagedThread *mThread, EtsObject *thisObj, panda_file::File::StringData name,
                        Span<VMHandle<ObjectHeader>> args)
 {
+    ASSERT(thisObj != nullptr);
     auto *executionCtx = EtsExecutionContext::FromMT(mThread);
     [[maybe_unused]] EtsHandleScope s(executionCtx);
     EtsHandle<EtsObject> thisObjHandle(executionCtx, thisObj);
