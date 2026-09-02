@@ -95,14 +95,17 @@ PatternGroupMeta BuildPatternGroupMeta(const CharT *pattern, size_t len)
     meta.CountableGroups().push_back(false);
     size_t groupId = 0;
     std::vector<size_t> currentGroups;
-    uint8_t prev = '\0';
-    uint8_t prev2 = '\0';
+    size_t backslashRun = 0;
     bool inClass = false;
     for (size_t i = 0U; i < len; i++) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         const auto cur = static_cast<uint8_t>(pattern[i]);
-        const bool notSupressed = prev != '\\' || prev2 == '\\';
-        if (cur == '(' && notSupressed && !inClass) {
+        // An odd number of consecutive backslashes escapes the current character; only an
+        // unescaped character is meta-syntax. A 2-char lookback misjudges runs of 3+.
+        const bool notSupressed = (backslashRun % 2U) == 0U;
+        if (cur == '\\') {
+            backslashRun++;
+        } else if (cur == '(' && notSupressed && !inClass) {
             groupId++;
             meta.CountableGroups().push_back(!IsUncountableGroupStart(pattern, len, i));
             currentGroups.push_back(groupId);
@@ -118,8 +121,9 @@ PatternGroupMeta BuildPatternGroupMeta(const CharT *pattern, size_t len)
         } else if (cur == ']' && notSupressed) {
             inClass = false;
         }
-        prev2 = prev;
-        prev = cur;
+        if (cur != '\\') {
+            backslashRun = 0;
+        }
     }
     return meta;
 }

@@ -50,6 +50,14 @@ public:
         auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         VMHandle<coretypes::String> handle(executionCtx->GetMT(), reinterpret_cast<ObjectHeader *>(coreStr));
         flatInfo_.emplace(coretypes::FlatStringInfo::FlattenAllString(handle, ctx));
+        // FlattenAllString returns a null-backed FlatStringInfo on allocation failure
+        // (SlowFlatten OOM). A pending OutOfMemoryError is already raised on the thread in
+        // that case; do not dereference it here -- report the failure via GetData*() == nullptr
+        // and let callers propagate the pending error instead of crashing the process.
+        if (flatInfo_->GetString() == nullptr) {
+            flattenFailed_ = true;
+            return;
+        }
         if (isUtf16_) {
             dataUtf16_ = flatInfo_->GetDataUtf16();
         } else {
@@ -72,6 +80,11 @@ public:
         return length_;
     }
 
+    bool HasFlattenedData() const
+    {
+        return !flattenFailed_;
+    }
+
     const uint8_t *GetDataUtf8() const
     {
         ASSERT(!isUtf16_);
@@ -90,6 +103,7 @@ private:
     const uint16_t *dataUtf16_ = nullptr;
     uint32_t length_ = 0;
     bool isUtf16_ = false;
+    bool flattenFailed_ = false;
 };
 
 }  // namespace ark::ets::stdlib

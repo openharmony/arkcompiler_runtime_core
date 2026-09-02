@@ -145,7 +145,8 @@ ani_array RunSplitNativeImpl(EtsRegExp &re, const ExecData &execData, int32_t in
         }
         return arr;
     };
-    auto result = PrepareInputAndRun<ani_array>(re, execData, env, executionKind, runner, runner);
+    auto result =
+        PrepareInputAndRun<ani_array>(re, execData, env, executionKind, InputRunMode::MATERIALIZE, runner, runner);
     return result;
 }
 
@@ -156,7 +157,13 @@ ani_array SplitNativeImpl(ani_env *env, [[maybe_unused]] ani_object regexp, ani_
                           ani_string str, ani_int patternSize, ani_int strSize, ani_long limit,
                           ani_boolean unicodeMatching, ani_boolean requiresUtf16Execution)
 {
-    ExecData execData = MakeExecData(env, pattern, str, flags, patternSize, strSize, 0, requiresUtf16Execution);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+    ExecData execData;
+    ani_status status =
+        MakeExecData(&execData, env, pattern, str, flags, patternSize, strSize, 0, requiresUtf16Execution);
+    if (status != ANI_OK) {
+        return nullptr;
+    }
     EtsRegExp re(env);
     re.SetFlags(ConvertFromAniString(env, execData.flags));
     const auto executionKind = SelectExecutionKind(re, execData);

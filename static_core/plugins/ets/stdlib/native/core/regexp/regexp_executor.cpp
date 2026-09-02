@@ -99,6 +99,7 @@ void EtsRegExp::SetIfNotSet(bool &flag)
 {
     if (flag) {
         ThrowBadFlagsException(env_);
+        return;
     }
     flag = true;
 }
@@ -108,11 +109,13 @@ void EtsRegExp::SetUnicodeFlag(const char &chr)
     if (chr == 'u') {
         if (flagUnicode_ || flagVnicode_) {
             ThrowBadFlagsException(env_);
+            return;
         }
         flagUnicode_ = true;
     } else if (chr == 'v') {
         if (flagVnicode_ || flagUnicode_) {
             ThrowBadFlagsException(env_);
+            return;
         }
         flagVnicode_ = true;
     }

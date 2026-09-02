@@ -96,7 +96,7 @@ static ani_object DoExec(ani_env *env, ani_object regexp, ani_class resultClass,
     }
     auto executionKind = SelectExecutionKind(re, execData);
     auto execResult = PrepareInputAndRun<RegExpExecResult>(
-        re, execData, env, executionKind,
+        re, execData, env, executionKind, InputRunMode::RUN_IN_MANAGED_SCOPE,
         [&re, &execData](const uint8_t *inputData) -> RegExpExecResult {
             auto result = RegExp8::Execute(re.GetCompiledRe8(), re.GetMatchFlags(), inputData,
                                            static_cast<int>(execData.inputSize), execData.lastIndex);
@@ -135,7 +135,13 @@ static ani_object Exec(ani_env *env, ani_object regexp, ani_string pattern, ani_
     ani_method regexpExecArrayCtor;
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(refs::g_regexpExecArrayClass, "<ctor>", ":", &regexpExecArrayCtor));
 
-    ExecData execData = MakeExecData(env, pattern, str, flags, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+    ExecData execData;
+    ani_status status =
+        MakeExecData(&execData, env, pattern, str, flags, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    if (status != ANI_OK) {
+        return nullptr;
+    }
 
     ani_object regexpExecArrayObject =
         CreateObjectOrNullOnPendingError(env, refs::g_regexpExecArrayClass, regexpExecArrayCtor);
@@ -152,7 +158,13 @@ static ani_object Match(ani_env *env, ani_object regexp, ani_string pattern, ani
     ani_method regexpMatchArrayCtor;
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(refs::g_regexpMatchArrayClass, "<ctor>", ":", &regexpMatchArrayCtor));
 
-    ExecData execData = MakeExecData(env, pattern, str, flags, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+    ExecData execData;
+    ani_status status =
+        MakeExecData(&execData, env, pattern, str, flags, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    if (status != ANI_OK) {
+        return nullptr;
+    }
 
     ani_object regexpMatchArrayObject =
         CreateObjectOrNullOnPendingError(env, refs::g_regexpMatchArrayClass, regexpMatchArrayCtor);
@@ -168,7 +180,14 @@ static ani_boolean Test(ani_env *env, [[maybe_unused]] ani_object regexp, ani_st
                         ani_int matchFlags, ani_int extraCompileFlags, ani_boolean globalOrSticky,
                         ani_boolean requiresUtf16Execution)
 {
-    ExecData execData = MakeTestExecData(env, pattern, str, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+    ExecData execData;
+    ani_status status =
+        MakeTestExecData(&execData, env, pattern, str, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    if (status != ANI_OK) {
+        // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+        return false;
+    }
     const bool isGlobalOrSticky = static_cast<bool>(globalOrSticky);
 
     int32_t endIndex = 0;
