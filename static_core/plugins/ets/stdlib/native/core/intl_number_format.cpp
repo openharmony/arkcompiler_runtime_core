@@ -590,7 +590,13 @@ ani_status IcuFormatToParts(ani_env *env, [[maybe_unused]] ani_object self, [[ma
     auto parts = ExtractParts(env, static_cast<const icu::FormattedValue &>(*fmtNumber), false);
     for (const auto &part : parts) {
         auto utype = CreateUtf8String(env, part.type.c_str(), part.type.size());
+        if (utype == nullptr) {
+            return ANI_PENDING_ERROR;
+        }
         auto uvalue = CreateUtf8String(env, part.value.c_str(), part.value.size());
+        if (uvalue == nullptr) {
+            return ANI_PENDING_ERROR;
+        }
         ani_object partObj = nullptr;
         ANI_RETURN_ON_PENDING_ERROR(GetNumberFormatPart(env, utype, uvalue, &partObj));
         resultParts.push_back(partObj);
@@ -634,8 +640,17 @@ ani_status IcuFormatToRangeParts(ani_env *env, [[maybe_unused]] ani_object self,
 
     for (size_t i = 0; i < parts.size(); ++i) {
         auto typeString = CreateUtf8String(env, parts[i].type.c_str(), parts[i].type.size());
+        if (typeString == nullptr) {
+            return ANI_PENDING_ERROR;
+        }
         auto valueString = CreateUtf8String(env, parts[i].value.c_str(), parts[i].value.size());
+        if (valueString == nullptr) {
+            return ANI_PENDING_ERROR;
+        }
         auto sourceString = CreateUtf8String(env, parts[i].source.c_str(), parts[i].source.size());
+        if (sourceString == nullptr) {
+            return ANI_PENDING_ERROR;
+        }
         ani_object part = nullptr;
         ANI_RETURN_ON_PENDING_ERROR(GetNumberFormatRangePart(env, typeString, valueString, sourceString, &part));
         ANI_FATAL_IF_ERROR(env->Array_Set(*out, i, part));
@@ -756,7 +771,7 @@ ani_int IcuCurrencyDigits(ani_env *env, [[maybe_unused]] ani_object self, ani_st
     UErrorCode status = U_ZERO_ERROR;
     const std::string currencyStr = ConvertFromAniString(env, currency);
     icu::UnicodeString uCurrency = icu::UnicodeString::fromUTF8(currencyStr);
-    int32_t fractionDigits = ucurr_getDefaultFractionDigits(uCurrency.getBuffer(), &status);
+    int32_t fractionDigits = ucurr_getDefaultFractionDigits(uCurrency.getTerminatedBuffer(), &status);
     if (U_SUCCESS(status) != 0) {
         return static_cast<ani_int>(fractionDigits);
     }

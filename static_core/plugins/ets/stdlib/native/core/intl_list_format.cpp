@@ -159,6 +159,9 @@ ani_object FormatToParts(ani_env *env, [[maybe_unused]] ani_class klass, ani_arr
 
         auto segment = formattedStr.tempSubStringBetween(start, limit);
         auto value = UnicodeToAniStr(env, segment);
+        if (value == nullptr) {
+            return nullptr;
+        }
         squashed.push_back(value);
     }
     ani_array arr = nullptr;

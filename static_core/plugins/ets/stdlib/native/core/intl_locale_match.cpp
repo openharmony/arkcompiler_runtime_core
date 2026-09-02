@@ -140,7 +140,7 @@ static ani_status ToAniStrArray(ani_env *env, std::vector<std::string> strings, 
     ANI_RETURN_ON_PENDING_ERROR(env->Array_New(strings.size(), first, out));
     for (size_t i = 1; i < strings.size(); ++i) {
         auto item = intl::StdStrToAni(env, strings[i]);
-        ANI_FATAL_IF_ERROR(env->Array_Set(*out, i, item));
+        ANI_RETURN_ON_PENDING_ERROR(env->Array_Set(*out, i, item));
     }
     return ANI_OK;
 }
@@ -233,6 +233,7 @@ ani_string StdCoreIntlBestFitLocale(ani_env *env, [[maybe_unused]] ani_class kla
     for (const auto &tag : tags) {
         if (!intl::IsStructurallyValidLanguageTag(tag)) {
             ThrowRangeError(env, "Incorrect locale information provided");
+            return nullptr;
         }
     }
     auto success = UErrorCode::U_ZERO_ERROR;
@@ -365,6 +366,7 @@ ani_string StdCoreIntlLookupLocale(ani_env *env, [[maybe_unused]] ani_class klas
         auto locTag = ConvertFromAniString(env, reinterpret_cast<ani_string>(locale));
         if (!intl::IsStructurallyValidLanguageTag(locTag)) {
             ThrowRangeError(env, "Incorrect locale information provided");
+            return nullptr;
         }
 
         bestLoc = LookupLocale(locTag, availableLocales, availableCount);

@@ -35,14 +35,15 @@ public:
     IntlCollatorCache();
     ~IntlCollatorCache() = default;
 
-    icu::Collator *GetOrCreateCollator(ani_env *env, const std::string &lang, const std::string &collation,
-                                       const std::string &caseFirst, bool numeric);
+    std::shared_ptr<icu::Collator> GetOrCreateCollator(ani_env *env, const std::string &lang,
+                                                       const std::string &collation, const std::string &caseFirst,
+                                                       bool numeric);
 
 private:
-    using CacheUMap = std::unordered_map<std::string, std::unique_ptr<icu::Collator>>;
+    using CacheUMap = std::unordered_map<std::string, std::shared_ptr<icu::Collator>>;
     using CacheUMapIterator = CacheUMap::iterator;
 
-    void EraseRandFmtsGroupByEraseRatio();
+    void EraseRandFmtsGroupByEraseRatio() REQUIRES(mtx_);
 
     os::memory::RecursiveMutex mtx_;
     CacheUMap cache_ GUARDED_BY(mtx_);
