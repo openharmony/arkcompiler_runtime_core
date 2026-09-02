@@ -23,6 +23,8 @@ namespace ark::ets::intrinsics::helpers {
 
 EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount = -1, int32_t primCount = -1, int32_t pc = -1);
 
+void EnsurePromiseCapacity(EtsExecutionContext *executionCtx, EtsHandle<EtsPromise> &promise);
+
 EtsObject *EtsAwaitPromiseSyncImpl(EtsPromise *promise);
 
 void EtsPromiseResolveImpl(EtsExecutionContext *executionCtx, EtsPromise *promise, EtsObject *value);

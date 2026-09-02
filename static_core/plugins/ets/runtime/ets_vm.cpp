@@ -46,6 +46,7 @@
 #include "runtime/include/value-inl.h"
 #include "runtime/init_icu.h"
 #include "runtime/execution/coroutines/stackful/stackful_coroutine_manager.h"
+#include "runtime/execution/job.h"
 #include "runtime/execution/stackless/stackless_job_manager.h"
 #include "runtime/execution/stackless/job_manager_config.h"
 #include "runtime/mem/lock_config_helper.h"
@@ -206,6 +207,20 @@ bool PandaEtsVM::Destroy(PandaEtsVM *vm)
     runtime->StopCoverageListener();
 
     return true;
+}
+
+AsyncStackSnapshotHandlePtr PandaEtsVM::CloneCurrentAsyncDebuggerStack() const
+{
+    auto *thread = ManagedThread::GetCurrent();
+    if (thread == nullptr || thread->GetVM() != this) {
+        return AsyncStackSnapshotHandlePtr {};
+    }
+
+    auto *job = Job::GetCurrent();
+    if (job == nullptr) {
+        return AsyncStackSnapshotHandlePtr {};
+    }
+    return job->CloneAsyncDebuggerStack();
 }
 
 void PandaEtsVM::InitializeANI(const RuntimeOptions &options)

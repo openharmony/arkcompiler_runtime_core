@@ -701,6 +701,10 @@ LaunchResult StackfulCoroutineManager::Launch(Job *job, const LaunchParams &para
         return LaunchResult::NOT_SUPPORTED;
     }
 
+    if (params.asyncDebuggerStack != nullptr) {
+        job->SetAsyncDebuggerStack(params.CloneAsyncDebuggerStack());
+    }
+
     LaunchResult result = LaunchResult::OK;
     if (params.launchImmediately) {
         auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(Coroutine::GetCurrent()->GetWorker()->GetId());
@@ -711,6 +715,10 @@ LaunchResult StackfulCoroutineManager::Launch(Job *job, const LaunchParams &para
             groupId = ark::JobWorkerThreadGroup::GenerateExactWorkerId(w->GetId());
         }
         result = LaunchImpl(job, groupId, params.startEvent);
+    }
+
+    if UNLIKELY (result != LaunchResult::OK) {
+        job->ResetAsyncDebuggerStack();
     }
 
     Tracer::Count(Tracer::LAUNCH, 1U);

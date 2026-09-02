@@ -16,6 +16,7 @@
 #include "plugins/ets/runtime/ani/ani_helpers.h"
 #include "plugins/ets/runtime/ani/verify/types/vref.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_resolve.h"
+#include "plugins/ets/runtime/dfx/static_async_stack_snapshot_manager.h"
 #include "runtime/execution/job_launch.h"
 #include "libarkfile/shorty_iterator.h"
 #include "libarkbase/macros.h"
@@ -463,6 +464,38 @@ extern "C" bool IsEtsMethodFastNative(Method *method)
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 // CC-OFFNXT(huge_method[C++], G.FUN.01) solid logic
+static void ReplaceStaticMethodArgWithClassObject(Method *method, uint8_t *regArgs)
+{
+    if (method->IsStatic()) {
+        // Replace the method pointer (Method *) by the pointer to the object class
+        // to satisfy stack walker
+        auto classObj = EtsClass::FromRuntimeClass(method->GetClass())->AsObject();
+        ASSERT(classObj != nullptr);
+        auto classPtr = reinterpret_cast<EtsObject **>(regArgs);
+        *classPtr = classObj;
+    }
+}
+
+static PandaVector<Value> ReadAsyncCallArguments(Method *method, uint8_t *regArgs, uint8_t *stackArgs)
+{
+    PandaVector<Value> args;
+    args.reserve(method->GetNumArgs());
+    Span<uint8_t> gprArgs(regArgs, ExtArchTraits::GP_ARG_NUM_BYTES);
+    Span<uint8_t> fprArgs(gprArgs.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
+    ArgReader argReader(gprArgs, fprArgs, stackArgs);
+    // ARCH_COPY_METHOD_ARGS continues from the reader after the hidden method argument and the optional receiver.
+    // Preserve this order; inserting another read before the macro would shift every copied argument.
+    argReader.Read<Method *>();  // Skip method
+    if (!method->IsStatic()) {
+        // Handle this arg
+        ASSERT(method->GetNumArgs() != 0 && !method->GetArgType(0).IsPrimitive());
+        args.push_back(Value(*const_cast<ObjectHeader **>(argReader.ReadPtr<ObjectHeader *>())));
+    }
+    arch::ValueWriter writer(&args);
+    ARCH_COPY_METHOD_ARGS(method, argReader, writer);
+    return args;
+}
+
 extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentCoro, uint8_t *regArgs,
                                           uint8_t *stackArgs)
 {
@@ -482,20 +515,7 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
         return 0;
     }
 
-    PandaVector<Value> args;
-    args.reserve(method->GetNumArgs());
-    Span<uint8_t> gprArgs(regArgs, ExtArchTraits::GP_ARG_NUM_BYTES);
-    Span<uint8_t> fprArgs(gprArgs.end(), ExtArchTraits::FP_ARG_NUM_BYTES);
-    ArgReader argReader(gprArgs, fprArgs, stackArgs);
-    argReader.Read<Method *>();  // Skip method
-    if (method->IsStatic()) {
-        // Replace the method pointer (Method *) by the pointer to the object class
-        // to satisfy stack walker
-        auto classObj = EtsClass::FromRuntimeClass(method->GetClass())->AsObject();
-        ASSERT(classObj != nullptr);
-        auto classPtr = reinterpret_cast<EtsObject **>(regArgs);
-        *classPtr = classObj;
-    }
+    ReplaceStaticMethodArgWithClassObject(method, regArgs);
 
     // Create object after arg fix ^^^.
     // Arg fix is needed for StackWalker. So if GC gets triggered in EtsPromise::Create
@@ -508,21 +528,23 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
     auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, jobMan);
 
-    // Read values from stack and keep in args values for Launch after possible GC in EtsPromise::Create
-    if (!method->IsStatic()) {
-        // Handle this arg
-        ASSERT(method->GetNumArgs() != 0 && !method->GetArgType(0).IsPrimitive());
-        args.push_back(Value(*const_cast<ObjectHeader **>(argReader.ReadPtr<ObjectHeader *>())));
-    }
-    arch::ValueWriter writer(&args);
-    ARCH_COPY_METHOD_ARGS(method, argReader, writer);
-
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
     EtsHandle<EtsPromise> promiseHandle(executionCtx, promise);
 
+    // Static async methods execute in a separate job. Capture the caller stack before launch and
+    // install it as the child job's current async debugger stack. Capture inherits the caller job's
+    // existing async chain, so later awaits can extend rather than replace this history.
+    auto asyncDebuggerStack = StaticAsyncStackSnapshotManager::CaptureHandle(executionCtx, "await", true);
+
+    // Read values after possible GCs in EtsPromise::Create and snapshot capture. Managed arguments
+    // are kept as raw pointers in Value and must not be read before allocations that can move them.
+    auto args = ReadAsyncCallArguments(method, regArgs, stackArgs);
+
     auto epInfo = Job::ManagedEntrypointInfo {evt, impl, std::move(args)};
     auto *job = jobMan->CreateJob(impl->GetFullName(), std::move(epInfo), EtsCoroutine::ASYNC_CALL);
-    LaunchResult launchResult = jobMan->Launch(job, LaunchParams {true});
+    LaunchParams launchParams {true};
+    launchParams.asyncDebuggerStack = std::move(asyncDebuggerStack);
+    LaunchResult launchResult = jobMan->Launch(job, launchParams);
     if (UNLIKELY(launchResult != LaunchResult::OK)) {
         jobMan->HandleLaunchResultManaged(launchResult);
         ASSERT(currentCoro->HasPendingException());

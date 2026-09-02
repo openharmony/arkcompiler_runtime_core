@@ -722,9 +722,13 @@ void Inspector::ClientDisconnect(PtThread thread)
     (void)thread;
 }
 
-void Inspector::SetAsyncCallStackDepth(PtThread thread)
+void Inspector::SetAsyncCallStackDepth(PtThread thread, uint32_t maxDepth)
 {
     (void)thread;
+    auto error = debugger_.SetAsyncCallStackDepth(maxDepth);
+    if (error) {
+        LOG(ERROR, DEBUGGER) << "Failed to set async call stack depth: " << error->GetMessage();
+    }
 }
 
 void Inspector::SetBlackboxPatterns(PtThread thread)
@@ -925,7 +929,7 @@ void Inspector::RegisterMethodHandlers()
     inspectorServer_.OnCallDebuggerRemoveBreakpointsByUrl(std::bind(&Inspector::RemoveBreakpoints, this, _1, _2));
     inspectorServer_.OnCallDebuggerRestartFrame(std::bind(&Inspector::RestartFrame, this, _1, _2));
     inspectorServer_.OnCallDebuggerResume(std::bind(&Inspector::Continue, this, _1));
-    inspectorServer_.OnCallDebuggerSetAsyncCallStackDepth(std::bind(&Inspector::SetAsyncCallStackDepth, this, _1));
+    inspectorServer_.OnCallDebuggerSetAsyncCallStackDepth(std::bind(&Inspector::SetAsyncCallStackDepth, this, _1, _2));
     inspectorServer_.OnCallDebuggerSetBlackboxPatterns(std::bind(&Inspector::SetBlackboxPatterns, this, _1));
     inspectorServer_.OnCallDebuggerSmartStepInto(std::bind(&Inspector::SmartStepInto, this, _1));
     inspectorServer_.OnCallDebuggerSetBreakpoint(std::bind(&Inspector::SetBreakpoint, this, _1, _2, _3, _4, _5));

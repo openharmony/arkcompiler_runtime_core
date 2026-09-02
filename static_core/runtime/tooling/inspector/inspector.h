@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <set>
 #include <string_view>
@@ -85,7 +86,7 @@ private:
     void Continue(PtThread thread);
     void Disable(PtThread thread);
     void ClientDisconnect(PtThread thread);
-    void SetAsyncCallStackDepth(PtThread thread);
+    void SetAsyncCallStackDepth(PtThread thread, uint32_t maxDepth);
     void SetBlackboxPatterns(PtThread thread);
     void SmartStepInto(PtThread thread);
     void DropFrame(PtThread thread);

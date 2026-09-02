@@ -625,12 +625,23 @@ TEST_F(ServerTest, OnCallDebuggerClientDisconnect)
 
 TEST_F(ServerTest, OnCallDebuggerSetAsyncCallStackDepth)
 {
+    constexpr uint32_t expectedMaxDepth = 8U;
     inspectorServer.CallTargetAttachedToTarget(g_mthread);
 
-    EXPECT_CALL(server, OnCallMock("Debugger.setAsyncCallStackDepth", testing::_)).WillOnce(g_simpleHandler);
+    EXPECT_CALL(server, OnCallMock("Debugger.setAsyncCallStackDepth", testing::_))
+        .WillOnce([expectedMaxDepth](testing::Unused, auto handler) {
+            JsonObjectBuilder params;
+            params.AddProperty("maxDepth", expectedMaxDepth);
+            auto res = handler(g_sessionId, JsonObject(std::move(params).Build()));
+            ResultHolder result;
+            GetResult(std::move(res), result);
+            ASSERT_THAT(*result, JsonProperties());
+            ASSERT_TRUE(g_handlerCalled);
+        });
 
-    inspectorServer.OnCallDebuggerSetAsyncCallStackDepth([](PtThread thread) {
+    inspectorServer.OnCallDebuggerSetAsyncCallStackDepth([expectedMaxDepth](PtThread thread, uint32_t maxDepth) {
         ASSERT_EQ(thread.GetId(), g_mthread.GetId());
+        ASSERT_EQ(maxDepth, expectedMaxDepth);
         g_handlerCalled = true;
     });
 }

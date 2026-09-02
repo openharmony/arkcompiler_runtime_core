@@ -24,6 +24,7 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
+#include "runtime/execution/async_stack_snapshot_handle.h"
 #include "runtime/execution/job_events.h"
 #include "runtime/include/object_accessor-inl.h"
 
@@ -33,8 +34,10 @@ enum class CoroutineMode { STACKFUL, STACKLESS };
 
 namespace test {
 class EtsPromiseTest;
+class EtsPromiseAsyncStackSnapshotQueueTestAccessor;
 }  // namespace test
 
+class EtsPromiseAsyncStackSnapshotQueue;
 class EtsPromise : public EtsObject {
 public:
     // temp
@@ -223,16 +226,7 @@ public:
         EtsPromise::OnPromiseCompletion(executionCtx, this);
     }
 
-    void SubmitCallback(EtsExecutionContext *executionCtx, EtsObject *callback, JobWorkerThreadDomain workerDomain)
-    {
-        ASSERT(IsLocked());
-        ASSERT(queueSize_ < static_cast<int>(GetCallbackQueue(executionCtx)->GetLength()));
-        auto *cbQueue = GetCallbackQueue(executionCtx);
-        auto *workerDomainQueue = GetWorkerDomainQueue(executionCtx);
-        workerDomainQueue->Set(queueSize_, static_cast<int>(workerDomain));
-        cbQueue->Set(queueSize_, callback);
-        queueSize_++;
-    }
+    void SubmitCallback(EtsExecutionContext *executionCtx, EtsObject *callback, JobWorkerThreadDomain workerDomain);
 
     EtsObject *GetValue(EtsExecutionContext *executionCtx) const
     {
@@ -281,26 +275,44 @@ public:
 
     // launch promise then/catch callback: void()
     static void LaunchCallback(EtsExecutionContext *executionCtx, EtsHandle<EtsObject> &handledCb,
-                               const JobWorkerThreadGroup::Id &groupId);
+                               const JobWorkerThreadGroup::Id &groupId,
+                               AsyncStackSnapshotHandlePtr asyncDebuggerStack = nullptr);
 
 private:
+    friend class EtsPromiseAsyncStackSnapshotQueue;
+    friend class test::EtsPromiseAsyncStackSnapshotQueueTestAccessor;
+
+    EtsObjectArray *GetAsyncStackSnapshotQueue(EtsExecutionContext *executionCtx) const
+    {
+        return EtsObjectArray::FromCoreType(ObjectAccessor::GetObject(
+            executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, asyncStackSnapshotQueue_)));
+    }
+
+    void SetAsyncStackSnapshotQueue(EtsExecutionContext *executionCtx, EtsObjectArray *asyncStackSnapshotQueue)
+    {
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, asyncStackSnapshotQueue_),
+                                  asyncStackSnapshotQueue->GetCoreType());
+    }
+
+    void ClearAsyncStackSnapshotQueue(EtsExecutionContext *executionCtx)
+    {
+        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, asyncStackSnapshotQueue_),
+                                  nullptr);
+    }
+
     static void OnPromiseCompletion(EtsExecutionContext *executionCtx, EtsPromise *promise);
 
-    void ClearQueues(EtsExecutionContext *executionCtx)
-    {
-        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, callbackQueue_), nullptr);
-        ObjectAccessor::SetObject(executionCtx->GetMT(), this, MEMBER_OFFSET(EtsPromise, workerDomainQueue_), nullptr);
-        queueSize_ = 0;
-    }
+    void ClearQueues(EtsExecutionContext *executionCtx);
 
     ObjectPointer<EtsObject> value_;  // the completion value of the Promise
     ObjectPointer<EtsMutex> mutex_;
     ObjectPointer<EtsEvent> event_;
     ObjectPointer<EtsObjectArray>
         callbackQueue_;  // the queue of 'then and catch' calbacks which will be called when the Promise gets fulfilled
-    ObjectPointer<EtsIntArray> workerDomainQueue_;  // the queue of callbacks' launch mode
-    ObjectPointer<EtsObject> interopObject_;        // internal object used in js interop
-    ObjectPointer<EtsObject> linkedPromise_;        // linked JS promise as JSValue (if exists)
+    ObjectPointer<EtsIntArray> workerDomainQueue_;           // the queue of callbacks' launch mode
+    ObjectPointer<EtsObjectArray> asyncStackSnapshotQueue_;  // the queue of captured debugger snapshots
+    ObjectPointer<EtsObject> interopObject_;                 // internal object used in js interop
+    ObjectPointer<EtsObject> linkedPromise_;                 // linked JS promise as JSValue (if exists)
     EtsInt queueSize_;
     std::atomic<uint32_t> state_;  // the Promise's state
     EtsBoolean handled_;

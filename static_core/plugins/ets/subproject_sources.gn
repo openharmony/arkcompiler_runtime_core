@@ -85,9 +85,9 @@ arkbytecodeopt_deps =
     [ "$_plugin_dir:isa_gen_ets_bytecodeopt_ets_codegen_intrinsics_gen_inc" ]
 
 arkruntime_deps = [
+  "$_plugin_dir:etsstdlib",
   "$ark_root/assembler:libarktsassembler_static",
   "$ark_root/libarkfile:libarktsfile_static",
-  "$_plugin_dir:etsstdlib",
 ]
 
 arkcompiler_deps += [ "$_plugin_dir/runtime/interop_js:interop_intrinsic_kinds_h(${default_toolchain})" ]
@@ -213,6 +213,8 @@ srcs_runtime = [
   "runtime/intrinsics/helpers/regexp_preparser.cpp",
   "runtime/intrinsics/helpers/intrinsic_promise_impl.cpp",
   "runtime/intrinsics/helpers/intrinsic_timer_impl.cpp",
+  "runtime/dfx/ets_async_stack_snapshot_handle.cpp",
+  "runtime/dfx/static_async_stack_snapshot_manager.cpp",
   "runtime/main_worker_external_scheduler.cpp",
   "runtime/mem/ets_gc_stat.cpp",
   "runtime/mem/ets_reference_processor.cpp",
@@ -227,6 +229,7 @@ srcs_runtime = [
   "runtime/types/ets_async_context.cpp",
   "runtime/types/ets_job.cpp",
   "runtime/types/ets_promise.cpp",
+  "runtime/types/ets_promise_async_stack_snapshot_queue.cpp",
   "runtime/types/ets_promise_ref.cpp",
   "runtime/types/ets_object.cpp",
   "runtime/types/ets_sync_primitives.cpp",
@@ -283,13 +286,9 @@ srcs_runtime = [
 ]
 
 if (ark_use_common_runtime) {
-  srcs_runtime += [
-    "runtime/intrinsics/std_core_common_gc.cpp",
-  ]
+  srcs_runtime += [ "runtime/intrinsics/std_core_common_gc.cpp" ]
 } else {
-  srcs_runtime += [
-    "runtime/intrinsics/std_core_default_gc.cpp",
-  ]
+  srcs_runtime += [ "runtime/intrinsics/std_core_default_gc.cpp" ]
 }
 
 if (is_ohos && is_standard_system && !ark_standalone_build) {
@@ -423,8 +422,8 @@ if (!ark_use_common_runtime) {
 if (!(ark_standalone_build || ark_static_standalone_build)) {
   # Ohos build: use external_deps (cross-part dependency)
   runtime_external_deps = [
-    "pcre2:libpcre2_static_8",
     "pcre2:libpcre2_static_16",
+    "pcre2:libpcre2_static_8",
   ]
   if (ark_ets_interop_js) {
     runtime_external_deps += [ "libuv:uv" ]
@@ -432,8 +431,8 @@ if (!(ark_standalone_build || ark_static_standalone_build)) {
 } else if (ark_standalone_build) {
   # ark_standalone build: use deps (third_party dependency)
   arkruntime_deps += [
-    "//third_party/pcre2:libpcre2_static_8",
     "//third_party/pcre2:libpcre2_static_16",
+    "//third_party/pcre2:libpcre2_static_8",
   ]
 } else if (ark_static_standalone_build) {
   # ark_static_standalone build: use deps (local plugin build)

@@ -882,6 +882,11 @@ if(TARGET arkruntime_async_stack_test)
     set_target_properties(arkruntime_async_stack_test PROPERTIES ENABLE_EXPORTS ON)
 endif()
 
+add_gtests(
+    arkruntime_async_stack_transport_test
+    tests/async_stack_transport_test.cpp
+)
+
 set(LAYOUT_TESTS_SOURCES
     tests/array_test.cpp
     tests/mark_word_test.cpp

@@ -14,6 +14,9 @@
  */
 
 #include "execution/stackless/stackless_job_manager.h"
+
+#include <utility>
+
 #include "intrinsics.h"
 #include "intrinsics/helpers/intrinsic_promise_impl.h"
 #include "plugins/ets/runtime/ets_utils.h"
@@ -22,6 +25,7 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/runtime/types/ets_promise_async_stack_snapshot_queue.h"
 #include "plugins/ets/runtime/types/ets_async_context.h"
 #include "plugins/ets/runtime/types/ets_async_context-inl.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
@@ -36,34 +40,76 @@
 #include "runtime/execution/job_worker_thread.h"
 #include "runtime/execution/stackless/suspendable_job.h"
 
-namespace ark::ets::intrinsics {
+namespace ark::ets::intrinsics::helpers {
 
-static void EnsureCapacity(EtsExecutionContext *executionCtx, EtsHandle<EtsPromise> &hpromise)
+namespace {
+
+struct QueueGrowthDimensions {
+    size_t newQueueLength;
+    size_t oldQueueLength;
+    size_t queueSize;
+};
+
+bool GrowBusinessQueues(EtsExecutionContext *executionCtx, EtsHandle<EtsPromise> &promise,
+                        const QueueGrowthDimensions &dimensions)
 {
-    ASSERT(hpromise.GetPtr() != nullptr);
-    ASSERT(hpromise->IsLocked());
-    int queueLength =
-        hpromise->GetCallbackQueue(executionCtx) == nullptr ? 0 : hpromise->GetCallbackQueue(executionCtx)->GetLength();
-    if (hpromise->GetQueueSize() != queueLength) {
-        return;
+    EtsHandle<EtsObjectArray> callbackQueueHandle(executionCtx, promise->GetCallbackQueue(executionCtx));
+    EtsHandle<EtsIntArray> workerDomainQueueHandle(executionCtx, promise->GetWorkerDomainQueue(executionCtx));
+
+    auto *newCallbackQueue = EtsObjectArray::Create(PlatformTypes(executionCtx)->coreObject, dimensions.newQueueLength);
+    if (newCallbackQueue == nullptr) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return false;
     }
-    auto newQueueLength = queueLength * 2U + 1U;
-    auto *objectClass = PlatformTypes(executionCtx)->coreObject;
-    auto *newCallbackQueue = EtsObjectArray::Create(objectClass, newQueueLength);
-    if (hpromise->GetQueueSize() != 0) {
-        hpromise->GetCallbackQueue(executionCtx)->CopyDataTo(newCallbackQueue);
+    EtsHandle<EtsObjectArray> newCallbackQueueHandle(executionCtx, newCallbackQueue);
+
+    auto *newWorkerDomainQueue = EtsIntArray::Create(dimensions.newQueueLength);
+    if (newWorkerDomainQueue == nullptr) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return false;
     }
-    hpromise->SetCallbackQueue(executionCtx, newCallbackQueue);
-    auto *newWorkerDomainQueue = EtsIntArray::Create(newQueueLength);
-    if (hpromise->GetQueueSize() != 0) {
-        auto *workerDomainQueueData = hpromise->GetWorkerDomainQueue(executionCtx)->GetData<EtsInt *>();
-        [[maybe_unused]] auto err =
-            memcpy_s(newWorkerDomainQueue->GetData<JobWorkerThreadDomain>(), newQueueLength * sizeof(EtsInt),
-                     workerDomainQueueData, queueLength * sizeof(JobWorkerThreadDomain));
+    EtsHandle<EtsIntArray> newWorkerDomainQueueHandle(executionCtx, newWorkerDomainQueue);
+
+    if (dimensions.queueSize != 0) {
+        callbackQueueHandle->CopyDataTo(newCallbackQueueHandle.GetPtr());
+        auto *workerDomainQueueData = workerDomainQueueHandle->GetData<EtsInt *>();
+        [[maybe_unused]] auto err = memcpy_s(newWorkerDomainQueueHandle->GetData<JobWorkerThreadDomain>(),
+                                             dimensions.newQueueLength * sizeof(EtsInt), workerDomainQueueData,
+                                             dimensions.oldQueueLength * sizeof(JobWorkerThreadDomain));
         ASSERT(err == EOK);
     }
-    hpromise->SetWorkerDomainQueue(executionCtx, newWorkerDomainQueue);
+
+    promise->SetCallbackQueue(executionCtx, newCallbackQueueHandle.GetPtr());
+    promise->SetWorkerDomainQueue(executionCtx, newWorkerDomainQueueHandle.GetPtr());
+    return true;
 }
+
+}  // namespace
+
+void EnsurePromiseCapacity(EtsExecutionContext *executionCtx, EtsHandle<EtsPromise> &promise)
+{
+    ASSERT(promise.GetPtr() != nullptr);
+    ASSERT(promise->IsLocked());
+    EtsHandle<EtsObjectArray> callbackQueueHandle(executionCtx, promise->GetCallbackQueue(executionCtx));
+
+    const auto queueLength = callbackQueueHandle.GetPtr() == nullptr ? 0U : callbackQueueHandle->GetLength();
+    const auto queueSize = static_cast<uint32_t>(promise->GetQueueSize());
+    if (queueSize != queueLength) {
+        EtsPromiseAsyncStackSnapshotQueue::EnsureCapacity(executionCtx, promise, queueLength);
+        return;
+    }
+
+    const auto newQueueLength = queueLength * 2U + 1U;
+    QueueGrowthDimensions dimensions {newQueueLength, queueLength, queueSize};
+    if (!GrowBusinessQueues(executionCtx, promise, dimensions)) {
+        return;
+    }
+    EtsPromiseAsyncStackSnapshotQueue::EnsureCapacity(executionCtx, promise, newQueueLength);
+}
+
+}  // namespace ark::ets::intrinsics::helpers
+
+namespace ark::ets::intrinsics {
 
 void EtsPromiseResolve(EtsPromise *promise, EtsObject *value, EtsBoolean wasLinked)
 {
@@ -104,11 +150,21 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
     EtsHandle<EtsPromise> hpromise(executionCtx, promise);
     EtsHandle<EtsObject> hcallback(executionCtx, callback);
+    EtsHandle<EtsAsyncStackSnapshot> asyncStackSnapshotHandle(
+        executionCtx, EtsPromiseAsyncStackSnapshotQueue::CaptureSubmissionSnapshot(executionCtx));
+
     EtsMutex::LockHolder lh(hpromise);
     hpromise->SetHandled();
     if (hpromise->IsPending() || hpromise->IsLinked()) {
-        EnsureCapacity(executionCtx, hpromise);
+        helpers::EnsurePromiseCapacity(executionCtx, hpromise);
+        if (UNLIKELY(executionCtx->GetMT()->HasPendingException())) {
+            return;
+        }
         hpromise->SubmitCallback(executionCtx, hcallback.GetPtr(), workerDomain);
+        auto callbackIndex = static_cast<uint32_t>(hpromise->GetQueueSize() - 1);
+        auto callbackQueueLength = hpromise->GetCallbackQueue(executionCtx)->GetLength();
+        EtsPromiseAsyncStackSnapshotQueue::Append(executionCtx, hpromise, asyncStackSnapshotHandle, callbackIndex,
+                                                  callbackQueueLength);
         return;
     }
     executionCtx->GetPandaVM()->GetUnhandledObjectManager()->RemoveRejectedPromise(hpromise.GetPtr(), executionCtx);
@@ -118,7 +174,9 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
     auto groupId = workerDomain == JobWorkerThreadDomain::MAIN
                        ? JobWorkerThreadGroup::FromDomain(jobExecCtx->GetManager(), JobWorkerThreadDomain::MAIN)
                        : JobWorkerThreadGroup::AnyId();
-    EtsPromise::LaunchCallback(executionCtx, hcallback, groupId);
+    auto asyncDebuggerStack =
+        EtsPromiseAsyncStackSnapshotQueue::CreateHandle(executionCtx, asyncStackSnapshotHandle.GetPtr());
+    EtsPromise::LaunchCallback(executionCtx, hcallback, groupId, std::move(asyncDebuggerStack));
 }
 
 EtsObject *EtsAwaitPromise(EtsPromise *promise)

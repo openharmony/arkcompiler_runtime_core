@@ -408,6 +408,49 @@ std::optional<Error> Debugger::EnumerateFrames(PtThread thread, std::function<bo
     return {};
 }
 
+std::optional<Error> Debugger::SetAsyncCallStackDepth(uint32_t maxDepth) const
+{
+    auto *vm = runtime_->GetPandaVM();
+    if (vm == nullptr) {
+        return Error(Error::Type::INVALID_VALUE, "VM is not initialized");
+    }
+    if (!runtime_->IsDebugMode()) {
+        return Error(Error::Type::INVALID_VALUE, "Runtime is not in debug mode");
+    }
+
+    vm->SetAsyncDebuggerMaxAsyncDepth(maxDepth);
+    return {};
+}
+
+std::unique_ptr<AsyncStackSnapshotView> Debugger::CreateCurrentAsyncStackSnapshotView() const
+{
+    auto *vm = runtime_->GetPandaVM();
+    if (vm == nullptr) {
+        return nullptr;
+    }
+
+    const auto config = vm->GetAsyncDebuggerConfig();
+    if (!runtime_->IsDebugMode() || !config.IsCaptureEnabled()) {
+        return nullptr;
+    }
+
+    auto handle = vm->CloneCurrentAsyncDebuggerStack();
+    if (handle == nullptr) {
+        return nullptr;
+    }
+
+    auto view = handle->CreateSnapshotView();
+    if (view != nullptr) {
+        if (view->generation != config.generation) {
+            return nullptr;
+        }
+        if (view->segments.size() > config.maxAsyncDepth) {
+            view->segments.resize(config.maxAsyncDepth);
+        }
+    }
+    return view;
+}
+
 std::optional<Error> Debugger::SuspendThread(PtThread thread) const
 {
     ManagedThread *managedThread = thread.GetManagedThread();

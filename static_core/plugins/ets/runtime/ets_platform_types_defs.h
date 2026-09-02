@@ -19,7 +19,7 @@
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
 // ETS runtime type dependencies list. Each entry MUST follow the common naming schema.
-// CC-OFFNXTP(G.PRE.06) macro list
+// CC-OFFNXT(G.PRE.01, G.PRE.06) macro list
 #define ETS_PLATFORM_TYPES_LIST(TP, AN, IM, SM)                                                                        \
     /* Core runtime type system */                                                                                     \
     TP("Lstd/core/Object;", coreObject)                                                                                \
@@ -178,6 +178,10 @@
     TP("[Lstd/core/Object;", coreObjectArray)                                                                          \
     /* Concurrency */                                                                                                  \
     TP("Larkruntime/AsyncContext;", arkruntimeAsyncContext)                                                            \
+    TP("Lstd/core/AsyncStackSourceIdentity;", coreAsyncStackSourceIdentity)                                            \
+    TP("Lstd/core/AsyncStackFrame;", coreAsyncStackFrame)                                                              \
+    TP("Lstd/core/AsyncStackSegment;", coreAsyncStackSegment)                                                          \
+    TP("Lstd/core/AsyncStackSnapshot;", coreAsyncStackSnapshot)                                                        \
     TP("Lstd/core/Promise;", corePromise)                                                                              \
     TP("Lstd/core/Job;", coreJob)                                                                                      \
     IM("Lstd/core/Promise;", "subscribeOnAnotherPromise", "Lstd/core/PromiseLike;:V",                                  \

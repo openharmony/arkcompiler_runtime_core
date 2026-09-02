@@ -308,11 +308,9 @@ public:
     std::optional<Error> RestartFrame([[maybe_unused]] PtThread thread,
                                       [[maybe_unused]] uint32_t frameNumber) const override;
 
-    std::optional<Error> SetAsyncCallStackDepth([[maybe_unused]] uint32_t maxDepth) const override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
+    std::optional<Error> SetAsyncCallStackDepth(uint32_t maxDepth) const override;
+
+    std::unique_ptr<AsyncStackSnapshotView> CreateCurrentAsyncStackSnapshotView() const override;
 
     std::optional<Error> GetProperties([[maybe_unused]] uint32_t *countPtr,
                                        [[maybe_unused]] char ***propertyPtr) const override

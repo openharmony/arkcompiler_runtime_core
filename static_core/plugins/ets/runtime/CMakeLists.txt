@@ -124,6 +124,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/helpers/regexp_preparser.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/intrinsic_promise_impl.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/intrinsic_timer_impl.cpp
+    ${ETS_EXT_SOURCES}/dfx/ets_async_stack_snapshot_handle.cpp
+    ${ETS_EXT_SOURCES}/dfx/static_async_stack_snapshot_manager.cpp
     ${ETS_EXT_SOURCES}/finalreg/finalization_registry_manager.cpp
     ${ETS_EXT_SOURCES}/unhandled_manager/unhandled_object_manager.cpp
     ${ETS_EXT_SOURCES}/main_worker_external_scheduler.cpp
@@ -152,6 +154,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_async_context.cpp
     ${ETS_EXT_SOURCES}/types/ets_job.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise.cpp
+    ${ETS_EXT_SOURCES}/types/ets_promise_async_stack_snapshot_queue.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise_ref.cpp
     ${ETS_EXT_SOURCES}/types/ets_object.cpp
     ${ETS_EXT_SOURCES}/types/ets_sync_primitives.cpp
