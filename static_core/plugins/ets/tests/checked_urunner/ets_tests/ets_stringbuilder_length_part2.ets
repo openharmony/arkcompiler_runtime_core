@@ -41,14 +41,12 @@
 //! RUN         options: "--compiler-enable-jit=false  --interpreter-type=cpp",
 //!             entry: "ets_stringbuilder_length_part2.ETSGLOBAL::main"
 
-function generateFakeRandomInteger() : Int32Array
-{
+function generateFakeRandomInteger() : Int32Array {
     let resource : Int32Array = new Int32Array([12, 43, 56, 76, 89, 54, 45, 32, 35, 47, 46, 44, 21, 37, 84]);
     return resource;
 }
 
-function stringCalculation02()
-{
+function stringCalculation02() {
     let outterCount : int = 2;
     let innerCount : int = 4;
     let str1 : string = 'h';
@@ -71,7 +69,6 @@ function stringCalculation02()
     return res.length.toInt() - 17
 }
 
-function main()
-{
+function main() {
     arktest.assertEQ(stringCalculation02(), 0, 'Wrong result at stringCalculation02');
 }

@@ -511,8 +511,7 @@ function hybridStringTest04(arg: string): string {
 
     try {
         var1 += arg
-    }
-    catch (e) {
+    } catch (e) {
         var1 += arg
     }
     var1 += arg
@@ -566,15 +565,13 @@ function hybridStringTest07(arg: string): string {
     let tmp1 = const2 + var1
     try {
         __noinline__consume(tmp1 + arg)
-    }
-    catch (e) {}
+    } catch (e) {}
 
     let tmp2 = tmp1 + arg
     let tmp3 = tmp0 + tmp2
     try {
         __noinline__consume(tmp2 + arg)
-    }
-    catch (e) {
+    } catch (e) {
         __noinline__consume(tmp3 + arg)
     }
 
@@ -724,8 +721,7 @@ function hybridStringTest15(arg: string): string {
 
     try {
         var1 += arg
-    }
-    catch (e) {
+    } catch (e) {
         var1 += arg
     }
 
@@ -748,8 +744,7 @@ function hybridStringTest16(arg: string, b: boolean): string {
     if (b) {
         var1 += arg
         var1 += 't'
-    }
-    else {
+    } else {
         var1 += arg
         var1 += 'f'
     }
@@ -785,8 +780,7 @@ function hybridStringTest17(arg: string, b: boolean, j: int): string {
             }
         }
         var1 += 't'
-    }
-    else {
+    } else {
         for (let i = 0; i < 10; i++) {
             var1 += arg
             if ((i & one) != zero) {
@@ -796,11 +790,10 @@ function hybridStringTest17(arg: string, b: boolean, j: int): string {
         var1 += 'f'
     }
 
-    switch (j)
-    {
-        case 0: var1 += '0'; break;
-        case 1: var1 += '1'; break;
-        default: var1 += 'def'; break;
+    switch (j) {
+      case 0: var1 += '0'; break;
+      case 1: var1 += '1'; break;
+      default: var1 += 'def'; break;
     }
 
     var1 += arg
