@@ -69,7 +69,7 @@ std::map<std::string, std::string> &GetDefaultEntities()
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 ark::os::memory::Mutex XmlPullParser::ParseInfoClassCache::initMutex_;
-bool XmlPullParser::ParseInfoClassCache::initFlag_ = false;
+std::atomic<bool> XmlPullParser::ParseInfoClassCache::initFlag_ {false};
 ani_class XmlPullParser::ParseInfoClassCache::cachedClass_ {};
 ani_method XmlPullParser::ParseInfoClassCache::constructor_ {};
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -81,7 +81,7 @@ PARSE_INFO_FIELD_LIST(DEFINE_PARSE_INFO_FIELD)
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 ark::os::memory::Mutex XmlPullParser::enumTypeMutex_;
-bool XmlPullParser::enumTypeInitFlag_ = false;
+std::atomic<bool> XmlPullParser::enumTypeInitFlag_ {false};
 ani_enum XmlPullParser::enumTypeClass_ {};
 
 XmlPullParser::ParseInfoClassCache::ParseInfoClassCache(ani_env *env) : env_(env)
@@ -91,11 +91,13 @@ XmlPullParser::ParseInfoClassCache::ParseInfoClassCache(ani_env *env) : env_(env
 
 void XmlPullParser::ParseInfoClassCache::EnsureInitialized(ani_env *env)
 {
-    if (initFlag_) {
+    // Atomic with acquire order reason: synchronize with the thread that completed initialization
+    if (initFlag_.load(std::memory_order_acquire)) {
         return;
     }
     os::memory::LockHolder lh(initMutex_);
-    if (initFlag_) {
+    // Atomic with relaxed order reason: mutex guarantees ordering, only re-check initialization status
+    if (initFlag_.load(std::memory_order_relaxed)) {
         return;
     }
     ani_class result {};
@@ -104,7 +106,8 @@ void XmlPullParser::ParseInfoClassCache::EnsureInitialized(ani_env *env)
         env->GlobalReference_Create(static_cast<ani_ref>(result), reinterpret_cast<ani_ref *>(&cachedClass_)));
     ANI_FATAL_IF_ERROR(env->Class_FindMethod(cachedClass_, "<ctor>", nullptr, &constructor_));
     InitFieldCache(env);
-    initFlag_ = true;
+    // Atomic with release order reason: make cached class and fields visible to other threads
+    initFlag_.store(true, std::memory_order_release);
 }
 
 ani_class XmlPullParser::ParseInfoClassCache::GetCachedClass()
@@ -183,18 +186,21 @@ XmlPullParser::~XmlPullParser() = default;
 
 void XmlPullParser::EnsureEnumTypeClassInitialized(ani_env *env)
 {
-    if (enumTypeInitFlag_) {
+    // Atomic with acquire order reason: synchronize with the thread that completed initialization
+    if (enumTypeInitFlag_.load(std::memory_order_acquire)) {
         return;
     }
     os::memory::LockHolder lh(enumTypeMutex_);
-    if (enumTypeInitFlag_) {
+    // Atomic with relaxed order reason: mutex guarantees ordering, only re-check initialization status
+    if (enumTypeInitFlag_.load(std::memory_order_relaxed)) {
         return;
     }
     ani_enum eTypeCache {};
     ANI_FATAL_IF_ERROR(env->FindEnum("@ohos.xml.xml.EventType", &eTypeCache));
     ANI_FATAL_IF_ERROR(
         env->GlobalReference_Create(static_cast<ani_ref>(eTypeCache), reinterpret_cast<ani_ref *>(&enumTypeClass_)));
-    enumTypeInitFlag_ = true;
+    // Atomic with release order reason: make cached enum type visible to other threads
+    enumTypeInitFlag_.store(true, std::memory_order_release);
 }
 
 // CC-OFFNXT(G.FUN.01-CPP) options of parse

@@ -21,19 +21,36 @@
 
 namespace ark::ets::sdk::util {
 
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+std::mutex XmlSAXParserHelper::classCacheMutex_;
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+std::atomic<bool> XmlSAXParserHelper::classCacheInitFlag_ {false};
+ani_ref XmlSAXParserHelper::sParserCls_ {nullptr};
+ani_method XmlSAXParserHelper::sCompleteRef_ {nullptr};
+ani_method XmlSAXParserHelper::sAsyncErrorRef_ {nullptr};
+ani_ref XmlSAXParserHelper::sMapClsRef_ {nullptr};
+ani_method XmlSAXParserHelper::sMapConstructorRef_ {nullptr};
+ani_method XmlSAXParserHelper::sMapSetRef_ {nullptr};
+
 constexpr size_t XML_SAX2_ATTR_ELEMENT_COUNT = 5;
 constexpr size_t XML_SAX2_ATTR_LOCALNAME_OFFSET = 0;
 constexpr size_t XML_SAX2_ATTR_PREFIX_OFFSET = 1;
 [[maybe_unused]] constexpr size_t XML_SAX2_ATTR_URI_OFFSET = 2;
 constexpr size_t XML_SAX2_ATTR_VALUE_START_OFFSET = 3;
 constexpr size_t XML_SAX2_ATTR_VALUE_END_OFFSET = 4;
-constexpr int XML_STARTELEMENT_PARAM = 4;
-constexpr int XML_ENDELEMENT_PARAM = 3;
-constexpr int XML_CHARACTERS_PARAM = 1;
+constexpr int STARTELEMENT_PARAM = 4;
+constexpr int STARTELEMENT_NAME_OFFSET = 0;
+constexpr int STARTELEMENT_URI_OFFSET = 1;
+constexpr int STARTELEMENT_QNAME_OFFSET = 2;
+constexpr int STARTELEMENT_ATTRS_OFFSET = 3;
+constexpr int ENDELEMENT_PARAM = 3;
+constexpr int ENDELEMENT_NAME_OFFSET = 0;
+constexpr int ENDELEMENT_URI_OFFSET = 1;
+constexpr int ENDELEMENT_QNAME_OFFSET = 2;
+constexpr int CHARACTERS_PARAM = 1;
 constexpr size_t XML_CALLBACK_BATCH_SIZE = 128;
 constexpr ani_size XML_LOCAL_SCOPE_CAPACITY = 16;
 constexpr int BUSINESS_ERROR_CODE = 401;
-constexpr int XML_STARTELEMENT_PARAM_THIRD = 3;
 
 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 XmlSAXParserHelper::XmlSAXParserHelper(ani_env *env)
@@ -126,14 +143,6 @@ void XmlSAXParserHelper::Cleanup()
             env->GlobalReference_Delete(parserRef_);
             parserRef_ = nullptr;
         }
-        if (parserCls_ != nullptr) {
-            env->GlobalReference_Delete(parserCls_);
-            parserCls_ = nullptr;
-        }
-        if (mapClsRef_ != nullptr) {
-            env->GlobalReference_Delete(mapClsRef_);
-            mapClsRef_ = nullptr;
-        }
     }
 
     if (asyncWork_ != nullptr && status == ANI_OK) {
@@ -171,6 +180,41 @@ bool XmlSAXParserHelper::InitParserContext()
     return true;
 }
 
+void XmlSAXParserHelper::EnsureClassCacheInitialized(ani_env *env, ani_object parser)
+{
+    // Atomic with acquire order reason: synchronize with the thread that completed initialization
+    if (classCacheInitFlag_.load(std::memory_order_acquire)) {
+        return;
+    }
+    std::lock_guard<std::mutex> lh(classCacheMutex_);
+    // Atomic with acquire order reason: synchronize with the thread that completed initialization
+    if (classCacheInitFlag_.load(std::memory_order_acquire)) {
+        return;
+    }
+
+    // Cache parser class and its async completion methods
+    ani_type aniParserType {};
+    ANI_FATAL_IF_ERROR(env->Object_GetType(parser, &aniParserType));
+    ANI_FATAL_IF_ERROR(env->GlobalReference_Create(aniParserType, &sParserCls_));
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(reinterpret_cast<ani_class>(sParserCls_), "handleAsyncParseComplete",
+                                             nullptr, &sCompleteRef_));
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(reinterpret_cast<ani_class>(sParserCls_), "handleAsyncParseError", nullptr,
+                                             &sAsyncErrorRef_));
+
+    // Cache std.core.Map class and its methods
+    ani_class mapClass = nullptr;
+    ANI_FATAL_IF_ERROR(env->FindClass("std.core.Map", &mapClass));
+    ANI_FATAL_IF_ERROR(env->GlobalReference_Create(mapClass, &sMapClsRef_));
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(mapClass, "<ctor>",
+                                             "X{C{std.core.Iterable}C{std.core.Null}"
+                                             "C{std.core.ReadonlyArray}}:",
+                                             &sMapConstructorRef_));
+    ANI_FATAL_IF_ERROR(env->Class_FindMethod(mapClass, "set", "YY:C{std.core.Map}", &sMapSetRef_));
+
+    // Atomic with release order reason: make cached class and methods visible to other threads
+    classCacheInitFlag_.store(true, std::memory_order_release);
+}
+
 bool XmlSAXParserHelper::ExtractCallbacks(ani_env *env, ani_object parser, ani_object handler)
 {
     if (callbacksExtracted_) {
@@ -181,6 +225,9 @@ bool XmlSAXParserHelper::ExtractCallbacks(ani_env *env, ani_object parser, ani_o
         return false;
     }
 
+    EnsureClassCacheInitialized(env, parser);
+
+    ANI_FATAL_IF_ERROR(env->GlobalReference_Create(parser, &parserRef_));
     ANI_FATAL_IF_ERROR(env->GlobalReference_Create(handler, &xmlsaxhandleRef_));
     ani_type anixmltype {};
     ANI_FATAL_IF_ERROR(env->Object_GetType(handler, &anixmltype));
@@ -196,25 +243,6 @@ bool XmlSAXParserHelper::ExtractCallbacks(ani_env *env, ani_object parser, ani_o
         env->Class_FindMethod(reinterpret_cast<ani_class>(xmlsaxhandleCls_), "endElement", nullptr, &endElementRef_));
     ANI_FATAL_IF_ERROR(
         env->Class_FindMethod(reinterpret_cast<ani_class>(xmlsaxhandleCls_), "characters", nullptr, &charactersRef_));
-
-    ANI_FATAL_IF_ERROR(env->GlobalReference_Create(parser, &parserRef_));
-    ani_type aniParserType {};
-    ANI_FATAL_IF_ERROR(env->Object_GetType(parser, &aniParserType));
-    ANI_FATAL_IF_ERROR(env->GlobalReference_Create(aniParserType, &parserCls_));
-    ANI_FATAL_IF_ERROR(env->Class_FindMethod(reinterpret_cast<ani_class>(parserCls_), "handleAsyncParseComplete",
-                                             nullptr, &completeRef_));
-    ANI_FATAL_IF_ERROR(env->Class_FindMethod(reinterpret_cast<ani_class>(parserCls_), "handleAsyncParseError", nullptr,
-                                             &asyncErrorRef_));
-
-    ani_class mapClass = nullptr;
-    if (env->FindClass("std.core.Map", &mapClass) == ANI_OK) {
-        ANI_FATAL_IF_ERROR(env->GlobalReference_Create(mapClass, &mapClsRef_));
-        ANI_FATAL_IF_ERROR(env->Class_FindMethod(mapClass, "<ctor>",
-                                                 "X{C{std.core.Iterable}C{std.core.Null}"
-                                                 "C{std.core.ReadonlyArray}}:",
-                                                 &mapConstructorRef_));
-        ANI_FATAL_IF_ERROR(env->Class_FindMethod(mapClass, "set", "YY:C{std.core.Map}", &mapSetRef_));
-    }
 
     callbacksExtracted_ = true;
     return true;
@@ -524,24 +552,12 @@ void XmlSAXParserHelper::ResetSession(ani_env *env)
         env->GlobalReference_Delete(parserRef_);
         parserRef_ = nullptr;
     }
-    if (parserCls_ != nullptr) {
-        env->GlobalReference_Delete(parserCls_);
-        parserCls_ = nullptr;
-    }
-    if (mapClsRef_ != nullptr) {
-        env->GlobalReference_Delete(mapClsRef_);
-        mapClsRef_ = nullptr;
-    }
 
     startDocumentRef_ = nullptr;
     endDocumentRef_ = nullptr;
     startElementRef_ = nullptr;
     endElementRef_ = nullptr;
     charactersRef_ = nullptr;
-    completeRef_ = nullptr;
-    asyncErrorRef_ = nullptr;
-    mapConstructorRef_ = nullptr;
-    mapSetRef_ = nullptr;
 
     {
         std::lock_guard<std::mutex> lock(parseMutex_);
@@ -598,18 +614,21 @@ void XmlSAXParserHelper::FinalizeSession(ani_env *env)
 
     switch (resultType) {
         case ParseResultType::COMPLETE:
-            if (completeRef_ != nullptr && parserRef_ != nullptr) {
+            if (sCompleteRef_ != nullptr && parserRef_ != nullptr) {
                 // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-                env->Object_CallMethod_Void(static_cast<ani_object>(parserRef_), completeRef_);
+                env->Object_CallMethod_Void(static_cast<ani_object>(parserRef_), sCompleteRef_);
             }
             break;
         case ParseResultType::ERROR:
-            if (asyncErrorRef_ != nullptr && parserRef_ != nullptr) {
+            if (sAsyncErrorRef_ != nullptr && parserRef_ != nullptr) {
                 ani_string errorValue = CreateStringValue(env, resultError);
+                ani_ref undefinedValue = nullptr;
+                env->GetUndefined(&undefinedValue);
                 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-                ani_value xmlargs[XML_CHARACTERS_PARAM];
-                xmlargs[0].r = errorValue;
-                env->Object_CallMethod_Void_A(static_cast<ani_object>(parserRef_), asyncErrorRef_, xmlargs);
+                ani_value xmlargs[CHARACTERS_PARAM];
+                // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+                xmlargs[0].r = errorValue ? static_cast<ani_ref>(errorValue) : undefinedValue;
+                env->Object_CallMethod_Void_A(static_cast<ani_object>(parserRef_), sAsyncErrorRef_, xmlargs);
             } else {
                 ThrowBusinessError(env, BUSINESS_ERROR_CODE, resultError);
             }
@@ -646,10 +665,14 @@ void XmlSAXParserHelper::ExecuteQueuedCallbacks()
     std::deque<SaxEvent> localQueue;
     {
         std::lock_guard<std::mutex> lock(callbackMutex_);
-        size_t batchSize = std::min(callbackQueue_.size(), XML_CALLBACK_BATCH_SIZE);
-        for (size_t i = 0; i < batchSize; i++) {
-            localQueue.push_back(std::move(callbackQueue_.front()));
-            callbackQueue_.pop_front();
+        if (callbackQueue_.size() < XML_CALLBACK_BATCH_SIZE) {
+            localQueue.swap(callbackQueue_);
+        } else {
+            size_t batchSize = XML_CALLBACK_BATCH_SIZE;
+            for (size_t i = 0; i < batchSize; i++) {
+                localQueue.push_back(std::move(callbackQueue_.front()));
+                callbackQueue_.pop_front();
+            }
         }
     }
 
@@ -675,28 +698,20 @@ void XmlSAXParserHelper::ExecuteQueuedCallbacks()
                 ani_string nameValue = CreateStringValue(env, event.name);
                 ani_string uriValue = CreateStringValue(env, event.uri);
                 ani_string qnameValue = CreateStringValue(env, event.qname);
+                ani_object mapObj = CreateAttributesMap(env, event.attributes);
                 ani_ref undefinedValue = nullptr;
                 env->GetUndefined(&undefinedValue);
 
                 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-                ani_ref args[XML_STARTELEMENT_PARAM] = {
-                    static_cast<ani_ref>(nameValue),
-                    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-                    uriValue ? static_cast<ani_ref>(uriValue) : undefinedValue,
-                    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-                    qnameValue ? static_cast<ani_ref>(qnameValue) : undefinedValue,
-                    undefinedValue,
-                };
-                ani_object mapObj = CreateAttributesMap(env, event.attributes);
-                if (mapObj != nullptr) {
-                    args[XML_STARTELEMENT_PARAM_THIRD] = static_cast<ani_ref>(mapObj);
-                }
-
-                // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-                ani_value xmlargs[XML_STARTELEMENT_PARAM];
-                for (int i = 0; i < XML_STARTELEMENT_PARAM; i++) {
-                    xmlargs[i].r = args[i];
-                }
+                ani_value xmlargs[STARTELEMENT_PARAM];
+                xmlargs[STARTELEMENT_NAME_OFFSET].r = nameValue ? static_cast<ani_ref>(nameValue) : undefinedValue;
+                // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+                xmlargs[STARTELEMENT_URI_OFFSET].r = uriValue ? static_cast<ani_ref>(uriValue) : undefinedValue;
+                // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+                xmlargs[STARTELEMENT_QNAME_OFFSET].r = qnameValue ? static_cast<ani_ref>(qnameValue) : undefinedValue;
+                // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+                xmlargs[STARTELEMENT_ATTRS_OFFSET].r =
+                    (mapObj != nullptr) ? static_cast<ani_ref>(mapObj) : undefinedValue;
                 env->Object_CallMethod_Void_A(static_cast<ani_object>(xmlsaxhandleRef_), startElementRef_, xmlargs);
                 break;
             }
@@ -711,19 +726,12 @@ void XmlSAXParserHelper::ExecuteQueuedCallbacks()
                 env->GetUndefined(&undefinedValue);
 
                 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-                ani_ref args[XML_ENDELEMENT_PARAM] = {
-                    static_cast<ani_ref>(nameValue),
-                    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-                    uriValue ? static_cast<ani_ref>(uriValue) : undefinedValue,
-                    // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-                    qnameValue ? static_cast<ani_ref>(qnameValue) : undefinedValue,
-                };
-
-                // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-                ani_value xmlargs[XML_ENDELEMENT_PARAM];
-                for (int i = 0; i < XML_ENDELEMENT_PARAM; i++) {
-                    xmlargs[i].r = args[i];
-                }
+                ani_value xmlargs[ENDELEMENT_PARAM];
+                xmlargs[ENDELEMENT_NAME_OFFSET].r = nameValue ? static_cast<ani_ref>(nameValue) : undefinedValue;
+                // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+                xmlargs[ENDELEMENT_URI_OFFSET].r = uriValue ? static_cast<ani_ref>(uriValue) : undefinedValue;
+                // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+                xmlargs[ENDELEMENT_QNAME_OFFSET].r = qnameValue ? static_cast<ani_ref>(qnameValue) : undefinedValue;
                 env->Object_CallMethod_Void_A(static_cast<ani_object>(xmlsaxhandleRef_), endElementRef_, xmlargs);
                 break;
             }
@@ -732,9 +740,12 @@ void XmlSAXParserHelper::ExecuteQueuedCallbacks()
                     break;
                 }
                 ani_string contentValue = CreateStringValue(env, event.content);
+                ani_ref undefinedValue = nullptr;
+                env->GetUndefined(&undefinedValue);
                 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-                ani_value xmlargs[XML_CHARACTERS_PARAM];
-                xmlargs[0].r = contentValue;
+                ani_value xmlargs[CHARACTERS_PARAM];
+                // NOLINTNEXTLINE(readability-implicit-bool-conversion)
+                xmlargs[0].r = contentValue ? static_cast<ani_ref>(contentValue) : undefinedValue;
                 env->Object_CallMethod_Void_A(static_cast<ani_object>(xmlsaxhandleRef_), charactersRef_, xmlargs);
                 break;
             }
@@ -787,31 +798,37 @@ std::map<std::string, std::string> XmlSAXParserHelper::ConvertSAX2Attributes(con
 // NOLINTNEXTLINE(misc-unused-parameters)
 ani_object XmlSAXParserHelper::CreateAttributesMap(ani_env *env, const std::map<std::string, std::string> &attrMap)
 {
-    if (mapClsRef_ == nullptr || mapConstructorRef_ == nullptr) {
+    if (sMapClsRef_ == nullptr || sMapConstructorRef_ == nullptr) {
         return nullptr;
     }
-    auto mapClass = reinterpret_cast<ani_class>(mapClsRef_);
+    auto mapClass = reinterpret_cast<ani_class>(sMapClsRef_);
 
     ani_object attributesMap = nullptr;
     ani_ref undefinedRef {};
     env->GetUndefined(&undefinedRef);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    if (env->Object_New(mapClass, mapConstructorRef_, &attributesMap, undefinedRef) != ANI_OK) {
+    if (env->Object_New(mapClass, sMapConstructorRef_, &attributesMap, undefinedRef) != ANI_OK) {
         return nullptr;
     }
 
-    if (mapSetRef_ == nullptr) {
+    if (sMapSetRef_ == nullptr) {
         return attributesMap;
     }
 
     for (const auto &[key, value] : attrMap) {
-        ani_string keyStr;
-        env->String_NewUTF8(key.c_str(), key.length(), &keyStr);
-        ani_string valueStr;
-        env->String_NewUTF8(value.c_str(), value.length(), &valueStr);
+        ani_string keyStr = nullptr;
+        if (env->String_NewUTF8(key.c_str(), key.length(), &keyStr) != ANI_OK) {
+            SetFatalError("Failed to create attribute key string: " + key);
+            return nullptr;
+        }
+        ani_string valueStr = nullptr;
+        if (env->String_NewUTF8(value.c_str(), value.length(), &valueStr) != ANI_OK) {
+            SetFatalError("Failed to create attribute value string for: " + key);
+            return nullptr;
+        }
         ani_ref setResult = nullptr;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        env->Object_CallMethod_Ref(attributesMap, mapSetRef_, &setResult, keyStr, valueStr);
+        env->Object_CallMethod_Ref(attributesMap, sMapSetRef_, &setResult, keyStr, valueStr);
     }
 
     return attributesMap;
@@ -869,7 +886,7 @@ void XmlSAXParserHelper::StartElementNsCallback(void *userData, [[maybe_unused]]
     if (prefix != nullptr && *prefix != 0) {
         qnameStr = reinterpret_cast<const char *>(prefix);
         qnameStr += ":";
-        qnameStr += reinterpret_cast<const char *>(localname);
+        qnameStr += nameStr;
     } else {
         qnameStr = "";
     }
@@ -901,7 +918,7 @@ void XmlSAXParserHelper::EndElementNsCallback(void *userData, const xmlChar *loc
     if (prefix != nullptr && *prefix != 0) {
         qnameStr = reinterpret_cast<const char *>(prefix);
         qnameStr += ":";
-        qnameStr += reinterpret_cast<const char *>(localname);
+        qnameStr += nameStr;
     } else {
         qnameStr = "";
     }
