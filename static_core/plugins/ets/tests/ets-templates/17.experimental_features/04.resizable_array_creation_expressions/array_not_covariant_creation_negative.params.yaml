@@ -24,10 +24,8 @@ cases:
 
    - logic: "let a = new Dog[30]((inx: int) => new Animal)"
      out:
-        - "Semantic error ESE0127: No matching construct signature for std.core.Array(Int, ((p1: Int) => Dog))"
-        - "Semantic error ESE0091: Type 'Animal' is not compatible with the enclosing method's return type 'Dog'"
+        - "Semantic error ESE0127: No matching call signature for create(Int, ((p1: Int) => Animal))"
 
    - logic: "let a = new Dog[30]((inx: int) => new Cat)"
      out:
-      - "Semantic error ESE0127: No matching construct signature for std.core.Array(Int, ((p1: Int) => Dog))"
-      - "Semantic error ESE0091: Type 'Cat' is not compatible with the enclosing method's return type 'Dog'"
+      - "Semantic error ESE0127: No matching call signature for create(Int, ((p1: Int) => Cat))"

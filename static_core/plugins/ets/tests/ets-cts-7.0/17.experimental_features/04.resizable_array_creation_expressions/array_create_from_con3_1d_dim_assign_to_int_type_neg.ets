@@ -14,7 +14,8 @@
  */
 
 /*---
-desc: Create 1D Array with dimension assignable to int type
+desc: Create 1D Array with lambda initializer and dimension assignable to int type
+tags: [compile-only, negative]
 ---*/
 
 enum ImpIntEnum { V1 = 1, V2 = 30 }
