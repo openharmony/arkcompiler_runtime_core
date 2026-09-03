@@ -18,6 +18,7 @@
 
 #include <ani.h>
 #include <algorithm>
+#include <atomic>
 #include <map>
 #include <string>
 #include <vector>
@@ -102,7 +103,7 @@ private:
 
         ani_env *env_ {};
         static ark::os::memory::Mutex initMutex_;
-        static bool initFlag_;
+        static std::atomic<bool> initFlag_;
         static ani_class cachedClass_;
         static ani_method constructor_;
 
@@ -186,7 +187,7 @@ private:
     [[maybe_unused]] ani_env *env_ {};
     ParseInfoClassCache infoClass_;
     static ark::os::memory::Mutex enumTypeMutex_;
-    static bool enumTypeInitFlag_;
+    static std::atomic<bool> enumTypeInitFlag_;
     static ani_enum enumTypeClass_;
     bool bDoctype_ {};
     bool bIgnoreNS_ {};

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <ani.h>
 #include <string>
+#include <vector>
 #include "unicode/ucnv.h"
 
 namespace ark::ets::sdk::util {
@@ -48,7 +49,7 @@ public:
     }
 
 private:
-    const char *pend_ {};
+    std::vector<char> pendingData_ {};
     int pendingLen_ {};
     UConverter *conv_ {};
 };

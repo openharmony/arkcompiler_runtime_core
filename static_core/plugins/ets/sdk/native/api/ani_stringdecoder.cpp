@@ -87,7 +87,7 @@ ani_string StringDecoder::Write(ani_env *env, const char *source, int32_t byteOf
     }
     pendingLen_ = ucnv_toUCountPending(conv_, &codeFlag);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    pend_ = oldSource + length - pendingLen_;
+    pendingData_.assign(oldSource + length - pendingLen_, oldSource + length);
     ani_string resultStr {};
     size_t resultLen = target - arr.data();
     ANI_FATAL_IF_ERROR(env->String_NewUTF16(reinterpret_cast<uint16_t *>(arr.data()), resultLen, &resultStr));
@@ -111,7 +111,7 @@ ani_string StringDecoder::End(ani_env *env)
     UChar *target = outputBuffer.data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     UChar *const targetEnd = target + pendingLen_;
-    const char *src = pend_;
+    const char *src = pendingData_.data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     const char *const sourceEnd = src + pendingLen_;
     UBool flush = 1;

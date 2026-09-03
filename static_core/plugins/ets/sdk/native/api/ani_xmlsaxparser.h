@@ -79,6 +79,7 @@ private:
 
     bool InitParserContext();
     void Cleanup();
+    static void EnsureClassCacheInitialized(ani_env *env, ani_object parser);
     bool ExtractCallbacks(ani_env *env, ani_object parser, ani_object handler);
     bool StartWorkerIfNeeded(ani_env *env);
     void RequestShutdown();
@@ -121,20 +122,23 @@ private:
     bool isInitialized_ {false};
     std::string error_ {};
 
+    static std::mutex classCacheMutex_;
+    static std::atomic_bool classCacheInitFlag_;
+    static ani_ref sParserCls_;
+    static ani_method sCompleteRef_;
+    static ani_method sAsyncErrorRef_;
+    static ani_ref sMapClsRef_;
+    static ani_method sMapConstructorRef_;
+    static ani_method sMapSetRef_;
+
     ani_method startDocumentRef_ {nullptr};
     ani_method endDocumentRef_ {nullptr};
     ani_method startElementRef_ {nullptr};
     ani_method endElementRef_ {nullptr};
     ani_method charactersRef_ {nullptr};
-    ani_method completeRef_ {nullptr};
-    ani_method asyncErrorRef_ {nullptr};
-    ani_method mapConstructorRef_ {nullptr};
-    ani_method mapSetRef_ {nullptr};
     ani_ref xmlsaxhandleRef_ {nullptr};
     ani_ref xmlsaxhandleCls_ {nullptr};
     ani_ref parserRef_ {nullptr};
-    ani_ref parserCls_ {nullptr};
-    ani_ref mapClsRef_ {nullptr};
     ani_vm *vm_ {nullptr};
     arkts::concurrency_helpers::AsyncWork *asyncWork_ {nullptr};
     std::atomic_uint32_t refCount_ {1};

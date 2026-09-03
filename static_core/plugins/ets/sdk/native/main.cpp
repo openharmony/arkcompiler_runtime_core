@@ -36,6 +36,7 @@ using XmlPullParser = ark::ets::sdk::util::XmlPullParser;
 using XmlSAXParser = ark::ets::sdk::util::XmlSAXParserHelper;
 #endif
 
+constexpr ani_size ANI_LOCAL_SCOPE_CAPACITY = 32;
 struct ArrayBufferInfo {
     void *data;
     size_t length;
@@ -214,9 +215,15 @@ static ani_boolean AniUtilsIsUndefined(ani_env *env, ani_object aniObj)
 static ani_boolean AniUtilsIsTypeArray(ani_env *env, ani_object aniObj)
 {
     ani_class cls {};
-    env->FindClass("escompat.Uint8Array", &cls);
+    ani_status status = env->FindClass("escompat.Uint8Array", &cls);
+    if (status != ANI_OK || cls == nullptr) {
+        return ANI_FALSE;
+    }
     ani_boolean isTypeArray = ANI_FALSE;
-    env->Object_InstanceOf(aniObj, cls, &isTypeArray);
+    status = env->Object_InstanceOf(aniObj, cls, &isTypeArray);
+    if (status != ANI_OK) {
+        return ANI_FALSE;
+    }
     return isTypeArray;
 }
 
@@ -347,11 +354,12 @@ static ani_status BindXmlSAXParserHelper(ani_env *env)
 
 extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    ani_env *env;
+    ani_env *env = nullptr;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         std::cerr << "Unsupported ANI_VERSION_1" << std::endl;
         return ANI_ERROR;
     }
+    bool localScopeCreated = env->CreateLocalScope(ANI_LOCAL_SCOPE_CAPACITY) == ANI_OK;
     auto status =
         // NOLINTNEXTLINE(hicpp-signed-bitwise,-warnings-as-errors)
         static_cast<ani_status>(BindUtilHelper(env) | BindTextDecoder(env) | BindTextEncoder(env) |
@@ -367,5 +375,8 @@ extern "C" ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
     *result = ANI_VERSION_1;
+    if (localScopeCreated) {
+        env->DestroyLocalScope();
+    }
     return ANI_OK;
 }
