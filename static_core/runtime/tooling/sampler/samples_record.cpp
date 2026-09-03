@@ -83,27 +83,35 @@ FrameInfo SamplesRecord::BuildStaticFrameInfo(const SampleInfo::ManagedStackFram
     return frameInfo;
 }
 
-void SamplesRecord::NodeInit(ProfileInfo &profileInfo)
+void SamplesRecord::NodeInit(ProfileInfo &profileInfo, std::map<NodeKey, int> &nodesMap)
 {
     NodeKey nodeKey;
     CpuProfileNode methodNode;
 
     nodeKey.methodKey.frameId.pandaFilePtr = ROOT_NODE_PTR;
-    nodesMap_.emplace(nodeKey, nodesMap_.size() + 1);
+    nodesMap.emplace(nodeKey, static_cast<int>(nodesMap.size() + 1));
     methodNode.parentId = 0;
     methodNode.codeEntry.functionName = "(root)";
     methodNode.id = ROOT_NODE_ID;
     profileInfo.nodes[profileInfo.nodeCount++] = methodNode;
 
+    if (profileInfo.nodeCount >= MAX_NODE_COUNT) {
+        LOG(WARNING, PROFILER) << "NodeInit: node count limit reached, dropping (program)/(idle) nodes";
+        return;
+    }
     nodeKey.methodKey.frameId.pandaFilePtr = PROGRAM_NODE_PTR;
-    nodesMap_.emplace(nodeKey, nodesMap_.size() + 1);
+    nodesMap.emplace(nodeKey, static_cast<int>(nodesMap.size() + 1));
     methodNode.codeEntry.functionName = "(program)";
     methodNode.id = PROGRAM_NODE_ID;
     profileInfo.nodes[profileInfo.nodeCount++] = methodNode;
     profileInfo.nodes[0].children.push_back(methodNode.id);
 
+    if (profileInfo.nodeCount >= MAX_NODE_COUNT) {
+        LOG(WARNING, PROFILER) << "NodeInit: node count limit reached, dropping (idle) node";
+        return;
+    }
     nodeKey.methodKey.frameId.pandaFilePtr = IDLE_NODE_PTR;
-    nodesMap_.emplace(nodeKey, nodesMap_.size() + 1);
+    nodesMap.emplace(nodeKey, static_cast<int>(nodesMap.size() + 1));
     methodNode.codeEntry.functionName = "(idle)";
     methodNode.id = IDLE_NODE_ID;
     profileInfo.nodes[profileInfo.nodeCount++] = methodNode;
@@ -165,18 +173,48 @@ struct FrameInfo *SamplesRecord::GetFrameInfoByFrameId(const SampleInfo::Managed
     return nullptr;
 }
 
+// Creates a profile node for the frame or retrieves the existing one. Returns the node id, or 0 when
+// the node count limit is reached and the frame (together with everything above it) must be dropped.
+int SamplesRecord::CreateOrGetNode(const FrameInfo *frameInfo, const NodeKey &nodeKey, ProfileInfo &profileInfo,
+                                   std::map<NodeKey, int> &nodesMap, bool &limitLogged)
+{
+    auto itor = nodesMap.find(nodeKey);
+    if (itor != nodesMap.end()) {
+        return itor->second;
+    }
+    if (profileInfo.nodeCount >= MAX_NODE_COUNT) {
+        // Writing past the array would corrupt the members that follow it (nodeCount included).
+        if (!limitLogged) {
+            LOG(WARNING, PROFILER) << "Node count limit " << MAX_NODE_COUNT
+                                   << " reached, further unique frames are dropped";
+            limitLogged = true;
+        }
+        return 0;
+    }
+    CpuProfileNode methodNode;
+    methodNode.id = static_cast<int>(profileInfo.nodeCount + 1);
+    nodesMap.emplace(nodeKey, methodNode.id);
+    methodNode.codeEntry = *frameInfo;
+    profileInfo.nodes[profileInfo.nodeCount++] = methodNode;
+    return methodNode.id;
+}
+
 /**
  * Processes a single call stack data from the sampleInfo and populates the profileInfo.
  * This function iterates over the managed stack frames in reverse order, builds nodes for each frame,
  * and updates the profileInfo object. It also calculates time deltas between samples and updates timestamps.
  * @param sampleInfo The SampleInfo object containing the stack information and timestamp.
  * @param profileInfo The ProfileInfo object to be updated with processed data.
+ * @param nodesMap Map from node key to node id, shared across all samples of the thread.
  * @param prevTimeStamp Reference to the previous timestamp for calculating time deltas.
+ * @param limitLogged Reference to the flag throttling the node-limit warning to one log per profile build.
  */
 void SamplesRecord::ProcessSingleCallStackData(const SampleInfo &sampleInfo, ProfileInfo &profileInfo,
-                                               uint64_t &prevTimeStamp)
+                                               std::map<NodeKey, int> &nodesMap, uint64_t &prevTimeStamp,
+                                               bool &limitLogged)
 {
     int nodeId = 1;
+    bool hasTopmostSample = false;
     // Iterate over the managed stack frames in reverse order.
     for (auto index = static_cast<int>(sampleInfo.stackInfo.managedStackSize - 1); index >= 0; --index) {
         const auto &currentFrame = &sampleInfo.stackInfo.managedStack[index];
@@ -186,30 +224,23 @@ void SamplesRecord::ProcessSingleCallStackData(const SampleInfo &sampleInfo, Pro
             LOG(DEBUG, PROFILER) << "Profiler encountered an invalid pandaFilePtr";
             continue;
         }
-
         // Generate a unique NodeKey for the current frame.
         NodeKey nodeKey;
         nodeKey.parentId = nodeId;
         nodeKey.methodKey.lineNumber = frameInfo->lineNumber;
         nodeKey.methodKey.frameId = *currentFrame;
 
-        // Check if the node already exists in the nodesMap_.
-        if (nodesMap_.find(nodeKey) == nodesMap_.end()) {
-            // Create a new CpuProfileNode if it doesn't exist.
-            CpuProfileNode methodNode;
-            methodNode.id = nodeId = static_cast<int>(nodesMap_.size() + 1);
-            nodesMap_.emplace(nodeKey, nodeId);
-            methodNode.codeEntry = *frameInfo;
-            profileInfo.nodes[profileInfo.nodeCount++] = methodNode;
-        } else {
-            // If the node already exists, retrieve its ID.
-            nodeId = nodesMap_.at(nodeKey);
+        int createdNodeId = CreateOrGetNode(frameInfo, nodeKey, profileInfo, nodesMap, limitLogged);
+        if (createdNodeId == 0) {
+            break;
         }
+        nodeId = createdNodeId;
 
         // Process the topmost frame (index == 0) to update hit count and add a sample.
         if (index == 0) {
             profileInfo.nodes[nodeId - 1].hitCount++;
             profileInfo.samples.push_back(nodeId);
+            hasTopmostSample = true;
         }
 
         // Update the parent node's children list.
@@ -219,10 +250,16 @@ void SamplesRecord::ProcessSingleCallStackData(const SampleInfo &sampleInfo, Pro
         }
     }
 
+    if (!hasTopmostSample) {
+        profileInfo.samples.push_back(static_cast<int>(IDLE_NODE_ID));
+        profileInfo.nodes[IDLE_NODE_ID - 1].hitCount++;
+    }
+
     // Calculate the time delta between the current sample and the previous one.
     int timeDelta;
     if (prevTimeStamp == 0) {
         profileInfo.tid = sampleInfo.threadInfo.threadId;
+        profileInfo.osTid = sampleInfo.threadInfo.osTid;
         profileInfo.startTime = threadStartTime_;
         timeDelta = static_cast<int>(sampleInfo.timeStamp - threadStartTime_);
     } else {
@@ -241,20 +278,23 @@ void SamplesRecord::ProcessSingleCallStackData(const SampleInfo &sampleInfo, Pro
  * Generates a ProfileInfo object for a single thread by processing a collection of SampleInfo objects.
  * @param sampleInfos A vector of unique pointers to `SampleInfo` objects representing profiling data for a
  * single thread.
+ * @param limitLogged Reference to the flag throttling the node-limit warning to one log per profile build.
  * @return A unique pointer to a `ProfileInfo` object containing the processed profiling data for the thread.
  *         Returns `nullptr` if the input `sampleInfos` vector is empty.
  */
-std::unique_ptr<ProfileInfo> SamplesRecord::GetSingleThreadProfileInfo(const SampleInfoVector &sampleInfos)
+std::unique_ptr<ProfileInfo> SamplesRecord::GetSingleThreadProfileInfo(const SampleInfoVector &sampleInfos,
+                                                                       bool &limitLogged)
 {
     if (sampleInfos.empty()) {
         return nullptr;
     }
     auto singleThreadProfileInfo = std::make_unique<ProfileInfo>();
-    NodeInit(*singleThreadProfileInfo);
+    std::map<NodeKey, int> nodesMap;
+    NodeInit(*singleThreadProfileInfo, nodesMap);
     uint64_t prevTimeStamp = 0;
     for (const auto &owned : sampleInfos) {
         BuildStackInfoMap(owned->sample);
-        ProcessSingleCallStackData(owned->sample, *singleThreadProfileInfo, prevTimeStamp);
+        ProcessSingleCallStackData(owned->sample, *singleThreadProfileInfo, nodesMap, prevTimeStamp, limitLogged);
     }
     return singleThreadProfileInfo;
 }
@@ -270,8 +310,9 @@ std::unique_ptr<std::vector<std::unique_ptr<ProfileInfo>>> SamplesRecord::GetAll
         return nullptr;
     }
     auto allThreadsProfileInfos = std::make_unique<std::vector<std::unique_ptr<ProfileInfo>>>();
+    bool limitLogged = false;
     for (const auto &pair : tidToSampleInfosMap_) {
-        auto profileInfo = GetSingleThreadProfileInfo(pair.second);
+        auto profileInfo = GetSingleThreadProfileInfo(pair.second, limitLogged);
         if (profileInfo) {
             allThreadsProfileInfos->emplace_back(std::move(profileInfo));
         }

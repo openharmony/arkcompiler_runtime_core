@@ -48,6 +48,7 @@ struct CpuProfileNode {
 
 struct ProfileInfo {
     uint64_t tid = 0;
+    uint32_t osTid = 0;
     uint64_t startTime = 0;
     uint64_t stopTime = 0;
     std::array<CpuProfileNode, MAX_NODE_COUNT> nodes;
@@ -130,12 +131,15 @@ public:
     };
 
 private:
-    void NodeInit(ProfileInfo &profileInfo);
+    void NodeInit(ProfileInfo &profileInfo, std::map<NodeKey, int> &nodesMap);
     using SampleInfoVector = std::vector<std::unique_ptr<OwnedSampleInfo>>;
-    std::unique_ptr<ProfileInfo> GetSingleThreadProfileInfo(const SampleInfoVector &sampleInfos);
+    std::unique_ptr<ProfileInfo> GetSingleThreadProfileInfo(const SampleInfoVector &sampleInfos, bool &limitLogged);
     void BuildStackInfoMap(const SampleInfo &sampleInfo);
     FrameInfo *GetFrameInfoByFrameId(const SampleInfo::ManagedStackFrameId &frameId);
-    void ProcessSingleCallStackData(const SampleInfo &sampleInfo, ProfileInfo &profileInfo, uint64_t &prevTimeStamp);
+    int CreateOrGetNode(const FrameInfo *frameInfo, const NodeKey &nodeKey, ProfileInfo &profileInfo,
+                        std::map<NodeKey, int> &nodesMap, bool &limitLogged);
+    void ProcessSingleCallStackData(const SampleInfo &sampleInfo, ProfileInfo &profileInfo,
+                                    std::map<NodeKey, int> &nodesMap, uint64_t &prevTimeStamp, bool &limitLogged);
 
     FrameInfo BuildDynamicFrameInfo(const uint8_t *buffer, size_t size);
     FrameInfo BuildStaticFrameInfo(const SampleInfo::ManagedStackFrameId &frameId);
@@ -144,7 +148,6 @@ private:
 
     uint64_t threadStartTime_ = 0;
     os::memory::Mutex addSamplInfoLock_;
-    std::map<NodeKey, int> nodesMap_ = {};
     std::map<std::string, size_t> scriptIdMap_ = {};
     std::map<SampleInfo::ManagedStackFrameId, FrameInfo> stackInfoMap_;
     std::unordered_map<uint32_t, SampleInfoVector> tidToSampleInfosMap_ = {};

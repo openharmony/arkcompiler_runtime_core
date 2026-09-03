@@ -41,6 +41,7 @@ void Profile::SerializeSingleProfileInfo(JsonObjectBuilder &builder, const sampl
 {
     // add normal data
     builder.AddProperty("tid", profileInfo.tid);
+    builder.AddProperty("osTid", profileInfo.osTid);
     builder.AddProperty("startTime", profileInfo.startTime);
     builder.AddProperty("endTime", profileInfo.stopTime);
     builder.AddProperty("gcTime", profileInfo.gcTime);

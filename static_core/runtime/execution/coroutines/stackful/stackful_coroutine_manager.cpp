@@ -1121,6 +1121,10 @@ void StackfulCoroutineManager::PreZygoteFork()
 void StackfulCoroutineManager::PostZygoteFork()
 {
     Runtime *runtime = Runtime::GetCurrent();
+    auto *mainCoroutine = static_cast<Coroutine *>(GetMainThread());
+    if (mainCoroutine != nullptr) {
+        mainCoroutine->UpdateIdToCurrentThread();
+    }
     CreateGeneralWorkers(commonWorkersCount_ - 1, runtime, runtime->GetPandaVM());
 }
 
