@@ -206,6 +206,9 @@ ani_object IcuGetPluralCategories(ani_env *env, [[maybe_unused]] ani_class klass
     }
 
     auto first = StdStrToAni(env, categories[0]);
+    if (UNLIKELY(first == nullptr)) {
+        return nullptr;
+    }
     ani_class stringClass;
     ANI_FATAL_IF_ERROR(env->FindClass("std.core.String", &stringClass));
     ani_fixedarray array;
@@ -214,6 +217,9 @@ ani_object IcuGetPluralCategories(ani_env *env, [[maybe_unused]] ani_class klass
     }
     for (size_t i = 1; i < categories.size(); ++i) {
         auto item = StdStrToAni(env, categories[i]);
+        if (UNLIKELY(item == nullptr)) {
+            return nullptr;
+        }
         ANI_FATAL_IF_ERROR(env->FixedArray_Set(array, i, item));
     }
     return array;

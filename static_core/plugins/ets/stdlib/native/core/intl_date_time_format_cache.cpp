@@ -29,8 +29,8 @@ IntlDateTimeFormatCache::IntlDateTimeFormatCache()
     ASSERT(ERASE_AMOUNT > 0);
 }
 
-icu::DateFormat *IntlDateTimeFormatCache::GetOrCreateDateFormat(ani_env *env, ani_object self,
-                                                                const std::string &cacheKey)
+std::shared_ptr<icu::DateFormat> IntlDateTimeFormatCache::GetOrCreateDateFormat(ani_env *env, ani_object self,
+                                                                                const std::string &cacheKey)
 {
     // --- Cache Lookup ---
     os::memory::LockHolder lock(mtx_);
@@ -38,7 +38,7 @@ icu::DateFormat *IntlDateTimeFormatCache::GetOrCreateDateFormat(ani_env *env, an
     auto it = cache_.find(cacheKey);
     if (it != cache_.end()) {
         // Cache Hit
-        return it->second.get();
+        return it->second;
     }
     // --- Cache Miss ---
     EraseRandFmtsGroupByEraseRatio();
@@ -48,10 +48,10 @@ icu::DateFormat *IntlDateTimeFormatCache::GetOrCreateDateFormat(ani_env *env, an
         return nullptr;
     }
 
-    auto *formatPtr = newFormat.get();
-    cache_.emplace(cacheKey, std::move(newFormat));
+    auto sp = std::shared_ptr<icu::DateFormat>(std::move(newFormat));
+    cache_.emplace(cacheKey, sp);
 
-    return formatPtr;
+    return sp;
 }
 
 void IntlDateTimeFormatCache::EraseRandFmtsGroupByEraseRatio()

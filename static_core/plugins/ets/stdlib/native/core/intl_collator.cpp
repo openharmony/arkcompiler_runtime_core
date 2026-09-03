@@ -27,6 +27,7 @@
 #include <unicode/translit.h>
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <array>
 #include "intl_locale_match.h"
@@ -38,12 +39,13 @@ static icu::Transliterator *GetAccentsTransliterator()
 {
     // thread_local: Transliterator is not thread-safe, so each thread gets its own instance.
     // Created once per thread instead of once per call (avoids expensive rule parsing).
-    thread_local icu::Transliterator *instance = nullptr;
+    thread_local std::unique_ptr<icu::Transliterator> instance;
     if (instance == nullptr) {
         UErrorCode s = U_ZERO_ERROR;
-        instance = icu::Transliterator::createInstance("NFD; [:M:] Remove; NFC", UTRANS_FORWARD, s);
+        instance.reset(icu::Transliterator::createInstance("NFD; [:M:] Remove; NFC", UTRANS_FORWARD, s));
     }
-    return instance;
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDelete)
+    return instance.get();
 }
 
 std::string RemoveAccents(ani_env *env, const std::string &str)
@@ -100,7 +102,7 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
     auto str2 = ConvertFromAniString(env, secondStr);
     auto caseFirst = ConvertFromAniString(env, caseFirstIn);
 
-    icu::Collator *collator =
+    auto collator =
         g_intlState->collatorCache.GetOrCreateCollator(env, lang, collation, caseFirst, numeric == ANI_TRUE);
     if (collator == nullptr) {
         ThrowNewError(env, "std.core.RuntimeError", "Failed to create Collator instance for comparison",
@@ -114,6 +116,7 @@ ani_double StdCoreIntlCollatorLocaleCmp(ani_env *env, [[maybe_unused]] ani_class
     auto res = collator->compare(source, target, status);
     if (UNLIKELY(U_FAILURE(status))) {
         ThrowNewError(env, "std.core.RuntimeError", "Comparison failed", ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
+        return 0;
     }
     return res;
 }

@@ -48,10 +48,10 @@ public:
      * @param self The ETS `std.core.Intl.DateTimeFormat` instance.
      * @return A pointer to the cached or newly created icu::DateFormat object.
      */
-    icu::DateFormat *GetOrCreateDateFormat(ani_env *env, ani_object self, const std::string &cacheKey);
+    std::shared_ptr<icu::DateFormat> GetOrCreateDateFormat(ani_env *env, ani_object self, const std::string &cacheKey);
 
 private:
-    using CacheUMap = std::unordered_map<std::string, std::unique_ptr<icu::DateFormat>>;
+    using CacheUMap = std::unordered_map<std::string, std::shared_ptr<icu::DateFormat>>;
 
     void EraseRandFmtsGroupByEraseRatio() REQUIRES(mtx_);
 

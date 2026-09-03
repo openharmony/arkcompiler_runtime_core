@@ -171,6 +171,9 @@ ani_status IntlClusters(ani_env *env, [[maybe_unused]] ani_class klass, BreakerF
         cluster.toUTF8String(utf8Cluster);
 
         ani_string clusterStr = StdStrToAni(env, utf8Cluster);
+        if (clusterStr == nullptr) {
+            return ANI_PENDING_ERROR;
+        }
         ani_boolean isWordLike = IntlCurrentClusterIsWordLike(breaker);
         ani_object clusterObject = nullptr;
         ANI_RETURN_ON_PENDING_ERROR(

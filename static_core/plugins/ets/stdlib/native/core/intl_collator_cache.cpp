@@ -121,16 +121,16 @@ IntlCollatorCache::IntlCollatorCache()
     ASSERT(ERASE_AMOUNT > 0);
 }
 
-icu::Collator *IntlCollatorCache::GetOrCreateCollator(ani_env *env, const std::string &lang,
-                                                      const std::string &collation, const std::string &caseFirst,
-                                                      bool numeric)
+std::shared_ptr<icu::Collator> IntlCollatorCache::GetOrCreateCollator(ani_env *env, const std::string &lang,
+                                                                      const std::string &collation,
+                                                                      const std::string &caseFirst, bool numeric)
 {
     std::string cacheKey = MakeCacheKey(lang, collation, caseFirst, numeric);
 
     os::memory::LockHolder lh(mtx_);
     auto it = cache_.find(cacheKey);
     if (it != cache_.end()) {
-        return it->second.get();
+        return it->second;
     }
     // Cache miss, create a new instance
     EraseRandFmtsGroupByEraseRatio();
@@ -140,13 +140,13 @@ icu::Collator *IntlCollatorCache::GetOrCreateCollator(ani_env *env, const std::s
         return nullptr;
     }
 
-    auto [iter, inserted] = cache_.insert_or_assign(cacheKey, std::move(newCollator));
-    return iter->second.get();
+    auto sp = std::shared_ptr<icu::Collator>(std::move(newCollator));
+    cache_.insert_or_assign(cacheKey, sp);
+    return sp;
 }
 
 void IntlCollatorCache::EraseRandFmtsGroupByEraseRatio()
 {
-    os::memory::LockHolder lh(mtx_);
     if (cache_.size() == MAX_SIZE_CACHE) {
         // NOLINTNEXTLINE(cert-msc51-cpp)
         static std::minstd_rand simpleRand(std::time(nullptr));
