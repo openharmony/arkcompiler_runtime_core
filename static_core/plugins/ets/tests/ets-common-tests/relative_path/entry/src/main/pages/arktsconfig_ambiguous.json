@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "package": "entry",
+        "baseUrl": "../../..",
+        "cacheDir": "${WORK_DIR}/${SUITE_NAME}/gen/ets-common-tests/relative_path/build/cache",
+        "declgenV2OutPath": "../../../../build/declgenV2",
+        "paths": {
+            "pkgAmbiguous": [
+                "../oh_modules/pkgAmbiguous"
+            ],
+            "pkgAmbiguous/Index": [
+                "../oh_modules/pkgAmbiguous/Index.d.ets"
+            ],
+            "pkgAmbiguous/src/main": [
+                "../build/declgenV2/pkgAmbiguous/src/main"
+            ]
+        }
+    }
+}

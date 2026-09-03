@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "package": "entry",
+        "baseUrl": "../../..",
+        "cacheDir": "${WORK_DIR}/${SUITE_NAME}/gen/ets-common-tests/relative_path/build/cache",
+        "declgenV2OutPath": "../../../../build/declgenV2",
+        "paths": {
+            "pkgMissing": [
+                "../oh_modules/pkgMissing"
+            ],
+            "pkgMissing/Index": [
+                "../oh_modules/pkgMissing/Index.d.ets"
+            ]
+        }
+    }
+}
