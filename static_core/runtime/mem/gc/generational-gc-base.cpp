@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,8 @@ template <class LanguageConfig>
 bool GenerationalGC<LanguageConfig>::ShouldRunTenuredGC(const GCTask &task)
 {
     return this->IsOnPygoteFork() || task.reason == GCTaskCause::OOM_CAUSE ||
-           task.reason == GCTaskCause::EXPLICIT_CAUSE || task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE ||
-           task.reason == GCTaskCause::STARTUP_COMPLETE_CAUSE;
+           task.reason == GCTaskCause::BACKGROUND_CAUSE || task.reason == GCTaskCause::EXPLICIT_CAUSE ||
+           task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE || task.reason == GCTaskCause::STARTUP_COMPLETE_CAUSE;
 }
 
 template <class LanguageConfig>

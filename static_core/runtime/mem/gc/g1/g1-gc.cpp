@@ -752,7 +752,7 @@ template <class LanguageConfig>
 bool G1GC<LanguageConfig>::NeedToRunGC(const ark::GCTask &task)
 {
     return (task.reason == GCTaskCause::YOUNG_GC_CAUSE) || (task.reason == GCTaskCause::OOM_CAUSE) ||
-           (task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) ||
+           (task.reason == GCTaskCause::BACKGROUND_CAUSE) || (task.reason == GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) ||
            (task.reason == GCTaskCause::STARTUP_COMPLETE_CAUSE) || (task.reason == GCTaskCause::EXPLICIT_CAUSE) ||
            (task.reason == GCTaskCause::NATIVE_ALLOC_CAUSE) || (task.reason == GCTaskCause::MIXED);
 }
@@ -760,7 +760,8 @@ bool G1GC<LanguageConfig>::NeedToRunGC(const ark::GCTask &task)
 template <class LanguageConfig>
 bool G1GC<LanguageConfig>::NeedFullGC(const ark::GCTask &task)
 {
-    return this->IsExplicitFull(task) || (task.reason == GCTaskCause::OOM_CAUSE);
+    return this->IsExplicitFull(task) || (task.reason == GCTaskCause::OOM_CAUSE) ||
+           (task.reason == GCTaskCause::BACKGROUND_CAUSE);
 }
 
 template <class LanguageConfig>
@@ -1790,17 +1791,14 @@ void G1GC<LanguageConfig>::UpdateRefsAndClear(const CollectionSet &collectionSet
                                               PandaVector<PandaVector<ObjectHeader *> *> *movedObjectsVector,
                                               HeapVerifierIntoGC<LanguageConfig> *collectVerifier)
 {
-    {
-        os::memory::LockHolder lock(queueLock_);
-        analytics_.ReportUpdateRefsStart(ark::time::GetCurrentTimeInNanos());
-        if (this->GetSettings()->ParallelRefUpdatingEnabled()) {
-            UpdateRefsToMovedObjects<FULL_GC, true>(movedObjectsContainer);
-        } else {
-            UpdateRefsToMovedObjects<FULL_GC, false>(movedObjectsContainer);
-        }
-        analytics_.ReportUpdateRefsEnd(ark::time::GetCurrentTimeInNanos());
-        ActualizeRemSets();
+    analytics_.ReportUpdateRefsStart(ark::time::GetCurrentTimeInNanos());
+    if (this->GetSettings()->ParallelRefUpdatingEnabled()) {
+        UpdateRefsToMovedObjects<FULL_GC, true>(movedObjectsContainer);
+    } else {
+        UpdateRefsToMovedObjects<FULL_GC, false>(movedObjectsContainer);
     }
+    analytics_.ReportUpdateRefsEnd(ark::time::GetCurrentTimeInNanos());
+    ActualizeRemSets();
 
     VerifyCollectAndMove(std::move(*collectVerifier), collectionSet);
 
@@ -3020,7 +3018,7 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurrentMarkImpl(GCMarkin
 template <class LanguageConfig>
 bool G1GC<LanguageConfig>::Trigger(PandaUniquePtr<GCTask> task)
 {
-    if (this->GetSettings()->G1EnablePauseTimeGoal() &&
+    if (task->reason != GCTaskCause::BACKGROUND_CAUSE && this->GetSettings()->G1EnablePauseTimeGoal() &&
         g1PauseTracker_.MinDelayBeforeMaxPauseInMicros(ark::time::GetCurrentTimeInMicros()) > 0) {
         return false;
     }

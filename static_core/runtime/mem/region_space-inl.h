@@ -140,10 +140,10 @@ void RegionPool::FreeRegion(Region *region)
 template <RegionSpace::ReleaseRegionsPolicy REGIONS_RELEASE_POLICY, OSPagesPolicy OS_PAGES_POLICY>
 void RegionSpace::FreeRegion(Region *region)
 {
-    FreeRegion(region, [](uintptr_t, uintptr_t) {});
+    FreeRegion<REGIONS_RELEASE_POLICY, OS_PAGES_POLICY>(region, [](uintptr_t, uintptr_t) {});
 }
 
-template <typename F, RegionSpace::ReleaseRegionsPolicy REGIONS_RELEASE_POLICY, OSPagesPolicy OS_PAGES_POLICY>
+template <RegionSpace::ReleaseRegionsPolicy REGIONS_RELEASE_POLICY, OSPagesPolicy OS_PAGES_POLICY, typename F>
 void RegionSpace::FreeRegion(Region *region, const F &onRegionDestroy)
 {
     ASSERT(region->GetSpace() == this);

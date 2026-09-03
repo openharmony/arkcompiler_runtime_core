@@ -788,7 +788,7 @@ TEST_F(YoungRegionCacheBoundTest, CacheBoundedByInitialMaxAfterYoungEnlargement)
 
     auto onRegionDestroy = [](uintptr_t, uintptr_t) {};
     for (auto *region : youngRegions) {
-        regionSpace->template FreeRegion<decltype(onRegionDestroy), RegionSpace::ReleaseRegionsPolicy::NoRelease>(
+        regionSpace->template FreeRegion<RegionSpace::ReleaseRegionsPolicy::NoRelease, OSPagesPolicy::IMMEDIATE_RETURN>(
             region, onRegionDestroy);
     }
 

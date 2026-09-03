@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -159,6 +159,31 @@ TEST_F(ExplicitGC, TestG1GCWithFullExplicit)
         task.Run(*gc);  // run full
         expectedLog = "[FULL (Explicit)]";
         log = testing::internal::GetCapturedStderr();
+        ASSERT_NE(log.find(expectedLog), std::string::npos) << "Expected:\n" << expectedLog << "\nLog:\n" << log;
+    }
+}
+
+TEST_F(ExplicitGC, TestG1GCWithBackgroundCause)
+{
+    SetupRuntime("g1-gc", true);
+
+    Runtime *runtime = Runtime::GetCurrent();
+    GC *gc = runtime->GetPandaVM()->GetGC();
+    MTManagedThread *thread = MTManagedThread::GetCurrent();
+    ScopedManagedCodeThread s(thread);
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    ObjectAllocator objectAllocator;
+
+    VMHandle<ObjectHeader> obj;
+    obj = VMHandle<ObjectHeader>(thread, objectAllocator.AllocObjectInYoung());
+
+    {
+        ScopedNativeCodeThread sn(thread);
+        testing::internal::CaptureStderr();
+        GCTask task(GCTaskCause::BACKGROUND_CAUSE);
+        task.Run(*gc);
+        std::string expectedLog = "[FULL (Background)]";
+        std::string log = testing::internal::GetCapturedStderr();
         ASSERT_NE(log.find(expectedLog), std::string::npos) << "Expected:\n" << expectedLog << "\nLog:\n" << log;
     }
 }

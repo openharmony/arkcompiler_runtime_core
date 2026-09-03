@@ -546,8 +546,7 @@ public:
     Region *NewRegion(size_t regionSize, RegionFlag edenOrOldOrNonmovable, RegionFlag properties,
                       OSPagesAllocPolicy allocPolicy = OSPagesAllocPolicy::NO_POLICY);
 
-    template <typename F, ReleaseRegionsPolicy REGIONS_RELEASE_POLICY = ReleaseRegionsPolicy::Release,
-              OSPagesPolicy OS_PAGES_POLICY = OSPagesPolicy::IMMEDIATE_RETURN>
+    template <ReleaseRegionsPolicy REGIONS_RELEASE_POLICY, OSPagesPolicy OS_PAGES_POLICY, typename F>
     void FreeRegion(Region *region, const F &onRegionDestroy);
 
     template <ReleaseRegionsPolicy REGIONS_RELEASE_POLICY = ReleaseRegionsPolicy::Release,

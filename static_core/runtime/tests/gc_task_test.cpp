@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "runtime/include/gc_task.h"
 
 namespace ark::test {
@@ -25,7 +26,8 @@ TEST_F(GcTaskTest, TestPriority)
     ASSERT_LT(GCTaskCause::YOUNG_GC_CAUSE, GCTaskCause::OOM_CAUSE);
     ASSERT_LT(GCTaskCause::YOUNG_GC_CAUSE, GCTaskCause::EXPLICIT_CAUSE);
     ASSERT_LT(GCTaskCause::YOUNG_GC_CAUSE, GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE);
-    ASSERT_LT(GCTaskCause::EXPLICIT_CAUSE, GCTaskCause::OOM_CAUSE);
+    ASSERT_LT(GCTaskCause::EXPLICIT_CAUSE, GCTaskCause::BACKGROUND_CAUSE);
+    ASSERT_LT(GCTaskCause::BACKGROUND_CAUSE, GCTaskCause::OOM_CAUSE);
 }
 
 }  // namespace ark::test

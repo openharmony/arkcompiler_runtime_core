@@ -614,7 +614,9 @@ void RegionAllocator<AllocConfigT, LockConfigT>::ResetAllYoungRegions(const F &o
         if (!region->IsYoung()) {
             return;
         }
-        this->GetSpace()->template FreeRegion<F, RegionSpace::ReleaseRegionsPolicy::NoRelease>(region, onRegionDestroy);
+        this->GetSpace()
+            ->template FreeRegion<RegionSpace::ReleaseRegionsPolicy::NoRelease, OSPagesPolicy::IMMEDIATE_RETURN, F>(
+                region, onRegionDestroy);
     });
     retainedTlabs_.clear();
 }
