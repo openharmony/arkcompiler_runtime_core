@@ -29,7 +29,7 @@ static_core/abc2program/              ^nazarovkonstantin @oatuwwutao @Graceunder
 static_core/assembler/                ^nazarovkonstantin ^igelhaus @Sprouted_Potato @zhaoshuting @dddzzzhhh
 static_core/bytecode_optimizer/       ^mbolshov ^chernykhsergey @oatuwwutao @Graceunderpressure @xhq1999 ^igelhaus
 static_core/cmake/                    @igelhaus
-static_core/compiler/                 @Prof @wanzixuan330 @LeechyLiang @zhangrunze13 @chernykhsergey ^oatuwwutao ^Graceunderpressure ^xhq1999 ^asidorov
+static_core/compiler/                 @Prof @wanzixuan330 @LeechyLiang @sherry2395 @chernykhsergey ^oatuwwutao ^Graceunderpressure ^xhq1999 ^asidorov
 static_core/cross_values/             @Prof @asidorov ^chernykhsergey
 static_core/cross_values/BUILD.gn     @sukhikhalexander
 static_core/disassembler/             ^nazarovkonstantin @oatuwwutao @Graceunderpressure @xhq1999 ^igelhaus
@@ -39,7 +39,7 @@ static_core/docs/task_manager.md      @dmitriitr
 static_core/dprof/                    @slynkodenis @v-cherkashin
 static_core/extras/                   @igelhaus
 static_core/gn/                       @igelhaus
-static_core/irtoc/                    @Prof @mbolshov @asidorov @wanzixuan330 ^chernykhsergey ^gitee-dakeQI @LeechyLiang @sukhikhalexander @lizheng89 @zhangrunze13
+static_core/irtoc/                    @Prof @mbolshov @asidorov @wanzixuan330 ^chernykhsergey ^gitee-dakeQI @LeechyLiang @sukhikhalexander @lizheng89 @sherry2395
 static_core/isa/                      @mbolshov ^igelhaus @oatuwwutao @Graceunderpressure @xhq1999 ^gitee-dakeQI @lizheng89
 static_core/isa/BUILD.gn              @sukhikhalexander
 static_core/libarkbase/               @dmitriitr @nazarovkonstantin ^igelhaus ^gitee-dakeQI @lizheng89
@@ -57,7 +57,7 @@ static_core/plugins/plugins.gni       @sukhikhalexander @ipetrov
 static_core/quickener/                @nsizov ^igelhaus
 static_core/runtime/                  @igelhaus @vpukhov
 static_core/runtime/*cframe*          @Prof ^wanzixuan330 ^LeechyLiang
-static_core/runtime/*compiler*        @Prof @wanzixuan330 @LeechyLiang @zhangrunze13
+static_core/runtime/*compiler*        @Prof @wanzixuan330 @LeechyLiang @sherry2395
 static_core/runtime/*deoptimization*  @Prof ^wanzixuan330 ^LeechyLiang
 static_core/runtime/*handle*          @artemu @ipetrov ^dmitriitr
 static_core/runtime/*method*          @igelhaus @vpukhov @Prof
@@ -74,9 +74,9 @@ static_core/tests/irtoc-interpreter-* @mbolshov ^igelhaus @chernykhsergey
 static_core/tests/vm-benchmarks       @ignatenkooleg @Prof @michaelfrost @giteeman46 ^asidorov ^wanzixuan330 ^LeechyLiang
 static_core/verification/             ^slynkodenis ^groshevmaksim ^igelhaus @oatuwwutao @Graceunderpressure @xhq1999 ^vpukhov
 static_core/compiler/**/*.gn{i,}      @sukhikhalexander
-static_core/compiler/aot/             @asidorov @Prof ^chernykhsergey @wanzixuan330 @sukhikhalexander @LeechyLiang @zhangrunze13
-static_core/compiler/code_info/       @asidorov @Prof @chernykhsergey @wanzixuan330 @LeechyLiang @zhangrunze13
-static_core/compiler/optimizer/       ^asidorov @Prof @chernykhsergey @wanzixuan330 @LeechyLiang @zhangrunze13
+static_core/compiler/aot/             @asidorov @Prof ^chernykhsergey @wanzixuan330 @sukhikhalexander @LeechyLiang @sherry2395
+static_core/compiler/code_info/       @asidorov @Prof @chernykhsergey @wanzixuan330 @LeechyLiang @sherry2395
+static_core/compiler/optimizer/       ^asidorov @Prof @chernykhsergey @wanzixuan330 @LeechyLiang @sherry2395
 static_core/docs/coroutines/                             @dmitriitr
 static_core/docs/diagrams/                               @dmitriitr
 static_core/gn/**/*.gn{i,}                               @sukhikhalexander
@@ -93,7 +93,7 @@ static_core/plugins/ets/playground                       ^anton-sysoev ^Nojpg @c
 static_core/plugins/ets/subproject_sources.gn            @sukhikhalexander @ipetrov
 static_core/runtime/arch/                                @Prof ^gitee-dakeQI @asidorov ^chernykhsergey @lizheng89
 static_core/runtime/asm_defines/BUILD.gn                 @sukhikhalexander
-static_core/runtime/bridge/                              @Prof @wanzixuan330 @asidorov ^gitee-dakeQI ^chernykhsergey @LeechyLiang @zhangrunze13 @lizheng89
+static_core/runtime/bridge/                              @Prof @wanzixuan330 @asidorov ^gitee-dakeQI ^chernykhsergey @LeechyLiang @sherry2395 @lizheng89
 static_core/runtime/entrypoints/                         @Prof ^gitee-dakeQI @chernykhsergey @lizheng89
 static_core/runtime/entrypoints/entrypoints.*            @mbolshov @chernykhsergey ^asidorov
 static_core/runtime/execution/                           ^dmitriitr ^konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
@@ -102,10 +102,10 @@ static_core/runtime/include/*mutator*                    ^dmitriitr @artemu @ipe
 static_core/runtime/include/*object*                     ^dmitriitr @artemu @ipetrov
 static_core/runtime/include/*thread*                     ^dmitriitr @artemu ^konstanting ^molotkovmikhail ^ipetrov
 static_core/runtime/interpreter/                         @igelhaus @chernykhsergey
-static_core/runtime/jit/                                 @Prof @zijiancogito @K0u1hw @wanzixuan330 ^chernykhsergey @zhuheng27 @zhangrunze13 @LeechyLiang
+static_core/runtime/jit/                                 @Prof @zijiancogito @K0u1hw @wanzixuan330 ^chernykhsergey @zhuheng27 @sherry2395 @LeechyLiang
 static_core/runtime/mem/                                 ^dmitriitr @artemu ^ipetrov ^gitee-dakeQI @lizheng89 ^shemetovphilip
-static_core/runtime/profilesaver/                        @chernykhsergey @zhuheng27 @zhangrunze13 @wanzixuan330 @LeechyLiang
-static_core/runtime/profiling/                           @chernykhsergey @zhangrunze13 @wanzixuan330 @LeechyLiang
+static_core/runtime/profilesaver/                        @chernykhsergey @zhuheng27 @sherry2395 @wanzixuan330 @LeechyLiang
+static_core/runtime/profiling/                           @chernykhsergey @sherry2395 @wanzixuan330 @LeechyLiang
 static_core/runtime/tooling/                             @slynkodenis ^kurnevichstanislav
 static_core/scripts/clang-tidy/                          @igelhaus @nazarovkonstantin
 static_core/scripts/code_style/                          @igelhaus @nazarovkonstantin
@@ -120,12 +120,12 @@ static_core/tests/tests-u-runner-2/                      ^amate ^sergeyandreev @
 static_core/tests/tests-u-runner/                        ^amate ^sergeyandreev @anton-sysoev ^Nojpg ^shirunova_viktoria ^kozhevnikova_elizaveta
 static_core/tests/verifier-tests/                        @igelhaus
 static_core/tools/ark_js_napi_cli/                       ^nazarovkonstantin @ipetrov ^rokashevichsvetlana ^kurnevichstanislav
-static_core/compiler/tools/paoc/                         @asidorov @Prof ^chernykhsergey @wanzixuan330 @sukhikhalexander @LeechyLiang @zhangrunze13
+static_core/compiler/tools/paoc/                         @asidorov @Prof ^chernykhsergey @wanzixuan330 @sukhikhalexander @LeechyLiang @sherry2395
 static_core/libarkbase/tests/genmc/                      @artemu
 static_core/libarkbase/tests/ringbuf/                    @artemu
 static_core/libarkbase/tests/taskmanager/                @artemu @molotkovmikhail
 static_core/plugins/ets/bytecode_optimizer/              ^mbolshov @oatuwwutao @Graceunderpressure @xhq1999 ^chernykhsergey
-static_core/plugins/ets/compiler/                        @Prof @wanzixuan330 @chernykhsergey ^asidorov @LeechyLiang @zhangrunze13
+static_core/plugins/ets/compiler/                        @Prof @wanzixuan330 @chernykhsergey ^asidorov @LeechyLiang @sherry2395
 static_core/plugins/ets/doc/concurrency                  ^konstanting @anedoria @dmitriitr ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/doc/spec                         ^konstanting ^Prof ^sergeyandreev ^slynkodenis ^nazarovkonstantin ^mbolshov ^akmaevaleksey ^anedoria ^klooer ^wanzixuan330 ^mengbierr ^davidwulanxi ^egavrin ^igelhaus ^vpukhov ^dmitriitr ^zsw_zhushiwei @fanglou @dumbledore @vigavi
 static_core/plugins/ets/irtoc_scripts/                   @Prof @mbolshov @asidorov ^wanzixuan330 ^gitee-dakeQI ^chernykhsergey ^LeechyLiang @lizheng89
