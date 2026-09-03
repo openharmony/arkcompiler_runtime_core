@@ -241,6 +241,11 @@ RegExpExecResult RegExp8::Execute(Pcre2Obj re, uint32_t matchFlags, const uint8_
 bool RegExp8::TestMatch(Pcre2Obj re, uint32_t matchFlags, const uint8_t *str, int len, int startOffset,
                         int32_t &endIndex)
 {
+    if (re == nullptr) {
+        // Defensive: callers must pass a compiled pattern; guard against a null one
+        // (e.g. a failed Compile) instead of dereferencing it below.
+        return false;
+    }
     auto *expr = reinterpret_cast<pcre2_code *>(re->pcre2Code);
     auto matchDataHandle = AcquireTestMatchData8();
     auto *matchData = matchDataHandle.data;

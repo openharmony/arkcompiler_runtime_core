@@ -148,7 +148,7 @@ ani_string MakeResultString(ani_env *env, const std::vector<CharT> &out)
 template <typename CharT>
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
 SubstituteResult<CharT> RunLiteralSubstitute(EtsRegExp &re, uint32_t matchFlags, ani_env *env, const ExecData &execData,
-                                             ani_string replaceValue, InputExecutionKind ek)
+                                             ani_string replaceValue)
 {
     const uint32_t opts = matchFlags | (re.IsGlobal() ? PCRE2_SUBSTITUTE_GLOBAL : 0U) | PCRE2_SUBSTITUTE_LITERAL |
                           PCRE2_SUBSTITUTE_OVERFLOW_LENGTH;
@@ -170,12 +170,13 @@ SubstituteResult<CharT> RunLiteralSubstitute(EtsRegExp &re, uint32_t matchFlags,
         std::vector<uint16_t> inStorage;
         ani_int replLen = 0;
         ark::ets::ani::ScopedManagedCodeFix scope(env);
-        const uint16_t *inData = AcquireUtf16Input(scope, execData.input, static_cast<int32_t>(execData.inputSize),
-                                                   ek == InputExecutionKind::LATIN1_TO_UTF16, inStorage);
         auto &patU16 = GetUtf16ScratchB();
         if (!CompileUtf16Pattern(re, scope, execData, patU16)) {
             return {};
         }
+
+        const uint16_t *inData =
+            AcquireUtf16Input(scope, execData.input, static_cast<int32_t>(execData.inputSize), inStorage);
         const uint16_t *replData = AcquireUtf16Replacement(scope, replaceValue, replStorage, replLen);
         return DoPcre2Substitute<uint16_t>(re.GetCompiledRe16()->pcre2Code, inData, inSize, execData.lastIndex, opts,
                                            replData, replLen);
@@ -185,9 +186,9 @@ SubstituteResult<CharT> RunLiteralSubstitute(EtsRegExp &re, uint32_t matchFlags,
 template <typename CharT>
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
 ani_string ReplaceLiteralCore(EtsRegExp &re, uint32_t matchFlags, ani_env *env, ani_object regexp, ani_field lif,
-                              bool gOrS, const ExecData &execData, ani_string replaceValue, InputExecutionKind ek)
+                              bool gOrS, const ExecData &execData, ani_string replaceValue)
 {
-    auto r = RunLiteralSubstitute<CharT>(re, matchFlags, env, execData, replaceValue, ek);
+    auto r = RunLiteralSubstitute<CharT>(re, matchFlags, env, execData, replaceValue);
     if (!r.valid) {
         return nullptr;
     }
@@ -223,7 +224,14 @@ ani_status AdvanceReplaceLoop(EtsRegExp &re, const CharT *input, int32_t inputSi
     }
     lastIndex = er.endIndex;
     if (er.index == er.endIndex) {
-        lastIndex = AdvanceIndex(input, inputSize, lastIndex, unicode);
+        const int32_t advanced = AdvanceIndex(input, inputSize, lastIndex, unicode);
+        if (advanced <= lastIndex) {
+            // AdvanceIndex saturated at INT32_MAX (end of a maximal-length input): no
+            // representable position remains past the end.
+            *shouldContinue = false;
+            return ANI_OK;
+        }
+        lastIndex = advanced;
         if (gOrS) {
             SetLastIndex(env, regexp, lif, lastIndex);
         }
@@ -261,6 +269,11 @@ ani_array RunReplaceLoop(EtsRegExp &re, uint32_t matchFlags, const CharT *input,
         ani_status status = AdvanceReplaceLoop(re, input, inputSize, unicode, env, regexp, lif, resCls, resCtor, er,
                                                gOrS, lastIndex, results, &shouldContinue);
         if (status != ANI_OK) {
+            // Reset lastIndex (advanced by a previous iteration) so a retry after this
+            // failure starts from 0; may no-op if the pending exception is already set.
+            if (gOrS) {
+                SetLastIndex(env, regexp, lif, 0);
+            }
             return nullptr;
         }
         if (!shouldContinue) {
@@ -278,7 +291,7 @@ ani_array RunReplaceNativeImpl(EtsRegExp &re, const ExecData &execData, int32_t 
                                InputExecutionKind ek, uint32_t matchFlags)
 {
     return PrepareInputAndRun<ani_array>(
-        re, execData, env, ek,
+        re, execData, env, ek, InputRunMode::MATERIALIZE,
         [&re, matchFlags, inputSize, env, regexp, lif, resCls, resCtor, execData](const uint8_t *p) -> ani_array {
             return RunReplaceLoop<uint8_t>(re, matchFlags, p, inputSize, false, env, regexp, lif, resCls, resCtor,
                                            execData);
@@ -305,11 +318,10 @@ ani_string RunReplaceLiteralNativeImpl(EtsRegExp &re, ExecData execData, ani_env
     }
     switch (ek) {
         case InputExecutionKind::LATIN1_DIRECT:
-            return ReplaceLiteralCore<uint8_t>(re, matchFlags, env, regexp, lif, gOrS, execData, replaceValue,
-                                               InputExecutionKind::LATIN1_DIRECT);
+            return ReplaceLiteralCore<uint8_t>(re, matchFlags, env, regexp, lif, gOrS, execData, replaceValue);
         case InputExecutionKind::UTF16_DIRECT:
         case InputExecutionKind::LATIN1_TO_UTF16:
-            return ReplaceLiteralCore<uint16_t>(re, matchFlags, env, regexp, lif, gOrS, execData, replaceValue, ek);
+            return ReplaceLiteralCore<uint16_t>(re, matchFlags, env, regexp, lif, gOrS, execData, replaceValue);
         default:
             UNREACHABLE();
     }
@@ -321,7 +333,13 @@ ani_string RunReplaceLiteralNativeImpl(EtsRegExp &re, ExecData execData, ani_env
 ani_array ReplaceNativeImpl(ani_env *env, ani_object regexp, ani_string pattern, ani_string flags, ani_string str,
                             ani_int patternSize, ani_int strSize, ani_int lastIndex, ani_boolean requiresUtf16Execution)
 {
-    ExecData execData = MakeExecData(env, pattern, str, flags, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+    ExecData execData;
+    ani_status status =
+        MakeExecData(&execData, env, pattern, str, flags, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    if (status != ANI_OK) {
+        return nullptr;
+    }
     EtsRegExp re(env);
     re.SetFlags(ConvertFromAniString(env, execData.flags));
 
@@ -344,7 +362,13 @@ ani_string ReplaceLiteralNativeImpl(ani_env *env, ani_object regexp, ani_string 
                                     ani_string str, ani_string replaceValue, ani_int patternSize, ani_int strSize,
                                     ani_int lastIndex, ani_boolean requiresUtf16Execution)
 {
-    ExecData execData = MakeExecData(env, pattern, str, flags, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+    ExecData execData;
+    ani_status status =
+        MakeExecData(&execData, env, pattern, str, flags, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    if (status != ANI_OK) {
+        return nullptr;
+    }
     EtsRegExp re(env);
     re.SetFlags(ConvertFromAniString(env, execData.flags));
     ani_field lif = nullptr;

@@ -133,6 +133,11 @@ ani_status SetGroupValsField(ani_env *env, ani_class regexpResultClass, ani_obje
 void MaterializeAsUtf16InPlace(const RegExpStringAccessor &accessor, std::vector<uint16_t> &out)
 {
     const size_t len = accessor.GetLength();
+    // Flatten may fail under OOM (pending exception already raised): GetData*() then return
+    // nullptr and copying must be skipped -- std::copy_n(nullptr, len>0, ..) is UB.
+    if (!accessor.HasFlattenedData()) {
+        return;
+    }
     out.resize(len);
 
     auto copy = [&out, len](const auto *src) { std::copy_n(src, len, out.data()); };
@@ -141,13 +146,10 @@ void MaterializeAsUtf16InPlace(const RegExpStringAccessor &accessor, std::vector
 }
 
 const uint16_t *AcquireUtf16Input(ark::ets::ani::ScopedManagedCodeFix &scope, ani_string input, int32_t inputSize,
-                                  bool needsMaterialization, std::vector<uint16_t> &storage)
+                                  std::vector<uint16_t> &storage)
 {
     auto *inputEtsStr = scope.ToInternalType(input);
     RegExpStringAccessor inputAccessor(inputEtsStr);
-    if (!needsMaterialization) {
-        return inputAccessor.GetDataUtf16();
-    }
     storage.resize(inputSize);
     MaterializeAsUtf16InPlace(inputAccessor, storage);
     return storage.data();
@@ -159,9 +161,6 @@ const uint16_t *AcquireUtf16Replacement(ark::ets::ani::ScopedManagedCodeFix &sco
     auto *replaceEtsStr = scope.ToInternalType(replaceValue);
     RegExpStringAccessor replaceAccessor(replaceEtsStr);
     length = static_cast<ani_int>(replaceAccessor.GetLength());
-    if (replaceAccessor.IsUtf16()) {
-        return replaceAccessor.GetDataUtf16();
-    }
     MaterializeAsUtf16InPlace(replaceAccessor, storage);
     return storage.data();
 }

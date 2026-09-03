@@ -93,6 +93,10 @@ struct NameTableParser<uint8_t> {
 
     static std::string GetName(const uint8_t *entry, int entrySize)
     {
+        // Minimum entry: 2 bytes of group number + at least 1 name byte
+        if (entrySize <= static_cast<int>(NAME_ENTRY_GROUP_NUM_SIZE)) {
+            return {};
+        }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto charPtr = reinterpret_cast<const char *>(entry + NAME_ENTRY_GROUP_NUM_SIZE);
         auto size = static_cast<size_t>(entrySize - NAME_ENTRY_GROUP_NUM_SIZE - 1);
@@ -114,6 +118,12 @@ struct NameTableParser<uint16_t> {
 
     static std::string GetName(const uint16_t *entry, int entrySize)
     {
+        // Minimum entry: 1 UTF-16 group number code unit + at least 1 UTF-16 name code unit
+        // NOLINTNEXTLINE(readability-identifier-naming)
+        constexpr auto minCodeUnits = NAME_ENTRY_GROUP_NUM_SIZE / UTF16_CODE_UNIT_SIZE + 1;
+        if (entrySize < static_cast<int>(minCodeUnits)) {
+            return {};
+        }
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto charPtr = reinterpret_cast<const char *>(entry + 1);
         size_t size =
@@ -136,6 +146,11 @@ struct NameTableParser<uint16_t> {
 template <typename CharT>
 void ParseNameTable(MatchMeta &meta, void *nameTablePtr, int nameCount, int nameEntrySize)
 {
+    // Skip invalid name tables (null pointer / no entries / entry too small to hold a group
+    // number plus a name byte): parsing them would read out of bounds.
+    if (nameTablePtr == nullptr || nameCount <= 0 || nameEntrySize <= static_cast<int>(NAME_ENTRY_GROUP_NUM_SIZE)) {
+        return;
+    }
     using Parser = NameTableParser<CharT>;
     auto tabPtr = reinterpret_cast<const CharT *>(nameTablePtr);
     for (int i = 0; i < nameCount; ++i) {
@@ -155,8 +170,34 @@ MatchMeta BuildMatchMeta(EtsRegExp &re)
 {
     MatchMeta meta;
     auto compiled = std::is_same_v<CharT, uint8_t> ? re.GetCompiledRe8() : re.GetCompiledRe16();
+    if (compiled == nullptr || compiled->pcre2Code == nullptr) {
+        // Defensive check: callers verify Compile() success, guard against future refactorings
+        // that may bypass it. An empty meta is safe: no named groups, no capture mapping.
+        return meta;
+    }
     const auto &countable = compiled->groupMeta.CountableGroups();
 
+    // Get PCRE2's authoritative capture count: the manual group-meta parse may over-count
+    // (e.g. 3+ backslashes before '(' are misread as a group), and the ovector is sized by
+    // PCRE2 -- reading past pcre2CaptureCount pairs would be out of bounds.
+    uint32_t pcre2CaptureCount = 0;
+    if constexpr (std::is_same_v<CharT, uint8_t>) {
+        if (pcre2_pattern_info_8(reinterpret_cast<pcre2_code_8 *>(compiled->pcre2Code), PCRE2_INFO_CAPTURECOUNT,
+                                 &pcre2CaptureCount) != 0) {
+            return meta;
+        }
+    } else {
+        if (pcre2_pattern_info_16(reinterpret_cast<pcre2_code_16 *>(compiled->pcre2Code), PCRE2_INFO_CAPTURECOUNT,
+                                  &pcre2CaptureCount) != 0) {
+            return meta;
+        }
+    }
+    // The ovector holds exactly pcre2CaptureCount + 1 pairs (group 0 + captures).
+
+    // Manual group indices count every '(' group (incl. lookarounds); the k-th *countable*
+    // manual group maps to PCRE2's k-th capture. Map all countable groups, then clamp the
+    // ECMA capture count to pcre2CaptureCount so a manual over-count never reads past the
+    // ovector.
     meta.pcre2ToEcma.resize(countable.size(), UNMAPPED_INDEX);
     uint32_t ecmaIdx = 0;
     for (size_t i = 0; i < countable.size(); ++i) {
@@ -164,10 +205,14 @@ MatchMeta BuildMatchMeta(EtsRegExp &re)
             meta.pcre2ToEcma[i] = ecmaIdx++;
         }
     }
-    meta.ecmaCaptureCount = ecmaIdx > 0 ? ecmaIdx - 1 : 0;
+    const uint32_t mappedCount = ecmaIdx - 1U;  // ecmaIdx >= 1: group 0 is always mapped
+    meta.ecmaCaptureCount = mappedCount < pcre2CaptureCount ? mappedCount : pcre2CaptureCount;
 
     for (const auto [child, parent] : compiled->groupMeta.ParentGroups()) {
         if (child >= countable.size() || parent >= countable.size()) {
+            continue;
+        }
+        if (meta.pcre2ToEcma[child] == UNMAPPED_INDEX || meta.pcre2ToEcma[parent] == UNMAPPED_INDEX) {
             continue;
         }
         if (!countable[child] || !countable[parent]) {
@@ -179,37 +224,42 @@ MatchMeta BuildMatchMeta(EtsRegExp &re)
     using CodeType = std::conditional_t<std::is_same_v<CharT, uint8_t>, pcre2_code_8, pcre2_code_16>;
     auto *code = reinterpret_cast<CodeType *>(compiled->pcre2Code);
     int nameCount = 0;
+    int rc = 0;
     if constexpr (std::is_same_v<CharT, uint8_t>) {
-        pcre2_pattern_info_8(code, PCRE2_INFO_NAMECOUNT, &nameCount);
+        rc = pcre2_pattern_info_8(code, PCRE2_INFO_NAMECOUNT, &nameCount);
     } else {
-        pcre2_pattern_info_16(code, PCRE2_INFO_NAMECOUNT, &nameCount);
+        rc = pcre2_pattern_info_16(code, PCRE2_INFO_NAMECOUNT, &nameCount);
     }
-    if (nameCount > 0) {
-        uint32_t captureCount = 0;
-        if constexpr (std::is_same_v<CharT, uint8_t>) {
-            pcre2_pattern_info_8(code, PCRE2_INFO_CAPTURECOUNT, &captureCount);
-        } else {
-            pcre2_pattern_info_16(code, PCRE2_INFO_CAPTURECOUNT, &captureCount);
-        }
-        meta.groupNames.resize(captureCount + 1);
+    if (rc == 0 && nameCount > 0) {
+        meta.groupNames.resize(pcre2CaptureCount + 1);
         void *nameTablePtr = nullptr;
         int nameEntrySize = 0;
         if constexpr (std::is_same_v<CharT, uint8_t>) {
-            pcre2_pattern_info_8(code, PCRE2_INFO_NAMETABLE, &nameTablePtr);
-            pcre2_pattern_info_8(code, PCRE2_INFO_NAMEENTRYSIZE, &nameEntrySize);
+            rc = pcre2_pattern_info_8(code, PCRE2_INFO_NAMETABLE, &nameTablePtr);
+            if (rc == 0) {
+                rc = pcre2_pattern_info_8(code, PCRE2_INFO_NAMEENTRYSIZE, &nameEntrySize);
+            }
         } else {
-            pcre2_pattern_info_16(code, PCRE2_INFO_NAMETABLE, &nameTablePtr);
-            pcre2_pattern_info_16(code, PCRE2_INFO_NAMEENTRYSIZE, &nameEntrySize);
+            rc = pcre2_pattern_info_16(code, PCRE2_INFO_NAMETABLE, &nameTablePtr);
+            if (rc == 0) {
+                rc = pcre2_pattern_info_16(code, PCRE2_INFO_NAMEENTRYSIZE, &nameEntrySize);
+            }
         }
-        ParseNameTable<CharT>(meta, nameTablePtr, nameCount, nameEntrySize);
-        meta.hasNamedGroups = true;
+        // PCRE2 invariants: a successfully compiled pattern with NAMECOUNT > 0 has a valid
+        // NAMETABLE and NAMEENTRYSIZE >= minimal entry size. Skip parsing if any query
+        // failed or the invariant is broken, instead of dereferencing invalid pointers.
+        const int minEntrySize = static_cast<int>(NAME_ENTRY_GROUP_NUM_SIZE) + 1;
+        if (rc == 0 && nameTablePtr != nullptr && nameEntrySize >= minEntrySize) {
+            ParseNameTable<CharT>(meta, nameTablePtr, nameCount, nameEntrySize);
+            meta.hasNamedGroups = true;
+        }
     }
     return meta;
 }
 
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
 ani_status PopulateFromOvector(ani_env *env, const FieldCache &fields, ani_object obj, const PCRE2_SIZE *ovector,
-                               const MatchMeta &meta)
+                               uint32_t ovectorPairCount, const MatchMeta &meta)
 {
     ANI_FATAL_IF_ERROR(env->Object_SetField_Boolean(obj, fields.isCorrect, true));
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -227,7 +277,10 @@ ani_status PopulateFromOvector(ani_env *env, const FieldCache &fields, ani_objec
         flat[1] = static_cast<ani_int>(ovector[1]);
         uint32_t ecmaIdx = 1;
         uint32_t captureIdx = 1;
-        for (uint32_t groupId = 1; groupId < meta.pcre2ToEcma.size() && ecmaIdx < totalSlots; ++groupId) {
+        // captureIdx must stay inside the ovector: its capacity is authoritative (sized by
+        // PCRE2's capture count), while pcre2ToEcma comes from a manual re-parse of the pattern.
+        for (uint32_t groupId = 1;
+             groupId < meta.pcre2ToEcma.size() && ecmaIdx < totalSlots && captureIdx < ovectorPairCount; ++groupId) {
             if (meta.pcre2ToEcma[groupId] == UNMAPPED_INDEX) {
                 continue;
             }
@@ -255,7 +308,7 @@ ani_status PopulateFromOvector(ani_env *env, const FieldCache &fields, ani_objec
     if (meta.hasNamedGroups) {
         std::vector<std::string> keys;
         std::vector<ani_int> vals;
-        for (size_t pcreIdx = 1; pcreIdx < meta.groupNames.size(); ++pcreIdx) {
+        for (size_t pcreIdx = 1; pcreIdx < meta.groupNames.size() && pcreIdx < ovectorPairCount; ++pcreIdx) {
             if (meta.groupNames[pcreIdx].empty()) {
                 continue;
             }
@@ -310,6 +363,9 @@ ani_array RunMatchAllLoop(EtsRegExp &re, uint32_t matchFlags, const CharT *input
 
     auto meta = BuildMatchMeta<CharT>(re);
     auto compiled = std::is_same_v<CharT, uint8_t> ? re.GetCompiledRe8() : re.GetCompiledRe16();
+    if (compiled == nullptr || compiled->pcre2Code == nullptr) {
+        return nullptr;
+    }
     auto *code = compiled->pcre2Code;
 
     using MdType = std::conditional_t<std::is_same_v<CharT, uint8_t>, pcre2_match_data_8, pcre2_match_data_16>;
@@ -341,10 +397,13 @@ ani_array RunMatchAllLoop(EtsRegExp &re, uint32_t matchFlags, const CharT *input
         }
 
         const PCRE2_SIZE *ovector = nullptr;
+        uint32_t ovectorPairCount = 0;
         if constexpr (std::is_same_v<CharT, uint8_t>) {
             ovector = pcre2_get_ovector_pointer_8(md);
+            ovectorPairCount = pcre2_get_ovector_count_8(md);
         } else {
             ovector = pcre2_get_ovector_pointer_16(md);
+            ovectorPairCount = pcre2_get_ovector_count_16(md);
         }
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -357,14 +416,20 @@ ani_array RunMatchAllLoop(EtsRegExp &re, uint32_t matchFlags, const CharT *input
         if (env->Object_New(resultClass, resultCtor, &resultObj) != ANI_OK) {
             return nullptr;
         }
-        if (PopulateFromOvector(env, fields, resultObj, ovector, meta) != ANI_OK) {
+        if (PopulateFromOvector(env, fields, resultObj, ovector, ovectorPairCount, meta) != ANI_OK) {
             return nullptr;
         }
         results.push_back(resultObj);
 
         lastIndex = matchEnd;
         if (matchStart == matchEnd) {
-            lastIndex = AdvanceIndex(input, inputSize, lastIndex, unicode);
+            const int32_t advanced = AdvanceIndex(input, inputSize, lastIndex, unicode);
+            if (advanced <= lastIndex) {
+                // AdvanceIndex saturated at INT32_MAX (end of a maximal-length input):
+                // no representable position remains past the end; stop iterating.
+                break;
+            }
+            lastIndex = advanced;
         }
 
         if (firstIter) {
@@ -393,6 +458,10 @@ ani_array RunWithStableLatin1Input(EtsRegExp &re, const ExecData &execData, ani_
 
         auto *inputEtsStr = scope.ToInternalType(execData.input);
         RegExpStringAccessor inputAccessor(inputEtsStr);
+        if (!inputAccessor.HasFlattenedData()) {
+            // OOM during flatten: pending exception is already raised, propagate the failure
+            return {};
+        }
         const auto *inputData = inputAccessor.GetDataUtf8();
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         inputStorage.assign(inputData, inputData + execData.inputSize);
@@ -403,19 +472,13 @@ ani_array RunWithStableLatin1Input(EtsRegExp &re, const ExecData &execData, ani_
 
 // CC-OFFNXT(G.FUN.01-CPP) solid logic
 ani_array RunWithStableUtf16Input(EtsRegExp &re, const ExecData &execData, ani_env *env,
-                                  InputExecutionKind executionKind, uint32_t matchFlags,
+                                  [[maybe_unused]] InputExecutionKind executionKind, uint32_t matchFlags,
                                   ani_method regexpMatchArrayCtor, int32_t inputSize)
 {
     std::vector<uint16_t> inputStorage;
     {
         ark::ets::ani::ScopedManagedCodeFix scope(env);
-        const bool needsMaterialization = executionKind == InputExecutionKind::LATIN1_TO_UTF16;
-        const uint16_t *inputData =
-            AcquireUtf16Input(scope, execData.input, inputSize, needsMaterialization, inputStorage);
-        if (!needsMaterialization) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            inputStorage.assign(inputData, inputData + execData.inputSize);
-        }
+        AcquireUtf16Input(scope, execData.input, inputSize, inputStorage);
         auto &patternUtf16 = GetUtf16ScratchA();
         if (!CompileUtf16Pattern(re, scope, execData, patternUtf16)) {
             return {};
@@ -432,7 +495,13 @@ ani_array MatchAllNativeImpl(ani_env *env, [[maybe_unused]] ani_object regexp, a
                              ani_string str, ani_int patternSize, ani_int strSize, ani_int lastIndex,
                              ani_boolean requiresUtf16Execution)
 {
-    ExecData execData = MakeExecData(env, pattern, str, flags, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
+    ExecData execData;
+    ani_status status =
+        MakeExecData(&execData, env, pattern, str, flags, patternSize, strSize, lastIndex, requiresUtf16Execution);
+    if (status != ANI_OK) {
+        return nullptr;
+    }
     const auto inputSize = static_cast<int32_t>(strSize);
 
     EtsRegExp re(env);

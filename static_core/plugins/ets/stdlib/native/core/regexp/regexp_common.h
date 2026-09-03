@@ -65,7 +65,7 @@ enum class InputExecutionKind {
 
 void MaterializeAsUtf16InPlace(const RegExpStringAccessor &accessor, std::vector<uint16_t> &out);
 const uint16_t *AcquireUtf16Input(ark::ets::ani::ScopedManagedCodeFix &scope, ani_string input, int32_t inputSize,
-                                  bool needsMaterialization, std::vector<uint16_t> &storage);
+                                  std::vector<uint16_t> &storage);
 const uint16_t *AcquireUtf16Replacement(ark::ets::ani::ScopedManagedCodeFix &scope, ani_string replaceValue,
                                         std::vector<uint16_t> &storage, ani_int &length);
 bool CompileUtf16Pattern(EtsRegExp &re, ark::ets::ani::ScopedManagedCodeFix &scope, const ExecData &execData,
@@ -86,6 +86,20 @@ inline bool IsUtf16(ani_env *env, ani_string str)
     ark::ets::ani::ScopedManagedCodeFix s(env);
     auto internalString = s.ToInternalType(str);
     return internalString->IsUtf16();
+}
+
+// Validates an ani_int size argument against the actual length of the managed string.
+// ani_int is signed: a negative value cast to size_t becomes huge, and a mismatched positive
+// value would cause heap over-read in vector::assign/resize or inside PCRE2. Trust boundary:
+// sizes passed from the managed layer must not be used without verification.
+inline ani_status ValidateStringSize(ani_env *env, ani_string str, ani_int size)
+{
+    ark::ets::ani::ScopedManagedCodeFix scope(env);
+    const auto actualLength = static_cast<uint32_t>(scope.ToInternalType(str)->GetLength());
+    if (size < 0 || static_cast<uint32_t>(size) != actualLength) {
+        return ThrowNewError(env, "std.core.RuntimeError", "invalid string size argument");
+    }
+    return ANI_OK;
 }
 
 inline std::vector<uint16_t> &GetUtf16ScratchA()
@@ -123,10 +137,19 @@ inline ani_status FindLastIndexField(ani_env *env, ani_field *out)
 }
 
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
-inline ExecData MakeExecData(ani_env *env, ani_string pattern, ani_string str, ani_string flags, ani_int patternSize,
-                             ani_int strSize, ani_int lastIndex, ani_boolean requiresUtf16Execution)
+inline ani_status MakeExecData(ExecData *out, ani_env *env, ani_string pattern, ani_string str, ani_string flags,
+                               ani_int patternSize, ani_int strSize, ani_int lastIndex,
+                               ani_boolean requiresUtf16Execution)
 {
-    return {pattern,
+    ani_status status = ValidateStringSize(env, pattern, patternSize);
+    if (status != ANI_OK) {
+        return status;
+    }
+    status = ValidateStringSize(env, str, strSize);
+    if (status != ANI_OK) {
+        return status;
+    }
+    *out = {pattern,
             str,
             flags,
             static_cast<int32_t>(lastIndex),
@@ -135,13 +158,22 @@ inline ExecData MakeExecData(ani_env *env, ani_string pattern, ani_string str, a
             IsUtf16(env, pattern),
             IsUtf16(env, str),
             static_cast<bool>(requiresUtf16Execution)};
+    return ANI_OK;
 }
 
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
-inline ExecData MakeTestExecData(ani_env *env, ani_string pattern, ani_string str, ani_int patternSize, ani_int strSize,
-                                 ani_int lastIndex, ani_boolean requiresUtf16Execution)
+inline ani_status MakeTestExecData(ExecData *out, ani_env *env, ani_string pattern, ani_string str, ani_int patternSize,
+                                   ani_int strSize, ani_int lastIndex, ani_boolean requiresUtf16Execution)
 {
-    return {pattern,
+    ani_status status = ValidateStringSize(env, pattern, patternSize);
+    if (status != ANI_OK) {
+        return status;
+    }
+    status = ValidateStringSize(env, str, strSize);
+    if (status != ANI_OK) {
+        return status;
+    }
+    *out = {pattern,
             str,
             {},
             static_cast<int32_t>(lastIndex),
@@ -150,16 +182,28 @@ inline ExecData MakeTestExecData(ani_env *env, ani_string pattern, ani_string st
             IsUtf16(env, pattern),
             IsUtf16(env, str),
             static_cast<bool>(requiresUtf16Execution)};
+    return ANI_OK;
 }
+
+// How the caller's fn is executed, i.e. how its raw input pointer is kept GC-safe:
+//  - RUN_IN_MANAGED_SCOPE: fn must be pure PCRE2/native code (no ANI calls, no managed
+//    allocations).
+//  - MATERIALIZE: fn uses ANI APIs / managed allocations (e.g. replace/split result
+//    construction). The input is copied to native memory and fn runs after the scope ends:
+//    a nested scope from ANI calls is only allowed in NATIVE state.
+enum class InputRunMode {
+    RUN_IN_MANAGED_SCOPE,
+    MATERIALIZE,
+};
 
 template <typename ResultT, typename Latin1Fn, typename Utf16Fn>
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
 ResultT PrepareInputAndRun(EtsRegExp &re, const ExecData &execData, ani_env *env, InputExecutionKind executionKind,
-                           Latin1Fn &&latin1Fn, Utf16Fn &&utf16Fn)
+                           InputRunMode runMode, Latin1Fn &&latin1Fn, Utf16Fn &&utf16Fn)
 {
     switch (executionKind) {
         case InputExecutionKind::LATIN1_DIRECT: {
-            const uint8_t *inputData = nullptr;
+            std::vector<uint8_t> inputStorage;
             {
                 ark::ets::ani::ScopedManagedCodeFix scope(env);
                 auto *patternEtsStr = scope.ToInternalType(execData.pattern);
@@ -170,25 +214,53 @@ ResultT PrepareInputAndRun(EtsRegExp &re, const ExecData &execData, ani_env *env
 
                 auto *inputEtsStr = scope.ToInternalType(execData.input);
                 RegExpStringAccessor inputAccessor(inputEtsStr);
-                inputData = inputAccessor.GetDataUtf8();
+                if (!inputAccessor.HasFlattenedData()) {
+                    // OOM during flatten: pending exception is already raised, propagate the failure
+                    return ResultT {};
+                }
+                if (runMode == InputRunMode::RUN_IN_MANAGED_SCOPE) {
+                    // Zero-copy fast path: the pure-PCRE2 fn is invoked still inside the
+                    // scope. The RUNNING state blocks STW GC and fn performs no managed
+                    // allocations / ANI calls, so the raw pointer cannot dangle.
+                    return std::forward<Latin1Fn>(latin1Fn)(inputAccessor.GetDataUtf8());
+                }
+                const uint8_t *inputData = inputAccessor.GetDataUtf8();
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                inputStorage.assign(inputData, inputData + execData.inputSize);
             }
-            return std::forward<Latin1Fn>(latin1Fn)(inputData);
+            // MATERIALIZE: the fn makes ANI calls / managed allocations and must run in
+            // NATIVE state with the materialized copy.
+            return std::forward<Latin1Fn>(latin1Fn)(inputStorage.data());
         }
         case InputExecutionKind::UTF16_DIRECT:
         case InputExecutionKind::LATIN1_TO_UTF16: {
-            const uint16_t *inputData = nullptr;
             std::vector<uint16_t> inputStorage;
             {
                 ark::ets::ani::ScopedManagedCodeFix scope(env);
-                const bool needsMaterialization = executionKind == InputExecutionKind::LATIN1_TO_UTF16;
-                inputData = AcquireUtf16Input(scope, execData.input, static_cast<int32_t>(execData.inputSize),
-                                              needsMaterialization, inputStorage);
                 auto &patternUtf16 = GetUtf16ScratchA();
                 if (!CompileUtf16Pattern(re, scope, execData, patternUtf16)) {
                     return ResultT {};
                 }
+                // Pattern flattening above may have triggered GC; acquire the input only
+                // after the last potential allocation point.
+                if (runMode == InputRunMode::RUN_IN_MANAGED_SCOPE &&
+                    executionKind == InputExecutionKind::UTF16_DIRECT) {
+                    // Zero-copy fast path: raw UTF-16 input + pure-PCRE2 fn inside the scope.
+                    RegExpStringAccessor inputAccessor(scope.ToInternalType(execData.input));
+                    if (!inputAccessor.HasFlattenedData()) {
+                        return ResultT {};
+                    }
+                    return std::forward<Utf16Fn>(utf16Fn)(inputAccessor.GetDataUtf16());
+                }
+                AcquireUtf16Input(scope, execData.input, static_cast<int32_t>(execData.inputSize), inputStorage);
+                if (runMode == InputRunMode::RUN_IN_MANAGED_SCOPE) {
+                    // LATIN1_TO_UTF16 transcoded input (native memory) + pure-PCRE2 fn:
+                    // safe to invoke inside the scope as well.
+                    return std::forward<Utf16Fn>(utf16Fn)(inputStorage.data());
+                }
             }
-            return std::forward<Utf16Fn>(utf16Fn)(inputData);
+            // MATERIALIZE: run in NATIVE state with the materialized copy.
+            return std::forward<Utf16Fn>(utf16Fn)(inputStorage.data());
         }
         default:
             UNREACHABLE();
@@ -214,10 +286,14 @@ int32_t AdvanceIndex(const CharT *data, int32_t size, int32_t pos, bool unicode)
         (void)data;
         (void)size;
         (void)unicode;
-        return pos + 1;
+        // Saturate: pos + 1 is unrepresentable when pos == INT32_MAX (maximal-length input)
+        return pos < INT32_MAX ? pos + 1 : pos;
     } else {
-        if (!unicode || pos + 1 >= size) {
-            return pos + 1;
+        // Overflow-safe form of the previous "pos + 1 >= size" guard: with pos == size ==
+        // INT32_MAX (a ~4GiB UTF-16 input), pos + 1 overflows int32, wraps negative and
+        // bypasses the bounds check, causing out-of-range reads of data[] below.
+        if (!unicode || pos < 0 || pos >= size - 1) {
+            return pos < INT32_MAX ? pos + 1 : pos;
         }
         const auto indexAdv = pos + 1;
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -256,36 +332,36 @@ ResultT PreparePatternAndInputAndRunTest(const ExecData &execData, ani_env *env,
 {
     switch (executionKind) {
         case InputExecutionKind::LATIN1_DIRECT: {
-            const uint8_t *patternData = nullptr;
-            const uint8_t *inputData = nullptr;
-            {
-                ark::ets::ani::ScopedManagedCodeFix scope(env);
-                auto *patternEtsStr = scope.ToInternalType(execData.pattern);
-                RegExpStringAccessor patternAccessor(patternEtsStr);
-                patternData = patternAccessor.GetDataUtf8();
-
-                auto *inputEtsStr = scope.ToInternalType(execData.input);
-                RegExpStringAccessor inputAccessor(inputEtsStr);
-                inputData = inputAccessor.GetDataUtf8();
+            ark::ets::ani::ScopedManagedCodeFix scope(env);
+            auto *patternEtsStr = scope.ToInternalType(execData.pattern);
+            RegExpStringAccessor patternAccessor(patternEtsStr);
+            if (!patternAccessor.HasFlattenedData()) {
+                // OOM during flatten: pending exception is already raised, propagate the failure
+                return ResultT {};
             }
+            const uint8_t *patternData = patternAccessor.GetDataUtf8();
+
+            auto *inputEtsStr = scope.ToInternalType(execData.input);
+            RegExpStringAccessor inputAccessor(inputEtsStr);
+            if (!inputAccessor.HasFlattenedData()) {
+                // OOM during flatten: pending exception is already raised, propagate the failure
+                return ResultT {};
+            }
+            const uint8_t *inputData = inputAccessor.GetDataUtf8();
+            // fn performs no managed allocations after the last potential GC point (the
+            // accessors above), so both raw pointers stay valid throughout the call.
             return std::forward<Latin1Fn>(latin1Fn)(patternData, inputData);
         }
         case InputExecutionKind::UTF16_DIRECT:
         case InputExecutionKind::LATIN1_TO_UTF16: {
-            const uint16_t *patternData = nullptr;
-            const uint16_t *inputData = nullptr;
             std::vector<uint16_t> patternStorage;
             std::vector<uint16_t> inputStorage;
-            {
-                ark::ets::ani::ScopedManagedCodeFix scope(env);
-                const bool needsPatternMaterialization = !execData.isUtf16Pattern;
-                patternData = AcquireUtf16Input(scope, execData.pattern, static_cast<int32_t>(execData.patternSize),
-                                                needsPatternMaterialization, patternStorage);
-                const bool needsInputMaterialization = executionKind == InputExecutionKind::LATIN1_TO_UTF16;
-                inputData = AcquireUtf16Input(scope, execData.input, static_cast<int32_t>(execData.inputSize),
-                                              needsInputMaterialization, inputStorage);
-            }
-            return std::forward<Utf16Fn>(utf16Fn)(patternData, inputData);
+            ark::ets::ani::ScopedManagedCodeFix scope(env);
+            // Patterns are always materialized (LATIN1 ones must be transcoded anyway);
+            // matching itself only reads them, and pcre2_compile copies the pattern out.
+            AcquireUtf16Input(scope, execData.pattern, static_cast<int32_t>(execData.patternSize), patternStorage);
+            AcquireUtf16Input(scope, execData.input, static_cast<int32_t>(execData.inputSize), inputStorage);
+            return std::forward<Utf16Fn>(utf16Fn)(patternStorage.data(), inputStorage.data());
         }
         default:
             UNREACHABLE();
