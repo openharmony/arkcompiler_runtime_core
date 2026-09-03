@@ -1317,7 +1317,7 @@ export namespace util {
             let cls = Class.of(obj)
             for (const field of reflect.getInstanceFieldsRecursive(cls)) {
                 if (field.getName() == key) {
-                    return field.getValue(key)
+                    return field.getValue(obj)
                 }
             }
             return null
