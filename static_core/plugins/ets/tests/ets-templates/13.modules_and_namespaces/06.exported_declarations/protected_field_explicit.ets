@@ -14,20 +14,23 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
-tags: [compile-only, negative]
-expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+desc: Protected members of an exported class may have explicit types.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
+'use static'
+
+// 导出类的 protected 字段有显式类型，应编译成功
+export class Base {
+    protected name: string = 'base'
+    protected getLabel(): string {
+        return this.name
     }
 }
 
+class Derived extends Base {
+    readLabel(): string { return this.getLabel() }
+}
+
 function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
+    arktest.assertEQ(new Derived().readLabel(), 'base')
 }

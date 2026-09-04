@@ -14,20 +14,14 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
+desc: Rejects an exported declaration that exposes a non-exported type.
 tags: [compile-only, negative]
 expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+    Semantic error ESE1236581: Type 'B' used in export declaration(s) is not exported.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
-    }
-}
+'use static'
 
-function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
-}
+// 10. 导出类型别名中的类型参数约束使用了未导出的类型，报错
+class B {}
+export type T<X extends B> = X

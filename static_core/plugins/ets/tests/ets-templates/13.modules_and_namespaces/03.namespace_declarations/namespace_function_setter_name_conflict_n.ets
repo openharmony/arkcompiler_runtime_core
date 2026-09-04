@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,24 +14,18 @@
  */
 
 /*---
-desc: >-
-    Transit namespace usage. TypeError Namespace 'Transit1' is already defined.
-    TypeError Property 'foo' does not exist on type 'Transit1'
-files:
-    - ./namespace_storage.ets
+desc: Rejects a function that conflicts with a namespace setter name.
 tags: [compile-only, negative]
 expected_out: |-
-    Semantic error ESE0349: Namespace 'Transit1' is already defined.
-    Semantic error ESE0087: Property 'foo' does not exist on type 'Transit1'
+    Semantic error ESE0218: Method cannot use the same name as naFunName accessor property
 ---*/
 
-import { Transit as Transit1 } from './namespace_storage'
+'use static'
 
-export namespace Transit1.B {
-    export let variable1: int = 1;
-}
+// namespace get/set和函数重名
+// 编译报错：Method cannot use the same name as naFunName accessor property
 
-function main() {
-    arktest.assertEQ(Transit1.B.variable1, 1)
-    arktest.assertEQ(Transit1.foo(), 'A foo')
+namespace MyNamespace1 {
+  function naFunName() {}
+  set naFunName(a: int) {}
 }

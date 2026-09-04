@@ -14,20 +14,25 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
-tags: [compile-only, negative]
-expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+desc: Exported top-level functions have explicit return types.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
-    }
+'use static'
+
+// 导出的顶层函数指定了显式返回类型，应编译成功
+export function add(a: int, b: int): int {
+    return a + b
+}
+export function greet(name: string): string {
+    return 'Hello, ' + name
+}
+export function log(message: string): void {
+    console.log(message)
 }
 
 function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
+    arktest.assertEQ(add(2, 3), 5)
+    arktest.assertEQ(greet('ArkTS'), 'Hello, ArkTS')
+    log('explicit return type')
+    arktest.assertTrue(true)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,24 +14,18 @@
  */
 
 /*---
-desc: >-
-    Transit namespace usage. TypeError Namespace 'Transit1' is already defined.
-    TypeError Property 'foo' does not exist on type 'Transit1'
-files:
-    - ./namespace_storage.ets
+desc: Rejects an exported declaration that exposes a non-exported type.
 tags: [compile-only, negative]
 expected_out: |-
-    Semantic error ESE0349: Namespace 'Transit1' is already defined.
-    Semantic error ESE0087: Property 'foo' does not exist on type 'Transit1'
+    Semantic error ESE1236581: Type 'Point' used in export declaration(s) is not exported.
 ---*/
 
-import { Transit as Transit1 } from './namespace_storage'
+'use static'
 
-export namespace Transit1.B {
-    export let variable1: int = 1;
+// 中间类型别名未导出，但 export type 指向一个未导出的类型别名，最终目标仍然是未导出的类型，应产生编译错误
+class Point {
+  public x: double = 0.0
+  public y: double = 0.0
 }
-
-function main() {
-    arktest.assertEQ(Transit1.B.variable1, 1)
-    arktest.assertEQ(Transit1.foo(), 'A foo')
-}
+type Helper = Point
+export type Exported = Helper  // FAIL: Helper 指向未导出的 Point

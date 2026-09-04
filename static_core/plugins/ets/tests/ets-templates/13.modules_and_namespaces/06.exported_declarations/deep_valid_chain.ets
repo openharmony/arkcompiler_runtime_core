@@ -14,20 +14,23 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
-tags: [compile-only, negative]
-expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+desc: An exported class may extend an exported class through multiple levels.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
-    }
+'use static'
+
+// 多层继承链：所有参与的类都是导出的，应编译成功
+export class GrandParent {
+    public a: int = 1
+}
+export class Parent extends GrandParent {
+  public b: int = 2
+}
+export class Child extends Parent {
+  public c: int = 3
 }
 
 function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
+    let child = new Child()
+    arktest.assertEQ(child.a + child.b + child.c, 6)
 }

@@ -14,20 +14,23 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
-tags: [compile-only, negative]
-expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+desc: Exported enums do not require a separate type annotation.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
-    }
+'use static'
+
+// 枚举没有"类型"可省略，应编译成功
+export enum Color {
+    Red,
+    Green,
+    Blue
+}
+export enum Status {
+    ACTIVE = 1,
+    INACTIVE = 0
 }
 
 function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
+    arktest.assertEQ(Color.Green, 1)
+    arktest.assertEQ(Status.ACTIVE, 1)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,24 +14,20 @@
  */
 
 /*---
-desc: >-
-    Transit namespace usage. TypeError Namespace 'Transit1' is already defined.
-    TypeError Property 'foo' does not exist on type 'Transit1'
-files:
-    - ./namespace_storage.ets
+desc: Rejects writes to a readonly accessor.
 tags: [compile-only, negative]
 expected_out: |-
-    Semantic error ESE0349: Namespace 'Transit1' is already defined.
-    Semantic error ESE0087: Property 'foo' does not exist on type 'Transit1'
+    Semantic error ESE71336: Exported function 'name' requires type annotation.
+    Semantic error ESE0209: Cannot assign to this property because it is readonly.
 ---*/
 
-import { Transit as Transit1 } from './namespace_storage'
-
-export namespace Transit1.B {
-    export let variable1: int = 1;
+'use static'
+namespace NS {
+    export get name() {
+        return '1'
+    }
 }
 
 function main() {
-    arktest.assertEQ(Transit1.B.variable1, 1)
-    arktest.assertEQ(Transit1.foo(), 'A foo')
+    NS.name = '1';
 }

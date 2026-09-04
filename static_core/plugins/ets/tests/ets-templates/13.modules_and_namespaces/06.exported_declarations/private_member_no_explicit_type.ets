@@ -14,20 +14,27 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
-tags: [compile-only, negative]
-expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+desc: Private members of an exported class may rely on inferred types.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
+'use static'
+
+// 导出类中的私有成员不在"accessible part"中，不需要显式类型
+export class Counter {
+    private count = 0  // OK: private field, implicit type allowed
+    private reset() {  // OK: private method, implicit return type allowed
+        this.count = 0
+    }
+    public increment(): void {
+        this.count++
+    }
+    public getValue(): int {
+        return this.count
     }
 }
 
 function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
+    let counter = new Counter()
+    counter.increment()
+    arktest.assertEQ(counter.getValue(), 1)
 }
