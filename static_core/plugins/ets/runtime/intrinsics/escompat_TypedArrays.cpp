@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <charconv>
 #include <optional>
 #include <type_traits>
@@ -42,6 +43,81 @@ constexpr uint64_t DOUBLE_HIDDEN_BIT = (1ULL << DOUBLE_SIGNIFICAND_SIZE);
 #define INT32_BITS (32)
 
 namespace ark::ets::intrinsics {
+
+static void ThrowRangeError(const char *message)
+{
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreRangeError, message);
+}
+
+static void ThrowNullPointerError(const char *message)
+{
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError, message);
+}
+
+static inline int32_t NormalizeIndex(int32_t idx, int32_t arrayLength)
+{
+    if (idx < -arrayLength) {
+        return 0;
+    }
+    if (idx < 0) {
+        return arrayLength + idx;
+    }
+    if (idx > arrayLength) {
+        return arrayLength;
+    }
+    return idx;
+}
+
+static bool CheckedAdd(size_t lhs, size_t rhs, size_t *result)
+{
+    if (UNLIKELY(lhs > std::numeric_limits<size_t>::max() - rhs)) {
+        return false;
+    }
+    *result = lhs + rhs;
+    return true;
+}
+
+static bool CheckedMul(size_t lhs, size_t rhs, size_t *result)
+{
+    if (UNLIKELY(rhs != 0 && lhs > std::numeric_limits<size_t>::max() / rhs)) {
+        return false;
+    }
+    *result = lhs * rhs;
+    return true;
+}
+
+template <typename T>
+static bool GetTypedArrayByteRange(T *array, size_t elementOffset, size_t elementCount, size_t *byteOffset,
+                                   size_t *byteCount)
+{
+    auto *arrayBuffer = static_cast<EtsStdCoreArrayBuffer *>(&*array->GetBuffer());
+    const EtsInt bufferLength = arrayBuffer->GetByteLength();
+    const EtsInt arrayLength = array->GetLengthInt();
+    const auto arrayByteOffset = static_cast<EtsInt>(array->GetByteOffset());
+    if (UNLIKELY(bufferLength < 0 || arrayLength < 0 || arrayByteOffset < 0)) {
+        ThrowRangeError("typed array range is out of bounds");
+        return false;
+    }
+
+    const auto bufferSize = static_cast<size_t>(bufferLength);
+    const auto length = static_cast<size_t>(arrayLength);
+    const auto baseByteOffset = static_cast<size_t>(arrayByteOffset);
+    size_t rangeByteOffset = 0;
+    size_t rangeByteCount = 0;
+    if (UNLIKELY(elementOffset > length || elementCount > length - elementOffset ||
+                 !CheckedMul(elementOffset, sizeof(typename T::ElementType), &rangeByteOffset) ||
+                 !CheckedAdd(rangeByteOffset, baseByteOffset, &rangeByteOffset) ||
+                 !CheckedMul(elementCount, sizeof(typename T::ElementType), &rangeByteCount) ||
+                 rangeByteOffset > bufferSize || rangeByteCount > bufferSize - rangeByteOffset)) {
+        ThrowRangeError("typed array range is out of bounds");
+        return false;
+    }
+    *byteOffset = rangeByteOffset;
+    *byteCount = rangeByteCount;
+    return true;
+}
 
 template <typename T>
 static void *GetNativeData(T *array)
@@ -250,16 +326,6 @@ constexpr uint64_t LONG_MASK = (uint64_t {1} << LONG_SHIFT) - uint64_t {1U};
     return static_cast<EtsUlong>(GetLong(bigint));
 }
 
-template <typename Cond>
-bool CheckCastedClass(Cond cond, const EtsClass *expectedClass, const EtsClass *objectClass)
-{
-    if (UNLIKELY(!cond(objectClass))) {
-        ThrowClassCastException(expectedClass->GetRuntimeClass(), objectClass->GetRuntimeClass());
-        return false;
-    }
-    return true;
-}
-
 template <typename T, typename = void>
 class ArrayElement;
 
@@ -279,10 +345,11 @@ public:
 private:
     std::optional<EtsInt> Unbox(EtsObject *object) const
     {
-        if (CheckCastedClass([](const EtsClass *klass) { return klass->IsBoxedInt(); }, coreIntClass_,
-                             object->GetClass())) {
+        const auto *objectClass = object->GetClass();
+        if (LIKELY(objectClass->IsBoxedInt())) {
             return EtsBoxPrimitive<EtsInt>::Unbox(object);
         }
+        ThrowClassCastException(coreIntClass_->GetRuntimeClass(), objectClass->GetRuntimeClass());
         return std::nullopt;
     }
 
@@ -310,10 +377,11 @@ public:
 private:
     std::optional<EtsDouble> Unbox(EtsObject *object) const
     {
-        if (CheckCastedClass([](const EtsClass *klass) { return klass->IsBoxedDouble(); }, coreDoubleClass_,
-                             object->GetClass())) {
+        const auto *objectClass = object->GetClass();
+        if (LIKELY(objectClass->IsBoxedDouble())) {
             return EtsBoxPrimitive<EtsDouble>::Unbox(object);
         }
+        ThrowClassCastException(coreDoubleClass_->GetRuntimeClass(), objectClass->GetRuntimeClass());
         return std::nullopt;
     }
 
@@ -368,10 +436,11 @@ public:
 private:
     const EtsBigInt *Cast(EtsObject *object) const
     {
-        if (CheckCastedClass([](const EtsClass *klass) { return klass->IsBigInt(); }, stdCoreBigIntClass_,
-                             object->GetClass())) {
+        const auto *objectClass = object->GetClass();
+        if (LIKELY(objectClass->IsBigInt())) {
             return EtsBigInt::FromEtsObject(object);
         }
+        ThrowClassCastException(stdCoreBigIntClass_->GetRuntimeClass(), objectClass->GetRuntimeClass());
         return nullptr;
     }
 
@@ -418,14 +487,12 @@ static void EtsEscompatTypedArraySetValuesFromFixedArray(T *thisArray, void *dst
     ASSERT(srcData != nullptr);
 
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    if (UNLIKELY(actualLength > static_cast<uint32_t>(thisArray->GetLengthInt()))) {
-        EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreRangeError, "offset is out of bounds");
+    size_t offset = 0;
+    size_t byteCount = 0;
+    if (!GetTypedArrayByteRange(thisArray, 0, actualLength, &offset, &byteCount)) {
         return;
     }
 
-    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    auto offset = static_cast<EtsInt>(thisArray->GetByteOffset());
     const auto arrayElement = unbox::ArrayElement<T>();
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     for (size_t i = 0; i < actualLength; ++i) {
@@ -438,21 +505,69 @@ static void EtsEscompatTypedArraySetValuesFromFixedArray(T *thisArray, void *dst
     }
 }
 
-/// Slow path, because methods of `srcArray` might be overriden
 template <typename T>
-static void EtsEscompatTypedArraySetValuesFromArraySlowPath(T *thisArray, void *dstData, EtsStdCoreArray *srcArray,
+static bool ValidateSetValuesFromArrayLength(T *thisArray, EtsInt thisArrayLength, EtsInt sourceLength,
+                                             EtsExecutionContext *executionCtx)
+{
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+    if (UNLIKELY(sourceLength < 0 || sourceLength > thisArrayLength)) {
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreRangeError, "offset is out of bounds");
+        return false;
+    }
+    size_t initialOffset = 0;
+    size_t byteCount = 0;
+    return GetTypedArrayByteRange(thisArray, 0, static_cast<size_t>(sourceLength), &initialOffset, &byteCount);
+}
+
+template <typename T>
+static bool SetValueFromArrayAt(EtsHandle<EtsObject> &thisArrayHandle, EtsHandle<EtsStdCoreArray> &srcArrayHandle,
+                                const unbox::ArrayElement<T> &arrayElement, size_t index,
+                                EtsExecutionContext *executionCtx)
+{
+    auto optElement = srcArrayHandle->GetRef(executionCtx, index);
+    if (UNLIKELY(!optElement)) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return false;
+    }
+    if (UNLIKELY(*optElement == nullptr)) {
+        PandaStringStream ss;
+        ss << "element at index " << index << " is undefined";
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError, ss.str());
+        return false;
+    }
+    const auto value = arrayElement.GetTyped(*optElement);
+    if (!value.has_value()) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return false;
+    }
+
+    // GetRef and GetTyped may execute user code or throw. Revalidate the backing buffer before every write.
+    auto *currentArray = reinterpret_cast<T *>(thisArrayHandle.GetPtr());
+    auto *dstData = GetNativeData(currentArray);
+    if (UNLIKELY(dstData == nullptr)) {
+        return false;
+    }
+    size_t offset = 0;
+    size_t elementBytes = 0;
+    if (!GetTypedArrayByteRange(currentArray, index, 1, &offset, &elementBytes)) {
+        return false;
+    }
+    ObjectAccessor::SetPrimitive(dstData, offset, *value);
+    return true;
+}
+
+/// Slow path, because methods of `srcArray` might be overridden
+template <typename T>
+static void EtsEscompatTypedArraySetValuesFromArraySlowPath(T *thisArray, EtsStdCoreArray *srcArray,
                                                             EtsExecutionContext *executionCtx)
 {
-    using ElementType = typename T::ElementType;
-
     ASSERT(thisArray != nullptr);
     ASSERT(srcArray != nullptr);
     ASSERT(executionCtx != nullptr);
 
     EtsInt thisArrayLengthInt = thisArray->GetLengthInt();
-    EtsInt offset = thisArray->GetByteOffset();
-
     EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsObject> thisArrayHandle(executionCtx, reinterpret_cast<EtsObject *>(thisArray));
     EtsHandle<EtsStdCoreArray> srcArrayHandle(executionCtx, srcArray);
 
     EtsInt actualLength = 0;
@@ -461,32 +576,16 @@ static void EtsEscompatTypedArraySetValuesFromArraySlowPath(T *thisArray, void *
         return;
     }
 
-    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    if (UNLIKELY(actualLength < 0 || actualLength > thisArrayLengthInt)) {
-        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreRangeError, "offset is out of bounds");
+    if (!ValidateSetValuesFromArrayLength(reinterpret_cast<T *>(thisArrayHandle.GetPtr()), thisArrayLengthInt,
+                                          actualLength, executionCtx)) {
         return;
     }
 
     const auto arrayElement = unbox::ArrayElement<T>();
     for (size_t i = 0; i < static_cast<size_t>(actualLength); ++i) {
-        auto optElement = srcArrayHandle->GetRef(executionCtx, i);
-        if (UNLIKELY(!optElement)) {
-            ASSERT(executionCtx->GetMT()->HasPendingException());
+        if (!SetValueFromArrayAt<T>(thisArrayHandle, srcArrayHandle, arrayElement, i, executionCtx)) {
             return;
         }
-        if (UNLIKELY(*optElement == nullptr)) {
-            PandaStringStream ss;
-            ss << "element at index " << i << " is undefined";
-            ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError, ss.str());
-            return;
-        }
-        const auto val = arrayElement.GetTyped(*optElement);
-        if (!val.has_value()) {
-            ASSERT(executionCtx->GetMT()->HasPendingException());
-            break;
-        }
-        ObjectAccessor::SetPrimitive(dstData, offset, *val);
-        offset += sizeof(ElementType);
     }
 }
 
@@ -507,7 +606,7 @@ static void EtsEscompatTypedArraySetValuesFromArrayImpl(T *thisArray, EtsStdCore
         EtsEscompatTypedArraySetValuesFromFixedArray(thisArray, dstData, srcArray->GetDataFromStdCoreArray(),
                                                      srcArray->GetActualLengthFromStdCoreArray());
     } else {
-        EtsEscompatTypedArraySetValuesFromArraySlowPath(thisArray, dstData, srcArray, executionCtx);
+        EtsEscompatTypedArraySetValuesFromArraySlowPath(thisArray, srcArray, executionCtx);
     }
 }
 
@@ -543,6 +642,21 @@ static void EtsEscompatTypedArrayFillInternal(T *thisArray, V val, EtsInt begin,
     if (UNLIKELY(data == nullptr)) {
         return;
     }
+    const auto length = thisArray->GetLengthInt();
+    size_t byteOffset = 0;
+    size_t byteCount = 0;
+    // The managed wrapper normalizes both bounds, so a violation here is an internal contract bug.
+    // Assert it in debug builds, but clamp in release: `fill` never throws a RangeError per the spec.
+    ASSERT(begin >= 0 && begin <= length && end >= 0 && end <= length);
+    begin = NormalizeIndex(begin, length);
+    end = NormalizeIndex(end, length);
+    if (end <= begin) {
+        return;
+    }
+    if (!GetTypedArrayByteRange(thisArray, static_cast<size_t>(begin), static_cast<size_t>(end - begin), &byteOffset,
+                                &byteCount)) {
+        return;
+    }
     /**
      * False-positive static-analyzer report:
      * GC can happen only on ThrowException in GetNativeData.
@@ -550,7 +664,7 @@ static void EtsEscompatTypedArrayFillInternal(T *thisArray, V val, EtsInt begin,
      * us from proceeding
      */
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    auto offset = static_cast<EtsInt>(thisArray->GetByteOffset()) + begin * sizeof(V);
+    auto offset = byteOffset;
     for (auto i = begin; i < end; ++i) {
         ObjectAccessor::SetPrimitive(data, offset, val);
         offset += sizeof(V);
@@ -1118,20 +1232,6 @@ REVERSE_COPY_BUFFER_CALL_DECL(BigUInt64)
 
 #undef REVERSE_COPY_BUFFER_CALL_DECL
 
-static inline int32_t NormalizeIndex(int32_t idx, int32_t arrayLength)
-{
-    if (idx < -arrayLength) {
-        return 0;
-    }
-    if (idx < 0) {
-        return arrayLength + idx;
-    }
-    if (idx > arrayLength) {
-        return arrayLength;
-    }
-    return idx;
-}
-
 template <typename T>
 void EtsEscompatTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt start, EtsInt count)
 {
@@ -1148,15 +1248,45 @@ void EtsEscompatTypedArrayCopyWithinImpl(T *thisArray, EtsInt target, EtsInt sta
      */
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     auto arrayLength = thisArray->GetLengthInt();
-    using ElementType = typename T::ElementType;
+    // The managed wrapper clamps `count` against both ends, so a violation here is an internal
+    // contract bug. Assert it in debug builds, but clamp in release: `copyWithin` never throws a
+    // RangeError per the spec, and clamping still keeps the memmove below inside the array.
+    ASSERT(target >= 0 && start >= 0 && target <= arrayLength && start <= arrayLength && count <= arrayLength - start &&
+           count <= arrayLength - target);
+    if (UNLIKELY(arrayLength <= 0 || count <= 0)) {
+        return;
+    }
+    target = NormalizeIndex(target, arrayLength);
+    start = NormalizeIndex(start, arrayLength);
+    count = std::min({count, arrayLength - start, arrayLength - target});
+    if (count <= 0) {
+        return;
+    }
+    size_t targetOffset = 0;
+    size_t targetBytes = 0;
+    size_t startOffset = 0;
+    size_t startBytes = 0;
+    if (!GetTypedArrayByteRange(thisArray, static_cast<size_t>(target), static_cast<size_t>(count), &targetOffset,
+                                &targetBytes)) {
+        return;
+    }
+    /**
+     * False-positive static-analyzer report:
+     * GetTypedArrayByteRange touches the GC only on ThrowException, and that path always reports
+     * failure, so reaching this line means no GC happened and `thisArray` is still valid.
+     */
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+    if (!GetTypedArrayByteRange(thisArray, static_cast<size_t>(start), static_cast<size_t>(count), &startOffset,
+                                &startBytes)) {
+        return;
+    }
     // See (GetNativeData) reason
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    auto *targetAddress = ToVoidPtr(ToUintPtr(data) + thisArray->GetByteOffset() + target * sizeof(ElementType));
+    auto *targetAddress = ToVoidPtr(ToUintPtr(data) + targetOffset);
     // See (GetNativeData) reason
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-    auto *startAddress = ToVoidPtr(ToUintPtr(data) + thisArray->GetByteOffset() + start * sizeof(ElementType));
-    [[maybe_unused]] auto error = memmove_s(targetAddress, (arrayLength - start) * sizeof(ElementType), startAddress,
-                                            count * sizeof(ElementType));
+    auto *startAddress = ToVoidPtr(ToUintPtr(data) + startOffset);
+    [[maybe_unused]] auto error = memmove_s(targetAddress, targetBytes, startAddress, startBytes);
     ASSERT(error == EOK);
     // See (GetNativeData) reason
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
@@ -1284,6 +1414,9 @@ static bool EtsEscompatTypedArrayContainsNaN(Array *array, EtsInt pos)
     auto byteOffset = static_cast<size_t>(array->GetByteOffset());
     uint32_t normalIndex = NormalizeIndex(pos, length);
     auto *data = GetNativeData(array);
+    if (UNLIKELY(data == nullptr)) {
+        return false;
+    }
     auto *begin = ToVoidPtr(ToUintPtr(data) + byteOffset);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     Span<ElementType> span(static_cast<ElementType *>(begin) + normalIndex, length - normalIndex);
@@ -1669,7 +1802,14 @@ static ark::ets::EtsString *TypedArrayJoinUtf16(Span<T> &data, ark::ets::EtsStri
     ASSERT(separator->IsUtf16());
 
     const size_t sepSize = separator->GetUtf16Length();
-    PandaVector<EtsChar> buf(data.Size() * (MaxChars<T>() + sepSize));
+    size_t elementSize = 0;
+    size_t allocationSize = 0;
+    if (UNLIKELY(!CheckedAdd(MaxChars<T>(), sepSize, &elementSize) ||
+                 !CheckedMul(data.Size(), elementSize, &allocationSize))) {
+        ThrowRangeError("typed array join result is too large");
+        return nullptr;
+    }
+    PandaVector<EtsChar> buf(allocationSize);
     size_t strSize = 0;
     auto n = data.Size() - 1;
     if (sepSize == 1) {
@@ -1699,7 +1839,12 @@ template <typename T>
 static ark::ets::EtsString *TypedArrayJoinUtf8(Span<T> &data)
 {
     ASSERT(!data.empty());
-    PandaVector<char> buf(data.Size() * MaxChars<T>());
+    size_t allocationSize = 0;
+    if (UNLIKELY(!CheckedMul(data.Size(), MaxChars<T>(), &allocationSize))) {
+        ThrowRangeError("typed array join result is too large");
+        return nullptr;
+    }
+    PandaVector<char> buf(allocationSize);
     size_t strSize = 0;
     auto n = data.Size();
     for (auto i = 0U; i < n; i++) {
@@ -1714,7 +1859,14 @@ static ark::ets::EtsString *TypedArrayJoinUtf8(Span<T> &data, ark::ets::EtsStrin
     ASSERT(!data.empty());
     ASSERT(!separator->IsUtf16() && !separator->IsEmpty());
     const size_t sepSize = separator->GetUtf8Length();
-    PandaVector<char> buf(data.Size() * (MaxChars<T>() + sepSize));
+    size_t elementSize = 0;
+    size_t allocationSize = 0;
+    if (UNLIKELY(!CheckedAdd(MaxChars<T>(), sepSize, &elementSize) ||
+                 !CheckedMul(data.Size(), elementSize, &allocationSize))) {
+        ThrowRangeError("typed array join result is too large");
+        return nullptr;
+    }
+    PandaVector<char> buf(allocationSize);
     size_t strSize = 0;
     auto n = data.Size() - 1;
     if (sepSize == 1) {
@@ -1987,49 +2139,50 @@ uint32_t CastNumberUnsignedHelper(double val)
     return static_cast<uint32_t>(*pTmp);
 }
 
-template <typename T1, typename T2>
-static void EtsEscompatTypedArrayOfImpl(T1 *thisArray, T2 *src)
+template <typename T1, typename T2, typename Convert>
+static void EtsEscompatTypedArrayOfImpl(T1 *thisArray, EtsCharArray *srcArray, Convert convert)
 {
+    if (UNLIKELY(srcArray == nullptr)) {
+        ThrowNullPointerError("typed array source is null");
+        return;
+    }
     auto *arrayPtr = GetNativeData(thisArray);
     if (UNLIKELY(arrayPtr == nullptr)) {
         return;
     }
 
     using ElementType = typename T1::ElementType;
-    auto *dst = reinterpret_cast<ElementType *>(ToUintPtr(arrayPtr) + static_cast<int>(thisArray->GetByteOffset()));
-    std::copy_n(src, thisArray->GetLengthInt(), dst);
+    const auto length = thisArray->GetLengthInt();
+    size_t dstOffset = 0;
+    size_t dstBytes = 0;
+    if (UNLIKELY(length < 0 || srcArray->GetElementSize() != sizeof(T2) ||
+                 static_cast<size_t>(length) > srcArray->GetLength() ||
+                 !GetTypedArrayByteRange(thisArray, 0, static_cast<size_t>(length), &dstOffset, &dstBytes))) {
+        if (!EtsExecutionContext::GetCurrent()->GetMT()->HasPendingException()) {
+            ThrowRangeError("typed array source or destination is too small");
+        }
+        return;
+    }
+    if (length == 0) {
+        return;
+    }
+    auto *srcData = srcArray->GetCoreType()->GetData();
+    if (UNLIKELY(srcData == nullptr)) {
+        ThrowNullPointerError("typed array source data is null");
+        return;
+    }
+    auto *src = reinterpret_cast<T2 *>(srcData);
+    auto *dst = reinterpret_cast<ElementType *>(ToUintPtr(arrayPtr) + dstOffset);
+    for (EtsInt i = 0; i < length; ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        dst[i] = convert(src[i]);
+    }
 }
 
 template <typename T1, typename T2>
-static void EtsEscompatTypedArrayOfImplNumber(T1 *thisArray, T2 *src)
+static void EtsEscompatTypedArrayOfImpl(T1 *thisArray, EtsCharArray *src)
 {
-    auto *arrayPtr = GetNativeData(thisArray);
-    if (UNLIKELY(arrayPtr == nullptr)) {
-        return;
-    }
-
-    using ElementType = typename T1::ElementType;
-    auto *dst = reinterpret_cast<ElementType *>(ToUintPtr(arrayPtr) + static_cast<int>(thisArray->GetByteOffset()));
-    for (int i = 0; i < thisArray->GetLengthInt(); i++) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        dst[i] = CastNumber<ElementType>(src[i]);
-    }
-}
-
-template <typename T1, typename T2>
-static void EtsEscompatTypedArrayOfImplNumberUnsigned(T1 *thisArray, T2 *src)
-{
-    auto *arrayPtr = GetNativeData(thisArray);
-    if (UNLIKELY(arrayPtr == nullptr)) {
-        return;
-    }
-
-    using ElementType = typename T1::ElementType;
-    auto *dst = reinterpret_cast<ElementType *>(ToUintPtr(arrayPtr) + static_cast<int>(thisArray->GetByteOffset()));
-    for (int i = 0; i < thisArray->GetLengthInt(); i++) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        dst[i] = CastNumberUnsigned<ElementType>(src[i]);
-    }
+    EtsEscompatTypedArrayOfImpl<T1, T2>(thisArray, src, [](T2 value) { return value; });
 }
 
 static int Clamp(double val)
@@ -2048,86 +2201,96 @@ static int Clamp(double val)
 }
 
 template <typename T1, typename T2>
-static void EtsEscompatTypedArrayOfImplClamped(T1 *thisArray, T2 *src)
+static void EtsEscompatTypedArrayOfImplNumber(T1 *thisArray, EtsCharArray *src)
 {
-    auto *arrayPtr = GetNativeData(thisArray);
-    if (UNLIKELY(arrayPtr == nullptr)) {
-        return;
-    }
-
     using ElementType = typename T1::ElementType;
-    auto *dst = reinterpret_cast<ElementType *>(ToUintPtr(arrayPtr) + static_cast<int>(thisArray->GetByteOffset()));
-    for (int i = 0; i < thisArray->GetLengthInt(); i++) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        dst[i] = Clamp(src[i]);
-    }
+    EtsEscompatTypedArrayOfImpl<T1, T2>(thisArray, src, [](T2 value) { return CastNumber<ElementType>(value); });
+}
+
+template <typename T1, typename T2>
+static void EtsEscompatTypedArrayOfImplNumberUnsigned(T1 *thisArray, EtsCharArray *src)
+{
+    using ElementType = typename T1::ElementType;
+    EtsEscompatTypedArrayOfImpl<T1, T2>(thisArray, src,
+                                        [](T2 value) { return CastNumberUnsigned<ElementType>(value); });
+}
+
+template <typename T1, typename T2>
+static void EtsEscompatTypedArrayOfImplClamped(T1 *thisArray, EtsCharArray *src)
+{
+    EtsEscompatTypedArrayOfImpl<T1, T2>(thisArray, src, [](T2 value) { return Clamp(value); });
 }
 
 extern "C" void EtsEscompatInt8ArrayOfInt(ark::ets::EtsEscompatInt8Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatInt8Array, EtsInt>(thisArray, src);
 }
 
 extern "C" void EtsEscompatInt8ArrayOfNumber(ark::ets::EtsEscompatInt8Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImplNumber(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImplNumber<EtsEscompatInt8Array, EtsDouble>(thisArray, src);
 }
 
 extern "C" void EtsEscompatInt8ArrayOfByte(ark::ets::EtsEscompatInt8Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsByte *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatInt8Array, EtsByte>(thisArray, src);
 }
 
 extern "C" void EtsEscompatInt16ArrayOfInt(ark::ets::EtsEscompatInt16Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatInt16Array, EtsInt>(thisArray, src);
 }
 
 extern "C" void EtsEscompatInt16ArrayOfNumber(ark::ets::EtsEscompatInt16Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImplNumber(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImplNumber<EtsEscompatInt16Array, EtsDouble>(thisArray, src);
 }
 
 extern "C" void EtsEscompatInt16ArrayOfShort(ark::ets::EtsEscompatInt16Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsShort *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatInt16Array, EtsShort>(thisArray, src);
 }
 
 extern "C" void EtsEscompatInt32ArrayOfInt(ark::ets::EtsEscompatInt32Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatInt32Array, EtsInt>(thisArray, src);
 }
 
 extern "C" void EtsEscompatInt32ArrayOfNumber(ark::ets::EtsEscompatInt32Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImplNumber(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImplNumber<EtsEscompatInt32Array, EtsDouble>(thisArray, src);
 }
 
 extern "C" void EtsEscompatBigInt64ArrayOfInt(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatBigInt64Array, EtsInt>(thisArray, src);
 }
 
 template <typename T, typename ToLong>
 void EtsEscompatTypedArrayOfBigIntImpl(T *thisArray, EtsTypedObjectArray<EtsBigInt> *src, ToLong toLong)
 {
+    if (UNLIKELY(src == nullptr)) {
+        ThrowNullPointerError("typed array source is null");
+        return;
+    }
     auto *arrayPtr = GetNativeData(thisArray);
     if (UNLIKELY(arrayPtr == nullptr)) {
         return;
     }
 
     using ElementType = typename T::ElementType;
-    auto *dst = reinterpret_cast<ElementType *>(ToUintPtr(arrayPtr) + static_cast<int>(thisArray->GetByteOffset()));
-    ASSERT(thisArray->GetLengthInt() >= 0 && static_cast<size_t>(thisArray->GetLengthInt()) >= src->GetLength());
+    size_t dstOffset = 0;
+    size_t dstBytes = 0;
+    if (!GetTypedArrayByteRange(thisArray, 0, src->GetLength(), &dstOffset, &dstBytes)) {
+        return;
+    }
+    for (size_t i = 0; i < src->GetLength(); ++i) {
+        if (UNLIKELY(src->Get(i) == nullptr)) {
+            ThrowNullPointerError("BigInt source element is null");
+            return;
+        }
+    }
+    auto *dst = reinterpret_cast<ElementType *>(ToUintPtr(arrayPtr) + dstOffset);
     std::generate_n(dst, src->GetLength(), [idx = 0, src, toLong]() mutable { return toLong(src->Get(idx++)); });
 }
 
@@ -2136,130 +2299,111 @@ extern "C" void EtsEscompatBigInt64ArrayOfBigInt(ark::ets::EtsEscompatBigInt64Ar
     // The method fills the typed array from a FixedArray<bigint> and in contrast to
     // EtsEscompatBigInt64ArraySetValuesFromArray, which fills a typed array from std.core.Array<bigint>, we can be
     // sure that `src` is an instance of the EtsTypedObjectArray<EtsBigInt> class.
-    EtsEscompatTypedArrayOfBigIntImpl(thisArray, EtsTypedObjectArray<EtsBigInt>::FromCoreType(src),
+    EtsEscompatTypedArrayOfBigIntImpl(thisArray,
+                                      src == nullptr ? nullptr : EtsTypedObjectArray<EtsBigInt>::FromCoreType(src),
                                       [](EtsBigInt *bigint) { return unbox::GetLong(bigint); });
 }
 
 extern "C" void EtsEscompatBigInt64ArrayOfLong(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsLong *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatBigInt64Array, EtsLong>(thisArray, src);
 }
 
 extern "C" void EtsEscompatBigInt64ArrayOfNumber(ark::ets::EtsEscompatBigInt64Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImplNumber(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImplNumber<EtsEscompatBigInt64Array, EtsDouble>(thisArray, src);
 }
 
 extern "C" void EtsEscompatFloat32ArrayOfInt(ark::ets::EtsEscompatFloat32Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatFloat32Array, EtsInt>(thisArray, src);
 }
 
 extern "C" void EtsEscompatFloat32ArrayOfFloat(ark::ets::EtsEscompatFloat32Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsFloat *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatFloat32Array, EtsFloat>(thisArray, src);
 }
 
 extern "C" void EtsEscompatFloat32ArrayOfNumber(ark::ets::EtsEscompatFloat32Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatFloat32Array, EtsDouble>(thisArray, src);
 }
 
 extern "C" void EtsEscompatFloat64ArrayOfInt(ark::ets::EtsEscompatFloat64Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatFloat64Array, EtsInt>(thisArray, src);
 }
 
 extern "C" void EtsEscompatFloat64ArrayOfNumber(ark::ets::EtsEscompatFloat64Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatFloat64Array, EtsDouble>(thisArray, src);
 }
 
 extern "C" void EtsEscompatUint8ClampedArrayOfNumber(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
                                                      EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImplClamped(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImplClamped<EtsEscompatUInt8ClampedArray, EtsDouble>(thisArray, src);
 }
 
 extern "C" void EtsEscompatUint8ClampedArrayOfInt(ark::ets::EtsEscompatUInt8ClampedArray *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImplClamped(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImplClamped<EtsEscompatUInt8ClampedArray, EtsInt>(thisArray, src);
 }
 
 extern "C" void EtsEscompatUint8ClampedArrayOfShort(ark::ets::EtsEscompatUInt8ClampedArray *thisArray,
                                                     EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsShort *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImplClamped(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImplClamped<EtsEscompatUInt8ClampedArray, EtsShort>(thisArray, src);
 }
 
 extern "C" void EtsEscompatUint8ArrayOfNumber(ark::ets::EtsEscompatUInt8Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImplNumberUnsigned(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImplNumberUnsigned<EtsEscompatUInt8Array, EtsDouble>(thisArray, src);
 }
 
 extern "C" void EtsEscompatUint8ArrayOfInt(ark::ets::EtsEscompatUInt8Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatUInt8Array, EtsInt>(thisArray, src);
 }
 
 extern "C" void EtsEscompatUint8ArrayOfShort(ark::ets::EtsEscompatUInt8Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsShort *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatUInt8Array, EtsShort>(thisArray, src);
 }
 
 extern "C" void EtsEscompatUint16ArrayOfNumber(ark::ets::EtsEscompatUInt16Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImplNumberUnsigned(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImplNumberUnsigned<EtsEscompatUInt16Array, EtsDouble>(thisArray, src);
 }
 
 extern "C" void EtsEscompatUint16ArrayOfInt(ark::ets::EtsEscompatUInt16Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatUInt16Array, EtsInt>(thisArray, src);
 }
 
 extern "C" void EtsEscompatUint32ArrayOfNumber(ark::ets::EtsEscompatUInt32Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsDouble *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImplNumberUnsigned(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImplNumberUnsigned<EtsEscompatUInt32Array, EtsDouble>(thisArray, src);
 }
 
 extern "C" void EtsEscompatUint32ArrayOfInt(ark::ets::EtsEscompatUInt32Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsUint *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatUInt32Array, EtsUint>(thisArray, src);
 }
 
 extern "C" void EtsEscompatUint32ArrayOfLong(ark::ets::EtsEscompatUInt32Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsLong *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatUInt32Array, EtsLong>(thisArray, src);
 }
 
 extern "C" void EtsEscompatBigUint64ArrayOfInt(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsInt *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatBigUInt64Array, EtsInt>(thisArray, src);
 }
 
 extern "C" void EtsEscompatBigUint64ArrayOfLong(ark::ets::EtsEscompatBigUInt64Array *thisArray, EtsCharArray *src)
 {
-    auto *srcAddress = reinterpret_cast<EtsLong *>(ToUintPtr(src->GetCoreType()->GetData()));
-    EtsEscompatTypedArrayOfImpl(thisArray, srcAddress);
+    EtsEscompatTypedArrayOfImpl<EtsEscompatBigUInt64Array, EtsLong>(thisArray, src);
 }
 
 extern "C" void EtsEscompatBigUint64ArrayOfBigInt(ark::ets::EtsEscompatBigUInt64Array *thisArray,
@@ -2268,7 +2412,8 @@ extern "C" void EtsEscompatBigUint64ArrayOfBigInt(ark::ets::EtsEscompatBigUInt64
     // The method fills the typed array from a FixedArray<bigint> and in contrast to
     // EtsEscompatBigUint64ArraySetValuesFromArray, which fills a typed array from std.core.Array<bigint>, we can be
     // sure that `src` is an instance of the EtsTypedObjectArray<EtsBigInt> class.
-    EtsEscompatTypedArrayOfBigIntImpl(thisArray, EtsTypedObjectArray<EtsBigInt>::FromCoreType(src),
+    EtsEscompatTypedArrayOfBigIntImpl(thisArray,
+                                      src == nullptr ? nullptr : EtsTypedObjectArray<EtsBigInt>::FromCoreType(src),
                                       [](EtsBigInt *bigint) { return unbox::GetULong(bigint); });
 }
 }  // namespace ark::ets::intrinsics

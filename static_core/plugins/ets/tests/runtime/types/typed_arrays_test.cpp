@@ -460,4 +460,101 @@ TEST_F(FloatingTypedArrayTest, Float32ContainsSignalingNaNOnly)
     TestContainsNaNOnly(std::numeric_limits<EtsFloat>::signaling_NaN());
 }
 
+// `fill` and `copyWithin` never throw a RangeError per the ECMAScript spec, so out-of-contract
+// arguments (which only a stdlib that skips the managed-side clamp can produce) must be clamped
+// rather than reported. Debug builds trip the ASSERT guarding that contract instead.
+TEST_F(FloatingTypedArrayTest, PrivateIntrinsicBoundsAreClamped)
+{
+    if (DEBUG_BUILD) {
+        GTEST_SKIP() << "out-of-contract arguments are asserted, not clamped, in debug builds";
+    }
+
+    constexpr EtsDouble FIRST_VALUE = 1.0;
+    constexpr EtsDouble SECOND_VALUE = 2.0;
+    constexpr EtsDouble THIRD_VALUE = 3.0;
+    constexpr EtsInt ARRAY_LENGTH = 3;
+    constexpr EtsInt NEGATIVE_BEGIN = -2;
+    constexpr EtsInt RANGE_END = 2;
+    constexpr EtsInt THIRD_INDEX = 2;
+
+    // fill(0.0, -2, 2) on a length-3 array normalizes to [1, 2) and touches the second element only.
+    auto *array = CreateTypedArray<EtsDouble>({FIRST_VALUE, SECOND_VALUE, THIRD_VALUE});
+    auto *typedArray = static_cast<EtsEscompatFloat64Array *>(array);
+    intrinsics::EtsEscompatFloat64ArrayFillInternal(typedArray, 0.0, NEGATIVE_BEGIN, RANGE_END);
+    EXPECT_FALSE(coroutine_->HasPendingException());
+    EXPECT_DOUBLE_EQ(intrinsics::EtsEscompatFloat64ArrayGetUnsafe(typedArray, TEST_INDEX_0), FIRST_VALUE);
+    EXPECT_DOUBLE_EQ(intrinsics::EtsEscompatFloat64ArrayGetUnsafe(typedArray, TEST_INDEX_1), 0.0);
+    EXPECT_DOUBLE_EQ(intrinsics::EtsEscompatFloat64ArrayGetUnsafe(typedArray, THIRD_INDEX), THIRD_VALUE);
+
+    // copyWithin(target=2, start=0, count=3) is what an unclamped caller passes for `copyWithin(2)`.
+    // The count must be clamped to 1 so that only the last element is overwritten.
+    auto *other = CreateTypedArray<EtsDouble>({FIRST_VALUE, SECOND_VALUE, THIRD_VALUE});
+    auto *otherTypedArray = static_cast<EtsEscompatFloat64Array *>(other);
+    intrinsics::EtsEscompatFloat64ArrayCopyWithinImpl(otherTypedArray, RANGE_END, 0, ARRAY_LENGTH);
+    EXPECT_FALSE(coroutine_->HasPendingException());
+    EXPECT_DOUBLE_EQ(intrinsics::EtsEscompatFloat64ArrayGetUnsafe(otherTypedArray, TEST_INDEX_0), FIRST_VALUE);
+    EXPECT_DOUBLE_EQ(intrinsics::EtsEscompatFloat64ArrayGetUnsafe(otherTypedArray, TEST_INDEX_1), SECOND_VALUE);
+    EXPECT_DOUBLE_EQ(intrinsics::EtsEscompatFloat64ArrayGetUnsafe(otherTypedArray, THIRD_INDEX), FIRST_VALUE);
+}
+
+TEST_F(FloatingTypedArrayTest, FillWithReversedRangeIsNoOp)
+{
+    constexpr EtsDouble FIRST_VALUE = 1.0;
+    constexpr EtsDouble SECOND_VALUE = 2.0;
+    constexpr EtsDouble THIRD_VALUE = 3.0;
+    constexpr EtsInt BEGIN = 2;
+    constexpr EtsInt END = 1;
+    constexpr EtsInt THIRD_INDEX = 2;
+    auto *array = CreateTypedArray<EtsDouble>({FIRST_VALUE, SECOND_VALUE, THIRD_VALUE});
+    auto *typedArray = static_cast<EtsEscompatFloat64Array *>(array);
+
+    intrinsics::EtsEscompatFloat64ArrayFillInternal(typedArray, 0.0, BEGIN, END);
+
+    EXPECT_FALSE(coroutine_->HasPendingException());
+    EXPECT_DOUBLE_EQ(intrinsics::EtsEscompatFloat64ArrayGetUnsafe(typedArray, TEST_INDEX_0), FIRST_VALUE);
+    EXPECT_DOUBLE_EQ(intrinsics::EtsEscompatFloat64ArrayGetUnsafe(typedArray, TEST_INDEX_1), SECOND_VALUE);
+    EXPECT_DOUBLE_EQ(intrinsics::EtsEscompatFloat64ArrayGetUnsafe(typedArray, THIRD_INDEX), THIRD_VALUE);
+}
+
+TEST_F(FloatingTypedArrayTest, OfRejectsShortSourceBuffer)
+{
+    constexpr EtsDouble SECOND_VALUE = 2.0;
+    auto *array = CreateTypedArray<EtsDouble>({1.0, SECOND_VALUE});
+    auto *source = EtsCharArray::Create(1);
+    ASSERT_NE(source, nullptr);
+
+    intrinsics::EtsEscompatFloat64ArrayOfNumber(static_cast<EtsEscompatFloat64Array *>(array), source);
+    EXPECT_TRUE(coroutine_->HasPendingException());
+    coroutine_->ClearException();
+}
+
+TEST_F(FloatingTypedArrayTest, OfAcceptsMatchingDoubleSource)
+{
+    constexpr EtsDouble FIRST_VALUE = 1.5;
+    constexpr EtsDouble SECOND_VALUE = 2.5;
+    auto *array = CreateTypedArray<EtsDouble>({0.0, 0.0});
+    auto *source = EtsDoubleArray::Create(array->GetLengthInt());
+    ASSERT_NE(source, nullptr);
+    source->Set(TEST_INDEX_0, FIRST_VALUE);
+    source->Set(TEST_INDEX_1, SECOND_VALUE);
+
+    auto *typedArray = static_cast<EtsEscompatFloat64Array *>(array);
+    intrinsics::EtsEscompatFloat64ArrayOfNumber(typedArray, reinterpret_cast<EtsCharArray *>(source));
+    EXPECT_FALSE(coroutine_->HasPendingException());
+    EXPECT_DOUBLE_EQ(intrinsics::EtsEscompatFloat64ArrayGetUnsafe(typedArray, TEST_INDEX_0), FIRST_VALUE);
+    EXPECT_DOUBLE_EQ(intrinsics::EtsEscompatFloat64ArrayGetUnsafe(typedArray, TEST_INDEX_1), SECOND_VALUE);
+}
+
+TEST_F(FloatingTypedArrayTest, ContainsNaNStopsOnDetachedBuffer)
+{
+    auto *array = CreateTypedArray<EtsDouble>({std::numeric_limits<EtsDouble>::quiet_NaN()});
+    auto *arrayBuffer = static_cast<EtsStdCoreArrayBuffer *>(&*array->GetBuffer());
+    ObjectAccessor::SetObject(arrayBuffer, EtsStdCoreArrayBuffer::GetManagedDataOffset(), nullptr);
+    ObjectAccessor::SetPrimitive<void *>(arrayBuffer, EtsStdCoreArrayBuffer::GetNativeDataOffset(), nullptr);
+
+    EXPECT_FALSE(g_containsNaN<EtsDouble>(array, 0));
+    EXPECT_TRUE(coroutine_->HasPendingException());
+    coroutine_->ClearException();
+}
+
 }  // namespace ark::ets::test
