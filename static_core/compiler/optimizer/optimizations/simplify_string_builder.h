@@ -267,7 +267,7 @@ private:
     bool IsInstanceHoistable(const ConcatenationLoopMatch &match) const;
     bool IsToStringHoistable(const ConcatenationLoopMatch &match, Marker appendInstructionVisited) const;
 
-    bool IsPhiAccumulatedValue(PhiInst *phi) const;
+    bool IsPhiAccumulatedValue(PhiInst *phi, Loop *loop) const;
     ArenaVector<Inst *> GetPhiAccumulatedValues(Loop *loop);
     void StringBuilderUsagesDFS(Inst *inst, Loop *loop, Marker visited);
     const ArenaVector<StringBuilderUsage> &GetStringBuilderUsagesPO(Inst *accValue);
