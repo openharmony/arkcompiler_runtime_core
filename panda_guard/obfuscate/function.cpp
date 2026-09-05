@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <utility>
+
 #include "function.h"
 
 #include "bytecode_optimizer/runtime_adapter.h"
@@ -79,25 +81,56 @@ bool IsWhiteListFunction(const std::string &functionIdx)
     return IsEntryMethod(functionIdx) || IsImplicitMethod(functionIdx);
 }
 
-bool GetConsoleLogInfoForStart(const std::vector<panda::pandasm::InsPtr> &insList, size_t &start, uint16_t &reg)
+size_t SkipLabels(const std::vector<panda::pandasm::InsPtr> &insList, size_t index)
 {
-    size_t i = 0;
-    while (i < insList.size()) {
+    while (index < insList.size() && insList[index]->IsLabel()) {
+        index++;
+    }
+    return index;
+}
+
+bool IsConsoleCallThis(panda::pandasm::Opcode opcode)
+{
+    return opcode == panda::pandasm::Opcode::CALLTHIS0 || opcode == panda::pandasm::Opcode::CALLTHIS1 ||
+           opcode == panda::pandasm::Opcode::CALLTHIS2 || opcode == panda::pandasm::Opcode::CALLTHIS3 ||
+           opcode == panda::pandasm::Opcode::CALLTHIS0WITHNAME || opcode == panda::pandasm::Opcode::CALLTHIS1WITHNAME ||
+           opcode == panda::pandasm::Opcode::CALLTHIS2WITHNAME || opcode == panda::pandasm::Opcode::CALLTHIS3WITHNAME;
+}
+
+bool IsConsoleCallThisRange(panda::pandasm::Opcode opcode)
+{
+    return opcode == panda::pandasm::Opcode::CALLTHISRANGE || opcode == panda::pandasm::Opcode::WIDE_CALLTHISRANGE ||
+           opcode == panda::pandasm::Opcode::CALLTHISRANGEWITHNAME ||
+           opcode == panda::pandasm::Opcode::WIDE_CALLTHISRANGEWITHNAME;
+}
+
+/**
+ * Find a canonical console.xxx() prologue: tryldglobalbyname "console" followed by sta.
+ * Other legal console loads (typeof/if/then(console.info)/acc-optimized) are skipped, not aborted.
+ */
+bool GetConsoleLogInfoForStart(const std::vector<panda::pandasm::InsPtr> &insList, size_t searchFrom, size_t &start,
+                               uint16_t &reg)
+{
+    for (size_t i = searchFrom; i < insList.size(); i++) {
         auto &ins = insList[i];
-        if (ins->GetOpcode() == panda::pandasm::Opcode::TRYLDGLOBALBYNAME && ins->GetId(0) == CONSOLE_INS_VAR) {
-            size_t nextInsIndex = i + 1;
-            PANDA_GUARD_ASSERT_PRINT(nextInsIndex >= insList.size(), TAG, panda::guard::ErrorCode::GENERIC_ERROR,
-                                     "get console next ins get bad index:" << nextInsIndex);
-
-            auto &nextIns = insList[nextInsIndex];
-            PANDA_GUARD_ASSERT_PRINT(nextIns->GetOpcode() != panda::pandasm::Opcode::STA, TAG,
-                                     panda::guard::ErrorCode::GENERIC_ERROR, "get console next ins get bad ins type");
-
-            reg = nextIns->GetReg(0);
-            start = i;
-            return true;
+        if (ins->GetOpcode() != panda::pandasm::Opcode::TRYLDGLOBALBYNAME || ins->GetId(0) != CONSOLE_INS_VAR) {
+            continue;
         }
-        i++;
+
+        size_t nextInsIndex = SkipLabels(insList, i + 1);
+        if (nextInsIndex >= insList.size()) {
+            return false;
+        }
+
+        auto &nextIns = insList[nextInsIndex];
+        if (nextIns->GetOpcode() != panda::pandasm::Opcode::STA) {
+            LOG(INFO, PANDAGUARD) << TAG << "skip unmatched console load, next ins: " << nextIns->OpcodeToString();
+            continue;
+        }
+
+        reg = nextIns->GetReg(0);
+        start = i;
+        return true;
     }
 
     return false;
@@ -118,21 +151,19 @@ bool HasMovInstForRange(const std::vector<panda::pandasm::InsPtr> &insList, size
     return false;
 }
 
-int GetConsoleLogInfoForEnd(const std::vector<panda::pandasm::InsPtr> &insList, size_t start, uint16_t reg, size_t &end)
+bool GetConsoleLogInfoForEnd(const std::vector<panda::pandasm::InsPtr> &insList, size_t start, uint16_t reg,
+                             size_t &end)
 {
     size_t i = start + 1;
     while (i < insList.size()) {
         auto &ins = insList[i];
-        if ((ins->GetOpcode() == panda::pandasm::Opcode::CALLTHIS1 ||
-             ins->GetOpcode() == panda::pandasm::Opcode::CALLTHIS2 ||
-             ins->GetOpcode() == panda::pandasm::Opcode::CALLTHIS3) &&
-            ins->GetReg(0) == reg) {
+        const auto opcode = ins->GetOpcode();
+        if (IsConsoleCallThis(opcode) && ins->GetReg(0) == reg) {
             end = i + 1;
             return true;
         }
 
-        if ((ins->GetOpcode() == panda::pandasm::Opcode::CALLTHISRANGE) &&
-            HasMovInstForRange(insList, start, i, reg, ins->GetReg(0))) {
+        if (IsConsoleCallThisRange(opcode) && HasMovInstForRange(insList, start, i, reg, ins->GetReg(0))) {
             end = i + 1;
             return true;
         }
@@ -152,21 +183,24 @@ int GetConsoleLogInfoForEnd(const std::vector<panda::pandasm::InsPtr> &insList, 
  */
 bool GetConsoleLogInfo(const std::vector<panda::pandasm::InsPtr> &insList, size_t &start, size_t &end)
 {
-    size_t startIndex = 0;
-    uint16_t reg = 0;  // console variable stored reg
-    size_t endIndex = 0;
-    if (!GetConsoleLogInfoForStart(insList, startIndex, reg)) {
-        return false;
+    size_t searchFrom = 0;
+    while (searchFrom < insList.size()) {
+        size_t startIndex = 0;
+        uint16_t reg = 0;  // console variable stored reg
+        size_t endIndex = 0;
+        if (!GetConsoleLogInfoForStart(insList, searchFrom, startIndex, reg)) {
+            return false;
+        }
+        if (GetConsoleLogInfoForEnd(insList, startIndex, reg, endIndex)) {
+            start = startIndex;
+            end = endIndex;
+            return true;
+        }
+        // Prologue matched but this load is not a console.xxx() call (e.g. then(console.info)).
+        searchFrom = startIndex + 1;
     }
 
-    if (!GetConsoleLogInfoForEnd(insList, startIndex, reg, endIndex)) {
-        return false;
-    }
-
-    start = startIndex;
-    end = endIndex;
-
-    return true;
+    return false;
 }
 }  // namespace
 
@@ -365,9 +399,18 @@ void panda::guard::Function::RemoveConsoleLog()
     while (GetConsoleLogInfo(insList, start, end)) {
         LOG(INFO, PANDAGUARD) << TAG << "remove console log for:" << this->idx_;
         LOG(INFO, PANDAGUARD) << TAG << "found console ins range:[" << start << ", " << end << ")";
-        PANDA_GUARD_ASSERT_PRINT(end >= insList.size(), TAG, ErrorCode::GENERIC_ERROR,
+        PANDA_GUARD_ASSERT_PRINT(end > insList.size(), TAG, ErrorCode::GENERIC_ERROR,
                                  "bad end ins index for console:" << end);
-        insList.erase(insList.begin() + start, insList.begin() + end);
+        size_t kept = start;
+        for (size_t i = start; i < end; i++) {
+            if (!insList[i]->IsLabel()) {
+                continue;
+            }
+            insList[kept] = std::move(insList[i]);
+            kept++;
+        }
+        insList.erase(insList.begin() + static_cast<std::ptrdiff_t>(kept),
+                      insList.begin() + static_cast<std::ptrdiff_t>(end));
     }
 }
 
