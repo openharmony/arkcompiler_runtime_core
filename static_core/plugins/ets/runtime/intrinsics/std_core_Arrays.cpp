@@ -147,15 +147,12 @@ static void MemAtomicCopyReadBarrier(mem::GCBarrierSet *barrierSet, T *srcAddr, 
 }
 
 template <typename T>
-static auto GetCopy()
+static auto GetCopy([[maybe_unused]] mem::GCBarrierSet *barrierSet, [[maybe_unused]] bool &useReadBarrier)
 {
 #if defined(ARK_USE_COMMON_RUNTIME)
-    auto *readBarrierSet = Mutator::GetCurrent()->GetBarrierSet();
-    bool useReadBarrier = readBarrierSet->IsReadBarrierEnabled();
-
-    return [useReadBarrier, readBarrierSet](T *srcPtr, T *dstPtr) {
+    return [&useReadBarrier, barrierSet](T *srcPtr, T *dstPtr) {
         if (useReadBarrier) {
-            MemAtomicCopyReadBarrier<T>(readBarrierSet, srcPtr, dstPtr);
+            MemAtomicCopyReadBarrier<T>(barrierSet, srcPtr, dstPtr);
         } else {
             MemAtomicCopy<T>(srcPtr, dstPtr);
         }
@@ -242,10 +239,11 @@ static void RefCopy(ManagedThread *mThread, ObjectArrayHandle<T> srcArray, Objec
     auto *src = srcArray.GetStartPtr();
     auto *dst = dstArray.GetStartPtr();
     bool backwards = reinterpret_cast<uintptr_t>(src) < reinterpret_cast<uintptr_t>(dst);
-    auto copy = GetCopy<T>();
+    auto *barrierSet = mThread->GetBarrierSet();
+    bool useReadBarrier = barrierSet->IsReadBarrierEnabled();
+    auto copy = GetCopy<T>(barrierSet, useReadBarrier);
 
     if constexpr (NEED_PRE_WRITE_BARRIER) {
-        auto *barrierSet = mThread->GetBarrierSet();
         bool usePreBarrier = barrierSet->IsPreBarrierEnabled();
         auto copyWithBarriers = [&copy, &usePreBarrier, barrierSet](T *srcPtr, T *dstPtr) {
             if (usePreBarrier) {
@@ -253,11 +251,12 @@ static void RefCopy(ManagedThread *mThread, ObjectArrayHandle<T> srcArray, Objec
             }
             copy(srcPtr, dstPtr);
         };
-        auto putSafepoint = [&usePreBarrier, barrierSet, srcArray, dstArray,
+        auto putSafepoint = [&usePreBarrier, &useReadBarrier, barrierSet, srcArray, dstArray,
                              mThread](T *&srcPtr, T *&dstPtr, size_t start, size_t count) mutable {
             PostWrite<T>(mThread, dstArray, start, count);
             mThread->Safepoint();
             usePreBarrier = barrierSet->IsPreBarrierEnabled();
+            useReadBarrier = barrierSet->IsReadBarrierEnabled();
             // If GC suspends worker during RefCopy execution, it may move the arrays pointed by srcPtr and dstPtr
             // to different memory locations; therefore, the new array addresses should be re-read.
             srcPtr = srcArray.GetStartPtr();
@@ -269,9 +268,11 @@ static void RefCopy(ManagedThread *mThread, ObjectArrayHandle<T> srcArray, Objec
             CopyForward(src, dst, length, copyWithBarriers, putSafepoint);
         }
     } else {
-        auto putSafepoint = [srcArray, dstArray, mThread](T *&srcPtr, T *&dstPtr, size_t start, size_t count) mutable {
+        auto putSafepoint = [&useReadBarrier, barrierSet, srcArray, dstArray,
+                             mThread](T *&srcPtr, T *&dstPtr, size_t start, size_t count) mutable {
             PostWrite<T>(mThread, dstArray, start, count);
             mThread->Safepoint();
+            useReadBarrier = barrierSet->IsReadBarrierEnabled();
             // If GC suspends worker during RefCopy execution, it may move the arrays pointed by srcPtr and dstPtr
             // to different memory locations; therefore, the new array addresses should be re-read.
             srcPtr = srcArray.GetStartPtr();
