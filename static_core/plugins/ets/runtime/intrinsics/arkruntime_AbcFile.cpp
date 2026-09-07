@@ -19,95 +19,62 @@
 #include "intrinsics.h"
 #include "libarkbase/utils/logger.h"
 #include "libarkbase/utils/utf.h"
-#include "libziparchive/extractortool/extractor.h"
 #include "runtime/handle_scope-inl.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_abc_file.h"
+#include "plugins/ets/runtime/types/ets_abc_package.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets::intrinsics {
 
-static constexpr const char *HSP_SUFFIX = ".hsp";
-static constexpr const char *HAP_SUFFIX = ".hap";
-static constexpr const char *PACKAGE_ABC_PATH = "/ets/modules_static.abc";
-static constexpr const char *PACKAGE_ABC_ENTRY = "ets/modules_static.abc";
-
-static EtsAbcFile *CreateAbcFile(EtsExecutionContext *executionCtx, ClassLinkerContext *ctx,
-                                 std::unique_ptr<const panda_file::File> &&pf)
-{
-    auto *abcFile =
-        EtsAbcFile::FromEtsObject(EtsObject::Create(executionCtx, PlatformTypes(executionCtx)->arkruntimeAbcFile));
-    abcFile->SetPandaFile(pf.get());
-
-    Runtime::GetCurrent()->GetClassLinker()->AddPandaFile(std::move(pf), ctx);
-    return abcFile;
-}
-
-static bool EndsWith(const std::string &path, const char *suffix)
-{
-    const std::string_view suffixStr(suffix);
-    return path.length() >= suffixStr.length() &&
-           path.compare(path.length() - suffixStr.length(), suffixStr.length(), suffixStr) == 0;
-}
-
 static bool IsHspPath(const std::string &path)
 {
-    return EndsWith(path, HSP_SUFFIX);
+    return ets::EndsWith(path, ets::HSP_SUFFIX);
 }
 
 static bool IsHapPath(const std::string &path)
 {
-    return EndsWith(path, HAP_SUFFIX);
+    return ets::EndsWith(path, ets::HAP_SUFFIX);
 }
 
-static bool CheckExtractor(const std::shared_ptr<ark::extractor::Extractor> &extractor,
-                           EtsExecutionContext *executionCtx, const std::string &path)
+/*
+ * Reads a package's abc entry through the shared package reader and translates the outcome into
+ * the loader's contract: a package that cannot be opened raises AbcFileNotFoundError, a readable
+ * package without the entry is a plain failure with a log (the historical asymmetry, kept).
+ */
+static bool GetPackageAbc(const std::string &pathStr, EtsExecutionContext *executionCtx,
+                          std::unique_ptr<const panda_file::File> &pf, std::string_view suffix)
 {
-    if (!extractor || !extractor->Init()) {
-        ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->arkruntimeAbcFileNotFoundError,
-                               "Open failed, file: " + path);
-        return false;
+    switch (ets::ReadPackageAbc(pathStr, suffix, pf)) {
+        case ets::PackageReadResult::OK:
+            return true;
+        case ets::PackageReadResult::OPEN_FAILED:
+            ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->arkruntimeAbcFileNotFoundError,
+                                   "Open failed, file: " + pathStr);
+            return false;
+        case ets::PackageReadResult::NO_ABC_ENTRY:
+        default:
+            LOG(ERROR, RUNTIME) << "Failed to get safe data from ABC package: "
+                                << ets::GetAbcPathFromPackagePath(pathStr, suffix);
+            return false;
     }
-    return true;
-}
-
-static std::string GetAbcPathFromPackagePath(const std::string &packagePath, const char *suffix)
-{
-    return packagePath.substr(0, packagePath.length() - std::strlen(suffix)).append(PACKAGE_ABC_PATH);
-}
-
-static bool GetPackagePath(const std::string &pathStr, EtsExecutionContext *executionCtx,
-                           std::unique_ptr<const panda_file::File> &pf, const char *suffix, bool isHsp)
-{
-    std::shared_ptr<ark::extractor::Extractor> extractor = std::make_shared<ark::extractor::Extractor>(pathStr);
-    if (!CheckExtractor(extractor, executionCtx, pathStr)) {
-        return false;
-    }
-    std::string abcPath = GetAbcPathFromPackagePath(pathStr, suffix);
-    auto safeData = isHsp ? extractor->GetSafeDataForHsp(abcPath) : extractor->GetSafeData(PACKAGE_ABC_ENTRY);
-    if (safeData == nullptr) {
-        LOG(ERROR, RUNTIME) << "Failed to get safe data from ABC package: " << abcPath;
-        return false;
-    }
-    pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), abcPath);
-    return pf != nullptr;
 }
 
 static bool GetHspPath(const std::string &pathStr, EtsExecutionContext *executionCtx,
                        std::unique_ptr<const panda_file::File> &pf)
 {
-    return GetPackagePath(pathStr, executionCtx, pf, HSP_SUFFIX, true);
+    return GetPackageAbc(pathStr, executionCtx, pf, ets::HSP_SUFFIX);
 }
 
 static bool GetHapPackagePath(const std::string &pathStr, EtsExecutionContext *executionCtx,
                               std::unique_ptr<const panda_file::File> &pf)
 {
-    return GetPackagePath(pathStr, executionCtx, pf, HAP_SUFFIX, false);
+    return GetPackageAbc(pathStr, executionCtx, pf, ets::HAP_SUFFIX);
 }
 
 EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *filePath)
@@ -146,7 +113,7 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
                                PandaString("Abc file not found: ") + path);
         return nullptr;
     }
-    return CreateAbcFile(executionCtx, ctx, std::move(pf));
+    return EtsAbcFile::CreateAbcFile(executionCtx, ctx, std::move(pf));
 }
 
 EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker [[maybe_unused]],
@@ -171,7 +138,7 @@ EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker [[maybe_unu
     }
 
     auto *ctx = runtimeLinker->GetClassLinkerContext();
-    return CreateAbcFile(executionCtx, ctx, std::move(pf));
+    return EtsAbcFile::CreateAbcFile(executionCtx, ctx, std::move(pf));
 #else
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError,

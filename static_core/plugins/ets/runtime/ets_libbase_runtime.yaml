@@ -7974,6 +7974,17 @@ intrinsics:
         - arkruntime.AbcFile[]
     impl: ark::ets::intrinsics::EtsAbcRuntimeLinkerAddNewAbcFiles
 
+  - name: StdCoreAbcRuntimeLinkerColdReload
+    space: ets
+    class_name: std.core.AbcRuntimeLinker
+    method_name: coldReload
+    static: false
+    signature:
+      ret: i32
+      args:
+        - std.core.String
+    impl: ark::ets::intrinsics::EtsAbcRuntimeLinkerColdReload
+
 ###################
 # std.core.RegExp #
 ###################
@@ -9889,6 +9900,7 @@ intrinsics:
       ret: i32
       args: [ std.core.Class ]
     impl: ark::ets::intrinsics::CountInstancesOfClass
+
 
 ###############################
 # std.core.Debugger #

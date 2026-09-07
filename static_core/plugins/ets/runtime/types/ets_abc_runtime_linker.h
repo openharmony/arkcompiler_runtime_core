@@ -26,6 +26,9 @@
 
 namespace ark::ets {
 
+class EtsAbcFile;
+class EtsExecutionContext;
+
 namespace test {
 class EtsAbcRuntimeLinkerTest;
 }  // namespace test
@@ -58,6 +61,15 @@ public:
     {
         ObjectAccessor::SetObject(this, MEMBER_OFFSET(EtsAbcRuntimeLinker, abcFiles_), abcFiles->GetCoreType());
     }
+
+    /**
+     * @brief Inserts @a abcFile at the front of abcFiles, shifting the existing entries.
+     *
+     * Runs under the context's abcFiles mutex. May allocate.
+     *
+     * @returns true on success, false on allocation failure (a pending exception is set then).
+     */
+    bool PrependAbcFile(EtsExecutionContext *executionCtx, EtsAbcFile *abcFile);
 
     EtsRuntimeLinker *GetParentLinker()
     {

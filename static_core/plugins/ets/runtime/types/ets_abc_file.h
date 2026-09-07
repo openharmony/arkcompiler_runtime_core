@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,13 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
-namespace ark::ets {
+namespace ark {
+
+class ClassLinkerContext;
+
+namespace ets {
+
+class EtsExecutionContext;
 
 namespace test {
 class EtsAbcRuntimeLinkerTest;
@@ -53,6 +59,14 @@ public:
         fileHandlePtr_ = reinterpret_cast<EtsLong>(file);
     }
 
+    /**
+     * @brief Wraps a panda file in a managed EtsAbcFile and registers it with the class linker.
+     *
+     * @returns the wrapper, or null on allocation failure (a pending exception is set then).
+     */
+    static EtsAbcFile *CreateAbcFile(EtsExecutionContext *executionCtx, ClassLinkerContext *ctx,
+                                     std::unique_ptr<const panda_file::File> &&pf);
+
 private:
     // ets.AbcFile fields BEGIN
     EtsLong fileHandlePtr_;
@@ -61,6 +75,7 @@ private:
     friend class test::EtsAbcRuntimeLinkerTest;
 };
 
-}  // namespace ark::ets
+}  // namespace ets
+}  // namespace ark
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_TYPES_ETS_ABC_FILE_H

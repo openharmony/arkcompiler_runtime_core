@@ -250,6 +250,7 @@
   "runtime/coretypes/line_string.cpp": "*",
   "runtime/coretypes/string.cpp": "*",
   "runtime/coretypes/string_flatten.cpp": "*",
+  "plugins/ets/tests/coldreload": "*",
   "runtime/include/method.h": "*",
   "runtime/interpreter/frame.h": "*",
   "runtime/jit/profiling_saver.cpp": "*",
