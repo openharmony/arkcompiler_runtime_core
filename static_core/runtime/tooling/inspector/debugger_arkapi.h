@@ -32,17 +32,40 @@
 using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
 
 namespace ark {
+namespace tooling::sampler {  // NOLINT(misc-definitions-in-headers)
+class SamplesRecord;
+}  // namespace tooling::sampler
+
+constexpr uint32_t DEFAULT_SAMPLE_INTERVAL_US = 500;  // default sampling interval in microseconds
+
+enum class ProfilerType : uint8_t { CPU_PROFILER, HEAP_PROFILER };
+
+struct ProfilerOption {
+    ProfilerType profilerType = ProfilerType::CPU_PROFILER;
+    uint32_t interval = DEFAULT_SAMPLE_INTERVAL_US;
+    int tid = 0;
+    int32_t instanceId = 0;
+};
+
 class PANDA_DEBUGGER_PUBLIC_API ArkDebugNativeAPI final {
 public:
     using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
     static bool StartDebuggerForSocketPair(int tid, int socketfd = -1);
     static bool NotifyDebugMode(int tid, int32_t instanceId, bool isStartWithDebug, void *vm,
-                                DebuggerPostTask &debuggerPostTask, bool isDebugApp);
+                                const DebuggerPostTask &debuggerPostTask, bool isDebugApp);
     static bool StopDebugger(void *vm);
     static bool IsDebugModeEnabled();
 
+    static bool StartProfiler(void *vm, const ProfilerOption &option, const DebuggerPostTask &debuggerPostTask,
+                              bool isDebugApp);
     static bool StartProfiling(const std::string &filePath, uint32_t interval = DEFAULT_SAMPLE_INTERVAL_US);
     static bool StopProfiling();
+
+    static bool StartProfilingSession(uint32_t interval);
+    static std::shared_ptr<tooling::sampler::SamplesRecord> StopProfilingSession();
+    static std::shared_ptr<tooling::sampler::SamplesRecord> GetProfileInfoBuffer();
+    static bool IsProfilerRunning();
+    static void ResetProfileInfoBuffer();
 
     ArkDebugNativeAPI() = delete;
     ~ArkDebugNativeAPI() = delete;
@@ -55,7 +78,6 @@ public:
 private:
     static void DebuggerLaunchSetup();
     static void *gHybridDebuggerHandle_;
-    static constexpr uint32_t DEFAULT_SAMPLE_INTERVAL_US = 500;
 };
 
 }  // namespace ark

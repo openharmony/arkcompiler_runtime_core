@@ -113,6 +113,11 @@ public:
     virtual void RequestResume();
     /// Unblock the blocked coroutine, setting its status to Status::RUNNABLE
     virtual void RequestUnblock();
+    // Refresh the bookkeeping thread id to the calling OS thread.
+    void UpdateIdToCurrentThread()
+    {
+        UpdateId(os::thread::GetCurrentThreadId());
+    }
     /**
      * @brief Indicate that coroutine entrypoint execution is finished. Propagates the coroutine
      * return value to language level objects.

@@ -50,6 +50,7 @@ struct SampleInfo {
     struct ThreadInfo {
         // Id of the thread from which sample was obtained
         uint32_t threadId {0};
+        uint32_t osTid {0};
         ThreadStatus threadStatus {ThreadStatus::UNDECLARED};
     };
     uint64_t timeStamp {0};

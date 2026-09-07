@@ -769,6 +769,7 @@ void SigProfSamplingProfilerHandler([[maybe_unused]] int signum, [[maybe_unused]
     // in order to bypass "variable might be clobbered by ‘longjmp’" compiler warning.
     sample.threadInfo.threadStatus = GetThreadStatus(mthread);
     sample.threadInfo.threadId = coro == nullptr ? os::thread::GetCurrentThreadId() : coro->GetCoroutineId();
+    sample.threadInfo.osTid = os::thread::GetCurrentThreadId();
     size_t stackCounter = 0;
 
     ScopedThreadSampling scopedThreadSampling(mthread->GetPtThreadInfo()->GetSamplingInfo());
@@ -803,6 +804,7 @@ void SigProfSamplingProfilerHandler([[maybe_unused]] int signum, [[maybe_unused]
 
 void Sampler::SamplerThreadEntry()
 {
+    QosHelper::SetCurrentWorkerPriority(PRIORITY_HIGH);
     struct sigaction action {};
     action.sa_sigaction = &SigProfSamplingProfilerHandler;
     action.sa_flags = SA_SIGINFO | SA_ONSTACK;
@@ -859,6 +861,7 @@ void Sampler::SamplerThreadEntry()
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
 void Sampler::ListenerThreadEntry(std::unique_ptr<StreamWriter> writerPtr)
 {
+    QosHelper::SetCurrentWorkerPriority(PRIORITY_HIGH);
     // Writing panda files that were loaded before sampler was created
     WriteLoadedPandaFiles(writerPtr.get());
 

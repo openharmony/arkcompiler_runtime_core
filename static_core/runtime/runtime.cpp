@@ -71,6 +71,7 @@
 #include "runtime/profilesaver/profile_saver.h"
 #include "runtime/tooling/coverage_listener.h"
 #include "runtime/tooling/debugger.h"
+#include "runtime/tooling/inspector/debugger_arkapi.h"
 #include "runtime/tooling/memory_allocation_dumper.h"
 #include "runtime/tooling/sampler/sample_writer.h"
 #include "runtime/include/file_manager.h"
@@ -633,10 +634,12 @@ bool Runtime::Destroy()
         instance_->GetPandaVM()->BeforeShutdown();
     }
 
-    if (instance_->GetOptions().IsSamplingProfilerCreate()) {
+    if (instance_->GetTools().IsSamplingProfilerCreate()) {
         instance_->GetTools().StopSamplingProfiler();
         instance_->GetTools().DestroySamplingProfiler();
     }
+
+    ArkDebugNativeAPI::ResetProfileInfoBuffer();
 
     // when signal start, but no signal stop tracing, should stop it
     if (Trace::isTracing_) {
