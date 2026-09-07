@@ -831,7 +831,12 @@ bool String::IsMutf8EqualsUtf16(const uint8_t *utf8Data, const uint16_t *utf16Da
 {
     auto allocator = Runtime::GetCurrent()->GetInternalAllocator();
     auto tmpBuffer = allocator->AllocArray<uint16_t>(utf16DataLength);
-    utf::ConvertMUtf8ToUtf16(utf8Data, utf::Mutf8Size(utf8Data), tmpBuffer);
+    [[maybe_unused]] auto convertedSize =
+        utf::ConvertRegionMUtf8ToUtf16(utf8Data, tmpBuffer, utf::Mutf8Size(utf8Data), utf16DataLength, 0);
+    if (UNLIKELY(convertedSize != utf16DataLength)) {
+        allocator->Delete(tmpBuffer);
+        return false;
+    }
     ark::common_vm::Span<const uint16_t> data1(tmpBuffer, utf16DataLength);
     ark::common_vm::Span<const uint16_t> data2(utf16Data, utf16DataLength);
     bool result = ark::mem::BaseString::StringsAreEquals(data1, data2);

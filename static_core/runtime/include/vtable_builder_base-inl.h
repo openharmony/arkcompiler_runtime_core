@@ -122,8 +122,10 @@ bool VTableBuilderBase<VISIT_SUPERITABLE>::AddClassMethods(Span<Method> vmethods
 {
     size_t numVmethods = vmethods.size();
     auto classMethods = allocator_->AllocArray<MethodInfo>(numVmethods);
+    if (classMethods == nullptr) {
+        return false;
+    }
     Span<MethodInfo> methodInfos(classMethods, numVmethods);
-    ASSERT(classMethods != nullptr);
 
     for (size_t i = 0; i < numVmethods; i++) {
         new (&methodInfos[i]) MethodInfo(&vmethods[i]);

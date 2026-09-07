@@ -355,6 +355,10 @@ public:
         if constexpr (IS_DYNAMIC) {
             return nregs;
         }
+        static constexpr uint32_t MAX_NREGS = UINT32_MAX / 2U;
+        if (UNLIKELY(nregs > MAX_NREGS)) {
+            return UINT32_MAX;
+        }
         return nregs * 2U;
     }
 

@@ -43,6 +43,10 @@ public:
 
     void *Alloc(size_t size)
     {
+        static constexpr size_t MAX_ALLOC_SIZE = SIZE_MAX - sizeof(Arena) - MAX_ALIGNMENT_DRIFT;
+        if (UNLIKELY(size > MAX_ALLOC_SIZE)) {
+            return nullptr;
+        }
         if (arenas_ != nullptr) {
             void *ptr = arenas_->Alloc(size);
             if (ptr != nullptr) {
@@ -160,10 +164,11 @@ private:
     InternalAllocatorPtr allocator_;
     Arena *arenas_ {nullptr};
 
+    static constexpr size_t ARENA_ALIGNMENT = GetAlignmentInBytes(ARENA_DEFAULT_ALIGNMENT);
+    static constexpr size_t MAX_ALIGNMENT_DRIFT = ARENA_ALIGNMENT - 1U;
+
     Arena *AllocArena(size_t size)
     {
-        static constexpr size_t ARENA_ALIGNMENT = GetAlignmentInBytes(ARENA_DEFAULT_ALIGNMENT);
-        static constexpr size_t MAX_ALIGNMENT_DRIFT = ARENA_ALIGNMENT - 1U;
         void *ptr = allocator_->Alloc(size + sizeof(Arena) + MAX_ALIGNMENT_DRIFT, ARENA_DEFAULT_ALIGNMENT);
         if (ptr == nullptr) {
             return nullptr;
