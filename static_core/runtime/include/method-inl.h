@@ -50,6 +50,9 @@ public:
     ALWAYS_INLINE inline static uint32_t GetFrameSize(uint32_t numVregs, uint32_t numDeclaredArgs,
                                                       [[maybe_unused]] uint32_t numActualArgs)
     {
+        if (UNLIKELY(numVregs > UINT32_MAX - numDeclaredArgs)) {
+            return UINT32_MAX;
+        }
         return numVregs + numDeclaredArgs;
     }
 
@@ -88,7 +91,11 @@ public:
     ALWAYS_INLINE inline static uint32_t GetFrameSize(uint32_t numVregs, uint32_t numDeclaredArgs,
                                                       uint32_t numActualArgs)
     {
-        return numVregs + std::max(numDeclaredArgs, numActualArgs);
+        uint32_t maxArgs = std::max(numDeclaredArgs, numActualArgs);
+        if (UNLIKELY(numVregs > UINT32_MAX - maxArgs)) {
+            return UINT32_MAX;
+        }
+        return numVregs + maxArgs;
     }
 
     // NOLINTNEXTLINE(misc-unused-parameters)

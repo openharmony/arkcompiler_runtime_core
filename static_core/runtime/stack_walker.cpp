@@ -559,13 +559,15 @@ Frame *StackWalker::GetFrameFromPrevFrameDynamic(Frame *prevFrame, Method *metho
     frame->SetDynamic();
     DynamicFrameHandler frameHandler(frame);
     static constexpr uint8_t ACC_OFFSET = VRegInfo::ENV_COUNT + 1;
-    for (size_t i = 0; i < vregList.size() - ACC_OFFSET; i++) {
-        if (!vregList[i].IsLive()) {
-            continue;
+    if (vregList.size() > ACC_OFFSET) {
+        for (size_t i = 0; i < vregList.size() - ACC_OFFSET; i++) {
+            if (!vregList[i].IsLive()) {
+                continue;
+            }
+            auto regRef = frameHandler.GetVReg(i);
+            GetCFrame().GetPackVRegValue(vregList[i], codeInfo_,
+                                         reinterpret_cast<SlotType **>(calleeStack_.stack.data()), regRef);
         }
-        auto regRef = frameHandler.GetVReg(i);
-        GetCFrame().GetPackVRegValue(vregList[i], codeInfo_, reinterpret_cast<SlotType **>(calleeStack_.stack.data()),
-                                     regRef);
     }
     auto accVreg = vregList[vregList.size() - ACC_OFFSET];
     if (accVreg.IsLive()) {
