@@ -301,7 +301,9 @@ EtsHandle<EtsObject> XRefObjectOperator::Invoke(EtsExecutionContext *executionCt
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
         if (UNLIKELY(dynamicArg == nullptr)) {
-            ctx->ForwardJSException(executionCtx);
+            if (InteropCtx::SanityJSExceptionPending()) {
+                ctx->ForwardJSException(executionCtx);
+            }
             return EtsHandle<EtsObject>();
         }
         dynamicArgs.push_back(dynamicArg);
@@ -347,7 +349,9 @@ EtsHandle<EtsObject> XRefObjectOperator::InvokeMethod(EtsExecutionContext *execu
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
         if (UNLIKELY(dynamicArg == nullptr)) {
-            ctx->ForwardJSException(executionCtx);
+            if (InteropCtx::SanityJSExceptionPending()) {
+                ctx->ForwardJSException(executionCtx);
+            }
             return EtsHandle<EtsObject>();
         }
         dynamicArgs.push_back(dynamicArg);
@@ -405,7 +409,9 @@ EtsHandle<EtsObject> XRefObjectOperator::InvokeMethod(EtsExecutionContext *execu
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
         if (UNLIKELY(dynamicArg == nullptr)) {
-            ctx->ForwardJSException(executionCtx);
+            if (InteropCtx::SanityJSExceptionPending()) {
+                ctx->ForwardJSException(executionCtx);
+            }
             return EtsHandle<EtsObject>();
         }
         dynamicArgs.push_back(dynamicArg);
@@ -550,7 +556,9 @@ EtsObject *XRefObjectOperator::Instantiate(EtsExecutionContext *executionCtx, Sp
         EtsObject *arg = EtsObject::FromCoreType(objHeader.GetPtr());
         auto dynamicArg = JSConvertEtsObject::WrapWithNullCheck(env, arg);
         if (UNLIKELY(dynamicArg == nullptr)) {
-            ctx->ForwardJSException(executionCtx);
+            if (InteropCtx::SanityJSExceptionPending()) {
+                ctx->ForwardJSException(executionCtx);
+            }
             return nullptr;
         }
         dynamicArgs.push_back(dynamicArg);
