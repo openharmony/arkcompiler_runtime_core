@@ -33,8 +33,9 @@ static GCTaskCause GCCauseFromInt(EtsInt cause)
     }
     if (cause == 2_I) {
         return GCTaskCause::OOM_CAUSE;
-    }
-    UNREACHABLE();
+    };
+    // Cause comes from ArkTS user code, an out-of-range value is a valid input (not a program bug),
+    // so return INVALID_CAUSE and let CheckGCCause throw a catchable exception instead of aborting.
     return GCTaskCause::INVALID_CAUSE;
 }
 
