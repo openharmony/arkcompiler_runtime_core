@@ -20,6 +20,7 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
+#include <securec.h>
 #include <string_view>
 #include <type_traits>
 
@@ -179,7 +180,8 @@ private:
     static int DeserializeLE(const uint8_t *buffer, size_t bufferSize, size_t &offset, std::make_unsigned_t<T> &value)
     {
         constexpr size_t N = sizeof(T);
-        if (offset + N > bufferSize) {
+        // Subtraction form avoids size_t wraparound if offset is corrupted beyond bufferSize.
+        if (offset > bufferSize || bufferSize - offset < N) {
             offset = bufferSize;
             return -1;
         }
@@ -220,7 +222,8 @@ private:
     // Check if there is enough space in the buffer; sets offset to bufferSize on overflow.
     static bool CheckBounds(size_t &offset, size_t bufferSize, size_t needed)
     {
-        if (offset + needed > bufferSize) {
+        // Subtraction form avoids size_t wraparound from an attacker-crafted (huge) needed value.
+        if (offset > bufferSize || needed > bufferSize - offset) {
             offset = bufferSize;
             return false;
         }

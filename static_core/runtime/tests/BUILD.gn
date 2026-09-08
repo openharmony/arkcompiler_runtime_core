@@ -91,8 +91,14 @@ ark_runtime_unittest("arkruntime_stack_overflow_test") {
   module_out_path = runtime_test_module_out_path
 }
 
+ark_runtime_unittest("arkruntime_buffer_serializer_test") {
+  sources = [ "buffer_serializer_test.cpp" ]
+  module_out_path = runtime_test_module_out_path
+}
+
 ark_unittest_group("runtime_tests") {
   deps = [
+    ":arkruntime_buffer_serializer_test",
     ":arkruntime_heap_dump_test",
     ":arkruntime_memory_management_test",
     ":arkruntime_pgo_class_context_utils_test",
