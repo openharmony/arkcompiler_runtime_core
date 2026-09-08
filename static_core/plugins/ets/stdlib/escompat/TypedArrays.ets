@@ -7518,7 +7518,10 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public includes(searchElement: float, fromIndex: int): boolean {
-        return this.indexOf(searchElement.toInt(), fromIndex) != -1
+        if (isNaN(searchElement)) {
+            return this.containsNaN(fromIndex)
+        }
+        return this.indexOf(searchElement.toDouble(), fromIndex) != -1
     }
 
     /**

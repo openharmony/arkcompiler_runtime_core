@@ -237,7 +237,7 @@ export final class Class {
      */ 
     public static ofAny(obj: Any): Class | undefined {
         if (obj instanceof Object) {
-            return Class.of(obj as Object)
+            return Class.of(obj)
         }
         if (obj === null) {
             return Class.from<null>()

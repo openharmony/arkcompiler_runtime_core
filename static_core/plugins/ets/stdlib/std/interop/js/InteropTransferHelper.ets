@@ -27,7 +27,7 @@ export final class InteropTransferHelper {
             throw new Error("dynamicObject is null or undefined");
         }
         let dynamicESValue = ESValue.wrap(dynamicObject as object);
-        return InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicESValue) as Object;
+        return InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicESValue);
     }
 
     private static native transferArrayBufferToDynamicImpl(staticObject: ArrayBuffer): Any;
@@ -52,22 +52,19 @@ export final class InteropTransferHelper {
         let length = dynamicESValue.getProperty("length").toNumber();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new Int8Array(staticBuffer, byteOffset, length) as Object;
+        return new Int8Array(staticBuffer, byteOffset, length);
     }
 
     public static transferInt8ArrayToDynamic(staticObject: Object): Any {
         let staticTypedArray = staticObject as Int8Array;
 
         let staticBuffer = staticTypedArray.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticTypedArray.byteOffset;
         let length = staticTypedArray.length;
 
         let dynamicTypedArray = InteropTransferHelper.createDynamicTypedArray(
-            staticBuffer as ArrayBuffer,
+            staticBuffer,
             0,
             length,
             byteOffset
@@ -86,22 +83,19 @@ export final class InteropTransferHelper {
         let length = dynamicESValue.getProperty("length").toNumber();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new Uint8Array(staticBuffer, byteOffset, length) as Object;
+        return new Uint8Array(staticBuffer, byteOffset, length);
     }
 
     public static transferUint8ArrayToDynamic(staticObject: Object): Any {
         let staticTypedArray = staticObject as Uint8Array;
 
         let staticBuffer = staticTypedArray.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticTypedArray.byteOffset;
         let length = staticTypedArray.length;
 
         let dynamicTypedArray = InteropTransferHelper.createDynamicTypedArray(
-            staticBuffer as ArrayBuffer,
+            staticBuffer,
             1,
             length,
             byteOffset
@@ -120,22 +114,19 @@ export final class InteropTransferHelper {
         let length = dynamicESValue.getProperty("length").toNumber();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new Uint8ClampedArray(staticBuffer, byteOffset, length) as Object;
+        return new Uint8ClampedArray(staticBuffer, byteOffset, length);
     }
 
     public static transferUint8ClampedArrayToDynamic(staticObject: Object): Any {
         let staticTypedArray = staticObject as Uint8ClampedArray;
 
         let staticBuffer = staticTypedArray.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticTypedArray.byteOffset;
         let length = staticTypedArray.length;
 
         let dynamicTypedArray = InteropTransferHelper.createDynamicTypedArray(
-            staticBuffer as ArrayBuffer,
+            staticBuffer,
             2,
             length,
             byteOffset
@@ -154,22 +145,19 @@ export final class InteropTransferHelper {
         let length = dynamicESValue.getProperty("length").toNumber();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new Int16Array(staticBuffer, byteOffset, length) as Object;
+        return new Int16Array(staticBuffer, byteOffset, length);
     }
 
     public static transferInt16ArrayToDynamic(staticObject: Object): Any {
         let staticTypedArray = staticObject as Int16Array;
 
         let staticBuffer = staticTypedArray.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticTypedArray.byteOffset;
         let length = staticTypedArray.length;
 
         let dynamicTypedArray = InteropTransferHelper.createDynamicTypedArray(
-            staticBuffer as ArrayBuffer,
+            staticBuffer,
             3,
             length,
             byteOffset
@@ -188,22 +176,19 @@ export final class InteropTransferHelper {
         let length = dynamicESValue.getProperty("length").toNumber();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new Uint16Array(staticBuffer, byteOffset, length) as Object;
+        return new Uint16Array(staticBuffer, byteOffset, length);
     }
 
     public static transferUint16ArrayToDynamic(staticObject: Object): Any {
         let staticTypedArray = staticObject as Uint16Array;
 
         let staticBuffer = staticTypedArray.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticTypedArray.byteOffset;
         let length = staticTypedArray.length;
 
         let dynamicTypedArray = InteropTransferHelper.createDynamicTypedArray(
-            staticBuffer as ArrayBuffer,
+            staticBuffer,
             4,
             length,
             byteOffset
@@ -222,22 +207,19 @@ export final class InteropTransferHelper {
         let length = dynamicESValue.getProperty("length").toNumber();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new Int32Array(staticBuffer, byteOffset, length) as Object;
+        return new Int32Array(staticBuffer, byteOffset, length);
     }
 
     public static transferInt32ArrayToDynamic(staticObject: Object): Any {
         let staticTypedArray = staticObject as Int32Array;
 
         let staticBuffer = staticTypedArray.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticTypedArray.byteOffset;
         let length = staticTypedArray.length;
 
         let dynamicTypedArray = InteropTransferHelper.createDynamicTypedArray(
-            staticBuffer as ArrayBuffer,
+            staticBuffer,
             5,
             length,
             byteOffset
@@ -256,22 +238,19 @@ export final class InteropTransferHelper {
         let length = dynamicESValue.getProperty("length").toNumber();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new Uint32Array(staticBuffer, byteOffset, length) as Object;
+        return new Uint32Array(staticBuffer, byteOffset, length);
     }
 
     public static transferUint32ArrayToDynamic(staticObject: Object): Any {
         let staticTypedArray = staticObject as Uint32Array;
 
         let staticBuffer = staticTypedArray.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticTypedArray.byteOffset;
         let length = staticTypedArray.length;
 
         let dynamicTypedArray = InteropTransferHelper.createDynamicTypedArray(
-            staticBuffer as ArrayBuffer,
+            staticBuffer,
             6,
             length,
             byteOffset
@@ -290,22 +269,19 @@ export final class InteropTransferHelper {
         let length = dynamicESValue.getProperty("length").toNumber();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new Float32Array(staticBuffer, byteOffset, length) as Object;
+        return new Float32Array(staticBuffer, byteOffset, length);
     }
 
     public static transferFloat32ArrayToDynamic(staticObject: Object): Any {
         let staticTypedArray = staticObject as Float32Array;
 
         let staticBuffer = staticTypedArray.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticTypedArray.byteOffset;
         let length = staticTypedArray.length;
 
         let dynamicTypedArray = InteropTransferHelper.createDynamicTypedArray(
-            staticBuffer as ArrayBuffer,
+            staticBuffer,
             7,
             length,
             byteOffset
@@ -324,22 +300,19 @@ export final class InteropTransferHelper {
         let length = dynamicESValue.getProperty("length").toNumber();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new Float64Array(staticBuffer, byteOffset, length) as Object;
+        return new Float64Array(staticBuffer, byteOffset, length);
     }
 
     public static transferFloat64ArrayToDynamic(staticObject: Object): Any {
         let staticTypedArray = staticObject as Float64Array;
 
         let staticBuffer = staticTypedArray.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticTypedArray.byteOffset;
         let length = staticTypedArray.length;
 
         let dynamicTypedArray = InteropTransferHelper.createDynamicTypedArray(
-            staticBuffer as ArrayBuffer,
+            staticBuffer,
             8,
             length,
             byteOffset
@@ -358,22 +331,19 @@ export final class InteropTransferHelper {
         let length = dynamicESValue.getProperty("length").toNumber();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new BigInt64Array(staticBuffer, byteOffset, length) as Object;
+        return new BigInt64Array(staticBuffer, byteOffset, length);
     }
 
     public static transferBigInt64ArrayToDynamic(staticObject: Object): Any {
         let staticTypedArray = staticObject as BigInt64Array;
 
         let staticBuffer = staticTypedArray.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticTypedArray.byteOffset;
         let length = staticTypedArray.length;
 
         let dynamicTypedArray = InteropTransferHelper.createDynamicTypedArray(
-            staticBuffer as ArrayBuffer,
+            staticBuffer,
             9,
             length,
             byteOffset
@@ -392,22 +362,19 @@ export final class InteropTransferHelper {
         let length = dynamicESValue.getProperty("length").toNumber();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new BigUint64Array(staticBuffer, byteOffset, length) as Object;
+        return new BigUint64Array(staticBuffer, byteOffset, length);
     }
 
     public static transferBigUint64ArrayToDynamic(staticObject: Object): Any {
         let staticTypedArray = staticObject as BigUint64Array;
 
         let staticBuffer = staticTypedArray.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticTypedArray.byteOffset;
         let length = staticTypedArray.length;
 
         let dynamicTypedArray = InteropTransferHelper.createDynamicTypedArray(
-            staticBuffer as ArrayBuffer,
+            staticBuffer,
             10,
             length,
             byteOffset
@@ -426,21 +393,18 @@ export final class InteropTransferHelper {
         let byteLength = dynamicESValue.getProperty("byteLength").toNumber().toInt();
 
         let staticBuffer = InteropTransferHelper.transferArrayBufferToStaticImpl(dynamicBuffer);
-        return new DataView(staticBuffer, byteOffset, byteLength) as Object;
+        return new DataView(staticBuffer, byteOffset, byteLength);
     }
 
     public static transferDataViewToDynamic(staticObject: Object): Any {
         let staticDataView = staticObject as DataView;
 
         let staticBuffer = staticDataView.buffer;
-        if(staticBuffer instanceof ArrayBuffer == false) {
-            throw new Error("staticObject.buffer is not an instance of ArrayBuffer");
-        }
 
         let byteOffset = staticDataView.byteOffset;
         let byteLength = staticDataView.byteLength;
 
-        let dynamicDataView = InteropTransferHelper.createDynamicDataView(staticBuffer as ArrayBuffer, byteLength, byteOffset);
+        let dynamicDataView = InteropTransferHelper.createDynamicDataView(staticBuffer, byteLength, byteOffset);
         return dynamicDataView;
     }
 }

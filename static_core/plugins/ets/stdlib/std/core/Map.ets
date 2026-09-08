@@ -420,9 +420,6 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
         for (let i = 0; i < values.length; ++i) {
             let pair = values[i]
-            if (pair == null) {
-                continue
-            }
             // TODO #33602: replace with const enum
             this.set(pair[/*Map.ENTRY_KEY*/0], pair[/*Map.ENTRY_VAL*/1])
         }

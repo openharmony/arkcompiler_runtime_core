@@ -79,7 +79,7 @@ class WaitersList {
         let tail = this.tail_.exchange(undefined);
         while (tail != undefined) {
             let newHead = tail;
-            tail = tail!.next;
+            tail = tail.next;
             newHead.next = this.head_;
             this.head_ = newHead;
         }

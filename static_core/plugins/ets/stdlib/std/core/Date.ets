@@ -408,7 +408,7 @@ function ecmaDayFromYear(year: int): int {
  * @see ECMA-262, 21.4.1.3, DayFromYear
  */
 function ecmaTimeFromYear(year: int): long {
-    return msPerDay * ecmaDayFromYear(year) as long;
+    return msPerDay * ecmaDayFromYear(year)
 }
 
 /**

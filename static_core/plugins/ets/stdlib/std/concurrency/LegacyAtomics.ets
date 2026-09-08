@@ -56,10 +56,8 @@ export namespace Atomics {
             return buffer.atomicAddU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
             return buffer.atomicAddU16(index, byteOffset, value.toShort())
-        } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicAddU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Unhandled array type')
+            return buffer.atomicAddU32(index, byteOffset, value.toInt())
         }
     }
 
@@ -77,10 +75,8 @@ export namespace Atomics {
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicAddU64(index, byteOffset, value.getULong()))
-        } else if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicAddI64(index, byteOffset, value.getLong()))
         } else {
-            throw new Error('Unhandled array type')
+            return new BigInt(buffer.atomicAddI64(index, byteOffset, value.getLong()))
         }
     }
 
@@ -106,10 +102,8 @@ export namespace Atomics {
             return buffer.atomicAndU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
             return buffer.atomicAndU16(index, byteOffset, value.toShort())
-        } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicAndU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Unhandled array type')
+            return buffer.atomicAndU32(index, byteOffset, value.toInt())
         }
     }
 
@@ -127,10 +121,8 @@ export namespace Atomics {
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicAndU64(index, byteOffset, value.getULong()))
-        } else if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicAndI64(index, byteOffset, value.getLong()))
         } else {
-            throw new Error('Unhandled array type')
+            return new BigInt(buffer.atomicAndI64(index, byteOffset, value.getLong()))
         }
     }
 
@@ -159,10 +151,8 @@ export namespace Atomics {
             return buffer.atomicCompareExchangeU8(index, byteOffset, expectedValue.toByte(), replacementValue.toByte())
         } else if (typedArray instanceof Uint16Array) {
             return buffer.atomicCompareExchangeU16(index, byteOffset, expectedValue.toShort(), replacementValue.toShort())
-        } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicCompareExchangeU32(index, byteOffset, expectedValue.toInt(), replacementValue.toInt())
         } else {
-            throw new Error('Unhandled array type')
+            return buffer.atomicCompareExchangeU32(index, byteOffset, expectedValue.toInt(), replacementValue.toInt())
         }
     }
 
@@ -183,10 +173,8 @@ export namespace Atomics {
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigUint64Array) {
             return BigInt.fromULong(buffer.atomicCompareExchangeU64(index, byteOffset, expectedValue.getULong(), replacementValue.getULong()))
-        } else if (typedArray instanceof BigInt64Array) {
-            return new BigInt(buffer.atomicCompareExchangeI64(index, byteOffset, expectedValue.getLong(), replacementValue.getLong()))
         } else {
-            throw new Error('Unhandled array type')
+            return new BigInt(buffer.atomicCompareExchangeI64(index, byteOffset, expectedValue.getLong(), replacementValue.getLong()))
         }
     }
 
@@ -214,10 +202,8 @@ export namespace Atomics {
             return buffer.atomicExchangeU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
             return buffer.atomicExchangeU16(index, byteOffset, value.toShort())
-        } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicExchangeU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Unhandled array type')
+            return buffer.atomicExchangeU32(index, byteOffset, value.toInt())
         }
     }
 
@@ -236,10 +222,8 @@ export namespace Atomics {
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicExchangeI64(index, byteOffset, value.getLong()))
-        } else if (typedArray instanceof BigUint64Array) {
-            return BigInt.fromULong(buffer.atomicExchangeU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error('Unhandled array type')
+            return BigInt.fromULong(buffer.atomicExchangeU64(index, byteOffset, value.getULong()))
         }
     }
 
@@ -264,10 +248,8 @@ export namespace Atomics {
             return buffer.atomicLoadU8(index, byteOffset)
         } else if (typedArray instanceof Uint16Array) {
             return buffer.atomicLoadU16(index, byteOffset)
-        } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicLoadU32(index, byteOffset)
         } else {
-            throw new Error('Unhandled array type')
+            return buffer.atomicLoadU32(index, byteOffset)
         }
     }
 
@@ -321,10 +303,8 @@ export namespace Atomics {
             return buffer.atomicOrU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
             return buffer.atomicOrU16(index, byteOffset, value.toShort())
-        } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicOrU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Unhandled array type')
+            return buffer.atomicOrU32(index, byteOffset, value.toInt())
         }
     }
 
@@ -342,10 +322,8 @@ export namespace Atomics {
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicOrI64(index, byteOffset, value.getLong()))
-        } else if (typedArray instanceof BigUint64Array) {
-            return BigInt.fromULong(buffer.atomicOrU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error('Unhandled array type')
+            return BigInt.fromULong(buffer.atomicOrU64(index, byteOffset, value.getULong()))
         }
     }
 
@@ -371,10 +349,8 @@ export namespace Atomics {
             return buffer.atomicStoreU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
             return buffer.atomicStoreU16(index, byteOffset, value.toShort())
-        } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicStoreU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Unhandled array type')
+            return buffer.atomicStoreU32(index, byteOffset, value.toInt())
         }
     }
 
@@ -392,10 +368,8 @@ export namespace Atomics {
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicStoreI64(index, byteOffset, value.getLong()))
-        } else if (typedArray instanceof BigUint64Array) {
-            return BigInt.fromULong(buffer.atomicStoreU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error('Unhandled array type')
+            return BigInt.fromULong(buffer.atomicStoreU64(index, byteOffset, value.getULong()))
         }
     }
 
@@ -421,10 +395,8 @@ export namespace Atomics {
             return buffer.atomicSubU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
             return buffer.atomicSubU16(index, byteOffset, value.toShort())
-        } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicSubU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Unhandled array type')
+            return buffer.atomicSubU32(index, byteOffset, value.toInt())
         }
     }
 
@@ -442,10 +414,8 @@ export namespace Atomics {
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicSubI64(index, byteOffset, value.getLong()))
-        } else if (typedArray instanceof BigUint64Array) {
-            return BigInt.fromULong(buffer.atomicSubU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error('Unhandled array type')
+            return BigInt.fromULong(buffer.atomicSubU64(index, byteOffset, value.getULong()))
         }
     }
 
@@ -471,10 +441,8 @@ export namespace Atomics {
             return buffer.atomicXorU8(index, byteOffset, value.toByte())
         } else if (typedArray instanceof Uint16Array) {
             return buffer.atomicXorU16(index, byteOffset, value.toShort())
-        } else if (typedArray instanceof Uint32Array) {
-            return buffer.atomicXorU32(index, byteOffset, value.toInt())
         } else {
-            throw new Error('Unhandled array type')
+            return buffer.atomicXorU32(index, byteOffset, value.toInt())
         }
     }
 
@@ -492,10 +460,8 @@ export namespace Atomics {
         let byteOffset = typedArray.byteOffset.toInt()
         if (typedArray instanceof BigInt64Array) {
             return new BigInt(buffer.atomicXorI64(index, byteOffset, value.getLong()))
-        } else if (typedArray instanceof BigUint64Array) {
-            return BigInt.fromULong(buffer.atomicXorU64(index, byteOffset, value.getULong()))
         } else {
-            throw new Error('Unhandled array type')
+            return BigInt.fromULong(buffer.atomicXorU64(index, byteOffset, value.getULong()))
         }
     }
 
@@ -787,13 +753,11 @@ export namespace Atomics {
             if (index < 0 || index >= notUnionTypedArray.length) {
                 throw new RangeError("Index out of bounds")
             }
-        } else if (typedArray instanceof BigUint64Array) {
+        } else {
             let notUnionTypedArray = typedArray as BigUint64Array;
             if (index < 0 || index >= notUnionTypedArray.length) {
                 throw new RangeError("Index out of bounds")
             }
-        } else {
-            throw new Error("Unhandled array type");
         }
     }
 }

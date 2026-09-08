@@ -460,7 +460,7 @@ function startTimer(func: () => void, delayMs: int, repeat: boolean): int
 {
     const realDelayMs = delayMs;
     if (CoroutineExtras.isExternalTimerEnabled()) {
-        return startTimerImpl(func as Object, realDelayMs < 0 ? 0 : realDelayMs, repeat);
+        return startTimerImpl(func, realDelayMs < 0 ? 0 : realDelayMs, repeat);
     }
     return registerTimer(func, realDelayMs < 0 ? 0 : realDelayMs, repeat);
 }

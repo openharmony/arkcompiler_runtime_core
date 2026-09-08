@@ -62,7 +62,7 @@ export namespace containers.stackless {
             for (let iterRes = entriesIter.next(); !iterRes.done; iterRes = entriesIter.next()) {
                 const val = iterRes.value;
                 if (val !== undefined) {
-                    if (!this.add(val!)) {
+                    if (!this.add(val)) {
                         throw new RangeError("ArrayConcurrentQueue:: iterable exceeds capacity");
                     }
                 }

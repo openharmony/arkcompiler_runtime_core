@@ -49,9 +49,7 @@ export class ProcessErrorHandler {
      * @FaAndStageModel
      */
     public handleUncaughtError(error: Object): void {
-        if (error instanceof Error) {
-            error = error as Error;
-        } else {
+        if (!(error instanceof Error)) {
             console.error('Error type is not recognized:', error);
             let procManager = new StdProcess.ProcessManager();
             procManager.exit(1);

@@ -82,7 +82,7 @@ export final class Box<T> {
      * @FaAndStageModel
      */
     public set(value: T): T {
-        return (this.value = value) as T;
+        return (this.value = value)
     }
 }
 

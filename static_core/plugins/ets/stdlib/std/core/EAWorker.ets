@@ -344,11 +344,11 @@ export class EAWorker {
     }
 
     public static postToMain<R>(coroFun: Function, launchParams: LaunchParams, ...args: FixedArray<Any>) : Job<R> {
-        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<Any>, launchParams.abortFlag);
+        return EAWorker.postTaskToMain<R>(coroFun, args, launchParams.abortFlag);
     }
 
     public static postToMain<R>(coroFun: Function, ...args: FixedArray<Any>) : Job<R> {
-        return EAWorker.postTaskToMain<R>(coroFun, args as FixedArray<Any>, false);
+        return EAWorker.postTaskToMain<R>(coroFun, args, false);
     }
     /**
      * Post task to main worker

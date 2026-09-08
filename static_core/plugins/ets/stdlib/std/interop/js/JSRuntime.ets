@@ -54,7 +54,7 @@ export class MimicJSValueIteratableIterator implements IterableIterator<Any> {
 
 export final class DynamicFunction implements Function0<Any> {
     private invokeDynamic(...args: FixedArray<Any>): Any {
-        return JSRuntime.invokeDynamicFunction(this as Object, args);
+        return JSRuntime.invokeDynamicFunction(this, args);
     }
 
     get name(): string {

@@ -89,7 +89,7 @@ static_core/platforms/**/*.gn{i,}                        @sukhikhalexander
 static_core/platforms/**/*mem*                           ^dmitriitr @artemu ^ipetrov
 static_core/plugins/ets/abc2program	                     ^nazarovkonstantin @oatuwwutao @Graceunderpressure @xhq1999
 static_core/plugins/ets/disassembler                     ^nazarovkonstantin @oatuwwutao @Graceunderpressure @xhq1999
-static_core/plugins/ets/playground                       ^anton-sysoev ^Nojpg @cy917474985 @oatuwwutao ^ivan-tyulyandin ^magikarp777 ^templinkonstantin
+static_core/plugins/ets/playground                       ^anton-sysoev ^Nojpg @cy917474985 @oatuwwutao ^ivan-tyulyandin ^magikarp777
 static_core/plugins/ets/subproject_sources.gn            @sukhikhalexander @ipetrov
 static_core/runtime/arch/                                @Prof ^gitee-dakeQI @asidorov ^chernykhsergey @lizheng89
 static_core/runtime/asm_defines/BUILD.gn                 @sukhikhalexander
@@ -107,6 +107,7 @@ static_core/runtime/mem/                                 ^dmitriitr @artemu ^ipe
 static_core/runtime/profilesaver/                        @chernykhsergey @zhuheng27 @sherry2395 @wanzixuan330 @LeechyLiang
 static_core/runtime/profiling/                           @chernykhsergey @sherry2395 @wanzixuan330 @LeechyLiang
 static_core/runtime/tooling/                             @slynkodenis ^kurnevichstanislav
+static_core/scripts/check_stdlib/                        @Nojpg @magikarp777 @lijin1039
 static_core/scripts/clang-tidy/                          @igelhaus @nazarovkonstantin
 static_core/scripts/code_style/                          @igelhaus @nazarovkonstantin
 static_core/scripts/llvm/                                @urandon ^chernykhsergey @sukhikhalexander
@@ -156,8 +157,8 @@ static_core/plugins/ets/runtime/external_iface_table.h   ^dmitriitr ^konstanting
 static_core/plugins/ets/runtime/job_queue.h              @dmitriitr
 static_core/plugins/ets/runtime/main_worker_external_scheduler.cpp            ^dmitriitr ^konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/runtime/unhandled_manager        ^dmitriitr ^konstanting ^ychen3 ^tanglu100 @MofengMa ^weixin_41079876
-static_core/plugins/ets/sdk/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @lijin1039 ^templinkonstantin @zhengshubin2233 ^liyiming13
-static_core/plugins/ets/stdlib/                          ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @zhangmingqi @fly971205 @lijin1039 ^templinkonstantin ^chernykhsergey ^liyiming13
+static_core/plugins/ets/sdk/                             ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @lijin1039 @zhengshubin2233 ^liyiming13
+static_core/plugins/ets/stdlib/                          ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @zhangmingqi @fly971205 @lijin1039 ^chernykhsergey ^liyiming13
 static_core/plugins/ets/tests/ani                        @wanzixuan330 @v-cherkashin ^slynkodenis ^liyiming13 @zengmanyi @LeechyLiang
 static_core/plugins/ets/verification/                    ^igelhaus @oatuwwutao ^slynkodenis ^groshevmaksim @Graceunderpressure @xhq1999
 static_core/runtime/include/mem/                         ^dmitriitr @artemu ^gitee-dakeQI @lizheng89 ^shemetovphilip
@@ -235,7 +236,7 @@ static_core/plugins/ets/stdlib/std/core/GC.ets                                ^d
 static_core/plugins/ets/stdlib/std/core/Promise.ets                           ^dmitriitr ^konstanting ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/stdlib/std/core/Runtime.ets                           @vpukhov @igelhaus @Prof @chernykhsergey ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg @lijin1039
 static_core/plugins/ets/stdlib/std/core/RuntimeLinker.ets                     @vpukhov @slynkodenis @shilei123 ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg ^liyiming13 ^lijin1039
-static_core/plugins/ets/stdlib/std/core/WeakRef.ets                           ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg ^liyiming13 @lijin1039 ^templinkonstantin ^chernykhsergey @artemu ^ipetrov
+static_core/plugins/ets/stdlib/std/core/WeakRef.ets                           ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg ^liyiming13 @lijin1039 ^chernykhsergey @artemu ^ipetrov
 static_core/plugins/ets/tests/ets-common-tests/atomics/                       ^konstanting ^anton-sysoev @magikarp777 ^ivan-tyulyandin @Nojpg ^tanglu100 @MofengMa ^weixin_41079876
 static_core/plugins/ets/tests/ets-common-tests/gc/                              @artemu
 static_core/plugins/ets/tests/ets-common-tests/gc/*finalization*                @artemu ^shemetovphilip

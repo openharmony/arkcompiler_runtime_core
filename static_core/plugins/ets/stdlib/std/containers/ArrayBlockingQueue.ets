@@ -55,7 +55,7 @@ export namespace containers {
                 for (let iterRes = entriesIter.next(); !iterRes.done; iterRes = entriesIter.next()) {
                     const val = iterRes.value;
                     if (val !== undefined) {
-                        this.add(val as T);
+                        this.add(val)
                     }
                 }
             }

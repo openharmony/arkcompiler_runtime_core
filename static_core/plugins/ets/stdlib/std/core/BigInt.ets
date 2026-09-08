@@ -2026,10 +2026,9 @@ export final class BigInt {
             return new BigInt(value)
         } else if (value instanceof String) {
             return new BigInt(value)
-        } else if (value instanceof Boolean) {
+        } else {
             return new BigInt(value)
         }
-        return new BigInt(0)
     }
 
     private static fromDoubleInteger(d: double): BigInt {

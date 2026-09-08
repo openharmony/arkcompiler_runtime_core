@@ -443,8 +443,8 @@ export namespace taskpool {
         public static closingTask: Task = new Task("closingTask", (): void => {});
 
         constructor (supportInterop: boolean) {
-            super(((): void => {}) as Object, "taskpool", supportInterop, true);
-            this.setInitialTask((() => this.workerBody()) as Object);
+            super(((): void => {}), 'taskpool', supportInterop, true);
+            this.setInitialTask((() => this.workerBody()));
             initGlobalTaskQueues();
             this.needInterop = supportInterop;
             this.start();
@@ -488,15 +488,15 @@ export namespace taskpool {
 
                 let execResult: Any;
                 try {
-                    execResult = internalTask!.execute(this, queuedExecution.executionRecord!);
+                    execResult = internalTask.execute(this, queuedExecution.executionRecord);
                 } catch (e) {
-                    queuedExecution.executionRecord!.markTaskError(e as Error);
-                    internalTask!.finishExecutionRecord(queuedExecution.executionRecord!);
+                    queuedExecution.executionRecord!.markTaskError(e);
+                    internalTask.finishExecutionRecord(queuedExecution.executionRecord!);
                     execResult = Promise.reject(e);
                 }
 
                 const finalize = () => {
-                    internalTask!.notifyDependencies();
+                    internalTask.notifyDependencies();
                     this.endLocalExecution();
                     this.tryAdvanceRetireRequest();
                 };
@@ -1403,7 +1403,7 @@ export namespace taskpool {
                         executionSucceeded = true;
                         return value;
                     }).catch((e) => {
-                        this.handleTaskFailure(e as Error);
+                        this.handleTaskFailure(e);
                         throw e;
                     });
                 } else {
@@ -1411,8 +1411,8 @@ export namespace taskpool {
                     taskResult = result;
                 }
             } catch (e) {
-                this.handleTaskFailure(e as Error);
-                taskError = e as Error;
+                this.handleTaskFailure(e);
+                taskError = e;
             }
 
             // We cannot reliably calculate ioDuration in 1.2 due to possible coroutine switches.
@@ -1459,7 +1459,7 @@ export namespace taskpool {
                 executionRecord.markTaskResult(value);
                 return executionRecord.promise;
             }).catch((e) => {
-                executionRecord.markTaskError(e as Error);
+                executionRecord.markTaskError(e);
                 return executionRecord.promise;
             });
         }
@@ -1717,7 +1717,7 @@ export namespace taskpool {
                     this.runnerImpl.isRunning = false;
                 } else {
                     nextTask = this.runnerImpl.tasks.shift();
-                    while (nextTask !== undefined && InternalTask.of(nextTask!).state.load() == (State.CANCELED.valueOf())) {
+                    while (nextTask !== undefined && InternalTask.of(nextTask).state.load() == (State.CANCELED.valueOf())) {
                         const nextInternalTask = InternalTask.of(nextTask!);
                         const currentExecutionRecord = nextInternalTask.currentExecutionRecord;
                         if (currentExecutionRecord !== undefined) {
@@ -1929,7 +1929,7 @@ export namespace taskpool {
             let result: boolean = false;
             let currentTask = getCurrentTask();
             if (currentTask !== undefined) {
-                result = InternalTask.of(currentTask!).state.load() == (State.CANCELED.valueOf());
+                result = InternalTask.of(currentTask).state.load() == (State.CANCELED.valueOf());
             }
             return result;
         }
@@ -1942,7 +1942,7 @@ export namespace taskpool {
         static checkCancellation(): void {
             let task = getCurrentTask();
             if (task !== undefined) {
-                InternalTask.of(task!).checkCancellation();
+                InternalTask.of(task).checkCancellation();
             }
         }
 
@@ -2123,9 +2123,6 @@ export namespace taskpool {
             if (callback === undefined) {
                 internalTask.onReceiveListener.store(undefined);
                 return;
-            }
-            if (callback === null) {
-                throw new TypeError("the type of onReceiveData's parameter must be function.");
             }
             if (!(callback instanceof Function)) {
                 throw new TypeError("the type of onReceiveData's parameter must be function.");
@@ -2463,7 +2460,7 @@ export namespace taskpool {
                 SequenceRunner.namedRunners.set(name, impl);
             }
             ConcurrencyHelpers.mutexUnlock(SequenceRunner.mutex);
-            return impl!;
+            return impl;
         }
 
         private checkExecution(task: Task) {
@@ -2520,7 +2517,7 @@ export namespace taskpool {
                     let nextTask = this.waitingQueue.shift();
                     if (nextTask == undefined) break;
                     if (InternalTask.of(nextTask).state.load() == State.CANCELED.valueOf()) {
-                        const canceledInternalTask = InternalTask.of(nextTask!);
+                        const canceledInternalTask = InternalTask.of(nextTask);
                         const canceledRecord = canceledInternalTask.currentExecutionRecord;
                         if (canceledRecord !== undefined) {
                             canceledRecord.markCanceled();
@@ -2584,7 +2581,7 @@ export namespace taskpool {
          */
         constructor(name: string | undefined, runningCapacity: int, waitingCapacity?: int) {
             const rcap: int = runningCapacity;
-            if (runningCapacity == undefined || runningCapacity <= 0) {
+            if (runningCapacity <= 0) {
                 throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_PARAM, "taskpool:: runningCapacity must be a positive number");
             }
             const wcap: int = waitingCapacity == undefined ? 0 : waitingCapacity;
@@ -2646,7 +2643,7 @@ export namespace taskpool {
                             // the waiting queue exceeds capacity, discard the head task.
                             const head = this.impl.waitingQueue.shift();
                             if (head != undefined) {
-                                const headInternalTask = InternalTask.of(head!);
+                                const headInternalTask = InternalTask.of(head);
                                 const currentExecutionRecord = headInternalTask.currentExecutionRecord;
                                 if (currentExecutionRecord !== undefined) {
                                     currentExecutionRecord.markCanceled();
@@ -2693,7 +2690,7 @@ export namespace taskpool {
                 AsyncRunner.namedRunners.set(name, impl);
             }
             ConcurrencyHelpers.mutexUnlock(AsyncRunner.mutex);
-            return impl!;
+            return impl;
         }
 
         private checkExecution(task: Task) {
@@ -3350,7 +3347,7 @@ export namespace taskpool {
             workers.forEach(worker=>{
                 const threadInfo: ThreadInfo = new ThreadInfo();
                 threadInfo.tid = worker.workerId;
-                threadInfo.priority = worker!.currentPriority;
+                threadInfo.priority = worker.currentPriority;
                 ConcurrencyHelpers.lockGuard(worker.currentTasksMutex, () => {
                     const tasksCount = worker.currentTasks.size.toInt();
                     if (tasksCount == 0) {
@@ -3429,13 +3426,13 @@ export namespace taskpool {
         }
 
         if (task !== undefined) {
-            let internalTask = InternalTask.of(task!);
+            let internalTask = InternalTask.of(task);
             if (internalTask.creatorWorkerId != currentWorkerId) {
                 return undefined;
             }
         }
 
-        if (taskName !== undefined && task !== undefined && task!.name != taskName) {
+        if (taskName !== undefined && task !== undefined && task.name != taskName) {
             return undefined;
         }
         return task;
@@ -3728,9 +3725,9 @@ export namespace taskpool {
             if (managerWorker === undefined) {
                 // Create managerWorker, and start to trigger shrink.
                 managerWorker = new GlobalQueueWorker();
-                managerWorker!.retriggerShrink();
+                managerWorker.retriggerShrink();
                 // Start blocked-worker expansion monitor separately from shrink logic.
-                managerWorker!.retriggerBlockedExpandMonitor();
+                managerWorker.retriggerBlockedExpandMonitor();
             }
 
             for (let i = 0; i < initialWorkersNumber; ++i) {
@@ -4059,7 +4056,7 @@ export namespace taskpool {
             try {
                 internalTask.execute(undefined, executionRecord);
             } catch (e) {
-                executionRecord.markTaskError(e as Error);
+                executionRecord.markTaskError(e);
                 internalTask.finishExecutionRecord(executionRecord);
             }
         });
@@ -4084,7 +4081,7 @@ export namespace taskpool {
                 resolve(res);
             } catch(e) {
                 // NOTE(csaba.osztrogonac): remove as cast once e has Error type
-                reject(e as Error);
+                reject(e);
             }
         });
         return promise;

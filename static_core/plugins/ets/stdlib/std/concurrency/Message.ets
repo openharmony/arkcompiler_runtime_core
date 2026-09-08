@@ -132,10 +132,7 @@ export namespace concurrency {
             if (this.callback != undefined) {
                 return this.callback == other.getCallback();
             }
-            if (this.what != undefined) {
-                return this.what == other.getWhat() && this.obj === other.getObject();
-            }
-            return false;
+            return this.what == other.getWhat() && this.obj === other.getObject();
         }
     }
 }

@@ -76,7 +76,7 @@ export interface FunctionN<R> extends Function {
 
 export abstract class LambdaN implements FunctionN<Any> {
     get name(): string {
-        return getFunctionObjectNameFromAnnotation(this as Object);
+        return getFunctionObjectNameFromAnnotation(this);
     }
 }
 
@@ -132,7 +132,7 @@ export abstract class LambdaR{{narg}}{{typeParamsDeclList(narg, True)}}
             ...Runtime.addFrontElementsStub(r, [{{listArgs(narg, extNarg)}}]))
     }
 {%- endfor %}
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 export abstract class Lambda{{narg}}{{typeParamsDeclList(narg, False)}}
     implements Function{{narg}}{{typeParamsList(narg, None)}} {
@@ -151,6 +151,6 @@ export abstract class Lambda{{narg}}{{typeParamsDeclList(narg, False)}}
         return this.{{invokeName(narg, "")}}({{listArgs(0, narg)}})
     }
 {%- endfor %}
-    get name(): string { return getFunctionObjectNameFromAnnotation(this as Object) }
+    get name(): string { return getFunctionObjectNameFromAnnotation(this) }
 }
 {% endfor %}

@@ -280,11 +280,11 @@ export function decodeURIComponent(uriComponent: string): string {
  */
 export function encodeURIComponent(uriComponent: String | Number | Boolean): string {
     if (uriComponent instanceof String) {
-        return encodeURIImpl(uriComponent as String, uriArrayComponent);
+        return encodeURIImpl(uriComponent, uriArrayComponent);
     } else if (uriComponent instanceof Number) {
-        return encodeURIImpl((uriComponent as Number).toString(), uriArrayComponent)
+        return encodeURIImpl(uriComponent.toString(), uriArrayComponent)
     } else {
-        return encodeURIImpl((uriComponent as Boolean).toString(), uriArrayComponent)
+        return encodeURIImpl(uriComponent.toString(), uriArrayComponent)
     }
 }
 

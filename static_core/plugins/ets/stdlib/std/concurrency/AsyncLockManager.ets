@@ -37,13 +37,13 @@ class AsyncLockManager {
         ConcurrencyHelpers.mutexLock(this.mutex);
         let lck = this.locks.get(name);
         if (lck != undefined) {
-            lock = lck!.deref();
+            lock = lck.deref();
         }
         if (lock == undefined) {
-            lock = (new AsyncLockHelper(name)) as AsyncLock;
+            lock = new AsyncLockHelper(name)
         }
         ConcurrencyHelpers.mutexUnlock(this.mutex);
-        return lock!;
+        return lock
 
     }
 
@@ -63,10 +63,10 @@ class AsyncLockManager {
             if (name.includes('__AnonymousLockName__')) {
                 throw new Error('AsyncLock:: Anonymous lock cannot be queried');
             }
-            if (lock!.deref() == undefined) {
-                throw new Error('AsyncLock:: Lock is in invalid state');
+            if (lock.deref() == undefined) {
+                throw new Error('AsyncLock:: Lock is in invalid state')
             }
-            return lock!.deref()!.query();
+            return lock.deref()!.query()
         }
         finally {
             ConcurrencyHelpers.mutexUnlock(this.mutex);
