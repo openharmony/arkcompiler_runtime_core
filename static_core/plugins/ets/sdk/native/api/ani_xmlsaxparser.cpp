@@ -284,10 +284,10 @@ bool XmlSAXParserHelper::StartWorkerIfNeeded(ani_env *env)
 
     AcquireSelf();
     if (arkts::concurrency_helpers::QueueAsyncWork(env, asyncWork_) != arkts::concurrency_helpers::WorkStatus::OK) {
-        Release();
         arkts::concurrency_helpers::DeleteAsyncWork(env, asyncWork_);
         asyncWork_ = nullptr;
         SetFatalError("Failed to queue SAX parser async worker");
+        Release();
         return false;
     }
 
@@ -439,8 +439,8 @@ bool XmlSAXParserHelper::TryScheduleCallbackDispatch(ani_env *env)
     if (status != arkts::concurrency_helpers::WorkStatus::OK) {
         // Atomic with release order reason: reset flag on SendEvent failure
         dispatchPending_.store(false, std::memory_order_release);
-        Release();
         SetFatalError("Failed to dispatch SAX callbacks to the main worker");
+        Release();
         return false;
     }
     return true;
@@ -474,8 +474,8 @@ bool XmlSAXParserHelper::TryScheduleParseResultDispatch(ani_env *env)
     if (status != arkts::concurrency_helpers::WorkStatus::OK) {
         // Atomic with release order reason: reset flag on SendEvent failure
         parseResultDispatchPending_.store(false, std::memory_order_release);
-        Release();
         SetFatalError("Failed to dispatch SAX parse result to the main worker");
+        Release();
         return false;
     }
     return true;
