@@ -182,24 +182,14 @@ ani_object IcuGetPluralCategories(ani_env *env, [[maybe_unused]] ani_class klass
     }
 
     std::vector<std::string> categories;
-
-    auto category = enumCategories->snext(status);
+    while (const auto *category = enumCategories->snext(status)) {
+        categories.emplace_back();
+        category->toUTF8String(categories.back());
+    }
     if (UNLIKELY(U_FAILURE(status))) {
         ThrowRangeError(env, "Failed to iterate plural category: ", u_errorName(status));
         return nullptr;
     }
-    while (category != nullptr) {
-        std::string str;
-        category->toUTF8String(str);
-        categories.push_back(str);
-
-        category = enumCategories->snext(status);
-        if (UNLIKELY(U_FAILURE(status))) {
-            ThrowRangeError(env, "Failed to iterate plural category: ", u_errorName(status));
-            return nullptr;
-        }
-    }
-
     if (UNLIKELY(categories.empty())) {
         ThrowRangeError(env, "No plural categories found");
         return nullptr;
