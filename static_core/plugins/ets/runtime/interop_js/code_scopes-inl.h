@@ -30,7 +30,9 @@ inline bool OpenInteropCodeScope(EtsExecutionContext *executionCtx, char const *
 
     auto *ctx = InteropCtx::Current(executionCtx);
     if constexpr (ETS_TO_JS) {
-        ctx->UpdateInteropStackInfoIfNeeded();
+        if (UNLIKELY(!ctx->PushAndUpdateInteropStackInfoIfNeeded(executionCtx))) {
+            return false;
+        }
     }
 
     if (ctx->GetInteropHybridStackEnabled()) {

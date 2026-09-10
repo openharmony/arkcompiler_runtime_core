@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,12 @@
  */
 
 #include <array>
+#include <new>
 #include <vector>
 #include <iostream>
 #include <node_api.h>
+#include <uv.h>
+#include "napi/native_node_hybrid_api.h"
 #include "interop_test_helper.h"
 #include "native_engine/native_engine.h"
 
@@ -24,6 +27,147 @@ namespace ark::ets::interop::js::helper {
 
 static constexpr const char *MODULE_PREFIX = "[INTEROP_TEST_HELPER] ";
 static constexpr const char *CONCATENATED_ARGV_ENV_VAR = "CONCATENATED_ARGV_ENV_VAR";
+
+// Owns one JS callback that is intentionally dispatched in a later libuv event-loop turn.
+struct EventLoopCallbackData {
+    napi_env env;
+    napi_ref callback;
+    // The boundary active before the Promise is completed from a stackful coroutine.
+    NapiStackInfo expectedStackInfo;
+    uv_async_t async;
+};
+
+static std::vector<napi_value> GetArgs(napi_env env, napi_callback_info info);
+
+[[noreturn]] static void AbortOnEventLoopCallbackError(const char *message, napi_status status)
+{
+    std::cerr << MODULE_PREFIX << message << ", status = " << status << std::endl;
+    std::abort();
+}
+
+static void CloseEventLoopCallback(uv_handle_t *handle)
+{
+    auto *data = reinterpret_cast<EventLoopCallbackData *>(handle->data);
+    if (napi_delete_reference(data->env, data->callback) != napi_ok) {
+        AbortOnEventLoopCallbackError("Failed to delete event-loop callback reference", napi_generic_failure);
+    }
+    delete data;
+}
+
+static void RunEventLoopCallback(uv_async_t *async)
+{
+    auto *data = reinterpret_cast<EventLoopCallbackData *>(async->data);
+    napi_value callback = nullptr;
+    auto status = napi_get_reference_value(data->env, data->callback, &callback);
+    if (status != napi_ok) {
+        AbortOnEventLoopCallbackError("Failed to get event-loop callback", status);
+    }
+
+    napi_value undefined = nullptr;
+    status = napi_get_undefined(data->env, &undefined);
+    if (status != napi_ok) {
+        AbortOnEventLoopCallbackError("Failed to get undefined", status);
+    }
+
+    // Promise reactions can run while napi_resolve_deferred() is still on the coroutine stack.
+    // This later libuv callback observes the stack info left after the ETS-to-JS scope has closed.
+    NapiStackInfo currentStackInfo {};
+    status = napi_get_stackinfo(data->env, &currentStackInfo);
+    if (status != napi_ok) {
+        AbortOnEventLoopCallbackError("Failed to get current stack info", status);
+    }
+    bool stackInfoRestored = currentStackInfo.stackStart == data->expectedStackInfo.stackStart &&
+                             currentStackInfo.stackSize == data->expectedStackInfo.stackSize;
+
+    napi_value callbackArg = nullptr;
+    status = napi_get_boolean(data->env, stackInfoRestored, &callbackArg);
+    if (status != napi_ok) {
+        AbortOnEventLoopCallbackError("Failed to create stack-info callback argument", status);
+    }
+
+    status = napi_call_function(data->env, undefined, callback, 1U, &callbackArg, nullptr);
+    if (status != napi_ok) {
+        AbortOnEventLoopCallbackError("Failed to call event-loop callback", status);
+    }
+
+    uv_close(reinterpret_cast<uv_handle_t *>(async), CloseEventLoopCallback);
+}
+
+static napi_value TriggerEventLoopCallback(napi_env env, napi_callback_info info)
+{
+    void *callbackData = nullptr;
+    if (napi_get_cb_info(env, info, nullptr, nullptr, nullptr, &callbackData) != napi_ok) {
+        AbortOnEventLoopCallbackError("Failed to get event-loop trigger data", napi_generic_failure);
+    }
+
+    auto *data = reinterpret_cast<EventLoopCallbackData *>(callbackData);
+    auto status = uv_async_send(&data->async);
+    if (status != 0) {
+        std::cerr << MODULE_PREFIX << "Failed to trigger event-loop callback, status = " << status << std::endl;
+        std::abort();
+    }
+
+    napi_value undefined = nullptr;
+    if (napi_get_undefined(env, &undefined) != napi_ok) {
+        AbortOnEventLoopCallbackError("Failed to get trigger result", napi_generic_failure);
+    }
+    return undefined;
+}
+
+static napi_value CreateEventLoopCallbackTrigger(napi_env env, napi_callback_info info)
+{
+    auto args = GetArgs(env, info);
+    napi_valuetype callbackType;
+    if (args.size() != 1 || napi_typeof(env, args[0], &callbackType) != napi_ok || callbackType != napi_function) {
+        napi_throw_type_error(env, nullptr, "A callback function is required");
+        return nullptr;
+    }
+
+    auto *data = new (std::nothrow) EventLoopCallbackData {env, nullptr, {}, {}};
+    if (data == nullptr) {
+        napi_throw_error(env, nullptr, "Failed to allocate event-loop callback data");
+        return nullptr;
+    }
+
+    auto status = napi_get_stackinfo(env, &data->expectedStackInfo);
+    if (status != napi_ok) {
+        delete data;
+        AbortOnEventLoopCallbackError("Failed to get initial stack info", status);
+    }
+
+    status = napi_create_reference(env, args[0], 1, &data->callback);
+    if (status != napi_ok) {
+        delete data;
+        AbortOnEventLoopCallbackError("Failed to create event-loop callback reference", status);
+    }
+
+    uv_loop_t *loop = nullptr;
+    status = napi_get_uv_event_loop(env, &loop);
+    if (status != napi_ok) {
+        napi_delete_reference(env, data->callback);
+        delete data;
+        AbortOnEventLoopCallbackError("Failed to get event loop", status);
+    }
+
+    // An active uv_async_t keeps the loop alive until the Promise reaction triggers this callback.
+    auto uvStatus = uv_async_init(loop, &data->async, RunEventLoopCallback);
+    if (uvStatus != 0) {
+        napi_delete_reference(env, data->callback);
+        delete data;
+        std::cerr << MODULE_PREFIX << "Failed to initialize event-loop callback, status = " << uvStatus << std::endl;
+        std::abort();
+    }
+    data->async.data = data;
+
+    napi_value trigger = nullptr;
+    status = napi_create_function(env, "triggerEventLoopCallback", NAPI_AUTO_LENGTH, TriggerEventLoopCallback, data,
+                                  &trigger);
+    if (status != napi_ok) {
+        uv_close(reinterpret_cast<uv_handle_t *>(&data->async), CloseEventLoopCallback);
+        AbortOnEventLoopCallbackError("Failed to create event-loop trigger", status);
+    }
+    return trigger;
+}
 
 bool RunAbcFileOnArkJSVM(napi_env env, const std::string_view path, std::string_view testName)
 {
@@ -173,6 +317,8 @@ static napi_value Init(napi_env env, napi_value exports)
     const std::array desc = {
         napi_property_descriptor {"getEnvironmentVar", 0, GetEnvironmentVar, 0, 0, 0, napi_enumerable, 0},
         napi_property_descriptor {"getArgv", 0, GetArgv, 0, 0, 0, napi_enumerable, 0},
+        napi_property_descriptor {"createEventLoopCallbackTrigger", 0, CreateEventLoopCallbackTrigger, 0, 0, 0,
+                                  napi_enumerable, 0},
     };
 
     if (napi_define_properties(env, exports, desc.size(), desc.data()) != napi_ok) {

@@ -632,6 +632,11 @@ void StackfulCoroutineWorker::MigrateCoroutinesImpl(StackfulCoroutineWorker *to,
             if ((*begin)->GetType() != Coroutine::Type::MUTATOR) {
                 continue;
             }
+            if ((*begin)->IsContextSwitchRisky()) {
+                LOG(DEBUG, COROUTINES) << "Skip migration of coroutine with active interop scope "
+                                       << (*begin)->GetCoroutineId();
+                continue;
+            }
             auto mask = (*begin)->GetJob()->GetAffinityMask();
             if (mask.IsWorkerAllowed(to->GetId())) {
                 LOG(DEBUG, COROUTINES) << "migrate coro " << (*begin)->GetCoroutineId() << " from " << GetId() << " to "

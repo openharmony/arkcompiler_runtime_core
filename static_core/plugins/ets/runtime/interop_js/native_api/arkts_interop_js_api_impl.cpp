@@ -26,6 +26,7 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/js_value.h"
+#include "plugins/ets/runtime/interop_js/logger.h"
 
 namespace ark::ets::interop::js {
 
@@ -157,7 +158,19 @@ PANDA_PUBLIC_API bool OpenETSToJSScope(EtsExecutionContext *executionCtx, char c
 
 PANDA_PUBLIC_API bool CloseETSToJSScope(EtsExecutionContext *executionCtx)
 {
-    return CloseInteropCodeScope<false>(executionCtx);
+    if (UNLIKELY(!CloseInteropCodeScope<false>(executionCtx))) {
+        return false;
+    }
+    auto *ctx = InteropCtx::Current(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
+        return false;
+    }
+    if (UNLIKELY(!ctx->RestoreInteropStackInfoIfNeeded(executionCtx))) {
+        INTEROP_LOG(ERROR) << "Failed to restore interop stack info after closing ETS-to-JS scope, executionCtx="
+                           << executionCtx << ", env=" << ctx->GetJSEnv();
+        return false;
+    }
+    return true;
 }
 
 static bool ConvertNativeReferences(EtsExecutionContext *executionCtx, InteropCtx *ctx, Span<napi_value> values,
@@ -198,12 +211,9 @@ static bool CloseJsScopeImpl(napi_env env, Span<napi_value> values, Span<ani_ref
         return false;
     }
 
-    if (!values.empty()) {
-        if (UNLIKELY(!ConvertNativeReferences(executionCtx, ctx, values, results))) {
-            return false;
-        }
-    }
-    return CloseETSToJSScope(executionCtx);
+    bool converted = values.empty() || ConvertNativeReferences(executionCtx, ctx, values, results);
+    bool closed = CloseETSToJSScope(executionCtx);
+    return converted && closed;
 }
 
 PANDA_PUBLIC_API bool CloseETSToJSScope(napi_env env, size_t nValues, napi_value *values, ani_ref *result)
