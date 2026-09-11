@@ -1,0 +1,34 @@
+{
+    "compilerOptions": {
+        "package": "entry",
+        "baseUrl": "../../..",
+        "cacheDir": "${WORK_DIR}/${SUITE_NAME}/gen/ets-common-tests/relative_path/build/cache",
+        "declgenV2OutPath": "../../../../build/declgenV2",
+        "paths": {
+            "pkgA": [
+                "../oh_modules/pkgA"
+            ],
+            "pkgA/Index": [
+                "../oh_modules/pkgA/Index.d.ets"
+            ],
+            "@test/pkgB": [
+                "../oh_modules/@test/pkgB"
+            ],
+            "@test/pkgB/Index": [
+                "../oh_modules/@test/pkgB/Index.d.ets"
+            ]
+        },
+        "dependencies": {
+            "pkgA/src/main/pkgADynamic": {
+                "language": "js",
+                "path": "../build/declgenV2/pkgA/src/main/pkgADynamic.d.ets",
+                "ohmUrl": "pkgA/src/main/pkgADynamic"
+            },
+            "@test/pkgB/src/main/scopedPkgBDynamic": {
+                "language": "js",
+                "path": "../build/declgenV2/@test/pkgB/src/main/scopedPkgBDynamic.d.ets",
+                "ohmUrl": "@test/pkgB/src/main/scopedPkgBDynamic"
+            }
+        }
+    }
+}

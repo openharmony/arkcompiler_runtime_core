@@ -39,7 +39,12 @@ parameters:
     work-dir: ${WORK_DIR}/${suite-name}
 
 collections:
-    ets-common-tests: |-
+    ets-common-tests:
+        exclude:
+            - relative_path
+    ets-common-tests/relative_path:
+        generator-class: runner.extensions.generators.ets_cts.ets_templates_generator.EtsTemplatesGenerator
+    ets-common-tests/relative_path/build/cache: |-
     ets-common-tests/atomics:
         parameters:
             ark-test-suite-args:

@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "cacheDir": "${WORK_DIR}/${SUITE_NAME}/gen/ets-common-tests/relative_path/build/cache",
+        "paths": {
+            "cacheDedup/shared": [
+                "./shared.ets"
+            ],
+            "cacheDedup/left": [
+                "./left.d.ets"
+            ],
+            "cacheDedup/right": [
+                "./right.d.ets"
+            ]
+        },
+        "rootDir": "${WORK_DIR}/${SUITE_NAME}/gen/ets-common-tests/relative_path/replaced_cache"
+    },
+    "files": [
+        "./main.ets",
+        "./shared.ets"
+    ]
+}

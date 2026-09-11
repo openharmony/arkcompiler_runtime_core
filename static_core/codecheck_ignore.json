@@ -110,6 +110,7 @@
   "plugins/ets/tests/ets-common-tests/re_export": "*",
   "plugins/ets/tests/ets-common-tests/re_export_with_alias": "*",
   "plugins/ets/tests/ets-common-tests/recursive_import": "*",
+  "plugins/ets/tests/ets-common-tests/relative_path": "*",
   "plugins/ets/tests/ets-common-tests/runtime_types": "*",
   "plugins/ets/tests/ets-common-tests/selective_export_with_alias": "*",
   "plugins/ets/tests/ets-common-tests/selective_re-export": "*",
