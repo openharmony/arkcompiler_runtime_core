@@ -14,20 +14,23 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
-tags: [compile-only, negative]
-expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+desc: Methods declared in an exported interface have explicit return types.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
-    }
+'use static'
+
+// 导出接口的方法有显式返回类型，应编译成功
+export interface Shape {
+    area(): double
+    perimeter(): double
+}
+
+class ShapeImpl implements Shape {
+    area(): double { return 6.0 }
+    perimeter(): double { return 10.0 }
 }
 
 function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
+    let shape = new ShapeImpl()
+    arktest.assertEQ(shape.area() + shape.perimeter(), 16.0)
 }

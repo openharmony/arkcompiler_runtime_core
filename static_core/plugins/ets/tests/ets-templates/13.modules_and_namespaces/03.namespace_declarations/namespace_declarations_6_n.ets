@@ -15,26 +15,26 @@
 
 /*---
 desc: CTE - there is no function 'sayHello' for local MyClass obj
-tags: [negative, compile-only]
+tags: [compile-only, negative]
 files:
     - ./namespace_storage.ets
 expected_out: |-
-    Semantic error ESE0087: Property 'sayHello' does not exist on type 'myClass'
+    Semantic error ESE0087: Property 'sayHello' does not exist on type 'MyClass'
 ---*/
 
-import {NS2 as NS2} from "./namespace_storage"
+import { NS2 as NS2 } from './namespace_storage'
 
-class myClass {
-    public message: string = "Hello from Class"
-    public constructor(newMessage : string) {
+class MyClass {
+    public message: string = 'Hello from Class'
+    public constructor(newMessage: string) {
         this.message = newMessage
     }
     public sayHelloLocal() {
-        return "Hello from Class"
+        return 'Hello from Class'
     }
 }
 
 function main() {
-    let NS2: myClass = new myClass("New message")
-    arktest.assertEQ(NS2.sayHello(), "Test should fail")
+    let ns2: MyClass = new MyClass('New message')
+    arktest.assertEQ(ns2.sayHello(), 'Test should fail')
 }

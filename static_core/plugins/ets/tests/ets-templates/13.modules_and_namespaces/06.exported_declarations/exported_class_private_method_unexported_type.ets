@@ -14,20 +14,19 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
-tags: [compile-only, negative]
-expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+desc: Private methods may use non-exported types in an exported class.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
-    }
+'use static'
+
+// 20. 私有方法使用未导出类型，不报错
+class B {}
+export class C {
+  private foo(): B {
+    return new B()
+  }
 }
 
 function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
+    arktest.assertTrue(new C() instanceof C)
 }

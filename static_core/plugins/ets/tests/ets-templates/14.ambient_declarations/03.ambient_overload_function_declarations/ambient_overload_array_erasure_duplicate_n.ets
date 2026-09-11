@@ -14,20 +14,14 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
+desc: Rejects ambient overloads with duplicate erased signatures.
 tags: [compile-only, negative]
 expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+    Semantic error ESE0131: Function overloadFail024Value with this assembly signature already declared.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
-    }
-}
+'use static'
 
-function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
-}
+export declare function overloadFail024Value(p: Array<string>): string
+
+export declare function overloadFail024Value(p: Array<int>): int

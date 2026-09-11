@@ -14,20 +14,24 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
-tags: [compile-only, negative]
-expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+desc: Exported type aliases may resolve to an exported interface.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
+'use static'
+
+// 类型别名指向已导出的接口，应编译成功
+export interface Shape {
+    area(): double
+}
+export type MyShape = Shape
+
+class ShapeImpl implements MyShape {
+    area(): double {
+        return 6.0
     }
 }
 
 function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
+    let shape: MyShape = new ShapeImpl()
+    arktest.assertEQ(shape.area(), 6.0)
 }

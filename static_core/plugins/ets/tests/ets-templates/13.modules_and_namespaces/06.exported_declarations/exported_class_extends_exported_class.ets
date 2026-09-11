@@ -14,20 +14,21 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
-tags: [compile-only, negative]
-expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+desc: An exported class may extend another exported class.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
+'use static'
+
+// 导出类继承自另一个导出类，应编译成功
+export class Base {
+  public value: int = 0
+}
+export class Derived extends Base {
+    getValue(): int {
+        return this.value
     }
 }
 
 function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
+    arktest.assertEQ(new Derived().getValue(), 0)
 }

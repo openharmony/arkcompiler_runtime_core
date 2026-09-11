@@ -14,20 +14,21 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
-tags: [compile-only, negative]
-expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+desc: Exported type aliases may resolve to builtin ArkTS types.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
-    }
-}
+'use static'
+
+// 类型别名指向内置类型，应编译成功（内置类型总是可用的）
+export type MyNumber = double
+export type MyString = string
+export type MyIntArray = int[]
 
 function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
+    let numberValue: MyNumber = 1.0
+    let stringValue: MyString = 'ArkTS'
+    let arrayValue: MyIntArray = [1, 2]
+    arktest.assertEQ(numberValue, 1.0)
+    arktest.assertEQ(stringValue, 'ArkTS')
+    arktest.assertEQ(arrayValue.length, 2)
 }

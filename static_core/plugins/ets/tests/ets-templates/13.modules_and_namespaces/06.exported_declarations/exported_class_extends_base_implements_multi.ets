@@ -14,20 +14,32 @@
  */
 
 /*---
-desc: ES2PANDA_FAIL TypeError 'returnConst' is not exported in 'MyNamespace'
-tags: [compile-only, negative]
-expected_out: |-
-    Semantic error ESE71336: Exported class property 'nsConstValue' requires type annotation.
-    Semantic error ESE0206: 'returnConst' is not exported in 'MyNamespace'
+desc: An exported class may extend an exported base and implement multiple exported interfaces.
 ---*/
 
-namespace MyNamespace {
-    export const nsConstValue = 53;
-    function returnConst() {
-        return MyNamespace.nsConstValue
+'use static'
+
+// 导出类继承导出基类并实现多个导出接口，应编译成功
+export class Base {
+  public id: int = 0
+}
+export interface Serializable {
+    serialize(): string
+}
+export interface Identifiable {
+    getId(): int
+}
+export class Entity extends Base implements Serializable, Identifiable {
+    serialize(): string {
+        return 'Entity:' + this.id
+    }
+    getId(): int {
+        return this.id
     }
 }
 
 function main() {
-    arktest.assertEQ(MyNamespace.returnConst(), 53)
+    let entity = new Entity()
+    arktest.assertEQ(entity.getId(), 0)
+    arktest.assertEQ(entity.serialize(), 'Entity:0')
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,24 +14,21 @@
  */
 
 /*---
-desc: >-
-    Transit namespace usage. TypeError Namespace 'Transit1' is already defined.
-    TypeError Property 'foo' does not exist on type 'Transit1'
-files:
-    - ./namespace_storage.ets
+desc: Rejects an exported declaration that exposes a non-exported type.
 tags: [compile-only, negative]
 expected_out: |-
-    Semantic error ESE0349: Namespace 'Transit1' is already defined.
-    Semantic error ESE0087: Property 'foo' does not exist on type 'Transit1'
+    Semantic error ESE1236581: Type 'Parent' used in export declaration(s) is not exported.
 ---*/
 
-import { Transit as Transit1 } from './namespace_storage'
+'use static'
 
-export namespace Transit1.B {
-    export let variable1: int = 1;
+// 中间类未导出导致导出类间接继承未导出类，应产生编译错误
+export class GrandParent {
+    public a: int = 1
 }
-
-function main() {
-    arktest.assertEQ(Transit1.B.variable1, 1)
-    arktest.assertEQ(Transit1.foo(), 'A foo')
+class Parent extends GrandParent {  // 隐式导出？不，没有 export，编译错误发生在下面的 Child
+  public b: int = 2
+}
+export class Child extends Parent {  // FAIL: Parent is not exported
+  public c: int = 3
 }
