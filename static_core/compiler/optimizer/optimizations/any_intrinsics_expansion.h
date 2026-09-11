@@ -67,10 +67,15 @@ public:
 private:
     void HandleAnyLdbyname(IntrinsicInst *inst);
     void HandleAnyStbyname(IntrinsicInst *inst);
+    void HandleAnyCallThis(IntrinsicInst *inst);
 
     Inst *CreateLoadClassWithGuard(Inst *inst, Inst *objInst, RuntimeInterface::ClassPtr cls);
-    Inst *BoxValue(Inst *inst, Inst *val);
+    Inst *BoxValue(Inst *inst, Inst *val, Inst *saveState);
     void CallSetter(IntrinsicInst *inst, Inst *val, Inst *obj, RuntimeInterface::MethodPtr setter);
+    std::optional<std::vector<Inst *>> GetBoxedArgs(IntrinsicInst *inst, RuntimeInterface::MethodPtr method);
+    Inst *UnboxValue(IntrinsicInst *inst, Inst *boxedValue, DataType::Type valueType);
+    Inst *CreateCallThis(IntrinsicInst *inst, Inst *thisObject, std::vector<Inst *> boxedArgs,
+                         RuntimeInterface::MethodPtr method);
 
     SmallVector<Inst *, 8U> toRemove_;
     bool isApplied_ {false};

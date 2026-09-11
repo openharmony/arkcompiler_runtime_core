@@ -211,6 +211,8 @@ static inline ObjectHeader *AnyCallThis([[maybe_unused]] ManagedThread *thread, 
 extern "C" ObjectHeader *AnyCallThis0(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj,
                                       uint32_t id, [[maybe_unused]] uint32_t icSlot)
 {
+    UpdateAnyIcSlot(frame, thisObj, icSlot);
+
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     auto pf = frame->GetMethod()->GetPandaFile();
     auto funcName = pf->GetStringData(panda_file::File::EntityId(id));
@@ -220,6 +222,8 @@ extern "C" ObjectHeader *AnyCallThis0(ManagedThread *thread, Frame *frame, Objec
 extern "C" ObjectHeader *AnyCallThisRange(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj,
                                           uint32_t id, uint8_t argStart, uint8_t argc, [[maybe_unused]] uint32_t icSlot)
 {
+    UpdateAnyIcSlot(frame, thisObj, icSlot);
+
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     PandaVector<VMHandle<ObjectHeader>> args;
     for (uint8_t i = 0; i < argc; i++) {
@@ -233,6 +237,8 @@ extern "C" ObjectHeader *AnyCallThisRange(ManagedThread *thread, Frame *frame, O
 extern "C" ObjectHeader *AnyCallThisShort(ManagedThread *thread, Frame *frame, ObjectHeader *thisObj,
                                           uint32_t id, ObjectHeader *arg, [[maybe_unused]] uint32_t icSlot)
 {
+    UpdateAnyIcSlot(frame, thisObj, icSlot);
+
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     std::array<VMHandle<ObjectHeader>, 1> args = {VMHandle<ObjectHeader>(thread, arg)};
     auto pf = frame->GetMethod()->GetPandaFile();

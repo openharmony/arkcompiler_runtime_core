@@ -197,6 +197,12 @@ public:
         return nullptr;
     }
 
+    virtual MethodPtr GetUniqueInstanceMethodByName([[maybe_unused]] ClassPtr klass,
+                                                    [[maybe_unused]] std::string_view name) const
+    {
+        return nullptr;
+    }
+
     virtual MethodId GetMethodId([[maybe_unused]] MethodPtr method) const
     {
         return 0;
