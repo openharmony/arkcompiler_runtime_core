@@ -55,7 +55,7 @@ class JSONAPI {
     public native static stringifyStringFast(str: String): String
 
     public native static getFieldDeclaredFastType(field: reflect.InstanceField): int
- 	 
+
     public native static getIntFieldFast(field: reflect.InstanceField, obj: Object): int
 
     public native static getLongFieldFast(field: reflect.InstanceField, obj: Object): long
@@ -648,10 +648,7 @@ export class JSON {
      */
     public static stringify(obj: Any): String {
         if (obj === undefined) {
-            return ''
-        }
-        if (obj instanceof Function) {
-            return ''
+            return 'undefined'
         }
         if (obj instanceof JSValue) {
             return JSON.stringifyJSValue(obj)
@@ -702,7 +699,7 @@ export class JSON {
                 replacer: ((key: string, value: Any) => Any) | undefined | null,
                 space?: int | string): string {
         if (obj === undefined) {
-            return ''
+            return 'undefined'
         }
         const replacerOpt: ((key: string, value: Any) => Any) | undefined = (replacer === null) ? undefined : replacer
         let spaceOpt: String | undefined
@@ -739,7 +736,7 @@ export class JSON {
                 replacer: Array<double | string> | Array<string> | Array<double>,
                 space?: int | string): string {
         if (obj === undefined) {
-            return ''
+            return 'undefined'
         }
         const filter: FixedArray<string> = new FixedArray<string>(replacer.length)
         let index: int = 0
@@ -1045,20 +1042,19 @@ export class JSON {
       */
     public static parseJsonElement(text: string, reviver: (key: string, value: jsonx.JsonElement) => jsonx.JsonElement,
         options?: jsonx.ParseOptions): jsonx.JsonElement {
-
         return new UnifiedJsonParser(text, reviver, options).parse()
     }
 
     /**
-      * Parses a JSON object string and returns a Record.
-      * @param {string} text - The JSON string to parse
-      * @param {jsonx.ParseOptions} [options] - BigInt parsing options
-      * @returns {Record<string, JsonRecordType>} The parsed Record object
-      * @throws {JsonParseError} If the JSON string is invalid
-      * @static
-      * @syscap SystemCapability.Utils.Lang
-      * @FaAndStageModel
-      */
+     * Parses a JSON object string and returns a Record.
+     * @param {string} text - The JSON string to parse
+     * @param {jsonx.ParseOptions} [options] - BigInt parsing options
+     * @returns {Record<string, JsonRecordType>} The parsed Record object
+     * @throws {JsonParseError} If the JSON string is invalid
+     * @static
+     * @syscap SystemCapability.Utils.Lang
+     * @FaAndStageModel
+     */
     public static parseJsonRecord(text: string, options?: jsonx.ParseOptions): Record<string, JsonRecordType> {
         return new UnifiedJsonParser(text, options).parseRecord()
     }
@@ -1168,7 +1164,7 @@ class JSONWriter {
         if (obj === null) {
             this.buffer.append('null')
         } else if (obj === undefined) {
-            this.buffer.append('')
+            this.buffer.append('undefined')
         } else if (obj instanceof String) {
             this.writeStringDirect(obj)
         } else if (obj instanceof Tuple) {
@@ -1188,7 +1184,7 @@ class JSONWriter {
         } else if (obj instanceof ArrayBuffer || obj instanceof DataView) {
             this.buffer.append(JSONObject.EMPTY)
         } else if (obj instanceof Function) {
-            this.buffer.append('')
+            this.buffer.append('undefined')
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else if (obj instanceof Date) {
@@ -1234,7 +1230,7 @@ class JSONWriter {
         if (obj === null) {
             this.buffer.append('null')
         } else if (obj === undefined) {
-            this.buffer.append('')
+            this.buffer.append('undefined')
         } else if (obj instanceof String) {
             this.writeStringDirect(obj)
         } else if(obj instanceof Tuple) {
@@ -1254,7 +1250,7 @@ class JSONWriter {
         } else if (obj instanceof ArrayBuffer || obj instanceof DataView) {
             this.buffer.append(JSONObject.EMPTY)
         } else if (obj instanceof Function) {
-            this.buffer.append('')
+            this.buffer.append('undefined')
         } else if (this.writeValueTypeWrapper(obj)) {
             // nothing to do - write completed successfully
         } else if (obj instanceof Date) {
@@ -1720,7 +1716,7 @@ class JSONWriter {
             if (len === 0) return -1
 
             // Find first non-null, non-Function element
-            let firstElem: Any | undefined = undefined
+            let firstElem: Any = undefined
             for (let i = 0; i < len; i++) {
                 const e = current[i]
                 if (e !== null && e !== undefined && !(e instanceof Function)) {
@@ -2951,7 +2947,7 @@ function stringifyElementRecursively(elem: jsonx.JsonElement, replacer?: (double
             return 'null'
 
         case jsonx.JsonType.JsonUndefined:
-            return ''
+            return 'undefined'
 
         case jsonx.JsonType.JsonTrue:
             return 'true'

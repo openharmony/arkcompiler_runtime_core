@@ -750,7 +750,7 @@ function replacerReturnUndef(): void {
     let replacer = (key: string, value: Any): Any => undefined
     let obj: ReplacerRootValueFields = { a: 1 }
     let str: string = JSON.stringify(obj, replacer)
-    arktest.assertEQ(str, '')
+    arktest.assertEQ(str, 'undefined')
 }
 
 function replacerReturnNull(): void {
@@ -764,21 +764,21 @@ function replacerReturnFunc(): void {
     let replacer = (key: string, value: Any): Any => (() => { })
     let obj: ReplacerRootValueFields = { a: 1 }
     let str: string = JSON.stringify(obj, replacer)
-    arktest.assertEQ(str, '')
+    arktest.assertEQ(str, 'undefined')
 }
 
 function replacerArrUndef(): void {
     let replacer = (key: string, value: Any): Any => undefined
     let arr: number[] = [1, 2, 3]
     let str: string = JSON.stringify(arr, replacer)
-    arktest.assertEQ(str, '')
+    arktest.assertEQ(str, 'undefined')
 }
 
 function replacerArrFunc(): void {
     let replacer = (key: string, value: Any): Any => (() => { })
     let arr: number[] = [1, 2, 3]
     let str: string = JSON.stringify(arr, replacer)
-    arktest.assertEQ(str, '')
+    arktest.assertEQ(str, 'undefined')
 }
 
 function propListSelectWeek(): void {

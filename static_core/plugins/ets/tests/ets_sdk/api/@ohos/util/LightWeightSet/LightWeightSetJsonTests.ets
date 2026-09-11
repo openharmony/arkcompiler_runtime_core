@@ -90,7 +90,7 @@ function testLightWeightSetJsonIteratorMultiElement() {
 function testLightWeightSetJsonValuesEmptySet() {
     let lightWeightSet = new LightWeightSet<string>();
     let iter = lightWeightSet.values();
-    arktest.assertEQ(JSON.stringify(iter.next().value), '');
+    arktest.assertEQ(JSON.stringify(iter.next().value), 'undefined');
 }
 
 function testLightWeightSetJsonIteratorStringConcat() {
