@@ -32,7 +32,7 @@ bool AsyncStackHelper::CheckLoadDfxAsyncStackFunc() const
 
 uint64_t AsyncStackHelper::CollectAsyncStack([[maybe_unused]] StackType stackType, [[maybe_unused]] size_t depth) const
 {
-    ASSERT(stackType == StackType::STACK_TYPE_LAUNCH);
+    ASSERT(stackType == StackType::STACK_TYPE_LAUNCH || stackType == StackType::STACK_TYPE_EXCLUSIVE_SCOPE);
     return 0U;
 }
 

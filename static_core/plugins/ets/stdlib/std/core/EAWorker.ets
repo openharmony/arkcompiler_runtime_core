@@ -329,6 +329,20 @@ export class EAWorker {
     }
 
     /**
+     * Execute callback on the current interop-enabled EAWorker's original OS stack.
+     * Coroutine switching is disabled until callback returns or throws.
+     */
+    public static exclusiveScope<T>(callback: () => T): T {
+        let currentWorker = EAWorker.getWorker(CoroutineExtras.getWorkerId());
+        if (currentWorker !== undefined && currentWorker.isTaskpool) {
+            throw new RuntimeError('EAWorker:: exclusiveScope is not supported in taskpool workers');
+        }
+        return EAWorker.exclusiveScopeImpl(callback) as T;
+    }
+
+    private static native exclusiveScopeImpl(callback: Object): Any;
+
+    /**
      * Run task in EAWorker
      * Note: it has no effect if EAWorker was stoped
      *

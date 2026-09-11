@@ -15,12 +15,18 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_EXECUTION_CONTEXT_H
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_EXECUTION_CONTEXT_H
 
+#include <utility>
+
 #include "runtime/include/managed_thread.h"
 #include "runtime/include/mem/allocator.h"
 #include "runtime/include/panda_vm.h"
 #include "runtime/execution/local_storage.h"
 #include "plugins/ets/runtime/external_iface_table.h"
 #include "plugins/ets/runtime/ets_ani_env.h"
+
+namespace ark::mem {
+class Reference;
+}  // namespace ark::mem
 
 namespace ark::ets {
 class PandaEtsNapiEnv;
@@ -134,6 +140,16 @@ public:
 
     int32_t GetTaskpoolSubmissionId() const;
 
+    mem::Reference *GetExclusiveScopeStackTraceRef() const
+    {
+        return exclusiveScopeStackTraceRef_;
+    }
+
+    mem::Reference *SetExclusiveScopeStackTraceRef(mem::Reference *stackTraceRef)
+    {
+        return std::exchange(exclusiveScopeStackTraceRef_, stackTraceRef);
+    }
+
     /// @brief traverse current unhandled failed jobs with custom handler
     void ProcessUnhandledFailedJobs();
 
@@ -159,6 +175,8 @@ private:
     static constexpr int32_t INVALID_TASKPOOL_SUBMISSION_ID = 0;
     int32_t taskpoolTaskid_ {INVALID_TASKPOOL_TASK_ID};
     int32_t taskpoolSubmissionId_ {INVALID_TASKPOOL_SUBMISSION_ID};
+
+    mem::Reference *exclusiveScopeStackTraceRef_ {nullptr};
 
     ManagedThread *mThread_;
 };

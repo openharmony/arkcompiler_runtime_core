@@ -10306,6 +10306,17 @@ intrinsics:
         - i32
     impl: ark::ets::intrinsics::JoinExclusiveWorker
 
+  - name: EtsEAWorkerExclusiveScope
+    space: ets
+    class_name: std.core.EAWorker
+    method_name: exclusiveScopeImpl
+    static: true
+    signature:
+      ret: std.core.Object
+      args:
+        - std.core.Object
+    impl: ark::ets::intrinsics::EAWorkerExclusiveScope
+
   - name: EtsEAWorkerHandleProcessUncaughtError
     space: ets
     class_name: std.core.InternalWorker

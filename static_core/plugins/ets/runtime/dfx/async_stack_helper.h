@@ -37,12 +37,14 @@ private:
     using CollectAsyncStackFunc = uint64_t (*)(uint64_t, size_t);
     using SetStackIdFunc = void (*)(uint64_t);
     using GetStackIdFunc = uint64_t (*)();
+    using GetAsyncStackModeFunc = int (*)();
 
     bool IsLoaded() const;
 
     CollectAsyncStackFunc collectAsyncStack_ {nullptr};
     SetStackIdFunc setStackId_ {nullptr};
     GetStackIdFunc getStackId_ {nullptr};
+    GetAsyncStackModeFunc getAsyncStackMode_ {nullptr};
 };
 
 }  // namespace ark::ets::dfx

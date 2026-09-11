@@ -36,6 +36,20 @@ AsyncStackScope::AsyncStackScope(Job *job, AsyncStackHelper &asyncStackHelper) :
     }
 }
 
+AsyncStackScope::AsyncStackScope(uint64_t stackId, AsyncStackHelper &asyncStackHelper)
+    : asyncStackHelper_(&asyncStackHelper)
+{
+    uint64_t id = stackId;
+    if (id != 0U) {
+        prevID_ = asyncStackHelper_->GetStackId();
+        if (prevID_ != id) {
+            asyncStackHelper_->SetStackId(id);
+            hasSetStackId_ = true;
+            LOG(DEBUG, EXECUTION) << "AsyncStackScope: set stack ID " << id;
+        }
+    }
+}
+
 AsyncStackScope::~AsyncStackScope()
 {
     if (hasSetStackId_) {

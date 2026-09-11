@@ -31,6 +31,18 @@ namespace ark {
 class StackfulCoroutineContext;
 class StackfulCoroutineManager;
 
+struct OsStackWorkItem {
+    using Callback = void (*)(void *);
+    using CancelCallback = void (*)(void *);
+
+    Callback execute {nullptr};
+    Callback complete {nullptr};
+    CancelCallback cancel {nullptr};
+    void *data {nullptr};
+};
+
+enum class SubmitOsStackWorkResult : uint8_t { ACCEPTED, QUEUE_NOT_READY, NOT_ACCEPTING, ALREADY_EXECUTING };
+
 /**
  * Represents a worker thread for stackful coroutines.
  * Contains local part of the scheduling machinery (local coroutine queues, methods)
@@ -138,6 +150,16 @@ public:
      * NOTE: precondition: worker is disabled for cross-worker launch
      */
     void CompleteAllAffinedCoroutines();
+
+    void SetOsStackExecutorCoroutine(Coroutine *executor);
+    Coroutine *GetOsStackExecutorCoroutine() const;
+    SubmitOsStackWorkResult SubmitOsStackWork(OsStackWorkItem item);
+    SubmitOsStackWorkResult ExecuteOsStackWorkInline(OsStackWorkItem item);
+    bool IsOsStackWorkExecuting() const;
+    bool IsServingOsStackWork() const;
+    void StartServingOsStackWork();
+    void StopAcceptingOsStackWork();
+    void CancelPendingOsStackWork();
 
     /* debugging tools */
     // See CoroutineManager/StackfulCoroutineManager for details
@@ -253,6 +275,11 @@ private:
 
     void ProcessTimerEvents();
 
+    enum class PendingOsStackWorkAction : uint8_t { NONE, EXECUTE, CANCEL };
+
+    PendingOsStackWorkAction TryTakeOsStackWork(OsStackWorkItem *item);
+    void ExecuteClaimedOsStackWork(const OsStackWorkItem &item);
+
     /**
      * @brief Method checks if we need to wait timer and if it is, returns time to wait.
      * @returns false and 0 if no need to wait. Otherwise, @returns true and time to wait
@@ -287,7 +314,15 @@ private:  // data members
      */
     uint32_t disableCoroSwitchCounter_ = 0;
 
-    GenericEvent allCoroutinesExecuted_;
+    GenericEvent executionLoopWakeEvent_;
+
+    mutable os::memory::Mutex osStackWorkLock_;
+    PandaQueue<OsStackWorkItem> pendingOsStackWork_ GUARDED_BY(osStackWorkLock_);
+    Coroutine *osStackExecutorCoroutine_ GUARDED_BY(osStackWorkLock_) = nullptr;
+    bool acceptingOsStackWork_ GUARDED_BY(osStackWorkLock_) = true;
+    // Queued work is unsafe until the executor enters its scheduling loop.
+    bool servingOsStackWork_ GUARDED_BY(osStackWorkLock_) = false;
+    bool osStackWorkExecuting_ GUARDED_BY(osStackWorkLock_) = false;
 
     // stats
     JobWorkerStats stats_;

@@ -19,7 +19,11 @@
 #include "runtime/execution/job_priority.h"
 #include "runtime/execution/job_events.h"
 #include "runtime/execution/job_worker_thread-inl.h"
+#include "runtime/execution/coroutines/stackful/stackful_coroutine_worker.h"
+#include "runtime/execution/dfx/async_stack_scope.h"
+#include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
+#include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "intrinsics.h"
 #include "libarkbase/os/mutex.h"
 #include "runtime/include/exceptions.h"
@@ -41,6 +45,256 @@
 namespace ark::ets::intrinsics {
 
 static constexpr EtsInt INVALID_WORKER_ID = -1;
+
+enum class ExclusiveScopeTaskStatus : uint8_t { PENDING, SUCCEEDED, FAILED, CANCELED };
+
+class ScopedExclusiveScopeStack {
+public:
+    ScopedExclusiveScopeStack(EtsExecutionContext *executionCtx, mem::Reference *stackRef)
+        : executionCtx_(executionCtx), previousStackRef_(executionCtx->SetExclusiveScopeStackTraceRef(stackRef))
+    {
+    }
+
+    ~ScopedExclusiveScopeStack()
+    {
+        executionCtx_->SetExclusiveScopeStackTraceRef(previousStackRef_);
+    }
+
+    NO_COPY_SEMANTIC(ScopedExclusiveScopeStack);
+    NO_MOVE_SEMANTIC(ScopedExclusiveScopeStack);
+
+private:
+    EtsExecutionContext *executionCtx_;
+    mem::Reference *previousStackRef_;
+};
+
+class ExclusiveScopeTask {
+public:
+    ExclusiveScopeTask(JobManager *jobMan, mem::GlobalObjectStorage *storage, mem::Reference *callback)
+        : completion_(jobMan), jobManager_(jobMan), refStorage_(storage), callbackRef_(callback)
+    {
+    }
+
+    GenericEvent *GetCompletion()
+    {
+        return &completion_;
+    }
+
+    mem::GlobalObjectStorage *GetRefStorage() const
+    {
+        return refStorage_;
+    }
+
+    JobManager *GetJobManager() const
+    {
+        return jobManager_;
+    }
+
+    mem::Reference *GetCallbackRef() const
+    {
+        return callbackRef_;
+    }
+
+    mem::Reference *GetResultRef() const
+    {
+        return resultRef_;
+    }
+
+    void SetResultRef(mem::Reference *resultRef)
+    {
+        resultRef_ = resultRef;
+    }
+
+    mem::Reference *GetExceptionRef() const
+    {
+        return exceptionRef_;
+    }
+
+    mem::Reference *GetStackTraceRef() const
+    {
+        return stackTraceRef_;
+    }
+
+    void SetStackTraceRef(mem::Reference *stackTraceRef)
+    {
+        stackTraceRef_ = stackTraceRef;
+    }
+
+    void SetExceptionRef(mem::Reference *exceptionRef)
+    {
+        exceptionRef_ = exceptionRef;
+    }
+
+    ExclusiveScopeTaskStatus GetStatus() const
+    {
+        return status_;
+    }
+
+    void SetStatus(ExclusiveScopeTaskStatus status)
+    {
+        status_ = status;
+    }
+
+    uint64_t GetAsyncStackId() const
+    {
+        return asyncStackId_;
+    }
+
+    void SetAsyncStackId(uint64_t asyncStackId)
+    {
+        asyncStackId_ = asyncStackId;
+    }
+
+private:
+    GenericEvent completion_;
+    JobManager *jobManager_;
+    mem::GlobalObjectStorage *refStorage_;
+    mem::Reference *callbackRef_;
+    mem::Reference *resultRef_ {nullptr};
+    mem::Reference *exceptionRef_ {nullptr};
+    mem::Reference *stackTraceRef_ {nullptr};
+    ExclusiveScopeTaskStatus status_ {ExclusiveScopeTaskStatus::PENDING};
+    uint64_t asyncStackId_ {0U};
+};
+
+static void InvokeExclusiveScopeCallbackManaged(ExclusiveScopeTask *task)
+{
+    ASSERT_MANAGED_CODE();
+    auto *thread = ManagedThread::GetCurrent();
+    EtsHandleScope scope(EtsExecutionContext::FromMT(thread));
+    auto *refStorage = task->GetRefStorage();
+    auto *callback = EtsObject::FromCoreType(refStorage->Get(task->GetCallbackRef()));
+    auto *result = EtsCall(thread, callback, Span<VMHandle<ObjectHeader>> {});
+    if (thread->HasPendingException()) {
+        task->SetExceptionRef(refStorage->Add(thread->GetException(), mem::Reference::ObjectType::GLOBAL));
+        ASSERT(task->GetExceptionRef() != nullptr);
+        thread->ClearException();
+        task->SetStatus(ExclusiveScopeTaskStatus::FAILED);
+        return;
+    }
+    if (result != nullptr) {
+        VMHandle<EtsObject> resultHandle(thread, result->GetCoreType());
+        task->SetResultRef(refStorage->Add(resultHandle.GetPtr()->GetCoreType(), mem::Reference::ObjectType::GLOBAL));
+        ASSERT(task->GetResultRef() != nullptr);
+    }
+    task->SetStatus(ExclusiveScopeTaskStatus::SUCCEEDED);
+}
+
+static void ExecuteExclusiveScopeTask(void *data)
+{
+    auto *task = static_cast<ExclusiveScopeTask *>(data);
+    auto *thread = ManagedThread::GetCurrent();
+    auto *executionCtx = EtsExecutionContext::FromMT(thread);
+    ScopedExclusiveScopeStack stackScope(executionCtx, task->GetStackTraceRef());
+    dfx::AsyncStackScope asyncStackScope(task->GetAsyncStackId(), task->GetJobManager()->GetAsyncStackHelper());
+    if (thread->IsInNativeCode()) {
+        ScopedManagedCodeThread managedCode(thread);
+        InvokeExclusiveScopeCallbackManaged(task);
+        return;
+    }
+    InvokeExclusiveScopeCallbackManaged(task);
+}
+
+static void CompleteExclusiveScopeTask(void *data)
+{
+    static_cast<ExclusiveScopeTask *>(data)->GetCompletion()->Happen();
+}
+
+static void CancelExclusiveScopeTask(void *data)
+{
+    auto *task = static_cast<ExclusiveScopeTask *>(data);
+    task->SetStatus(ExclusiveScopeTaskStatus::CANCELED);
+    task->GetCompletion()->Happen();
+}
+
+static OsStackWorkItem CreateExclusiveScopeWorkItem(ExclusiveScopeTask *task)
+{
+    return OsStackWorkItem {ExecuteExclusiveScopeTask, CompleteExclusiveScopeTask, CancelExclusiveScopeTask, task};
+}
+
+static ExclusiveScopeTask *AllocateExclusiveScopeTask(EtsExecutionContext *executionCtx, EtsObject *callback,
+                                                      JobManager *jobMan)
+{
+    auto *refStorage = executionCtx->GetPandaVM()->GetGlobalObjectStorage();
+    auto *callbackRef = refStorage->Add(callback->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+    ASSERT(callbackRef != nullptr);
+    auto *task =
+        Runtime::GetCurrent()->GetInternalAllocator()->New<ExclusiveScopeTask>(jobMan, refStorage, callbackRef);
+    ASSERT(task != nullptr);
+    return task;
+}
+
+static void DestroyExclusiveScopeTask(ExclusiveScopeTask *task)
+{
+    auto *refStorage = task->GetRefStorage();
+    refStorage->Remove(task->GetCallbackRef());
+    if (task->GetResultRef() != nullptr) {
+        refStorage->Remove(task->GetResultRef());
+    }
+    if (task->GetExceptionRef() != nullptr) {
+        refStorage->Remove(task->GetExceptionRef());
+    }
+    if (task->GetStackTraceRef() != nullptr) {
+        refStorage->Remove(task->GetStackTraceRef());
+    }
+    Runtime::GetCurrent()->GetInternalAllocator()->Delete(task);
+}
+
+static EtsObject *ConsumeExclusiveScopeTask(EtsExecutionContext *executionCtx, ExclusiveScopeTask *task)
+{
+    EtsHandleScope scope(executionCtx);
+    auto status = task->GetStatus();
+    if (status == ExclusiveScopeTaskStatus::SUCCEEDED && task->GetResultRef() != nullptr) {
+        auto *resultObject = task->GetRefStorage()->Get(task->GetResultRef());
+        EtsHandle<EtsObject> result(executionCtx, EtsObject::FromCoreType(resultObject));
+        DestroyExclusiveScopeTask(task);
+        return result.GetPtr();
+    }
+    if (status == ExclusiveScopeTaskStatus::FAILED) {
+        executionCtx->GetMT()->SetException(task->GetRefStorage()->Get(task->GetExceptionRef()));
+    }
+    DestroyExclusiveScopeTask(task);
+    if (status == ExclusiveScopeTaskStatus::CANCELED) {
+        ThrowRuntimeException("EAWorker:: exclusiveScope task was canceled during worker shutdown");
+        return nullptr;
+    }
+    ASSERT(status == ExclusiveScopeTaskStatus::SUCCEEDED || status == ExclusiveScopeTaskStatus::FAILED);
+    return nullptr;
+}
+
+static StackfulCoroutineWorker *ValidateExclusiveScopeCall(EtsExecutionContext *executionCtx, EtsObject *callback)
+{
+    if (EtsReferenceNullish(executionCtx, callback)) {
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreNullPointerError,
+                          "EAWorker:: exclusiveScope callback must not be null");
+        return nullptr;
+    }
+    if (!callback->GetClass()->IsFunction()) {
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError,
+                          "EAWorker:: exclusiveScope callback must be a std.core.Function");
+        return nullptr;
+    }
+    if (Runtime::GetCurrent()->GetOptions().GetCoroutineImpl() != "stackful") {
+        ThrowRuntimeException("EAWorker:: exclusiveScope requires stackful coroutines");
+        return nullptr;
+    }
+
+    auto *jobCtx = JobExecutionContext::CastFromMutator(executionCtx->GetMT());
+    auto *worker = jobCtx->GetWorker();
+    if (executionCtx->GetTaskpoolTaskId() != 0) {
+        ThrowRuntimeException("EAWorker:: exclusiveScope is not supported in taskpool workers");
+        return nullptr;
+    }
+    if (worker == nullptr || !worker->InExclusiveMode()) {
+        ThrowRuntimeException("EAWorker:: exclusiveScope can only be called in EAWorker");
+        return nullptr;
+    }
+    if (worker->GetLocalStorage().Get<JobWorkerThread::DataIdx::INTEROP_CTX_PTR, void *>() == nullptr) {
+        ThrowRuntimeException("EAWorker:: exclusiveScope requires an EAWorker created with needInterop=true");
+        return nullptr;
+    }
+    return StackfulCoroutineWorker::FromJobWorkerThread(worker);
+}
 
 void SetCurrentWorkerPriority(int priority)
 {
@@ -285,6 +539,10 @@ static void EAWorkerLoop(PandaEtsVM *etsVM, mem::Reference *taskRef, [[maybe_unu
 
     auto *executionCtx = JobExecutionContext::GetCurrent();
     auto *worker = executionCtx->GetWorker();
+    // Pump shutdown awaits its exit and can let an already-admitted user coroutine run. Publish OS-stack queue
+    // readiness first so exclusiveScope cannot observe an initialized worker whose executor is not serving yet.
+    StackfulCoroutineWorker::FromJobWorkerThread(worker)->StartServingOsStackWork();
+
     if (supportInterop) {
         StopInteropEventLoopPump(worker, executionCtx->GetManager());
     }
@@ -424,7 +682,107 @@ EtsInt ExclusiveLaunch(EtsObject *task, EtsPromise *joiningPromise, EtsString *n
 
 void JoinExclusiveWorker(EtsInt workerId)
 {
+    auto *jobMan = EtsExecutionContext::GetCurrent()->GetPandaVM()->GetJobManager();
+    if (Runtime::GetCurrent()->GetOptions().GetCoroutineImpl() == "stackful") {
+        jobMan->EnumerateWorkers([workerId](JobWorkerThread *worker) {
+            if (worker->GetId() != workerId) {
+                return true;
+            }
+            if (worker->InExclusiveMode()) {
+                StackfulCoroutineWorker::FromJobWorkerThread(worker)->StopAcceptingOsStackWork();
+            }
+            return false;
+        });
+    }
     g_eaWorkerHelper.StopPeriodicScheduling(workerId);
+}
+
+static bool PrepareExclusiveScopeStackTrace(ExclusiveScopeTask *task)
+{
+    auto *jobMan = task->GetJobManager();
+    // A zero ID means that DFX is unavailable or exclusive-scope collection is disabled.
+    // Use the same switch for the managed requester snapshot to keep the default path cheap.
+    task->SetAsyncStackId(jobMan->GetAsyncStackHelper().CollectAsyncStack(dfx::StackType::STACK_TYPE_EXCLUSIVE_SCOPE,
+                                                                          dfx::AsyncStackHelper::DEFAULT_STACK_DEPTH));
+    if (task->GetAsyncStackId() == 0U) {
+        return true;
+    }
+    auto *requesterStackTrace = EtsObjectArray::FromCoreType(ArkRuntimeStackTraceProvisionStackTrace());
+    if (requesterStackTrace == nullptr) {
+        return false;
+    }
+    task->SetStackTraceRef(
+        task->GetRefStorage()->Add(requesterStackTrace->GetCoreType(), mem::Reference::ObjectType::GLOBAL));
+    ASSERT(task->GetStackTraceRef() != nullptr);
+    return true;
+}
+
+static EtsObject *ExecuteQueuedExclusiveScope(EtsExecutionContext *executionCtx, StackfulCoroutineWorker *worker,
+                                              ExclusiveScopeTask *task)
+{
+    auto *completion = task->GetCompletion();
+    completion->Lock();
+    if (!PrepareExclusiveScopeStackTrace(task)) {
+        completion->Unlock();
+        DestroyExclusiveScopeTask(task);
+        return nullptr;
+    }
+    auto submitResult = worker->SubmitOsStackWork(CreateExclusiveScopeWorkItem(task));
+    if (submitResult != SubmitOsStackWorkResult::ACCEPTED) {
+        completion->Unlock();
+        DestroyExclusiveScopeTask(task);
+        if (submitResult == SubmitOsStackWorkResult::QUEUE_NOT_READY) {
+            ThrowRuntimeException("EAWorker:: exclusiveScope cannot be called before the initial task completes");
+            return nullptr;
+        }
+        ThrowRuntimeException("EAWorker:: exclusiveScope cannot be started while the worker is shutting down");
+        return nullptr;
+    }
+    {
+        ScopedNativeCodeThread nativeCode(executionCtx->GetMT());
+        task->GetJobManager()->Await(completion);
+    }
+    return ConsumeExclusiveScopeTask(executionCtx, task);
+}
+
+EtsObject *EAWorkerExclusiveScope(EtsObject *callback)
+{
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ASSERT(executionCtx != nullptr);
+    auto *thread = executionCtx->GetMT();
+    auto *stackfulWorker = ValidateExclusiveScopeCall(executionCtx, callback);
+    if (stackfulWorker == nullptr) {
+        return nullptr;
+    }
+    auto *executor = stackfulWorker->GetOsStackExecutorCoroutine();
+    if (executor == nullptr) {
+        ThrowRuntimeException("EAWorker:: exclusiveScope OS-stack executor is unavailable");
+        return nullptr;
+    }
+    auto *current = Coroutine::GetCurrent();
+    if (current == executor && stackfulWorker->IsOsStackWorkExecuting()) {
+        ThrowRuntimeException("EAWorker:: nested exclusiveScope is not allowed");
+        return nullptr;
+    }
+
+    auto *jobMan = JobExecutionContext::CastFromMutator(thread)->GetManager();
+    if (current != executor && jobMan->IsJobSwitchDisabled()) {
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreInvalidJobOperationError,
+                          "EAWorker:: exclusiveScope cannot be called while coroutine switching is disabled");
+        return nullptr;
+    }
+    auto *task = AllocateExclusiveScopeTask(executionCtx, callback, jobMan);
+
+    if (current == executor) {
+        auto submitResult = stackfulWorker->ExecuteOsStackWorkInline(CreateExclusiveScopeWorkItem(task));
+        if (submitResult != SubmitOsStackWorkResult::ACCEPTED) {
+            DestroyExclusiveScopeTask(task);
+            ThrowRuntimeException("EAWorker:: exclusiveScope cannot be started while the worker is shutting down");
+            return nullptr;
+        }
+        return ConsumeExclusiveScopeTask(executionCtx, task);
+    }
+    return ExecuteQueuedExclusiveScope(executionCtx, stackfulWorker, task);
 }
 
 extern "C" EtsInt StdCoroutineGetExclusiveWorkersLimit()
