@@ -164,6 +164,57 @@ function allocatingLoopTest(): void {
     arktest.assertEQ(seen, 300)
 }
 
+function namedGroupsBeyond255Test(): void {
+    // PCRE2's 8-bit name table stores group numbers as 2 big-endian bytes. Group numbers
+    // >= 256 (i.e. more than 255 capture groups in one pattern) must not lose their high
+    // byte: a truncated number aliased group 256 to the whole match (number 0) and group
+    // 257 to group 1, silently corrupting named-group results on exec/matchAll/replace.
+    let pattern: string = ''
+    for (let i = 0; i < 300; i++) {
+        pattern += '(?<g' + i.toString() + '>.)'
+    }
+    // Distinct single-byte chars (28..227 keep the input Latin-1); the values below are
+    // chosen so that every asserted group differs from its truncated (buggy) counterpart.
+    let input: string = ''
+    for (let i = 0; i < 300; i++) {
+        input += String.fromCharCode(28 + (i % 200))
+    }
+
+    // LATIN1 path (RegExp8 ExtractGroups)
+    const r = new RegExp(pattern, '').exec(input)
+    arktest.assertEQ(r?.[0], input)
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    arktest.assertEQ(r?.groups?.['g0'], String.fromCharCode(28))
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    arktest.assertEQ(r?.groups?.['g254'], String.fromCharCode(28 + 54))
+    // g255 is capture group 256 (0x0100): the high byte is significant
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    arktest.assertEQ(r?.groups?.['g255'], String.fromCharCode(28 + 55))
+    // g256 is capture group 257: must NOT alias to group 1 (g0's value)
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    arktest.assertEQ(r?.groups?.['g256'], String.fromCharCode(28 + 56))
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    arktest.assertEQ(r?.groups?.['g299'], String.fromCharCode(28 + 99))
+
+    // UTF16 execution path (RegExp16 ExtractGroups, LATIN1_TO_UTF16)
+    const ru = new RegExp(pattern, 'u').exec(input)
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    arktest.assertEQ(ru?.groups?.['g255'], String.fromCharCode(28 + 55))
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    arktest.assertEQ(ru?.groups?.['g299'], String.fromCharCode(28 + 99))
+
+    // matchAll path (ParseNameTable)
+    const matches = Array.from(input.matchAll(new RegExp(pattern, 'g')))
+    arktest.assertEQ(matches.length, 1)
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    arktest.assertEQ(matches[0].groups?.['g255'], String.fromCharCode(28 + 55))
+    // CC-OFFNXT(G.OBJ.04) bracket notation required for Record/JsonElement/indexable types
+    arktest.assertEQ(matches[0].groups?.['g299'], String.fromCharCode(28 + 99))
+
+    // $<name> substitution reads the same named-group table
+    arktest.assertEQ(input.replace(new RegExp(pattern, 'g'), '$<g299>'), String.fromCharCode(28 + 99))
+}
+
 function lastIndexResetTest(): void {
     // after a failed global match, lastIndex must be reset to 0
     const re = new RegExp('z', 'g')

@@ -43,6 +43,9 @@ ani_status CreateSplitResultArray(ani_env *env, const Boundaries &boundaries, co
                                   ani_array *out)
 {
     ani_ref emptyStr = CreateUtf8String(env, "", 0);
+    if (emptyStr == nullptr) {
+        return ANI_OUT_OF_MEMORY;
+    }
     ANI_RETURN_ON_PENDING_ERROR(
         env->Array_New(static_cast<ani_size>(boundaries.size() / BOUNDARY_PAIR_SIZE), emptyStr, out));
     for (ani_size i = 0; i < boundaries.size(); i += BOUNDARY_PAIR_SIZE) {
