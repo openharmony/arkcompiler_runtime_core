@@ -87,8 +87,8 @@ template <>
 struct NameTableParser<uint8_t> {
     static int GetGroupNumber(const uint8_t *entry)
     {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        return static_cast<int32_t>(static_cast<PCRE2_UCHAR8>(entry[0] << NAME_ENTRY_GROUP_SHIFT) | entry[1]);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic, hicpp-signed-bitwise)
+        return static_cast<int32_t>((entry[0] << NAME_ENTRY_GROUP_SHIFT) | entry[1]);
     }
 
     static std::string GetName(const uint8_t *entry, int entrySize)

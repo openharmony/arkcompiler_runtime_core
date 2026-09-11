@@ -217,10 +217,8 @@ RegExpExecResult RegExp8::Execute(Pcre2Obj re, uint32_t matchFlags, const uint8_
         indices.emplace_back(std::make_pair(substringStart, substringEnd));
     }
 
-    int nameCount;
-    pcre2_pattern_info(expr, PCRE2_INFO_NAMECOUNT, &nameCount);
-
-    if (nameCount > 0) {
+    int nameCount = 0;
+    if (pcre2_pattern_info(expr, PCRE2_INFO_NAMECOUNT, &nameCount) == 0 && nameCount > 0) {
         RegExp8::ExtractGroups(re, nameCount, result, reinterpret_cast<void *>(ovector));
     }
 
@@ -264,36 +262,55 @@ bool RegExp8::TestMatch(Pcre2Obj re, uint32_t matchFlags, const uint8_t *str, in
     return true;
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 void RegExp8::ExtractGroups(Pcre2Obj expression, int count, RegExpExecResult &result, void *data)
 {
-    PCRE2_SPTR nameTable;
-    PCRE2_SPTR tabPtr;
-    int nameEntrySize;
+    PCRE2_SPTR nameTable = nullptr;
+    int nameEntrySize = 0;
 
     auto *expr = reinterpret_cast<pcre2_code *>(expression->pcre2Code);
     auto *ovector = reinterpret_cast<PCRE2_SIZE *>(data);
 
-    pcre2_pattern_info(expr, PCRE2_INFO_NAMETABLE, &nameTable);
-    pcre2_pattern_info(expr, PCRE2_INFO_NAMEENTRYSIZE, &nameEntrySize);
+    constexpr int MIN_NAME_ENTRY_SIZE = 3;
+    if (pcre2_pattern_info(expr, PCRE2_INFO_NAMETABLE, &nameTable) != 0 || nameTable == nullptr) {
+        return;
+    }
+    if (pcre2_pattern_info(expr, PCRE2_INFO_NAMEENTRYSIZE, &nameEntrySize) != 0 ||
+        nameEntrySize < MIN_NAME_ENTRY_SIZE) {
+        return;
+    }
 
-    tabPtr = nameTable;
+    uint32_t captureCount = 0U;
+    if (pcre2_pattern_info(expr, PCRE2_INFO_CAPTURECOUNT, &captureCount) != 0) {
+        return;
+    }
+
+    auto tabPtr = nameTable;
     for (int i = 0; i < count; i++) {
-        auto n = static_cast<int32_t>(static_cast<PCRE2_UCHAR8>(tabPtr[0] << 8U) | tabPtr[1]);
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto index = static_cast<int32_t>(ovector[2 * n]);
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto endIndex = static_cast<int32_t>(ovector[2 * n + 1]);
-        auto tabConstCharPtr = reinterpret_cast<const char *>(tabPtr + 2);
-        size_t size = nameEntrySize - PCRE2_GROUPS_NAME_ENTRY_SHIFT;
-        while (size > 0) {
+        // NOLINTNEXTLINE(hicpp-signed-bitwise, cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto n = static_cast<int32_t>((tabPtr[0] << 8U) | tabPtr[1]);
+        if (n >= 0 && static_cast<uint32_t>(n) <= captureCount) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            if (static_cast<uint8_t>(*(tabConstCharPtr + size - PCRE2_CHARACTER_WIDTH)) != 0) {
-                break;
+            auto index = static_cast<int32_t>(ovector[2 * n]);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            auto endIndex = static_cast<int32_t>(ovector[2 * n + 1]);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            auto tabConstCharPtr = reinterpret_cast<const char *>(tabPtr + 2);
+            size_t size = nameEntrySize - PCRE2_GROUPS_NAME_ENTRY_SHIFT;
+            while (size > 0) {
+                // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                // CC-OFFNXT(G.FUN.01-CPP)
+                if (static_cast<uint8_t>(*(tabConstCharPtr + size - PCRE2_CHARACTER_WIDTH)) != 0) {
+                    break;
+                }
+                // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                size -= PCRE2_CHARACTER_WIDTH;
             }
-            size -= PCRE2_CHARACTER_WIDTH;
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            auto key = std::string(reinterpret_cast<const char *>(tabPtr + 2), size);
+            result.namedGroups[key] = {index, endIndex};
         }
-        auto key = std::string(reinterpret_cast<const char *>(tabPtr + 2), size);
-        result.namedGroups[key] = {index, endIndex};
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         tabPtr += nameEntrySize;
     }
 }
