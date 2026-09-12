@@ -426,6 +426,10 @@ export namespace taskpool {
                 tryScheduleOnReceiveDrain(executionRecord, event.listener.hostWorkerId);
                 return;
             }
+            let tagName = "Sta TaskPool:OnReceiveDataCallback:workerId:" + currentWorkerId.toString();
+            let traceId = callbackTraceIdSeq.fetchAdd(1);
+            Tracer.startAsyncTrace(tagName, traceId);
+            hilogDebug(tagName);
             try {
                 if (!executionRecord.canDispatchToHost()) {
                     continue;
@@ -435,6 +439,7 @@ export namespace taskpool {
                 console.error(`taskpool:: onReceiveData callback failed: ${e}`);
             } finally {
                 executionRecord.completeReceiveEvent();
+                Tracer.finishAsyncTrace(tagName, traceId);
             }
         }
     }
@@ -510,6 +515,10 @@ export namespace taskpool {
         }
 
         private executeTransient(transientExecution: TransientExecution): void {
+            let traceId = callbackTraceIdSeq.fetchAdd(1);
+            let tagName = "Sta TaskPool:FuncPerform";
+            Tracer.startAsyncTrace(tagName, traceId);
+            hilogDebug(tagName);
             this.beginLocalExecution();
             this.idleTime = 0;
 
@@ -517,6 +526,7 @@ export namespace taskpool {
             try {
                 result = transientExecution.execute();
             } catch (e) {
+                Tracer.finishAsyncTrace(tagName, traceId);
                 transientExecution.reject(e as Error);
                 transientExecution.reportUnhandledRejection();
                 this.endLocalExecution();
@@ -526,16 +536,19 @@ export namespace taskpool {
 
             if (result instanceof Promise) {
                 (result as Promise<Any>).then((value: Any) => {
+                    Tracer.finishAsyncTrace(tagName, traceId);
                     transientExecution.resolve(value);
                     this.endLocalExecution();
                     this.tryAdvanceRetireRequest();
                 }, (e) => {
+                    Tracer.finishAsyncTrace(tagName, traceId);
                     transientExecution.reject(e as Error);
                     transientExecution.reportUnhandledRejection();
                     this.endLocalExecution();
                     this.tryAdvanceRetireRequest();
                 });
             } else {
+                Tracer.finishAsyncTrace(tagName, traceId);
                 transientExecution.resolve(result);
                 this.endLocalExecution();
                 this.tryAdvanceRetireRequest();
@@ -667,6 +680,8 @@ export namespace taskpool {
             // exception has to be handled
             try {
                 let expandJob = this.run<Any>((): Any => {
+                    let tagName = "Sta TaskPool:Expand:name:" + this.getName();
+                    Tracer.startTrace(tagName);
                     try {
                         // Take the queue snapshot before reading execution stats to avoid nested mutexes.
                         let queueSnap: int = 0;
@@ -703,7 +718,7 @@ export namespace taskpool {
                                 }
                             }
                             const idleWorkersNum: int = runnableIdleWorkersNum;
-                            
+
                             if (workerCount < workersLimit && idleWorkersNum < targetNum) {
                                 // Cap by total-worker shortage. The target total is running workers plus the
                                 // runnable backlog target, so stale waiting counters cannot over-expand a batch.
@@ -722,6 +737,13 @@ export namespace taskpool {
                                     }
                                 }
                             }
+                            hilogDebug(tagName +
+                                ", workerCount:" + workerCount.toString() +
+                                ", idleWorkers:" + idleWorkersNum.toString() +
+                                ", runningWorkers:" + runningWorkersNum.toString() +
+                                ", queueSnap:" + queueSnap.toString() +
+                                ", targetNum:" + targetNum.toString() +
+                                ", workersLimit:" + workersLimit.toString());
                         });
                         // Align with native DispatchAndTryExpandInner: re-check expansion while tasks remain.
                         if (!isTaskPoolUseLaunch) {
@@ -742,6 +764,7 @@ export namespace taskpool {
                         return 1;
                     } finally {
                         this.finishExpandJob();
+                        Tracer.finishTrace();
                     }
                 });
             } catch(e){
@@ -797,56 +820,68 @@ export namespace taskpool {
                         this.timerId = -1;
                         return;
                     }
-                    let runningWorkersNum: int = 0;
-                    let retireRequests: int = 0;
-                    ConcurrencyHelpers.lockGuard(workersMutex, () => {
-                        this.cleanupReadyWorkersLocked();
-                        for (let w: GlobalQueueWorker of workers) {
-                            let currentTasksSize: int = 0;
-                            ConcurrencyHelpers.lockGuard(w.currentTasksMutex, () => {
-                                currentTasksSize = w.currentTasks.size.toInt();
-                            });
-                            if (currentTasksSize !== 0 || w.currentTasksCount.load() != 0) {
-                                runningWorkersNum++;
+                    let tagName = "Sta TaskPool:Shrink:name:" + this.getName();
+                    Tracer.startTrace(tagName);
+                    try {
+                        let runningWorkersNum: int = 0;
+                        let retireRequests: int = 0;
+                        ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                            this.cleanupReadyWorkersLocked();
+                            for (let w: GlobalQueueWorker of workers) {
+                                let currentTasksSize: int = 0;
+                                ConcurrencyHelpers.lockGuard(w.currentTasksMutex, () => {
+                                    currentTasksSize = w.currentTasks.size.toInt();
+                                });
+                                if (currentTasksSize !== 0 || w.currentTasksCount.load() != 0) {
+                                    runningWorkersNum++;
+                                }
                             }
+                        });
+                        let targetNum: int = runningWorkersNum;
+                        ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
+                            if (totalExecCount.load() != 0) {
+                                let averageDuration: number = totalExecTime.load() / totalExecCount.load();
+                                let result: number = (averageDuration * waitingTasksNum.load()) / TASK_DURATION;
+                                targetNum += (min(waitingTasksNum.load(), result)).toInt();
+                            } else {
+                                targetNum += min(2, waitingTasksNum.load());
+                            }
+                        });
+                        ConcurrencyHelpers.lockGuard(workersMutex, () => {
+                            if (workers.size > WORKERS_MINIMUM && workers.size > targetNum) {
+                                targetNum = max(WORKERS_MINIMUM, targetNum);
+                            } else {
+                                return;
+                            }
+                            let step = min(SHRINK_STEP, workers.size - targetNum);
+                            let count: int = 0;
+                            for (let worker: GlobalQueueWorker of idleWorkers) {
+                                if (count >= step) {
+                                    break;
+                                }
+                                if (worker.idleTime == 0) {
+                                    continue;
+                                }
+                                if (Chrono.nanoNow() - worker.idleTime < idleThreshold) {
+                                    continue;
+                                }
+                                if (worker.tryRequestRetireForShrink()) {
+                                    count++;
+                                }
+                            }
+                            retireRequests = count;
+                        });
+                        hilogDebug(tagName +
+                            ", workerCount:" + workers.size.toString() +
+                            ", runningWorkers:" + runningWorkersNum.toString() +
+                            ", waitingTasks:" + waitingTasksNum.load().toString() +
+                            ", targetNum:" + targetNum.toString() +
+                            ", retireRequests:" + retireRequests.toString());
+                        if (retireRequests > 0) {
+                            notifyNewTaskAvailable();
                         }
-                    });
-                    let targetNum: int = runningWorkersNum;
-                    ConcurrencyHelpers.lockGuard(taskCountMutex, () => {
-                        if (totalExecCount.load() != 0) {
-                            let averageDuration: number = totalExecTime.load() / totalExecCount.load();
-                            let result: number = (averageDuration * waitingTasksNum.load()) / TASK_DURATION;
-                            targetNum += (min(waitingTasksNum.load(), result)).toInt();
-                        } else {
-                            targetNum += min(2, waitingTasksNum.load());
-                        }
-                    });
-                    ConcurrencyHelpers.lockGuard(workersMutex, () => {
-                        if (workers.size > WORKERS_MINIMUM && workers.size > targetNum) {
-                            targetNum = max(WORKERS_MINIMUM, targetNum);
-                        } else {
-                            return;
-                        }
-                        let step = min(SHRINK_STEP, workers.size - targetNum);
-                        let count: int = 0;
-                        for (let worker: GlobalQueueWorker of idleWorkers) {
-                            if (count >= step) {
-                                break;
-                            }
-                            if (worker.idleTime == 0) {
-                                continue;
-                            }
-                            if (Chrono.nanoNow() - worker.idleTime < idleThreshold) {
-                                continue;
-                            }
-                            if (worker.tryRequestRetireForShrink()) {
-                                count++;
-                            }
-                        }
-                        retireRequests = count;
-                    });
-                    if (retireRequests > 0) {
-                        notifyNewTaskAvailable();
+                    } finally {
+                        Tracer.finishTrace();
                     }
                 }, triggerInterval);
             });
@@ -1380,7 +1415,20 @@ export namespace taskpool {
                     shouldRestoreAsyncStackId = true;
                 }
             }
-            this.callUserCallback(this.onStartCallback);
+            if (this.onStartCallback !== undefined) {
+                let tagName = "Sta TaskPool:OnStartCallback:taskID:" +
+                    this.task.taskId.toString() +
+                    ", priority:" +
+                    this.priority.toString();
+                let traceId = callbackTraceIdSeq.fetchAdd(1);
+                Tracer.startAsyncTrace(tagName, traceId);
+                hilogDebug(tagName);
+                try {
+                    this.callUserCallback(this.onStartCallback);
+                } finally {
+                    Tracer.finishAsyncTrace(tagName, traceId);
+                }
+            }
             let executionSucceeded: boolean = false;
             let taskResultPromise: Promise<Any> | undefined = undefined;
             let taskResult: Any = undefined;
@@ -1393,6 +1441,12 @@ export namespace taskpool {
             }
             const previousTaskId = getTaskId();
             const previousSubmissionId = getSubmissionId();
+            let tagNamePerform = "Sta TaskPool:Perform:name:" + this.task.name +
+                ", taskID:" + this.task.taskId.toString() +
+                ", priority:" + this.priority.toString();
+            let traceIdPerform = callbackTraceIdSeq.fetchAdd(1);
+            Tracer.startAsyncTrace(tagNamePerform, traceIdPerform);
+            hilogDebug(tagNamePerform);
             try {
                 setTaskId(this.task.taskId);
                 setSubmissionId(executionRecord.submissionId);
@@ -1400,17 +1454,21 @@ export namespace taskpool {
                 const result = this.task.taskFunction();
                 if (result instanceof Promise) {
                     taskResultPromise = result.then((value: Any) => {
+                        Tracer.finishAsyncTrace(tagNamePerform, traceIdPerform);
                         executionSucceeded = true;
                         return value;
                     }).catch((e) => {
+                        Tracer.finishAsyncTrace(tagNamePerform, traceIdPerform);
                         this.handleTaskFailure(e);
                         throw e;
                     });
                 } else {
+                    Tracer.finishAsyncTrace(tagNamePerform, traceIdPerform);
                     executionSucceeded = true;
                     taskResult = result;
                 }
             } catch (e) {
+                Tracer.finishAsyncTrace(tagNamePerform, traceIdPerform);
                 this.handleTaskFailure(e);
                 taskError = e;
             }
@@ -1510,13 +1568,38 @@ export namespace taskpool {
                             GroupState.of(group).successCallbacks.add(callback);
                         }
                     } else {
-                        this.callUserCallback(this.onSuccessCallback);
+                        if (this.onSuccessCallback !== undefined) {
+                            let tagName = "Sta TaskPool:OnSuccessCallback:taskID:" +
+                                this.task.taskId.toString() +
+                                ", priority:" +
+                                this.priority.toString();
+                            let traceId = callbackTraceIdSeq.fetchAdd(1);
+                            Tracer.startAsyncTrace(tagName, traceId);
+                            hilogDebug(tagName);
+                            try {
+                                this.callUserCallback(this.onSuccessCallback);
+                            } finally {
+                                Tracer.finishAsyncTrace(tagName, traceId);
+                            }
+                        }
                     }
                 }
             } catch (e) {
-                try {
-                    this.onFailCallback?.(e as Error);
-                } catch (callbackError) {}
+                if (this.onFailCallback !== undefined) {
+                    let tagName = "Sta TaskPool:OnFailCallback:taskID:" +
+                        this.task.taskId.toString() +
+                        ", priority:" +
+                        this.priority.toString();
+                    let traceId = callbackTraceIdSeq.fetchAdd(1);
+                    Tracer.startAsyncTrace(tagName, traceId);
+                    hilogDebug(tagName);
+                    try {
+                        this.onFailCallback?.(e as Error);
+                    } catch (callbackError) {}
+                    finally {
+                        Tracer.finishAsyncTrace(tagName, traceId);
+                    }
+                }
                 throw e;
             } finally {
                 this.tryTriggerAsyncRunnerAndGroup();
@@ -1556,47 +1639,81 @@ export namespace taskpool {
                     GroupState.of(group).hasFailedTask.store(1);
                 }
             }
-            try {
-                // NOTE(csaba.osztrogonac): remove as cast once e has Error type
-                this.onFailCallback?.(error);
-            } catch (callbackError) {}
+            if (this.onFailCallback !== undefined) {
+                let tagName = "Sta TaskPool:OnFailCallback:taskID:" +
+                    this.task.taskId.toString() +
+                    ", priority:" +
+                    this.priority.toString();
+                let traceId = callbackTraceIdSeq.fetchAdd(1);
+                Tracer.startAsyncTrace(tagName, traceId);
+                hilogDebug(tagName);
+                try {
+                    this.onFailCallback?.(error);
+                } catch (callbackError) {}
+                finally {
+                    Tracer.finishAsyncTrace(tagName, traceId);
+                }
+            }
         }
 
         /// The task is added to taskpool for execution
         enqueue(priority?: Priority, executionRecordArg?: ExecutionRecord): void {
-            priority = priority === undefined ? Priority.MEDIUM : priority;
-            this.priority = priority;
-            while(true) {
-                let curState = this.state.load();
-                if (curState == State.CANCELED) {
-                    break;
+            let traceId = callbackTraceIdSeq.fetchAdd(1);
+            let tagNameEnqueue = "Sta TaskPool:Enqueue:taskID:" +
+                this.task.taskId.toString() +
+                ", priority:" +
+                (priority ?? Priority.MEDIUM).toString();
+            Tracer.startAsyncTrace(tagNameEnqueue, traceId);
+            hilogDebug(tagNameEnqueue);
+            try {
+                priority = priority === undefined ? Priority.MEDIUM : priority;
+                this.priority = priority;
+                while(true) {
+                    let curState = this.state.load();
+                    if (curState == State.CANCELED) {
+                        break;
+                    }
+                    if (this.state.compareAndSwap(curState, InternalState.WAITING) == curState) {
+                        break;
+                    }
                 }
-                if (this.state.compareAndSwap(curState, InternalState.WAITING) == curState) {
-                    break;
+                if (!isTaskPoolUseLaunch) {
+                    const executionRecord = executionRecordArg ?? this.currentExecutionRecord;
+                    if (executionRecord === undefined) {
+                        throw new Error("taskpool:: missing execution record");
+                    }
+                    initGlobalTaskQueues();
+                    this.addTaskRegistryReference();
+                    const newWaitingTasksNum = waitingTasksNum.fetchAdd(1) + 1;
+                    while (!globalTaskQueue?.get(normalizeTaskQueuePriority(priority))?.add(
+                        new QueuedExecution(this.task, executionRecord, priority)
+                    )) {
+                        Coroutine.Schedule();
+                    }
+                    if (newWaitingTasksNum > workers.size * 2) {
+                        tryTriggerExpand();
+                    }
+                    // Notify waiting workers using condition variable
+                    ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
+                        ConcurrencyHelpers.condVarNotifyOne(globalTaskCondVar, globalTaskQueuesMutex);
+                    });
                 }
+                if (this.onEnqueueCallback !== undefined) {
+                    let tagNameOnEnqueue = "Sta TaskPool:OnEnqueueCallback:taskID:" +
+                        this.task.taskId.toString() +
+                        ", priority:" +
+                        priority.toString();
+                    Tracer.startAsyncTrace(tagNameOnEnqueue, traceId);
+                    hilogDebug(tagNameOnEnqueue);
+                    try {
+                        this.callUserCallback(this.onEnqueueCallback);
+                    } finally {
+                        Tracer.finishAsyncTrace(tagNameOnEnqueue, traceId);
+                    }
+                }
+            } finally {
+                Tracer.finishAsyncTrace(tagNameEnqueue, traceId);
             }
-            if (!isTaskPoolUseLaunch) {
-                const executionRecord = executionRecordArg ?? this.currentExecutionRecord;
-                if (executionRecord === undefined) {
-                    throw new Error("taskpool:: missing execution record");
-                }
-                initGlobalTaskQueues();
-                this.addTaskRegistryReference();
-                const newWaitingTasksNum = waitingTasksNum.fetchAdd(1) + 1;
-                while (!globalTaskQueue?.get(normalizeTaskQueuePriority(priority))?.add(
-                    new QueuedExecution(this.task, executionRecord, priority)
-                )) {
-                    Coroutine.Schedule();
-                }
-                if (newWaitingTasksNum > workers.size * 2) {
-                    tryTriggerExpand();
-                }
-                // Notify waiting workers using condition variable
-                ConcurrencyHelpers.lockGuard(globalTaskQueuesMutex, () => {
-                    ConcurrencyHelpers.condVarNotifyOne(globalTaskCondVar, globalTaskQueuesMutex);
-                });
-            }
-            this.callUserCallback(this.onEnqueueCallback);
         }
 
         createExecutionRecord(): ExecutionRecord {
@@ -1765,9 +1882,15 @@ export namespace taskpool {
                 if (GroupState.of(group).taskCount.load() == 0) {
                     if (GroupState.of(group).hasFailedTask.load() == 0) {
                         GroupState.of(group).successCallbacks.forEach((callback: CallbackFunction) => {
+                            let tagName = "Sta TaskPool:OnSuccessCallback:groupID:" + this.groupId.toString();
+                            let traceId = callbackTraceIdSeq.fetchAdd(1);
+                            Tracer.startAsyncTrace(tagName, traceId);
+                            hilogDebug(tagName);
                             try {
                                 callback();
-                            } catch (e) {}
+                            } catch (e) {} finally {
+                                Tracer.finishAsyncTrace(tagName, traceId);
+                            }
                         });
                     }
                     GroupState.of(group).state_.store(InternalState.FINISHED.valueOf());
@@ -2000,40 +2123,54 @@ export namespace taskpool {
          *     - argument tasks add a circular dependency
          */
         addDependency(...tasks: Task[]): void {
+            let internalThis = InternalTask.of(this);
             if (tasks.length == 0) {
                 throw new Error(TASKPOOL_ERROR_NO_PARAMS, "taskpool:: addDependency has no params.");
             }
-            if (InternalTask.of(this).isPeriodicTask) {
+            if (internalThis.isPeriodicTask) {
                 throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_ADD_DEPENDENCY, "taskpool:: the periodic task cannot have a dependency");
             }
-            if (InternalTask.of(this).isSubmitted || InternalTask.of(this).seqId.load() != 0 || InternalTask.of(this).asyncId.load() != 0) {
+            if (internalThis.isSubmitted || internalThis.seqId.load() != 0 || internalThis.asyncId.load() != 0) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_ADD_DEPENDENCY, "taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot addDependency");
             }
-            if (InternalTask.of(this).groupId != 0) {
+            if (internalThis.groupId != 0) {
                 throw new Error(TASKPOOL_ERROR_GROUP_TASK_ADD_DEPENDENCY, "taskpool:: groupTask cannot addDependency");
             }
+            let tagName = "Sta Task::AddDependency:taskID:" +
+                this.taskId.toString() +
+                ", depCount:" +
+                tasks.length.toString();
+            Tracer.startTrace(tagName);
+            hilogDebug(tagName);
             for (const task: Task of tasks) {
-                if (InternalTask.of(task).isPeriodicTask) {
+                let internalTask = InternalTask.of(task);
+                if (internalTask.isPeriodicTask) {
+                    Tracer.finishTrace();
                     throw new Error(TASKPOOL_ERROR_PERIODIC_TASK_ADD_DEPENDENCY, "taskpool:: the periodic task cannot have a dependency");
                 }
-                if (InternalTask.of(task).isSubmitted || InternalTask.of(task).seqId.load() != 0 || InternalTask.of(task).asyncId.load() != 0) {
+                if (internalTask.isSubmitted || internalTask.seqId.load() != 0 || internalTask.asyncId.load() != 0) {
+                    Tracer.finishTrace();
                     throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_OR_ASYNC_RUNNER_TASK_RELIED_ON, "taskpool:: asyncRunnerTask or seqRunnerTask or executedTask cannot be relied on");
                 }
-                if (InternalTask.of(task).groupId != 0) {
+                if (internalTask.groupId != 0) {
+                    Tracer.finishTrace();
                     throw new Error(TASKPOOL_ERROR_GROUP_TASK_RELIED_ON, "taskpool:: groupTask cannot be relied on");
                 }
                 if (this.taskId == task.taskId || this.hasTaskDFS(task)) {
+                    Tracer.finishTrace();
                     throw new Error(TASKPOOL_ERROR_CIRCULAR_DEPENDENCY, "taskpool:: There is a circular dependency");
                 }
             }
             for (const task: Task of tasks) {
-                if (InternalTask.of(task).getDependentTasks().has(this)) {
+                let internalTask = InternalTask.of(task);
+                if (internalTask.getDependentTasks().has(this)) {
                     continue;
                 }
-                InternalTask.of(task).getDependentTasks().add(this);
-                InternalTask.of(this).taskDependenciesCount.fetchAdd(1);
+                internalTask.getDependentTasks().add(this);
+                internalThis.taskDependenciesCount.fetchAdd(1);
             }
-            InternalTask.of(this).isDependent = (InternalTask.of(this).taskDependenciesCount.load() != 0);
+            internalThis.isDependent = (internalThis.taskDependenciesCount.load() != 0);
+            Tracer.finishTrace();
         }
 
         /**
@@ -2046,31 +2183,43 @@ export namespace taskpool {
          *     - this task does not depend on an argument task
          */
         removeDependency(...tasks: Task[]): void {
+            let internalThis = InternalTask.of(this);
             if (tasks.length == 0) {
                 throw new Error(TASKPOOL_ERROR_NO_PARAMS, "taskpool:: removeDependency has no params.");
             }
-            if (!InternalTask.of(this).isDependent) {
+            if (!internalThis.isDependent) {
                 throw new Error(TASKPOOL_ERROR_NO_DEPENDENCY, "taskpool:: task has no dependency");
             }
-            if (InternalTask.of(this).isSubmitted) {
+            if (internalThis.isSubmitted) {
                 throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY, "taskpool:: executedTask cannot removeDependency");
             }
-            for (const task: Task of tasks) {
-                if (!InternalTask.of(task).hasDependentTasks() && !InternalTask.of(task).isDependent) {
-                    throw new Error(TASKPOOL_ERROR_NO_DEPENDENCY, "taskpool:: task has no dependency");
+            let tagName = "Sta Task::RemoveDependency:taskID:" +
+                this.taskId.toString() +
+                ", depCount:" +
+                tasks.length.toString();
+            Tracer.startTrace(tagName);
+            hilogDebug(tagName);
+            try {
+                for (const task: Task of tasks) {
+                    let internalTask = InternalTask.of(task);
+                    if (!internalTask.hasDependentTasks() && !internalTask.isDependent) {
+                        throw new Error(TASKPOOL_ERROR_NO_DEPENDENCY, "taskpool:: task has no dependency");
+                    }
+                    if (internalTask.isSubmitted) {
+                        throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY, "taskpool:: cannot removeDependency on a dependent and executed task");
+                    }
+                    if (!internalTask.getDependentTasks().has(this)) {
+                        throw new Error(TASKPOOL_ERROR_DEPENDENCY_NOT_EXIST, "taskpool:: The dependency does not exist");
+                    }
                 }
-                if (InternalTask.of(task).isSubmitted) {
-                    throw new Error(TASKPOOL_ERROR_EXECUTED_TASK_REMOVE_DEPENDENCY, "taskpool:: cannot removeDependency on a dependent and executed task");
+                for (let task: Task of tasks) {
+                    InternalTask.of(task).getDependentTasks().delete(this);
+                    internalThis.taskDependenciesCount.fetchSub(1);
                 }
-                if (!InternalTask.of(task).getDependentTasks().has(this)) {
-                    throw new Error(TASKPOOL_ERROR_DEPENDENCY_NOT_EXIST, "taskpool:: The dependency does not exist");
-                }
+                internalThis.isDependent = (internalThis.taskDependenciesCount.load() != 0);
+            } finally {
+                Tracer.finishTrace();
             }
-            for (let task: Task of tasks) {
-                InternalTask.of(task).getDependentTasks().delete(this);
-                InternalTask.of(this).taskDependenciesCount.fetchSub(1);
-            }
-            InternalTask.of(this).isDependent = (InternalTask.of(this).taskDependenciesCount.load() != 0);
         }
 
         /**
@@ -2303,6 +2452,7 @@ export namespace taskpool {
          * @param { string } name The name of TaskGroup
          */
         constructor(name: string) {
+            hilogDebug("Sta TaskPool:TaskGroup:Constructor:name:" + name);
             this.name = name;
             this.state = new GroupState();
         }
@@ -2328,6 +2478,10 @@ export namespace taskpool {
          *     - task executed via SequenceRunner
          */
         addTask(task: Task): void {
+            hilogDebug("Sta TaskPool:TaskGroup:AddTask:groupID:" +
+                GroupState.of(this).id.toString() +
+                ", taskID:" +
+                task.taskId.toString());
             this.checkExecution(task);
             InternalTask.of(task).groupId = GroupState.of(this).id;
             GroupState.of(this).tasks.push(task);
@@ -2389,6 +2543,7 @@ export namespace taskpool {
         }
 
         constructor(name: string, priority?: Priority) {
+            hilogInfo("Sta TaskPool:SeqRunner:Constructor:name:" + name);
             this.impl = SequenceRunner.getOrCreateSeqRunnerImpl(name);
             let newPriority = priority === undefined ? Priority.MEDIUM : priority;
             if (name.isEmpty() || this.impl.priority === undefined) {
@@ -2399,6 +2554,10 @@ export namespace taskpool {
         }
 
         execute(task: Task): Promise<Any> {
+            hilogDebug("Sta TaskPool:SeqRunner:Execute:seqRunnerId:" +
+                this.impl.id.toString() +
+                ", taskID:" +
+                task.taskId.toString());
             initWorkerPoolSync();
             this.checkExecution(task);
 
@@ -2434,6 +2593,10 @@ export namespace taskpool {
                             break;
                         }
                     }
+                    hilogDebug("Sta TaskPool:SeqRunner:EnqueueWaiting:seqRunnerId:" +
+                        this.impl.id.toString() +
+                        ", taskID:" +
+                        task.taskId.toString());
                     this.impl.tasks.push(task);
                 } else {
                     this.impl.isRunning = true;
@@ -2518,6 +2681,10 @@ export namespace taskpool {
                     if (nextTask == undefined) break;
                     if (InternalTask.of(nextTask).state.load() == State.CANCELED.valueOf()) {
                         const canceledInternalTask = InternalTask.of(nextTask);
+                        hilogDebug("Sta TaskPool:AsyncRunner:DequeueCanceled:asyncRunnerId:" +
+                            this.id.toString() +
+                            ", taskID:" +
+                            nextTask!.taskId.toString());
                         const canceledRecord = canceledInternalTask.currentExecutionRecord;
                         if (canceledRecord !== undefined) {
                             canceledRecord.markCanceled();
@@ -2529,6 +2696,10 @@ export namespace taskpool {
                         }
                         continue;
                     }
+                    hilogDebug("Sta TaskPool:AsyncRunner:Dequeue:asyncRunnerId:" +
+                        this.id.toString() +
+                        ", taskID:" +
+                        nextTask!.taskId.toString());
                     this.runningCount++;
                     toEnqueue.push(nextTask);
                 }
@@ -2580,6 +2751,12 @@ export namespace taskpool {
          * @param waitingCapacity The waiting task capacity, 0 is default, means no limit on waiting task capacity.
          */
         constructor(name: string | undefined, runningCapacity: int, waitingCapacity?: int) {
+            hilogInfo("Sta TaskPool:AsyncRunner:Constructor:name:" +
+                (name ?? "").toString() +
+                ", runningCapacity:" +
+                runningCapacity.toString() +
+                ", waitingCapacity:" +
+                (waitingCapacity ?? 0).toString());
             const rcap: int = runningCapacity;
             if (runningCapacity <= 0) {
                 throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_PARAM, "taskpool:: runningCapacity must be a positive number");
@@ -2604,6 +2781,10 @@ export namespace taskpool {
          * @returns
          */
         execute(task: Task, priority?: Priority): Promise<Any> {
+            hilogDebug("Sta TaskPool:AsyncRunner:Execute:asyncRunnerId:" +
+                this.impl.id.toString() +
+                ", taskID:" +
+                task.taskId.toString());
             initWorkerPoolSync();
             this.checkExecution(task);
 
@@ -2637,6 +2818,10 @@ export namespace taskpool {
                         }
                     }
                     if (this.impl.waitingCapacity == 0) {
+                        hilogDebug("Sta TaskPool:AsyncRunner:EnqueueWaiting:asyncRunnerId:" +
+                            this.impl.id.toString() +
+                            ", taskID:" +
+                            task.taskId.toString());
                         this.impl.waitingQueue.push(task);
                     } else {
                         if (this.impl.waitingCapacity > 0 && this.impl.waitingQueue.length >= this.impl.waitingCapacity) {
@@ -2657,6 +2842,10 @@ export namespace taskpool {
                                 headInternalTask.isSubmitted = false;
                             }
                         }
+                        hilogDebug("Sta TaskPool:AsyncRunner:EnqueueWaiting:asyncRunnerId:" +
+                            this.impl.id.toString() +
+                            ", taskID:" +
+                            task.taskId.toString());
                         this.impl.waitingQueue.push(task);
                     }
                 }
@@ -3007,11 +3196,16 @@ export namespace taskpool {
                 if (GroupState.of(group).state_.load() === InternalState.CANCELED.valueOf()) {
                     return;
                 }
+                let tagName = "Sta TaskPool:TimeoutGroup:groupID:" +
+                    groupState.id.toString();
+                Tracer.startTrace(tagName);
+                hilogInfo(tagName);
                 GroupState.of(group).state_.store(InternalState.TIMEOUT.valueOf());
                 GroupState.of(group).tasks.forEach((task: Task) => {
                     InternalTask.of(task).state.store(InternalState.TIMEOUT.valueOf());
                 });
                 reject(new Error(TASKPOOL_ERROR_TASK_EXECUTE_TIMEOUT, "taskpool:: task group has been timeout"));
+                Tracer.finishTrace();
             }, configs.timeout!.toInt());
         });
         const allPromise = Promise.all<Any>(promises);
@@ -3107,6 +3301,13 @@ export namespace taskpool {
         }
         return new Promise<Any>((resolve, reject) => {
             InternalTask.of(task).timerId = setTimeout(() => {
+                let tagName = "Sta TaskPool:ExecuteDelayed:taskID:" +
+                    task.taskId.toString() +
+                    ", priority:" +
+                    (priority ?? Priority.MEDIUM).toString() +
+                    ", delayTime:" +
+                    delayTime.toString();
+                hilogDebug(tagName);
                 ConcurrencyHelpers.lockGuard(mutex, () => {
                     pendingDelayed.delete(task);
                 });
@@ -3214,50 +3415,58 @@ export namespace taskpool {
      * @see Task.isCancel
      */
     export function cancel(task: Task): void {
-        tryCancelDependentTasks(task);
-        // 1. task has been canceled skip it
-        // 2. task is waiting or running, cancel it
-        let timerId = -1;
-        if (InternalTask.of(task).timerId !== -1) {
-            timerId = InternalTask.of(task).timerId;
-            if (InternalTask.of(task).isPeriodicTask) {
-                clearInterval(timerId);
-                periodicTasks.delete(task.taskId);
+        let tagName = "Sta TaskPool:CancelTask:taskID:" + task.taskId.toString();
+        Tracer.startTrace(tagName);
+        hilogInfo(tagName);
+        try {
+            tryCancelDependentTasks(task);
+            // 1. task has been canceled skip it
+            // 2. task is waiting or running, cancel it
+            let timerId = -1;
+            if (InternalTask.of(task).timerId !== -1) {
+                timerId = InternalTask.of(task).timerId;
+                if (InternalTask.of(task).isPeriodicTask) {
+                    clearInterval(timerId);
+                    periodicTasks.delete(task.taskId);
+                }
             }
-        }
-        if (timerId != -1) {
-            ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
-                InternalTask.of(task).timerId = -1;
-                InternalTask.of(task).clearPeriodicPendingExecutionRecordsUnsafe();
-                // canceled task set state to canceled, avoid duplicate execution
-                InternalTask.of(task).state.store(State.CANCELED.valueOf());
-            });
-            return;
-        }
-        while(true) {
-            let curState = InternalTask.of(task).state.load();
-            if (curState == InternalState.CANCELED) {
+            if (timerId != -1) {
+                ConcurrencyHelpers.lockGuard(InternalTask.of(task).taskMutex, () => {
+                    InternalTask.of(task).timerId = -1;
+                    InternalTask.of(task).clearPeriodicPendingExecutionRecordsUnsafe();
+                    // canceled task set state to canceled, avoid duplicate execution
+                    InternalTask.of(task).state.store(State.CANCELED.valueOf());
+                });
+                InternalTask.of(task).removeTaskRegistryReference();
                 return;
             }
-            if (curState == InternalState.NOT_FOUND) {
-                throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK, "taskpool:: task is not executed or has been executed");
-            }
-            if (curState == InternalState.FINISHED) {
-                if (InternalTask.of(task).seqId.load() != 0) {
-                    throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTED, "taskpool:: sequenceRunner task has been executed");
+            while(true) {
+                let curState = InternalTask.of(task).state.load();
+                if (curState == InternalState.CANCELED) {
+                    return;
                 }
-                if (InternalTask.of(task).asyncId.load() != 0) {
-                    throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTED, "taskpool:: asyncRunner task has been executed")
+                if (curState == InternalState.NOT_FOUND) {
+                    throw new Error(TASKPOOL_ERROR_TASK_NOT_EXECUTED_TASK, "taskpool:: task is not executed or has been executed");
                 }
-                throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
-            }
-            if (InternalTask.of(task).state.compareAndSwap(curState, InternalState.CANCELED) == curState) {
-                cleanupCanceledPendingDependencyTask(task);
-                if (curState == InternalState.RUNNING.valueOf()) {
-                    cleanupCanceledRunningTask(task);
+                if (curState == InternalState.FINISHED) {
+                    if (InternalTask.of(task).seqId.load() != 0) {
+                        throw new Error(TASKPOOL_ERROR_SEQ_RUNNER_TASK_EXECUTED, "taskpool:: sequenceRunner task has been executed");
+                    }
+                    if (InternalTask.of(task).asyncId.load() != 0) {
+                        throw new Error(TASKPOOL_ERROR_ASYNC_RUNNER_TASK_EXECUTED, "taskpool:: asyncRunner task has been executed")
+                    }
+                    throw new Error(TASKPOOL_ERROR_TASK_ALREADY_EXECUTED_BASIC, "taskpool:: task has been executed");
                 }
-                return;
+                if (InternalTask.of(task).state.compareAndSwap(curState, InternalState.CANCELED) == curState) {
+                    cleanupCanceledPendingDependencyTask(task);
+                    if (curState == InternalState.RUNNING.valueOf()) {
+                        cleanupCanceledRunningTask(task);
+                    }
+                    return;
+                }
             }
+        } finally {
+            Tracer.finishTrace();
         }
     }
 
@@ -3269,21 +3478,28 @@ export namespace taskpool {
      */
     export function cancel(group: TaskGroup): void {
         const groupState = GroupState.of(group);
-        ConcurrencyHelpers.lockGuard(groupState.controlMutex, () => {
-            let currentState = groupState.state_.load();
-            if (currentState != (InternalState.RUNNING.valueOf()) &&
-                currentState != (InternalState.WAITING.valueOf())) {
-                throw new Error(
-                    TASKPOOL_ERROR_TASK_NOT_EXECUTED_GROUP,
-                    "taskpool:: taskGroup is not executed or has been executed"
-                );
-            }
-            groupState.state_.store(State.CANCELED.valueOf());
-            groupState.tasks.forEach((task: Task) => {
-                InternalTask.of(task).state.store(State.CANCELED.valueOf());
+        let tagName = "Sta TaskPool:CancelGroup:groupID:" + groupState.id.toString();
+        Tracer.startTrace(tagName);
+        hilogInfo(tagName);
+        try {
+            ConcurrencyHelpers.lockGuard(groupState.controlMutex, () => {
+                let currentState = groupState.state_.load();
+                if (currentState != (InternalState.RUNNING.valueOf()) &&
+                    currentState != (InternalState.WAITING.valueOf())) {
+                    throw new Error(
+                        TASKPOOL_ERROR_TASK_NOT_EXECUTED_GROUP,
+                        "taskpool:: taskGroup is not executed or has been executed"
+                    );
+                }
+                groupState.state_.store(State.CANCELED.valueOf());
+                groupState.tasks.forEach((task: Task) => {
+                    InternalTask.of(task).state.store(State.CANCELED.valueOf());
+                });
+                tryRejectCanceledGroupResultLocked(groupState);
             });
-            tryRejectCanceledGroupResultLocked(groupState);
-        });
+        } finally {
+            Tracer.finishTrace();
+        }
     }
 
     /**
@@ -3721,7 +3937,8 @@ export namespace taskpool {
             if (isWorkersInitialized.get() || isTaskPoolUseLaunch) {
                 return;
             }
-
+            let tagName = "Sta TaskPool:Init";
+            hilogDebug(tagName);
             if (managerWorker === undefined) {
                 // Create managerWorker, and start to trigger shrink.
                 managerWorker = new GlobalQueueWorker();
@@ -4147,6 +4364,7 @@ export namespace taskpool {
     let waitingTasksNum: AtomicInt = new AtomicInt(0);
     let totalExecCount: AtomicInt = new AtomicInt(0);
     let totalExecTime: AtomicInt = new AtomicInt(0);
+    let callbackTraceIdSeq: AtomicInt = new AtomicInt(0);
     let managerWorker: GlobalQueueWorker | undefined = undefined;
     let triggerInterval: int = 30000; // 30s is the default shrink interval.
     let idleThreshold: int = 60000; // If the worker is idle for more than 60s, it will be released.

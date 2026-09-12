@@ -355,8 +355,16 @@ export class EAWorker {
      * Note: it has no effect if EAWorker was stoped
      */
     private static postTaskToMain<R>(coroFun: Function, args: FixedArray<Any>, abort: boolean) : Job<R> {
+        let traceId = InternalWorker.traceIdSeq.fetchAdd(1);
+        let tagName = "EAWorker:postToMain";
+        hilogDebug(tagName);
         let wrappedTask = (): R => {
-            return coroFun.unsafeCall(...args) as R;
+            Tracer.startAsyncTrace(tagName, traceId);
+            try {
+                return coroFun.unsafeCall(...args) as R;
+            } finally {
+                Tracer.finishAsyncTrace(tagName, traceId);
+            }
         }
         let lParams: LaunchParams = {
             workerGroupId: WorkerGroup.generateGroupId(WorkerDomain.EXACT_ID, [MAIN_WORKER_ID]),
@@ -373,12 +381,17 @@ export class EAWorker {
      */
     public join(): Job<void> {
         if (!this.loopStarted.get()) {
-             throw new Error('EAWorker:: Cannot stop worker before start');
+            throw new Error('EAWorker:: Cannot stop worker before start');
         }
         let finalTask = () => {
+            let tagName = "EAWorker:join:workerName:" + this.getName() +
+                ", workerId:" + this.worker.getWorkerId();
+            Tracer.startTrace(tagName);
+            hilogDebug(tagName);
             cleanupWorkerState(this.worker.getWorkerId());
             EAWorker.unregisterWorker(this.worker.getWorkerId(), this);
             this.releaseUserWorkerSlot();
+            Tracer.finishTrace();
         };
         let joinJob = this.worker.join(finalTask);
         this.loopStarted.set(false);
@@ -392,12 +405,14 @@ export class EAWorker {
      */
     public postTask(task: Task):void {
         if (this.isMain()) {
+            hilogDebug("EAWorker:postTask:main");
             EAWorker.postToMain<void>(task);
             return;
         }
         if (!this.loopStarted.get()) {
             throw new Error('EAWorker:: Cannot post task when worker is not started');
         }
+        hilogDebug("EAWorker:postTask:name:" + this.getName());
         this.worker.run<void>(task);
     }
 
@@ -455,6 +470,7 @@ export abstract class InternalWorker {
     protected workerId: int;
     private errorHandler: ErrorHandlerType | undefined = undefined;
     private joiningPromise = new Promise<void>((res) => {});
+    public static traceIdSeq: AtomicInt = new AtomicInt(0);
 
     constructor(name: string, workerId: int) {
         this.name = name;
@@ -462,7 +478,20 @@ export abstract class InternalWorker {
     }
 
     run<R>(task: Function, ...args: FixedArray<Any>): Job<R> {
-        return this.runImpl<R>((): R => { return task.unsafeCall(...args) as R; });
+        return this.runImpl<R>((): R => {
+            let traceId = InternalWorker.traceIdSeq.fetchAdd(1);
+            let tagName = "EAWorker:run:name:" +
+                this.getName() +
+                ", workerId:" +
+                this.workerId.toString();
+            Tracer.startAsyncTrace(tagName, traceId);
+            hilogDebug(tagName);
+            try {
+                return task.unsafeCall(...args) as R;
+            } finally {
+                Tracer.finishAsyncTrace(tagName, traceId);
+            }
+        });
     }
 
     abstract start(initialTask: Task): void;
@@ -560,11 +589,22 @@ class InteropWorker extends InternalWorker {
 
     start(initialTask: Task) {
         let wrappedTask = () => {
+            let traceId = -1;
+            let tagName = "";
+            if (this.getName() != "taskpool") {
+                traceId = InternalWorker.traceIdSeq.fetchAdd(1);
+                tagName = "EAWorker:Start:name:" + this.getName();
+                Tracer.startAsyncTrace(tagName, traceId);
+                hilogDebug(tagName);
+            }
             try {
                 initialTask();
             } finally {
                 this.interopInitialized.set(true);
                 this.processPendingTasks();
+                if (this.getName() != "taskpool") {
+                    Tracer.finishAsyncTrace(tagName, traceId);
+                }
             }
         }
         super.startImpl(wrappedTask, true);
@@ -586,12 +626,21 @@ class InteropWorker extends InternalWorker {
 
         let completer = new CompletableJob<R>();
         let pendingTask: Task = () => {
+            let traceId = InternalWorker.traceIdSeq.fetchAdd(1);
+            let tagName = "EAWorker:run:name:" +
+                this.getName() +
+                ", workerId:" +
+                this.workerId.toString();
+            Tracer.startAsyncTrace(tagName, traceId);
+            hilogDebug(tagName);
             try {
                 let serializeHelper = new InteropSerializeHelper(args);
                 let res = task.unsafeCall(...serializeHelper.deserialize()) as R;
                 completer.finish(res);
             } catch (e) {
                 completer.fail(e);
+            } finally {
+                Tracer.finishAsyncTrace(tagName, traceId);
             }
         }
         let failJob: ErrorHandlerType = (err: Error) => {
@@ -605,7 +654,18 @@ class InteropWorker extends InternalWorker {
     private runInternal<R>(task: Function, args: FixedArray<Any>): Job<R> {
         let serializeHelper = new InteropSerializeHelper(args);
         let wrappedTask = (): R => {
-            return task.unsafeCall(...serializeHelper.deserialize()) as R;
+            let traceId = InternalWorker.traceIdSeq.fetchAdd(1);
+            let tagName = "EAWorker:run:name:" +
+                this.getName() +
+                ", workerId:" +
+                this.workerId.toString();
+            Tracer.startAsyncTrace(tagName, traceId);
+            hilogDebug(tagName);
+            try {
+                return task.unsafeCall(...serializeHelper.deserialize()) as R;
+            } finally {
+                Tracer.finishAsyncTrace(tagName, traceId);
+            }
         }
         return super.runImpl<R>(wrappedTask);
     }
@@ -645,7 +705,24 @@ class StaticWorker extends InternalWorker {
     }
 
     start(initialTask: Task) {
-        super.startImpl(initialTask, false);
+        let wrappedTask = () => {
+            let traceId = -1;
+            let tagName = "";
+            if (this.getName() != "taskpool") {
+                traceId = InternalWorker.traceIdSeq.fetchAdd(1);
+                tagName = "EAWorker:Start:name:" + this.getName();
+                Tracer.startAsyncTrace(tagName, traceId);
+                hilogDebug(tagName);
+            }
+            try {
+                initialTask();
+            } finally {
+                if (this.getName() != "taskpool") {
+                    Tracer.finishAsyncTrace(tagName, traceId);
+                }
+            }
+        }
+        super.startImpl(wrappedTask, false);
     }
 
     handleCreateInteropEnvError() {

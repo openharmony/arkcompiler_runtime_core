@@ -5675,6 +5675,126 @@ intrinsics:
     impl: ark::ets::intrinsics::StackTraceGetMainThreadStackTrace
     clear_flags: [ no_dce ]
 
+  - name: ConcurrencyTracerStartTrace
+    space: ets
+    class_name: std.concurrency.Tracer
+    method_name: startTrace
+    static: true
+    signature:
+      ret: void
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::TracerStartTraceImpl
+
+  - name: ConcurrencyTracerFinishTrace
+    space: ets
+    class_name: std.concurrency.Tracer
+    method_name: finishTrace
+    static: true
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::TracerFinishTraceImpl
+
+  - name: ConcurrencyTracerStartAsyncTrace
+    space: ets
+    class_name: std.concurrency.Tracer
+    method_name: startAsyncTrace
+    static: true
+    signature:
+      ret: void
+      args: [std.core.String, i32]
+    impl: ark::ets::intrinsics::TracerStartAsyncTraceImpl
+
+  - name: ConcurrencyTracerFinishAsyncTrace
+    space: ets
+    class_name: std.concurrency.Tracer
+    method_name: finishAsyncTrace
+    static: true
+    signature:
+      ret: void
+      args: [std.core.String, i32]
+    impl: ark::ets::intrinsics::TracerFinishAsyncTraceImpl
+
+  - name: ConcurrencyHilogDebug
+    space: ets
+    class_name: std.concurrency.ETSGLOBAL
+    method_name: hilogDebug
+    static: true
+    signature:
+      ret: void
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::LogDebugImpl
+
+  - name: ConcurrencyHilogInfo
+    space: ets
+    class_name: std.concurrency.ETSGLOBAL
+    method_name: hilogInfo
+    static: true
+    signature:
+      ret: void
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::LogInfoImpl
+
+  - name: CoreTracerStartTrace
+    space: ets
+    class_name: std.core.Tracer
+    method_name: startTrace
+    static: true
+    signature:
+      ret: void
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::TracerStartTraceImpl
+
+  - name: CoreTracerFinishTrace
+    space: ets
+    class_name: std.core.Tracer
+    method_name: finishTrace
+    static: true
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::TracerFinishTraceImpl
+
+  - name: CoreTracerStartAsyncTrace
+    space: ets
+    class_name: std.core.Tracer
+    method_name: startAsyncTrace
+    static: true
+    signature:
+      ret: void
+      args: [std.core.String, i32]
+    impl: ark::ets::intrinsics::TracerStartAsyncTraceImpl
+
+  - name: CoreTracerFinishAsyncTrace
+    space: ets
+    class_name: std.core.Tracer
+    method_name: finishAsyncTrace
+    static: true
+    signature:
+      ret: void
+      args: [std.core.String, i32]
+    impl: ark::ets::intrinsics::TracerFinishAsyncTraceImpl
+
+  - name: CoreHilogDebug
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: hilogDebug
+    static: true
+    signature:
+      ret: void
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::LogDebugImpl
+
+  - name: CoreHilogInfo
+    space: ets
+    class_name: std.core.ETSGLOBAL
+    method_name: hilogInfo
+    static: true
+    signature:
+      ret: void
+      args: [std.core.String]
+    impl: ark::ets::intrinsics::LogInfoImpl
+
   - name: StdCoreExit
     space: ets
     class_name: std.core.ETSGLOBAL
