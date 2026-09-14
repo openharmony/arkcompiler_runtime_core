@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@ function main(): int {
     failures += test(createMapAndAdd(), "Create Map and Add single item")
     failures += test(createMapAddAndGet(), "Create Map add and get value")
     failures += test(createMapAndGetDefault(), "Create Map and get default value")
+    failures += test(createMapWithUndefinedValueAndGetDefault(), 'Map with undefined value returns undefined not default')
     failures += test(createMapAddReplaceAndGet(), "Create map add and replace entry")
 
     failures += test(createMapAddAndClear(), "Create Map add and clear it")
@@ -243,6 +244,14 @@ function createMapAndGetDefault(): int {
     let map: Map<char, double> = new Map<char, double>()
     let expected: Double = map.get(c'a', 1.0)
     let result = expected == 1.0 ? 0 : 1
+    return result
+}
+
+function createMapWithUndefinedValueAndGetDefault(): int {
+    let map: Map<string, string | undefined> = new Map<string, string | undefined>()
+    map.set('k', undefined)
+    let val: string | undefined = map.get('k', 'default')
+    let result = val === undefined ? 0 : 1
     return result
 }
 

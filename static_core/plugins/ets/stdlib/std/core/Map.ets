@@ -293,6 +293,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     private initialCapacity: int = Map.MIN_CAPACITY  // The capacity used to create the Map.
 
     private static readonly MIN_CAPACITY = 4
+    private static readonly MAX_CAPACITY = 1 << 29
     private static readonly MIN_SHRINK_CAPACITY = 16
     // TODO #33602: replace with const enum
     //private static readonly ENTRY_KEY = 0
@@ -301,6 +302,8 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
     private static adjustCapacity(numEntries: int): int {
         if (numEntries <= Map.MIN_CAPACITY)
             return Map.MIN_CAPACITY
+        if (numEntries > Map.MAX_CAPACITY)
+            return Map.MAX_CAPACITY
         return Math.ceilPow2(numEntries)
     }
 
@@ -316,6 +319,9 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         }
 
         // grow
+        if (capacity >= Map.MAX_CAPACITY) {
+            return capacity
+        }
         return capacity * 2
     }
 
@@ -596,7 +602,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     set(key: K, val: V): this {
         // rehash
-        if (this.numEntries * 4 >= this.cap * 3) {
+        if (this.numEntries >= this.cap - this.cap / 4 && this.cap < Map.MAX_CAPACITY) {
             this.rehash(Map.computeCapacityForGrow(this.cap, this.sizeVal, this.numEntries))
         }
 
@@ -755,7 +761,17 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      * @returns value if key presents, def otherwise
      */
     get(key: K, def: V): V {
-        return this.get(key) ?? def
+        const bucketIdx = this.getBucketIndex(key)
+        let bucket = this.getBucketByIdx(bucketIdx)
+
+        while (isLegalAt(bucket)) {
+            if (Map.sameValueZero(getKeyAt<K>(this.data, bucket), key)) {
+                return getValueAt<V>(this.data, bucket)
+            }
+            bucket = this.getNextAt(bucket)
+        }
+
+        return def
     }
 
     private mappedIterator<R>(fn: (k: K, v: V) => R): IterableIterator<R> {
