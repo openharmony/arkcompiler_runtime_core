@@ -358,18 +358,18 @@ icu::Formattable DoubleToFormattable([[maybe_unused]] ani_env *env, double value
     return icu::Formattable(value);
 }
 
-icu::Formattable StrToFormattable(ani_env *env, ani_string value)
+ani_status StrToFormattable(ani_env *env, ani_string value, icu::Formattable *result)
 {
     UErrorCode status = U_ZERO_ERROR;
     const std::string &str = ConvertFromAniString(env, value);
     const icu::StringPiece sp {str.data(), static_cast<int32_t>(str.size())};
-    icu::Formattable ret(sp, status);
+    new (result) icu::Formattable(sp, status);
     if (UNLIKELY(U_FAILURE(status))) {
-        std::string message = "StrToToFormattable failed " + std::string(u_errorName(status));
+        std::string message = "StrToFormattable failed " + std::string(u_errorName(status));
         ThrowNewError(env, ERR_CLS_RUNTIME_EXCEPTION, message.c_str(), ERROR_CTOR_SIGNATURE);
-        return icu::Formattable();
+        return ANI_ERROR;
     }
-    return ret;
+    return ANI_OK;
 }
 
 template <typename T>
@@ -666,17 +666,33 @@ ani_string IcuFormatRangeDoubleDouble(ani_env *env, ani_object self, ani_double 
 
 ani_string IcuFormatRangeDoubleDecStr(ani_env *env, ani_object self, ani_double startValue, ani_string endValue)
 {
-    return IcuFormatRange(env, self, DoubleToFormattable(env, startValue), StrToFormattable(env, endValue));
+    icu::Formattable endFrmtbl;
+    if (StrToFormattable(env, endValue, &endFrmtbl) != ANI_OK) {
+        return nullptr;
+    }
+    return IcuFormatRange(env, self, DoubleToFormattable(env, startValue), endFrmtbl);
 }
 
 ani_string IcuFormatRangeDecStrDouble(ani_env *env, ani_object self, ani_string startValue, ani_double endValue)
 {
-    return IcuFormatRange(env, self, StrToFormattable(env, startValue), DoubleToFormattable(env, endValue));
+    icu::Formattable startFrmtbl;
+    if (StrToFormattable(env, startValue, &startFrmtbl) != ANI_OK) {
+        return nullptr;
+    }
+    return IcuFormatRange(env, self, startFrmtbl, DoubleToFormattable(env, endValue));
 }
 
 ani_string IcuFormatRangeDecStrDecStr(ani_env *env, ani_object self, ani_string startValue, ani_string endValue)
 {
-    return IcuFormatRange(env, self, StrToFormattable(env, startValue), StrToFormattable(env, endValue));
+    icu::Formattable startFrmtbl;
+    if (StrToFormattable(env, startValue, &startFrmtbl) != ANI_OK) {
+        return nullptr;
+    }
+    icu::Formattable endFrmtbl;
+    if (StrToFormattable(env, endValue, &endFrmtbl) != ANI_OK) {
+        return nullptr;
+    }
+    return IcuFormatRange(env, self, startFrmtbl, endFrmtbl);
 }
 
 ani_array IcuFormatToPartsDouble(ani_env *env, [[maybe_unused]] ani_object self, [[maybe_unused]] ani_double value)
@@ -707,9 +723,12 @@ ani_array IcuFormatToRangePartsDoubleDecStr(ani_env *env, [[maybe_unused]] ani_o
                                             [[maybe_unused]] ani_double startValue,
                                             [[maybe_unused]] ani_string endValue)
 {
+    icu::Formattable endFrmtbl;
+    if (StrToFormattable(env, endValue, &endFrmtbl) != ANI_OK) {
+        return nullptr;
+    }
     ani_array arr = nullptr;
-    ani_status status =
-        IcuFormatToRangeParts(env, self, DoubleToFormattable(env, startValue), StrToFormattable(env, endValue), &arr);
+    ani_status status = IcuFormatToRangeParts(env, self, DoubleToFormattable(env, startValue), endFrmtbl, &arr);
     return status == ANI_OK ? arr : nullptr;
 }
 
@@ -717,9 +736,12 @@ ani_array IcuFormatToRangePartsDecStrDouble(ani_env *env, [[maybe_unused]] ani_o
                                             [[maybe_unused]] ani_string startValue,
                                             [[maybe_unused]] ani_double endValue)
 {
+    icu::Formattable startFrmtbl;
+    if (StrToFormattable(env, startValue, &startFrmtbl) != ANI_OK) {
+        return nullptr;
+    }
     ani_array arr = nullptr;
-    ani_status status =
-        IcuFormatToRangeParts(env, self, StrToFormattable(env, startValue), DoubleToFormattable(env, endValue), &arr);
+    ani_status status = IcuFormatToRangeParts(env, self, startFrmtbl, DoubleToFormattable(env, endValue), &arr);
     return status == ANI_OK ? arr : nullptr;
 }
 
@@ -727,9 +749,16 @@ ani_array IcuFormatToRangePartsDecStrDecStr(ani_env *env, [[maybe_unused]] ani_o
                                             [[maybe_unused]] ani_string startValue,
                                             [[maybe_unused]] ani_string endValue)
 {
+    icu::Formattable startFrmtbl;
+    if (StrToFormattable(env, startValue, &startFrmtbl) != ANI_OK) {
+        return nullptr;
+    }
+    icu::Formattable endFrmtbl;
+    if (StrToFormattable(env, endValue, &endFrmtbl) != ANI_OK) {
+        return nullptr;
+    }
     ani_array arr = nullptr;
-    ani_status status =
-        IcuFormatToRangeParts(env, self, StrToFormattable(env, startValue), StrToFormattable(env, endValue), &arr);
+    ani_status status = IcuFormatToRangeParts(env, self, startFrmtbl, endFrmtbl, &arr);
     return status == ANI_OK ? arr : nullptr;
 }
 
