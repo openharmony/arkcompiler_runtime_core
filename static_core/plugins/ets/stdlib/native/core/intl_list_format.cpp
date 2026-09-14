@@ -112,13 +112,12 @@ ani_object FormatToParts(ani_env *env, [[maybe_unused]] ani_class klass, ani_arr
 {
     auto list = ToIcuList(env, aniList);
     auto tag = ConvertFromAniString(env, aniLocale);
-    auto locale = GetLocale(tag);
     auto style = ToIcuStyle(env, aniStyle);
     auto type = ToIcuType(env, aniType);
 
     auto status = UErrorCode::U_ZERO_ERROR;
     auto formatter =
-        std::unique_ptr<icu::ListFormatter>(icu::ListFormatter::createInstance(locale, type, style, status));
+        std::unique_ptr<icu::ListFormatter>(icu::ListFormatter::createInstance(GetLocale(tag), type, style, status));
     if (UNLIKELY(U_FAILURE(status))) {
         ThrowRangeError(env, "Failed to create ListFormatter: ", u_errorName(status));
         return nullptr;
@@ -165,8 +164,7 @@ ani_object FormatToParts(ani_env *env, [[maybe_unused]] ani_class klass, ani_arr
         squashed.push_back(value);
     }
     ani_array arr = nullptr;
-    ani_status toArrStatus = ToAniArray(env, squashed, &arr);
-    return toArrStatus == ANI_OK ? static_cast<ani_object>(arr) : nullptr;
+    return ToAniArray(env, squashed, &arr) == ANI_OK ? static_cast<ani_object>(arr) : nullptr;
 }
 
 ani_status RegisterIntlListFormat(ani_env *env)
