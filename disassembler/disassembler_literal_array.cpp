@@ -14,6 +14,7 @@
  */
 
 #include "disassembler.h"
+#include "parse_hex_u32.h"
 
 #include "utils/logger.h"
 
@@ -61,7 +62,12 @@ void Disassembler::DumpLiteralArrayContent(const pandasm::LiteralArray &literal_
             }
             case panda_file::LiteralTag::LITERALARRAY: {
                 std::string offsetStr = std::get<std::string>(item.value_);
-                uint32_t litArrayOffset = std::stoi(offsetStr, nullptr, 16);
+                uint32_t litArrayOffset = 0;
+                if (!ParseHexU32(offsetStr, litArrayOffset)) {
+                    LOG(ERROR, DISASSEMBLER) << "> bad literal array offset " << offsetStr;
+                    ss << "\"<bad literal array offset>\"";
+                    break;
+                }
                 DumpLiteralArrayByOffset(litArrayOffset, ss, visiting);
                 break;
             }
@@ -116,7 +122,10 @@ std::string Disassembler::getLiteralArrayTypeContent(const pandasm::LiteralArray
         }
         case panda_file::LiteralTag::LITERALARRAY: {
             std::string offsetStr = std::get<std::string>(literal_array.literals_[0].value_);
-            uint32_t litArrayOffset = std::stoi(offsetStr, nullptr, 16);
+            uint32_t litArrayOffset = 0;
+            if (!ParseHexU32(offsetStr, litArrayOffset)) {
+                return "any[]";
+            }
             return getLiteralArrayTypeByOffset(litArrayOffset, visiting) + "[]";
         }
         case panda_file::LiteralTag::BUILTINTYPEINDEX: {
