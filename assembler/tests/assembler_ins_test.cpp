@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -263,5 +263,40 @@ HWTEST_F(AssemblerInsTest, assembler_ins_test_006, TestSize.Level1)
     EXPECT_TRUE(con.NextMask());
     con.end = true;
     EXPECT_TRUE(con.NextMask());
+}
+
+/**
+ * @tc.name: assembler_ins_test_007
+ * @tc.desc: Verify that CollectStringsFromFunctionInsns only collects string_id operands. method_id and
+ *           literalarray_id operands are resolved into method/literal array items by the emitter, so collecting
+ *           them would emit unreferenced string items into the abc file.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblerInsTest, assembler_ins_test_007, TestSize.Level1)
+{
+    panda::panda_file::SourceLang language {panda::panda_file::SourceLang::PANDA_ASSEMBLY};
+    panda::pandasm::Function function("func", language);
+
+    const std::string string_constant = "stringConstant";
+    const std::string method_id = "&record&.#~@0>#method";
+    const std::string literalarray_id = "record_0";
+
+    std::vector<uint16_t> regs {0};
+    std::vector<IType> imms {IType(int64_t(0x0)), IType(int64_t(0x0))};
+    std::vector<std::string> string_ids {string_constant};
+    std::vector<std::string> method_ids {method_id};
+    std::vector<std::string> method_and_literalarray_ids {method_id, literalarray_id};
+
+    function.ins.emplace_back(Ins::CreateIns(Opcode::LDA_STR, regs, imms, string_ids));
+    function.ins.emplace_back(Ins::CreateIns(Opcode::DEFINEFUNC, regs, imms, method_ids));
+    function.ins.emplace_back(Ins::CreateIns(Opcode::DEFINEMETHOD, regs, imms, method_ids));
+    function.ins.emplace_back(Ins::CreateIns(Opcode::DEFINECLASSWITHBUFFER, regs, imms,
+                                             method_and_literalarray_ids));
+    function.ins.emplace_back(Ins::CreateIns(Opcode::CALLRUNTIME_DEFINESENDABLECLASS, regs, imms,
+                                             method_and_literalarray_ids));
+
+    const std::set<std::string> expected_strings {string_constant};
+    EXPECT_EQ(function.CollectStringsFromFunctionInsns(), expected_strings);
 }
 }
