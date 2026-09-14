@@ -880,6 +880,15 @@
 
 #31873 [ArkTS][CTE] incorrect computed smart type for typeof v === "string"
 15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_1.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_8.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_9.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_11.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_12.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_13.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_14.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_15.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_16.ets
+15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_17.ets
 
 #34132 branching on v === e not working
 15.semantic_rules/08.smart_casts_and_smart_types/04.computing_smart_types/br_19.ets
