@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include <cstdlib>
 #include <gtest/gtest.h>
+#include <iostream>
+#include <string>
 
 #include "plugins/ets/tests/ani/ani_gtest/ani_gtest.h"
 
@@ -29,6 +30,12 @@
 
 namespace ark::ets::test {
 
+namespace {
+
+constexpr size_t SIGQUIT_LOG_PAYLOAD_SIZE = 768U;
+
+}  // namespace
+
 class EtsCoroutineDFXTest : public ani::testing::AniTest {
 public:
     static ani_function ResolveFunction(ani_env *env, std::string_view methodName, std::string_view signature)
@@ -40,6 +47,13 @@ public:
         status = env->Module_FindFunction(md, methodName.data(), signature.data(), &func);
         ASSERT(status == ANI_OK);
         return func;
+    }
+
+    StackfulCoroutineManager *GetCoroutineManager() const
+    {
+        auto *coroutine = EtsCoroutine::GetCurrent();
+        auto *etsVm = coroutine->GetPandaVM();
+        return static_cast<StackfulCoroutineManager *>(etsVm->GetJobManager());
     }
 
 private:
@@ -55,17 +69,92 @@ private:
 
 TEST_F(EtsCoroutineDFXTest, PrintStackTest)
 {
-    auto coroutine = EtsCoroutine::GetCurrent();
-    auto etsVm = coroutine->GetPandaVM();
-    auto *coroutineManager = static_cast<StackfulCoroutineManager *>(etsVm->GetJobManager());
+    auto *coroutineManager = GetCoroutineManager();
 
     CallEtsFunction<ani_int>("coroutine_dfx_test", "startWaitCoro");
     coroutineManager->ExecuteJobs();
-    auto coroInfo = coroutineManager->GetAllWorkerFullStatus()->OutputInfo();
+    auto snapshot = coroutineManager->GetAllWorkerFullStatus();
+    CallEtsFunction<ani_int>("coroutine_dfx_test", "notify");
+    coroutineManager->ExecuteJobs();
+
+    auto coroInfo = snapshot->OutputInfo();
     ASSERT_TRUE(coroInfo.find("Status: BLOCKED") != coroInfo.npos);
     ASSERT_TRUE(coroInfo.find("coroutine_dfx_test.ETSGLOBAL::%%async-waiter") !=
                 coroInfo.npos);  // check if it contains stack with waiter()
-    CallEtsFunction<ani_int>("coroutine_dfx_test", "notify");
+    ASSERT_EQ(coroInfo.find("WaitReason:"), coroInfo.npos);
+}
+
+TEST_F(EtsCoroutineDFXTest, MutexWaitSnapshotTest)
+{
+    auto *coroutineManager = GetCoroutineManager();
+    CallEtsFunction<ani_int>("coroutine_dfx_test", "startMutexWaitCoro");
+    coroutineManager->ExecuteJobs();
+
+    auto coroInfo = coroutineManager->GetAllWorkerFullStatus()->OutputInfo();
+    ASSERT_NE(coroInfo.find("WaitReason: MUTEX_LOCK"), coroInfo.npos);
+    ASSERT_NE(coroInfo.find("WaitMode: MUTEX"), coroInfo.npos);
+    ASSERT_EQ(coroInfo.find("WaitResource:"), coroInfo.npos);
+
+    ASSERT_EQ(CallEtsFunction<ani_int>("coroutine_dfx_test", "dumpContainsMutexWait"), 1);
+
+    auto *etsVm = EtsCoroutine::GetCurrent()->GetPandaVM();
+    etsVm->DumpForSigQuit(std::cerr);
+
+    CallEtsFunction<ani_int>("coroutine_dfx_test", "unlockMutex");
+    coroutineManager->ExecuteJobs();
+}
+
+TEST_F(EtsCoroutineDFXTest, CoroutineDumpIsCompleteTest)
+{
+    auto *coroutineManager = GetCoroutineManager();
+    CallEtsFunction<ani_int>("coroutine_dfx_test", "startManyMutexWaitCoroutines");
+    coroutineManager->ExecuteJobs();
+
+    auto *etsVm = EtsCoroutine::GetCurrent()->GetPandaVM();
+    auto coroutineInfo = etsVm->GetCoroutineInfo();
+    ASSERT_GT(coroutineInfo.size(), SIGQUIT_LOG_PAYLOAD_SIZE);
+    ASSERT_EQ(CallEtsFunction<ani_int>("coroutine_dfx_test", "dumpContainsAllMutexWaiters"), 1);
+
+    etsVm->DumpForSigQuit(std::cerr);
+
+    CallEtsFunction<ani_int>("coroutine_dfx_test", "unlockMutex");
+    coroutineManager->ExecuteJobs();
+}
+
+TEST_F(EtsCoroutineDFXTest, RWLockWriteWaitSnapshotTest)
+{
+    auto *coroutineManager = GetCoroutineManager();
+    CallEtsFunction<ani_int>("coroutine_dfx_test", "startRWWriteWaitCoro");
+    coroutineManager->ExecuteJobs();
+
+    auto coroInfo = coroutineManager->GetAllWorkerFullStatus()->OutputInfo();
+    ASSERT_NE(coroInfo.find("WaitReason: RWLOCK_WRITE"), coroInfo.npos);
+    ASSERT_NE(coroInfo.find("WaitMode: WRITELOCK"), coroInfo.npos);
+    ASSERT_NE(coroInfo.find("Readers: 1"), coroInfo.npos);
+    ASSERT_NE(coroInfo.find("Writers: 1"), coroInfo.npos);
+    ASSERT_EQ(coroInfo.find("WaitResource:"), coroInfo.npos);
+    ASSERT_EQ(CallEtsFunction<ani_int>("coroutine_dfx_test", "dumpContainsRWWriteWait"), 1);
+
+    CallEtsFunction<ani_int>("coroutine_dfx_test", "unlockRWRead");
+    coroutineManager->ExecuteJobs();
+}
+
+TEST_F(EtsCoroutineDFXTest, RWLockReadWaitSnapshotTest)
+{
+    auto *coroutineManager = GetCoroutineManager();
+    CallEtsFunction<ani_int>("coroutine_dfx_test", "startRWReadWaitCoro");
+    coroutineManager->ExecuteJobs();
+
+    auto coroInfo = coroutineManager->GetAllWorkerFullStatus()->OutputInfo();
+    ASSERT_NE(coroInfo.find("WaitReason: RWLOCK_READ"), coroInfo.npos);
+    ASSERT_NE(coroInfo.find("WaitMode: READLOCK"), coroInfo.npos);
+    ASSERT_NE(coroInfo.find("Readers: 1"), coroInfo.npos);
+    ASSERT_NE(coroInfo.find("Writers: 1"), coroInfo.npos);
+    ASSERT_EQ(coroInfo.find("WaitResource:"), coroInfo.npos);
+    ASSERT_EQ(CallEtsFunction<ani_int>("coroutine_dfx_test", "dumpContainsRWReadWait"), 1);
+
+    CallEtsFunction<ani_int>("coroutine_dfx_test", "unlockRWWrite");
+    coroutineManager->ExecuteJobs();
 }
 
 }  // namespace ark::ets::test

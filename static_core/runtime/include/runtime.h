@@ -59,6 +59,7 @@ class DProfiler;
 class CompilerInterface;
 class ClassHierarchyAnalysis;
 class RuntimeController;
+class RuntimeSignalCatcher;
 class PandaVM;
 class RuntimeNotificationManager;
 class Trace;
@@ -556,6 +557,10 @@ private:
 
 #ifndef PANDA_TARGET_WINDOWS
     SignalManager *signalManager_ {nullptr};
+#endif
+
+#ifdef PANDA_TARGET_UNIX
+    std::unique_ptr<RuntimeSignalCatcher> signalCatcher_;
 #endif
 
     // For IDE is real connected.

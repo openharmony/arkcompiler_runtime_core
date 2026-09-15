@@ -16,6 +16,8 @@
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/ets_vm_out_of_memory_listener.h"
 
+#include <algorithm>
+
 #include "compiler/optimizer/ir/runtime_interface.h"
 #include "plugins/ets/runtime/ets_execution_context.h"
 #include "plugins/ets/runtime/ets_execution_context_wrapper.h"
@@ -23,6 +25,7 @@
 #include "include/mem/panda_string.h"
 #include "jit/profile_saver_worker.h"
 #include "libarkbase/macros.h"
+#include "libarkbase/utils/logger.h"
 #include "plugins/ets/runtime/ani/ani_vm_api.h"
 #include "plugins/ets/runtime/ani/verify/verify_ani_vm_api.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
@@ -63,6 +66,46 @@
 #include "libarkbase/taskmanager/task_manager.h"
 
 namespace ark::ets {
+
+namespace {
+
+constexpr size_t COROUTINE_DUMP_LOG_CHUNK_SIZE = 768U;
+constexpr uint8_t MUTF8_CONTINUATION_MASK = 0xC0U;
+constexpr uint8_t MUTF8_CONTINUATION_VALUE = 0x80U;
+
+size_t GetCoroutineDumpChunkSize(const PandaString &coroutineInfo, size_t offset, size_t lineEnd)
+{
+    size_t chunkSize = std::min(COROUTINE_DUMP_LOG_CHUNK_SIZE, lineEnd - offset);
+    if (offset + chunkSize == lineEnd) {
+        return chunkSize;
+    }
+
+    while (chunkSize > 0U && (static_cast<uint8_t>(coroutineInfo[offset + chunkSize]) & MUTF8_CONTINUATION_MASK) ==
+                                 MUTF8_CONTINUATION_VALUE) {
+        --chunkSize;
+    }
+    return chunkSize;
+}
+
+void LogCoroutineInfoInChunks(const PandaString &coroutineInfo)
+{
+    size_t offset = 0;
+    while (offset < coroutineInfo.size()) {
+        size_t lineEnd = coroutineInfo.find('\n', offset);
+        if (lineEnd == PandaString::npos) {
+            lineEnd = coroutineInfo.size();
+        }
+        while (offset < lineEnd) {
+            size_t chunkSize = GetCoroutineDumpChunkSize(coroutineInfo, offset, lineEnd);
+            ASSERT(chunkSize > 0U);
+            LOG(ERROR, RUNTIME) << coroutineInfo.substr(offset, chunkSize);
+            offset += chunkSize;
+        }
+        offset = lineEnd + (lineEnd < coroutineInfo.size() ? 1U : 0U);
+    }
+}
+
+}  // namespace
 
 static PandaEtsVM *g_pandaEtsVM = nullptr;
 
@@ -317,6 +360,30 @@ PandaEtsVM::~PandaEtsVM()
 PandaEtsVM *PandaEtsVM::GetCurrent()
 {
     return g_pandaEtsVM;
+}
+
+PandaString PandaEtsVM::GetCoroutineInfo() const
+{
+    auto coroutineStateInfo = GetCoroutineStateInfo();
+    return coroutineStateInfo == nullptr ? "Coroutine dump is not supported in stackless mode.\n"
+                                         : coroutineStateInfo->OutputInfo();
+}
+
+PandaUniquePtr<StackfulCoroutineStateInfoTable> PandaEtsVM::GetCoroutineStateInfo() const
+{
+    auto langStr = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
+    if (GetOptions().GetCoroutineImpl(langStr) != "stackful") {
+        return nullptr;
+    }
+
+    auto *coroutineManager = static_cast<StackfulCoroutineManager *>(jobManager_);
+    return coroutineManager->GetAllWorkerFullStatus();
+}
+
+void PandaEtsVM::DumpForSigQuit([[maybe_unused]] std::ostream &os) const
+{
+    LOG(ERROR, RUNTIME) << "-> Dump ArkTS coroutine info";
+    LogCoroutineInfoInChunks(GetCoroutineInfo());
 }
 
 static mem::Reference *PreallocSpecialReference(PandaEtsVM *vm, EtsClass *cls, bool nonMovable = false)

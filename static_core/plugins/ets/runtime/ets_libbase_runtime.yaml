@@ -7354,6 +7354,21 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::StdSystemAtomicFlagGet
 
+#########################
+# std.dfx.CoroutineDump #
+#########################
+
+  - name: StdDfxCoroutineDumpInfoRaw
+    space: ets
+    class_name: std.dfx.CoroutineDump
+    method_name: dumpCoroutineInfoRaw
+    static: true
+    signature:
+      ret: std.core.Array
+      args: [  ]
+    impl: ark::ets::intrinsics::StdDfxCoroutineDumpInfoRaw
+    clear_flags: [ ]
+
 ####################
 # std.core.Runtime #
 ####################

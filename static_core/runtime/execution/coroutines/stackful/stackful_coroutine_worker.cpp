@@ -843,8 +843,9 @@ void StackfulCoroutineWorker::GetFullWorkerStateInfo(StackfulCoroutineWorkerStat
 {
     {
         os::memory::LockHolder lh(waitersLock_);
-        std::for_each(waiters_.begin(), waiters_.end(),
-                      [&info](const std::pair<JobEvent *, Coroutine *> &pair) { info->AddCoroutine(pair.second); });
+        std::for_each(waiters_.begin(), waiters_.end(), [&info](const std::pair<JobEvent *, Coroutine *> &pair) {
+            info->AddCoroutine(pair.second, pair.first);
+        });
     }
     {
         os::memory::LockHolder lock(runnablesLock_);

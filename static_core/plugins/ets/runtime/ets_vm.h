@@ -70,6 +70,10 @@
 #include "plugins/ets/runtime/ets_stdlib_cache.h"
 #include "plugins/ets/runtime/unhandled_manager/unhandled_object_manager.h"
 
+namespace ark {
+class StackfulCoroutineStateInfoTable;
+}  // namespace ark
+
 namespace ark::ets {
 class EtsAbcRuntimeLinker;
 class EtsFinalizableWeakRef;
@@ -237,6 +241,12 @@ public:
     {
         return jobManager_;
     }
+
+    PandaString GetCoroutineInfo() const;
+
+    PandaUniquePtr<StackfulCoroutineStateInfoTable> GetCoroutineStateInfo() const;
+
+    void DumpForSigQuit(std::ostream &os) const override;
 
     Rendezvous *GetRendezvous() const override
     {

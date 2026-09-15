@@ -19,6 +19,7 @@
 #include <cstddef>
 #include "runtime/execution/coroutines/coroutine.h"
 #include "runtime/execution/coroutines/coroutine_context.h"
+#include "runtime/execution/job_events.h"
 #include "libarkbase/macros.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/stack_walker.h"
@@ -47,6 +48,11 @@ public:
     PandaString OutputInfo(const CoroutineStateFilter &coroFilter) const;
     PandaString OutputInfo(std::nullptr_t coroFilter = nullptr) const;
 
+    const PandaVector<StackfulCoroutineWorkerStateInfo> &GetWorkersInfo() const
+    {
+        return workersInfo_;
+    }
+
 private:
     PandaVector<StackfulCoroutineWorkerStateInfo> workersInfo_;
 };
@@ -61,6 +67,7 @@ public:
     ~StackfulCoroutineWorkerStateInfo() = default;
 
     void AddCoroutine(Coroutine *co);
+    void AddCoroutine(Coroutine *co, JobEvent *event);
 
     const PandaString &GetWorkerName() const
     {
@@ -74,6 +81,11 @@ public:
 
     PandaString OutputInfo(const CoroutineStateFilter &filter = nullptr) const;
 
+    const PandaVector<StackfulCoroutineStateInfo> &GetCoroutinesInfo() const
+    {
+        return coroutinesInfo_;
+    }
+
 private:
     PandaVector<StackfulCoroutineStateInfo> coroutinesInfo_;
     PandaString workerName_;
@@ -82,37 +94,44 @@ private:
 
 class StackfulCoroutineStateInfo {
 public:
-    explicit StackfulCoroutineStateInfo(Coroutine *co);
+    explicit StackfulCoroutineStateInfo(Coroutine *co, WaitDiagnosticInfo waitDiagnosticInfo = {});
     DEFAULT_COPY_SEMANTIC(StackfulCoroutineStateInfo);
     DEFAULT_MOVE_SEMANTIC(StackfulCoroutineStateInfo);
     ~StackfulCoroutineStateInfo() = default;
-
-    /**
-     * @brief Method creates a stackwalker because count of methods works only with rvalue
-     * @see StackWalker::Dump(...)
-     */
-    StackWalker GetStackWalker() const
-    {
-        return StackWalker::Create(this->coro_);
-    }
 
     const PandaString &GetCoroutineName() const
     {
         return this->coroutineName_;
     }
 
-    Coroutine::Status GetCorutineStatus() const
+    Coroutine::Status GetCoroutineStatus() const
     {
         return this->coroutineStatus_;
+    }
+
+    Coroutine::Type GetCoroutineType() const
+    {
+        return coroutineType_;
+    }
+
+    const WaitDiagnosticInfo &GetWaitDiagnosticInfo() const
+    {
+        return waitDiagnosticInfo_;
+    }
+
+    const PandaString &GetCallStack() const
+    {
+        return callStack_;
     }
 
     PandaString OutputInfo() const;
 
 private:
-    Coroutine *coro_;
     PandaString coroutineName_;
     Coroutine::Status coroutineStatus_;
     Coroutine::Type coroutineType_;
+    WaitDiagnosticInfo waitDiagnosticInfo_;
+    PandaString callStack_;
 };
 
 }  // namespace ark

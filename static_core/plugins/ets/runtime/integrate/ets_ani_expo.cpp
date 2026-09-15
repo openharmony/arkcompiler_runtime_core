@@ -32,7 +32,7 @@ PANDA_PUBLIC_API void ETSAni::Prefork(ani_env *env, [[maybe_unused]] void *napie
 {
     PandaEtsVM *vm = PandaAniEnv::FromAniEnv(env)->GetEtsVM();
     ProcessTaskpoolWorker(true);
-    vm->PreZygoteFork();
+    vm->GetRuntime()->PreZygoteFork();
 #ifdef PANDA_ETS_INTEROP_JS
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     if (!interop::js::CreateMainInteropContext(executionCtx, napienv, true)) {
@@ -93,7 +93,7 @@ PANDA_PUBLIC_API void ETSAni::Postfork(ani_env *env, const std::vector<ani_optio
     }
     InitializeVerifyANI(env);
     if (postZygoteFork) {
-        vm->PostZygoteFork();
+        vm->GetRuntime()->PostZygoteFork();
         ProcessTaskpoolWorker(false);
     }
 }

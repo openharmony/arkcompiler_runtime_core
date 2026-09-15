@@ -21,6 +21,57 @@
 
 namespace ark {
 
+namespace {
+
+const char *WaitReasonToString(WaitReason reason)
+{
+    switch (reason) {
+        case WaitReason::NONE:
+            return "NONE";
+        case WaitReason::MUTEX_LOCK:
+            return "MUTEX_LOCK";
+        case WaitReason::RWLOCK_READ:
+            return "RWLOCK_READ";
+        case WaitReason::RWLOCK_WRITE:
+            return "RWLOCK_WRITE";
+        default:
+            return "Invalid";
+    }
+}
+
+const char *WaitModeToString(WaitMode mode)
+{
+    switch (mode) {
+        case WaitMode::NONE:
+            return "NONE";
+        case WaitMode::MUTEX:
+            return "MUTEX";
+        case WaitMode::READLOCK:
+            return "READLOCK";
+        case WaitMode::WRITELOCK:
+            return "WRITELOCK";
+        default:
+            return "INVALID";
+    }
+}
+
+void DumpWaitDiagnosticInfo(PandaStringStream &sstream, const WaitDiagnosticInfo &diagnosticInfo)
+{
+    if (diagnosticInfo.GetReason() == WaitReason::NONE) {
+        return;
+    }
+
+    sstream << "WaitReason: " << WaitReasonToString(diagnosticInfo.GetReason()) << "\n";
+    sstream << "WaitMode: " << WaitModeToString(diagnosticInfo.GetRequestedMode()) << "\n";
+    if (diagnosticInfo.GetReason() == WaitReason::RWLOCK_READ ||
+        diagnosticInfo.GetReason() == WaitReason::RWLOCK_WRITE) {
+        sstream << "Readers: " << diagnosticInfo.GetReadersAtBlock() << "\n";
+        sstream << "Writers: " << diagnosticInfo.GetWritersAtBlock() << "\n";
+    }
+}
+
+}  // namespace
+
 void StackfulCoroutineStateInfoTable::AddWorker(StackfulCoroutineWorker *worker)
 {
     workersInfo_.emplace_back(worker);
@@ -31,18 +82,30 @@ void StackfulCoroutineWorkerStateInfo::AddCoroutine(Coroutine *co)
     coroutinesInfo_.emplace_back(co);
 }
 
+void StackfulCoroutineWorkerStateInfo::AddCoroutine(Coroutine *co, JobEvent *event)
+{
+    ASSERT(event != nullptr);
+    auto diagnosticInfo = event->GetType() == JobEvent::Type::BLOCKING
+                              ? static_cast<BlockingEvent *>(event)->GetWaitDiagnosticInfo()
+                              : WaitDiagnosticInfo {};
+    coroutinesInfo_.emplace_back(co, diagnosticInfo);
+}
+
 StackfulCoroutineWorkerStateInfo::StackfulCoroutineWorkerStateInfo(StackfulCoroutineWorker *worker)
     : workerName_(worker->GetName()), isMainWorker_(worker->IsMainWorker())
 {
     worker->GetFullWorkerStateInfo(this);
 }
 
-StackfulCoroutineStateInfo::StackfulCoroutineStateInfo(Coroutine *co)
-    : coro_(co),
-      coroutineName_(co->GetName()),
+StackfulCoroutineStateInfo::StackfulCoroutineStateInfo(Coroutine *co, WaitDiagnosticInfo waitDiagnosticInfo)
+    : coroutineName_(co->GetName()),
       coroutineStatus_(co->GetCoroutineStatus()),
-      coroutineType_(co->GetType())
+      coroutineType_(co->GetType()),
+      waitDiagnosticInfo_(waitDiagnosticInfo)
 {
+    PandaStringStream stackStream;
+    StackWalker::Create(co).Dump(stackStream);
+    callStack_ = stackStream.str();
 }
 
 PandaString StackfulCoroutineStateInfo::OutputInfo() const
@@ -54,8 +117,9 @@ PandaString StackfulCoroutineStateInfo::OutputInfo() const
     sstream << "Status: " << this->coroutineStatus_ << "\n";
     // Line with Coroutine Type
     sstream << "Type: " << this->coroutineType_ << "\n";
+    DumpWaitDiagnosticInfo(sstream, waitDiagnosticInfo_);
     // Stack Trace
-    this->GetStackWalker().Dump(sstream);
+    sstream << callStack_;
 
     return sstream.str();
 }
