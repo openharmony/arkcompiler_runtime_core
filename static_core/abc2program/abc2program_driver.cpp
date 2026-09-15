@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,9 @@ int Abc2ProgramDriver::Run(int argc, const char **argv)
     if (!options.Parse(argc, argv)) {
         return 1;
     }
+    listClasses_ = options.IsListClasses();
+    listMethods_ = options.IsListMethods();
+    skeleton_ = options.IsSkeleton();
     if (Run(options.GetInputFilePath(), options.GetOutputFilePath())) {
         return 0;
     }
@@ -33,7 +36,19 @@ int Abc2ProgramDriver::Run(int argc, const char **argv)
 
 bool Abc2ProgramDriver::Run(const std::string &inputFilePath, const std::string &outputFilePath)
 {
-    return (Compile(inputFilePath) && Dump(outputFilePath));
+    if (!Compile(inputFilePath)) {
+        return false;
+    }
+    if (listClasses_) {
+        return DumpListClasses(outputFilePath);
+    }
+    if (listMethods_) {
+        return DumpListMethods(outputFilePath);
+    }
+    if (skeleton_) {
+        return DumpSkeleton(outputFilePath);
+    }
+    return Dump(outputFilePath);
 }
 
 bool Abc2ProgramDriver::Compile(const std::string &inputFilePath)
@@ -69,6 +84,36 @@ const pandasm::Program &Abc2ProgramDriver::GetProgram() const
 pandasm::Program &Abc2ProgramDriver::GetProgram()
 {
     return program_;
+}
+
+bool Abc2ProgramDriver::DumpSkeleton(const std::string &outputFilePath)
+{
+    std::ofstream ofs;
+    ofs.open(outputFilePath, std::ios::trunc | std::ios::out);
+    PandasmProgramDumper dumper(compiler_.GetAbcFile(), compiler_.GetAbcStringTable());
+    dumper.DumpSkeleton(ofs, program_);
+    ofs.close();
+    return true;
+}
+
+bool Abc2ProgramDriver::DumpListClasses(const std::string &outputFilePath)
+{
+    std::ofstream ofs;
+    ofs.open(outputFilePath, std::ios::trunc | std::ios::out);
+    PandasmProgramDumper dumper(compiler_.GetAbcFile(), compiler_.GetAbcStringTable());
+    dumper.DumpListClasses(ofs, program_);
+    ofs.close();
+    return true;
+}
+
+bool Abc2ProgramDriver::DumpListMethods(const std::string &outputFilePath)
+{
+    std::ofstream ofs;
+    ofs.open(outputFilePath, std::ios::trunc | std::ios::out);
+    PandasmProgramDumper dumper(compiler_.GetAbcFile(), compiler_.GetAbcStringTable());
+    dumper.DumpListMethods(ofs, program_);
+    ofs.close();
+    return true;
 }
 
 }  // namespace ark::abc2program

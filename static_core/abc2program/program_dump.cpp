@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,92 @@ void PandasmProgramDumper::Dump(std::ostream &os, const pandasm::Program &progra
     DumpLiteralArrayTable(os, program);
     DumpRecordTable(os, program);
     DumpFunctionTable(os, program);
+}
+
+void PandasmProgramDumper::DumpSkeleton(std::ostream &os, const pandasm::Program &program) const
+{
+    if (file_ != nullptr) {
+        os << "# Skeleton dump of " << file_->GetFilename() << std::endl;
+    }
+    os << ".language " << ark::panda_file::LanguageToString(program.lang) << std::endl << std::endl;
+
+    for (const auto &it : program.recordTable) {
+        const auto &record = it.second;
+        if (AbcFileUtils::IsSystemTypeName(record.name)) {
+            continue;
+        }
+        if (record.metadata->IsForeign()) {
+            continue;
+        }
+        os << ".class " << record.name << std::endl;
+        DumpSkeletonClassMethods(os, program.functionInstanceTable, record.name);
+        DumpSkeletonClassMethods(os, program.functionStaticTable, record.name);
+        os << std::endl;
+    }
+}
+
+void PandasmProgramDumper::DumpSkeletonClassMethods(std::ostream &os,
+                                                    const pandasm::Program::FunctionTableT &functionTable,
+                                                    const std::string &recordName) const
+{
+    for (const auto &funcIt : functionTable) {
+        const auto &func = funcIt.second;
+        size_t lastDot = func.name.rfind('.');
+        if (lastDot == std::string::npos) {
+            continue;
+        }
+        if (func.name.substr(0, lastDot) != recordName) {
+            continue;
+        }
+        std::string methodName = func.name.substr(lastDot + 1);
+        os << "    .method " << func.returnType.GetPandasmName() << " " << methodName << "(";
+        size_t startParam = (!func.IsStatic() && !func.params.empty()) ? 1 : 0;
+        for (size_t i = startParam; i < func.params.size(); i++) {
+            if (i > startParam) {
+                os << ", ";
+            }
+            os << func.params[i].type.GetPandasmName();
+        }
+        os << ")" << std::endl;
+    }
+}
+
+void PandasmProgramDumper::DumpListClasses(std::ostream &os, const pandasm::Program &program) const
+{
+    if (file_ != nullptr) {
+        os << "# Classes in " << file_->GetFilename() << std::endl;
+    }
+    for (const auto &it : program.recordTable) {
+        const auto &record = it.second;
+        if (AbcFileUtils::IsSystemTypeName(record.name)) {
+            continue;
+        }
+        if (record.metadata->IsForeign()) {
+            continue;
+        }
+        os << record.name << std::endl;
+    }
+}
+
+void PandasmProgramDumper::DumpListMethods(std::ostream &os, const pandasm::Program &program) const
+{
+    if (file_ != nullptr) {
+        os << "# Methods in " << file_->GetFilename() << std::endl;
+    }
+    for (const auto &it : program.functionInstanceTable) {
+        const auto &func = it.second;
+        if (func.metadata->IsForeign()) {
+            continue;
+        }
+        os << func.name << std::endl;
+    }
+    for (const auto &it : program.functionStaticTable) {
+        const auto &func = it.second;
+        if (func.metadata->IsForeign()) {
+            continue;
+        }
+        os << func.name << std::endl;
+    }
 }
 
 bool PandasmProgramDumper::HasNoAbcInput() const
