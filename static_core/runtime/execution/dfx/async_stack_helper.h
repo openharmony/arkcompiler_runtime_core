@@ -25,6 +25,7 @@ namespace ark::dfx {
 
 enum class StackType : uint8_t {
     STACK_TYPE_LAUNCH,
+    STACK_TYPE_EXCLUSIVE_SCOPE,
 };
 
 class AsyncStackHelper {

@@ -960,6 +960,7 @@ JobExecutionContext *StackfulCoroutineManager::AttachExclusiveWorker(Runtime *ru
     auto *eCoro = CreateEntrypointlessCoroutine(runtime, vm, true, "[ea_coro] " + eWorker->GetName(),
                                                 Coroutine::Type::MUTATOR, CoroutinePriority::MEDIUM_PRIORITY);
     ASSERT(eCoro != nullptr);
+    eWorker->SetOsStackExecutorCoroutine(eCoro);
     eWorker->AddRunningCoroutine(eCoro);
     OnWorkerStartup(eWorker);
 
@@ -978,10 +979,15 @@ bool StackfulCoroutineManager::DetachExclusiveWorker()
 
     {
         os::memory::LockHolder lock(workersLock_);
+        eWorker->StopAcceptingOsStackWork();
         eWorker->DisableForCrossWorkersLaunch();
     }
 
     eWorker->DestroyCallbackPoster();
+    // Work that has already been claimed is allowed to finish.  Work still in
+    // the OS-stack queue has not entered user code, so cancel it before the
+    // final coroutine drain wakes its requesters.
+    eWorker->CancelPendingOsStackWork();
     eWorker->CompleteAllAffinedCoroutines();
 
     eWorker->SetActive(false);
@@ -992,6 +998,9 @@ bool StackfulCoroutineManager::DetachExclusiveWorker()
     eWorker->DestroyLocalStorage();
 
     auto *eaCoro = Coroutine::GetCurrent();
+    ASSERT(eaCoro == eWorker->GetOsStackExecutorCoroutine());
+    ASSERT(!eWorker->IsOsStackWorkExecuting());
+    eWorker->SetOsStackExecutorCoroutine(nullptr);
     programCompletionLock_.Lock();
     DestroyEntrypointlessCoroutine(eaCoro);
     Coroutine::SetCurrent(nullptr);

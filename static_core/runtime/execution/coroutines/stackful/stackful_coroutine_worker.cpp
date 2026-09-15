@@ -28,7 +28,7 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
     : CoroutineWorker(runtime, vm, name, id, inExclusiveMode, isMainWorker),
       coroManager_(coroManager),
       threadId_(os::thread::GetCurrentThreadId()),
-      allCoroutinesExecuted_(coroManager),
+      executionLoopWakeEvent_(coroManager),
       stats_(std::move(name))
 {
     LOG(DEBUG, COROUTINES) << "Created a coroutine worker instance: id=" << GetId() << " name=" << GetName();
@@ -226,20 +226,171 @@ void StackfulCoroutineWorker::ExecuteJobsUntilIdle()
 
     // CC-OFFNXT(G.CTL.03): false positive
     while (true) {
+        OsStackWorkItem item;
+        auto action = TryTakeOsStackWork(&item);
+        if (action == PendingOsStackWorkAction::EXECUTE) {
+            ExecuteClaimedOsStackWork(item);
+            continue;
+        }
+        if (action == PendingOsStackWorkAction::CANCEL) {
+            item.cancel(item.data);
+            continue;
+        }
+
         lock(waitersLock_, runnablesLock_);
         if (runnables_.Size() > 1) {
             unlock(waitersLock_, runnablesLock_);
             coroManager_->ExecuteJobs();
         } else if (!waiters_.empty()) {
-            allCoroutinesExecuted_.Lock();
-            allCoroutinesExecuted_.SetNotHappened();
+            executionLoopWakeEvent_.Lock();
+            executionLoopWakeEvent_.SetNotHappened();
             unlock(waitersLock_, runnablesLock_);
-            coroManager_->Await(&allCoroutinesExecuted_);
+            coroManager_->Await(&executionLoopWakeEvent_);
         } else {
             unlock(waitersLock_, runnablesLock_);
             break;
         }
     }
+}
+
+void StackfulCoroutineWorker::SetOsStackExecutorCoroutine(Coroutine *executor)
+{
+    os::memory::LockHolder lock(osStackWorkLock_);
+    ASSERT(osStackExecutorCoroutine_ == nullptr || executor == nullptr);
+    osStackExecutorCoroutine_ = executor;
+}
+
+Coroutine *StackfulCoroutineWorker::GetOsStackExecutorCoroutine() const
+{
+    os::memory::LockHolder lock(osStackWorkLock_);
+    return osStackExecutorCoroutine_;
+}
+
+SubmitOsStackWorkResult StackfulCoroutineWorker::SubmitOsStackWork(OsStackWorkItem item)
+{
+    // OS-stack work is local to this worker.  Cross-thread submission would need a
+    // separate lifetime and wakeup protocol, so callers must already execute here.
+    ASSERT(GetCurrentContext()->GetWorker() == this);
+    ASSERT(item.execute != nullptr);
+    ASSERT(item.complete != nullptr);
+    ASSERT(item.cancel != nullptr);
+
+    {
+        os::memory::LockHolder lock(osStackWorkLock_);
+        if (!acceptingOsStackWork_ || osStackExecutorCoroutine_ == nullptr) {
+            return SubmitOsStackWorkResult::NOT_ACCEPTING;
+        }
+        if (!servingOsStackWork_) {
+            return SubmitOsStackWorkResult::QUEUE_NOT_READY;
+        }
+        pendingOsStackWork_.push(item);
+    }
+    executionLoopWakeEvent_.Happen();
+    return SubmitOsStackWorkResult::ACCEPTED;
+}
+
+SubmitOsStackWorkResult StackfulCoroutineWorker::ExecuteOsStackWorkInline(OsStackWorkItem item)
+{
+    ASSERT(item.execute != nullptr);
+    ASSERT(item.complete != nullptr);
+    ASSERT(item.cancel != nullptr);
+
+    {
+        os::memory::LockHolder lock(osStackWorkLock_);
+        if (!acceptingOsStackWork_ || osStackExecutorCoroutine_ == nullptr) {
+            return SubmitOsStackWorkResult::NOT_ACCEPTING;
+        }
+        if (osStackWorkExecuting_) {
+            return SubmitOsStackWorkResult::ALREADY_EXECUTING;
+        }
+        ASSERT(Coroutine::GetCurrent() == osStackExecutorCoroutine_);
+        osStackWorkExecuting_ = true;
+    }
+    ExecuteClaimedOsStackWork(item);
+    return SubmitOsStackWorkResult::ACCEPTED;
+}
+
+bool StackfulCoroutineWorker::IsOsStackWorkExecuting() const
+{
+    os::memory::LockHolder lock(osStackWorkLock_);
+    return osStackWorkExecuting_;
+}
+
+bool StackfulCoroutineWorker::IsServingOsStackWork() const
+{
+    os::memory::LockHolder lock(osStackWorkLock_);
+    return servingOsStackWork_;
+}
+
+void StackfulCoroutineWorker::StartServingOsStackWork()
+{
+    os::memory::LockHolder lock(osStackWorkLock_);
+    ASSERT(Coroutine::GetCurrent() == osStackExecutorCoroutine_);
+    ASSERT(pendingOsStackWork_.empty());
+    if (acceptingOsStackWork_) {
+        servingOsStackWork_ = true;
+    }
+}
+
+void StackfulCoroutineWorker::StopAcceptingOsStackWork()
+{
+    os::memory::LockHolder lock(osStackWorkLock_);
+    acceptingOsStackWork_ = false;
+    servingOsStackWork_ = false;
+}
+
+void StackfulCoroutineWorker::CancelPendingOsStackWork()
+{
+    bool hasPendingWork = true;
+    while (hasPendingWork) {
+        OsStackWorkItem item;
+        {
+            os::memory::LockHolder lock(osStackWorkLock_);
+            ASSERT(!acceptingOsStackWork_);
+            hasPendingWork = !pendingOsStackWork_.empty();
+            if (hasPendingWork) {
+                item = pendingOsStackWork_.front();
+                pendingOsStackWork_.pop();
+            }
+        }
+        if (hasPendingWork) {
+            item.cancel(item.data);
+        }
+    }
+}
+
+StackfulCoroutineWorker::PendingOsStackWorkAction StackfulCoroutineWorker::TryTakeOsStackWork(OsStackWorkItem *item)
+{
+    os::memory::LockHolder lock(osStackWorkLock_);
+    if (osStackExecutorCoroutine_ == nullptr || Coroutine::GetCurrent() != osStackExecutorCoroutine_ ||
+        pendingOsStackWork_.empty()) {
+        return PendingOsStackWorkAction::NONE;
+    }
+    ASSERT(!osStackWorkExecuting_);
+    *item = pendingOsStackWork_.front();
+    pendingOsStackWork_.pop();
+    // Taking work and observing shutdown are linearized by osStackWorkLock_: work
+    // claimed before close executes, while work still queued after close is canceled.
+    if (!acceptingOsStackWork_) {
+        return PendingOsStackWorkAction::CANCEL;
+    }
+    osStackWorkExecuting_ = true;
+    return PendingOsStackWorkAction::EXECUTE;
+}
+
+void StackfulCoroutineWorker::ExecuteClaimedOsStackWork(const OsStackWorkItem &item)
+{
+    ASSERT(Coroutine::GetCurrent() == GetOsStackExecutorCoroutine());
+    {
+        ScopedDisableJobSwitch noSwitch(coroManager_);
+        item.execute(item.data);
+    }
+    {
+        os::memory::LockHolder lock(osStackWorkLock_);
+        ASSERT(osStackWorkExecuting_);
+        osStackWorkExecuting_ = false;
+    }
+    item.complete(item.data);
 }
 
 void StackfulCoroutineWorker::CompleteAllAffinedCoroutines()
@@ -436,7 +587,7 @@ void StackfulCoroutineWorker::RequestScheduleImpl()
             return;
         }
         if (waitingTimeMs == WAITING_TIME_UNLIMITED) {
-            allCoroutinesExecuted_.Happen();
+            executionLoopWakeEvent_.Happen();
         }
 
         bool migrationHappened = coroManager_->MigrateCoroutinesInward(this);

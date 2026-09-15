@@ -78,13 +78,21 @@ extern "C" EtsObjectArray *ArkRuntimeStackTraceProvisionStackTrace()
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
 
     auto stackTraceElementClass = PlatformTypes(executionCtx)->arkruntimeStackTraceElement;
+    EtsHandle<EtsObjectArray> requesterStackTrace(executionCtx, nullptr);
+    if (auto *stackTraceRef = executionCtx->GetExclusiveScopeStackTraceRef(); stackTraceRef != nullptr) {
+        requesterStackTrace = EtsHandle<EtsObjectArray>(
+            executionCtx,
+            EtsObjectArray::FromCoreType(executionCtx->GetPandaVM()->GetGlobalObjectStorage()->Get(stackTraceRef)));
+    }
 
     uint32_t linesSize = 0;
     for (auto stack = StackWalker::Create(executionCtx->GetMT()); stack.HasFrame(); stack.NextFrame()) {
         linesSize++;
     }
+    uint32_t requesterLinesSize =
+        requesterStackTrace.GetPtr() != nullptr ? static_cast<uint32_t>(requesterStackTrace->GetLength()) : 0U;
 
-    auto *resultArray = EtsObjectArray::Create(stackTraceElementClass, linesSize);
+    auto *resultArray = EtsObjectArray::Create(stackTraceElementClass, linesSize + requesterLinesSize);
     if (UNLIKELY(resultArray == nullptr)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
@@ -99,6 +107,10 @@ extern "C" EtsObjectArray *ArkRuntimeStackTraceProvisionStackTrace()
             return nullptr;
         }
         resultArrayHandle.GetPtr()->Set(i, element->AsObject());
+        i++;
+    }
+    for (uint32_t requesterIndex = 0U; requesterIndex < requesterLinesSize; ++requesterIndex) {
+        resultArrayHandle.GetPtr()->Set(i, requesterStackTrace->Get(requesterIndex));
         i++;
     }
     return resultArrayHandle.GetPtr();

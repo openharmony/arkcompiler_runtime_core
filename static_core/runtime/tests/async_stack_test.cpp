@@ -194,6 +194,23 @@ TEST(AsyncStackTest, ScopeForJobSetsAndRestoresStackId)
     ASSERT_EQ(g_setCalls, 2U);
 }
 
+TEST(AsyncStackTest, ScopeForRawIdSetsAndRestoresStackId)
+{
+    ResetDfxState();
+    constexpr uint64_t previousStackId = 0x1111U;
+    constexpr uint64_t rawStackId = 0x2222U;
+    g_submitterStackId = previousStackId;
+    TestAsyncStackHelper asyncStackHelper;
+
+    {
+        dfx::AsyncStackScope scope(rawStackId, asyncStackHelper);
+        ASSERT_EQ(g_submitterStackId, rawStackId);
+    }
+
+    ASSERT_EQ(g_submitterStackId, previousStackId);
+    ASSERT_EQ(g_setCalls, 2U);
+}
+
 TEST(AsyncStackTest, ScopeForJobIgnoresZeroStackId)
 {
     ResetDfxState();

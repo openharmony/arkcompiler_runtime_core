@@ -28,6 +28,7 @@ namespace dfx {
 class AsyncStackScope {
 public:
     explicit AsyncStackScope(Job *job, AsyncStackHelper &asyncStackHelper);
+    AsyncStackScope(uint64_t stackId, AsyncStackHelper &asyncStackHelper);
 
     ~AsyncStackScope();
 

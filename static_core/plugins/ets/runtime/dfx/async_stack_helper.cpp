@@ -23,11 +23,19 @@ namespace ark::ets::dfx {
 namespace {
 
 constexpr uint64_t ARKTS_STA_LAUNCH_DFX_TYPE = 1ULL << 26ULL;
+constexpr uint64_t ARKTS_EXCLUSIVE_SCOPE_DFX_TYPE = 1ULL << 27ULL;
+constexpr int DFX_MODE_LAST_STACKTRACE = 0;
 
-uint64_t MapToDfxType([[maybe_unused]] ark::dfx::StackType stackType)
+uint64_t MapToDfxType(ark::dfx::StackType stackType)
 {
-    ASSERT(stackType == ark::dfx::StackType::STACK_TYPE_LAUNCH);
-    return ARKTS_STA_LAUNCH_DFX_TYPE;
+    switch (stackType) {
+        case ark::dfx::StackType::STACK_TYPE_LAUNCH:
+            return ARKTS_STA_LAUNCH_DFX_TYPE;
+        case ark::dfx::StackType::STACK_TYPE_EXCLUSIVE_SCOPE:
+            return ARKTS_EXCLUSIVE_SCOPE_DFX_TYPE;
+        default:
+            UNREACHABLE();
+    }
 }
 
 }  // namespace
@@ -38,6 +46,7 @@ void OhosAsyncStackHelper::Initialize()
     collectAsyncStack_ = reinterpret_cast<CollectAsyncStackFunc>(dlsym(RTLD_DEFAULT, "DfxCollectStackWithDepth"));
     setStackId_ = reinterpret_cast<SetStackIdFunc>(dlsym(RTLD_DEFAULT, "DfxSetSubmitterStackId"));
     getStackId_ = reinterpret_cast<GetStackIdFunc>(dlsym(RTLD_DEFAULT, "DfxGetSubmitterStackId"));
+    getAsyncStackMode_ = reinterpret_cast<GetAsyncStackModeFunc>(dlsym(RTLD_DEFAULT, "GetAsyncStackMode"));
 }
 
 bool OhosAsyncStackHelper::IsLoaded() const
@@ -58,6 +67,13 @@ uint64_t OhosAsyncStackHelper::CollectAsyncStack(ark::dfx::StackType stackType, 
 {
     if (!IsLoaded()) {
         LOG(DEBUG, DFX) << "DfxCollectStackWithDepth is not loaded.";
+        return 0U;
+    }
+    // exclusiveScope uses an ordinary unique-stack ID and LAST-mode set/restore semantics. Do not collect when
+    // the active DFX mode cannot be confirmed as LAST; CHAINED contexts require different ownership and push/pop.
+    if (stackType == ark::dfx::StackType::STACK_TYPE_EXCLUSIVE_SCOPE &&
+        (getAsyncStackMode_ == nullptr || getAsyncStackMode_() != DFX_MODE_LAST_STACKTRACE)) {
+        LOG(DEBUG, DFX) << "exclusiveScope stack stitching requires LAST mode.";
         return 0U;
     }
     auto type = MapToDfxType(stackType);
