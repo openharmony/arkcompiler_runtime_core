@@ -28,21 +28,19 @@ std::set<std::string> panda::pandasm::Function::CollectStringsFromFunctionInsns(
             case Opcode::<%= insn.asm_token %>: {
 %               num_id = 0
 %               property_idx_start = 0
+%               # Only string_id operands are string constants. method_id and literalarray_id operands are
+%               # resolved into method/literal array items by the emitter, so collecting them here would
+%               # emit unreferenced string items into the abc file.
+%               collect_properties = ['string_id']
+%               id_property_types = ['string_id', 'method_id', 'literalarray_id']
 %               insn.operands.each do |op|
 %                   if op.id?
 %                       id_properties = insn.properties.slice(property_idx_start, insn.properties.length - property_idx_start)
 %                       id_properties.each_with_index do |prop, prop_idx|
-%                           if prop == 'string_id'
+%                           if collect_properties.include?(prop)
                 function_strings.insert(panda_insn->Ids()[<%= num_id %>]);
-%                               property_idx_start += prop_idx + 1
-%                               num_id += 1
-%                               break
-%                           elsif prop == 'method_id'
-                function_strings.insert(panda_insn->Ids()[<%= num_id %>]);
-%                               property_idx_start += prop_idx + 1
-%                               num_id += 1
-%                               break
-%                           elsif prop == 'literalarray_id'
+%                           end
+%                           if id_property_types.include?(prop)
 %                               property_idx_start += prop_idx + 1
 %                               num_id += 1
 %                               break
