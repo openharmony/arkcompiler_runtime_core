@@ -89,6 +89,37 @@ TEST_F(EtsArrayBufferTest, MemoryLayout)
     MirrorFieldInfo::CompareMemberOffsets(klass, GetMembers());
 }
 
+TEST_F(EtsArrayBufferTest, CreateNonMovableSetsNativeData)
+{
+    auto *executionCtx = EtsExecutionContext::FromMT(EtsCoroutine::GetCurrent());
+    for (EtsInt length : {0, 24}) {
+        SCOPED_TRACE(length);
+        [[maybe_unused]] EtsHandleScope scope(executionCtx);
+        void *resultData = nullptr;
+        EtsHandle<EtsStdCoreArrayBuffer> handle(
+            executionCtx, EtsStdCoreArrayBuffer::CreateNonMovable(executionCtx, length, &resultData));
+        ASSERT_NE(handle.GetPtr(), nullptr);
+        ASSERT_NE(resultData, nullptr);
+        ASSERT_EQ(handle->GetByteLength(), length);
+        ASSERT_TRUE(EtsStdCoreArrayBuffer::IsNativeArray(handle.GetPtr()));
+        ASSERT_TRUE(EtsStdCoreArrayBuffer::IsNonMovableArray(executionCtx, handle.GetPtr()));
+        ASSERT_FALSE(handle->IsExternal());
+        ASSERT_EQ(resultData, handle->GetData());
+        auto *nativeData =
+            ObjectAccessor::GetPrimitive<void *>(handle.GetPtr(), EtsStdCoreArrayBuffer::GetNativeDataOffset());
+        ASSERT_EQ(nativeData, resultData);
+
+        auto data = Span<uint8_t>(static_cast<uint8_t *>(nativeData), length);
+        for (EtsInt index = 0; index < length; ++index) {
+            ASSERT_EQ(data[index], 0U);
+            handle->Set(index, static_cast<EtsByte>(index + 1));
+            ASSERT_EQ(data[index], index + 1);
+            data[index] = static_cast<uint8_t>(length - index);
+            ASSERT_EQ(handle->At(index), length - index);
+        }
+    }
+}
+
 /**
  * @brief Creates an ArrayBuffer in movable space
  * and reallocates it to non-movable space to guarantee a valid data pointer.
@@ -103,6 +134,7 @@ TEST_F(EtsArrayBufferTest, ReallocateToNonMovable)
     EtsHandle<EtsStdCoreArrayBuffer> handle(executionCtx, EtsStdCoreArrayBuffer::Create(executionCtx, EXPECTED_LEN));
     ASSERT_NE(handle.GetPtr(), nullptr);
 
+    ASSERT_FALSE(EtsStdCoreArrayBuffer::IsNativeArray(handle.GetPtr()));
     ASSERT_FALSE(EtsStdCoreArrayBuffer::IsNonMovableArray(executionCtx, handle.GetPtr()));
     ASSERT_EQ(handle->GetByteLength(), EXPECTED_LEN);
 
@@ -115,12 +147,17 @@ TEST_F(EtsArrayBufferTest, ReallocateToNonMovable)
 
     EtsStdCoreArrayBuffer::ReallocateNonMovableArray(executionCtx, handle.GetPtr(), EXPECTED_LEN);
 
+    ASSERT_TRUE(EtsStdCoreArrayBuffer::IsNativeArray(handle.GetPtr()));
     ASSERT_TRUE(EtsStdCoreArrayBuffer::IsNonMovableArray(executionCtx, handle.GetPtr()));
+    ASSERT_FALSE(handle->IsExternal());
     ASSERT_EQ(handle->GetByteLength(), EXPECTED_LEN);
 
     // Validate ArrayBuffer after data reallocation.
     auto newData = Span<uint8_t>(handle->GetData<uint8_t *>(), EXPECTED_LEN);
     ASSERT_NE(newData.Data(), nullptr);
+    auto *nativeData =
+        ObjectAccessor::GetPrimitive<void *>(handle.GetPtr(), EtsStdCoreArrayBuffer::GetNativeDataOffset());
+    ASSERT_EQ(nativeData, handle->GetData());
 
     handle->Set(3U, 4U);
 

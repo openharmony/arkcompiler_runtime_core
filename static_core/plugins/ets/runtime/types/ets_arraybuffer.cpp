@@ -65,6 +65,9 @@ EtsStdCoreArrayBuffer *EtsStdCoreArrayBuffer::CreateNonMovable(EtsExecutionConte
         return nullptr;
     }
     handle->Initialize(executionCtx, length, buf);
+    // Set nativeData_ to the non-movable data address so that IsNativeArray() fast path works,
+    // avoiding expensive heap allocator queries in IsNonMovableArray().
+    ObjectAccessor::SetPrimitive(handle.GetPtr(), GetNativeDataOffset(), GetAddress(buf));
     *resultData = handle->GetData();
     return handle.GetPtr();
 }
@@ -98,7 +101,7 @@ void EtsStdCoreArrayBuffer::ReallocateNonMovableArray(EtsExecutionContext *execu
     if (UNLIKELY(bytesLen <= 0 || handle.GetPtr() == nullptr)) {
         return;
     }
-    ASSERT(!IsNativeArray(handle.GetPtr()));
+    ASSERT(!handle->IsExternal());
 
     auto *nonMovArray = AllocateNonMovableArray(bytesLen);
     if (UNLIKELY(nonMovArray == nullptr)) {
@@ -118,6 +121,9 @@ void EtsStdCoreArrayBuffer::ReallocateNonMovableArray(EtsExecutionContext *execu
     }
     ObjectAccessor::SetObject(executionCtx->GetMT(), handle.GetPtr(), GetManagedDataOffset(),
                               nonMovArray->GetCoreType());
+    // Set nativeData_ to the non-movable data address so that IsNativeArray() fast path works
+    // on subsequent calls to IsNonMovableArray(), avoiding expensive heap allocator queries.
+    ObjectAccessor::SetPrimitive(handle.GetPtr(), GetNativeDataOffset(), GetAddress(nonMovArray));
 
     // Without full memory barrier it is possible that architectures with weak memory order can try fetching
     // managed data before it's set
