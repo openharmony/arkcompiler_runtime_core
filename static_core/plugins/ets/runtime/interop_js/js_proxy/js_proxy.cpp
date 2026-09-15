@@ -222,8 +222,10 @@ JSProxy *JSProxy::CreateProxy(const uint8_t *descriptor, Class *baseClass, Span<
         ASSERT(EtsExecutionContext::GetCurrent()->GetMT()->HasPendingException());
         return nullptr;
     }
-    proxyCls->SetState(Class::State::INITIALIZING);
-    proxyCls->SetState(Class::State::INITIALIZED);
+    if (!proxyCls->IsInitialized()) {
+        proxyCls->SetState(Class::State::INITIALIZING);
+        proxyCls->SetState(Class::State::INITIALIZED);
+    }
     ASSERT(proxyCls->IsInitialized());
 
     // make the proxy class a xref class

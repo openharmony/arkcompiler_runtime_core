@@ -394,6 +394,18 @@ function checkInstaniate(): boolean {
     return user.getProperty('ID').toNumber() === 123;
 }
 
+function checkInstantiateNonExistentClass(): boolean {
+    let nonExistentJsClass = module.getProperty('NonExistentClass');
+    let res = !module.hasProperty('NonExistentClass');
+    try {
+        nonExistentJsClass.instantiate();
+        res = false;
+    } catch (e) {
+        res = res && e.message.includes('Need object');
+    }
+    return res;
+}
+
 function testUndefined(): boolean {
     propObj.setProperty('property1', undefined);
     propObj.setProperty('property2', ESValue.wrap(undefined));

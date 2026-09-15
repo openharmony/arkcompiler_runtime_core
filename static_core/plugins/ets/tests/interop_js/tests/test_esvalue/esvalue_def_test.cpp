@@ -223,6 +223,11 @@ TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_instaniate)
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstaniate"));
 }
 
+TEST_F(EtsESValueJsToEtsTest, test_esvalue_check_instantiate_non_existent_class)
+{
+    ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "checkInstantiateNonExistentClass"));
+}
+
 TEST_F(EtsESValueJsToEtsTest, test_esvalue_test_undefined)
 {
     ASSERT_EQ(true, CallEtsFunction<bool>(GetPackageName(), "testUndefined"));
