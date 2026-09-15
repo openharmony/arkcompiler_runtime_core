@@ -1,0 +1,140 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - desc: A field cannot be overridden with an unrelated type.
+    expected_out: >-
+      Semantic error ESE52491: field in DifferentDerived cannot override field in DifferentBase
+      because overriding type is not compatible with the base type.
+    decl: |-
+      class DifferentBase {
+        field: int = 1
+      }
+      class DifferentDerived extends DifferentBase {
+        override field: string = 'one'
+      }
+
+  - desc: An array field cannot be overridden with an incompatible element type.
+    expected_out: >-
+      Semantic error ESE52491: field in ArrayDerived cannot override field in ArrayBase because
+      overriding type is not compatible with the base type.
+    decl: |-
+      class ArrayBase {
+        field: Object[] = ['base']
+      }
+      class ArrayDerived extends ArrayBase {
+        override field: string[] = ['derived']
+      }
+
+  - desc: A field cannot be narrowed from a base string type to a string literal type.
+    expected_out: >-
+      Semantic error ESE52491: field in BaseToLiteralDerived cannot override field in
+      BaseToLiteralBase because overriding type is not compatible with the base type.
+    decl: |-
+      class BaseToLiteralBase {
+        field: string = 'base'
+      }
+      class BaseToLiteralDerived extends BaseToLiteralBase {
+        override field: 'derived' = 'derived'
+      }
+
+  - desc: An invariant generic field cannot be overridden with a different type argument.
+    expected_out: >-
+      Semantic error ESE52491: field in GenericDerived cannot override field in GenericBase
+      because overriding type is not compatible with the base type.
+    decl: |-
+      class GenericBox<T> {
+        value: T
+        constructor(value: T) {
+          this.value = value
+        }
+      }
+      class GenericBase {
+        field: GenericBox<Object> = new GenericBox<Object>('base')
+      }
+      class GenericDerived extends GenericBase {
+        override field: GenericBox<string> = new GenericBox<string>('derived')
+      }
+
+  - desc: A string literal field cannot be widened to string in an override.
+    expected_out: >-
+      Semantic error ESE52491: field in LiteralToBaseDerived cannot override field in
+      LiteralToBaseBase because overriding type is not compatible with the base type.
+    decl: |-
+      class LiteralToBaseBase {
+        field: 'base' = 'base'
+      }
+      class LiteralToBaseDerived extends LiteralToBaseBase {
+        override field: string = 'base'
+      }
+
+  - desc: A nullable field cannot be overridden with an undefined union.
+    expected_out: >-
+      Semantic error ESE52491: field in NullableDerived cannot override field in NullableBase
+      because overriding type is not compatible with the base type.
+    decl: |-
+      class NullableBase {
+        field: int | null = null
+      }
+      class NullableDerived extends NullableBase {
+        override field: int | undefined = 26
+      }
+
+  - desc: A non-nullable field cannot be overridden with a nullable field.
+    expected_out: >-
+      Semantic error ESE52491: field in NumberDerived cannot override field in NumberBase
+      because overriding type is not compatible with the base type.
+    decl: |-
+      class NumberBase {
+        field: int = 25
+      }
+      class NumberDerived extends NumberBase {
+        override field: int | null = 25
+      }
+
+  - desc: An optional field cannot be overridden by a required field.
+    expected_out: >-
+      Semantic error ESE52491: field in OptionalDerived cannot override field in OptionalBase
+      because overriding type is not compatible with the base type.
+    decl: |-
+      class OptionalBase {
+        field?: int = 14
+      }
+      class OptionalDerived extends OptionalBase {
+        override field: int = 14
+      }
+
+  - desc: A tuple field cannot be overridden with a tuple of a different length.
+    expected_out: >-
+      Semantic error ESE52491: field in TupleDerived cannot override field in TupleBase because
+      overriding type is not compatible with the base type.
+    decl: |-
+      class TupleBase {
+        field: [int] = [30]
+      }
+      class TupleDerived extends TupleBase {
+        override field: [int, int] = [30, 31]
+      }
+
+  - desc: A union-typed field cannot be narrowed in an override.
+    expected_out: >-
+      Semantic error ESE52491: field in UnionDerived cannot override field in UnionBase because
+      overriding type is not compatible with the base type.
+    decl: |-
+      class UnionBase {
+        field: int | string = 13
+      }
+      class UnionDerived extends UnionBase {
+        override field: int = 13
+      }

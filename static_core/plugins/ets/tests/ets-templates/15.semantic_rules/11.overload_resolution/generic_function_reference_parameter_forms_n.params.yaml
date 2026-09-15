@@ -1,0 +1,53 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  - desc: >-
+      Assigning a generic reference with a wider required parameter does not change the
+      reference's narrower callable signature.
+    expected_out: |-
+      Semantic error ESE0127: No matching call signature for (Base, Int)
+      Semantic error ESE0046: Type 'Base' is not compatible with type 'Derived' at index 1
+    decl: |-
+      function acceptsBase<T>(p: T, n: number): T { return p }
+      function acceptsDerived<G extends T, T>(p: G, n: number): T { return p }
+      let reference = acceptsDerived<Derived, Base>
+      reference = acceptsBase<Base>
+      reference(new Base(), 1)
+
+  - desc: >-
+      Assigning a generic reference with a wider optional parameter does not change the
+      reference's narrower callable signature.
+    expected_out: |-
+      Semantic error ESE0127: No matching call signature for (Base, Int)
+      Semantic error ESE0046: Type 'Base' is not compatible with type 'Derived' at index 1
+    decl: |-
+      function acceptsBase<T>(p: T, n?: number): T { return p }
+      function acceptsDerived<G extends T, T>(p: G, n?: number): T { return p }
+      let reference = acceptsDerived<Derived, Base>
+      reference = acceptsBase<Base>
+      reference(new Base(), 1)
+
+  - desc: >-
+      Assigning a generic reference with a wider rest parameter does not change the
+      reference's narrower callable signature.
+    expected_out: |-
+      Semantic error ESE0127: No matching call signature for (Base, Int)
+      Semantic error ESE0046: Type 'Base' is not compatible with type 'Derived' at index 1
+    decl: |-
+      function acceptsBase<T>(p: T, ...n: number[]): T { return p }
+      function acceptsDerived<G extends T, T>(p: G, ...n: number[]): T { return p }
+      let reference = acceptsDerived<Derived, Base>
+      reference = acceptsBase<Base>
+      reference(new Base(), 1)
