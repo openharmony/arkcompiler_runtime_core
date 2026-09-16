@@ -394,7 +394,7 @@ cases:
     - decl: |-
           class A<T, U, V> {
               tup: readonly [() => T, () => U, () => V]
-              constructor(...tup: [() => T, () => U, () => V]) {
+              constructor(...tup: readonly [() => T, () => U, () => V]) {
                   this.tup = tup
               }
           }

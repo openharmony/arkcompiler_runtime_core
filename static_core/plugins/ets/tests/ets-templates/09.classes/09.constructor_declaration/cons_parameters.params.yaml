@@ -486,7 +486,7 @@ cases:
     - decl: |-
           class A {
               tup: readonly [() => boolean, () => string, () => number]
-              constructor(...tup: [() => boolean, () => string, () => number]) {
+              constructor(...tup: readonly [() => boolean, () => string, () => number]) {
                   this.tup = tup
               }
           }
