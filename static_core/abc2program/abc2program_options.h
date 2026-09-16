@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,10 +28,13 @@ public:
     bool Parse(int argc, const char **argv);
     const std::string &GetInputFilePath() const;
     const std::string &GetOutputFilePath() const;
+    bool IsListClasses() const;
+    bool IsListMethods() const;
+    bool IsSkeleton() const;
 
 private:
     bool ProcessArgs(int argc, const char **argv);
-    void ConstructErrorMsg();
+    void ConstructErrorMsg(const std::string &error = "");
     void PrintErrorMsg() const;
     ark::PandArgParser paParser_;
     std::string inputFilePath_;
@@ -42,6 +45,9 @@ private:
     ark::PandArg<std::string> debugFileArg_;
     ark::PandArg<std::string> inputFileArg_;
     ark::PandArg<std::string> outputFileArg_;
+    ark::PandArg<bool> listClassesArg_;
+    ark::PandArg<bool> listMethodsArg_;
+    ark::PandArg<bool> skeletonArg_;
 };  // class Abc2ProgramOptions
 
 }  // namespace ark::abc2program

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,8 +30,13 @@ public:
     }
     PandasmProgramDumper() = default;
     void Dump(std::ostream &os, const pandasm::Program &program) const;
+    void DumpSkeleton(std::ostream &os, const pandasm::Program &program) const;
+    void DumpListClasses(std::ostream &os, const pandasm::Program &program) const;
+    void DumpListMethods(std::ostream &os, const pandasm::Program &program) const;
 
 private:
+    void DumpSkeletonClassMethods(std::ostream &os, const pandasm::Program::FunctionTableT &functionTable,
+                                  const std::string &recordName) const;
     bool HasNoAbcInput() const;
     void DumpAbcFilePath(std::ostream &os) const;
     void DumpProgramLanguage(std::ostream &os, const pandasm::Program &program) const;

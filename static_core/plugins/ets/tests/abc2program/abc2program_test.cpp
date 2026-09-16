@@ -21,6 +21,9 @@
 #include <sstream>
 #include <vector>
 #include "abc2program_driver.h"
+#include "abc2program_options.h"
+#include "abc_file_utils.h"
+#include "program_dump.h"
 
 namespace ark::abc2program {
 
@@ -589,6 +592,160 @@ TEST_F(Abc2ProgramMetadataTest, Method3)
         const auto attributes = it.second.metadata->GetAttributes();
         EXPECT_TRUE(ValidateAttributes(attributes, expectedAttributes));
     }
+}
+
+class Abc2ProgramSkeletonTest : public Abc2ProgramTest {
+public:
+    void SetUp() override
+    {
+        (void)driver.Compile(HELLO_WORLD_ABC_TEST_FILE_NAME.data());
+        prog = &(driver.GetProgram());
+    }
+};
+
+TEST_F(Abc2ProgramSkeletonTest, UserClassesOnly)
+{
+    std::set<std::string> userRecordNames;
+    for (const auto &it : prog->recordTable) {
+        if (AbcFileUtils::IsSystemTypeName(it.second.name)) {
+            continue;
+        }
+        if (it.second.metadata->IsForeign()) {
+            continue;
+        }
+        userRecordNames.insert(it.second.name);
+    }
+    EXPECT_TRUE(userRecordNames.find("HelloWorld.HelloWorld") != userRecordNames.end());
+    EXPECT_TRUE(userRecordNames.find("HelloWorld.ETSGLOBAL") != userRecordNames.end());
+    EXPECT_EQ(userRecordNames.size(), 2U);
+}
+
+TEST_F(Abc2ProgramSkeletonTest, UserMethodsOnly)
+{
+    std::set<std::string> userMethods;
+    for (const auto &it : prog->functionInstanceTable) {
+        if (it.second.metadata->IsForeign()) {
+            continue;
+        }
+        userMethods.insert(it.second.name);
+    }
+    for (const auto &it : prog->functionStaticTable) {
+        if (it.second.metadata->IsForeign()) {
+            continue;
+        }
+        userMethods.insert(it.second.name);
+    }
+    EXPECT_TRUE(userMethods.find("HelloWorld.HelloWorld._ctor_") != userMethods.end());
+    EXPECT_TRUE(userMethods.find("HelloWorld.ETSGLOBAL._cctor_") != userMethods.end());
+    EXPECT_TRUE(userMethods.find("HelloWorld.ETSGLOBAL.main") != userMethods.end());
+}
+
+TEST_F(Abc2ProgramSkeletonTest, SkeletonNoCrashWithoutFile)
+{
+    PandasmProgramDumper dumper;
+    std::ostringstream oss;
+    dumper.DumpSkeleton(oss, *prog);
+    std::string output = oss.str();
+    EXPECT_EQ(output.find("# Skeleton dump of"), std::string::npos);
+    EXPECT_NE(output.find(".language eTS"), std::string::npos);
+}
+
+TEST_F(Abc2ProgramSkeletonTest, SkeletonSignaturesPreserved)
+{
+    PandasmProgramDumper dumper;
+    std::ostringstream oss;
+    dumper.DumpSkeleton(oss, *prog);
+    std::string output = oss.str();
+    EXPECT_NE(output.find(".method i32 foo(i32)"), std::string::npos);
+    EXPECT_NE(output.find(".method std.core.Object bar(std.core.Object)"), std::string::npos);
+    EXPECT_NE(output.find(".method void _ctor_()"), std::string::npos);
+    EXPECT_NE(output.find(".method void main()"), std::string::npos);
+    EXPECT_EQ(output.find(".method foo()"), std::string::npos);
+    EXPECT_EQ(output.find(".method bar()"), std::string::npos);
+}
+
+TEST_F(Abc2ProgramSkeletonTest, SkeletonExactRecordMatchingForPrefixNames)
+{
+    pandasm::Program program;
+    program.lang = panda_file::SourceLang::ETS;
+    program.AddToRecordTable(pandasm::Record("pkg.A", panda_file::SourceLang::ETS));
+    program.AddToRecordTable(pandasm::Record("pkg.A.B", panda_file::SourceLang::ETS));
+
+    pandasm::Function funcBar("pkg.A.B.bar", panda_file::SourceLang::ETS);
+    funcBar.metadata->SetAccessFlags(ACC_STATIC);
+    funcBar.returnType = pandasm::Type("i32", 0);
+    program.functionStaticTable.emplace("pkg.A.B.bar:i32;", std::move(funcBar));
+
+    pandasm::Function funcFoo("pkg.A.foo", panda_file::SourceLang::ETS);
+    funcFoo.metadata->SetAccessFlags(ACC_STATIC);
+    funcFoo.returnType = pandasm::Type("void", 0);
+    program.functionStaticTable.emplace("pkg.A.foo:void;", std::move(funcFoo));
+
+    PandasmProgramDumper dumper;
+    std::ostringstream oss;
+    dumper.DumpSkeleton(oss, program);
+    std::string output = oss.str();
+    EXPECT_NE(output.find(".class pkg.A.B\n    .method i32 bar()"), std::string::npos);
+    EXPECT_EQ(output.find(".class pkg.A\n    .method i32 bar()"), std::string::npos);
+    EXPECT_NE(output.find(".class pkg.A\n    .method void foo()"), std::string::npos);
+}
+
+TEST_F(Abc2ProgramSkeletonTest, SkeletonOverloadSignatures)
+{
+    pandasm::Program program;
+    program.lang = panda_file::SourceLang::ETS;
+    program.AddToRecordTable(pandasm::Record("pkg.Cls", panda_file::SourceLang::ETS));
+
+    pandasm::Function funcFooI32("pkg.Cls.foo", panda_file::SourceLang::ETS);
+    funcFooI32.metadata->SetAccessFlags(ACC_STATIC);
+    funcFooI32.returnType = pandasm::Type("void", 0);
+    funcFooI32.params.emplace_back(pandasm::Type("i32", 0), panda_file::SourceLang::ETS);
+    program.functionStaticTable.emplace("pkg.Cls.foo:i32;void;", std::move(funcFooI32));
+
+    pandasm::Function funcFooF64("pkg.Cls.foo", panda_file::SourceLang::ETS);
+    funcFooF64.metadata->SetAccessFlags(ACC_STATIC);
+    funcFooF64.returnType = pandasm::Type("void", 0);
+    funcFooF64.params.emplace_back(pandasm::Type("f64", 0), panda_file::SourceLang::ETS);
+    program.functionStaticTable.emplace("pkg.Cls.foo:f64;void;", std::move(funcFooF64));
+
+    PandasmProgramDumper dumper;
+    std::ostringstream oss;
+    dumper.DumpSkeleton(oss, program);
+    std::string output = oss.str();
+    EXPECT_NE(output.find(".method void foo(i32)"), std::string::npos);
+    EXPECT_NE(output.find(".method void foo(f64)"), std::string::npos);
+}
+
+TEST_F(Abc2ProgramSkeletonTest, ListClassesOutput)
+{
+    PandasmProgramDumper dumper;
+    std::ostringstream oss;
+    dumper.DumpListClasses(oss, *prog);
+    std::string output = oss.str();
+    EXPECT_EQ(output.find("# Classes in"), std::string::npos);
+    EXPECT_NE(output.find("HelloWorld.HelloWorld"), std::string::npos);
+    EXPECT_NE(output.find("HelloWorld.ETSGLOBAL"), std::string::npos);
+    EXPECT_EQ(output.find("std.core.Object"), std::string::npos);
+}
+
+TEST_F(Abc2ProgramSkeletonTest, ListMethodsOutput)
+{
+    PandasmProgramDumper dumper;
+    std::ostringstream oss;
+    dumper.DumpListMethods(oss, *prog);
+    std::string output = oss.str();
+    EXPECT_EQ(output.find("# Methods in"), std::string::npos);
+    EXPECT_NE(output.find("HelloWorld.HelloWorld._ctor_"), std::string::npos);
+    EXPECT_NE(output.find("HelloWorld.HelloWorld.foo"), std::string::npos);
+    EXPECT_NE(output.find("HelloWorld.ETSGLOBAL.main"), std::string::npos);
+    EXPECT_EQ(output.find("std.core.Object"), std::string::npos);
+}
+
+TEST_F(Abc2ProgramTest, OptionsMutualExclusion)
+{
+    std::vector<const char *> argv = {"abc2prog", "--list-classes", "--list-methods", "input.abc", "output.txt"};
+    Abc2ProgramOptions options;
+    EXPECT_FALSE(options.Parse(static_cast<int>(argv.size()), argv.data()));
 }
 
 }  // namespace ark::abc2program
