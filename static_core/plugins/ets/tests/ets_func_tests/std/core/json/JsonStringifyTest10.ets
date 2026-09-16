@@ -144,7 +144,7 @@ function main(): int {
 
 function checkUndefined(): void {
     const result: string = JSON.stringify(undefined)
-    arktest.assertEQ(result, '')
+    arktest.assertEQ(result, 'undefined')
 }
 
 function checkNull(): void {

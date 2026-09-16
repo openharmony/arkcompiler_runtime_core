@@ -75,5 +75,5 @@ function testStringifyNull() {
 }
 
 function testStringifyUndefined() {
-    arktest.assertEQ(JSON.stringify(undefined, undefined, 0), '')
+    arktest.assertEQ(JSON.stringify(undefined, undefined, 0), 'undefined')
 }

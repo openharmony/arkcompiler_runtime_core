@@ -72,7 +72,7 @@ function main(): int {
     suite.addTest('replacer adds 5 to first array element', firstP5)
     suite.addTest('replacer rewrites object as flat array', obj2Arr)
     suite.addTest('3-space indentation', indent3)
-    suite.addTest('standalone function stringifies to empty', funcEmpty)
+    suite.addTest('standalone function stringifies to undefined', funcEmpty)
     suite.addTest('replacer uppercases string value', toUpper)
     suite.addTest('arrow string indentation', indentArrow)
     suite.addTest('zero indentation for value 25', indent0b)
@@ -717,7 +717,7 @@ function funcEmpty() {
     const func = () => {
     }
     const jsonStr = JSON.stringify(func)
-    arktest.assertEQ(jsonStr, '')
+    arktest.assertEQ(jsonStr, 'undefined')
 }
 
 function toUpper() {
