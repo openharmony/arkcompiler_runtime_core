@@ -161,7 +161,16 @@ T StringToInt(const PandaString &str, PandaString::size_type startIndex, uint8_t
 template <typename T>
 T StringToInt(EtsString *str, uint8_t radix)
 {
-    auto ps = str->TrimLeft()->GetMutf8();
+    auto trimmed = str->TrimLeft();
+    // TrimLeft() only returns nullptr when substring allocation fails (OOM).
+    // In that case AllocLineStringObject has already raised an OutOfMemoryError;
+    // returning 0 lets that pending exception propagate instead of crashing on a
+    // nullptr dereference in GetMutf8(). For an empty input TrimLeft() returns
+    // `this` (a non-null empty string), so nullptr only occurs on allocation failure.
+    if (trimmed == nullptr) {
+        return 0;
+    }
+    auto ps = trimmed->GetMutf8();
     PandaString::size_type index = 0;
     if (index >= ps.size()) {
         ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreFormatError,
