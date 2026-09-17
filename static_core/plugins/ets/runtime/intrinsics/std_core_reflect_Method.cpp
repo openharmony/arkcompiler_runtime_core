@@ -54,10 +54,16 @@ extern "C" EtsClass *ReflectMethodGetReturnTypeImpl(EtsLong etsMethodPtr)
 extern "C" EtsClass *ReflectMethodGetParameterTypeByIdxImpl(EtsLong etsFunctionPtr, EtsInt i)
 {
     auto *executionCtx = EtsExecutionContext::GetCurrent();
-    ASSERT(executionCtx != nullptr);
+    if (UNLIKELY(executionCtx == nullptr)) {
+        ThrowNullPointerException();
+        return nullptr;
+    }
 
     auto *function = reinterpret_cast<EtsMethod *>(etsFunctionPtr);
-    ASSERT(function != nullptr);
+    if (UNLIKELY(function == nullptr)) {
+        ThrowNullPointerException();
+        return nullptr;
+    }
 
     auto parametersNum = function->GetParametersNum();
     if (UNLIKELY(i < 0 || static_cast<uint32_t>(i) >= parametersNum)) {
