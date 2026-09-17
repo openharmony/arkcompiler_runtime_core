@@ -790,13 +790,13 @@ bool ZipFile::UnzipWithInflatedFromMMap(const ZipEntry &zipEntry, [[maybe_unused
     bool ret = true;
     int32_t zlibErr = Z_OK;
     uint32_t remainCompressedSize = zipEntry.compressedSize;
-    size_t inflateLen = 0;
     uint8_t errorTimes = 0;
 
     len = zipEntry.uncompressedSize;
     dataPtr = std::make_unique<uint8_t[]>(len);  // NOLINT(modernize-avoid-c-arrays)
     auto *dstDataPtr = static_cast<uint8_t *>(dataPtr.get());
     void *mmapSrcDataPtr = mmapDataPtr;
+    size_t remainUncompressedSize = len;
 
     while ((remainCompressedSize > 0) || (zstream.avail_in > 0)) {
         if (!ReadZStreamFromMMap(bufIn, mmapSrcDataPtr, zstream, remainCompressedSize)) {
@@ -811,8 +811,8 @@ bool ZipFile::UnzipWithInflatedFromMMap(const ZipEntry &zipEntry, [[maybe_unused
             break;
         }
 
-        inflateLen = UNZIP_BUF_OUT_LEN - zstream.avail_out;
-        if (!CopyInflateOut(zstream, inflateLen, &dstDataPtr, bufOut, errorTimes)) {
+        if (!CopyInflateOut(zstream, &dstDataPtr, bufOut, errorTimes, remainUncompressedSize)) {
+            ret = false;
             break;
         }
     }
@@ -824,21 +824,30 @@ bool ZipFile::UnzipWithInflatedFromMMap(const ZipEntry &zipEntry, [[maybe_unused
         ret = false;
     }
 
+    if (!ret) {
+        dataPtr.reset();
+    }
     delete[] bufOut;
     delete[] bufIn;
     return ret;
 }
 
-bool ZipFile::CopyInflateOut(z_stream &zstream, size_t inflateLen, uint8_t **dstDataPtr, BytePtr bufOut,
-                             uint8_t &errorTimes) const
+bool ZipFile::CopyInflateOut(z_stream &zstream, uint8_t **dstDataPtr, BytePtr bufOut, uint8_t &errorTimes,
+                             size_t &remainUncompressedSize) const
 {
+    size_t inflateLen = UNZIP_BUF_OUT_LEN - zstream.avail_out;
     if (inflateLen > 0) {
-        if (memcpy_s(*dstDataPtr, inflateLen, bufOut, inflateLen) != EOK) {
+        if (inflateLen > remainUncompressedSize) {
+            LOG(ERROR, ZIPARCHIVE) << "Buffer overflow detected: inflated size exceeds declared uncompressedSize";
+            return false;
+        }
+        if (memcpy_s(*dstDataPtr, remainUncompressedSize, bufOut, inflateLen) != EOK) {
             LOG(ERROR, ZIPARCHIVE) << "memcpy failed";
             return false;
         }
 
         *dstDataPtr += inflateLen;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        remainUncompressedSize -= inflateLen;
         zstream.next_out = bufOut;
         zstream.avail_out = UNZIP_BUF_OUT_LEN;
         errorTimes = 0;
