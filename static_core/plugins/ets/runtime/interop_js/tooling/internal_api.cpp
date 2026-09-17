@@ -50,7 +50,9 @@ bool UnionStackIsEmpty(bool *isEmpty)
     if (UNLIKELY(ctx == nullptr)) {
         return false;
     }
-    *isEmpty = (!ctx->GetInteropHybridStackEnabled()) || (ctx->GetOrCreateCallStack().GetRecords().Size() == 0);
+    auto &callStack = ctx->GetOrCreateCallStack();
+    *isEmpty = (!ctx->GetInteropHybridStackEnabled()) ||
+               ((callStack.GetRecords().Size() == 0) && (callStack.GetStaticTopFrame() == nullptr));
     return true;
 }
 

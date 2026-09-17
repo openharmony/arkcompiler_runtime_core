@@ -17,53 +17,67 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CODE_SCOPES_INL_H
 
 #include "ets_coroutine.h"
+#include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 
 namespace ark::ets::interop::js {
 
-template <bool ETS_TO_JS>
-inline bool OpenInteropCodeScope(EtsExecutionContext *executionCtx, char const *descr)
+inline InteropCtx *GetInteropScopeCtx(EtsExecutionContext *executionCtx)
 {
     if (UNLIKELY(executionCtx == nullptr || executionCtx->GetMT() != ManagedThread::GetCurrent())) {
+        return nullptr;
+    }
+    return InteropCtx::Current(executionCtx);
+}
+
+inline void AllocInteropRecord(InteropCtx *ctx, char const *descr)
+{
+    if (ctx->GetInteropHybridStackEnabled()) {
+        auto &callStack = ctx->GetOrCreateCallStack();
+        callStack.AllocRecord(callStack.GetDynamicTopFrameSP(), callStack.GetStaticTopFrame(), descr);
+    }
+}
+
+inline void PopInteropRecord(InteropCtx *ctx)
+{
+    if (ctx->GetInteropHybridStackEnabled()) {
+        ctx->GetOrCreateCallStack().PopRecord();
+    }
+}
+
+inline void UpdateStackInfoAndPopRecord(InteropCtx *ctx, bool recordStack)
+{
+    ctx->UpdateInteropStackInfoIfNeeded();
+    if (recordStack) {
+        PopInteropRecord(ctx);
+    }
+}
+
+template <InteropScopeKind KIND>
+inline bool OpenInteropCodeScope(EtsExecutionContext *executionCtx, char const *descr, bool recordStack = true)
+{
+    auto *ctx = GetInteropScopeCtx(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
         return false;
     }
-
-    auto *ctx = InteropCtx::Current(executionCtx);
-    if constexpr (ETS_TO_JS) {
-        if (UNLIKELY(!ctx->PushAndUpdateInteropStackInfoIfNeeded(executionCtx))) {
-            return false;
-        }
+    if constexpr (KIND == InteropScopeKind::ETS_TO_JS) {
+        return ctx->PushAndUpdateInteropStackInfoIfNeeded(executionCtx);
+    } else if (recordStack) {
+        AllocInteropRecord(ctx, descr);
     }
-
-    if (ctx->GetInteropHybridStackEnabled()) {
-        void *topFrame {};
-        if constexpr (ETS_TO_JS) {
-            // ETS → JS: Record static (ETS) frame
-            topFrame = ctx->GetOrCreateCallStack().GetStaticTopFrame();
-        } else {
-            // JS → ETS: Record dynamic (JS) frame
-            topFrame = ctx->GetOrCreateCallStack().GetDynamicTopFrameSP();
-        }
-        ctx->GetOrCreateCallStack().AllocRecord(topFrame, ETS_TO_JS, descr);
-    } else {
-        ctx->GetOrCreateCallStack().AllocRecord(executionCtx->GetMT()->GetCurrentFrame(), ETS_TO_JS, descr);
-    }
-
     return true;
 }
 
-template <bool ETS_TO_JS>
-inline bool CloseInteropCodeScope(EtsExecutionContext *executionCtx)
+template <InteropScopeKind KIND>
+inline bool CloseInteropCodeScope(EtsExecutionContext *executionCtx, bool recordStack = true)
 {
-    if (UNLIKELY(executionCtx == nullptr || executionCtx->GetMT() != ManagedThread::GetCurrent())) {
+    auto *ctx = GetInteropScopeCtx(executionCtx);
+    if (UNLIKELY(ctx == nullptr)) {
         return false;
     }
-
-    auto *ctx = InteropCtx::Current(executionCtx);
-    if constexpr (ETS_TO_JS) {
-        ctx->UpdateInteropStackInfoIfNeeded();
+    if constexpr (KIND == InteropScopeKind::JS_TO_ETS) {
+        UpdateStackInfoAndPopRecord(ctx, recordStack);
     }
-    ctx->GetOrCreateCallStack().PopRecord();
     return true;
 }
 

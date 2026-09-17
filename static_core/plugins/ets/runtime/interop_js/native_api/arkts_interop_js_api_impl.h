@@ -34,10 +34,11 @@ PANDA_PUBLIC_API bool UnwrapESValue(ani_env *env, ani_object esValue, void **res
 PANDA_PUBLIC_API bool GetCurrentNapiEnv(ani_env *env, napi_env *result);
 
 /// Experimental API, only for internal usage in runtime.
-PANDA_PUBLIC_API bool OpenJSToETSScope(EtsExecutionContext *executionCtx, char const *descr = nullptr);
+PANDA_PUBLIC_API bool OpenJSToETSScope(EtsExecutionContext *executionCtx, char const *descr = nullptr,
+                                       bool recordStack = true);
 
 /// Experimental API, only for internal usage in runtime.
-PANDA_PUBLIC_API bool CloseJSToETSScope(EtsExecutionContext *executionCtx);
+PANDA_PUBLIC_API bool CloseJSToETSScope(EtsExecutionContext *executionCtx, bool recordStack = true);
 
 /// Experimental API, only for internal usage in runtime.
 PANDA_PUBLIC_API bool OpenETSToJSScope(EtsExecutionContext *executionCtx, char const *descr = nullptr);

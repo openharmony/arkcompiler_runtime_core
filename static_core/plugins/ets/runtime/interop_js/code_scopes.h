@@ -20,6 +20,8 @@
 
 namespace ark::ets::interop::js {
 
+enum class InteropScopeKind { JS_TO_ETS, ETS_TO_JS };
+
 /// @brief RAII-style class for registering interop call stack information
 class ScopedInteropCallStackRecord {
 public:
@@ -41,6 +43,7 @@ public:
 
 private:
     EtsExecutionContext *executionCtx_;
+    bool opened_ {};
 
     NO_COPY_SEMANTIC(InteropETSToJSCodeScope);
     NO_MOVE_SEMANTIC(InteropETSToJSCodeScope);
@@ -49,11 +52,13 @@ private:
 /// @brief RAII-style class for switching from JS state to ETS
 class InteropJSToETSCodeScope {
 public:
-    explicit InteropJSToETSCodeScope(EtsExecutionContext *executionCtx, char const *descr = nullptr);
+    explicit InteropJSToETSCodeScope(EtsExecutionContext *executionCtx, char const *descr = nullptr,
+                                     bool recordStack = true);
     ~InteropJSToETSCodeScope();
 
 private:
     EtsExecutionContext *executionCtx_;
+    bool recordStack_;
 
     NO_COPY_SEMANTIC(InteropJSToETSCodeScope);
     NO_MOVE_SEMANTIC(InteropJSToETSCodeScope);

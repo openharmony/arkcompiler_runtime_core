@@ -98,44 +98,37 @@ bool InteropCallStack::ForEachStaticFrame(StackWalker *stack, void *toFrame,
 
 bool InteropCallStack::ForEachInteropFrame(const std::function<void(const void *frame, bool isStaticFrame)> &callback)
 {
+    if (UNLIKELY(!InteropCtx::IsHybridStackEnabled())) {
+        return false;
+    }
     auto *execCtx = JobExecutionContext::GetCurrent();
     if (UNLIKELY(execCtx == nullptr)) {
         return false;
     }
-    // Get the current top stack and traverse the stack between the current node and the recorded node.
     StackWalker staticStack = StackWalker::Create(execCtx);
     void *dynamicFrameSP = GetDynamicTopFrameSP();
-    void *toFrame = nullptr;
 
-    int frameSize = static_cast<int>(GetRecords().size());
+    auto records = GetRecords();
+    int frameSize = static_cast<int>(records.size());
 
     for (int fIdx = frameSize - 1; fIdx >= 0; fIdx--) {
-        toFrame = GetRecords()[fIdx].frame;
-        bool nextIsStatic = GetRecords()[fIdx].isStaticFrame;
-        if (nextIsStatic) {
-            // Parse static frames.
-            if (!ForEachStaticFrame(&staticStack, toFrame, [&callback](const void *frame) { callback(frame, true); })) {
-                return false;
-            }
-        } else {
-            // Parse dynamic frames.
-            if (!ForEachDynamicFrame(dynamicFrameSP, toFrame,
-                                     [&callback](const void *frame) { callback(frame, false); })) {
-                return false;
-            }
-            dynamicFrameSP = toFrame;
+        if (!ForEachDynamicFrame(dynamicFrameSP, records[fIdx].dynamicSP,
+                                 [&callback](const void *frame) { callback(frame, false); })) {
+            return false;
+        }
+        dynamicFrameSP = records[fIdx].dynamicSP;
+        if (!ForEachStaticFrame(&staticStack, records[fIdx].staticEntryFrame,
+                                [&callback](const void *frame) { callback(frame, true); })) {
+            return false;
         }
     }
 
-    // Parse all remaining static frames ans dynamic frames.
-    if (frameSize > 0 && GetRecords()[0U].isStaticFrame) {
-        return ForEachDynamicFrame(dynamicFrameSP, nullptr,
-                                   [&callback](const void *frame) { callback(frame, false); }) &&
-               ForEachStaticFrame(&staticStack, nullptr, [&callback](const void *frame) { callback(frame, true); });
+    if (dynamicFrameSP != nullptr) {
+        if (!ForEachDynamicFrame(dynamicFrameSP, nullptr, [&callback](const void *frame) { callback(frame, false); })) {
+            return false;
+        }
     }
-
-    return ForEachStaticFrame(&staticStack, nullptr, [&callback](const void *frame) { callback(frame, true); }) &&
-           ForEachDynamicFrame(dynamicFrameSP, nullptr, [&callback](const void *frame) { callback(frame, false); });
+    return ForEachStaticFrame(&staticStack, nullptr, [&callback](const void *frame) { callback(frame, true); });
 }
 
 }  // namespace ark::ets::interop::js

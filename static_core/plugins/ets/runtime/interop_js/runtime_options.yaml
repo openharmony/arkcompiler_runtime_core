@@ -49,5 +49,5 @@ options:
   lang:
     - ets
   type: bool
-  default: false
-  description: interop support hybridstack or not, only valid in the UT environment or the command is activated on the device side
+  default: true
+  description: Enable interop hybrid call stack recording, pass false to disable it
