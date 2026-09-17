@@ -85,6 +85,7 @@
   "plugins/ets/tests/ets-common-tests/atomics": "*",
   "plugins/ets/tests/ets-common-tests/class": "*",
   "plugins/ets/tests/ets-common-tests/default_import": "*",
+  "plugins/ets/tests/ets-common-tests/dynamic_declaration": "*",
   "plugins/ets/tests/ets-common-tests/export": "*",
   "plugins/ets/tests/ets-common-tests/export_enum_test": "*",
   "plugins/ets/tests/ets-common-tests/export_default": "*",

@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "baseUrl": "..",
+        "paths": {
+            "entry/DirectoryIndex": [
+                "entry/DirectoryIndex.ets"
+            ]
+        },
+        "dependencies": {
+            "@test/pkg/src/Nested": {
+                "language": "js",
+                "path": "modules/index/build/declgenV2/src/Nested.d.ets",
+                "ohmUrl": "runtime/entry",
+                "sourceFilePath": "modules/index/src/Nested.ets"
+            },
+            "@test/pkg": {
+                "language": "js",
+                "path": "modules/index/build/declgenV2/Index.d.ets",
+                "ohmUrl": "runtime/Foo",
+                "sourceFilePath": "modules/index/Index.ets"
+            }
+        }
+    }
+}

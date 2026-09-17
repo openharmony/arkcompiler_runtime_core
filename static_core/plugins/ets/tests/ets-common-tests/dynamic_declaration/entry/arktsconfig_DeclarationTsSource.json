@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "baseUrl": "..",
+        "paths": {
+            "entry/DeclarationTsSource": [
+                "entry/DeclarationTsSource.ets"
+            ]
+        },
+        "dependencies": {
+            "@test/pkg": {
+                "language": "js",
+                "path": "modules/declaration_ts/build/declgenV2/Index.d.ets",
+                "ohmUrl": "runtime/entry",
+                "sourceFilePath": "modules/declaration_ts/Index.d.ts"
+            },
+            "@test/pkg/Foo": {
+                "language": "js",
+                "path": "modules/declaration_ts/build/declgenV2/Foo.d.ets",
+                "ohmUrl": "runtime/Foo",
+                "sourceFilePath": "modules/declaration_ts/Foo.d.ts"
+            }
+        }
+    }
+}

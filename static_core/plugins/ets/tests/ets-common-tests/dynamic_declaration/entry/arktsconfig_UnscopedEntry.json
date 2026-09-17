@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "baseUrl": "..",
+        "paths": {
+            "entry/UnscopedEntry": [
+                "entry/UnscopedEntry.ets"
+            ]
+        },
+        "dependencies": {
+            "pkg": {
+                "language": "js",
+                "path": "modules/unscoped/build/declgenV2/Index.d.ets",
+                "ohmUrl": "runtime/entry",
+                "sourceFilePath": "modules/unscoped/Index.ets"
+            },
+            "pkg/Foo": {
+                "language": "js",
+                "path": "modules/unscoped/build/declgenV2/Foo.d.ets",
+                "ohmUrl": "runtime/Foo",
+                "sourceFilePath": "modules/unscoped/Foo.ets"
+            }
+        }
+    }
+}

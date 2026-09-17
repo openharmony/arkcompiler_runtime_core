@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "baseUrl": "..",
+        "paths": {
+            "entry/DirectoryWithoutIndex": [
+                "entry/DirectoryWithoutIndex.ets"
+            ],
+            "@test/pkg/Foo/Unrelated": [
+                "modules/no_index/Foo/Unrelated.ets"
+            ]
+        },
+        "dependencies": {
+            "@test/pkg/Foo": {
+                "language": "js",
+                "path": "modules/no_index/build/declgenV2/Foo.d.ets",
+                "ohmUrl": "runtime/Foo",
+                "sourceFilePath": "modules/no_index/Foo.ets"
+            },
+            "@test/pkg/src/Nested": {
+                "language": "js",
+                "path": "modules/no_index/build/declgenV2/src/Nested.d.ets",
+                "ohmUrl": "runtime/entry",
+                "sourceFilePath": "modules/no_index/src/Nested.ets"
+            }
+        }
+    }
+}
