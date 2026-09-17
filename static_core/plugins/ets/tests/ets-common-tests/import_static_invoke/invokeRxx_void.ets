@@ -26,7 +26,7 @@ class TestObj {
 
 let arg = (...args: Array<Object | string | number | undefined | null>) => { return ('HelloWorld') }
 
-const methodArgs: FixedArray<Object> = new FixedArray<Object>(1, {});
+const methodArgs: FixedArray<Object> = new FixedArray<Object>(1);
 
 methodArgs[0] = arg;
 

@@ -113,7 +113,7 @@ function main(): int {
         // =============== Test 4 ===============
         // An element of array may be changed after StringBuilder is constructed from the array.
         // So StringBuilder must add a copy of the array to the buffer.
-        let arr4: FixedArray<char> = new FixedArray<char>(3, c'\u0000')
+        let arr4: FixedArray<char> = new FixedArray<char>(3)
         arr4[0] = c'a';
         arr4[1] = c'b';
         arr4[2] = c'c';

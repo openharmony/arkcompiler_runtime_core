@@ -23,7 +23,7 @@ tags: [negative, compile-only]
 {% if cc.expected_out is defined %}
 expected_out: "{{cc.expected_out}}"
 {% else %}
-expected_out:  "Semantic error ESE0046: Type '{{cc.initType}}' is not compatible with type '{{cc.type}}' at index 1"
+expected_out:  "Semantic error ESE0318: Type '{{cc.initType}}' cannot be assigned to type '{{cc.type}}'"
 {% endif -%}
 
 ---*/

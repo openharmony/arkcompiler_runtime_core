@@ -65,7 +65,7 @@ function main1(): int {
 //! INST       /CallStatic.*ext_funcs_4_1\.ETSGLOBAL::middle.*\[file=\d+\]/
 class A{}
 function main2(): int {
-    let arr = new FixedArray<A>(3, new A())
+    let arr = new FixedArray<A>(3)
     let total = 0;
 
     try {

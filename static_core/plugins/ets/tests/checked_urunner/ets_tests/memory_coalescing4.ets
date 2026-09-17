@@ -49,7 +49,7 @@ export class Test {
 
     __noinline__test(n: int): void {
         let i: int;
-        let u: ValueArray<int> = new ValueArray<int>(n, 0)
+        let u: ValueArray<int> = new ValueArray<int>(n)
         let a: A = new A();
         for (i = 0; i < n; i++) {
             u[i] = i;

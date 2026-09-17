@@ -39,6 +39,6 @@ function main(): void {
 }
 
 function func(arr: ValueArray<byte>, startIndex: int, endIndex: int): void {
-    const cnts: ValueArray<int> = new ValueArray<int>(256, 0)
+    const cnts: ValueArray<int> = new ValueArray<int>(256)
     cnts[arr[7] + 128]++
 }

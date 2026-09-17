@@ -94,7 +94,7 @@ let GLOBAL_OFFS: int = 1;
 class TestSupported {
     static testNoAliasLocals(): int {
         let src: ValueArray<int> = [1, 2, 3, 4];
-        let dst: ValueArray<int> = new ValueArray<int>(4, 0);
+        let dst: ValueArray<int> = new ValueArray<int>(4);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
@@ -103,7 +103,7 @@ class TestSupported {
 
     static testNoAloasLocalsRef(): int {
         let src: FixedArray<string> = ['1', '2', '3', '4'];
-        let dst: FixedArray<string> = new FixedArray<string>(4, '');
+        let dst: FixedArray<string> = new FixedArray<string>(4);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
@@ -112,7 +112,7 @@ class TestSupported {
 
     static testNoAliasUpdateFirstOnlyRef(): int {
         let src: FixedArray<string> = ['1', '2', '3', '4'];
-        let dst: FixedArray<string> = new FixedArray<string>(4, '');
+        let dst: FixedArray<string> = new FixedArray<string>(4);
         TestSupported.__noinline__updateFirst(dst);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
@@ -130,7 +130,7 @@ class TestSupported {
     }
 
     static __noinline__testNoAliasLocalAndParam(src: ValueArray<int>): ValueArray<int> {
-        let dst: ValueArray<int> = new ValueArray<int>(4, 0);
+        let dst: ValueArray<int> = new ValueArray<int>(4);
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }

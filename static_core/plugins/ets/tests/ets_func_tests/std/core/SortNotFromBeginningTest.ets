@@ -15,8 +15,8 @@
 
 function sortArrayFromSecondElementTest(): int {
     let size: int = 100;
-    let arr: FixedArray<int> = new FixedArray<int>(size, 0);
-    let expected: FixedArray<int> = new FixedArray<int>(size, 0);
+    let arr: FixedArray<int> = new FixedArray<int>(size);
+    let expected: FixedArray<int> = new FixedArray<int>(size);
     for (let i = 0; i < size; ++i) {
         arr[i] = size - i;
         expected[i] = i;

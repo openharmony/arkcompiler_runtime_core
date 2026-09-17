@@ -851,7 +851,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
             return res
         }
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new FixedArray<int>(1, new Int())
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0].toDouble())
@@ -878,7 +878,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Uint8ClampedArray(6)
-        let index : FixedArray<int> = new FixedArray<int>(1, new Int())
+        let index : FixedArray<int> = new FixedArray<int>(1)
         index[0] = 0
 
         iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
@@ -1155,7 +1155,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
         }
         const MAX_SHORT_LENGTH = 24
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<int> = new FixedArray<int>(this.lengthInt, new Int())
+            let arr: FixedArray<int> = new FixedArray<int>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
@@ -1164,7 +1164,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<Int> = new FixedArray<Int>(this.lengthInt, new Int())
+            let buffer: FixedArray<Int> = new FixedArray<Int>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
@@ -1472,7 +1472,7 @@ export final class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Numb
      * @FaAndStageModel
      */
     public filter(fn: (val: number, index: int, array: Uint8ClampedArray) => boolean): Uint8ClampedArray {
-        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt, false)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; i++) {
             markers[i] = fn(this.getUnsafe(i).toDouble(), i, this)
@@ -2488,7 +2488,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
             return res
         }
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new FixedArray<int>(1, new Int())
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0].toDouble())
@@ -2515,7 +2515,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Uint8Array(6)
-        let index : FixedArray<int> = new FixedArray<int>(1, new Int())
+        let index : FixedArray<int> = new FixedArray<int>(1)
         index[0] = 0
 
         iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
@@ -2792,7 +2792,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         }
         const MAX_SHORT_LENGTH = 24
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<int> = new FixedArray<int>(this.lengthInt, new Int())
+            let arr: FixedArray<int> = new FixedArray<int>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
@@ -2801,7 +2801,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<Int> = new FixedArray<Int>(this.lengthInt, new Int())
+            let buffer: FixedArray<Int> = new FixedArray<Int>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
@@ -3109,7 +3109,7 @@ export final class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public filter(fn: (val: number, index: int, array: Uint8Array) => boolean): Uint8Array {
-        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt, false)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; i++) {
             markers[i] = fn(this.getUnsafe(i).toDouble(), i, this)
@@ -4107,7 +4107,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
             return res
         }
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new FixedArray<int>(1, new Int())
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0].toDouble())
@@ -4134,7 +4134,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Uint16Array(6)
-        let index : FixedArray<int> = new FixedArray<int>(1, new Int())
+        let index : FixedArray<int> = new FixedArray<int>(1)
         index[0] = 0
 
         iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
@@ -4411,7 +4411,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         }
         const MAX_SHORT_LENGTH = 24
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<int> = new FixedArray<int>(this.lengthInt, new Int())
+            let arr: FixedArray<int> = new FixedArray<int>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
@@ -4420,7 +4420,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<Int> = new FixedArray<Int>(this.lengthInt, new Int())
+            let buffer: FixedArray<Int> = new FixedArray<Int>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
@@ -4728,7 +4728,7 @@ export final class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public filter(fn: (val: number, index: int, array: Uint16Array) => boolean): Uint16Array {
-        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt, false)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; i++) {
             markers[i] = fn(this.getUnsafe(i).toDouble(), i, this)
@@ -5764,7 +5764,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
             return res
         }
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new FixedArray<int>(1, new Int())
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0].toDouble())
@@ -5791,7 +5791,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Uint32Array(6)
-        let index : FixedArray<int> = new FixedArray<int>(1, new Int())
+        let index : FixedArray<int> = new FixedArray<int>(1)
         index[0] = 0
 
         iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
@@ -6068,7 +6068,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         }
         const MAX_SHORT_LENGTH = 24
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<long> = new FixedArray<long>(this.lengthInt, new Long())
+            let arr: FixedArray<long> = new FixedArray<long>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
@@ -6077,7 +6077,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<Long> = new FixedArray<Long>(this.lengthInt, new Long())
+            let buffer: FixedArray<Long> = new FixedArray<Long>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
@@ -6385,7 +6385,7 @@ export final class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * @FaAndStageModel
      */
     public filter(fn: (val: number, index: int, array: Uint32Array) => boolean): Uint32Array {
-        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt, false)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; i++) {
             markers[i] = fn(this.getUnsafe(i).toDouble(), i, this)
@@ -7424,7 +7424,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
             return res
         }
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new FixedArray<int>(1, new Int())
+        const idx : FixedArray<int> = new FixedArray<int>(1)
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0].toDouble())
@@ -7451,7 +7451,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
 
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new BigUint64Array(6)
-        let index : FixedArray<int> = new FixedArray<int>(1, new Int())
+        let index : FixedArray<int> = new FixedArray<int>(1)
         index[0] = 0
 
         iteratorForEach<BigInt>(arrayLike.$_iterator(), (x: BigInt): void => {
@@ -7743,7 +7743,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
         }
         const MAX_SHORT_LENGTH = 24
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<long> = new FixedArray<long>(this.lengthInt, new Long())
+            let arr: FixedArray<long> = new FixedArray<long>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 arr[i] = this.getUnsafe(i)
             }
@@ -7752,7 +7752,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<Long> = new FixedArray<Long>(this.lengthInt, new Long())
+            let buffer: FixedArray<Long> = new FixedArray<Long>(this.lengthInt)
             for (let i = 0; i < this.lengthInt; ++i) {
                 buffer[i] = this.getUnsafe(i)
             }
@@ -8060,7 +8060,7 @@ export final class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt>
      * @FaAndStageModel
      */
     public filter(fn: (val: BigInt, index: int, array: BigUint64Array) => boolean): BigUint64Array {
-        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt, false)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; i++) {
             markers[i] = fn(BigInt.fromULong(this.getUnsafe(i)), i, this)

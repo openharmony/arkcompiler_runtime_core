@@ -40,8 +40,8 @@ export class ArraySort {
    * @Setup
    */
   public prepareArray(): void {
-    this.ints = new FixedArray<int>(this.size, 0);
-    this.intsInitial = new FixedArray<int>(this.size, 0);
+    this.ints = new FixedArray<int>(this.size);
+    this.intsInitial = new FixedArray<int>(this.size);
     let size = this.size
     switch (this.distribution) {
       case "sorted":

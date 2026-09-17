@@ -72,7 +72,7 @@ function hot(i:int):int {
 
 function testLoops(): void {
     let N = cold();
-    let arr: ValueArray<int> = new ValueArray<int>(N, 0);
+    let arr: ValueArray<int> = new ValueArray<int>(N);
 
     for (let i:int = 0; i < N; i++) {
         arr[i] += hot(i);

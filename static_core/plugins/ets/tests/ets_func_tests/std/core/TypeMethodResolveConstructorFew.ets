@@ -58,7 +58,7 @@ function test(args: FixedArray<Any>, exp: int): int {
 }
 
 function from(x: Any): FixedArray<Any> {
-    const ret : FixedArray<Any> = new FixedArray<Any>(1, undefined)
+    const ret : FixedArray<Any> = new FixedArray<Any>(1)
     ret[0] = x
     return ret
 }

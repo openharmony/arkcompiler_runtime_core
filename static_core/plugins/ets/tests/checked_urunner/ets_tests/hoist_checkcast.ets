@@ -59,7 +59,7 @@ function test(arr: FixedArray<A>, value: A | B) : int {
 }
 
 function main(): int {
-    let arr: FixedArray<A> = new FixedArray<A>(5, new A());
+    let arr: FixedArray<A> = new FixedArray<A>(5);
     if (test(arr, new A()) != 5) {
         return 1;
     }
@@ -119,7 +119,7 @@ function test2(arr: FixedArray<Object>, value: A | B) : int {
 }
 
 function main2(): int {
-    let arr: FixedArray<A> = new FixedArray<A>(5, new A());
+    let arr: FixedArray<A> = new FixedArray<A>(5);
     if (test2(arr, new A()) != 5) {
         return 1;
     }

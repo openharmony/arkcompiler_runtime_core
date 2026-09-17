@@ -14,7 +14,7 @@
  */
 
 function simpleTestCall(): void {
-    let obj_array: FixedArray<Object> = new FixedArray<Object>(4, {});
+    let obj_array: FixedArray<Object> = new FixedArray<Object>(4);
     for (let i = 0; i < 4; i++) {
         obj_array[i] = new Object();
         arktest.assertLT(0, GC.getObjectAddress(obj_array[i]), "getObjectAddress for regular object must return value > 0");
@@ -28,7 +28,7 @@ function main(): int {
     let obj = new Object();
     arktest.assertLT(0, GC.getObjectAddress(obj), "getObjectAddress for regular object must return value > 0");
     arktest.assertLT(0, GC.getObjectAddress("non-movable string"), "getObjectAddress for non-movable must return value > 0");
-    let h_obj: ValueArray<long> = new ValueArray<long>(1024 * 1024, 0);
+    let h_obj: ValueArray<long> = new ValueArray<long>(1024 * 1024);
     simpleTestCall()
     return 0;
 }

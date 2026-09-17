@@ -46,7 +46,7 @@ cases:
   - { value: '[new Object()]',     result: 'FA:object'  }
   - { value: '[Color.Red]',        result: 'FA:Color'   }
   - { value: '[Size.M]',           result: 'FA:string'  }
-  - { value: 'new FixedArray<A>(1, new A())',           result: 'FA:A'       }
+  - { value: 'new FixedArray<A>(1)',           result: 'FA:A'       }
   - { value: '[3.14, 3.14]',       result: 'FA:double'  }
   - { value: '["abc", "xyz"]',     result: 'FA:string'  }
   - { value: '10, 20',             result: 'i+i'        }

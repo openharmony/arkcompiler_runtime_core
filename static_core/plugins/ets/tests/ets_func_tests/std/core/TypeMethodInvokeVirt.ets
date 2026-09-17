@@ -32,7 +32,7 @@ function main(): void {
             continue
         }
         got++
-        arktest.assertEQ( m.invoke(new C(), new FixedArray<Any>(0, undefined)) as Int, 30)
+        arktest.assertEQ( m.invoke(new C(), new FixedArray<Any>(0)) as Int, 30)
     }
     arktest.assertEQ( got, 1)
 }

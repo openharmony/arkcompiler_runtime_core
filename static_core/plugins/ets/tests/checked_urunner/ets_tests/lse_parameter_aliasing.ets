@@ -42,10 +42,10 @@ function test(a: FixedArray<String[]>, b: FixedArray<String[]>): String {
 
 function main(): void {
     {
-        let c: FixedArray<String[]> = new FixedArray<String[]>(2, null)
+        let c: FixedArray<String[]> = new FixedArray<String[]>(2)
         c[0] = new String[2]("")
         c[1] = new String[2]("")
-        let d: FixedArray<String[]> = new FixedArray<String[]>(2, null)
+        let d: FixedArray<String[]> = new FixedArray<String[]>(2)
         d[0] = new String[2]("")
         d[1] = new String[2]("")
         c[0][0] = 'b'
@@ -53,7 +53,7 @@ function main(): void {
         arktest.assertEQ(c[0][0], 'a')
     }
     {
-        let c: FixedArray<String[]> = new FixedArray<String[]>(2, null)
+        let c: FixedArray<String[]> = new FixedArray<String[]>(2)
         c[0] = new String[2]("")
         c[1] = new String[2]("")
         c[0][0] = 'b'

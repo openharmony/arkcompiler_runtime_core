@@ -41,7 +41,7 @@ const FAILURE = 1
 
 function testToSorted(): int {
 
-    let unsorted: FixedArray<Object> = new FixedArray<Object>(source.length, {})
+    let unsorted: FixedArray<Object> = new FixedArray<Object>(source.length)
     let l:int = unsorted.length
 
     for (let i: int = 0; i < l; i++) {

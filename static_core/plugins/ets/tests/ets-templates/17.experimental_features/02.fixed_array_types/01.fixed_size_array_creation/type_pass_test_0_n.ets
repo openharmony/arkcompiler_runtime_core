@@ -20,7 +20,7 @@ expected_out: "Semantic error ESE0007: Cannot use array creation expression with
 ---*/
 
 function init<T>(size: int): FixedArray<T> {
-    let rr = new FixedArray<T>(size, undefined);
+    let rr = new FixedArray<T>(size);
     return rr;
 }
 

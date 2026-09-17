@@ -43,5 +43,5 @@ export native function printStackTrace(): void
  * @FaAndStageModel
  */
 export function stackTraceLines(): FixedArray<String> {
-    return new FixedArray<String>(0, new String());
+    return new FixedArray<String>(0);
 }

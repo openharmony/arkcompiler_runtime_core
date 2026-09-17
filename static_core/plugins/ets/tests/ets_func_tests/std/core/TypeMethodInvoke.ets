@@ -26,7 +26,7 @@ class C {
 }
 
 function testSum(sum: Method): void {
-    const args : FixedArray<Any> = new FixedArray<Any>(2, undefined)
+    const args : FixedArray<Any> = new FixedArray<Any>(2)
     args[0] = Int.MAX_VALUE
     args[1] = 30
     const res = sum.invoke(null, args)
@@ -36,7 +36,7 @@ function testSum(sum: Method): void {
 function testGetIsEvenPlusX(getIsEvenPlusX: Method): void {
     const c = new C()
     c.a = 15
-    const args : FixedArray<Any> = new FixedArray<Any>(1, undefined)
+    const args : FixedArray<Any> = new FixedArray<Any>(1)
 
     args[0] = 13
     arktest.assertEQ( getIsEvenPlusX.invoke(c, args), true)

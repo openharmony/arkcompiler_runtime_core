@@ -40,8 +40,8 @@ function insertion_sort(arr: FixedArray<Byte>, startIndex: int, endIndex: int, c
 function arr_perform_merge(arr: FixedArray<Byte>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: byte, rhs: byte) => int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    let left : FixedArray<Byte> = new FixedArray<Byte>(len1, new Byte());
-    let right : FixedArray<Byte> = new FixedArray<Byte>(len2, new Byte());
+    let left : FixedArray<Byte> = new FixedArray<Byte>(len1);
+    let right : FixedArray<Byte> = new FixedArray<Byte>(len2);
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i];
     }
@@ -131,8 +131,8 @@ function insertion_sort(arr: FixedArray<Short>, startIndex: int, endIndex: int, 
 function arr_perform_merge(arr: FixedArray<Short>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: short, rhs: short) => int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    let left : FixedArray<Short> = new FixedArray<Short>(len1, new Short());
-    let right : FixedArray<Short> = new FixedArray<Short>(len2, new Short());
+    let left : FixedArray<Short> = new FixedArray<Short>(len1);
+    let right : FixedArray<Short> = new FixedArray<Short>(len2);
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i];
     }
@@ -222,8 +222,8 @@ function insertion_sort(arr: FixedArray<Int>, startIndex: int, endIndex: int, co
 function arr_perform_merge(arr: FixedArray<Int>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: int, rhs: int) => int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    let left : FixedArray<Int> = new FixedArray<Int>(len1, new Int());
-    let right : FixedArray<Int> = new FixedArray<Int>(len2, new Int());
+    let left : FixedArray<Int> = new FixedArray<Int>(len1);
+    let right : FixedArray<Int> = new FixedArray<Int>(len2);
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i];
     }
@@ -313,8 +313,8 @@ function insertion_sort(arr: FixedArray<Long>, startIndex: int, endIndex: int, c
 function arr_perform_merge(arr: FixedArray<Long>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: long, rhs: long) => int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    let left : FixedArray<Long> = new FixedArray<Long>(len1, new Long());
-    let right : FixedArray<Long> = new FixedArray<Long>(len2, new Long());
+    let left : FixedArray<Long> = new FixedArray<Long>(len1);
+    let right : FixedArray<Long> = new FixedArray<Long>(len2);
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i];
     }
@@ -404,8 +404,8 @@ function insertion_sort(arr: FixedArray<Float>, startIndex: int, endIndex: int, 
 function arr_perform_merge(arr: FixedArray<Float>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: float, rhs: float) => int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    let left : FixedArray<Float> = new FixedArray<Float>(len1, new Float());
-    let right : FixedArray<Float> = new FixedArray<Float>(len2, new Float());
+    let left : FixedArray<Float> = new FixedArray<Float>(len1);
+    let right : FixedArray<Float> = new FixedArray<Float>(len2);
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i];
     }
@@ -495,8 +495,8 @@ function insertion_sort(arr: FixedArray<Double>, startIndex: int, endIndex: int,
 function arr_perform_merge(arr: FixedArray<Double>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: double, rhs: double) => int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    let left : FixedArray<Double> = new FixedArray<Double>(len1, new Double());
-    let right : FixedArray<Double> = new FixedArray<Double>(len2, new Double());
+    let left : FixedArray<Double> = new FixedArray<Double>(len1);
+    let right : FixedArray<Double> = new FixedArray<Double>(len2);
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i];
     }
@@ -746,7 +746,7 @@ function copyPart(dst: FixedArray<byte>, counter: int, src: FixedArray<byte>, st
 }
 
 function merge(left: FixedArray<byte>, right: FixedArray<byte>, cmp: (lhs: byte, rhs: byte) => int): FixedArray<byte> {
-    const result:FixedArray<byte> = new FixedArray<byte>(right.length + left.length, new Byte())
+    const result:FixedArray<byte> = new FixedArray<byte>(right.length + left.length)
     let leftIndex = 0;
     let rightIndex = 0;
     let counter: int = 0
@@ -787,12 +787,12 @@ export function mergeSort(array: FixedArray<byte>, cmp: (lhs: byte, rhs: byte) =
         return array;
     }
     const middle = Math.floor(begin + arrLength / 2).toInt()
-    const leftHalf:FixedArray<byte> = new FixedArray<byte>(middle, new Byte())
+    const leftHalf:FixedArray<byte> = new FixedArray<byte>(middle)
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
 
     counter = 0
-    const rightHalf:FixedArray<byte> = new FixedArray<byte>(arrLength - middle, new Byte())
+    const rightHalf:FixedArray<byte> = new FixedArray<byte>(arrLength - middle)
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
@@ -1297,7 +1297,7 @@ export function sort_subarray(arr: FixedArray<byte>, startIndex: int, mustPreced
 }
 
 function countSort(arr: FixedArray<byte>, startIndex: int, endIndex: int): void {
-    const cnts : FixedArray<int> = new FixedArray<int>(256, new Int())
+    const cnts : FixedArray<int> = new FixedArray<int>(256)
     for (let i = startIndex; i < endIndex; i++) {
         cnts[arr[i] + 128]++
     }
@@ -1319,7 +1319,7 @@ function copyPart(dst: FixedArray<short>, counter: int, src: FixedArray<short>, 
 }
 
 function merge(left: FixedArray<short>, right: FixedArray<short>, cmp: (lhs: short, rhs: short) => int): FixedArray<short> {
-    const result:FixedArray<short> = new FixedArray<short>(right.length + left.length, new Short())
+    const result:FixedArray<short> = new FixedArray<short>(right.length + left.length)
     let leftIndex = 0;
     let rightIndex = 0;
     let counter: int = 0
@@ -1360,12 +1360,12 @@ export function mergeSort(array: FixedArray<short>, cmp: (lhs: short, rhs: short
         return array;
     }
     const middle = Math.floor(begin + arrLength / 2).toInt()
-    const leftHalf:FixedArray<short> = new FixedArray<short>(middle, new Short())
+    const leftHalf:FixedArray<short> = new FixedArray<short>(middle)
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
 
     counter = 0
-    const rightHalf:FixedArray<short> = new FixedArray<short>(arrLength - middle, new Short())
+    const rightHalf:FixedArray<short> = new FixedArray<short>(arrLength - middle)
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
@@ -1876,7 +1876,7 @@ function copyPart(dst: FixedArray<int>, counter: int, src: FixedArray<int>, star
 }
 
 function merge(left: FixedArray<int>, right: FixedArray<int>, cmp: (lhs: int, rhs: int) => int): FixedArray<int> {
-    const result:FixedArray<int> = new FixedArray<int>(right.length + left.length, new Int())
+    const result:FixedArray<int> = new FixedArray<int>(right.length + left.length)
     let leftIndex = 0;
     let rightIndex = 0;
     let counter: int = 0
@@ -1917,12 +1917,12 @@ export function mergeSort(array: FixedArray<int>, cmp: (lhs: int, rhs: int) => i
         return array;
     }
     const middle = Math.floor(begin + arrLength / 2).toInt()
-    const leftHalf:FixedArray<int> = new FixedArray<int>(middle, new Int())
+    const leftHalf:FixedArray<int> = new FixedArray<int>(middle)
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
 
     counter = 0
-    const rightHalf:FixedArray<int> = new FixedArray<int>(arrLength - middle, new Int())
+    const rightHalf:FixedArray<int> = new FixedArray<int>(arrLength - middle)
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
@@ -2433,7 +2433,7 @@ function copyPart(dst: FixedArray<long>, counter: int, src: FixedArray<long>, st
 }
 
 function merge(left: FixedArray<long>, right: FixedArray<long>, cmp: (lhs: long, rhs: long) => int): FixedArray<long> {
-    const result:FixedArray<long> = new FixedArray<long>(right.length + left.length, new Long())
+    const result:FixedArray<long> = new FixedArray<long>(right.length + left.length)
     let leftIndex = 0;
     let rightIndex = 0;
     let counter: int = 0
@@ -2474,12 +2474,12 @@ export function mergeSort(array: FixedArray<long>, cmp: (lhs: long, rhs: long) =
         return array;
     }
     const middle = Math.floor(begin + arrLength / 2).toInt()
-    const leftHalf:FixedArray<long> = new FixedArray<long>(middle, new Long())
+    const leftHalf:FixedArray<long> = new FixedArray<long>(middle)
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
 
     counter = 0
-    const rightHalf:FixedArray<long> = new FixedArray<long>(arrLength - middle, new Long())
+    const rightHalf:FixedArray<long> = new FixedArray<long>(arrLength - middle)
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
@@ -2990,7 +2990,7 @@ function copyPart(dst: FixedArray<float>, counter: int, src: FixedArray<float>, 
 }
 
 function merge(left: FixedArray<float>, right: FixedArray<float>, cmp: (lhs: float, rhs: float) => int): FixedArray<float> {
-    const result:FixedArray<float> = new FixedArray<float>(right.length + left.length, new Float())
+    const result:FixedArray<float> = new FixedArray<float>(right.length + left.length)
     let leftIndex = 0;
     let rightIndex = 0;
     let counter: int = 0
@@ -3031,12 +3031,12 @@ export function mergeSort(array: FixedArray<float>, cmp: (lhs: float, rhs: float
         return array;
     }
     const middle = Math.floor(begin + arrLength / 2).toInt()
-    const leftHalf:FixedArray<float> = new FixedArray<float>(middle, new Float())
+    const leftHalf:FixedArray<float> = new FixedArray<float>(middle)
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
 
     counter = 0
-    const rightHalf:FixedArray<float> = new FixedArray<float>(arrLength - middle, new Float())
+    const rightHalf:FixedArray<float> = new FixedArray<float>(arrLength - middle)
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);
@@ -3547,7 +3547,7 @@ function copyPart(dst: FixedArray<double>, counter: int, src: FixedArray<double>
 }
 
 function merge(left: FixedArray<double>, right: FixedArray<double>, cmp: (lhs: double, rhs: double) => int): FixedArray<double> {
-    const result:FixedArray<double> = new FixedArray<double>(right.length + left.length, new Double())
+    const result:FixedArray<double> = new FixedArray<double>(right.length + left.length)
     let leftIndex = 0;
     let rightIndex = 0;
     let counter: int = 0
@@ -3588,12 +3588,12 @@ export function mergeSort(array: FixedArray<double>, cmp: (lhs: double, rhs: dou
         return array;
     }
     const middle = Math.floor(begin + arrLength / 2).toInt()
-    const leftHalf:FixedArray<double> = new FixedArray<double>(middle, new Double())
+    const leftHalf:FixedArray<double> = new FixedArray<double>(middle)
     let counter: int = 0
     copyPart(leftHalf, counter, array, 0, middle)
 
     counter = 0
-    const rightHalf:FixedArray<double> = new FixedArray<double>(arrLength - middle, new Double())
+    const rightHalf:FixedArray<double> = new FixedArray<double>(arrLength - middle)
     copyPart(rightHalf, counter, array, middle)
 
     return merge(mergeSort(leftHalf, cmp), mergeSort(rightHalf, cmp), cmp);

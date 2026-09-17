@@ -31,7 +31,7 @@ let savedRef: FixedArray<long> | null = null;
 
 function allocLargeAndReturnFreeHeapSize(): long {
     const ALLOC_SIZE: int = 65536; // 65536 * 8 = 512 KB > 1 region (256 KB)
-    savedRef = new FixedArray<long>(ALLOC_SIZE, 0);
+    savedRef = new FixedArray<long>(ALLOC_SIZE);
     return GC.getFreeHeapSize();
 }
 

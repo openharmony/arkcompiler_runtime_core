@@ -61,7 +61,7 @@ export final class FinalizationRegistry<T> {
         this.callback = callback;
         this.workerId = FinalizationRegistry.getWorkerId();
         this.workerDomain = FinalizationRegistry.getWorkerDomain();
-        this.buckets = new FixedArray<FinRegNode<T> | undefined>(FinalizationRegistry.INITIAL_BUCKETS_COUNT, undefined)
+        this.buckets = new FixedArray<FinRegNode<T> | undefined>(FinalizationRegistry.INITIAL_BUCKETS_COUNT)
     }
 
     /**
@@ -162,7 +162,7 @@ export final class FinalizationRegistry<T> {
     private rehash(newSizeArg: int) {
         const oldMap = this.buckets;
         const newSize = newSizeArg;
-        this.buckets = new FixedArray<(FinRegNode<T> | undefined)>(newSize, undefined);
+        this.buckets = new FixedArray<(FinRegNode<T> | undefined)>(newSize);
         this.mapSize = 0;
         for (let oldMapIdx = 0; oldMapIdx < oldMap.length; oldMapIdx++) {
             let nextNode: (FinRegNode<T> | undefined) = undefined;

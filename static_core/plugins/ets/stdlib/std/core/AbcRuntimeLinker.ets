@@ -28,7 +28,7 @@ export class AbcRuntimeLinker extends RuntimeLinker {
     public constructor(parentLinker: RuntimeLinker | undefined, paths: string[]) {
         super()
         this.parentLinker = parentLinker ?? getBootRuntimeLinker()
-        this.abcFiles = new FixedArray<AbcFile | undefined>(paths.length, undefined)
+        this.abcFiles = new FixedArray<AbcFile | undefined>(paths.length)
         this.sharedLibraryLoaders = []
         for (let i = 0; i < paths.length; i++) {
             this.abcFiles[i] = AbcFile.loadAbcFile(this, paths[i])
@@ -38,8 +38,8 @@ export class AbcRuntimeLinker extends RuntimeLinker {
     public constructor(parentLinker: RuntimeLinker | undefined, paths: string[], sharedLibraryLoaders: AbcRuntimeLinker[]) {
         super()
         this.parentLinker = parentLinker ?? getBootRuntimeLinker()
-        this.abcFiles = new FixedArray<AbcFile | undefined>(paths.length, undefined)
-        this.sharedLibraryLoaders = new FixedArray<AbcRuntimeLinker | undefined>(sharedLibraryLoaders.length, undefined)
+        this.abcFiles = new FixedArray<AbcFile | undefined>(paths.length)
+        this.sharedLibraryLoaders = new FixedArray<AbcRuntimeLinker | undefined>(sharedLibraryLoaders.length)
         for (let i = 0; i < sharedLibraryLoaders.length; i++) {
             this.sharedLibraryLoaders[i] = sharedLibraryLoaders[i]
         }
@@ -57,7 +57,7 @@ export class AbcRuntimeLinker extends RuntimeLinker {
      */
     public addAbcFiles(paths: string[]): void {
         const loadedFiles : FixedArray<AbcFile | undefined> =
-            new FixedArray<AbcFile | undefined>(paths.length, undefined)
+            new FixedArray<AbcFile | undefined>(paths.length)
         let count = 0
         for (let i = 0; i < paths.length; i++) {
             const file = AbcFile.loadAbcFile(this, paths[i])
@@ -70,7 +70,7 @@ export class AbcRuntimeLinker extends RuntimeLinker {
             }
         }
         const newFiles : FixedArray<AbcFile | undefined> = 
-            new FixedArray<AbcFile | undefined>(count, undefined)
+            new FixedArray<AbcFile | undefined>(count)
         for (let i = 0; i < count; i++) {
             newFiles[i] = loadedFiles[i]
         }

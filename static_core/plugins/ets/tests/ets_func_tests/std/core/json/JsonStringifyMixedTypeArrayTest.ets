@@ -544,7 +544,7 @@ function testRepeatedFieldTypeChanges(): void {
 // not blindly cast based on first element's type.
 
 function testFixedArrayMixedTypes(): void {
-    const fa = new FixedArray<Any>(4, undefined)
+    const fa = new FixedArray<Any>(4)
     fa[0] = 1
     fa[1] = 'hello'
     fa[2] = true

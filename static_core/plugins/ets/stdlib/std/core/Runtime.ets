@@ -147,7 +147,7 @@ export final class Runtime {
         if (rest.length >= required) {
             return rest
         }
-        let newRest : FixedArray<Any> = new FixedArray<Any>(required, undefined)
+        let newRest : FixedArray<Any> = new FixedArray<Any>(required)
         for (let i: int = 0; i < rest.length; ++i) {
             newRest[i] = rest[i]
         }

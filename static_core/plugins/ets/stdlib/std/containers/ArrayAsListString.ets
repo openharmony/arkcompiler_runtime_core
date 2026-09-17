@@ -20,7 +20,7 @@ export namespace containers {
     export class ArrayAsListString implements ListString {
 
         private init(capacity: int, val: String): void {
-            this.data = new FixedArray<String>(capacity, new String());
+            this.data = new FixedArray<String>(capacity);
             for (let i = 0; i < this.data.length; ++i) {
                 this.data[i] = val;
             }
@@ -42,7 +42,7 @@ export namespace containers {
         * Constructs new empty ArrayAsList
         */
         constructor() {
-            this.init(0, '');
+            this.init(0, new String());
         }
 
         /**
@@ -51,7 +51,7 @@ export namespace containers {
         * @param capacity
         */
         constructor(capacity: int) {
-            this.init(capacity, '');
+            this.init(capacity, new String());
         }
 
         /**
@@ -61,7 +61,7 @@ export namespace containers {
         */
         public reserve(capacity: int): void {
             if (this.data.length < capacity) {
-                let newData : FixedArray<String> = new FixedArray<String>(capacity, new String());
+                let newData : FixedArray<String> = new FixedArray<String>(capacity);
                 for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i];
                 }
@@ -102,7 +102,7 @@ export namespace containers {
         public override pushFront(e: String): void {
             let dst = this.data;
             if (this.curSize == this.data.length) {
-                dst = new FixedArray<String>(ArrayAsListString.getNewCapacity(this.data.length), new String());
+                dst = new FixedArray<String>(ArrayAsListString.getNewCapacity(this.data.length));
             }
             for (let i = this.curSize; i != 0; --i) {
                 dst[i] = this.data[i-1];
@@ -136,7 +136,7 @@ export namespace containers {
         */
         public override pushBack(e: String): void {
             if (this.curSize == this.data.length) {
-                let newData : FixedArray<String> = new FixedArray<String>(ArrayAsListString.getNewCapacity(this.data.length), new String());
+                let newData : FixedArray<String> = new FixedArray<String>(ArrayAsListString.getNewCapacity(this.data.length));
                 for (let i = 0; i < this.curSize; ++i) {
                     newData[i] = this.data[i];
                 }

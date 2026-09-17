@@ -14,13 +14,13 @@
 cases:
   - desc: Create empty FixedArray
     logic: |-
-      let a = new FixedArray<number>(0, 0)
+      let a = new FixedArray<number>(0)
       arktest.assertEQ(a.length, 0)
 
   - desc: Create FixedArray with length < 0
     decl: |-
       function f(len: int): void {
-        let a = new FixedArray<number>(len, 0)
+        let a = new FixedArray<number>(len)
       }
     logic: |-
       let res: boolean = false
@@ -32,7 +32,7 @@ cases:
 
   - desc: Create FixedArray with type Object
     logic: |-
-      let a = new FixedArray<Object>(30, {})
+      let a = new FixedArray<Object>(30)
       arktest.assertEQ(a.length, 30)
       for (let i = 0; i < 30; i++) {
         arktest.assertTrue(a[i] instanceof Object)
@@ -52,7 +52,7 @@ cases:
       - {check_type: "char", check_value: "c'\\u0000'"}
       - {check_type: "boolean", check_value: "false"}
     logic: |-
-      let a = new FixedArray<[check_type]>(30, [check_value])
+      let a = new FixedArray<[check_type]>(30)
       arktest.assertEQ(a.length, 30)
       arktest.assertTrue(a[0] instanceof [check_type])
       for (let i = 0; i < 30; i++) {
@@ -71,7 +71,7 @@ cases:
         }
       }
     logic: |-
-      let a = new FixedArray<C>(30, new C())
+      let a = new FixedArray<C>(30)
       arktest.assertEQ(a.length, 30)
       arktest.assertTrue(a[0] instanceof C)
       for (let i = 0; i < 30; i++) {
@@ -91,7 +91,7 @@ cases:
         }
       }
     logic: |-
-      let a = new FixedArray<C>(30, new C())
+      let a = new FixedArray<C>(30)
       arktest.assertEQ(a.length, 30)
       arktest.assertTrue(a[0] instanceof C)
       for (let i = 0; i < 30; i++) {
@@ -111,7 +111,7 @@ cases:
         }
       }
     logic: |-
-      let a = new FixedArray<C>(30, new C())
+      let a = new FixedArray<C>(30)
       arktest.assertEQ(a.length, 30)
       arktest.assertTrue(a[0] instanceof C)
       for (let i = 0; i < 30; i++) {

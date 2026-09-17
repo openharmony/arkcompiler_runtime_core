@@ -18,7 +18,7 @@ class A {
     public b: int;
 };
 
-let arr: FixedArray<int> = new FixedArray<int>(4, 0)
+let arr: FixedArray<int> = new FixedArray<int>(4)
 function foo(obj: A, cnt: int): int  {
     obj.b = 2;
     return arr[cnt]

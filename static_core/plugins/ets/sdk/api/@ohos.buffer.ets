@@ -172,7 +172,7 @@ function sanitizeUtf8(str: string): string {
         return str
     }
 
-    const chars = new ValueArray<char>(finalSize, c'\u0000')
+    const chars = new ValueArray<char>(finalSize)
     let charIndex = 0
 
     for (let i = 0; i < len; i++) {

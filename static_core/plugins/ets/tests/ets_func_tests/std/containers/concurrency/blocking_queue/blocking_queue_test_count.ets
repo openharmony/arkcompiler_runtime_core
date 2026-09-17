@@ -67,7 +67,7 @@ function testPopAndPushCount(constr: BQConstructorI): void {
 	};
 
 	let popFunction: () => FixedArray<int> = () => {
-		let counter: FixedArray<int> = new FixedArray<int>(PUSH_COUNT, 0);
+		let counter: FixedArray<int> = new FixedArray<int>(PUSH_COUNT);
 		while (true) {
 			let val = queue.pop();
 			if (val == EXTRA) {
@@ -85,7 +85,7 @@ function testPopAndPushCount(constr: BQConstructorI): void {
 	}
 
 	awaitAll<void>(pushers);
-	let finalCounter: FixedArray<int> = new FixedArray<int>(PUSH_COUNT, 0);
+	let finalCounter: FixedArray<int> = new FixedArray<int>(PUSH_COUNT);
 	let resCounters = awaitAll<FixedArray<int>>(poppers);
 
 	for (let i = 0; i < JOB_COUNT; ++ i) {

@@ -22,7 +22,7 @@ import { stub, AbcFile } from "arkruntime"
 export class MemoryRuntimeLinker extends AbcRuntimeLinker {
     public constructor(parentLinker: RuntimeLinker | undefined, rawAbcFiles: Array<FixedArray<byte>> | Array<ValueArray<byte>>) {
         super(parentLinker, [])
-        const abcFiles : FixedArray<AbcFile | undefined> =  new FixedArray<AbcFile | undefined>(rawAbcFiles.length, undefined)
+        const abcFiles : FixedArray<AbcFile | undefined> =  new FixedArray<AbcFile | undefined>(rawAbcFiles.length)
         let i = 0
         for (const rawFile of rawAbcFiles) {
             if (rawFile instanceof ValueArray<byte>) {

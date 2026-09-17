@@ -48,7 +48,7 @@ export namespace containers {
         /* const */ static ArrayInitSize : int = 16
 
         private init(capacity: int, val: UndefinableObject): void {
-            this.data = new FixedArray<UndefinableObject>(capacity, undefined)
+            this.data = new FixedArray<UndefinableObject>(capacity)
             for (let i = 0; i < this.data.length; ++i) {
                 this.data[i] = val
             }
@@ -73,7 +73,7 @@ export namespace containers {
          * @syscap SystemCapability.Utils.Lang
          */
         constructor(capacity: int) {
-            this.data = new FixedArray<UndefinableObject>(capacity, undefined)
+            this.data = new FixedArray<UndefinableObject>(capacity)
             this.curSize = 0
         }
 
@@ -94,7 +94,7 @@ export namespace containers {
          */
         public reserve(capacity: int): void {
             if (this.data.length < capacity) {
-                let newData : FixedArray<UndefinableObject> = new FixedArray<UndefinableObject>(capacity, undefined)
+                let newData : FixedArray<UndefinableObject> = new FixedArray<UndefinableObject>(capacity)
                 for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]
                 }
@@ -135,7 +135,7 @@ export namespace containers {
          */
         public pushBack(e: UndefinableObject): void {
             if (this.curSize == this.data.length) {
-                let newData : FixedArray<UndefinableObject> = new FixedArray<UndefinableObject>(UndefinableObjectArray.getNewCapacity(this.data.length), undefined)
+                let newData : FixedArray<UndefinableObject> = new FixedArray<UndefinableObject>(UndefinableObjectArray.getNewCapacity(this.data.length))
                 for (let i = 0; i < this.curSize; ++i) {
                     newData[i] = this.data[i]
                 }
