@@ -1385,4 +1385,62 @@ HWTEST(ItemContainer, GetStatCodeMetrics, testing::ext::TestSize.Level0)
     EXPECT_EQ(stat.at("instructions_number"), instructions.size());
     EXPECT_EQ(stat.at("codesize"), code_item->GetCodeSize());
 }
+
+HWTEST(ItemContainer, LineNumberProgramDedupNeedsEmitTest, testing::ext::TestSize.Level0)
+{
+    ItemContainer container;
+
+    ClassItem *class_item = container.GetOrCreateClassItem("LTest;");
+    class_item->SetAccessFlags(ACC_PUBLIC);
+
+    StringItem *param_name = container.GetOrCreateStringItem("a0");
+
+    PrimitiveTypeItem *ret_type = container.GetOrCreatePrimitiveTypeItem(Type::TypeId::VOID);
+    std::vector<MethodParamItem> params;
+    ProtoItem *proto_item = container.GetOrCreateProtoItem(ret_type, params);
+
+    std::vector<LineNumberProgramItem *> lnp_items;
+    std::vector<DebugInfoItem *> debug_items;
+
+    for (int i = 0; i < 2; i++) {
+        std::string name = "foo" + std::to_string(i);
+        StringItem *method_name = container.GetOrCreateStringItem(name);
+        MethodItem *method_item = class_item->AddMethod(method_name, proto_item, ACC_PUBLIC | ACC_STATIC, params);
+
+        LineNumberProgramItem *lnp_item = container.CreateLineNumberProgramItem();
+        DebugInfoItem *debug_info = container.CreateItem<DebugInfoItem>(lnp_item);
+        method_item->SetDebugInfo(debug_info);
+
+        debug_info->SetLineNumber(1);
+        debug_info->AddParameter(param_name);
+        lnp_items.push_back(lnp_item);
+        debug_items.push_back(debug_info);
+    }
+
+    container.ComputeLayoutForReferencedItems();
+
+    for (int i = 0; i < 2; i++) {
+        auto *cp = debug_items[i]->GetConstantPool();
+        lnp_items[i]->EmitAdvancePc(cp, 1);
+        lnp_items[i]->EmitAdvanceLine(cp, 1);
+        lnp_items[i]->EmitEnd();
+    }
+
+    container.DeduplicateItems(true);
+    container.ComputeLayout();
+
+    size_t lnp_count = 0;
+    size_t deduped_count = 0;
+    for (const auto &item : container.GetItems()) {
+        if (item->GetItemType() == ItemTypes::LINE_NUMBER_PROGRAM_ITEM) {
+            lnp_count++;
+            if (!item->NeedsEmit()) {
+                deduped_count++;
+            }
+        }
+    }
+
+    EXPECT_EQ(lnp_count, 2U);
+    EXPECT_EQ(deduped_count, 1U);
+}
 }  // namespace panda::panda_file::test
