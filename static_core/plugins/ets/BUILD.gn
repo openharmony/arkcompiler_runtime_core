@@ -145,7 +145,19 @@ if (!is_host_product &&
     is_ohos_ets_stdlib_abc = "True"
   }
 
-  ohos_shared_library("ets_sdk_native") {
+  ets_sdk_native_external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "ets_utils:console",
+    "hilog:libhilog",
+    "libuv:uv",
+    "openssl:libcrypto_shared",
+    icuuc_dep,
+  ]
+  if (path_exists("//third_party/libxml2")) {
+    ets_sdk_native_external_deps += [ "libxml2:libxml2" ]
+  }
+
+  ohos_source_set("ets_sdk_native_src") {
     include_dirs = [
       "$ark_root/plugins/ets",
       "$ark_root/plugins/ets/runtime",
@@ -163,26 +175,24 @@ if (!is_host_product &&
       "$ark_root/plugins/ets/sdk/native/main.cpp",
       "$ark_root/plugins/ets/stdlib/native/core/stdlib_ani_helpers.cpp",
     ]
-    external_deps = [
-      "bounds_checking_function:libsec_shared",
-      "ets_utils:console",
-      "hilog:libhilog",
-      "libuv:uv",
-      "openssl:libcrypto_shared",
-      icuuc_dep,
-    ]
     if (path_exists("//third_party/libxml2")) {
       defines = ["IMPORT_LIBXML2"]
       sources += ["$ark_root/plugins/ets/sdk/native/api/ani_xmlsaxparser.cpp"]
-      external_deps += [
-          "libxml2:libxml2",
-        ]
     }
+    external_deps = ets_sdk_native_external_deps
     deps = [
       "$ark_root/libarkbase:libarktsbase_static",
       "$ark_root/plugins/ets/runtime/ani:ani",
       "$ark_root/plugins/ets/runtime/libani_helpers:ani_helpers",
     ]
+    subsystem_name = "arkcompiler"
+    part_name = "runtime_core"
+  }
+
+  ohos_shared_library("ets_sdk_native") {
+    deps = [ ":ets_sdk_native_src" ]
+    version_script = "ets_sdk_native.versionscript"
+    external_deps = ets_sdk_native_external_deps
     subsystem_name = "arkcompiler"
     part_name = "runtime_core"
     output_extension = "so"
