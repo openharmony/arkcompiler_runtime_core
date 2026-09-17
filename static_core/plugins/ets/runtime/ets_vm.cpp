@@ -277,13 +277,14 @@ PandaEtsVM::~PandaEtsVM()
     ASSERT(allocator != nullptr);
 
     allocator->Delete(rendezvous_);
+    // Compiler workers may still use the runtime interface while they are being finalized.
+    allocator->Delete(compiler_);
     allocator->Delete(runtimeIface_);
     allocator->Delete(jobManager_);
     allocator->Delete(referenceProcessor_);
     allocator->Delete(monitorPool_);
     allocator->Delete(finalizationRegistryManager_);
     allocator->Delete(stringTable_);
-    allocator->Delete(compiler_);
     allocator->Delete(unhandledObjectManager_);
     allocator->Delete(fullGCLongTimeListener_);
     allocator->Delete(outOfMemoryListener_);

@@ -426,6 +426,19 @@ TEST_F(StringTest, RegionCopyTestUtf16)
     ASSERT_EQ(out16, res16);
 }
 
+TEST_F(StringTest, RegionCopyUtf8RejectsUtf16SourceOffsetOutOfRange)
+{
+    std::vector<uint16_t> data {'a', 0x00A7, 'b'};
+    String *string =
+        String::CreateFromUtf16(data.data(), data.size(), GetLanguageContext(), Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_TRUE(string->IsUtf16());
+    ASSERT_GT(string->GetUtf8Length(), string->GetUtf16Length());
+
+    std::vector<uint8_t> output(2U, 0xA5U);
+    ASSERT_EQ(string->CopyDataRegionUtf8(output.data(), string->GetUtf16Length() + 1U, 1U, 1U), 0U);
+    ASSERT_EQ(output[0], 0xA5U);
+}
+
 TEST_F(StringTest, GetUtf8Length)
 {
     std::vector<uint8_t> data = {'H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!', 0};

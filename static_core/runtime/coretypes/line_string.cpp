@@ -139,6 +139,9 @@ LineString *LineString::CreateFromMUtf8(const uint8_t *mutf8Data, uint32_t mutf8
 LineString *LineString::CreatePaddedFromMutf8(uint16_t padChar, uint32_t padLength, const uint8_t *mutf8Data,
                                               uint32_t mutf8Length, const LanguageContext &ctx, PandaVM *vm)
 {
+    if (UNLIKELY(mutf8Length > std::numeric_limits<uint32_t>::max() - padLength)) {
+        return nullptr;
+    }
     auto *thread = ManagedThread::GetCurrent();
     auto *klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::LINE_STRING);
     bool compressed = padLength == 0 || ark::mem::BaseString::IsASCIICharacter(padChar);

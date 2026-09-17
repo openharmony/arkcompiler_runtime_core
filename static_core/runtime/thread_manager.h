@@ -220,6 +220,8 @@ protected:
     }
 
 private:
+    void DumpUnattachedThreadsWithLockHeld(std::ostream &os) REQUIRES(threadLock_);
+
     bool HasNoActiveThreads() const REQUIRES(threadLock_)
     {
         ASSERT(threadsCount_ >= daemonThreadsCount_);

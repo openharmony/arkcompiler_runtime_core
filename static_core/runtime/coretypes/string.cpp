@@ -749,10 +749,19 @@ bool String::CanBeCompressedMUtf8(const uint8_t *mutf8Data, uint32_t mutf8Length
     return isCompressed;
 }
 
+template <typename SrcType, typename DstType>
+static void ReplaceCharacters(const SrcType *source, DstType *destination, uint32_t length, uint16_t oldC,
+                              uint16_t newC)
+{
+    auto replace = [oldC, newC](SrcType c) { return static_cast<DstType>((oldC != c) ? c : newC); };
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    std::transform(source, source + length, destination, replace);
+}
+
 String *String::DoReplace(String *src, uint16_t oldC, uint16_t newC, const LanguageContext &ctx, PandaVM *vm)
 {
     ASSERT(src != nullptr);
-    auto length = static_cast<int32_t>(src->GetLength());
+    auto length = src->GetLength();
     bool canBeCompressed = ark::mem::BaseString::IsASCIICharacter(newC);
 
     // allocator may trig gc and move src, need to hold it
@@ -760,6 +769,9 @@ String *String::DoReplace(String *src, uint16_t oldC, uint16_t newC, const Langu
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<String> srcHandle(thread, src);
     FlatStringInfo srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
+    if (UNLIKELY(srcFlat.GetString() == nullptr)) {
+        return nullptr;
+    }
     if (srcFlat.IsUtf16()) {
         const uint16_t *flatData16 = srcFlat.GetDataUtf16();
         ASSERT(flatData16 != nullptr);
@@ -771,43 +783,39 @@ String *String::DoReplace(String *src, uint16_t oldC, uint16_t newC, const Langu
     }
 
     auto *string = String::AllocLineStringObject(thread, length, canBeCompressed, ctx, vm);
-    if (string == nullptr) {
+    if (UNLIKELY(string == nullptr)) {
+        return nullptr;
+    }
+    // The flattening below may trigger GC and move the allocated string, need to hold it
+    VMHandle<String> stringHandle(thread, string);
+
+    // Allocation may move the source or the flattened backing string.
+    srcFlat = FlatStringInfo::FlattenAllString(srcHandle, ctx);
+    if (UNLIKELY(srcFlat.GetString() == nullptr)) {
         return nullptr;
     }
 
-    ASSERT(string->GetHashcode() == 0);
+    ASSERT(stringHandle->GetHashcode() == 0);
 
     // After replacing we should have a full barrier, so this writes should happen-before barrier
     TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
     if (srcFlat.IsUtf16()) {
         if (canBeCompressed) {
-            auto replace = [oldC, newC](uint16_t c) { return static_cast<uint8_t>((oldC != c) ? c : newC); };
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            std::transform(srcFlat.GetDataUtf16(), srcFlat.GetDataUtf16() + length, string->GetDataUtf8Writable(),
-                           replace);
+            ReplaceCharacters(srcFlat.GetDataUtf16(), stringHandle->GetDataUtf8Writable(), length, oldC, newC);
         } else {
-            auto replace = [oldC, newC](uint16_t c) { return (oldC != c) ? c : newC; };
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            std::transform(srcFlat.GetDataUtf16(), srcFlat.GetDataUtf16() + length, string->GetDataUtf16Writable(),
-                           replace);
+            ReplaceCharacters(srcFlat.GetDataUtf16(), stringHandle->GetDataUtf16Writable(), length, oldC, newC);
         }
     } else {
         if (canBeCompressed) {
-            auto replace = [oldC, newC](uint16_t c) { return static_cast<uint8_t>((oldC != c) ? c : newC); };
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            std::transform(srcFlat.GetDataUtf8(), srcFlat.GetDataUtf8() + length, string->GetDataUtf8Writable(),
-                           replace);
+            ReplaceCharacters(srcFlat.GetDataUtf8(), stringHandle->GetDataUtf8Writable(), length, oldC, newC);
         } else {
-            auto replace = [oldC, newC](uint16_t c) { return (oldC != c) ? c : newC; };
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            std::transform(srcFlat.GetDataUtf8(), srcFlat.GetDataUtf8() + length, string->GetDataUtf16Writable(),
-                           replace);
+            ReplaceCharacters(srcFlat.GetDataUtf8(), stringHandle->GetDataUtf16Writable(), length, oldC, newC);
         }
     }
     TSAN_ANNOTATE_IGNORE_WRITES_END();
     // String is supposed to be a constant object, so all its data should be visible by all threads
     arch::FullMemoryBarrier();
-    return string;
+    return stringHandle.GetPtr();
 }
 
 // static

@@ -46,34 +46,44 @@ bool GCTaskTracker::IsInitialized()
 void GCTaskTracker::AddTaskId(uint64_t id)
 {
     os::memory::LockHolder lock(lock_);
-    taskIds_.push_back(id);
+    callbackRefs_[id] = nullptr;
 }
 
 bool GCTaskTracker::HasId(uint64_t id)
 {
     os::memory::LockHolder lock(lock_);
-    return std::find(taskIds_.begin(), taskIds_.end(), id) != taskIds_.end();
+    return callbackRefs_.find(id) != callbackRefs_.end();
 }
 
-void GCTaskTracker::SetCallbackForTask(uint32_t taskId, mem::Reference *callbackRef)
+void GCTaskTracker::SetCallbackForTask(uint64_t taskId, mem::Reference *callbackRef)
 {
-    callbackTaskId_ = taskId;
-    callbackRef_ = callbackRef;
+    os::memory::LockHolder lock(lock_);
+    callbackRefs_[taskId] = callbackRef;
 }
 
 void GCTaskTracker::GCStarted(const GCTask &task, [[maybe_unused]] size_t heapSize)
 {
+    os::memory::LockHolder lock(lock_);
     currentTaskId_ = task.GetId();
 }
 
 void GCTaskTracker::GCPhaseStarted(mem::GCPhase phase)
 {
-    if (phase != mem::GCPhase::GC_PHASE_MARK || callbackRef_ == nullptr || currentTaskId_ != callbackTaskId_) {
+    if (phase != mem::GCPhase::GC_PHASE_MARK) {
         return;
+    }
+    mem::Reference *callbackRef = nullptr;
+    {
+        os::memory::LockHolder lock(lock_);
+        auto it = callbackRefs_.find(currentTaskId_);
+        if (it == callbackRefs_.end() || it->second == nullptr) {
+            return;
+        }
+        callbackRef = it->second;
     }
     auto *mThread = ManagedThread::GetCurrent();
     ASSERT(mThread != nullptr);
-    auto *obj = reinterpret_cast<EtsObject *>(mThread->GetVM()->GetGlobalObjectStorage()->Get(callbackRef_));
+    auto *obj = reinterpret_cast<EtsObject *>(mThread->GetVM()->GetGlobalObjectStorage()->Get(callbackRef));
     Value arg(obj->GetCoreType());
     os::memory::ReadLockHolder lock(*mThread->GetVM()->GetRendezvous()->GetMutatorLock());
     LambdaUtils::InvokeVoid(mThread, obj);
@@ -87,20 +97,22 @@ void GCTaskTracker::GCFinished(const GCTask &task, [[maybe_unused]] size_t heapS
 
 void GCTaskTracker::RemoveId(uint64_t id)
 {
-    currentTaskId_ = 0;
-    if (id == callbackTaskId_ && callbackRef_ != nullptr) {
+    mem::Reference *callbackRef = nullptr;
+    {
+        os::memory::LockHolder lock(lock_);
+        if (currentTaskId_ == id) {
+            currentTaskId_ = 0;
+        }
+        auto callbackIt = callbackRefs_.find(id);
+        if (callbackIt != callbackRefs_.end()) {
+            callbackRef = callbackIt->second;
+            callbackRefs_.erase(callbackIt);
+        }
+    }
+    if (callbackRef != nullptr) {
         auto *executionCtx = EtsExecutionContext::GetCurrent();
         ASSERT(executionCtx != nullptr);
-        executionCtx->GetPandaVM()->GetGlobalObjectStorage()->Remove(callbackRef_);
-        callbackRef_ = nullptr;
-    }
-    if (id != 0) {
-        os::memory::LockHolder lock(lock_);
-        auto it = std::find(taskIds_.begin(), taskIds_.end(), id);
-        // There may be no such id if the corresponding GC has been triggered not by startGC
-        if (it != taskIds_.end()) {
-            taskIds_.erase(it);
-        }
+        executionCtx->GetPandaVM()->GetGlobalObjectStorage()->Remove(callbackRef);
     }
 }
 

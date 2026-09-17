@@ -629,18 +629,22 @@ public:
         if (length > maxLength) {
             return 0;
         }
-        uint32_t len = GetUtf8Length();
-        if (start + length > len) {
-            return 0;
-        }
         auto readBarrier = [](void *obj, size_t offset) {
             return reinterpret_cast<ark::mem::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
         if (!IsUtf16()) {
+            uint32_t len = GetUtf8Length();
+            if (start + length > len) {
+                return 0;
+            }
             return ToString()->CopyDataRegionUtf8(std::move(readBarrier), buf, start, length, maxLength);
         }
-        length = this->GetUtf16Length();
+        auto utf16Length = this->GetUtf16Length();
+        if (UNLIKELY(start > utf16Length)) {
+            return 0;
+        }
+        length = utf16Length - start;
         std::vector<uint16_t> tmpBuf;
         const uint16_t *data = ToString()->GetUtf16DataFlat(std::move(readBarrier), ToString(), tmpBuf);
         return ark::utf::ConvertRegionUtf16ToUtf8(data, buf, length, maxLength, start, false);

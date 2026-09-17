@@ -51,7 +51,7 @@ extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean is
     }
     auto &gcTaskTracker = GCTaskTracker::InitIfNeededAndGet(gc);
     auto task = MakePandaUnique<GCTask>(reason);
-    uint32_t id = task->GetId();
+    uint64_t id = task->GetId();
     if (callback != nullptr) {
         auto *callbackRef = executionCtx->GetPandaVM()->GetGlobalObjectStorage()->Add(
             callback->GetCoreType(), mem::Reference::ObjectType::GLOBAL);

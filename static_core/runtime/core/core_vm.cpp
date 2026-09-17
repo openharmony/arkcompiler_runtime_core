@@ -93,12 +93,13 @@ PandaCoreVM::~PandaCoreVM()
 {
     mem::InternalAllocatorPtr allocator = mm_->GetHeapManager()->GetInternalAllocator();
     allocator->Delete(rendezvous_);
+    // Compiler workers may still use the runtime interface while they are being finalized.
+    allocator->Delete(compiler_);
     allocator->Delete(runtimeIface_);
     allocator->Delete(threadManager_);
     allocator->Delete(referenceProcessor_);
     allocator->Delete(monitorPool_);
     allocator->Delete(stringTable_);
-    allocator->Delete(compiler_);
     mm_->Finalize();
     mem::MemoryManager::Destroy(mm_);
 }

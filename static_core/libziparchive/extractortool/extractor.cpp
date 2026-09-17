@@ -120,8 +120,6 @@ std::shared_ptr<FileMapper> Extractor::GetSafeData(const std::string &fileName)
     if (result != ConsistencyResult::CONSISTENT) {
         LOG(ERROR, ZIPARCHIVE) << "Entry data not consistent for " << relativePath.c_str()
                                << ", result=" << static_cast<int>(result);
-    }
-    if (result == ConsistencyResult::OFFSET_MISMATCH || result == ConsistencyResult::ENTRY_NOT_FOUND) {
         return nullptr;
     }
 

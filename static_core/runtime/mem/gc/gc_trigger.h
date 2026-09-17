@@ -181,7 +181,7 @@ private:
     HeapSpace *heapSpace_ {nullptr};
     size_t minTargetFootprint_ {DEFAULT_MIN_TARGET_FOOTPRINT};
     MemStatsType *memStats_;
-    uint8_t skipGcCount_ {0};
+    std::atomic<uint8_t> skipGcCount_ {0};
     uint32_t gcPostponeCount_ {0};
 
     friend class ark::test::GCTriggerTest;

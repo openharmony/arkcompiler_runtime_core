@@ -145,9 +145,12 @@ void GCTriggerHeap::FinishPostponeGCIfNeeded(GC *gc, size_t bytesInHeap)
 
 void GCTriggerHeap::TriggerGcIfNeeded(GC *gc)
 {
-    if (skipGcCount_ > 0) {
-        skipGcCount_--;
-        return;
+    // Atomic with relaxed order reason: only the skip quota value is synchronized; it does not guard other data
+    auto skipCount = skipGcCount_.load(std::memory_order_relaxed);
+    while (skipCount > 0) {
+        if (skipGcCount_.compare_exchange_weak(skipCount, skipCount - 1, std::memory_order_relaxed)) {
+            return;
+        }
     }
 
     size_t bytesInHeap = memStats_->GetFootprintHeap();
