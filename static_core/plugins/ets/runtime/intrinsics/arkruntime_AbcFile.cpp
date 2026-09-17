@@ -132,12 +132,14 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
     if (IsHapPath(pathStr) && !GetHapPackagePath(pathStr, executionCtx, pf)) {
         return nullptr;
     }
+#ifndef PANDA_TARGET_OHOS
     if (pf == nullptr) {
         // Loading panda-file might be time-consuming, which would affect GC
         // unless being executed in native scope
         ScopedNativeCodeThread etsNativeScope(executionCtx->GetMT());
         pf = panda_file::OpenPandaFileOrZip(path);
     }
+#endif
 
     if (pf == nullptr) {
         ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->arkruntimeAbcFileNotFoundError,
@@ -147,8 +149,10 @@ EtsAbcFile *EtsAbcFileLoadAbcFile(EtsRuntimeLinker *runtimeLinker, EtsString *fi
     return CreateAbcFile(executionCtx, ctx, std::move(pf));
 }
 
-EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHeader *rawFileArray)
+EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker [[maybe_unused]],
+                                     ObjectHeader *rawFileArray [[maybe_unused]])
 {
+#ifndef PANDA_TARGET_OHOS
     if (UNLIKELY(runtimeLinker == nullptr || rawFileArray == nullptr)) {
         ThrowNullPointerException();
         return nullptr;
@@ -168,6 +172,12 @@ EtsAbcFile *EtsAbcFileLoadFromMemory(EtsRuntimeLinker *runtimeLinker, ObjectHead
 
     auto *ctx = runtimeLinker->GetClassLinkerContext();
     return CreateAbcFile(executionCtx, ctx, std::move(pf));
+#else
+    auto *executionCtx = EtsExecutionContext::GetCurrent();
+    ets::ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError,
+                           "Load abc from memory is not supported");
+    return nullptr;
+#endif
 }
 
 EtsClass *EtsAbcFileLoadClass(EtsAbcFile *abcFile, EtsRuntimeLinker *runtimeLinker, EtsString *clsName, EtsBoolean init)

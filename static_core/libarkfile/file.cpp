@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,9 @@ namespace ark::panda_file {
 const char *ARCHIVE_FILENAME = "classes.abc";
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
 const char *ARCHIVE_SPLIT = "!/";
+static constexpr size_t XPM_PROC_LENGTH = 50;
+// NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
+static constexpr char PROC_SELF_XPM_REGION_PATH[] = "/proc/self/xpm_region";
 
 const std::array<uint8_t, File::MAGIC_SIZE> File::MAGIC {'P', 'A', 'N', 'D', 'A', '\0', '\0', '\0'};
 
@@ -111,6 +114,49 @@ public:
 private:
     MemNameSet memNameSet_;
 };
+
+static bool CheckSecureMem(uintptr_t mem, size_t size)
+{
+    static bool hasOpen = false;
+    static uintptr_t secureMemStart = 0;
+    static uintptr_t secureMemEnd = 0;
+    if (!hasOpen) {
+        FILE *fp = fopen(PROC_SELF_XPM_REGION_PATH, "re");
+        if (fp == nullptr) {
+            LOG(ERROR, PANDAFILE) << "Can not open xpm proc file, do not check secure memory anymore.";
+            // No verification is performed when a file fails to be opened.
+            hasOpen = true;
+            return true;
+        }
+        // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
+        char xpmValidateRegion[XPM_PROC_LENGTH] = {0};
+        size_t ret = fread(xpmValidateRegion, 1, sizeof(xpmValidateRegion), fp);
+        if (ret <= 0) {
+            LOG(ERROR, PANDAFILE) << "Read xpm proc file failed";
+            fclose(fp);
+            return false;
+        }
+        fclose(fp);
+        // NOLINTNEXTLINE(cert-err34-c, cppcoreguidelines-pro-type-vararg)
+        if (sscanf_s(xpmValidateRegion, "%lx-%lx", &secureMemStart, &secureMemEnd) <= 0) {
+            LOG(ERROR, PANDAFILE) << "sscanf_s xpm validate region failed";
+            return false;
+        }
+        // The check is not performed when the file is already opened.
+        hasOpen = true;
+        LOG(DEBUG, PANDAFILE) << "Successfully open xpm region.";
+    }
+    // xpm proc does not exist, the read value is 0, and the check is not performed.
+    if (secureMemStart == 0 && secureMemEnd == 0) {
+        LOG(ERROR, PANDAFILE) << "Secure memory check: xpm proc does not exist, do not check secure memory anymore.";
+        return true;
+    }
+    if (mem < secureMemStart || (size > (std::numeric_limits<uintptr_t>::max() - mem)) || (mem + size) > secureMemEnd) {
+        LOG(ERROR, PANDAFILE) << "Secure memory check failed, mem out of secure memory region.";
+        return false;
+    }
+    return true;
+}
 
 std::unique_ptr<const File> OpenPandaFileOrZip(std::string_view location, panda_file::File::OpenMode openMode)
 {
@@ -315,6 +361,11 @@ std::unique_ptr<const File> OpenPandaFileFromSecureMemory(uint8_t *buffer, size_
 {
     if (buffer == nullptr) {
         PLOG(ERROR, PANDAFILE) << "OpenPandaFileFromSecureMemory buffer is nullptr'";
+        return nullptr;
+    }
+
+    if (!CheckSecureMem(reinterpret_cast<uintptr_t>(buffer), size)) {
+        PLOG(ERROR, PANDAFILE) << "Secure memory check failed, please execute in secure memory.";
         return nullptr;
     }
 
