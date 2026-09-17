@@ -143,11 +143,12 @@ public:
         if (name_.empty()) {
             return {};
         }
-        auto idx = name_.length() - 1;
-        while (name_[idx] == ']') {
-            idx -= Type::RANK_STEP;
+        size_t size = name_.size();
+        size_t i = 0;
+        while (i + Type::RANK_STEP <= size && name_[size - i - 1] == ']' && name_[size - i - Type::RANK_STEP] == '[') {
+            i += Type::RANK_STEP;
         }
-        return name_.substr(0, idx + 1);
+        return name_.substr(0, size - i);
     }
 
     std::string GetPandasmName() const

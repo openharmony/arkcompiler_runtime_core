@@ -72,6 +72,9 @@ TEST(typetests, malformed_descriptor_returns_invalid_type)
     std::string_view malformedReferenceDescriptor = "L;";
     ark::pandasm::Type malformedReferenceType = ark::pandasm::Type::FromDescriptor(malformedReferenceDescriptor);
     ASSERT_FALSE(malformedReferenceType.IsValid());
+
+    ark::pandasm::Type malformedReferenceSuffix = ark::pandasm::Type::FromDescriptor("L];");
+    ASSERT_EQ(malformedReferenceSuffix.GetNameWithoutRank(), "]");
 }
 
 TEST(typetests, malformed_type_name_returns_invalid_type)

@@ -147,6 +147,9 @@ public:
     static std::string DemangledName(panda_file::File::StringData data)
     {
         auto descriptor = data.data;
+        if (descriptor == nullptr) {
+            return {};
+        }
         switch (*descriptor) {
             case 'V':
                 return "void";
@@ -184,13 +187,19 @@ public:
         }
 
         std::string name = utf::Mutf8AsCString(descriptor);
-        if (name[0] == '[') {
+        if (!name.empty() && name[0] == '[') {
             return name;
         }
 
         std::replace(name.begin(), name.end(), '/', '.');
 
-        ASSERT(name.size() > 2);  // 2 - L and ;
+        // ASSERT(name.size() > 2) is compiled out in release builds, so a malformed
+        // descriptor (length <= 2, not a primitive, not '['-prefixed) could leave
+        // name empty after erase() and cause pop_back() on an empty string (UB).
+        // Guard this with a real runtime check instead of an assertion.
+        if (name.size() <= 2) {  // 2 - L and ;
+            return name;
+        }
 
         name.erase(0, 1);
         name.pop_back();
