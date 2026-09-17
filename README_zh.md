@@ -93,12 +93,12 @@ ark_disasm [选项] 输入文件 输出文件
 输出文件：文本格式的方舟字节码
 
 
-更多使用说明请参考：[方舟运行时使用指南](https://gitee.com/openharmony/arkcompiler_ets_runtime/blob/master/docs/README_zh.md)
+更多使用说明请参考：[方舟运行时使用指南](https://gitcode.com/openharmony/arkcompiler_ets_runtime/blob/master/docs/README_zh.md)
 
 ## 相关仓<a name="section1371113476307"></a>
 
-**[arkcompiler\_runtime\_core](https://gitee.com/openharmony/arkcompiler_runtime_core)**
+**[arkcompiler\_runtime\_core](https://gitcode.com/openharmony/arkcompiler_runtime_core)**
 
-[arkcompiler\_ets\_runtime](https://gitee.com/openharmony/arkcompiler_ets_runtime)
+[arkcompiler\_ets\_runtime](https://gitcode.com/openharmony/arkcompiler_ets_runtime)
 
-[arkcompiler\_ets\_frontend](https://gitee.com/openharmony/arkcompiler_ets_frontend)
+[arkcompiler\_ets\_frontend](https://gitcode.com/openharmony/arkcompiler_ets_frontend)
