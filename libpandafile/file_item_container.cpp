@@ -516,6 +516,7 @@ void ItemContainer::RebuildLineNumberProgramIndex()
 {
     for (auto &item : items_) {
         if (item->GetItemType() == ItemTypes::LINE_NUMBER_PROGRAM_ITEM &&
+            item->NeedsEmit() &&
             !line_number_program_index_item_.Has(static_cast<LineNumberProgramItem *>(item.get()))) {
             line_number_program_index_item_.Add(static_cast<LineNumberProgramItem *>(item.get()));
         }
