@@ -120,7 +120,7 @@ cases:
     effective_type: FixedArray<Object> | undefined
     instanceof_type: 'FixedArray<Object | undefined> | undefined'
     init: |-
-      = new FixedArray<A>(0)
+      = new FixedArray<A>(0, new A())
     test_suffix: fixed_array
 
   - decl: |-

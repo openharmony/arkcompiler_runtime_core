@@ -1679,7 +1679,7 @@ export namespace util {
                         resolve(value);
                     }
                 };
-                const newArgs: FixedArray<Any> = new FixedArray<Any>(args.length + 1);
+                const newArgs: FixedArray<Any> = new FixedArray<Any>(args.length + 1, undefined);
                 for (let i = 0; i < args.length; i++) {
                     newArgs[i] = args[i];
                 }
@@ -1695,7 +1695,7 @@ export namespace util {
                 throw new Error('maybe is not function');
             }
             const func: Function = args[args.length - 1] as Function;
-            const newArgs: FixedArray<Any> = new FixedArray<Any>(args.length - 1);
+            const newArgs: FixedArray<Any> = new FixedArray<Any>(args.length - 1, undefined);
             for (let i = 0; i < args.length - 1; i++) {
                 newArgs[i] = args[i];
             }

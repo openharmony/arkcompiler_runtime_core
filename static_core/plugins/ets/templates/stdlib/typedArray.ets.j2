@@ -1050,7 +1050,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             return res
         }
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
-        const idx : FixedArray<int> = new FixedArray<int>(1)
+        const idx : FixedArray<int> = new FixedArray<int>(1, new Int())
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
             const mapped = mapfn(x as T, idx[0])
@@ -1086,7 +1086,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         let iter = arrayLike.$_iterator()
         // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new {{N}}Array(6)
-        let index : FixedArray<int> = new FixedArray<int>(1)
+        let index : FixedArray<int> = new FixedArray<int>(1, new Int())
         index[0] = 0
 
         iteratorForEach<{{elementCompat}}>(iter, (x: {{elementCompat}}): void => {
@@ -1626,7 +1626,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         {%- endif%}
 
         if (this.lengthInt > MAX_SHORT_LENGTH) {
-            let arr: FixedArray<{{T}}> = new FixedArray<{{T}}>(this.lengthInt)
+            let arr: FixedArray<{{T}}> = new FixedArray<{{T}}>(this.lengthInt, new {{TBoxed}}())
             for (let i = 0; i < this.lengthInt; ++i) {
             {%- if N in ['Float32', 'Float64'] %}
                 let val = this.getUnsafe(i)
@@ -1654,7 +1654,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
                 this.setUnsafe(i, arr[i])
             }
         } else {
-            let buffer: FixedArray<{{BT}}> = new FixedArray<{{BT}}>(this.lengthInt)
+            let buffer: FixedArray<{{BT}}> = new FixedArray<{{BT}}>(this.lengthInt, new {{BT}}())
             for (let i = 0; i < this.lengthInt; ++i) {
             {%- if N in ['Float32', 'Float64'] %}
                 let val = this.getUnsafe(i)
@@ -1848,7 +1848,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @FaAndStageModel
      */
     public filter(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => boolean): {{N}}Array {
-        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt)
+        let markers : ValueArray<boolean> = new ValueArray<boolean>(this.lengthInt, false)
         let resLen = 0
         for (let i = 0; i < this.lengthInt; ++i) {
             markers[i] = fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)

@@ -73,7 +73,7 @@ class BuiltinArrayKeysIterator implements IterableIterator<int> {
 }
 
 function cloneArray(self: FixedArray<boolean>): FixedArray<boolean> {
-    const ret : FixedArray<boolean> = new FixedArray<boolean>(self.length);;
+    const ret : FixedArray<boolean> = new FixedArray<boolean>(self.length, new Boolean());;
     for (let i = 0; i < self.length; i++) {
         ret[i] = self[i];
     }
@@ -429,7 +429,7 @@ export function slice(self: FixedArray<boolean>, start?: int, end?: int): FixedA
     if (count < 0) {
         count = 0;
     }
-    let res : FixedArray<boolean> = new FixedArray<boolean>(count)
+    let res : FixedArray<boolean> = new FixedArray<boolean>(count, new Boolean())
     copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
@@ -592,7 +592,7 @@ export function toSpliced(self: FixedArray<boolean>, start: int, delete: int, ..
     if (start > len - delete) {
         delete = len - start
     }
-    const res : FixedArray<boolean> = new FixedArray<boolean>(len - delete + items.length);
+    const res : FixedArray<boolean> = new FixedArray<boolean>(len - delete + items.length, new Boolean());
     for (let i = 0; i < start; i++) {
         res[i] = self[i]
     }
@@ -718,7 +718,7 @@ export function reverse(self: FixedArray<boolean>): FixedArray<boolean> {
  * @FaAndStageModel
  */
 export function toReversed(self: FixedArray<boolean>): FixedArray<boolean> {
-    let arr : FixedArray<boolean> = new FixedArray<boolean>(self.length)
+    let arr : FixedArray<boolean> = new FixedArray<boolean>(self.length, new Boolean())
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
@@ -783,7 +783,7 @@ export function entries(self: FixedArray<boolean>): IterableIterator<[int, boole
  */
 export function map(self: FixedArray<boolean>, callbackfn: (value: boolean, index: int, array: FixedArray<boolean>) => boolean): FixedArray<boolean> {
     const len = self.length;
-    let res : FixedArray<boolean> = new FixedArray<boolean>(len);
+    let res : FixedArray<boolean> = new FixedArray<boolean>(len, new Boolean());
     for (let i = 0; i < len; i++) {
         res[i] = callbackfn(self[i], i, self);
     }
@@ -823,7 +823,7 @@ export function reduceRight(self: FixedArray<boolean>, callbackfn: (previousValu
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<boolean>, fn: (v: boolean, k: int, array: FixedArray<boolean>) => boolean): FixedArray<boolean> {
-    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length, false)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -833,7 +833,7 @@ export function filter(self: FixedArray<boolean>, fn: (v: boolean, k: int, array
             cnt++;
         }
     }
-    const res : FixedArray<boolean> = new FixedArray<boolean>(cnt);
+    const res : FixedArray<boolean> = new FixedArray<boolean>(cnt, new Boolean());
     let idx_store = 0;
     for (let i: int = 0; i < self.length; i++) {
         if (mask[i]) {
@@ -849,7 +849,7 @@ export function concat(self: FixedArray<boolean>, fst: FixedArray<boolean>, ...m
     for (let i = 0; i < more.length; i++) {
         ln += more[i].length
     }
-    const r : FixedArray<boolean> = new FixedArray<boolean>(ln);
+    const r : FixedArray<boolean> = new FixedArray<boolean>(ln, new Boolean());
     try {
         copyTo(self, r, 0, 0, self.length);
         copyTo(fst, r, self.length, 0, fst.length);
@@ -877,7 +877,7 @@ export function concat(self: FixedArray<boolean>, ...items: FixedArray<ConcatArr
         totalAdd += items[i].length
     }
 
-    const buf : FixedArray<boolean> = new FixedArray<boolean>(totalAdd);
+    const buf : FixedArray<boolean> = new FixedArray<boolean>(totalAdd, new Boolean());
 
     for (let i = 0; i < self.length; i++) {
         buf[i] = self[i];
@@ -974,7 +974,7 @@ class ArrayEntriesIterator_boolean_FixedArray implements IterableIterator<[int, 
 }
 
 function cloneArray(self: FixedArray<byte>): FixedArray<byte> {
-    const ret : FixedArray<byte> = new FixedArray<byte>(self.length);;
+    const ret : FixedArray<byte> = new FixedArray<byte>(self.length, new Byte());;
     for (let i = 0; i < self.length; i++) {
         ret[i] = self[i];
     }
@@ -1330,7 +1330,7 @@ export function slice(self: FixedArray<byte>, start?: int, end?: int): FixedArra
     if (count < 0) {
         count = 0;
     }
-    let res : FixedArray<byte> = new FixedArray<byte>(count)
+    let res : FixedArray<byte> = new FixedArray<byte>(count, new Byte())
     copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
@@ -1493,7 +1493,7 @@ export function toSpliced(self: FixedArray<byte>, start: int, delete: int, ...it
     if (start > len - delete) {
         delete = len - start
     }
-    const res : FixedArray<byte> = new FixedArray<byte>(len - delete + items.length);
+    const res : FixedArray<byte> = new FixedArray<byte>(len - delete + items.length, new Byte());
     for (let i = 0; i < start; i++) {
         res[i] = self[i]
     }
@@ -1619,7 +1619,7 @@ export function reverse(self: FixedArray<byte>): FixedArray<byte> {
  * @FaAndStageModel
  */
 export function toReversed(self: FixedArray<byte>): FixedArray<byte> {
-    let arr : FixedArray<byte> = new FixedArray<byte>(self.length)
+    let arr : FixedArray<byte> = new FixedArray<byte>(self.length, new Byte())
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
@@ -1684,7 +1684,7 @@ export function entries(self: FixedArray<byte>): IterableIterator<[int, byte]> {
  */
 export function map(self: FixedArray<byte>, callbackfn: (value: byte, index: int, array: FixedArray<byte>) => byte): FixedArray<byte> {
     const len = self.length;
-    let res : FixedArray<byte> = new FixedArray<byte>(len);
+    let res : FixedArray<byte> = new FixedArray<byte>(len, new Byte());
     for (let i = 0; i < len; i++) {
         res[i] = callbackfn(self[i], i, self);
     }
@@ -1724,7 +1724,7 @@ export function reduceRight(self: FixedArray<byte>, callbackfn: (previousValue: 
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<byte>, fn: (v: byte, k: int, array: FixedArray<byte>) => boolean): FixedArray<byte> {
-    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length, false)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -1734,7 +1734,7 @@ export function filter(self: FixedArray<byte>, fn: (v: byte, k: int, array: Fixe
             cnt++;
         }
     }
-    const res : FixedArray<byte> = new FixedArray<byte>(cnt);
+    const res : FixedArray<byte> = new FixedArray<byte>(cnt, new Byte());
     let idx_store = 0;
     for (let i: int = 0; i < self.length; i++) {
         if (mask[i]) {
@@ -1750,7 +1750,7 @@ export function concat(self: FixedArray<byte>, fst: FixedArray<byte>, ...more: F
     for (let i = 0; i < more.length; i++) {
         ln += more[i].length
     }
-    const r : FixedArray<byte> = new FixedArray<byte>(ln);
+    const r : FixedArray<byte> = new FixedArray<byte>(ln, new Byte());
     try {
         copyTo(self, r, 0, 0, self.length);
         copyTo(fst, r, self.length, 0, fst.length);
@@ -1778,7 +1778,7 @@ export function concat(self: FixedArray<byte>, ...items: FixedArray<ConcatArray<
         totalAdd += items[i].length
     }
 
-    const buf : FixedArray<byte> = new FixedArray<byte>(totalAdd);
+    const buf : FixedArray<byte> = new FixedArray<byte>(totalAdd, new Byte());
 
     for (let i = 0; i < self.length; i++) {
         buf[i] = self[i];
@@ -1875,7 +1875,7 @@ class ArrayEntriesIterator_byte_FixedArray implements IterableIterator<[int, byt
 }
 
 function cloneArray(self: FixedArray<short>): FixedArray<short> {
-    const ret : FixedArray<short> = new FixedArray<short>(self.length);;
+    const ret : FixedArray<short> = new FixedArray<short>(self.length, new Short());;
     for (let i = 0; i < self.length; i++) {
         ret[i] = self[i];
     }
@@ -2231,7 +2231,7 @@ export function slice(self: FixedArray<short>, start?: int, end?: int): FixedArr
     if (count < 0) {
         count = 0;
     }
-    let res : FixedArray<short> = new FixedArray<short>(count)
+    let res : FixedArray<short> = new FixedArray<short>(count, new Short())
     copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
@@ -2394,7 +2394,7 @@ export function toSpliced(self: FixedArray<short>, start: int, delete: int, ...i
     if (start > len - delete) {
         delete = len - start
     }
-    const res : FixedArray<short> = new FixedArray<short>(len - delete + items.length);
+    const res : FixedArray<short> = new FixedArray<short>(len - delete + items.length, new Short());
     for (let i = 0; i < start; i++) {
         res[i] = self[i]
     }
@@ -2520,7 +2520,7 @@ export function reverse(self: FixedArray<short>): FixedArray<short> {
  * @FaAndStageModel
  */
 export function toReversed(self: FixedArray<short>): FixedArray<short> {
-    let arr : FixedArray<short> = new FixedArray<short>(self.length)
+    let arr : FixedArray<short> = new FixedArray<short>(self.length, new Short())
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
@@ -2585,7 +2585,7 @@ export function entries(self: FixedArray<short>): IterableIterator<[int, short]>
  */
 export function map(self: FixedArray<short>, callbackfn: (value: short, index: int, array: FixedArray<short>) => short): FixedArray<short> {
     const len = self.length;
-    let res : FixedArray<short> = new FixedArray<short>(len);
+    let res : FixedArray<short> = new FixedArray<short>(len, new Short());
     for (let i = 0; i < len; i++) {
         res[i] = callbackfn(self[i], i, self);
     }
@@ -2625,7 +2625,7 @@ export function reduceRight(self: FixedArray<short>, callbackfn: (previousValue:
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<short>, fn: (v: short, k: int, array: FixedArray<short>) => boolean): FixedArray<short> {
-    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length, false)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -2635,7 +2635,7 @@ export function filter(self: FixedArray<short>, fn: (v: short, k: int, array: Fi
             cnt++;
         }
     }
-    const res : FixedArray<short> = new FixedArray<short>(cnt);
+    const res : FixedArray<short> = new FixedArray<short>(cnt, new Short());
     let idx_store = 0;
     for (let i: int = 0; i < self.length; i++) {
         if (mask[i]) {
@@ -2651,7 +2651,7 @@ export function concat(self: FixedArray<short>, fst: FixedArray<short>, ...more:
     for (let i = 0; i < more.length; i++) {
         ln += more[i].length
     }
-    const r : FixedArray<short> = new FixedArray<short>(ln);
+    const r : FixedArray<short> = new FixedArray<short>(ln, new Short());
     try {
         copyTo(self, r, 0, 0, self.length);
         copyTo(fst, r, self.length, 0, fst.length);
@@ -2679,7 +2679,7 @@ export function concat(self: FixedArray<short>, ...items: FixedArray<ConcatArray
         totalAdd += items[i].length
     }
 
-    const buf : FixedArray<short> = new FixedArray<short>(totalAdd);
+    const buf : FixedArray<short> = new FixedArray<short>(totalAdd, new Short());
 
     for (let i = 0; i < self.length; i++) {
         buf[i] = self[i];
@@ -2776,7 +2776,7 @@ class ArrayEntriesIterator_short_FixedArray implements IterableIterator<[int, sh
 }
 
 function cloneArray(self: FixedArray<int>): FixedArray<int> {
-    const ret : FixedArray<int> = new FixedArray<int>(self.length);;
+    const ret : FixedArray<int> = new FixedArray<int>(self.length, new Int());;
     for (let i = 0; i < self.length; i++) {
         ret[i] = self[i];
     }
@@ -3132,7 +3132,7 @@ export function slice(self: FixedArray<int>, start?: int, end?: int): FixedArray
     if (count < 0) {
         count = 0;
     }
-    let res : FixedArray<int> = new FixedArray<int>(count)
+    let res : FixedArray<int> = new FixedArray<int>(count, new Int())
     copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
@@ -3295,7 +3295,7 @@ export function toSpliced(self: FixedArray<int>, start: int, delete: int, ...ite
     if (start > len - delete) {
         delete = len - start
     }
-    const res : FixedArray<int> = new FixedArray<int>(len - delete + items.length);
+    const res : FixedArray<int> = new FixedArray<int>(len - delete + items.length, new Int());
     for (let i = 0; i < start; i++) {
         res[i] = self[i]
     }
@@ -3421,7 +3421,7 @@ export function reverse(self: FixedArray<int>): FixedArray<int> {
  * @FaAndStageModel
  */
 export function toReversed(self: FixedArray<int>): FixedArray<int> {
-    let arr : FixedArray<int> = new FixedArray<int>(self.length)
+    let arr : FixedArray<int> = new FixedArray<int>(self.length, new Int())
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
@@ -3486,7 +3486,7 @@ export function entries(self: FixedArray<int>): IterableIterator<[int, int]> {
  */
 export function map(self: FixedArray<int>, callbackfn: (value: int, index: int, array: FixedArray<int>) => int): FixedArray<int> {
     const len = self.length;
-    let res : FixedArray<int> = new FixedArray<int>(len);
+    let res : FixedArray<int> = new FixedArray<int>(len, new Int());
     for (let i = 0; i < len; i++) {
         res[i] = callbackfn(self[i], i, self);
     }
@@ -3526,7 +3526,7 @@ export function reduceRight(self: FixedArray<int>, callbackfn: (previousValue: i
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<int>, fn: (v: int, k: int, array: FixedArray<int>) => boolean): FixedArray<int> {
-    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length, false)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -3536,7 +3536,7 @@ export function filter(self: FixedArray<int>, fn: (v: int, k: int, array: FixedA
             cnt++;
         }
     }
-    const res : FixedArray<int> = new FixedArray<int>(cnt);
+    const res : FixedArray<int> = new FixedArray<int>(cnt, new Int());
     let idx_store = 0;
     for (let i: int = 0; i < self.length; i++) {
         if (mask[i]) {
@@ -3552,7 +3552,7 @@ export function concat(self: FixedArray<int>, fst: FixedArray<int>, ...more: Fix
     for (let i = 0; i < more.length; i++) {
         ln += more[i].length
     }
-    const r : FixedArray<int> = new FixedArray<int>(ln);
+    const r : FixedArray<int> = new FixedArray<int>(ln, new Int());
     try {
         copyTo(self, r, 0, 0, self.length);
         copyTo(fst, r, self.length, 0, fst.length);
@@ -3580,7 +3580,7 @@ export function concat(self: FixedArray<int>, ...items: FixedArray<ConcatArray<i
         totalAdd += items[i].length
     }
 
-    const buf : FixedArray<int> = new FixedArray<int>(totalAdd);
+    const buf : FixedArray<int> = new FixedArray<int>(totalAdd, new Int());
 
     for (let i = 0; i < self.length; i++) {
         buf[i] = self[i];
@@ -3677,7 +3677,7 @@ class ArrayEntriesIterator_int_FixedArray implements IterableIterator<[int, int]
 }
 
 function cloneArray(self: FixedArray<long>): FixedArray<long> {
-    const ret : FixedArray<long> = new FixedArray<long>(self.length);;
+    const ret : FixedArray<long> = new FixedArray<long>(self.length, new Long());;
     for (let i = 0; i < self.length; i++) {
         ret[i] = self[i];
     }
@@ -4033,7 +4033,7 @@ export function slice(self: FixedArray<long>, start?: int, end?: int): FixedArra
     if (count < 0) {
         count = 0;
     }
-    let res : FixedArray<long> = new FixedArray<long>(count)
+    let res : FixedArray<long> = new FixedArray<long>(count, new Long())
     copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
@@ -4196,7 +4196,7 @@ export function toSpliced(self: FixedArray<long>, start: int, delete: int, ...it
     if (start > len - delete) {
         delete = len - start
     }
-    const res : FixedArray<long> = new FixedArray<long>(len - delete + items.length);
+    const res : FixedArray<long> = new FixedArray<long>(len - delete + items.length, new Long());
     for (let i = 0; i < start; i++) {
         res[i] = self[i]
     }
@@ -4322,7 +4322,7 @@ export function reverse(self: FixedArray<long>): FixedArray<long> {
  * @FaAndStageModel
  */
 export function toReversed(self: FixedArray<long>): FixedArray<long> {
-    let arr : FixedArray<long> = new FixedArray<long>(self.length)
+    let arr : FixedArray<long> = new FixedArray<long>(self.length, new Long())
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
@@ -4387,7 +4387,7 @@ export function entries(self: FixedArray<long>): IterableIterator<[int, long]> {
  */
 export function map(self: FixedArray<long>, callbackfn: (value: long, index: int, array: FixedArray<long>) => long): FixedArray<long> {
     const len = self.length;
-    let res : FixedArray<long> = new FixedArray<long>(len);
+    let res : FixedArray<long> = new FixedArray<long>(len, new Long());
     for (let i = 0; i < len; i++) {
         res[i] = callbackfn(self[i], i, self);
     }
@@ -4427,7 +4427,7 @@ export function reduceRight(self: FixedArray<long>, callbackfn: (previousValue: 
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<long>, fn: (v: long, k: int, array: FixedArray<long>) => boolean): FixedArray<long> {
-    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length, false)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -4437,7 +4437,7 @@ export function filter(self: FixedArray<long>, fn: (v: long, k: int, array: Fixe
             cnt++;
         }
     }
-    const res : FixedArray<long> = new FixedArray<long>(cnt);
+    const res : FixedArray<long> = new FixedArray<long>(cnt, new Long());
     let idx_store = 0;
     for (let i: int = 0; i < self.length; i++) {
         if (mask[i]) {
@@ -4453,7 +4453,7 @@ export function concat(self: FixedArray<long>, fst: FixedArray<long>, ...more: F
     for (let i = 0; i < more.length; i++) {
         ln += more[i].length
     }
-    const r : FixedArray<long> = new FixedArray<long>(ln);
+    const r : FixedArray<long> = new FixedArray<long>(ln, new Long());
     try {
         copyTo(self, r, 0, 0, self.length);
         copyTo(fst, r, self.length, 0, fst.length);
@@ -4481,7 +4481,7 @@ export function concat(self: FixedArray<long>, ...items: FixedArray<ConcatArray<
         totalAdd += items[i].length
     }
 
-    const buf : FixedArray<long> = new FixedArray<long>(totalAdd);
+    const buf : FixedArray<long> = new FixedArray<long>(totalAdd, new Long());
 
     for (let i = 0; i < self.length; i++) {
         buf[i] = self[i];
@@ -4578,7 +4578,7 @@ class ArrayEntriesIterator_long_FixedArray implements IterableIterator<[int, lon
 }
 
 function cloneArray(self: FixedArray<float>): FixedArray<float> {
-    const ret : FixedArray<float> = new FixedArray<float>(self.length);;
+    const ret : FixedArray<float> = new FixedArray<float>(self.length, new Float());;
     for (let i = 0; i < self.length; i++) {
         ret[i] = self[i];
     }
@@ -4934,7 +4934,7 @@ export function slice(self: FixedArray<float>, start?: int, end?: int): FixedArr
     if (count < 0) {
         count = 0;
     }
-    let res : FixedArray<float> = new FixedArray<float>(count)
+    let res : FixedArray<float> = new FixedArray<float>(count, new Float())
     copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
@@ -5097,7 +5097,7 @@ export function toSpliced(self: FixedArray<float>, start: int, delete: int, ...i
     if (start > len - delete) {
         delete = len - start
     }
-    const res : FixedArray<float> = new FixedArray<float>(len - delete + items.length);
+    const res : FixedArray<float> = new FixedArray<float>(len - delete + items.length, new Float());
     for (let i = 0; i < start; i++) {
         res[i] = self[i]
     }
@@ -5231,7 +5231,7 @@ export function reverse(self: FixedArray<float>): FixedArray<float> {
  * @FaAndStageModel
  */
 export function toReversed(self: FixedArray<float>): FixedArray<float> {
-    let arr : FixedArray<float> = new FixedArray<float>(self.length)
+    let arr : FixedArray<float> = new FixedArray<float>(self.length, new Float())
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
@@ -5296,7 +5296,7 @@ export function entries(self: FixedArray<float>): IterableIterator<[int, float]>
  */
 export function map(self: FixedArray<float>, callbackfn: (value: float, index: int, array: FixedArray<float>) => float): FixedArray<float> {
     const len = self.length;
-    let res : FixedArray<float> = new FixedArray<float>(len);
+    let res : FixedArray<float> = new FixedArray<float>(len, new Float());
     for (let i = 0; i < len; i++) {
         res[i] = callbackfn(self[i], i, self);
     }
@@ -5336,7 +5336,7 @@ export function reduceRight(self: FixedArray<float>, callbackfn: (previousValue:
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<float>, fn: (v: float, k: int, array: FixedArray<float>) => boolean): FixedArray<float> {
-    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length, false)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -5346,7 +5346,7 @@ export function filter(self: FixedArray<float>, fn: (v: float, k: int, array: Fi
             cnt++;
         }
     }
-    const res : FixedArray<float> = new FixedArray<float>(cnt);
+    const res : FixedArray<float> = new FixedArray<float>(cnt, new Float());
     let idx_store = 0;
     for (let i: int = 0; i < self.length; i++) {
         if (mask[i]) {
@@ -5362,7 +5362,7 @@ export function concat(self: FixedArray<float>, fst: FixedArray<float>, ...more:
     for (let i = 0; i < more.length; i++) {
         ln += more[i].length
     }
-    const r : FixedArray<float> = new FixedArray<float>(ln);
+    const r : FixedArray<float> = new FixedArray<float>(ln, new Float());
     try {
         copyTo(self, r, 0, 0, self.length);
         copyTo(fst, r, self.length, 0, fst.length);
@@ -5390,7 +5390,7 @@ export function concat(self: FixedArray<float>, ...items: FixedArray<ConcatArray
         totalAdd += items[i].length
     }
 
-    const buf : FixedArray<float> = new FixedArray<float>(totalAdd);
+    const buf : FixedArray<float> = new FixedArray<float>(totalAdd, new Float());
 
     for (let i = 0; i < self.length; i++) {
         buf[i] = self[i];
@@ -5487,7 +5487,7 @@ class ArrayEntriesIterator_float_FixedArray implements IterableIterator<[int, fl
 }
 
 function cloneArray(self: FixedArray<double>): FixedArray<double> {
-    const ret : FixedArray<double> = new FixedArray<double>(self.length);;
+    const ret : FixedArray<double> = new FixedArray<double>(self.length, new Double());;
     for (let i = 0; i < self.length; i++) {
         ret[i] = self[i];
     }
@@ -5843,7 +5843,7 @@ export function slice(self: FixedArray<double>, start?: int, end?: int): FixedAr
     if (count < 0) {
         count = 0;
     }
-    let res : FixedArray<double> = new FixedArray<double>(count)
+    let res : FixedArray<double> = new FixedArray<double>(count, new Double())
     copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
@@ -6006,7 +6006,7 @@ export function toSpliced(self: FixedArray<double>, start: int, delete: int, ...
     if (start > len - delete) {
         delete = len - start
     }
-    const res : FixedArray<double> = new FixedArray<double>(len - delete + items.length);
+    const res : FixedArray<double> = new FixedArray<double>(len - delete + items.length, new Double());
     for (let i = 0; i < start; i++) {
         res[i] = self[i]
     }
@@ -6140,7 +6140,7 @@ export function reverse(self: FixedArray<double>): FixedArray<double> {
  * @FaAndStageModel
  */
 export function toReversed(self: FixedArray<double>): FixedArray<double> {
-    let arr : FixedArray<double> = new FixedArray<double>(self.length)
+    let arr : FixedArray<double> = new FixedArray<double>(self.length, new Double())
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
@@ -6205,7 +6205,7 @@ export function entries(self: FixedArray<double>): IterableIterator<[int, double
  */
 export function map(self: FixedArray<double>, callbackfn: (value: double, index: int, array: FixedArray<double>) => double): FixedArray<double> {
     const len = self.length;
-    let res : FixedArray<double> = new FixedArray<double>(len);
+    let res : FixedArray<double> = new FixedArray<double>(len, new Double());
     for (let i = 0; i < len; i++) {
         res[i] = callbackfn(self[i], i, self);
     }
@@ -6245,7 +6245,7 @@ export function reduceRight(self: FixedArray<double>, callbackfn: (previousValue
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<double>, fn: (v: double, k: int, array: FixedArray<double>) => boolean): FixedArray<double> {
-    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length, false)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -6255,7 +6255,7 @@ export function filter(self: FixedArray<double>, fn: (v: double, k: int, array: 
             cnt++;
         }
     }
-    const res : FixedArray<double> = new FixedArray<double>(cnt);
+    const res : FixedArray<double> = new FixedArray<double>(cnt, new Double());
     let idx_store = 0;
     for (let i: int = 0; i < self.length; i++) {
         if (mask[i]) {
@@ -6271,7 +6271,7 @@ export function concat(self: FixedArray<double>, fst: FixedArray<double>, ...mor
     for (let i = 0; i < more.length; i++) {
         ln += more[i].length
     }
-    const r : FixedArray<double> = new FixedArray<double>(ln);
+    const r : FixedArray<double> = new FixedArray<double>(ln, new Double());
     try {
         copyTo(self, r, 0, 0, self.length);
         copyTo(fst, r, self.length, 0, fst.length);
@@ -6299,7 +6299,7 @@ export function concat(self: FixedArray<double>, ...items: FixedArray<ConcatArra
         totalAdd += items[i].length
     }
 
-    const buf : FixedArray<double> = new FixedArray<double>(totalAdd);
+    const buf : FixedArray<double> = new FixedArray<double>(totalAdd, new Double());
 
     for (let i = 0; i < self.length; i++) {
         buf[i] = self[i];
@@ -6396,7 +6396,7 @@ class ArrayEntriesIterator_double_FixedArray implements IterableIterator<[int, d
 }
 
 function cloneArray(self: FixedArray<char>): FixedArray<char> {
-    const ret : FixedArray<char> = new FixedArray<char>(self.length);;
+    const ret : FixedArray<char> = new FixedArray<char>(self.length, new Char());;
     for (let i = 0; i < self.length; i++) {
         ret[i] = self[i];
     }
@@ -6752,7 +6752,7 @@ export function slice(self: FixedArray<char>, start?: int, end?: int): FixedArra
     if (count < 0) {
         count = 0;
     }
-    let res : FixedArray<char> = new FixedArray<char>(count)
+    let res : FixedArray<char> = new FixedArray<char>(count, new Char())
     copyTo(self, res, 0, relStart, relStart + count);
     return res
 }
@@ -6915,7 +6915,7 @@ export function toSpliced(self: FixedArray<char>, start: int, delete: int, ...it
     if (start > len - delete) {
         delete = len - start
     }
-    const res : FixedArray<char> = new FixedArray<char>(len - delete + items.length);
+    const res : FixedArray<char> = new FixedArray<char>(len - delete + items.length, new Char());
     for (let i = 0; i < start; i++) {
         res[i] = self[i]
     }
@@ -7041,7 +7041,7 @@ export function reverse(self: FixedArray<char>): FixedArray<char> {
  * @FaAndStageModel
  */
 export function toReversed(self: FixedArray<char>): FixedArray<char> {
-    let arr : FixedArray<char> = new FixedArray<char>(self.length)
+    let arr : FixedArray<char> = new FixedArray<char>(self.length, new Char())
     for (let i = 0; i < self.length; i++) {
         arr[self.length - 1 - i] = self[i]
     }
@@ -7106,7 +7106,7 @@ export function entries(self: FixedArray<char>): IterableIterator<[int, char]> {
  */
 export function map(self: FixedArray<char>, callbackfn: (value: char, index: int, array: FixedArray<char>) => char): FixedArray<char> {
     const len = self.length;
-    let res : FixedArray<char> = new FixedArray<char>(len);
+    let res : FixedArray<char> = new FixedArray<char>(len, new Char());
     for (let i = 0; i < len; i++) {
         res[i] = callbackfn(self[i], i, self);
     }
@@ -7146,7 +7146,7 @@ export function reduceRight(self: FixedArray<char>, callbackfn: (previousValue: 
  * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
  */
 export function filter(self: FixedArray<char>, fn: (v: char, k: int, array: FixedArray<char>) => boolean): FixedArray<char> {
-    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length)
+    const mask: ValueArray<boolean> = new ValueArray<boolean>(self.length, false)
     let cnt = 0
 
     for (let i: int = 0; i < self.length; i++) {
@@ -7156,7 +7156,7 @@ export function filter(self: FixedArray<char>, fn: (v: char, k: int, array: Fixe
             cnt++;
         }
     }
-    const res : FixedArray<char> = new FixedArray<char>(cnt);
+    const res : FixedArray<char> = new FixedArray<char>(cnt, new Char());
     let idx_store = 0;
     for (let i: int = 0; i < self.length; i++) {
         if (mask[i]) {
@@ -7172,7 +7172,7 @@ export function concat(self: FixedArray<char>, fst: FixedArray<char>, ...more: F
     for (let i = 0; i < more.length; i++) {
         ln += more[i].length
     }
-    const r : FixedArray<char> = new FixedArray<char>(ln);
+    const r : FixedArray<char> = new FixedArray<char>(ln, new Char());
     try {
         copyTo(self, r, 0, 0, self.length);
         copyTo(fst, r, self.length, 0, fst.length);
@@ -7200,7 +7200,7 @@ export function concat(self: FixedArray<char>, ...items: FixedArray<ConcatArray<
         totalAdd += items[i].length
     }
 
-    const buf : FixedArray<char> = new FixedArray<char>(totalAdd);
+    const buf : FixedArray<char> = new FixedArray<char>(totalAdd, new Char());
 
     for (let i = 0; i < self.length; i++) {
         buf[i] = self[i];
@@ -7438,8 +7438,8 @@ function builtin_insertion_sort<T>(arr: FixedArray<T>, startIndex: int, endIndex
 function perform_merge<T>(arr: FixedArray<T>, startIndex: int, midIndex: int, endIndex: int, comp: (lhs: T, rhs: T) => int): void {
     const len1 = midIndex - startIndex + 1;
     const len2 = endIndex - midIndex;
-    let left : FixedArray<T | undefined> = new FixedArray<(T | undefined)>(len1);
-    let right : FixedArray<T | undefined> = new FixedArray<(T | undefined)>(len2);
+    let left : FixedArray<T | undefined> = new FixedArray<(T | undefined)>(len1, undefined);
+    let right : FixedArray<T | undefined> = new FixedArray<(T | undefined)>(len2, undefined);
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i];
     }
@@ -7532,8 +7532,8 @@ function stringified_perform_merge<T>(arr: FixedArray<T>, arrStr: FixedArray<buf
     const len2 = endIndex - midIndex;
     let left: (T | undefined)[] = Array.create<T | undefined>(len1, undefined);
     let right: (T | undefined)[] = Array.create<T | undefined>(len2, undefined);
-    let leftStr : FixedArray<buffStr> = new FixedArray<buffStr>(len1)
-    let rightStr : FixedArray<buffStr> = new FixedArray<buffStr>(len2)
+    let leftStr : FixedArray<buffStr> = new FixedArray<buffStr>(len1, undefined)
+    let rightStr : FixedArray<buffStr> = new FixedArray<buffStr>(len2, undefined)
     for (let i = 0; i < len1; i++) {
         left[i] = arr[startIndex + i]
         leftStr[i] = arrStr[startIndex + i]

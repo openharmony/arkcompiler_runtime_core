@@ -69,7 +69,7 @@ function testConcurrentRemove2() {
 
 	let map = new CHMap();
 	let removeF: ()=>FixedArray<int> = () => {
-		let arr: FixedArray<int> = new FixedArray<int>(SET_COUNT);
+		let arr: FixedArray<int> = new FixedArray<int>(SET_COUNT, 0);
 		for (let i = 0; i < SET_COUNT; ++ i) {
 			let val = map.remove(i);
 			if (val !== undefined ) {

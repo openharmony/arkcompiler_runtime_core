@@ -313,7 +313,7 @@ function storeReserve39() : string {
 }
 
 function chainReserve40() : String {
-    let chars:ValueArray<char> = new ValueArray<char>(1)
+    let chars:ValueArray<char> = new ValueArray<char>(1, c'\u0000')
     chars[0] = c'0'
     return new StringBuilder(chars).append(1).append(2).toString()   // applied
 }

@@ -64,7 +64,7 @@ function primeFactorsTrivialPlus(n0: long): FixedArray<long> {
 }
 
 function sievePrimes(n: int): FixedArray<long> {
-    let isPrime: FixedArray<boolean> = new FixedArray<boolean>(n + 1);
+    let isPrime: FixedArray<boolean> = new FixedArray<boolean>(n + 1, false);
     let primes: FixedArray<long> = [];
     fill(isPrime, true);
     // 0 and 1 are not primes

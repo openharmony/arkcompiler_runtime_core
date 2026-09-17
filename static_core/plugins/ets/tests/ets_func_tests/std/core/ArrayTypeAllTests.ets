@@ -36,7 +36,7 @@ function main(): int {
 }
 
 function testArrayHasName() {
-    const at = Type.of(new FixedArray<int>(0)) as ArrayType;
+    const at = Type.of(new FixedArray<int>(0, 0)) as ArrayType;
     arktest.assertFalse(
         at.hasName(),
         'ArrayType.hasName() should be false'
@@ -44,7 +44,7 @@ function testArrayHasName() {
 }
 
 function testArrayHasNamePositive() {
-    const at = Type.of(new FixedArray<Elem>(0)) as ArrayType;
+    const at = Type.of(new FixedArray<Elem>(0, new Elem())) as ArrayType;
     arktest.assertTrue(
         at.hasName(),
         'ArrayType.hasName() should be true for named reference types'
@@ -52,7 +52,7 @@ function testArrayHasNamePositive() {
 }
 
 function testArrayGetNamePositive() {
-    const at = Type.of(new FixedArray<Elem>(0)) as ArrayType;
+    const at = Type.of(new FixedArray<Elem>(0, new Elem())) as ArrayType;
     arktest.assertEQ(
         'ArrayTypeAllTests.Elem',
         at.getElementType().getName(),
@@ -61,7 +61,7 @@ function testArrayGetNamePositive() {
 }
 
 function testArrayGetName() {
-    const at = Type.of(new FixedArray<float>(0)) as ArrayType;
+    const at = Type.of(new FixedArray<float>(0, 0)) as ArrayType;
     arktest.assertEQ(
         '',
         at.getName(),
@@ -70,7 +70,7 @@ function testArrayGetName() {
 }
 
 function testElementTypePrimitive() {
-    const at = Type.of(new FixedArray<boolean>(0)) as ArrayType;
+    const at = Type.of(new FixedArray<boolean>(0, false)) as ArrayType;
     const et = at.getElementType();
     arktest.assertEQ(
         'Boolean',
@@ -80,7 +80,7 @@ function testElementTypePrimitive() {
 }
 
 function testElementTypeReference() {
-    const at = Type.of(new FixedArray<Elem>(0)) as ArrayType;
+    const at = Type.of(new FixedArray<Elem>(0, new Elem())) as ArrayType;
     const et = at.getElementType();
     arktest.assertTrue(
         et.hasName(),
@@ -94,7 +94,7 @@ function testElementTypeReference() {
 }
 
 function testMakePrimitiveArray() {
-    const at = Type.of(new FixedArray<int>(0)) as ArrayType;
+    const at = Type.of(new FixedArray<int>(0, 0)) as ArrayType;
     const arr = at.make(5) as FixedArray<int>
     arktest.assertEQ(
         5 as long,
@@ -109,7 +109,7 @@ function testMakePrimitiveArray() {
 }
 
 function testMakeZeroLengthArray() {
-    const at = Type.of(new FixedArray<string>(0)) as ArrayType;
+    const at = Type.of(new FixedArray<string>(0, '')) as ArrayType;
     const arr = at.make(0) as FixedArray<string>;
     arktest.assertEQ(
         0 as long,

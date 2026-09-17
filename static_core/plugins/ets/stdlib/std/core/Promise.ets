@@ -575,9 +575,9 @@ export final class Promise<out T> implements PromiseLike<T> {
         let it = values.$_iterator();
         let v = it.next();
         if (v.done) {
-            return new FixedArray<U | undefined>(0);
+            return new FixedArray<U | undefined>(0, undefined);
         }
-        let array : FixedArray<U | undefined> = new FixedArray<U | undefined>(1);
+        let array : FixedArray<U | undefined> = new FixedArray<U | undefined>(1, undefined);
         array[0] = v.value;
         let len = 1;
         while (true) {
@@ -595,7 +595,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         if (array.length == length) {
             return array;
         }
-        let result : FixedArray<U | undefined> = new FixedArray<U | undefined>(length);
+        let result : FixedArray<U | undefined> = new FixedArray<U | undefined>(length, undefined);
         for (let i = 0; i < length; ++i) {
             result[i] = array[i];
         }
@@ -606,7 +606,7 @@ export final class Promise<out T> implements PromiseLike<T> {
         if (size <= queue.length) {
             return queue;
         }
-        let newQueue : FixedArray<U | undefined> = new FixedArray<U | undefined>(size * 2);
+        let newQueue : FixedArray<U | undefined> = new FixedArray<U | undefined>(size * 2, undefined);
         for (let i = 0; i < queue.length; ++i) {
             newQueue[i] = queue[i];
         }

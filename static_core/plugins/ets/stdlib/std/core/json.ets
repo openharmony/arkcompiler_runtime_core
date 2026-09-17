@@ -738,7 +738,7 @@ export class JSON {
         if (obj === undefined) {
             return 'undefined'
         }
-        const filter: FixedArray<string> = new FixedArray<string>(replacer.length)
+        const filter: FixedArray<string> = new FixedArray<string>(replacer.length, new String())
         let index: int = 0
         for (let element of replacer) {
             filter[index++] = `${element}`
@@ -791,7 +791,7 @@ export class JSON {
      * @returns String - JSON representation of Object
      */
     public static stringify(obj: Any, replacer: FixedArray<double | string>, space?: int | string): string {
-        const filter : FixedArray<string> = new FixedArray<string>(replacer.length)
+        const filter : FixedArray<string> = new FixedArray<string>(replacer.length, new String())
         for (let i = 0; i < replacer.length; i++) {
             filter[i] = `${replacer[i]}`
         }
@@ -806,7 +806,7 @@ export class JSON {
     public static stringify(obj: Any, replacer: Array<double | string> | Array<string> | Array<double>,
         space?: int | string): string {
 
-        const filter : FixedArray<string> = new FixedArray<string>(replacer.length)
+        const filter : FixedArray<string> = new FixedArray<string>(replacer.length, new String())
         let index: int = 0
         for (let element of replacer) {
             filter[index++] = `${element}`
@@ -1101,7 +1101,7 @@ class JSONWriter {
 
     private getPaddingCache(): FixedArray<String> {
         if (this.paddingCache === undefined) {
-            const cache = new FixedArray<String>(JSONWriter.PADDING_CACHE_SIZE)
+            const cache = new FixedArray<String>(JSONWriter.PADDING_CACHE_SIZE, new String())
             for (let i = 0; i < JSONWriter.PADDING_CACHE_SIZE; i++) {
                 cache[i] = this.space!.repeat(i)
             }
@@ -1383,7 +1383,7 @@ class JSONWriter {
     }
 
     private writeFilteredRecordEntries<K extends Numeric | string | BaseEnum<Int> | BaseEnum<Long> | BaseEnum<string> | BaseEnum<Float> | BaseEnum<Double> | BaseEnum<Byte> | BaseEnum<Short>, V>(record: Record<K, V>, entryDumped: boolean): boolean {
-        const matchedEntries = new FixedArray<[K, V] | undefined>(this.fieldsFilter.length)
+        const matchedEntries = new FixedArray<[K, V] | undefined>(this.fieldsFilter.length, undefined)
 
         record.forEach((entryVal: V, entryKey: K) => {
             const entryName = entryKey.toString()
@@ -3052,7 +3052,7 @@ class EscapeStringBuilder {
 
     private static createEscapeTable(): FixedArray<string> {
         const asciiRange: int = 128
-        const table: FixedArray<string> = new FixedArray<string>(asciiRange)
+        const table: FixedArray<string> = new FixedArray<string>(asciiRange, new String())
         for (let code = 0; code < asciiRange; code++) {
             switch (code.toChar()) {
                 case c'"':
@@ -3114,7 +3114,7 @@ let indentCache: FixedArray<string> | undefined = undefined
 let indentCacheUnit: string | undefined = undefined
 
 function buildIndentCache(unit: string): FixedArray<string> {
-    const cache = new FixedArray<string>(INDENT_CACHE_SIZE)
+    const cache = new FixedArray<string>(INDENT_CACHE_SIZE, new String())
     for (let i = 0; i < INDENT_CACHE_SIZE; i++) {
         cache[i] = unit.repeat(i)
     }
@@ -3513,7 +3513,7 @@ class UnifiedJsonParser {
             throw JsonParseError(`Unterminated string at ${this.getPositionDesc()}`, start, this.index)
         }
 
-        let decoded = new ValueArray<char>(decodedLen)
+        let decoded = new ValueArray<char>(decodedLen, c'\u0000')
         let readIdx = start
         let writeIdx = 0
         while (readIdx < quoteIdx) {

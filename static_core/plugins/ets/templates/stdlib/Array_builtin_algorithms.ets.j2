@@ -152,7 +152,7 @@ export function upperBoundSearch(arr: FixedArray<{{T}}>, key: {{T}}): int {
  * @FaAndStageModel
  */
 export function copyOf(src: FixedArray<{{T}}>): FixedArray<{{T}}> {
-    const r : FixedArray<{{T}}> = new FixedArray<{{T}}>(src.length);
+    const r : FixedArray<{{T}}> = new FixedArray<{{T}}>(src.length{% if T == 'boolean' %}, new Boolean(){% elif T == 'char' %}, new Char(){% elif T == 'Any' %}, undefined{% else %}, new {{T[0].upper() + T[1:]}}(){% endif %});
     try {
         copyTo(src, r, 0, 0, src.length);
     } catch (e) {

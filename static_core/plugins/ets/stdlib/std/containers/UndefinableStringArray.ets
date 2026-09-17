@@ -48,7 +48,7 @@ export namespace containers {
         /* const */ static ArrayInitSize : int = 16
 
         private init(capacity: int, val: UndefinableString): void {
-            this.data = new FixedArray<UndefinableString>(capacity)
+            this.data = new FixedArray<UndefinableString>(capacity, undefined)
             for (let i = 0; i < this.data.length; ++i) {
                 this.data[i] = val
             }
@@ -71,7 +71,7 @@ export namespace containers {
          * @syscap SystemCapability.Utils.Lang
          */
         constructor(capacity: int) {
-            this.data = new FixedArray<UndefinableString>(capacity)
+            this.data = new FixedArray<UndefinableString>(capacity, undefined)
             this.curSize = 0
         }
 
@@ -90,7 +90,7 @@ export namespace containers {
          */
         public reserve(capacity: int): void {
             if (this.data.length < capacity) {
-                let newData : FixedArray<UndefinableString> = new FixedArray<UndefinableString>(capacity)
+                let newData : FixedArray<UndefinableString> = new FixedArray<UndefinableString>(capacity, undefined)
                 for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]
                 }
@@ -121,7 +121,7 @@ export namespace containers {
          * @syscap SystemCapability.Utils.Lang
          */
         public toFixedArray(): FixedArray<String> {
-            let newData: FixedArray<String> = new FixedArray<String>(this.curSize)
+            let newData: FixedArray<String> = new FixedArray<String>(this.curSize, new String())
             for (let i = 0; i < this.curSize; ++i) {
                 newData[i] = this.data[i]!
             }
@@ -160,7 +160,7 @@ export namespace containers {
          */
         public pushBack(e: UndefinableString): void {
             if (this.curSize == this.data.length) {
-                let newData : FixedArray<UndefinableString> = new FixedArray<UndefinableString>(UndefinableStringArray.getNewCapacity(this.data.length))
+                let newData : FixedArray<UndefinableString> = new FixedArray<UndefinableString>(UndefinableStringArray.getNewCapacity(this.data.length), undefined)
                 for (let i = 0; i < this.curSize; ++i) {
                     newData[i] = this.data[i]
                 }

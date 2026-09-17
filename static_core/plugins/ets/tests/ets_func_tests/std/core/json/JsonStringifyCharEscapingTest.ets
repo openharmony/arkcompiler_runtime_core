@@ -80,7 +80,7 @@ function jsonStringifyCharDel(): void {
 }
 
 function jsonStringifyFixedArrayCharEscaping(): void {
-    let arr: FixedArray<char> = new FixedArray<char>(4)
+    let arr: FixedArray<char> = new FixedArray<char>(4, c'\u0000')
     arr[0] = c'\n'
     arr[1] = c'\t'
     arr[2] = c'"'
@@ -89,25 +89,25 @@ function jsonStringifyFixedArrayCharEscaping(): void {
 }
 
 function jsonStringifyFixedArrayCharBackslash(): void {
-    let arr: FixedArray<char> = new FixedArray<char>(2)
+    let arr: FixedArray<char> = new FixedArray<char>(2, c'\u0000')
     arr[0] = c'\\'
     arr[1] = c'B'
     arktest.assertEQ(JSON.stringify(arr), '["\\\\","B"]')
 }
 
 function jsonStringifyFixedArrayCharEmpty(): void {
-    let arr: FixedArray<char> = new FixedArray<char>(0)
+    let arr: FixedArray<char> = new FixedArray<char>(0, c'\u0000')
     arktest.assertEQ(JSON.stringify(arr), '[]')
 }
 
 function jsonStringifyFixedArrayCharSingle(): void {
-    let arr: FixedArray<char> = new FixedArray<char>(1)
+    let arr: FixedArray<char> = new FixedArray<char>(1, c'\u0000')
     arr[0] = c'X'
     arktest.assertEQ(JSON.stringify(arr), '["X"]')
 }
 
 function jsonStringifyFixedArrayCharControlCharacters(): void {
-    let arr: FixedArray<char> = new FixedArray<char>(3)
+    let arr: FixedArray<char> = new FixedArray<char>(3, c'\u0000')
     arr[0] = c'\0'
     arr[1] = c'\r'
     arr[2] = c'\u001f'
@@ -115,14 +115,14 @@ function jsonStringifyFixedArrayCharControlCharacters(): void {
 }
 
 function jsonStringifyFixedArrayCharDel(): void {
-    let arr: FixedArray<char> = new FixedArray<char>(2)
+    let arr: FixedArray<char> = new FixedArray<char>(2, c'\u0000')
     arr[0] = c'\u007f'
     arr[1] = c'A'
     arktest.assertEQ(JSON.stringify(arr), '["\\u007f","A"]')
 }
 
 function jsonStringifyValueArrayCharEscaping(): void {
-    let arr: ValueArray<char> = new ValueArray<char>(3)
+    let arr: ValueArray<char> = new ValueArray<char>(3, c'\u0000')
     arr[0] = c'\n'
     arr[1] = c'"'
     arr[2] = c'A'
@@ -130,7 +130,7 @@ function jsonStringifyValueArrayCharEscaping(): void {
 }
 
 function jsonStringifyValueArrayCharEmpty(): void {
-    let arr: ValueArray<char> = new ValueArray<char>(0)
+    let arr: ValueArray<char> = new ValueArray<char>(0, c'\u0000')
     arktest.assertEQ(JSON.stringify(arr), '[]')
 }
 
@@ -251,7 +251,7 @@ function jsonStringifyCharLowSurrogate(): void {
 }
 
 function jsonStringifyFixedArrayCharSurrogates(): void {
-    let arr: FixedArray<char> = new FixedArray<char>(4)
+    let arr: FixedArray<char> = new FixedArray<char>(4, c'\u0000')
     arr[0] = c'\uD800'
     arr[1] = c'\uDBFF'
     arr[2] = c'\uDC00'
@@ -260,7 +260,7 @@ function jsonStringifyFixedArrayCharSurrogates(): void {
 }
 
 function jsonStringifyValueArrayCharSurrogates(): void {
-    let arr: ValueArray<char> = new ValueArray<char>(4)
+    let arr: ValueArray<char> = new ValueArray<char>(4, c'\u0000')
     arr[0] = c'\uD800'
     arr[1] = c'\uDBFF'
     arr[2] = c'\uDC00'
@@ -302,7 +302,7 @@ function jsonStringifyCharSurrogateRoundTrip(): void {
 }
 
 function jsonStringifyValueArrayCharControlChars(): void {
-    let arr: ValueArray<char> = new ValueArray<char>(4)
+    let arr: ValueArray<char> = new ValueArray<char>(4, c'\u0000')
     arr[0] = c'\0'
     arr[1] = c'\r'
     arr[2] = c'\u001f'
@@ -311,14 +311,14 @@ function jsonStringifyValueArrayCharControlChars(): void {
 }
 
 function jsonStringifyValueArrayCharDel(): void {
-    let arr: ValueArray<char> = new ValueArray<char>(2)
+    let arr: ValueArray<char> = new ValueArray<char>(2, c'\u0000')
     arr[0] = c'\u007f'
     arr[1] = c'A'
     arktest.assertEQ(JSON.stringify(arr), '["\\u007f","A"]')
 }
 
 function jsonStringifyValueArrayCharBackslash(): void {
-    let arr: ValueArray<char> = new ValueArray<char>(2)
+    let arr: ValueArray<char> = new ValueArray<char>(2, c'\u0000')
     arr[0] = c'\\'
     arr[1] = c'B'
     arktest.assertEQ(JSON.stringify(arr), '["\\\\","B"]')
@@ -338,7 +338,7 @@ function jsonStringifyCharNonAsciiBmp(): void {
 }
 
 function jsonStringifyFixedArrayCharSurrogatesAndNormal(): void {
-    let arr: FixedArray<char> = new FixedArray<char>(3)
+    let arr: FixedArray<char> = new FixedArray<char>(3, c'\u0000')
     arr[0] = c'A'
     arr[1] = c'\uD800'
     arr[2] = c'B'

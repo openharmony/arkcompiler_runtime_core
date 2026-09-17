@@ -242,7 +242,7 @@ export final class ESValue {
     }
 
     public instantiate(...args: FixedArray<StaticOrESValue>): ESValue {
-        let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length);
+        let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length, undefined);
         // NOTE(www): ICMTI1, it should be handled in JSRuntime.
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
@@ -348,7 +348,7 @@ export final class ESValue {
     }
 
     public invoke(...args: FixedArray<StaticOrESValue>): ESValue {
-        let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length);
+        let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length, undefined);
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
                 let arg = args[i] as ESValue;
@@ -361,7 +361,7 @@ export final class ESValue {
     }
 
     public invokeWithRecv(recv: ESValue, ...args: FixedArray<StaticOrESValue>): ESValue {
-        let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length);
+        let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length, undefined);
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
                 let arg = args[i] as ESValue;
@@ -378,7 +378,7 @@ export final class ESValue {
         if (callable.isUndefined()) {
             throw Error(`Method '${method}' not found`);
         }
-        let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length);
+        let argsAny: FixedArray<Any> = new FixedArray<Any>(args.length, undefined);
         for (let i = 0; i < args.length; i++) {
             if (args[i] instanceof ESValue) {
                 let arg = args[i] as ESValue;

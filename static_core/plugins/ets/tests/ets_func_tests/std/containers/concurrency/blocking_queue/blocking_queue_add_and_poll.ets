@@ -74,7 +74,7 @@ function testOrderAddAndPollMany(constr: BQConstructorI) {
 
     let pollF = () => {
         let found: int[] = [];
-        let prev: FixedArray<int> = new FixedArray<int>(JOB_COUNT);
+        let prev: FixedArray<int> = new FixedArray<int>(JOB_COUNT, 0);
         for (let i = 0; i < JOB_COUNT; ++ i) {
             prev[i] = -1;
         }
@@ -101,7 +101,7 @@ function testOrderAddAndPollMany(constr: BQConstructorI) {
     }
 
     // each must be found in poll or lost in add
-    let check: FixedArray<int> = new FixedArray<int>(JOB_COUNT * ADD_COUNT); awaitAll(adders);
+    let check: FixedArray<int> = new FixedArray<int>(JOB_COUNT * ADD_COUNT, 0); awaitAll(adders);
     let lost = awaitAll(adders);
     let found = awaitAll(pollers);
     lost.forEach(arr => arr.forEach(i => { ++check[i] }));
@@ -122,7 +122,7 @@ function testAddAndPollCount(constr: BQConstructorI): void {
     const EXTRA = -1;
 
     let addFunction: () => FixedArray<int> = () => {
-        let added: FixedArray<int> = new FixedArray<int>(ADD_COUNT);
+        let added: FixedArray<int> = new FixedArray<int>(ADD_COUNT, 0);
         for (let i = 0; i < ADD_COUNT; ++i) {
             if (queue.add(i)) {
                 ++ added[i];
@@ -133,7 +133,7 @@ function testAddAndPollCount(constr: BQConstructorI): void {
     };
 
     let pollFunction: () => FixedArray<int> = () => {
-        let polled: FixedArray<int> = new FixedArray<int>(ADD_COUNT);
+        let polled: FixedArray<int> = new FixedArray<int>(ADD_COUNT, 0);
         while (true) {
             let val = queue.poll();
             Coroutine.Schedule();
@@ -151,7 +151,7 @@ function testAddAndPollCount(constr: BQConstructorI): void {
         addLaunch(pollers, pollFunction);
     }
 
-    let finalCounter: FixedArray<int> = new FixedArray<int>(ADD_COUNT);
+    let finalCounter: FixedArray<int> = new FixedArray<int>(ADD_COUNT, 0);
     let addedCounter = awaitAll(adders);
     let polledCounter = awaitAll(pollers);
     for (let i = 0; i < JOB_COUNT; ++ i) {

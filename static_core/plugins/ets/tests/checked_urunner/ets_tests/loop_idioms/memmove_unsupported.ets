@@ -87,7 +87,7 @@ class TestUnsupported {
         }
         return dst;
     }
-    
+
     static patternMissmatch_boundscheck(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
@@ -98,7 +98,7 @@ class TestUnsupported {
         }
         return check(dst, [1, 6, 7, 8, 5]);
     }
-    
+
     static subIdx(): int {
         let src: FixedArray<int> = [6, 7, 8];
         let dst: FixedArray<int> = [1, 2, 3, 4, 5];
@@ -115,16 +115,18 @@ class TestUnsupported {
         return check(TestUnsupported.__noinline__noAlias_RefTypeCheck(src), src);
     }
     static __noinline__noAlias_RefTypeCheck(src: FixedArray<string>): FixedArray<string> {
-        let dst: FixedArray<string> = new FixedArray<string>(4);
+        // CC-OFFNXT(G.DCL.06) IR checker test requires new String() to preserve bytecode offset bc:0x24
+        let dst: FixedArray<string> = new FixedArray<string>(4, new String());
         for (let i: int = 0; i < src.length; i++) {
             dst[i] = src[i];
         }
         return dst;
     }
-    
+
     static noAlias_UpdateFirst_inLoop_ref(): int {
         let src: FixedArray<string> = ['1', '2', '3', '4'];
-        let dst: FixedArray<string> = new FixedArray<string>(4);
+        // CC-OFFNXT(G.DCL.06) IR checker test requires new String() to preserve bytecode offset bc:0x24
+        let dst: FixedArray<string> = new FixedArray<string>(4, new String());
         for (let i: int = 0; i < src.length; i++) {
             TestUnsupported.__noinline__updateFirst(dst);
             dst[i] = src[i];

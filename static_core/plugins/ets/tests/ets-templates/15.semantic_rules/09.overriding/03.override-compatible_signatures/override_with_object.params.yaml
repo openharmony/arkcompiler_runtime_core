@@ -203,7 +203,7 @@ cases:
           override foo(i: FixedArray<Object>): void {
               res = 2;
           }
-      call: new Derived().foo(new FixedArray<Object>(2));
+      call: new Derived().foo(new FixedArray<Object>(2, {}));
       result: 2
 
     # override-compatible return type (invariance)
@@ -224,12 +224,12 @@ cases:
     - base: |-
           foo(): FixedArray<Object> {
               res = 1;
-              return new FixedArray<Object>(2);
+              return new FixedArray<Object>(2, {});
           }
       derived: |-
           override foo(): FixedArray<Base> {
               res = 2;
-              return new FixedArray<Base>(2);
+              return new FixedArray<Base>(2, new Base());
           }
       call: new Derived().foo();
       result: 2

@@ -130,8 +130,8 @@ export class Test {
 
     __noinline__test(n: int): void {
         let i: int;
-        let u: ValueArray<double> = new ValueArray<double>(n);
-        let v: ValueArray<double> = new ValueArray<double>(n);
+        let u: ValueArray<double> = new ValueArray<double>(n, 0);
+        let v: ValueArray<double> = new ValueArray<double>(n, 0);
         let vv1: double = 0;
         let vv2: double = 0;
         let vv3: double = 0;

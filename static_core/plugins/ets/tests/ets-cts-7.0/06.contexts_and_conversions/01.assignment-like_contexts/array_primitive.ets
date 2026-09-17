@@ -23,8 +23,8 @@ function main(): int {
 
     {% for c in cases %}
         testSuite.addTest("FixedArray_primitive{{loop.index}}", () => {
-            let src_{{loop.index}}: FixedArray<{{c.src_type}}> = new FixedArray<{{c.src_type}}>(1);
-            let dst_{{loop.index}}: FixedArray<{{c.dst_type}}> = new FixedArray<{{c.dst_type}}>(1);
+            let src_{{loop.index}}: FixedArray<{{c.src_type}}> = new FixedArray<{{c.src_type}}>(1, {% if c.src_type in ['boolean', 'Boolean'] %}false{% elif c.src_type in ['char', 'Char'] %}c'\u0000'{% else %}0{% endif %});
+            let dst_{{loop.index}}: FixedArray<{{c.dst_type}}> = new FixedArray<{{c.dst_type}}>(1, {% if c.dst_type in ['boolean', 'Boolean'] %}false{% elif c.dst_type in ['char', 'Char'] %}c'\u0000'{% else %}0{% endif %});
             dst_{{loop.index}} = src_{{loop.index}};
         }); 
     {%- endfor %}
