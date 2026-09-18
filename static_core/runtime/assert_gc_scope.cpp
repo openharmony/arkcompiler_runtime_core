@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,23 @@
 
 namespace ark {
 
-std::atomic<int> AssertGCScopeT<true>::gcFlag_ = 0;
+std::atomic<int> AssertGCScopeT::gcFlag_ = 0;
 
-// static
-bool AssertGCScopeT<true>::IsAllowed()
+void AssertGCScopeT::Enter()
 {
-    // Atomic with relaxed order reason: data race with gc_flag with no synchronization or ordering constraints imposed
+    // Atomic with relaxed order reason: there is no synchronization or ordering constraint on other reads or writes.
+    gcFlag_.fetch_add(1, std::memory_order_relaxed);
+}
+
+void AssertGCScopeT::Exit()
+{
+    // Atomic with relaxed order reason: there is no synchronization or ordering constraint on other reads or writes.
+    gcFlag_.fetch_sub(1, std::memory_order_relaxed);
+}
+
+bool AssertGCScopeT::IsAllowed()
+{
+    // Atomic with relaxed order reason: data race with gcFlag_ with no synchronization or ordering constraints imposed
     // on other reads or writes
     return AssertGCScopeT::gcFlag_.load(std::memory_order_relaxed) == 0;
 }
