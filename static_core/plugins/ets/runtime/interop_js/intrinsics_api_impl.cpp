@@ -1136,7 +1136,9 @@ EtsObject *JSRuntimeInvoke(EtsObject *recv, EtsObject *func, EtsArray *args)
 EtsObject *JSRuntimeInstantiate(EtsObject *callable, EtsArray *args)
 {
     auto executionCtx = EtsExecutionContext::GetCurrent();
-
+    if (CheckEtsObjectFoundException(executionCtx, callable)) {
+        return nullptr;
+    }
     HandleScope<ObjectHeader *> scope(executionCtx->GetMT());
     size_t argc = args->GetLength();
     std::vector<VMHandle<ObjectHeader>> argsVec;
