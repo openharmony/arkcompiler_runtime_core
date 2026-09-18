@@ -1,0 +1,2 @@
+/dedup_class_buffer/dedup_cls_src1.js;dedup_cls_src1;esm;dedup_class_buffer/dedup_cls_src1.js;dedup_cls_src1;false
+/dedup_class_buffer/dedup_cls_src2.js;dedup_cls_src2;esm;dedup_class_buffer/dedup_cls_src2.js;dedup_cls_src2;false

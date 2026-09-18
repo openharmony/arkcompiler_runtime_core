@@ -85,6 +85,14 @@ public:
                              const EmitterConfig &emitterConfig = EmitterConfig {},
                              std::map<std::string, size_t> *stat = nullptr);
 
+    // Merge literal arrays with identical content across the given programs in place: the first
+    // occurrence (in progs order) of each unique content is kept, and the referencing
+    // CREATEARRAYWITHBUFFER / CREATEOBJECTWITHBUFFER instruction ids are rewritten to it. Only
+    // those two instruction types participate, and only within their own type group — the runtime
+    // constant pool cache slot is typed by instruction, so cross-type sharing would be type
+    // confusion. NOTE: modifies the caller's Programs in place; they must not be reused.
+    static void DeduplicateLiteralArrays(const std::vector<Program *> &progs);
+
     PANDA_PUBLIC_API static std::unique_ptr<const panda_file::File> Emit(
         const Program &program, PandaFileToPandaAsmMaps *maps = nullptr, uint8_t api = 0,
         std::string subApi = panda_file::DEFAULT_SUB_API_VERSION);

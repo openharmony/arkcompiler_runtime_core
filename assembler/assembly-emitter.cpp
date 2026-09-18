@@ -15,6 +15,10 @@
 
 #include "assembly-emitter.h"
 
+#include <type_traits>
+#include <unordered_set>
+#include <variant>
+
 #include "bytecode_instruction-inl.h"
 #include "emit-item.h"
 #include "libpandabase/utils/timers.h"
@@ -1391,6 +1395,133 @@ static bool WriteToFile(ItemContainer &items, const std::string &filename)
     return items.Write(&writer);
 }
 
+// Byte-exact content signature of a literal array: same tags and values yield the same key, so
+// equal keys can share one LiteralArrayItem. A LITERALARRAY-tagged literal holds the id of another
+// array instead of real content; it is replaced by that array's own key, so arrays referencing
+// identical (but differently-id'd) sub-arrays compare equal. Every value is length-prefixed so the
+// encoding is uniquely decodable (no collision between different content). `cache` memoizes the key
+// per id. On a nested-reference cycle (malformed input) the raw refId is used as the key — unique per
+// id, hence never merged.
+static std::string ComputeContentKey(const std::string &id, const std::map<std::string, LiteralArray> &table,
+                                     std::unordered_map<std::string, std::string> &cache,
+                                     std::unordered_set<std::string> &visiting)
+{
+    auto cacheIt = cache.find(id);
+    if (cacheIt != cache.end()) {
+        return cacheIt->second;
+    }
+    if (visiting.count(id) != 0) {
+        return id;
+    }
+    visiting.insert(id);
+
+    auto tableIt = table.find(id);
+    if (tableIt == table.end()) {
+        visiting.erase(id);
+        return id;
+    }
+
+    std::string key;
+    for (const auto &literal : tableIt->second.literals_) {
+        key.push_back(static_cast<char>(static_cast<uint8_t>(literal.tag_)));
+        if (literal.tag_ == panda_file::LiteralTag::LITERALARRAY &&
+            std::holds_alternative<std::string>(literal.value_)) {
+            const auto &refId = std::get<std::string>(literal.value_);
+            auto refKey = ComputeContentKey(refId, table, cache, visiting);
+            auto size = static_cast<uint32_t>(refKey.size());
+            key.append(reinterpret_cast<const char *>(&size), sizeof(uint32_t));
+            key.append(refKey);
+            continue;
+        }
+        std::visit(
+            [&key](auto &&arg) {
+                using T = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<T, bool>) {
+                    key.push_back(arg ? '\1' : '\0');
+                } else if constexpr (std::is_same_v<T, std::string>) {
+                    auto size = static_cast<uint32_t>(arg.size());
+                    key.append(reinterpret_cast<const char *>(&size), sizeof(uint32_t));
+                    key.append(arg);
+                } else {
+                    static_assert(std::is_arithmetic_v<T>);
+                    key.push_back(static_cast<char>(sizeof(T)));
+                    key.append(reinterpret_cast<const char *>(&arg), sizeof(T));
+                }
+            },
+            literal.value_);
+    }
+    visiting.erase(id);
+    cache[id] = key;
+    return key;
+}
+
+// Composite dedup key = opcode prefix + content key: arrays only merge within the same
+// instruction-type group, since the runtime constant pool cache slot is typed by instruction
+// and cross-type sharing would be type confusion.
+static std::string MakeDedupCompositeKey(Opcode op, const std::string &contentKey)
+{
+    std::string compositeKey;
+    compositeKey.push_back(static_cast<char>(static_cast<uint8_t>(op)));
+    compositeKey.append(contentKey);
+    return compositeKey;
+}
+// Single ins traversal per program: collect the dedup whitelist (ids referenced by
+// CREATEARRAYWITHBUFFER / CREATEOBJECTWITHBUFFER), compute content keys via table lookups, and
+// resolve aliases against the global canonical map — all in one pass. An id referenced by multiple
+// instruction types is excluded: its prior canonical/alias entry is undone on detection.
+static void CollectAndResolveDuplicates(const Program &prog,
+                                        std::unordered_map<std::string, std::string> &contentToCanonical,
+                                        std::vector<Ins *> &bufferInsns,
+                                        std::unordered_map<std::string, std::string> &aliases)
+{
+    const auto &table = prog.literalarray_table;
+    std::unordered_map<std::string, Opcode> deduplicable;
+    std::unordered_map<std::string, std::string> keyCache;
+    for (const auto &fnEntry : prog.function_table) {
+        for (const auto &insnPtr : fnEntry.second.ins) {
+            auto op = insnPtr->GetOpcode();
+            if (op != Opcode::CREATEARRAYWITHBUFFER && op != Opcode::CREATEOBJECTWITHBUFFER) {
+                continue;
+            }
+            bufferInsns.push_back(insnPtr.get());
+            const auto &id = insnPtr->GetId(0);
+            auto [it, inserted] = deduplicable.try_emplace(id, op);
+            if (!inserted && it->second != op) {
+                contentToCanonical.erase(MakeDedupCompositeKey(it->second, keyCache.at(id)));
+                aliases.erase(id);
+            }
+            if (!inserted) {
+                continue;
+            }
+            std::unordered_set<std::string> visiting;
+            auto contentKey = ComputeContentKey(id, table, keyCache, visiting);
+            auto [cit, cinserted] = contentToCanonical.emplace(MakeDedupCompositeKey(op, contentKey), id);
+            if (!cinserted) {
+                aliases.emplace(id, cit->second);
+            }
+        }
+    }
+}
+
+void AsmEmitter::DeduplicateLiteralArrays(const std::vector<Program *> &progs)
+{
+    std::unordered_map<std::string, std::string> contentToCanonical;
+    for (auto *prog : progs) {
+        std::vector<Ins *> bufferInsns;
+        std::unordered_map<std::string, std::string> aliases;
+        CollectAndResolveDuplicates(*prog, contentToCanonical, bufferInsns, aliases);
+        for (auto *insn : bufferInsns) {
+            auto it = aliases.find(insn->GetId(0));
+            if (it != aliases.end()) {
+                insn->SetId(0, it->second);
+            }
+        }
+        for (const auto &alias : aliases) {
+            prog->literalarray_table.erase(alias.first);
+        }
+    }
+}
+
 bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info,
                               const EmitterConfig &emitterConfig, std::map<std::string, size_t> *stat)
 {
@@ -1402,6 +1533,12 @@ bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Pro
     auto primitive_types = CreatePrimitiveTypes(&items);
     auto entities = AsmEmitter::AsmEntityCollections {};
     SetLastError("");
+    // Deduplicate identical literal arrays across the merged programs before building ItemContainer
+    // items so the merged abc carries one LiteralArrayItem per unique content. Only in release mode —
+    // debug builds keep all arrays for faithful round-trip disassembly.
+    if (!emitterConfig.isDebug) {
+        DeduplicateLiteralArrays(progs);
+    }
     {
         panda::Timer::ScopeTimer timer(panda::EVENT_MAKE_ITEMS_FOR_SINGLE_PROGRAM);
         for (auto *prog : progs) {

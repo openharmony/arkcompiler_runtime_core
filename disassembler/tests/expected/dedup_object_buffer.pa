@@ -1,0 +1,62 @@
+# source binary: dedup_object_buffer.abc
+
+0 0x2ed { 6 [ string:"a", i32:1, string:"b", i32:2, string:"c", i32:3, ]}
+1 0x30f 
+4 0x2c5 
+2 0x2c9 { 1 [
+	MODULE_REQUEST_ARRAY: {
+	};
+	ModuleTag: LOCAL_EXPORT, local_name: obj, export_name: obj;
+]}
+3 0x313 { 1 [
+	MODULE_REQUEST_ARRAY: {
+	};
+	ModuleTag: LOCAL_EXPORT, local_name: obj, export_name: obj;
+]}
+
+.language ECMAScript
+.record _ESConcurrentModuleRequestsAnnotation {
+}
+
+.language ECMAScript
+.record _ESExpectedPropertyCountAnnotation {
+}
+
+.language ECMAScript
+.record _ESSlotNumberAnnotation {
+}
+
+.language ECMAScript
+.record dedup_obj_src1 {
+	u8 pkgName@dedup_obj_src1 = 0x0
+	u8 isCommonjs = 0x0
+	u32 scopeNames = 0x2c5
+	u32 moduleRecordIdx = 0x2c9
+}
+
+.language ECMAScript
+.record dedup_obj_src2 {
+	u8 pkgName@dedup_obj_src2 = 0x0
+	u8 isCommonjs = 0x0
+	u32 scopeNames = 0x30f
+	u32 moduleRecordIdx = 0x313
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x1 }
+.language ECMAScript
+.function any dedup_obj_src1.func_main_0(any a0, any a1, any a2) <static> {
+	createobjectwithbuffer 0x0, { 6 [ string:"a", i32:1, string:"b", i32:2, string:"c", i32:3, ]}
+	stmodulevar 0x0
+	returnundefined
+}
+
+L_ESSlotNumberAnnotation:
+	u32 SlotNumber { 0x1 }
+.language ECMAScript
+.function any dedup_obj_src2.func_main_0(any a0, any a1, any a2) <static> {
+	createobjectwithbuffer 0x0, { 6 [ string:"a", i32:1, string:"b", i32:2, string:"c", i32:3, ]}
+	stmodulevar 0x0
+	returnundefined
+}
+
