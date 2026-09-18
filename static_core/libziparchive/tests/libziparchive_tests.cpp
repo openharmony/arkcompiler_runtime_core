@@ -1389,4 +1389,106 @@ TEST(LIBZIPARCHIVE, GetSafeData_006)
 
     (void)remove(archivename);
 }
+
+// Change the declared uncompressed size of the first entry in both the central directory and the local
+// header (or the data descriptor when the data-descriptor flag is set), while leaving its compressed
+// payload intact. This makes the inflate output exceed the declared uncompressed size, which is exactly
+// the heap-buffer-overflow condition guarded by the CopyInflateOut fix.
+static void ModifyFirstEntryUncompressedSize(const char *archivename, uint32_t newValue)
+{
+    FILE *fp = fopen(archivename, "rbe");
+    ASSERT_NE(fp, nullptr);
+    (void)fseek(fp, 0, SEEK_END);
+    auto fileSize = ftell(fp);
+    (void)fseek(fp, 0, SEEK_SET);
+    std::vector<uint8_t> buffer(fileSize);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ASSERT_EQ(fread(buffer.data(), 1, fileSize, fp), static_cast<size_t>(fileSize));
+    (void)fclose(fp);
+
+    constexpr uint32_t EOCD_SIGNATURE = 0x06054b50;
+    constexpr size_t EOCD_MIN_SIZE = 22U;
+    constexpr size_t EOCD_OFFSET_OFFSET = 16U;
+    constexpr size_t CENTRAL_COMPRESSED_SIZE_OFFSET = 20U;
+    constexpr size_t CENTRAL_UNCOMPRESSED_SIZE_OFFSET = 24U;
+    constexpr size_t CENTRAL_LOCAL_HEADER_OFFSET_OFFSET = 42U;
+    constexpr size_t LOCAL_FLAGS_OFFSET = 6U;
+    constexpr size_t LOCAL_NAME_SIZE_OFFSET = 26U;
+    constexpr size_t LOCAL_EXTRA_SIZE_OFFSET = 28U;
+    constexpr size_t LOCAL_UNCOMPRESSED_SIZE_OFFSET = 22U;
+    constexpr size_t DATA_DESC_UNCOMPRESSED_SIZE_OFFSET = 12U;
+    constexpr uint16_t DATA_DESC_FLAG = 1U << 3U;
+
+    size_t eocdPos = 0;
+    size_t maxCommentLen = static_cast<size_t>(fileSize) - EOCD_MIN_SIZE;
+    for (size_t offset = 0; offset <= maxCommentLen; ++offset) {
+        size_t pos = static_cast<size_t>(fileSize) - EOCD_MIN_SIZE - offset;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (*reinterpret_cast<uint32_t *>(buffer.data() + pos) == EOCD_SIGNATURE) {
+            eocdPos = pos;
+            break;
+        }
+    }
+    ASSERT_GT(eocdPos, 0U);
+
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto centralDirOffset = *reinterpret_cast<uint32_t *>(buffer.data() + eocdPos + EOCD_OFFSET_OFFSET);
+    auto *centralEntry = buffer.data() + centralDirOffset;
+    auto localHeaderOffset = *reinterpret_cast<uint32_t *>(centralEntry + CENTRAL_LOCAL_HEADER_OFFSET_OFFSET);
+    auto *localHeader = buffer.data() + localHeaderOffset;
+    *reinterpret_cast<uint32_t *>(centralEntry + CENTRAL_UNCOMPRESSED_SIZE_OFFSET) = newValue;
+
+    auto flags = *reinterpret_cast<uint16_t *>(localHeader + LOCAL_FLAGS_OFFSET);
+    if ((flags & DATA_DESC_FLAG) == 0U) {
+        *reinterpret_cast<uint32_t *>(localHeader + LOCAL_UNCOMPRESSED_SIZE_OFFSET) = newValue;
+    } else {
+        auto compressedSize = *reinterpret_cast<uint32_t *>(centralEntry + CENTRAL_COMPRESSED_SIZE_OFFSET);
+        auto nameSize = *reinterpret_cast<uint16_t *>(localHeader + LOCAL_NAME_SIZE_OFFSET);
+        auto extraSize = *reinterpret_cast<uint16_t *>(localHeader + LOCAL_EXTRA_SIZE_OFFSET);
+        auto dataDescOffset =
+            localHeaderOffset + sizeof(ark::extractor::LocalHeader) + nameSize + extraSize + compressedSize;
+        *reinterpret_cast<uint32_t *>(buffer.data() + dataDescOffset + DATA_DESC_UNCOMPRESSED_SIZE_OFFSET) = newValue;
+    }
+    // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+
+    fp = fopen(archivename, "wbe");
+    ASSERT_NE(fp, nullptr);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    ASSERT_EQ(fwrite(buffer.data(), 1, fileSize, fp), static_cast<size_t>(fileSize));
+    (void)fclose(fp);
+}
+
+/*
+ * Feature: ZipFile
+ * Function: ExtractToBufByName / UnzipWithInflatedFromMMap / CopyInflateOut
+ * SubFunction: NA
+ * EnvConditions: NA
+ * CaseDescription: Extracting an entry whose declared uncompressed size has been tampered to a small
+ *                  value (compressed payload left intact) must not crash. The inflate output exceeds the
+ *                  declared uncompressed size, so CopyInflateOut's overflow guard must reject it gracefully.
+ */
+TEST(LIBZIPARCHIVE, ExtractTamperedUncompressedSizeDoesNotCrash)
+{
+    static const char *archivename = "__LIBZIPARCHIVE__TamperedUncompressedSize__.zip";
+    static const char *filename = "payload.txt";
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    std::vector<uint8_t> data(FILLER_TEXT, FILLER_TEXT + strlen(FILLER_TEXT));
+
+    (void)remove(archivename);
+    ASSERT_EQ(CreateOrAddFileIntoZip(archivename, filename, &data, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION),
+              ZIPARCHIVE_OK);
+    // Declare an uncompressed size far smaller than the real payload so that inflate produces more output
+    // than the declared size, triggering the buffer-overflow guard added in the zipfile security fix.
+    ModifyFirstEntryUncompressedSize(archivename, 1U);
+
+    ark::extractor::ZipFile zipFile(archivename);
+    ASSERT_TRUE(zipFile.Open());
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+    std::unique_ptr<uint8_t[]> extractedData;
+    size_t extractedLength = 0;
+    EXPECT_FALSE(zipFile.ExtractToBufByName(filename, extractedData, extractedLength));
+    EXPECT_EQ(extractedData, nullptr);
+
+    (void)remove(archivename);
+}
 }  // namespace ark::test
