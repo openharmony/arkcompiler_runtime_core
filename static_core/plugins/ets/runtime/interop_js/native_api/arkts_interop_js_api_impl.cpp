@@ -141,24 +141,24 @@ PANDA_PUBLIC_API bool GetCurrentNapiEnv(ani_env *env, napi_env *result)
     return true;
 }
 
-PANDA_PUBLIC_API bool OpenJSToETSScope(EtsExecutionContext *executionCtx, char const *descr)
+PANDA_PUBLIC_API bool OpenJSToETSScope(EtsExecutionContext *executionCtx, char const *descr, bool recordStack)
 {
-    return OpenInteropCodeScope<false>(executionCtx, descr);
+    return OpenInteropCodeScope<InteropScopeKind::JS_TO_ETS>(executionCtx, descr, recordStack);
 }
 
-PANDA_PUBLIC_API bool CloseJSToETSScope(EtsExecutionContext *executionCtx)
+PANDA_PUBLIC_API bool CloseJSToETSScope(EtsExecutionContext *executionCtx, bool recordStack)
 {
-    return CloseInteropCodeScope<true>(executionCtx);
+    return CloseInteropCodeScope<InteropScopeKind::JS_TO_ETS>(executionCtx, recordStack);
 }
 
 PANDA_PUBLIC_API bool OpenETSToJSScope(EtsExecutionContext *executionCtx, char const *descr)
 {
-    return OpenInteropCodeScope<true>(executionCtx, descr);
+    return OpenInteropCodeScope<InteropScopeKind::ETS_TO_JS>(executionCtx, descr);
 }
 
 PANDA_PUBLIC_API bool CloseETSToJSScope(EtsExecutionContext *executionCtx)
 {
-    if (UNLIKELY(!CloseInteropCodeScope<false>(executionCtx))) {
+    if (UNLIKELY(!CloseInteropCodeScope<InteropScopeKind::ETS_TO_JS>(executionCtx))) {
         return false;
     }
     auto *ctx = InteropCtx::Current(executionCtx);

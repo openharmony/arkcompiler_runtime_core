@@ -18,7 +18,6 @@
 
 #include "ets_platform_types.h"
 #include "platforms/ohos/ohos_device_helpers.h"
-#include "platforms/target_defaults/default_target_options.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/interop_js/app_state_manager.h"
@@ -494,15 +493,9 @@ public:
     static std::shared_ptr<void> TryAcquireSharedEtsVmState();
     static InteropCtx *GetMainInteropContext(PandaEtsVM *vm);
 
-    bool GetInteropHybridStackEnabled()
-    {
-        std::call_once(initStackFlag_, [this]() {
-            if (!isInteropStackEnabled_) {
-                isInteropStackEnabled_ = ark::default_target_options::GetInteropHybridStackEnable();
-            }
-        });
-        return isInteropStackEnabled_;
-    }
+    bool GetInteropHybridStackEnabled() const;
+
+    static bool IsHybridStackEnabled();
 
     // hybrid call stack support
     PANDA_PUBLIC_API static InteropCallStack &GetOrCreateCallStack();
@@ -590,8 +583,6 @@ private:
     ets_proxy::EtsClassWrappersCache etsClassWrappersCache_ {};
 
     StackInfoManager stackInfoManager_;
-    bool isInteropStackEnabled_ {};
-    std::once_flag initStackFlag_;
 
     PandaUniquePtr<XGCVmAdaptor> ecmaVMIterfaceAdaptor_;
     arkplatform::EcmaVMInterface *ecmaInterface_ {};

@@ -27,7 +27,11 @@
 
 #include "runtime/mem/vm_handle-inl.h"
 
+#include <type_traits>
+
 namespace ark::ets::interop::js::ets_proxy {
+
+struct EtsFieldAccessorREFERENCE;
 
 template <bool IS_STATIC>
 static EtsObject *EtsAccessorsHandleThis(EtsFieldWrapper *fieldWrapper, EtsExecutionContext *executionCtx,
@@ -35,9 +39,12 @@ static EtsObject *EtsAccessorsHandleThis(EtsFieldWrapper *fieldWrapper, EtsExecu
 {
     if constexpr (IS_STATIC) {
         EtsClass *etsClass = fieldWrapper->GetOwner()->GetEtsClass();
-        if (UNLIKELY(!executionCtx->GetPandaVM()->GetClassLinker()->InitializeClass(executionCtx, etsClass))) {
-            ctx->ForwardEtsException(executionCtx);
-            return nullptr;
+        if (UNLIKELY(!etsClass->IsInitialized())) {
+            InteropJSToETSCodeScope initScope(executionCtx);
+            if (UNLIKELY(!executionCtx->GetPandaVM()->GetClassLinker()->InitializeClass(executionCtx, etsClass))) {
+                ctx->ForwardEtsException(executionCtx);
+                return nullptr;
+            }
         }
         return etsClass->AsObject();
     }
@@ -68,7 +75,8 @@ static napi_value EtsFieldGetter(napi_env env, napi_callback_info cinfo)
     auto etsFieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
     EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(executionCtx);
-    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
+    constexpr bool IS_REFERENCE = std::is_same_v<FieldAccessor, EtsFieldAccessorREFERENCE>;
+    InteropJSToETSCodeScope codeScope(executionCtx, __PRETTY_FUNCTION__, IS_REFERENCE);
     ScopedManagedCodeThread managedScope(executionCtx->GetMT());
 
     EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, executionCtx, ctx, jsThis);
@@ -103,7 +111,8 @@ static napi_value EtsFieldSetter(napi_env env, napi_callback_info cinfo)
     auto etsFieldWrapper = reinterpret_cast<EtsFieldWrapper *>(data);
     EtsExecutionContext *executionCtx = EtsExecutionContext::GetCurrent();
     InteropCtx *ctx = InteropCtx::Current(executionCtx);
-    INTEROP_CODE_SCOPE_JS_TO_ETS(executionCtx);
+    constexpr bool IS_REFERENCE = std::is_same_v<FieldAccessor, EtsFieldAccessorREFERENCE>;
+    InteropJSToETSCodeScope codeScope(executionCtx, __PRETTY_FUNCTION__, IS_REFERENCE);
     ScopedManagedCodeThread managedScope(executionCtx->GetMT());
 
     EtsObject *etsThis = EtsAccessorsHandleThis<IS_STATIC>(etsFieldWrapper, executionCtx, ctx, jsThis);

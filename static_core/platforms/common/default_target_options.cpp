@@ -49,7 +49,7 @@ std::string GetDebuggerLibraryPath()
 
 bool GetInteropHybridStackEnable()
 {
-    return false;
+    return true;
 }
 
 }  // namespace ark::default_target_options

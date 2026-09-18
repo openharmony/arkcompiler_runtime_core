@@ -28,9 +28,12 @@
 #include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
 #include "plugins/ets/runtime/types/ets_abc_runtime_linker.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "platforms/target_defaults/default_target_options.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/local_object_handle.h"
 #include "runtime/execution/job_execution_context.h"
+
+#include <atomic>
 
 #include "plugins/ets/runtime/interop_js/event_loop_module.h"
 #include "plugins/ets/runtime/interop_js/timer_module.h"
@@ -75,6 +78,10 @@ napi_add_env_cleanup_hook([[maybe_unused]] napi_env env, [[maybe_unused]] void (
 #endif
 
 namespace ark::ets::interop::js {
+
+namespace {
+std::atomic<bool> g_hybridStackEnabled {false};
+}  // namespace
 
 #if defined(PANDA_TARGET_OHOS)
 static void AppStateCallback(int state, int64_t timeStamp)
@@ -491,14 +498,18 @@ InteropCtx::InteropCtx(EtsExecutionContext *executionCtx, napi_env env, bool isJ
       commonJSObjectCache_(this),
       stackInfoManager_(this, executionCtx)
 {
+    auto lang = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
+    auto &options = Runtime::GetOptions();
+    // Atomic with release order reason: pairs with acquire loads in the getters
+    g_hybridStackEnabled.store(options.IsInteropSupportHybridstack(lang) &&
+                                   ark::default_target_options::GetInteropHybridStackEnable(),
+                               std::memory_order_release);
+
     stackInfoManager_.InitStackInfoIfNeeded();
     ecmaVMIterfaceAdaptor_ = MakePandaUnique<XGCVmAdaptor>(env, nullptr);
 
     InitExternalInterfaces();
     InitJsValueFinalizationRegistry(executionCtx);
-
-    isInteropStackEnabled_ =
-        Runtime::GetOptions().IsInteropSupportHybridstack(plugins::LangToRuntimeType(panda_file::SourceLang::ETS));
 }
 
 InteropCtx::~InteropCtx()
@@ -849,20 +860,21 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     auto istkIt = istk.rbegin();
 
     auto printIstkFrames = [&istkIt, &istk](void *fp) {
-        while (istkIt != istk.rend() && fp == istkIt->frame) {
+        while (istkIt != istk.rend() && fp == istkIt->staticEntryFrame) {
             INTEROP_LOG(ERROR) << "<interop> " << (istkIt->descr != nullptr ? istkIt->descr : "unknown");
             istkIt++;
         }
     };
 
     for (auto stack = StackWalker::Create(executionCtx->GetMT()); stack.HasFrame(); stack.NextFrame()) {
-        printIstkFrames(istkIt->frame);
+        void *currFrame =
+            stack.IsCFrame() ? static_cast<void *>(&stack.GetCFrame()) : static_cast<void *>(stack.GetIFrame());
+        printIstkFrames(currFrame);
         Method *method = stack.GetMethod();
         ASSERT(method != nullptr);
         INTEROP_LOG(ERROR) << method->GetClass()->GetName() << "." << method->GetName().data << " at "
                            << method->GetLineNumberAndSourceFile(stack.GetBytecodePc());
     }
-    ASSERT(istkIt == istk.rend() || !istkIt->isStaticFrame);
     printIstkFrames(nullptr);
 
     auto env = ctx->GetJSEnv();
@@ -886,6 +898,18 @@ static std::optional<std::string> NapiTryDumpStack(napi_env env)
     INTEROP_LOG(ERROR) << "======================== Native stack =========================";
     PrintStack(Logger::Message(Logger::Level::ERROR, Logger::Component::ETS_INTEROP_JS, false).GetStream());
     std::abort();
+}
+
+bool InteropCtx::GetInteropHybridStackEnabled() const
+{
+    // Atomic with acquire order reason: pairs with the release store in the InteropCtx ctor
+    return g_hybridStackEnabled.load(std::memory_order_acquire);
+}
+
+bool InteropCtx::IsHybridStackEnabled()
+{
+    // Atomic with acquire order reason: pairs with the release store in the InteropCtx ctor
+    return g_hybridStackEnabled.load(std::memory_order_acquire);
 }
 
 void InteropCtx::Init(EtsExecutionContext *executionCtx, napi_env env, bool deferBuiltinJSRefConvertorsRegistration,

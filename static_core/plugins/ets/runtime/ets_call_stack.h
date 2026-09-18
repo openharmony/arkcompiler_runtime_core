@@ -29,11 +29,14 @@ public:
     virtual ~EtsCallStack() = default;
 
     struct Record {
-        Record(void *f, bool isSTFrame, char const *d) : frame(f), isStaticFrame(isSTFrame), descr(d) {}
+        Record(void *dynSp, void *staticEntry, char const *d)
+            : dynamicSP(dynSp), staticEntryFrame(staticEntry), descr(d)
+        {
+        }
 
-        void *frame {};         // NOLINT(misc-non-private-member-variables-in-classes)
-        bool isStaticFrame {};  // NOLINT(misc-non-private-member-variables-in-classes)
-        char const *descr {};   // NOLINT(misc-non-private-member-variables-in-classes)
+        void *dynamicSP {};         // NOLINT(misc-non-private-member-variables-in-classes)
+        void *staticEntryFrame {};  // NOLINT(misc-non-private-member-variables-in-classes)
+        char const *descr {};       // NOLINT(misc-non-private-member-variables-in-classes)
     };
 
     /// The method returns record of current managed frame

@@ -23,41 +23,41 @@ namespace ark::ets::interop::js {
 ScopedInteropCallStackRecord::ScopedInteropCallStackRecord(EtsExecutionContext *executionCtx, char const *descr)
     : executionCtx_(executionCtx)
 {
-    [[maybe_unused]] auto status = OpenInteropCodeScope<false>(executionCtx_, descr);
+    [[maybe_unused]] auto status = OpenInteropCodeScope<InteropScopeKind::JS_TO_ETS>(executionCtx_, descr);
     ASSERT(status);
 }
 
 ScopedInteropCallStackRecord::~ScopedInteropCallStackRecord()
 {
-    [[maybe_unused]] auto status = CloseInteropCodeScope<false>(executionCtx_);
+    [[maybe_unused]] auto status = CloseInteropCodeScope<InteropScopeKind::JS_TO_ETS>(executionCtx_);
     ASSERT(status);
 }
 
 InteropETSToJSCodeScope::InteropETSToJSCodeScope(EtsExecutionContext *executionCtx, char const *descr)
-    : executionCtx_(executionCtx)
+    : executionCtx_(executionCtx), opened_(OpenETSToJSScope(executionCtx_, descr))
 {
-    if (UNLIKELY(!OpenETSToJSScope(executionCtx_, descr))) {
+    if (UNLIKELY(!opened_)) {
         INTEROP_LOG(ERROR) << "Failed to open ETS-to-JS scope";
     }
 }
 
 InteropETSToJSCodeScope::~InteropETSToJSCodeScope()
 {
-    if (UNLIKELY(!CloseETSToJSScope(executionCtx_))) {
+    if (LIKELY(opened_) && UNLIKELY(!CloseETSToJSScope(executionCtx_))) {
         INTEROP_LOG(ERROR) << "Failed to close ETS-to-JS scope";
     }
 }
 
-InteropJSToETSCodeScope::InteropJSToETSCodeScope(EtsExecutionContext *executionCtx, char const *descr)
-    : executionCtx_(executionCtx)
+InteropJSToETSCodeScope::InteropJSToETSCodeScope(EtsExecutionContext *executionCtx, char const *descr, bool recordStack)
+    : executionCtx_(executionCtx), recordStack_(recordStack)
 {
-    [[maybe_unused]] auto status = OpenJSToETSScope(executionCtx_, descr);
+    [[maybe_unused]] auto status = OpenJSToETSScope(executionCtx_, descr, recordStack_);
     ASSERT(status);
 }
 
 InteropJSToETSCodeScope::~InteropJSToETSCodeScope()
 {
-    [[maybe_unused]] auto status = CloseJSToETSScope(executionCtx_);
+    [[maybe_unused]] auto status = CloseJSToETSScope(executionCtx_, recordStack_);
     ASSERT(status);
 }
 

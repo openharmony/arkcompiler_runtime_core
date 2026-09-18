@@ -50,7 +50,9 @@ std::string GetDebuggerLibraryPath()
 
 bool GetInteropHybridStackEnable()
 {
-    return OHOS::system::GetBoolParameter("persist.ark.interop.hybridstack.enable", false);
+    // Device-side policy gate (ANDed with the runtime option):
+    // unset (default true) keeps the option in charge, explicit false force-disables
+    return OHOS::system::GetBoolParameter("persist.ark.interop.hybridstack.enable", true);
 }
 
 }  // namespace ark::ohos_device
