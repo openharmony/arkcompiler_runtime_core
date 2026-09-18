@@ -1045,6 +1045,7 @@ add_gtests(
     tests/explicit_gc_test.cpp
     tests/g1_pause_tracker_test.cpp
     tests/g1_analytics_test.cpp
+    tests/assert_gc_scope_test.cpp
 )
 
 
