@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,6 +32,26 @@ verifier_test_js_files = [
   "test_constant_pool",
   "test_register_index",
   "test_constant_pool_content",
+  "test_ic_slots",
+  "test_ic_slots_overflow",
+  "test_class_methods",
+  "test_try_nested",
+  "test_generators",
+  "test_object_literal",
+  "test_switch_loops",
+  "test_map_set",
+  "test_async_methods",
+  "test_class_heritage",
+  "test_private_fields",
+  "test_regex_template",
+  "test_iterators",
+  "test_destructure_call",
+]
+
+verifier_test_module_js_files = [
+  "test_module_content",
+  "test_tla_main",
+  "test_named_exports",
 ]
 
 verifier_test_ts_files = [ "test_literal_array" ]
@@ -48,6 +68,24 @@ foreach(file, verifier_test_js_files) {
     dst_file = rebase_path(test_abc)
 
     extra_args = [ "--source-file=${file}" ]
+
+    in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+  }
+}
+
+foreach(file, verifier_test_module_js_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_js = "${test_js_path}${file}.js"
+    test_abc = "$target_out_dir/${file}.abc"
+
+    src_js = rebase_path(test_js)
+    dst_file = rebase_path(test_abc)
+
+    extra_args = [
+      "--source-file=${file}",
+      "--module",
+    ]
 
     in_puts = [ test_js ]
     out_puts = [ test_abc ]
@@ -76,6 +114,8 @@ host_unittest_action("VerifierTest") {
     "utils.cpp",
     "verify_checksum_test.cpp",
     "verify_constant_pool_tests.cpp",
+    "verify_new_checks_test.cpp",
+    "verify_new_checks_fixtures_test.cpp",
     "verify_register_index_test.cpp",
   ]
 
@@ -90,6 +130,9 @@ host_unittest_action("VerifierTest") {
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
   foreach(file, verifier_test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+  foreach(file, verifier_test_module_js_files) {
     deps += [ ":gen_${file}_abc" ]
   }
   foreach(file, verifier_test_ts_files) {

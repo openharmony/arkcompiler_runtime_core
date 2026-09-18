@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,13 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <codecvt>
-#include <locale>
-
-#include "verifier.h"
+#include "verifier_internal.h"
+#include "annotation_data_accessor.h"
 #include "class_data_accessor-inl.h"
 #include "libpandafile/util/collect_util.h"
+#include "proto_data_accessor-inl.h"
 #include "zlib.h"
+
+#include <algorithm>
+#include <cstring>
+#include <limits>
 
 namespace panda::verifier {
 
@@ -52,10 +55,122 @@ bool Verifier::CollectIdInfos()
         return false;
     }
     GetConstantPoolIds();
+    if (!ValidateInstructionBasics()) {
+        return false;
+    }
     if (include_literal_array_ids) {
         GetLiteralIds();
     }
     return CheckConstantPool(verifier::ActionType::COLLECTINFOS);
+}
+
+bool Verifier::ResolveInstructionIds(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &method_id,
+                                     InstructionIds &ids)
+{
+    if (bc_ins.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
+        // literal id index is 0 except defineclasswithbuffer / definesendableclass
+        size_t idx = bc_ins.GetLiteralIndex();
+        const auto arg_literal_idx = bc_ins.GetId(idx).AsIndex();
+        const auto literal_id = file_->ResolveMethodIndex(method_id, arg_literal_idx);
+        if (literal_id.GetOffset() == 0) {
+            LOG(ERROR, VERIFIER) << "Literal array index 0x" << std::hex << arg_literal_idx
+                                 << " is out of bounds of the constant pool!";
+            return false;
+        }
+        ids.literal_id = literal_id;
+    }
+    if (bc_ins.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
+        const auto arg_method_idx = bc_ins.GetId().AsIndex();
+        const auto arg_method_id = file_->ResolveMethodIndex(method_id, arg_method_idx);
+        if (arg_method_id.GetOffset() == 0) {
+            LOG(ERROR, VERIFIER) << "Method index 0x" << std::hex << arg_method_idx
+                                 << " is out of bounds of the constant pool!";
+            return false;
+        }
+        ids.method_id = arg_method_id;
+    }
+    if (bc_ins.HasFlag(BytecodeInstruction::Flags::STRING_ID)) {
+        const auto arg_string_idx = bc_ins.GetId().AsIndex();
+        const auto string_id = file_->ResolveOffsetByIndex(method_id, arg_string_idx);
+        if (string_id.GetOffset() == 0) {
+            LOG(ERROR, VERIFIER) << "String index 0x" << std::hex << arg_string_idx
+                                 << " is out of bounds of the constant pool!";
+            return false;
+        }
+        ids.string_id = string_id;
+    }
+    return true;
+}
+
+void Verifier::CollectClassLiteralId(const BytecodeInstruction &bc_ins, const panda_file::File::EntityId &literal_id)
+{
+    auto opcode = bc_ins.GetOpcode();
+    if (opcode == Opcode::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8 ||
+        opcode == Opcode::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8) {
+        class_literal_ids_.insert(literal_id.GetOffset());
+    } else if (opcode == Opcode::CALLRUNTIME_DEFINESENDABLECLASS_PREF_IMM16_ID16_ID16_IMM16_V8) {
+        sendable_class_literal_ids_.insert(literal_id.GetOffset());
+    }
+}
+
+bool Verifier::ValidateMethodInstructionBasics(panda_file::MethodDataAccessor &method_accessor,
+                                               std::unordered_set<uint32_t> &validated_literals,
+                                               std::vector<uint32_t> &pending_literals)
+{
+    if (file_->GetIndexHeader(method_accessor.GetMethodId()) == nullptr) {
+        LOG(ERROR, VERIFIER) << "Fail to find index header of method 0x" << std::hex
+                             << method_accessor.GetMethodId().GetOffset() << "!";
+        return false;
+    }
+    if (!method_accessor.GetCodeId().has_value()) {
+        return true;
+    }
+    panda_file::CodeDataAccessor code_accessor(*file_, method_accessor.GetCodeId().value());
+    auto bc_ins = BytecodeInstruction(code_accessor.GetInstructions());
+    const auto bc_ins_last = bc_ins.JumpTo(code_accessor.GetCodeSize());
+    while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
+        if (!CheckInstructionOpcodes(bc_ins, bc_ins_last, method_accessor.GetCodeId().value(),
+                                     method_accessor.GetMethodId())) {
+            return false;
+        }
+        InstructionIds ids;
+        if (!ResolveInstructionIds(bc_ins, method_accessor.GetMethodId(), ids)) {
+            return false;
+        }
+        if (ids.literal_id.has_value() &&
+            !ValidateLiteralStructure(ids.literal_id.value(), validated_literals, pending_literals)) {
+            return false;
+        }
+        bc_ins = bc_ins.GetNext();
+    }
+    return true;
+}
+
+bool Verifier::ValidateInstructionBasics()
+{
+    std::unordered_set<uint32_t> validated_literals;
+    std::vector<uint32_t> pending_literals;
+    auto validate_record = [&](const panda_file::File::EntityId & /*record_id*/,
+                               panda_file::ClassDataAccessor &class_accessor) -> bool {
+        bool check_res = true;
+        class_accessor.EnumerateMethods([&](panda_file::MethodDataAccessor &method_accessor) -> void {
+            check_res =
+                check_res && ValidateMethodInstructionBasics(method_accessor, validated_literals, pending_literals);
+        });
+        return check_res;
+    };
+    if (!ForEachInternalRecord(validate_record)) {
+        return false;
+    }
+    while (!pending_literals.empty()) {
+        uint32_t literal_offset = pending_literals.back();
+        pending_literals.pop_back();
+        if (!ValidateLiteralStructure(panda_file::File::EntityId(literal_offset), validated_literals,
+                                      pending_literals)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool Verifier::VerifyChecksum()
@@ -74,6 +189,10 @@ bool Verifier::VerifyConstantPool()
 {
     if (file_ == nullptr) {
         LOG(ERROR, VERIFIER) << "Failed to verify empty abc file!";
+        return false;
+    }
+
+    if (!CheckConstantPoolIdsBounds()) {
         return false;
     }
 
@@ -119,10 +238,12 @@ bool Verifier::VerifyRegisterIndex()
         }
         auto bc_ins = BytecodeInstruction(code_data.GetInstructions());
         const auto bc_ins_last = bc_ins.JumpTo(code_data.GetCodeSize());
-        ASSERT(arg_nums >= DEFAULT_ARGUMENT_NUMBER);
+        if (!VerifyMethodNumArgs(code_data, method_accessor)) {
+            return false;
+        }
         while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
             const size_t count = GetVRegCount(bc_ins);
-            if (count == 0) { // Skip instructions that do not use registers
+            if (count == 0) {  // Skip instructions that do not use registers
                 bc_ins = bc_ins.GetNext();
                 continue;
             }
@@ -139,6 +260,10 @@ bool Verifier::VerifyConstantPoolIndex()
 {
     if (file_ == nullptr) {
         LOG(ERROR, VERIFIER) << "Failed to verify empty abc file!";
+        return false;
+    }
+
+    if (!CheckConstantPoolIdsBounds()) {
         return false;
     }
 
@@ -176,7 +301,7 @@ void Verifier::GetConstantPoolIds()
     for (const auto &index_header : index_headers) {
         auto region_indexs = file_->GetMethodIndex(&index_header);
         for (auto &index : region_indexs) {
-            constant_pool_ids_.push_back(index.GetOffset());
+            constant_pool_ids_.insert(index.GetOffset());
         }
     }
 }
@@ -202,19 +327,20 @@ template <typename T>
 void Verifier::PushToLiteralIds(T &ids)
 {
     for (const auto id : ids) {
-        literal_ids_.push_back(id);
+        literal_ids_.insert(id);
     }
 }
 
-bool Verifier::CheckConstantPoolActions(const verifier::ActionType type, panda_file::File::EntityId method_id)
+bool Verifier::CheckConstantPoolActions(const verifier::ActionType type, panda_file::File::EntityId method_id,
+                                        bool module_instructions_allowed)
 {
     switch (type) {
         case verifier::ActionType::CHECKCONSTPOOLCONTENT: {
             return CheckConstantPoolMethodContent(method_id);
         }
         case verifier::ActionType::COLLECTINFOS: {
-            all_method_ids_.push_back(method_id.GetOffset());
-            return CollectIdInInstructions(method_id);
+            all_method_ids_.insert(method_id.GetOffset());
+            return CollectIdInInstructions(method_id, module_instructions_allowed);
         }
         default: {
             return true;
@@ -222,7 +348,40 @@ bool Verifier::CheckConstantPoolActions(const verifier::ActionType type, panda_f
     }
 }
 
-bool Verifier::CollectIdInInstructions(const panda_file::File::EntityId &method_id)
+bool Verifier::CheckInstructionOpcodes(const BytecodeInstruction &bc_ins, const BytecodeInstruction &bc_ins_last,
+                                       const panda_file::File::EntityId &code_id,
+                                       const panda_file::File::EntityId &method_id)
+{
+    if (!bc_ins.IsPrimaryOpcodeValid()) {
+        LOG(ERROR, VERIFIER) << "Fail to verify primary opcode!";
+        return false;
+    }
+    if (!IsSecondaryOpcodeValid(bc_ins)) {
+        LOG(ERROR, VERIFIER) << "Fail to verify secondary opcode!";
+        return false;
+    }
+    if (!IsInstructionEndInBounds(bc_ins, bc_ins_last)) {
+        ReportCorruptedInstructionSequence(code_id, method_id);
+        return false;
+    }
+    return true;
+}
+
+void Verifier::CollectResolvedInstructionIds(const BytecodeInstruction &bc_ins, const InstructionIds &ids)
+{
+    if (ids.literal_id.has_value()) {
+        ins_literal_ids_.insert(ids.literal_id.value().GetOffset());
+        CollectClassLiteralId(bc_ins, ids.literal_id.value());
+    }
+    if (ids.method_id.has_value()) {
+        ins_method_ids_.insert(ids.method_id.value().GetOffset());
+    }
+    if (ids.string_id.has_value()) {
+        ins_string_ids_.insert(ids.string_id.value().GetOffset());
+    }
+}
+
+bool Verifier::CollectIdInInstructions(const panda_file::File::EntityId &method_id, bool module_instructions_allowed)
 {
     panda_file::MethodDataAccessor method_accessor(*file_, method_id);
     if (!method_accessor.GetCodeId().has_value()) {
@@ -236,76 +395,81 @@ bool Verifier::CollectIdInInstructions(const panda_file::File::EntityId &method_
     const auto bc_ins_last = bc_ins.JumpTo(ins_size);
 
     while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
-        if (!bc_ins.IsPrimaryOpcodeValid()) {
-            LOG(ERROR, VERIFIER) << "Fail to verify primary opcode!";
+        if (!CheckInstructionOpcodes(bc_ins, bc_ins_last, method_accessor.GetCodeId().value(), method_id)) {
             return false;
         }
-        if (bc_ins.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
-            // the idx of any instruction with a literal id is 0
-            // except defineclasswithbuffer/callruntime.definesendableclass
-            size_t idx = bc_ins.GetLiteralIndex();
-            const auto arg_literal_idx = bc_ins.GetId(idx).AsIndex();
-            const auto literal_id = file_->ResolveMethodIndex(method_id, arg_literal_idx);
-            ins_literal_ids_.insert(literal_id.GetOffset());
+        if (!module_instructions_allowed && IsModuleRelatedInstruction(bc_ins)) {
+            LOG(ERROR, VERIFIER) << "Module related instruction in non-esmodule record, method 0x" << std::hex
+                                 << method_id.GetOffset() << "!";
+            return false;
         }
-        if (bc_ins.HasFlag(BytecodeInstruction::Flags::METHOD_ID)) {
-            const auto arg_method_idx = bc_ins.GetId().AsIndex();
-            const auto arg_method_id = file_->ResolveMethodIndex(method_id, arg_method_idx);
-            ins_method_ids_.insert(arg_method_id.GetOffset());
+        InstructionIds ids;
+        if (!ResolveInstructionIds(bc_ins, method_id, ids)) {
+            return false;
         }
-        if (bc_ins.HasFlag(BytecodeInstruction::Flags::STRING_ID)) {
-            const auto arg_string_idx = bc_ins.GetId().AsIndex();
-            const auto string_id = file_->ResolveOffsetByIndex(method_id, arg_string_idx);
-            ins_string_ids_.insert(string_id.GetOffset());
-        }
+        CollectResolvedInstructionIds(bc_ins, ids);
         bc_ins = bc_ins.GetNext();
     }
     return true;
 }
 
-void Verifier::CollectModuleLiteralId(const panda_file::File::EntityId &field_id)
+bool Verifier::ForEachInternalRecord(
+    const std::function<bool(const panda_file::File::EntityId &, panda_file::ClassDataAccessor &)> &cb)
 {
-    panda_file::FieldDataAccessor field_accessor(*file_, field_id);
-    const auto literal_id = field_accessor.GetValue<uint32_t>().value();
-    if (std::find(literal_ids_.begin(), literal_ids_.end(), literal_id) != literal_ids_.end()) {
-        module_literals_.insert(literal_id);
+    for (uint32_t class_id : file_->GetClasses()) {
+        if (class_id >= file_->GetHeader()->file_size) {
+            LOG(ERROR, VERIFIER) << "Binary file corrupted. out of bounds (0x" << std::hex << class_id << ")!";
+            return false;
+        }
+        const panda_file::File::EntityId record_id {class_id};
+        if (file_->IsExternal(record_id)) {
+            continue;
+        }
+        panda_file::ClassDataAccessor class_accessor {*file_, record_id};
+        if (!cb(record_id, class_accessor)) {
+            return false;
+        }
     }
+    return true;
+}
+
+bool Verifier::CheckRecord(const panda_file::File::EntityId &record_id, panda_file::ClassDataAccessor &class_accessor,
+                           const verifier::ActionType type)
+{
+    bool record_is_esmodule = false;
+    bool record_has_tla = false;
+    if (type == verifier::ActionType::COLLECTINFOS) {
+        CollectRecordInfo(class_accessor, record_id, record_is_esmodule, record_has_tla);
+    }
+    bool module_instructions_allowed = record_is_esmodule || has_esmodule_record_class_;
+    bool check_res = true;
+    class_accessor.EnumerateMethods([&](panda_file::MethodDataAccessor &method_accessor) -> void {
+        if (type == verifier::ActionType::COLLECTINFOS) {
+            method_class_map_.emplace(method_accessor.GetMethodId().GetOffset(), record_id.GetOffset());
+        }
+        check_res =
+            check_res && CheckConstantPoolActions(type, method_accessor.GetMethodId(), module_instructions_allowed);
+        if (type == verifier::ActionType::COLLECTINFOS && check_res && (record_has_tla || has_tla_class_)) {
+            check_res = VerifyTlaMainFunctionReturn(method_accessor);
+        }
+    });
+    return check_res;
 }
 
 bool Verifier::CheckConstantPool(const verifier::ActionType type)
 {
-    const auto class_idx = file_->GetClasses();
-    for (size_t i = 0; i < class_idx.size(); i++) {
-        uint32_t class_id = class_idx[i];
-        if (class_id > file_->GetHeader()->file_size) {
-            LOG(ERROR, VERIFIER) << "Binary file corrupted. out of bounds (0x" << std::hex
-                                 << file_->GetHeader()->file_size;
-            return false;
-        }
-        const panda_file::File::EntityId record_id {class_id};
-        if (!file_->IsExternal(record_id)) {
-            panda_file::ClassDataAccessor class_accessor {*file_, record_id};
-            bool check_res = true;
-            class_accessor.EnumerateMethods([&](panda_file::MethodDataAccessor &method_accessor) -> void {
-                check_res = check_res && CheckConstantPoolActions(type, method_accessor.GetMethodId());
-            });
-            if (!check_res) {
-                return false;
-            }
-            if (type == verifier::ActionType::COLLECTINFOS) {
-                class_accessor.EnumerateFields([&](panda_file::FieldDataAccessor &field_accessor) -> void {
-                    CollectModuleLiteralId(field_accessor.GetFieldId());
-                });
-            }
-        }
+    if (type == verifier::ActionType::COLLECTINFOS && !DetectSpecialRecords()) {
+        return false;
     }
-
-    return true;
+    return ForEachInternalRecord([this, type](const panda_file::File::EntityId &record_id,
+                                              panda_file::ClassDataAccessor &class_accessor) -> bool {
+        return CheckRecord(record_id, class_accessor, type);
+    });
 }
 
 size_t Verifier::GetVRegCount(const BytecodeInstruction &bc_ins)
 {
-    size_t idx = 0; // Represents the idxTH register index in an instruction
+    size_t idx = 0;  // Represents the idxTH register index in an instruction
     BytecodeInstruction::Format format = bc_ins.GetFormat();
     while (bc_ins.HasVReg(format, idx)) {
         idx++;
@@ -313,13 +477,13 @@ size_t Verifier::GetVRegCount(const BytecodeInstruction &bc_ins)
     return idx;
 }
 
-bool Verifier::IsRangeInstAndHasInvalidRegIdx(const BytecodeInstruction &bc_ins,
-                                              const size_t count, uint64_t valid_regs_num)
+bool Verifier::IsRangeInstAndHasInvalidRegIdx(const BytecodeInstruction &bc_ins, const size_t count,
+                                              uint64_t valid_regs_num)
 {
     ASSERT(bc_ins.IsRangeInstruction());
 
     uint64_t reg_idx = bc_ins.GetVReg(FIRST_INDEX);
-    if (IsRegIdxOutOfBounds(reg_idx, valid_regs_num)) { // for [format: +AA/+AAAA vBB vCC], vBB can be verified here
+    if (IsRegIdxOutOfBounds(reg_idx, valid_regs_num)) {  // for [format: +AA/+AAAA vBB vCC], vBB can be verified here
         return true;
     }
 
@@ -340,8 +504,8 @@ bool Verifier::IsRangeInstAndHasInvalidRegIdx(const BytecodeInstruction &bc_ins,
 bool Verifier::IsRegIdxOutOfBounds(uint64_t reg_idx, uint64_t valid_regs_num)
 {
     if (reg_idx >= valid_regs_num) {
-        LOG(ERROR, VERIFIER) << "Register index out of bounds: 0x" << std::hex
-                             << reg_idx << ", Max allowed: 0x" << std::hex << valid_regs_num;
+        LOG(ERROR, VERIFIER) << "Register index out of bounds: 0x" << std::hex << reg_idx << ", Max allowed: 0x"
+                             << std::hex << valid_regs_num;
         return true;
     }
     return false;
@@ -349,15 +513,14 @@ bool Verifier::IsRegIdxOutOfBounds(uint64_t reg_idx, uint64_t valid_regs_num)
 
 bool Verifier::CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, uint64_t valid_regs_num)
 {
-    if (bc_ins.IsRangeInstruction() &&
-        IsRangeInstAndHasInvalidRegIdx(bc_ins, count, valid_regs_num)) {
+    if (bc_ins.IsRangeInstruction() && IsRangeInstAndHasInvalidRegIdx(bc_ins, count, valid_regs_num)) {
         return false;
     }
-    for (size_t idx = 0; idx < count; idx++) { // Represents the idxTH register index in an instruction
+    for (size_t idx = 0; idx < count; idx++) {  // Represents the idxTH register index in an instruction
         uint16_t reg_idx = bc_ins.GetVReg(idx);
         if (reg_idx >= valid_regs_num) {
-            LOG(ERROR, VERIFIER) << "Register index out of bounds: 0x" << std::hex
-                                 << reg_idx << ", Max allowed: 0x" << std::hex << valid_regs_num;
+            LOG(ERROR, VERIFIER) << "Register index out of bounds: 0x" << std::hex << reg_idx << ", Max allowed: 0x"
+                                 << std::hex << valid_regs_num;
             return false;
         }
     }
@@ -366,38 +529,58 @@ bool Verifier::CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t coun
 
 bool Verifier::VerifyMethodId(const uint32_t &method_id) const
 {
-    auto iter = std::find(constant_pool_ids_.begin(), constant_pool_ids_.end(), method_id);
-    if (iter == constant_pool_ids_.end() ||
-        (std::find(literal_ids_.begin(), literal_ids_.end(), method_id) != literal_ids_.end()) ||
-        ins_string_ids_.count(method_id)) {
+    if (literal_ids_.count(method_id) != 0 || ins_string_ids_.count(method_id) != 0 || !IsDeclaredMethodId(method_id)) {
         LOG(ERROR, VERIFIER) << "Fail to verify method id. method_id(0x" << std::hex << method_id << ")!";
         return false;
     }
     return true;
 }
 
+bool Verifier::IsDeclaredMethodId(const uint32_t &method_id) const
+{
+    if (method_class_map_.find(method_id) != method_class_map_.end()) {
+        return true;
+    }
+    return IsExternalMethodId(method_id);
+}
+
+bool Verifier::IsExternalMethodId(const uint32_t &method_id) const
+{
+    constexpr size_t FOREIGN_METHOD_HEADER_SIZE = 2U * panda_file::IDX_SIZE + panda_file::ID_SIZE;
+    const uint32_t file_size = file_->GetHeader()->file_size;
+    const panda_file::File::EntityId id {method_id};
+    if (!file_->IsExternal(id) || method_id > file_size - FOREIGN_METHOD_HEADER_SIZE) {
+        return false;
+    }
+    auto sp = file_->GetSpanFromId(id);
+    auto class_idx = ReadBounded(&sp, panda_file::IDX_SIZE);
+    auto proto_idx = ReadBounded(&sp, panda_file::IDX_SIZE);
+    auto name_off = ReadBounded(&sp, panda_file::ID_SIZE);
+    if (!class_idx.has_value() || !proto_idx.has_value() || !name_off.has_value()) {
+        return false;
+    }
+    return VerifyStringItem(static_cast<uint32_t>(name_off.value()), "external method");
+}
+
 bool Verifier::VerifyLiteralId(const uint32_t &literal_id) const
 {
-    auto iter = std::find(constant_pool_ids_.begin(), constant_pool_ids_.end(), literal_id);
-    if (iter == constant_pool_ids_.end() ||
-        (std::find(all_method_ids_.begin(), all_method_ids_.end(), literal_id) != all_method_ids_.end()) ||
-        ins_string_ids_.count(literal_id)) {
+    if (all_method_ids_.count(literal_id) != 0 || ins_string_ids_.count(literal_id) != 0) {
         LOG(ERROR, VERIFIER) << "Fail to verify literal id. literal_id(0x" << std::hex << literal_id << ")!";
         return false;
     }
-    return true;
+    if (!panda_file::ContainsLiteralArrayInHeader(file_->GetHeader()->version)) {
+        return true;
+    }
+    return literal_ids_.count(literal_id) != 0;
 }
 
 bool Verifier::VerifyStringId(const uint32_t &string_id) const
 {
-    auto iter = std::find(constant_pool_ids_.begin(), constant_pool_ids_.end(), string_id);
-    if (iter == constant_pool_ids_.end() ||
-        ins_method_ids_.count(string_id) ||
-        (std::find(literal_ids_.begin(), literal_ids_.end(), string_id) != literal_ids_.end())) {
+    if (ins_method_ids_.count(string_id) != 0 || literal_ids_.count(string_id) != 0) {
         LOG(ERROR, VERIFIER) << "Fail to verify string id. string_id(0x" << std::hex << string_id << ")!";
         return false;
     }
-    return true;
+    return VerifyStringItem(string_id, "constant pool");
 }
 
 std::optional<int64_t> Verifier::GetFirstImmFromInstruction(const BytecodeInstruction &bc_ins)
@@ -412,158 +595,83 @@ std::optional<int64_t> Verifier::GetFirstImmFromInstruction(const BytecodeInstru
     return first_imm;
 }
 
-std::optional<uint64_t> Verifier::GetSlotNumberFromAnnotation(panda_file::MethodDataAccessor &method_accessor)
+namespace {
+bool MatchAnnotationElement(const panda_file::File &file, panda_file::AnnotationDataAccessor &ada,
+                            std::string_view element_name, uint64_t &value)
 {
-    std::optional<uint64_t> slot_number {};
+    uint32_t elem_count = ada.GetCount();
+    for (uint32_t i = 0; i < elem_count; i++) {
+        panda_file::AnnotationDataAccessor::Elem adae = ada.GetElement(i);
+        auto *elem_name = reinterpret_cast<const char *>(file.GetStringData(adae.GetNameId()).data);
+        if (element_name != elem_name) {
+            continue;
+        }
+        value = adae.GetScalarValue().GetValue();
+        return true;
+    }
+    return false;
+}
+}  // namespace
+
+std::optional<uint64_t> Verifier::FindAnnotationElementValue(panda_file::MethodDataAccessor &method_accessor,
+                                                             std::string_view annotation_name,
+                                                             std::string_view element_name) const
+{
+    std::optional<uint64_t> result {};
     method_accessor.EnumerateAnnotations([&](panda_file::File::EntityId annotation_id) {
         panda_file::AnnotationDataAccessor ada(*file_, annotation_id);
-        auto *annotation_name = reinterpret_cast<const char *>(file_->GetStringData(ada.GetClassId()).data);
-        if (::strcmp("L_ESSlotNumberAnnotation;", annotation_name) == 0) {
-            uint32_t elem_count = ada.GetCount();
-            for (uint32_t i = 0; i < elem_count; i++) {
-                panda_file::AnnotationDataAccessor::Elem adae = ada.GetElement(i);
-                auto *elem_name = reinterpret_cast<const char *>(file_->GetStringData(adae.GetNameId()).data);
-                if (::strcmp("SlotNumber", elem_name) == 0) {
-                    slot_number = adae.GetScalarValue().GetValue();
-                }
-            }
+        auto *class_name = reinterpret_cast<const char *>(file_->GetStringData(ada.GetClassId()).data);
+        if (annotation_name != class_name) {
+            return;
+        }
+        uint64_t value = 0;
+        if (MatchAnnotationElement(*file_, ada, element_name, value)) {
+            result = value;
         }
     });
-    return slot_number;
+    return result;
 }
 
-bool Verifier::VerifyMethodIdInLiteralArray(const uint32_t &id)
+std::optional<uint32_t> Verifier::GetCallTypeFromAnnotation(panda_file::MethodDataAccessor &method_accessor)
 {
-    const auto method_id = panda_file::File::EntityId(id).GetOffset();
-    auto iter = std::find(all_method_ids_.begin(), all_method_ids_.end(), method_id);
-    if (iter == all_method_ids_.end()) {
-        LOG(ERROR, VERIFIER) << "Invalid method id(0x" << id << ") in literal array";
-        return false;
+    auto call_type = FindAnnotationElementValue(method_accessor, CALL_TYPE_ANNOTATION, CALL_TYPE_ELEMENT_NAME);
+    if (!call_type.has_value()) {
+        return std::nullopt;
     }
-    return true;
+    return static_cast<uint32_t>(call_type.value());
 }
 
-bool Verifier::VerifyStringIdInLiteralArray(const uint32_t &id)
+bool Verifier::VerifyStringItem(uint32_t string_offset, std::string_view where) const
 {
-    auto string_data = file_->GetStringData(panda_file::File::EntityId(id));
-    if (string_data.data == nullptr) {
-        LOG(ERROR, VERIFIER) << "Invalid string_id. string_id(0x" << std::hex << id << ")!";
+    if (string_offset <= sizeof(panda_file::File::Header) || string_offset >= file_->GetHeader()->file_size) {
+        LOG(ERROR, VERIFIER) << "Invalid string offset 0x" << std::hex << string_offset << " in " << where << "!";
         return false;
     }
-    auto desc = std::string(utf::Mutf8AsCString(string_data.data));
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring utf16_desc = converter.from_bytes(desc);
-    if (string_data.utf16_length != utf16_desc.length()) {
-        LOG(ERROR, VERIFIER) << "Invalid string value(0x" << id << ") in literal array";
-        return false;
-    }
-    return true;
-}
-
-bool Verifier::VerifyLiteralIdInLiteralArray(const uint32_t &id)
-{
-    auto iter = std::find(literal_ids_.begin(), literal_ids_.end(), id);
-    if (iter == literal_ids_.end()) {
-        LOG(ERROR, VERIFIER) << "Invalid literal id(0x" << id << ") in literal array";
-        return false;
-    }
-    return true;
-}
-
-bool Verifier::VerifySingleLiteralArray(const panda_file::File::EntityId &literal_id)
-{
-    auto sp = file_->GetSpanFromId(literal_id);
-    const auto literal_vals_num = panda_file::helpers::Read<sizeof(uint32_t)>(&sp);
-    for (size_t i = 0; i < literal_vals_num; i += 2U) { // 2u skip literal item
-        const auto tag = static_cast<panda_file::LiteralTag>(panda_file::helpers::Read<panda_file::TAG_SIZE>(&sp));
-        switch (tag) {
-            case panda_file::LiteralTag::TAGVALUE:
-            case panda_file::LiteralTag::BOOL:
-            case panda_file::LiteralTag::ACCESSOR:
-            case panda_file::LiteralTag::NULLVALUE:
-            case panda_file::LiteralTag::BUILTINTYPEINDEX: {
-                sp = sp.SubSpan(sizeof(uint8_t)); // run next sp
-                break;
-            }
-            case panda_file::LiteralTag::METHODAFFILIATE: {
-                sp = sp.SubSpan(sizeof(uint16_t));
-                break;
-            }
-            case panda_file::LiteralTag::INTEGER:
-            case panda_file::LiteralTag::FLOAT:
-            case panda_file::LiteralTag::GETTER:
-            case panda_file::LiteralTag::SETTER:
-            case panda_file::LiteralTag::GENERATORMETHOD:
-            case panda_file::LiteralTag::LITERALBUFFERINDEX:
-            case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
-                sp = sp.SubSpan(sizeof(uint32_t));
-                break;
-            }
-            case panda_file::LiteralTag::DOUBLE: {
-                const auto value = bit_cast<double>(panda_file::helpers::Read<sizeof(uint64_t)>(&sp));
-                // true: High 16-bit of double value >= 0xffff
-                if (IsImpureNaN(value)) {
-                    LOG(ERROR, VERIFIER) << "Fail to verify double value " << value << " in literal array";
-                    return false;
-                }
-                break;
-            }
-            case panda_file::LiteralTag::ARRAY_U1:
-            case panda_file::LiteralTag::ARRAY_U8:
-            case panda_file::LiteralTag::ARRAY_I8:
-            case panda_file::LiteralTag::ARRAY_U16:
-            case panda_file::LiteralTag::ARRAY_I16:
-            case panda_file::LiteralTag::ARRAY_U32:
-            case panda_file::LiteralTag::ARRAY_I32:
-            case panda_file::LiteralTag::ARRAY_U64:
-            case panda_file::LiteralTag::ARRAY_I64:
-            case panda_file::LiteralTag::ARRAY_F32:
-            case panda_file::LiteralTag::ARRAY_F64:
-            case panda_file::LiteralTag::ARRAY_STRING: {
-                i = literal_vals_num;
-                break;
-            }
-            case panda_file::LiteralTag::STRING: {
-                panda_file::helpers::Read<sizeof(uint32_t)>(&sp);
-                break;
-            }
-            case panda_file::LiteralTag::METHOD: {
-                const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
-                inner_method_map_.emplace(literal_id.GetOffset(), value);
-                if (!VerifyMethodIdInLiteralArray(value)) {
-                    return false;
-                }
-                break;
-            }
-            case panda_file::LiteralTag::LITERALARRAY: {
-                const auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&sp));
-                inner_literal_map_.emplace(literal_id.GetOffset(), value);
-                if (!VerifyLiteralIdInLiteralArray(value)) {
-                    return false;
-                }
-                break;
-            }
-            default: {
-                LOG(ERROR, VERIFIER) << "Invalid literal tag";
-                return false;
-            }
+    auto sp = file_->GetSpanFromId(panda_file::File::EntityId(string_offset));
+    size_t length_size = 0;
+    while (length_size < sp.Size() && length_size < MAX_ULEB128_U32_SIZE) {
+        if ((sp[length_size] & 0x80U) == 0) {
+            break;
         }
+        length_size++;
     }
-    return true;
-}
-
-bool Verifier::IsModuleLiteralId(const panda_file::File::EntityId &id) const
-{
-    return module_literals_.find(id.GetOffset()) != module_literals_.end();
-}
-
-bool Verifier::VerifyLiteralArrays()
-{
-    for (const auto &arg_literal_id : literal_ids_) {
-        const auto literal_id = panda_file::File::EntityId(arg_literal_id);
-        if (!IsModuleLiteralId(literal_id) && !VerifySingleLiteralArray(literal_id)) {
-            return false;
-        }
+    if (length_size >= sp.Size() || length_size >= MAX_ULEB128_U32_SIZE) {
+        LOG(ERROR, VERIFIER) << "Invalid string offset 0x" << std::hex << string_offset << " in " << where << "!";
+        return false;
+    }
+    uint32_t tagged_utf16_length = 0;
+    for (size_t i = 0; i <= length_size; i++) {
+        tagged_utf16_length |= static_cast<uint32_t>(sp[i] & 0x7fU) << (i * 7U);
+    }
+    const uint8_t *data = sp.Data() + length_size + 1;
+    size_t data_size = sp.Size() - length_size - 1;
+    if (memchr(data, 0, data_size) == nullptr) {
+        LOG(ERROR, VERIFIER) << "Invalid string offset 0x" << std::hex << string_offset << " in " << where << "!";
+        return false;
+    }
+    if (!utf::IsValidModifiedUTF8(data) || utf::MUtf8ToUtf16Size(data) != (tagged_utf16_length >> 1U)) {
+        LOG(ERROR, VERIFIER) << "Invalid string value 0x" << std::hex << string_offset << " in " << where << "!";
+        return false;
     }
     return true;
 }
@@ -575,11 +683,18 @@ bool Verifier::PrecomputeInstructionIndices(const BytecodeInstruction &bc_ins_st
     size_t index = 0;
     auto current_ins = bc_ins_start;
     instruction_index_map_[current_ins.GetAddress()] = index;
-    
+
     while (current_ins.GetAddress() < bc_ins_last.GetAddress()) {
-        //Must keep IsPrimaryOpcodeValid is the first check item
+        // Must keep IsPrimaryOpcodeValid is the first check item
         if (!current_ins.IsPrimaryOpcodeValid()) {
             LOG(ERROR, VERIFIER) << "Fail to verify primary opcode!";
+            return false;
+        }
+        if (!IsSecondaryOpcodeValid(current_ins)) {
+            LOG(ERROR, VERIFIER) << "Fail to verify secondary opcode!";
+            return false;
+        }
+        if (!IsInstructionEndInBounds(current_ins, bc_ins_last)) {
             return false;
         }
         current_ins = current_ins.GetNext();
@@ -587,6 +702,11 @@ bool Verifier::PrecomputeInstructionIndices(const BytecodeInstruction &bc_ins_st
         instruction_index_map_[current_ins.GetAddress()] = index;
     }
     return true;
+}
+
+bool Verifier::IsInstructionEndInBounds(const BytecodeInstruction &bc_ins, const BytecodeInstruction &bc_ins_last)
+{
+    return bc_ins.GetNext().GetAddress() <= bc_ins_last.GetAddress();
 }
 
 bool Verifier::IsMethodBytecodeInstruction(const BytecodeInstruction &bc_ins_cur)
@@ -601,9 +721,7 @@ bool Verifier::VerifyJumpInstruction(const BytecodeInstruction &bc_ins, const By
                                      const BytecodeInstruction &bc_ins_first, const uint8_t *ins_arr,
                                      panda_file::File::EntityId code_id)
 {
-    // update maximum forward offset
     const auto bc_ins_forward_size = bc_ins_last.GetAddress() - bc_ins.GetAddress();
-    // update maximum backward offset
     const auto bc_ins_backward_size = bc_ins.GetAddress() - bc_ins_first.GetAddress();
 
     if (bc_ins.IsJumpInstruction()) {
@@ -626,10 +744,14 @@ bool Verifier::VerifyJumpInstruction(const BytecodeInstruction &bc_ins, const By
             LOG(ERROR, VERIFIER) << "Fail to verify target jump primary opcode!";
             return false;
         }
+        if (!IsSecondaryOpcodeValid(bc_ins_dest)) {
+            LOG(ERROR, VERIFIER) << "Fail to verify target jump secondary opcode!";
+            return false;
+        }
         if (!IsMethodBytecodeInstruction(bc_ins_dest)) {
-            LOG(ERROR, VERIFIER) << "> error encountered at " << code_id << " (0x" << std::hex << code_id
-                                 << "). incorrect instruction at offset: 0x" << (bc_ins.GetAddress() - ins_arr)
-                                 << ": invalid jump offset 0x" << immdata.value()
+            LOG(ERROR, VERIFIER) << "> error encountered at " << code_id.GetOffset() << " (0x" << std::hex
+                                 << code_id.GetOffset() << "). incorrect instruction at offset: 0x"
+                                 << (bc_ins.GetAddress() - ins_arr) << ": invalid jump offset 0x" << immdata.value()
                                  << " - jumping in the middle of another instruction!";
             return false;
         }
@@ -638,120 +760,107 @@ bool Verifier::VerifyJumpInstruction(const BytecodeInstruction &bc_ins, const By
     return true;
 }
 
-bool Verifier::GetIcSlotFromInstruction(const BytecodeInstruction &bc_ins, uint32_t &first_slot_index,
-                                        bool &has_slot, bool &is_two_slot)
+bool Verifier::VerifyCatchBlockOffsets(panda_file::CodeDataAccessor::CatchBlock &catch_block,
+                                       const BytecodeInstruction &bc_ins, const BytecodeInstruction &bc_ins_last)
 {
-    std::optional<uint64_t> first_imm = {};
-    if (bc_ins.HasFlag(BytecodeInstruction::Flags::ONE_SLOT)) {
-        first_imm = GetFirstImmFromInstruction(bc_ins);
-        if (!first_imm.has_value()) {
-            LOG(ERROR, VERIFIER) << "Fail to get first immediate data!";
-            return false;
-        }
-        first_slot_index = first_imm.value();
-        is_two_slot = false;
-        has_slot = true;
-    } else if (bc_ins.HasFlag(BytecodeInstruction::Flags::TWO_SLOT)) {
-        first_imm = GetFirstImmFromInstruction(bc_ins);
-        if (!first_imm.has_value()) {
-            LOG(ERROR, VERIFIER) << "Fail to get first immediate data!";
-            return false;
-        }
-        first_slot_index = first_imm.value();
-        has_slot = true;
-        is_two_slot = true;
-    }
+    const auto handler_begin_offset = catch_block.GetHandlerPc();
+    const auto handler_end_offset = handler_begin_offset + catch_block.GetCodeSize();
 
+    const auto handler_begin_bc_ins = bc_ins.JumpTo(handler_begin_offset);
+    const auto handler_end_bc_ins = bc_ins.JumpTo(handler_end_offset);
+
+    const bool handler_begin_offset_in_range = bc_ins_last.GetAddress() > handler_begin_bc_ins.GetAddress();
+    const bool handler_end_offset_in_range = bc_ins_last.GetAddress() >= handler_end_bc_ins.GetAddress();
+
+    if (!handler_begin_offset_in_range) {
+        LOG(ERROR, VERIFIER) << "> Invalid catch block begin offset range! address is: 0x" << std::hex
+                             << handler_begin_bc_ins.GetAddress();
+        return false;
+    }
+    if (!IsMethodBytecodeInstruction(handler_begin_bc_ins)) {
+        LOG(ERROR, VERIFIER) << "> Invalid catch block begin offset validity! address is: 0x" << std::hex
+                             << handler_begin_bc_ins.GetAddress();
+        return false;
+    }
+    if (!handler_end_offset_in_range) {
+        LOG(ERROR, VERIFIER) << "> Invalid catch block end offset range! address is: 0x" << std::hex
+                             << handler_end_bc_ins.GetAddress();
+        return false;
+    }
+    if (!IsMethodBytecodeInstruction(handler_end_bc_ins)) {
+        LOG(ERROR, VERIFIER) << "> Invalid catch block end offset validity! address is: 0x" << std::hex
+                             << handler_end_bc_ins.GetAddress();
+        return false;
+    }
     return true;
 }
 
 bool Verifier::VerifyCatchBlocks(panda_file::CodeDataAccessor::TryBlock &try_block, const BytecodeInstruction &bc_ins,
-                                 const BytecodeInstruction &bc_ins_last)
+                                 const BytecodeInstruction &bc_ins_last, const panda_file::File::EntityId &method_id)
 {
     bool result = true;
 
     try_block.EnumerateCatchBlocks([&](panda_file::CodeDataAccessor::CatchBlock &catch_block) {
-        const auto handler_begin_offset = catch_block.GetHandlerPc();
-        // GetCodeSize() returns a unsigned long value, which is always >= 0,
-        // so handler_end_offset is guaranteed to be >= handler_begin_offset
-        const auto handler_end_offset = handler_begin_offset + catch_block.GetCodeSize();
-
-        const auto handler_begin_bc_ins = bc_ins.JumpTo(handler_begin_offset);
-        const auto handler_end_bc_ins = bc_ins.JumpTo(handler_end_offset);
-
-        const bool handler_begin_offset_in_range = bc_ins_last.GetAddress() > handler_begin_bc_ins.GetAddress();
-        const bool handler_end_offset_in_range = bc_ins_last.GetAddress() >= handler_end_bc_ins.GetAddress();
-
-        if (!handler_begin_offset_in_range) {
-            LOG(ERROR, VERIFIER) << "> Invalid catch block begin offset range! address is: 0x" << std::hex
-                                 << handler_begin_bc_ins.GetAddress();
+        const auto type_idx = catch_block.GetTypeIdx();
+        if (type_idx != panda_file::INVALID_INDEX) {
+            const auto catch_cls_id = file_->ResolveClassIndex(method_id, type_idx);
+            if (!catch_cls_id.IsValid() || catch_cls_id.GetOffset() >= file_->GetHeader()->file_size) {
+                LOG(ERROR, VERIFIER) << "> Invalid catch block type idx! type_idx is: 0x" << std::hex << type_idx
+                                     << " of method 0x" << method_id.GetOffset();
+                result = false;
+                return false;
+            }
+        }
+        if (!VerifyCatchBlockOffsets(catch_block, bc_ins, bc_ins_last)) {
             result = false;
             return false;
         }
-        if (!IsMethodBytecodeInstruction(handler_begin_bc_ins)) {
-            LOG(ERROR, VERIFIER) << "> Invalid catch block begin offset validity! address is: 0x" << std::hex
-                                 << handler_begin_bc_ins.GetAddress();
-            result = false;
-            return false;
-        }
-        if (!handler_end_offset_in_range) {
-            LOG(ERROR, VERIFIER) << "> Invalid catch block end offset range! address is: 0x" << std::hex
-                                 << handler_end_bc_ins.GetAddress();
-            result = false;
-            return false;
-        }
-        if (!IsMethodBytecodeInstruction(handler_end_bc_ins)) {
-            LOG(ERROR, VERIFIER) << "> Invalid catch block end offset validity! address is: 0x" << std::hex
-                                 << handler_end_bc_ins.GetAddress();
-            result = false;
-            return false;
-        }
-
         return true;
     });
 
     return result;
 }
 
+bool Verifier::VerifyTryBlockOffsets(const BytecodeInstruction &try_begin_bc_ins,
+                                     const BytecodeInstruction &try_end_bc_ins,
+                                     const BytecodeInstruction &bc_ins_last)
+{
+    if (bc_ins_last.GetAddress() <= try_begin_bc_ins.GetAddress()) {
+        LOG(ERROR, VERIFIER) << "> Invalid try block begin offset range! address is: 0x" << std::hex
+                             << try_begin_bc_ins.GetAddress();
+        return false;
+    }
+    if (!IsMethodBytecodeInstruction(try_begin_bc_ins)) {
+        LOG(ERROR, VERIFIER) << "> Invalid try block begin offset validity! address is: 0x" << std::hex
+                             << try_begin_bc_ins.GetAddress();
+        return false;
+    }
+    if (bc_ins_last.GetAddress() < try_end_bc_ins.GetAddress()) {
+        LOG(ERROR, VERIFIER) << "> Invalid try block end offset range! address is: 0x" << std::hex
+                             << try_end_bc_ins.GetAddress();
+        return false;
+    }
+    if (!IsMethodBytecodeInstruction(try_end_bc_ins)) {
+        LOG(ERROR, VERIFIER) << "> Invalid try block end offset validity! address is: 0x" << std::hex
+                             << try_end_bc_ins.GetAddress();
+        return false;
+    }
+    return true;
+}
+
 bool Verifier::VerifyTryBlocks(panda_file::CodeDataAccessor &code_accessor, const BytecodeInstruction &bc_ins,
-                               const BytecodeInstruction &bc_ins_last)
+                               const BytecodeInstruction &bc_ins_last, const panda_file::File::EntityId &method_id)
 {
     bool result = true;
 
     code_accessor.EnumerateTryBlocks([&](panda_file::CodeDataAccessor::TryBlock &try_block) {
         const auto try_begin_bc_ins = bc_ins.JumpTo(try_block.GetStartPc());
-        // GetLength() returns a uint32 value, which is always >= 0,
-        // so try_end_bc_ins is guaranteed to be >= try_begin_bc_ins
         const auto try_end_bc_ins = bc_ins.JumpTo(try_block.GetStartPc() + try_block.GetLength());
-
-        const bool try_begin_offset_in_range = bc_ins_last.GetAddress() > try_begin_bc_ins.GetAddress();
-        const bool try_end_offset_in_range = bc_ins_last.GetAddress() >= try_end_bc_ins.GetAddress();
-
-        if (!try_begin_offset_in_range) {
-            LOG(ERROR, VERIFIER) << "> Invalid try block begin offset range! address is: 0x" << std::hex
-                                 << try_begin_bc_ins.GetAddress();
+        if (!VerifyTryBlockOffsets(try_begin_bc_ins, try_end_bc_ins, bc_ins_last)) {
             result = false;
             return false;
         }
-        if (!IsMethodBytecodeInstruction(try_begin_bc_ins)) {
-            LOG(ERROR, VERIFIER) << "> Invalid try block begin offset validity! address is: 0x" << std::hex
-                                 << try_begin_bc_ins.GetAddress();
-            result = false;
-            return false;
-        }
-        if (!try_end_offset_in_range) {
-            LOG(ERROR, VERIFIER) << "> Invalid try block end offset range! address is: 0x" << std::hex
-                                 << try_end_bc_ins.GetAddress();
-            result = false;
-            return false;
-        }
-        if (!IsMethodBytecodeInstruction(try_end_bc_ins)) {
-            LOG(ERROR, VERIFIER) << "> Invalid try block end offset validity! address is: 0x" << std::hex
-                                 << try_end_bc_ins.GetAddress();
-            result = false;
-            return false;
-        }
-        if (!VerifyCatchBlocks(try_block, bc_ins, bc_ins_last)) {
+        if (!VerifyCatchBlocks(try_block, bc_ins, bc_ins_last, method_id)) {
             LOG(ERROR, VERIFIER) << "Catch block validation failed!";
             result = false;
             return false;
@@ -761,24 +870,6 @@ bool Verifier::VerifyTryBlocks(panda_file::CodeDataAccessor &code_accessor, cons
     });
 
     return result;
-}
-
-
-bool Verifier::VerifySlotNumber(panda_file::MethodDataAccessor &method_accessor, const uint32_t &slot_number,
-                                const panda_file::File::EntityId &method_id)
-{
-    const auto ann_slot_number = GetSlotNumberFromAnnotation(method_accessor);
-    if (!ann_slot_number.has_value()) {
-        LOG(INFO, VERIFIER) << "There is no slot number information in annotaion.";
-        // To be compatible with old abc, slot number verification is not continued
-        return true;
-    }
-    if (slot_number == ann_slot_number.value()) {
-        return true;
-    }
-
-    LOG(ERROR, VERIFIER) << "Slot number has been falsified in method 0x" << method_id;
-    return false;
 }
 
 bool Verifier::VerifyMethodRegisterIndex(panda_file::CodeDataAccessor &code_accessor,
@@ -798,51 +889,195 @@ bool Verifier::VerifyMethodRegisterIndex(panda_file::CodeDataAccessor &code_acce
     return true;
 }
 
-bool Verifier::VerifyMethodInstructions(const MethodInfos &infos)
+bool Verifier::VerifyMethodNumArgs(panda_file::CodeDataAccessor &code_accessor,
+                                   panda_file::MethodDataAccessor &method_accessor)
 {
-    auto current_ins = infos.bc_ins;
+    const uint64_t num_args = code_accessor.GetNumArgs();
+    uint32_t call_type = GetCallTypeFromAnnotation(method_accessor).value_or(DEFAULT_CALL_TYPE) & CALL_TYPE_MASK;
+    uint64_t num_args_lower_limit = ((call_type & HAVE_THIS_BIT) != 0 ? 1 : 0) +
+                                    ((call_type & HAVE_NEW_TARGET_BIT) != 0 ? 1 : 0) +
+                                    ((call_type & HAVE_FUNC_BIT) != 0 ? 1 : 0);
+    if (num_args < num_args_lower_limit) {
+        LOG(ERROR, VERIFIER) << "Function argument number " << num_args << " is less than the lower limit "
+                             << num_args_lower_limit << "!";
+        return false;
+    }
+    return VerifyProtoArgNumber(num_args, method_accessor);
+}
+
+bool Verifier::VerifyProtoArgNumber(uint64_t num_args, panda_file::MethodDataAccessor &method_accessor)
+{
+    if (method_accessor.GetProtoIdx() == panda_file::INVALID_INDEX_16) {
+        return true;
+    }
+    const auto proto_arg_num = GetProtoArgNumber(method_accessor.GetProtoId());
+    if (!proto_arg_num.has_value()) {
+        LOG(ERROR, VERIFIER) << "Fail to get the parameter number of the proto of method 0x" << std::hex
+                             << method_accessor.GetMethodId().GetOffset() << "!";
+        return false;
+    }
+    uint64_t expected = static_cast<uint64_t>(proto_arg_num.value()) + (method_accessor.IsStatic() ? 0U : 1U);
+    if (num_args != expected) {
+        LOG(ERROR, VERIFIER) << "Function argument number " << num_args
+                             << " does not match the parameter number of the proto " << expected << "!";
+        return false;
+    }
+    return true;
+}
+
+std::optional<uint32_t> Verifier::GetProtoArgNumber(const panda_file::File::EntityId &proto_id) const
+{
+    if (proto_id.GetOffset() <= sizeof(panda_file::File::Header) ||
+        proto_id.GetOffset() >= file_->GetHeader()->file_size) {
+        return std::nullopt;
+    }
+    constexpr size_t ELEMS_PER_BLOCK = panda_file::SHORTY_ELEM_PER16;
+    constexpr size_t ELEM_WIDTH = panda_file::SHORTY_ELEM_WIDTH;
+    constexpr size_t ELEM_MASK = panda_file::SHORTY_ELEM_MASK;
+    auto sp = file_->GetSpanFromId(proto_id);
+    auto block_opt = ReadBounded(&sp, panda_file::SHORTY_ELEM_SIZE);
+    if (!block_opt.has_value()) {
+        return std::nullopt;
+    }
+    uint32_t block = static_cast<uint32_t>(block_opt.value());
+    uint32_t elem_num = 0;
+    while (block != 0) {
+        size_t shift = (elem_num % ELEMS_PER_BLOCK) * ELEM_WIDTH;
+        if (((block >> shift) & ELEM_MASK) == 0) {
+            break;
+        }
+        elem_num++;
+        if (elem_num % ELEMS_PER_BLOCK == 0) {
+            block_opt = ReadBounded(&sp, panda_file::SHORTY_ELEM_SIZE);
+            if (!block_opt.has_value()) {
+                return std::nullopt;
+            }
+            block = static_cast<uint32_t>(block_opt.value());
+        }
+    }
+    return elem_num == 0 ? std::nullopt : std::optional<uint32_t>(elem_num - 1U);
+}
+
+void Verifier::ReportCorruptedInstructionSequence(const panda_file::File::EntityId &code_id,
+                                                  const panda_file::File::EntityId &method_id) const
+{
+    LOG(ERROR, VERIFIER) << "> error encountered at " << code_id.GetOffset() << " (0x" << std::hex
+                         << code_id.GetOffset() << "). bytecode instructions sequence corrupted for method 0x"
+                         << method_id.GetOffset() << "! went out of bounds";
+}
+
+bool Verifier::VerifyMethodInstructions(MethodInfos &infos)
+{
+    auto current_ins = infos.bc_ins_init;
     auto last_ins = infos.bc_ins_last;
     auto code_id = infos.method_accessor.GetCodeId().value();
     auto method_id = infos.method_id;
-    auto valid_regs_num = infos.valid_regs_num.value();
-    auto ins_slot_num = infos.ins_slot_num;
-    auto has_slot = infos.has_slot;
-    auto is_two_slot = infos.is_two_slot;
-    
+    auto valid_regs_num = infos.valid_regs_num;
+
     while (current_ins.GetAddress() != last_ins.GetAddress()) {
         if (current_ins.GetAddress() > last_ins.GetAddress()) {
-            LOG(ERROR, VERIFIER) << "> error encountered at " << code_id
-                                 << " (0x" << std::hex << code_id
-                                 << "). bytecode instructions sequence corrupted for method "
-                                 << method_id
-                                 << "! went out of bounds";
+            ReportCorruptedInstructionSequence(code_id, method_id);
             return false;
         }
-        if (!current_ins.IsJumpInstruction() && !current_ins.IsReturnOrThrowInstruction()
-            && current_ins.GetNext().GetAddress() == last_ins.GetAddress()) {
-            LOG(ERROR, VERIFIER) << "> error encountered at " << code_id
-                                 << " (0x" << std::hex << code_id
-                                 << "). bytecode instructions sequence corrupted for method "
-                                 << method_id
-                                 << "! went out of bounds";
+        if (!current_ins.IsJumpInstruction() && !current_ins.IsReturnOrThrowInstruction() &&
+            current_ins.GetNext().GetAddress() == last_ins.GetAddress()) {
+            ReportCorruptedInstructionSequence(code_id, method_id);
             return false;
         }
         const size_t count = GetVRegCount(current_ins);
         if (count != 0 && !CheckVRegIdx(current_ins, count, valid_regs_num)) {
             return false;
         }
-        if (!VerifyJumpInstruction(current_ins, last_ins,
-                                   infos.bc_ins_init, infos.ins_arr,
-                                   code_id)) {
+        if (!VerifyJumpInstruction(current_ins, last_ins, infos.bc_ins_init, infos.ins_arr, code_id)) {
             LOG(ERROR, VERIFIER) << "Invalid target position of jump instruction";
             return false;
         }
-        if (!GetIcSlotFromInstruction(current_ins, ins_slot_num,
-                                      has_slot, is_two_slot)) {
-            LOG(ERROR, VERIFIER) << "Fail to get first slot index!";
+        if (infos.ic_state.ic_check_enabled && !CollectIcSlotInsn(current_ins, infos.ic_insns)) {
             return false;
         }
         current_ins = current_ins.GetNext();
+    }
+    return true;
+}
+
+bool Verifier::IsSecondaryOpcodeValid(const BytecodeInstruction &bc_ins)
+{
+    if (!bc_ins.IsPrefixed()) {
+        return true;
+    }
+    uint8_t primary_opcode = bc_ins.GetPrimaryOpcode();
+    uint8_t secondary_opcode = bc_ins.GetSecondaryOpcode();
+    for (const auto &bound : PREFIX_OPCODE_BOUNDS) {
+        if (primary_opcode == bound.prefix) {
+            return secondary_opcode <= bound.last_secondary;
+        }
+    }
+    return false;
+}
+
+bool Verifier::VerifyMethodInRecord(const uint32_t &method_id) const
+{
+    auto iter = method_class_map_.find(method_id);
+    if (iter == method_class_map_.end()) {
+        if (IsExternalMethodId(method_id)) {
+            return true;
+        }
+        LOG(ERROR, VERIFIER) << "Method id(0x" << std::hex << method_id
+                             << ") is not declared in any record of the abc file!";
+        return false;
+    }
+    panda_file::MethodDataAccessor method_accessor(*file_, panda_file::File::EntityId(method_id));
+    if (method_accessor.GetClassId().GetOffset() != iter->second) {
+        LOG(ERROR, VERIFIER) << "Method id(0x" << std::hex << method_id << ") does not belong to the record 0x"
+                             << std::hex << iter->second << "!";
+        return false;
+    }
+    return true;
+}
+
+bool Verifier::VerifyMethodHeaderInfo(panda_file::CodeDataAccessor &code_accessor,
+                                      panda_file::MethodDataAccessor &method_accessor, MethodInfos &infos)
+{
+    if (code_accessor.GetCodeSize() <= 0) {
+        LOG(ERROR, VERIFIER) << "Fail to verify code size!";
+        return false;
+    }
+    std::optional<uint64_t> valid_regs_num;
+    if (!VerifyMethodRegisterIndex(code_accessor, valid_regs_num)) {
+        LOG(ERROR, VERIFIER) << "Fail to verify method register index!";
+        return false;
+    }
+    infos.valid_regs_num = valid_regs_num.value();
+    if (!VerifyMethodNumArgs(code_accessor, method_accessor)) {
+        return false;
+    }
+    return true;
+}
+
+bool Verifier::VerifyMethodCodeContent(panda_file::CodeDataAccessor &code_accessor, MethodInfos &infos)
+{
+    if (!PrecomputeInstructionIndices(infos.bc_ins_init, infos.bc_ins_last)) {
+        LOG(ERROR, VERIFIER) << "Fail to precompute instruction indices!";
+        return false;
+    }
+    if (!IsMethodBytecodeInstruction(infos.bc_ins_init)) {
+        LOG(ERROR, VERIFIER) << "Fail to verify method first bytecode instruction!";
+        return false;
+    }
+    if (!VerifyTryBlocks(code_accessor, infos.bc_ins_init, infos.bc_ins_last, infos.method_id)) {
+        LOG(ERROR, VERIFIER) << "Fail to verify try blocks or catch blocks!";
+        return false;
+    }
+    if (!VerifyMethodInstructions(infos)) {
+        LOG(ERROR, VERIFIER) << "Fail to verify method instructions!";
+        return false;
+    }
+    if (!VerifyMethodRegisterInitialization(code_accessor)) {
+        LOG(ERROR, VERIFIER) << "Fail to verify method register initialization!";
+        return false;
+    }
+    if (infos.ic_state.ic_check_enabled && !VerifyIcSlotAllocation(infos.ic_insns, infos.ic_state, infos.method_id)) {
+        return false;
     }
     return true;
 }
@@ -858,42 +1093,13 @@ bool Verifier::CheckConstantPoolMethodContent(const panda_file::File::EntityId &
     const auto ins_size = code_accessor.GetCodeSize();
     const auto ins_arr = code_accessor.GetInstructions();
     auto bc_ins = BytecodeInstruction(ins_arr);
-    const auto bc_ins_last = bc_ins.JumpTo(ins_size);
-    const auto bc_ins_init = bc_ins; // initial PC value
-    uint32_t ins_slot_num = 0; // For ic slot index verification
-    bool has_slot = false;
-    bool is_two_slot = false;
-    std::optional<uint64_t> valid_regs_num = 0;
-    MethodInfos infos = {bc_ins_init, bc_ins, bc_ins_last, method_accessor, method_id,
-                         valid_regs_num, ins_arr, ins_slot_num, has_slot, is_two_slot};
-    if (ins_size <= 0) {
-        LOG(ERROR, VERIFIER) << "Fail to verify code size!";
+    MethodInfos infos {bc_ins, bc_ins.JumpTo(ins_size), method_accessor, method_id, 0, ins_arr, {}, {}};
+    PrepareIcSlotCheck(method_accessor, infos.ic_state);
+    if (!VerifyMethodHeaderInfo(code_accessor, method_accessor, infos)) {
         return false;
     }
-    if (!VerifyMethodRegisterIndex(code_accessor, valid_regs_num)) {
-        LOG(ERROR, VERIFIER) << "Fail to verify method register index!";
+    if (!VerifyMethodCodeContent(code_accessor, infos)) {
         return false;
-    }
-    if (!PrecomputeInstructionIndices(bc_ins, bc_ins_last)) {
-        LOG(ERROR, VERIFIER) << "Fail to precompute instruction indices!";
-        return false;
-    }
-    if (!IsMethodBytecodeInstruction(bc_ins)) {
-        LOG(ERROR, VERIFIER) << "Fail to verify method first bytecode instruction!";
-    }
-    if (!VerifyTryBlocks(code_accessor, bc_ins, bc_ins_last)) {
-        LOG(ERROR, VERIFIER) << "Fail to verify try blocks or catch blocks!";
-        return false;
-    }
-    if (!VerifyMethodInstructions(infos)) {
-        LOG(ERROR, VERIFIER) << "Fail to verify method instructions!";
-        return false;
-    }
-    if (has_slot) {
-        if (is_two_slot) {
-            ins_slot_num += 1; // when there are two slots for the last instruction, the slot index increases
-        }
-        ins_slot_num += 1; // slot index starts with zero
     }
     return true;
 }
@@ -902,6 +1108,9 @@ bool Verifier::CheckConstantPoolIndex() const
 {
     for (auto &id : ins_method_ids_) {
         if (!VerifyMethodId(id)) {
+            return false;
+        }
+        if (!VerifyMethodInRecord(id)) {
             return false;
         }
     }
@@ -921,6 +1130,18 @@ bool Verifier::CheckConstantPoolIndex() const
     return true;
 }
 
+bool Verifier::CheckConstantPoolIdsBounds() const
+{
+    const uint32_t file_size = file_->GetHeader()->file_size;
+    for (const auto &id : constant_pool_ids_) {
+        if (id == 0 || id >= file_size) {
+            LOG(ERROR, VERIFIER) << "Constant pool id(0x" << std::hex << id << ") is out of bounds!";
+            return false;
+        }
+    }
+    return true;
+}
+
 std::optional<uint64_t> Verifier::SafeAdd(uint64_t a, uint64_t b) const
 {
     if (a > std::numeric_limits<uint64_t>::max() - b) {
@@ -928,4 +1149,4 @@ std::optional<uint64_t> Verifier::SafeAdd(uint64_t a, uint64_t b) const
     }
     return a + b;
 }
-} // namespace panda::verifier
+}  // namespace panda::verifier
