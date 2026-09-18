@@ -114,6 +114,9 @@ public:
 
     void *GetItem() const
     {
+        if (UNLIKELY(entry_->pc != instAddress_ || entry_->caller != instMethod_)) {
+            return nullptr;
+        }
         return entry_->item;
     }
 

@@ -213,7 +213,11 @@ public:
             }
             return length;
         }
-        length = GetUtf16Length();
+        auto utf16Length = GetUtf16Length();
+        if (UNLIKELY(start > utf16Length)) {
+            return 0;
+        }
+        length = utf16Length - start;
         return ark::utf::ConvertRegionUtf16ToUtf8(GetDataUtf16(), buf, length, maxLength, start, false);
     }
 

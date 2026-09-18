@@ -95,7 +95,7 @@ static bool GetPackagePath(const std::string &pathStr, EtsExecutionContext *exec
         return false;
     }
     pf = panda_file::OpenPandaFileFromSecureMemory(safeData->GetDataPtr(), safeData->GetDataLen(), abcPath);
-    return true;
+    return pf != nullptr;
 }
 
 static bool GetHspPath(const std::string &pathStr, EtsExecutionContext *executionCtx,

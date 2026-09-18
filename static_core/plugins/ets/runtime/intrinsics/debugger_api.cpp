@@ -23,6 +23,8 @@
 #include "plugins/ets/runtime/tooling/helpers.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
+#include <limits>
+
 namespace ark::ets::intrinsics {
 
 static void SetRuntimeException(EtsLong regNumber, EtsExecutionContext *executionCtx, std::string_view typeName)
@@ -42,7 +44,7 @@ static T DebuggerAPIGetLocal(EtsExecutionContext *executionCtx, EtsLong regNumbe
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, "Debugger is not enabled");
         return static_cast<T>(0);
     }
-    if (UNLIKELY(regNumber < 0)) {
+    if (UNLIKELY(regNumber < 0 || regNumber > std::numeric_limits<int32_t>::max())) {
         SetRuntimeException(regNumber, executionCtx, ark::ets::tooling::EtsTypeName<T>::NAME);
         return static_cast<T>(0);
     }
@@ -128,7 +130,7 @@ static void DebuggerAPISetLocal(EtsExecutionContext *executionCtx, EtsLong regNu
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->escompatError, "Debugger is not enabled");
         return;
     }
-    if (UNLIKELY(regNumber < 0)) {
+    if (UNLIKELY(regNumber < 0 || regNumber > std::numeric_limits<int32_t>::max())) {
         SetRuntimeException(regNumber, executionCtx, ark::ets::tooling::EtsTypeName<T>::NAME);
         return;
     }

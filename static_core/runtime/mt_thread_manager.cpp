@@ -272,9 +272,14 @@ void MTThreadManager::RegisterSensitiveThread() const
 
 void MTThreadManager::DumpUnattachedThreads(std::ostream &os)
 {
+    os::memory::LockHolder lock(threadLock_);
+    DumpUnattachedThreadsWithLockHeld(os);
+}
+
+void MTThreadManager::DumpUnattachedThreadsWithLockHeld(std::ostream &os)
+{
     os::native_stack::DumpUnattachedThread dump;
     dump.InitKernelTidLists();
-    os::memory::LockHolder lock(threadLock_);
     for (const auto &thread : threads_) {
         dump.AddTid(static_cast<pid_t>(thread->GetId()));
     }
@@ -314,7 +319,7 @@ void MTThreadManager::EnumerateThreadsForDump(const std::function<bool(ManagedTh
             break;
         }
     }
-    DumpUnattachedThreads(os);
+    DumpUnattachedThreadsWithLockHeld(os);
     self->GetMutatorLock()->Unlock();
     self->GetVM()->GetMutatorManager()->ResumeAllMutators();
 }
