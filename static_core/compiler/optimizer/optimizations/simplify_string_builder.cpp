@@ -1725,7 +1725,7 @@ bool SimplifyStringBuilder::HasAppendInstructionUser(Inst *inst) const
     return false;
 }
 
-bool SimplifyStringBuilder::IsPhiAccumulatedValue(PhiInst *phi) const
+bool SimplifyStringBuilder::IsPhiAccumulatedValue(PhiInst *phi, Loop *loop) const
 {
     // Phi-instruction is accumulated value, if it is used in the following way:
     //  bb_preheader:
@@ -1744,8 +1744,8 @@ bool SimplifyStringBuilder::IsPhiAccumulatedValue(PhiInst *phi) const
     //      20 CallStatic std.core.StringBuilder::toString sb, ss
     //      ...
 
-    return HasInputFromPreHeader(phi) && HasToStringCallInput(phi) && !UsedByPhiInstInSameBB(phi) &&
-           (HasAppendInstructionUser(phi) || HasSbCtorStrInstructionUser(phi));
+    return phi->GetBasicBlock()->GetLoop() == loop && HasInputFromPreHeader(phi) && HasToStringCallInput(phi) &&
+           !UsedByPhiInstInSameBB(phi) && (HasAppendInstructionUser(phi) || HasSbCtorStrInstructionUser(phi));
 }
 
 ArenaVector<Inst *> SimplifyStringBuilder::GetPhiAccumulatedValues(Loop *loop)
@@ -1756,7 +1756,7 @@ ArenaVector<Inst *> SimplifyStringBuilder::GetPhiAccumulatedValues(Loop *loop)
     instructionsVector_.clear();
 
     for (auto inst : loop->GetHeader()->PhiInsts()) {
-        if (IsPhiAccumulatedValue(inst->CastToPhi())) {
+        if (IsPhiAccumulatedValue(inst->CastToPhi(), loop)) {
             instructionsVector_.push_back(inst);
         }
     }
@@ -1768,7 +1768,7 @@ ArenaVector<Inst *> SimplifyStringBuilder::GetPhiAccumulatedValues(Loop *loop)
         }
 
         for (auto inst : backEdge->PhiInsts()) {
-            if (IsPhiAccumulatedValue(inst->CastToPhi())) {
+            if (IsPhiAccumulatedValue(inst->CastToPhi(), loop)) {
                 instructionsVector_.push_back(inst);
             }
         }
@@ -2010,6 +2010,7 @@ Inst *SimplifyStringBuilder::MatchHoistableInstructions(const StringBuilderUsage
     ASSERT(match.loop.toStringLengthChains.empty());
     match.loop.toStringLengthChains = usage.toStringLengthChains;
 
+    Loop *loop = usage.instance->GetBasicBlock()->GetLoop();
     for (auto &user : usage.instance->GetUsers()) {
         auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
         if (userInst->IsSaveState()) {
@@ -2024,7 +2025,7 @@ Inst *SimplifyStringBuilder::MatchHoistableInstructions(const StringBuilderUsage
         auto appendInstruction = userInst;
         ASSERT(appendInstruction->GetInputsCount() > 1);
         auto appendArg = appendInstruction->GetDataFlowInput(1);
-        if (appendArg->IsPhi() && IsPhiAccumulatedValue(appendArg->CastToPhi())) {
+        if (appendArg->IsPhi() && IsPhiAccumulatedValue(appendArg->CastToPhi(), loop)) {
             // Append-call needs to be hoisted, if its argument is accumulated value
             auto phiAppendArg = appendArg->CastToPhi();
             auto initialValue =
