@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+# Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,9 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include(cmake/ani_tests.cmake)
+cmake_minimum_required(VERSION 3.10)
 
-add_subdirectory(ani_gtest)
-add_subdirectory(tests)
-add_subdirectory(app)
-add_subdirectory(coldreload_app)
+project(ani_coldreload_app)
+
+panda_add_executable(ani_coldreload_app main.cpp)
+
+panda_target_link_libraries(ani_coldreload_app arkruntime)
+
+panda_add_sanitizers(TARGET ani_coldreload_app SANITIZERS ${PANDA_SANITIZERS_LIST})

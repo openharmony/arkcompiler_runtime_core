@@ -41,6 +41,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_class_linker.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker_context.cpp
     ${ETS_EXT_SOURCES}/ets_class_linker_extension.cpp
+    ${ETS_EXT_SOURCES}/coldreload/coldreload.cpp
+    ${ETS_EXT_SOURCES}/coldreload/ets_coldreload.cpp
     ${ETS_EXT_SOURCES}/ets_exceptions.cpp
     ${ETS_EXT_SOURCES}/ets_itable_builder.cpp
     ${ETS_EXT_SOURCES}/ets_language_context.cpp
@@ -149,6 +151,9 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_arraybuffer.cpp
     ${ETS_EXT_SOURCES}/types/ets_std_core_array.cpp
     ${ETS_EXT_SOURCES}/types/ets_field.cpp
+    ${ETS_EXT_SOURCES}/types/ets_abc_file.cpp
+    ${ETS_EXT_SOURCES}/types/ets_abc_package.cpp
+    ${ETS_EXT_SOURCES}/types/ets_abc_runtime_linker.cpp
     ${ETS_EXT_SOURCES}/types/ets_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_async_context.cpp
     ${ETS_EXT_SOURCES}/types/ets_job.cpp

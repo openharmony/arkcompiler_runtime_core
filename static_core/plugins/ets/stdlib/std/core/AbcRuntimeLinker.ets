@@ -111,4 +111,25 @@ export class AbcRuntimeLinker extends RuntimeLinker {
     protected final native addAbcFiles(newFiles: FixedArray<AbcFile | undefined>): void
 
     private native loadClassFromAbcFiles(clsName: string, init: boolean): Class | undefined
+
+    /**
+     * Cold reload: prepend a patch abc to this linker's search order, so that
+     * classes present in the patch are loaded from it and classes absent from
+     * it fall back to the files already registered via addAbcFiles.
+     *
+     * Intended for application startup (before any user code has run), after
+     * the process has been restarted. Structural changes are supported, since
+     * there is no live state to preserve. The process must not have AOT files
+     * loaded; such a call is rejected. A package without the abc entry (a
+     * native-only patch) is a no-op success: class lookup has nothing to
+     * reorder. Calling this more than once stacks the patches, newest first.
+     *
+     * @param patchPath path of the patch: a plain `.abc` file, or a `.hqf` /
+     *                  `.hap` / `.hsp` package holding `ets/modules_static.abc`.
+     *
+     * @returns 0 on success, otherwise a `coldreload::Error` ordinal.
+     *          Throws NullPointerException when patchPath is null; every
+     *          other failure comes back as the return code.
+     */
+    protected final native coldReload(patchPath: string): int
 }
