@@ -36,14 +36,28 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_reflect_method.h"
+#include "runtime/hotreload/redirect.h"
 #include "common_interfaces/objects/string/line_string.h"
 
 namespace ark::ets::intrinsics {
 
+/**
+ * @brief Turn the raw pointer a managed `Method` object carries into a live `EtsMethod`.
+ *
+ * These intrinsics receive the reflection object's `long` field directly rather than going through
+ * `EtsReflectMethod::GetEtsMethod`, so they need the same hot reload translation: a reflection
+ * object created before a reload holds the pointer of the method that now belongs to the obsolete
+ * class.
+ */
+static EtsMethod *EtsMethodFromRaw(EtsLong raw)
+{
+    return reinterpret_cast<EtsMethod *>(ark::hotreload::RedirectMethod(reinterpret_cast<Method *>(raw)));
+}
+
 // Utility functions
 extern "C" EtsClass *ReflectMethodGetReturnTypeImpl(EtsLong etsMethodPtr)
 {
-    auto *retCls = reinterpret_cast<EtsMethod *>(etsMethodPtr)->ResolveReturnType();
+    auto *retCls = EtsMethodFromRaw(etsMethodPtr)->ResolveReturnType();
     if (UNLIKELY(retCls == nullptr)) {
         ASSERT(EtsExecutionContext::GetCurrent()->GetMT()->HasPendingException());
         return nullptr;
@@ -59,7 +73,7 @@ extern "C" EtsClass *ReflectMethodGetParameterTypeByIdxImpl(EtsLong etsFunctionP
         return nullptr;
     }
 
-    auto *function = reinterpret_cast<EtsMethod *>(etsFunctionPtr);
+    auto *function = EtsMethodFromRaw(etsFunctionPtr);
     if (UNLIKELY(function == nullptr)) {
         ThrowNullPointerException();
         return nullptr;
@@ -85,7 +99,7 @@ extern "C" EtsClass *ReflectMethodGetParameterTypeByIdxImpl(EtsLong etsFunctionP
 
 extern "C" EtsInt ReflectMethodGetParametersNumImpl(EtsLong etsFunctionPtr)
 {
-    auto *function = reinterpret_cast<EtsMethod *>(etsFunctionPtr);
+    auto *function = EtsMethodFromRaw(etsFunctionPtr);
     ASSERT(function != nullptr);
     return function->GetParametersNum();
 }
@@ -95,7 +109,7 @@ extern "C" ObjectHeader *ReflectMethodGetParameterTypesImpl(EtsLong etsFunctionP
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     ASSERT(executionCtx != nullptr);
 
-    auto *function = reinterpret_cast<EtsMethod *>(etsFunctionPtr);
+    auto *function = EtsMethodFromRaw(etsFunctionPtr);
     ASSERT(function != nullptr);
     auto numParams = function->GetParametersNum();
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
@@ -125,7 +139,7 @@ extern "C" ObjectHeader *ReflectMethodGetParameterTypesImpl(EtsLong etsFunctionP
 
 extern "C" EtsString *ReflectMethodGetNameInternal(EtsLong etsMethodPtr)
 {
-    auto *method = reinterpret_cast<EtsMethod *>(etsMethodPtr);
+    auto *method = EtsMethodFromRaw(etsMethodPtr);
     EtsString *name;
     if (method->IsInstanceConstructor()) {
         name = EtsString::CreateFromMUtf8(CONSTRUCTOR_NAME);

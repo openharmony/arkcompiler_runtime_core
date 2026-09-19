@@ -599,7 +599,25 @@ EtsClassLinkerExtension::~EtsClassLinkerExtension()
         return;
     }
 
+    // Obsolete classes left over by hotreload are plain internal-allocator data that nothing else
+    // owns; they must be released before the active classes, and before the panda files they
+    // reference are dropped.
+    FreeObsoleteData();
     FreeLoadedClasses();
+}
+
+void EtsClassLinkerExtension::MarkPandaFileSuperseded(const panda_file::File *pf)
+{
+    ASSERT(pf != nullptr);
+    os::memory::LockHolder lock(supersededPandaFilesLock_);
+    supersededPandaFiles_.insert(pf);
+}
+
+bool EtsClassLinkerExtension::IsPandaFileSuperseded(const panda_file::File *pf) const
+{
+    ASSERT(pf != nullptr);
+    os::memory::LockHolder lock(supersededPandaFilesLock_);
+    return supersededPandaFiles_.find(pf) != supersededPandaFiles_.end();
 }
 
 bool EtsClassLinkerExtension::IsMethodNativeApi(const Method *method) const

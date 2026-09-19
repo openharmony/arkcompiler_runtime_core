@@ -28,6 +28,7 @@
 #include "plugins/ets/runtime/ani/ani_converters.h"
 #include "plugins/ets/runtime/ani/ani_interaction_api.h"
 #include "plugins/ets/runtime/ani/ani_mangle.h"
+#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ani/verify/types/internal_ref.h"
 #include "plugins/ets/runtime/ani/verify/types/venv.h"
@@ -42,7 +43,6 @@
 #include "plugins/ets/runtime/types/ets_field.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 
 namespace ark::ets::ani::verify {
 
@@ -3659,6 +3659,20 @@ bool VerifyANIArgs(std::string_view functionName, std::initializer_list<ANIArg> 
     VVm *vvm = VVm::GetInstance();
     VEnv *venv = VEnv::GetCurrent();
     auto etsVm = PandaEtsVM::FromAniVM(vvm->GetVm());
+
+    /*
+     * ONE managed scope for the whole verification: the entity resolution (RedirectAcrossHotreload
+     * in the resolvers) and the ownership checks in the verify functions must observe one
+     * generation, and a reload must not commit between them. The per-function scopes further
+     * down nest inside this one; a nested ScopedManagedCodeFix never transitions (the outer
+     * scope owns the single native-to-managed transition), so the nesting is safe by
+     * construction.
+     */
+    PandaAniEnv *scopeEnv = (venv != nullptr) ? PandaAniEnv::FromAniEnv(venv->GetEnv()) : nullptr;
+    std::optional<ScopedManagedCodeFix> managedScope;
+    if (scopeEnv != nullptr) {
+        managedScope.emplace(scopeEnv);
+    }
 
     PandaVector<ArgInfo> argInfoList;
     Verifier verifier(vvm, venv);

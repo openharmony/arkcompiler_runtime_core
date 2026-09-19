@@ -297,10 +297,9 @@ static inline ani_status GetPrimitiveTypeField(ani_env *env, ani_object object, 
     CHECK_PTR_ARG(field);
     CHECK_PTR_ARG(result);
 
+    ScopedManagedCodeFix s(env);
     EtsField *etsField = ToInternalField(field);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
-
-    ScopedManagedCodeFix s(env);
     EtsObject *etsObject = s.ToInternalType(object);
     *result = etsObject->GetFieldPrimitive<T>(etsField);
     return ANI_OK;
@@ -313,10 +312,9 @@ static inline ani_status SetPrimitiveTypeField(ani_env *env, ani_object object, 
     CHECK_PTR_ARG(object);
     CHECK_PTR_ARG(field);
 
+    ScopedManagedCodeFix s(env);
     EtsField *etsField = ToInternalField(field);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
-
-    ScopedManagedCodeFix s(env);
     EtsObject *etsObject = s.ToInternalType(object);
     etsObject->SetFieldPrimitive(etsField, value);
     return ANI_OK;
@@ -330,10 +328,9 @@ static ani_status ClassGetStaticField(ani_env *env, ani_class cls, ani_static_fi
     CHECK_PTR_ARG(field);
     CHECK_PTR_ARG(result);
 
+    ScopedManagedCodeFix s(env);
     EtsField *etsField = ToInternalField(field);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
-
-    ScopedManagedCodeFix s(env);
     EtsClass *etsClass = etsField->GetDeclaringClass();
     ani_status status = InitializeClass(s, etsClass);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
@@ -354,10 +351,9 @@ static ani_status ClassSetStaticField(ani_env *env, ani_class cls, ani_static_fi
     CHECK_PTR_ARG(cls);
     CHECK_PTR_ARG(field);
 
+    ScopedManagedCodeFix s(env);
     EtsField *etsField = ToInternalField(field);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<T>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
-
-    ScopedManagedCodeFix s(env);
     EtsClass *etsClass = etsField->GetDeclaringClass();
     ani_status status = InitializeClass(s, etsClass);
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
@@ -2566,10 +2562,9 @@ NO_UB_SANITIZE static ani_status Object_GetField_Ref(ani_env *env, ani_object ob
     CHECK_PTR_ARG(field);
     CHECK_PTR_ARG(result);
 
+    ScopedManagedCodeFix s(env);
     EtsField *etsField = ToInternalField(field);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
-
-    ScopedManagedCodeFix s(env);
     EtsObject *etsObject = s.ToInternalType(object);
     EtsObject *etsRes = etsObject->GetFieldObject(etsField);
     return s.AddLocalRef(etsRes, result);
@@ -2652,10 +2647,9 @@ NO_UB_SANITIZE static ani_status Object_SetField_Ref(ani_env *env, ani_object ob
     CHECK_PTR_ARG(field);
     CHECK_PTR_ARG(value);
 
+    ScopedManagedCodeFix s(env);
     EtsField *etsField = ToInternalField(field);
     ANI_CHECK_RETURN_IF_NE(etsField->GetEtsType(), AniTypeInfo<ani_ref>::ETS_TYPE_VALUE, ANI_INVALID_TYPE);
-
-    ScopedManagedCodeFix s(env);
     EtsObject *etsObject = s.ToInternalType(object);
     EtsObject *etsValue = s.ToInternalType(value);
     etsObject->SetFieldObject(etsField, etsValue);

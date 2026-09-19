@@ -399,11 +399,18 @@ public:
         }
 #endif  // NDEBUG
 
-        if (alreadyInManaged_ && IsAccessFromManagedAllowed()) {
-            return;
+        /*
+         * A nested scope must not transition. When the thread is already in managed state an
+         * outer scope owns the transition back (a fast-native caller that stays managed, or an
+         * enclosing verify scope such as the one VerifyANIArgs holds for the whole argument
+         * verification), and ManagedCodeBegin from managed state is a FATAL. Scopes may nest by
+         * design; the innermost scope that actually leaves native code performs the one
+         * native-to-managed transition, and every scope skips ManagedCodeEnd symmetrically via
+         * alreadyInManaged_.
+         */
+        if (!alreadyInManaged_) {
+            GetExecutionContext()->GetMT()->ManagedCodeBegin();
         }
-
-        GetExecutionContext()->GetMT()->ManagedCodeBegin();
     }
     explicit ScopedManagedCodeFix(ani_env *env) : ScopedManagedCodeFix(PandaAniEnv::FromAniEnv(env)) {}
 
@@ -427,19 +434,6 @@ public:
     NO_MOVE_SEMANTIC(ScopedManagedCodeFix);
 
 private:
-    bool IsAccessFromManagedAllowed()
-    {
-#ifndef NDEBUG
-        auto stack = StackWalker::Create(GetExecutionContext()->GetMT());
-        if (stack.HasFrame()) {
-            auto method = EtsMethod::FromRuntimeMethod(stack.GetMethod());
-            ASSERT(method != nullptr);
-            return method->IsFastNative();
-        }
-#endif  // NDEBUG
-        return true;
-    }
-
     PandaUniquePtr<ExceptionData> exceptionData_;
     bool alreadyInManaged_;
 };

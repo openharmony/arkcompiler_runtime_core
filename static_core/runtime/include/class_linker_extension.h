@@ -278,6 +278,26 @@ public:
     void AddObsoleteClass(const PandaVector<ark::Class *> &classes);
     void FreeObsoleteData();
 
+    /**
+     * @brief Visit the classes hotreload has retired, without the live ones.
+     *
+     * `EnumerateClasses` yields obsolete classes mixed in with the live ones and gives no way to
+     * tell them apart, and the usual test --- "the context resolves this descriptor to this very
+     * class" --- cannot be used from inside its callback, because `FindClass` wants the same
+     * non-recursive lock. The commit needs the distinction: an obsolete class must keep dispatching
+     * inside its own generation while every live class is repaired.
+     */
+    template <class Callback>
+    void EnumerateObsoleteClasses(const Callback &cb)
+    {
+        os::memory::LockHolder lock(obsoleteClassesLock_);
+        for (const auto &cls : obsoleteClasses_) {
+            if (!cb(cls)) {
+                return;
+            }
+        }
+    }
+
     virtual Class *FromClassObject(ObjectHeader *obj);
 
     virtual size_t GetClassObjectSizeFromClassSize(uint32_t size);

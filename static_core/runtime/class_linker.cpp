@@ -964,6 +964,35 @@ private:
     ClassLoadingSet **tlSetPtr_ {nullptr};
 };
 
+/**
+ * Counts an in-flight load on the context for the whole duration of `ClassLinker::LoadClass`.
+ * Every path that can publish a class into a context funnels through that entry, so the counter
+ * covers the full window from "decided to load" to "published or failed". See
+ * `ClassLinkerContext::GetPendingLoads` for the reader.
+ */
+class PendingLoadGuard {
+public:
+    PendingLoadGuard(ClassLinker *classLinker, ClassLinkerContext *context)
+        : classLinker_(classLinker), context_(context)
+    {
+        classLinker_->BeginPendingLoad();
+        context_->BeginPendingLoad();
+    }
+
+    ~PendingLoadGuard()
+    {
+        classLinker_->EndPendingLoad();
+        context_->EndPendingLoad();
+    }
+
+    NO_COPY_SEMANTIC(PendingLoadGuard);
+    NO_MOVE_SEMANTIC(PendingLoadGuard);
+
+private:
+    ClassLinker *classLinker_;
+    ClassLinkerContext *context_;
+};
+
 static uint64_t GetClassUniqueHash(uint32_t pandaFileHash, uint32_t classId)
 {
     const uint8_t bitsToShuffle = 32;
@@ -1137,6 +1166,7 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
     ASSERT(pf != nullptr);
     ASSERT(!pf->IsExternal(classId));
     ASSERT(context != nullptr);
+    PendingLoadGuard pendingLoad(this, context);
     panda_file::ClassDataAccessor classDataAccessor(*pf, classId);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(&classDataAccessor);
     if (!IsContextCanBeLoaded(ctx, context, descriptor, errorHandler)) {

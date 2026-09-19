@@ -78,6 +78,7 @@ options:
   - coroutines
   - task_manager
   - stdlib
+  - hotreload
   - coldreload
   description: Enable logs from specified components
   delimiter: ":"

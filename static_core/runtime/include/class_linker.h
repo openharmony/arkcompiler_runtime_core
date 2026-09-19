@@ -353,6 +353,32 @@ public:
 
     void BuildBootClassIndex();
 
+    /// @brief Count one load that starts executing anywhere in this VM.
+    void BeginPendingLoad()
+    {
+        // Atomic with relaxed order reason: the counter publishes no data, it is bookkeeping only.
+        // The reload quiesce gate re-reads it under stop-the-world, where the world-stop handshake
+        // already orders the updates.
+        pendingLoads_.fetch_add(1, std::memory_order_relaxed);
+    }
+
+    /// @brief Count one load that finished (in any outcome) anywhere in this VM.
+    void EndPendingLoad()
+    {
+        // Atomic with relaxed order reason: same as BeginPendingLoad -- pure bookkeeping, the
+        // authoritative read happens under STW and needs no ordering from the counter itself.
+        pendingLoads_.fetch_sub(1, std::memory_order_relaxed);
+    }
+
+    /// @brief How many loads are in flight anywhere in this VM (see ClassLinkerContext::GetPendingLoads)
+    uint32_t GetPendingLoads() const
+    {
+        // Atomic with relaxed order reason: the reload reads this under stop-the-world, where the
+        // safepoint handshake makes every completed update visible; outside STW the value is
+        // advisory only (a load may start or finish right after the read).
+        return pendingLoads_.load(std::memory_order_relaxed);
+    }
+
 private:
     class InterfaceProxyBuilder;
 
@@ -444,6 +470,9 @@ private:
 
     bool isInitialized_ {false};
     bool isTraceEnabled_ {false};
+
+    // Diagnostic only, see `GetPendingLoads`
+    std::atomic<uint32_t> pendingLoads_ {0};
 
     NO_COPY_SEMANTIC(ClassLinker);
     NO_MOVE_SEMANTIC(ClassLinker);

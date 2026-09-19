@@ -26,18 +26,25 @@
 #include "types/ets_object.h"
 #include "types/ets_primitives.h"
 #include "types/ets_type.h"
+#include "runtime/hotreload/redirect.h"
 
 namespace ark::ets::intrinsics {
 
+/// @see `EtsMethodFromRaw` in `std_core_reflect_Method.cpp` --- same problem, same fix.
+static EtsField *EtsFieldFromRaw(EtsLong raw)
+{
+    return reinterpret_cast<EtsField *>(ark::hotreload::RedirectField(reinterpret_cast<Field *>(raw)));
+}
+
 extern "C" EtsString *ReflectFieldGetNameInternal(EtsLong etsFieldPtr)
 {
-    return ManglingUtils::GetDisplayNameStringFromField(reinterpret_cast<EtsField *>(etsFieldPtr));
+    return ManglingUtils::GetDisplayNameStringFromField(EtsFieldFromRaw(etsFieldPtr));
 }
 
 extern "C" EtsClass *ReflectFieldGetTypeInternal(EtsLong etsFieldPtr)
 {
     // do not expose primitive types and string types except std.sore.String
-    auto fieldType = reinterpret_cast<EtsField *>(etsFieldPtr)->GetType();
+    auto fieldType = EtsFieldFromRaw(etsFieldPtr)->GetType();
     if (fieldType == nullptr) {
         ASSERT(EtsExecutionContext::GetCurrent()->GetMT()->HasPendingException());
         return nullptr;

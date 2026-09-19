@@ -54,6 +54,7 @@ set(SOURCES
     gc_task.cpp
     dprofiler/dprofiler.cpp
     hotreload/hotreload.cpp
+    hotreload/redirect.cpp
     interpreter/interpreter.cpp
     intrinsics.cpp
     coretypes/line_string.cpp

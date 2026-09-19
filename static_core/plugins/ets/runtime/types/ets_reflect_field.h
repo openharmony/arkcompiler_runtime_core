@@ -18,6 +18,7 @@
 
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "runtime/hotreload/redirect.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 
 namespace ark {
@@ -86,9 +87,17 @@ public:
         ObjectAccessor::SetPrimitive(this, MEMBER_OFFSET(EtsReflectField, accessMod_), accessMod);
     }
 
+    /**
+     * @brief The field this reflection object stands for.
+     *
+     * Translated on every read for the same reason as `EtsReflectMethod::GetEtsMethod`: the stored
+     * `long` is a raw `Field *`, and hot reload exchanges the field arrays. A stale STATIC field
+     * would otherwise address the obsolete class's own storage, silently reading and writing memory
+     * nothing else looks at.
+     */
     EtsField *GetEtsField()
     {
-        return reinterpret_cast<EtsField *>(etsField_);
+        return reinterpret_cast<EtsField *>(ark::hotreload::RedirectField(reinterpret_cast<Field *>(etsField_)));
     }
 
     EtsClass *GetCachedFieldType()

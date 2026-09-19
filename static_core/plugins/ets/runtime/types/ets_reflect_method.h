@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "runtime/hotreload/redirect.h"
 
 namespace ark::ets {
 
@@ -85,9 +86,17 @@ public:
         ObjectAccessor::SetPrimitive(this, MEMBER_OFFSET(EtsReflectMethod, accessMod_), accessMod);
     }
 
+    /**
+     * @brief The method this reflection object stands for.
+     *
+     * `etsMethod_` is a raw `Method *` stored in a managed `long`, so a `Method` object that
+     * outlived a hot reload names the obsolete method. The stored value is left alone and
+     * translated on every read instead: writing the new pointer back would need a managed write
+     * from inside the commit, and the read is not on any hot path.
+     */
     EtsMethod *GetEtsMethod()
     {
-        return reinterpret_cast<EtsMethod *>(etsMethod_);
+        return reinterpret_cast<EtsMethod *>(ark::hotreload::RedirectMethod(reinterpret_cast<Method *>(etsMethod_)));
     }
 
 private:

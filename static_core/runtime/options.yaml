@@ -191,6 +191,7 @@ options:
     - events
     - scheduler
     - coroutines
+    - hotreload
     - coldreload
   description: '[DEPRECATED] Option was moved to libarkbase/utils/logger_options.yaml, use logger::Options instead of runtime options.'
   delimiter: ":"
