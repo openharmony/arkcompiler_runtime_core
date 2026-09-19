@@ -612,15 +612,24 @@ uint32_t ItemContainer::DeleteItems()
     // Elem->ValueItem
     // ValueItem->BaseItem if ValueItem::Type == Type::ID
     // BaseItem should be remove from AnnotationItem before delete
-    auto shouldRemoveAnnotationItem = [this](const std::unique_ptr<BaseItem> &item) -> bool {
+    // Pass 1: clean up annotation references while every referenced object is still
+    // alive. A single remove_if that both cleans references and deletes the element
+    // (std::list::remove_if destroys the element immediately) would leave a dangling
+    // pointer if a referenced annotation is destroyed before the referencing one is
+    // processed. Splitting clean-up and deletion into two passes avoids that UAF.
+    for (auto &item : items_) {
+        if (item->GetItemType() == ItemTypes::ANNOTATION_ITEM) {
+            auto annoItem = static_cast<AnnotationItem *>(item.get());
+            DeleteReferenceFromAnno(annoItem);
+        }
+    }
+    // Pass 2: delete the annotations that are not needed anymore.
+    items_.remove_if([](const std::unique_ptr<BaseItem> &item) {
         if (item->GetItemType() != ItemTypes::ANNOTATION_ITEM) {
             return false;
         }
-        auto annoItem = static_cast<AnnotationItem *>(item.get());
-        DeleteReferenceFromAnno(annoItem);
         return !item->GetDependencyMark() && item->NeedsEmit();
-    };
-    items_.remove_if(shouldRemoveAnnotationItem);
+    });
     std::unordered_set<LineNumberProgramItem *> removedLineNumberPrograms;
     items_.remove_if([this, &removedLineNumberPrograms](const std::unique_ptr<BaseItem> &item) {
         if (!item->GetDependencyMark()) {

@@ -43,6 +43,14 @@
 
 namespace ark::panda_file::test {
 
+TEST(ClassDataAccessor, RejectsInvalidDescriptorData)
+{
+    EXPECT_TRUE(ClassDataAccessor::DemangledName(File::StringData {}).empty());
+
+    static constexpr std::array<uint8_t, 2> INVALID_DESCRIPTOR {'X', '\0'};
+    EXPECT_EQ(ClassDataAccessor::DemangledName(File::StringData {1U, INVALID_DESCRIPTOR.data()}), "X");
+}
+
 class FailingLargeItem final : public BaseItem {
 public:
     static constexpr size_t SIZE = 64U * 1024U;
