@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,6 +154,9 @@ private:
         auto value = fieldAcc->GetValue<uint32_t>();
         if (value) {
             panda_file::File::EntityId stringId(value.value());
+            if (!stringId.IsValid() || stringId.GetOffset() >= file_->GetHeader()->fileSize) {
+                return;
+            }
             auto data = file_->GetStringData(stringId);
             std::string stringData(reinterpret_cast<const char *>(data.data));
             auto *stringItem = container_.GetOrCreateStringItem(stringData);

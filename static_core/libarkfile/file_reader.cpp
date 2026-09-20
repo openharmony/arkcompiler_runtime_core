@@ -291,6 +291,10 @@ ValueItem *FileReader::SetElemValueItem(AnnotationDataAccessor::Tag &annTag, Ann
         case 'C': {
             auto scalar = annElem.GetScalarValue();
             const File::EntityId strId(scalar.Get<uint32_t>());
+            if (!strId.IsValid() || strId.GetOffset() >= file_->GetHeader()->fileSize) {
+                auto *strItem = container_.GetOrCreateStringItem("");
+                return container_.GetOrCreateIdValueItem(strItem);
+            }
             auto data = file_->GetStringData(strId);
             std::string itemStr(utf::Mutf8AsCString(data.data));
             auto *strItem = container_.GetOrCreateStringItem(itemStr);
@@ -582,6 +586,10 @@ DebugInfoItem *FileReader::CreateDebugInfoItem(File::EntityId debugInfoId)
 
     debugInfoItem->SetLineNumber(debugAcc.GetLineStart());
     debugAcc.EnumerateParameters([this, &debugInfoItem](File::EntityId paramId) {
+        if (UNLIKELY(!paramId.IsValid())) {
+            debugInfoItem->AddParameter(nullptr);
+            return;
+        }
         auto data = file_->GetStringData(paramId);
         std::string itemStr(utf::Mutf8AsCString(data.data));
         auto *stringItem = container_.GetOrCreateStringItem(itemStr);

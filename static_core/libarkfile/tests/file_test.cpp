@@ -655,4 +655,87 @@ TEST(File, LoadPandFileExt_Behavior)
     EXPECT_TRUE(allSet) << "Function pointers are in all_set state";
 }
 
+static os::mem::ConstBytePtr MakeBytePtr(std::vector<uint8_t> *data)
+{
+    return os::mem::ConstBytePtr(reinterpret_cast<std::byte *>(data->data()), data->size(),
+                                 [](std::byte *, size_t) noexcept {});
+}
+
+static std::unique_ptr<const File> MakeFileWithClass(const char *className, std::vector<uint8_t> *data)
+{
+    ItemContainer container;
+    container.GetOrCreateClassItem(className);
+    MemoryWriter memWriter;
+    EXPECT_TRUE(container.Write(&memWriter));
+    *data = memWriter.GetData();
+    return GetPandaFile(data);
+}
+
+TEST(File, GetSpanFromId)
+{
+    std::vector<uint8_t> data;
+    auto pandaFile = MakeFileWithClass("SpanTestClass", &data);
+    ASSERT_NE(pandaFile, nullptr);
+
+    auto id = pandaFile->GetClassId(reinterpret_cast<const uint8_t *>("SpanTestClass"));
+    ASSERT_TRUE(id.IsValid());
+
+    auto span = pandaFile->GetSpanFromId(id);
+    EXPECT_EQ(reinterpret_cast<uintptr_t>(span.data()),
+              reinterpret_cast<uintptr_t>(pandaFile->GetBase()) + id.GetOffset());
+    EXPECT_EQ(span.Size(), pandaFile->GetHeader()->fileSize - id.GetOffset());
+
+    // The last byte of the file is still a valid offset
+    auto lastByteId = File::EntityId(pandaFile->GetHeader()->fileSize - 1U);
+    auto lastByteSpan = pandaFile->GetSpanFromId(lastByteId);
+    EXPECT_EQ(lastByteSpan.Size(), 1U);
+}
+
+TEST(File, GetSpanFromIdInvalidOffsetShouldFatal)
+{
+    std::vector<uint8_t> data;
+    auto pandaFile = MakeFileWithClass("SpanDeathTestClass", &data);
+    ASSERT_NE(pandaFile, nullptr);
+
+    // Offset equal to the file size is out of range
+    EXPECT_DEATH(pandaFile->GetSpanFromId(File::EntityId(pandaFile->GetHeader()->fileSize)), ".*");
+    // Offset beyond the file size is out of range
+    EXPECT_DEATH(pandaFile->GetSpanFromId(File::EntityId(0xFFFFFFFFU)), ".*");
+    // Zero offset is not a valid entity id
+    EXPECT_DEATH(pandaFile->GetSpanFromId(File::EntityId(0)), ".*");
+}
+
+TEST(File, ThrowIfWithCheckNoFatalWhenConditionIsFalse)
+{
+    auto data = GetEmptyPandaFileBytes();
+    auto ptr = MakeBytePtr(&data);
+
+    // Condition is false: nothing happens, with and without tag
+    ThrowIfWithCheck(ptr, false, File::INVALID_FILE_OFFSET, File::GET_SPAN_FROM_ID);
+    ThrowIfWithCheck(ptr, false, File::INVALID_FILE_OFFSET);
+}
+
+TEST(File, ThrowIfWithCheckShouldFatalOnValidChecksum)
+{
+    auto data = GetEmptyPandaFileBytes();
+    auto ptr = MakeBytePtr(&data);
+
+    // Checksum is valid: fatal message is extended with the tag
+    EXPECT_DEATH(ThrowIfWithCheck(ptr, true, File::INVALID_FILE_OFFSET, File::GET_SPAN_FROM_ID), ".*");
+    // Empty tag: fatal message without method name
+    EXPECT_DEATH(ThrowIfWithCheck(ptr, true, File::INVALID_FILE_OFFSET), ".*");
+}
+
+TEST(File, ThrowIfWithCheckChecksumMismatchShouldFatal)
+{
+    auto data = GetEmptyPandaFileBytes();
+    ASSERT_GT(data.size(), sizeof(File::Header));
+    // Corrupt the payload after the header, the checksum field in the header stays intact
+    constexpr uint32_t META_DATA = 0xFFU;
+    data.back() ^= META_DATA;
+
+    auto ptr = MakeBytePtr(&data);
+    EXPECT_DEATH(ThrowIfWithCheck(ptr, true, File::INVALID_FILE_OFFSET, File::GET_SPAN_FROM_ID), ".*");
+}
+
 }  // namespace ark::panda_file::test

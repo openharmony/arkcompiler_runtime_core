@@ -660,6 +660,25 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
     return true;
 }
 
+PANDA_PUBLIC_API void ThrowIfWithCheck(const os::mem::ConstBytePtr &ptr, bool cond, const std::string_view &msg,
+                                       const std::string_view &tag)
+{
+    if (UNLIKELY(cond)) {
+        bool isCheckSumMatch = ValidateChecksum(ptr);
+        if (!isCheckSumMatch) {
+            auto *header = reinterpret_cast<const File::Header *>(ptr.Get());
+            LOG(FATAL, PANDAFILE) << msg << ", checksum mismatch. The abc file has been corrupted. "
+                                  << "Expected checksum: 0x" << std::hex << header->checksum;
+        }
+
+        if (!tag.empty()) {
+            LOG(FATAL, PANDAFILE) << msg << ", from method: " << tag;
+        } else {
+            LOG(FATAL, PANDAFILE) << msg;
+        }
+    }
+}
+
 /* static */
 std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr)
 {

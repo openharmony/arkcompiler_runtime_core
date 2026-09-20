@@ -805,7 +805,9 @@ public:
             program_->SetDependencyMark();
         }
         for (auto &item : parameters_) {
-            item->SetDependencyMark();
+            if (item != nullptr) {
+                item->SetDependencyMark();
+            }
         }
     }
 

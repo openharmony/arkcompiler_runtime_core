@@ -46,6 +46,12 @@ struct EntityPairHeader {
     uint32_t nextPos;
 };
 
+/*
+ * If the check fails. exception information is displayed
+ */
+PANDA_PUBLIC_API void ThrowIfWithCheck(const os::mem::ConstBytePtr &ptr, bool cond, const std::string_view &msg,
+                                       const std::string_view &tag = "");
+
 class File {
 public:
     using Index = uint16_t;
@@ -187,6 +193,8 @@ public:
     {
         const Header *header = GetHeader();
         Span file(GetBase(), header->fileSize);
+        panda_file::ThrowIfWithCheck(GetPtr(), !id.IsValid() || id.GetOffset() >= file.size(),
+                                     File::INVALID_FILE_OFFSET, File::GET_SPAN_FROM_ID);
         return file.Last(file.size() - id.GetOffset());
     }
 
@@ -461,6 +469,8 @@ public:
     static constexpr uint32_t FILE_INDEX_SHIFT = 32;
     static constexpr uint32_t INVALID_FILE_INDEX = 0;
     static constexpr uint32_t FILE_INDEX_BASE_OFFSET = 1;
+    static constexpr const char *INVALID_FILE_OFFSET = "Invalid file offset";
+    static constexpr const char *GET_SPAN_FROM_ID = "GetSpanFromId";
 
     static constexpr uint64_t PackFileEntityIdWithIndex(uint32_t entityIdOffset, uint32_t index)
     {

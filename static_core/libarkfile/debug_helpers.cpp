@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,9 @@ size_t GetLineNumber(ark::panda_file::MethodDataAccessor mda, uint32_t bcOffset,
 const char *GetStringFromConstantPool(const File &pf, uint32_t offset)
 {
     auto id = File::EntityId(offset);
-    ASSERT(id.IsValid());
+    if (!id.IsValid()) {
+        return nullptr;
+    }
     return utf::Mutf8AsCString(pf.GetStringData(id).data);
 }
 

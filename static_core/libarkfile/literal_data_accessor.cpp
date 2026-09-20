@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,9 @@ LiteralDataAccessor::LiteralDataAccessor(const File &pandaFile, File::EntityId l
     : pandaFile_(pandaFile), literalDataId_(literalDataId)
 {
     literalNum_ = pandaFile_.GetHeader()->numLiteralarrays;
+    if (UNLIKELY(literalNum_ == 0)) {
+        return;
+    }
     literalDataSp_ = pandaFile_.GetSpanFromId(literalDataId_);
     if (literalDataSp_.size() >= pandaFile_.GetHeader()->fileSize) {
         LOG(FATAL, PANDAFILE) << "Literal data size is greater than file size";
