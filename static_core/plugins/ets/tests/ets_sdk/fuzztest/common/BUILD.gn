@@ -1,0 +1,48 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     `http://www.apache.org/licenses/LICENSE-2.0`
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//arkcompiler/runtime_core/static_core/ark_root.gni")
+
+config("ets_sdk_native_test_common_config") {
+  include_dirs = [
+    ".",
+    "$ark_root/plugins/ets/stdlib/native",
+    "$ark_root/plugins/ets/runtime/ani",
+    "$ark_root/plugins/ets/sdk/native",
+    "$ark_root/libarkbase",
+  ]
+}
+
+ohos_static_library("ets_sdk_native_test_common") {
+  visibility = [ "$ark_root/plugins/ets/tests/ets_sdk/fuzztest/*" ]
+  testonly = true
+
+  public_configs = [ ":ets_sdk_native_test_common_config" ]
+
+  public_deps = [ "$ark_root/plugins/ets:ets_sdk_native_src" ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "hilog:libhilog",
+    "libuv:uv",
+    "openssl:libcrypto_shared",
+    "icu:shared_icuuc",
+  ]
+  if (path_exists("//third_party/libxml2")) {
+    external_deps += [ "libxml2:libxml2" ]
+  }
+
+  subsystem_name = "arkcompiler"
+  part_name = "runtime_core"
+}
