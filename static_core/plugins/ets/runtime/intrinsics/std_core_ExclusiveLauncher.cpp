@@ -46,6 +46,30 @@ namespace ark::ets::intrinsics {
 
 static constexpr EtsInt INVALID_WORKER_ID = -1;
 
+class GlobalRefGuard {
+public:
+    GlobalRefGuard(mem::GlobalObjectStorage *storage, mem::Reference *ref) : storage_(storage), ref_(ref) {}
+
+    ~GlobalRefGuard()
+    {
+        if (ref_ != nullptr) {
+            storage_->Remove(ref_);
+        }
+    }
+
+    void Release()
+    {
+        ref_ = nullptr;
+    }
+
+    NO_COPY_SEMANTIC(GlobalRefGuard);
+    NO_MOVE_SEMANTIC(GlobalRefGuard);
+
+private:
+    mem::GlobalObjectStorage *storage_;
+    mem::Reference *ref_ = nullptr;
+};
+
 enum class ExclusiveScopeTaskStatus : uint8_t { PENDING, SUCCEEDED, FAILED, CANCELED };
 
 class ScopedExclusiveScopeStack {
@@ -616,7 +640,9 @@ static void SetupAndRunExclusiveWorker(PandaEtsVM *etsVM, JobExecutionContext *e
     if (!res) {
         g_eaWorkerHelper.StopPeriodicScheduling(eaExecCtx->GetWorker()->GetId());
         HandleInteropEnvError();
-        etsVM->GetGlobalObjectStorage()->Remove(taskRef);
+        auto *refStorage = etsVM->GetGlobalObjectStorage();
+        refStorage->Remove(taskRef);
+        refStorage->Remove(joiningPromiseRef);
         return;
     }
     if (supportInterop) {
@@ -643,6 +669,8 @@ EtsInt ExclusiveLaunch(EtsObject *task, EtsPromise *joiningPromise, EtsString *n
     ASSERT(taskRef != nullptr);
     auto *joiningPromiseRef = refStorage->Add(joiningPromise->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
     ASSERT(joiningPromiseRef != nullptr);
+    GlobalRefGuard taskRefGuard(refStorage, taskRef);
+    GlobalRefGuard joiningPromiseRefGuard(refStorage, joiningPromiseRef);
     auto limitIsReached = false;
     auto jsEnvEmpty = false;
     bool supportInterop = static_cast<bool>(needInterop);
@@ -668,6 +696,8 @@ EtsInt ExclusiveLaunch(EtsObject *task, EtsPromise *joiningPromise, EtsString *n
                 event.Fire();
                 SetupAndRunExclusiveWorker(etsVM, eaExecCtx, supportInterop, taskRef, joiningPromiseRef);
             });
+        taskRefGuard.Release();
+        joiningPromiseRefGuard.Release();
         os::thread::SetThreadName(t.native_handle(), nameStr.c_str());
         event.Wait();
         t.detach();

@@ -247,14 +247,14 @@ static ani_status DetachCurrentThread(ani_vm *vm)
     bool isJsEnvCreatedExternally = ifaceTable->IsJsEnvCreatedExternally();
     auto *jsEnv = ifaceTable->GetJSEnv();
     auto result = jobMan->DetachExclusiveWorker();
+    if (!result) {
+        LOG(ERROR, ANI) << "Cannot DetachThread, thread was not attached or is executing a job";
+        return ANI_ERROR;
+    }
     if (jsEnv != nullptr) {
         if (!isJsEnvCreatedExternally) {
             ifaceTable->CleanUpJSEnv(jsEnv);
         }
-    }
-    if (!result) {
-        LOG(ERROR, ANI) << "Cannot DetachThread, thread was not attached";
-        return ANI_ERROR;
     }
     ASSERT(Mutator::GetCurrent() == nullptr);
 

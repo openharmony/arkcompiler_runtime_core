@@ -47,6 +47,7 @@ static EtsMethod *ResolveInvokeMethod(EtsExecutionContext *executionCtx, VMHandl
     if (!func->GetClass()->IsFunction()) {
         ThrowEtsException(executionCtx, PlatformTypes()->coreTypeError,
                           "Method have to be instance of std.core.Function");
+        return nullptr;
     }
     auto *method = func->GetClass()->ResolveVirtualMethod(PlatformTypes(executionCtx)->coreFunctionUnsafeCall);
     ASSERT(method != nullptr);
@@ -83,6 +84,7 @@ CoroResult *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id gro
     VMHandle<EtsObject> function(executionCtx->GetMT(), func->GetCoreType());
     EtsMethod *method = ResolveInvokeMethod(executionCtx, function);
     if (method == nullptr) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
         return nullptr;
     }
 
@@ -92,10 +94,6 @@ CoroResult *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id gro
         return nullptr;
     }
 
-    auto *storage = executionCtx->GetPandaVM()->GetGlobalObjectStorage();
-    auto *ref = storage->Add(coroResultHandle.GetPtr()->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-    auto *evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(ref, jobMan);
-
     // since transferring arguments from frame registers (which are local roots for GC) to a C++ vector
     // introduces the potential risk of pointer invalidation in case GC moves the referenced objects,
     // we would like to do this transfer below all potential GC invocation points
@@ -104,6 +102,10 @@ CoroResult *Launch(EtsObject *func, bool abortFlag, JobWorkerThreadGroup::Id gro
         ThrowNullPointerException(ctx, executionCtx->GetMT());
         return nullptr;
     }
+
+    auto *storage = executionCtx->GetPandaVM()->GetGlobalObjectStorage();
+    auto *ref = storage->Add(coroResultHandle.GetPtr()->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+    auto *evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(ref, jobMan);
 
     auto realArgs = PandaVector<Value> {Value(function->GetCoreType()), Value(argArray->GetCoreType())};
     groupId = postToMain ? JobWorkerThreadGroup::FromDomain(jobMan, JobWorkerThreadDomain::MAIN) : groupId;
@@ -141,6 +143,10 @@ void EtsLaunchSameWorker(EtsObject *callback)
     ASSERT(hCallback.GetPtr() != nullptr);
 
     auto *method = ResolveInvokeMethod(executionCtx, hCallback);
+    if (method == nullptr) {
+        ASSERT(executionCtx->GetMT()->HasPendingException());
+        return;
+    }
     auto argArray = EtsObjectArray::Create(PlatformTypes(executionCtx)->coreObject, 0U);
     if (UNLIKELY(argArray == nullptr)) {
         ASSERT(executionCtx->GetMT()->HasPendingException());
