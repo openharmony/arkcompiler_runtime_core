@@ -20,12 +20,19 @@ if (ark_standalone_build) {
 }
 
 if (is_ohos && is_standard_system) {
+  etsstdlib_bootabc_available = !ark_is_host_product &&
+      !(ark_standalone_build ||
+        (defined(ohos_indep_compiler_enable) && ohos_indep_compiler_enable) ||
+        (defined(ark_static_standalone_build) && ark_static_standalone_build))
   ohos_prebuilt_etc("etsstdlib_install") {
     deps = [ "$ark_root/plugins/ets:etsstdlib" ]
     stdlib_dir =
         get_label_info("$ark_root/plugins/ets:etsstdlib", "target_gen_dir")
     source = "$stdlib_dir/etsstdlib.abc"
-    symlink_path = "../framework/etsstdlib_bootabc.abc"
+    if (etsstdlib_bootabc_available) {
+      deps += [ "$ark_root/plugins/ets:etsstdlib_bootabc" ]
+      symlink_path = "../framework/etsstdlib_bootabc.abc"
+    }
     part_name = ark_part_name
     subsystem_name = ark_subsystem_name
   }
