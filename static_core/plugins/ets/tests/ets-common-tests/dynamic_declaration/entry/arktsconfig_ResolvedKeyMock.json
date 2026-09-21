@@ -1,0 +1,35 @@
+{
+    "compilerOptions": {
+        "baseUrl": "..",
+        "paths": {
+            "entry/ResolvedKeyMock": [
+                "entry/ResolvedKeyMock.ets"
+            ],
+            "mock": [
+                "modules/mock"
+            ],
+            "mock/Foo": [
+                "modules/mock/Foo.ets"
+            ]
+        },
+        "dependencies": {
+            "@test/pkg": {
+                "language": "js",
+                "path": "modules/scoped/build/declgenV2/Index.d.ets",
+                "ohmUrl": "runtime/entry",
+                "sourceFilePath": "modules/scoped/Index.ets"
+            },
+            "@test/pkg/Foo": {
+                "language": "js",
+                "path": "modules/scoped/build/declgenV2/Decoy.d.ets",
+                "ohmUrl": "runtime/Foo",
+                "sourceFilePath": "modules/scoped/Foo.ets"
+            }
+        },
+        "mock": {
+            "@test/pkg/Foo": {
+                "source": "modules/mock/Foo.ets"
+            }
+        }
+    }
+}

@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "baseUrl": "..",
+        "paths": {
+            "entry/MissingDeclaration": [
+                "entry/MissingDeclaration.ets"
+            ]
+        },
+        "dependencies": {
+            "@test/pkg/Foo": {
+                "language": "js",
+                "path": "modules/scoped/build/declgenV2/Foo.d.ets",
+                "ohmUrl": "runtime/decoy"
+            },
+            "@test/pkg/Actual": {
+                "language": "js",
+                "path": "modules/scoped/build/declgenV2/Missing.d.ets",
+                "ohmUrl": "runtime/Foo",
+                "sourceFilePath": "modules/scoped/Foo.ets"
+            },
+            "@test/pkg/src/Nested": {
+                "language": "js",
+                "path": "modules/scoped/build/declgenV2/src/Nested.d.ets",
+                "ohmUrl": "runtime/entry",
+                "sourceFilePath": "modules/scoped/src/Nested.ets"
+            }
+        }
+    }
+}

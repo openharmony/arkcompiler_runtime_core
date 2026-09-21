@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "baseUrl": "..",
+        "paths": {
+            "entry/StaticTarget": [
+                "entry/StaticTarget.ets"
+            ],
+            "@test/pkg/Foo": [
+                "modules/static/Foo.ets"
+            ]
+        },
+        "dependencies": {
+            "@test/pkg": {
+                "language": "js",
+                "path": "modules/static/build/declgenV2/Index.d.ets",
+                "ohmUrl": "runtime/entry",
+                "sourceFilePath": "modules/static/Index.ets"
+            }
+        }
+    }
+}

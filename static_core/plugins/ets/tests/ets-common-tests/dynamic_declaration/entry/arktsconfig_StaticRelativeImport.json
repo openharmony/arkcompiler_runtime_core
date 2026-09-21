@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "baseUrl": "..",
+        "paths": {
+            "entry/StaticRelativeImport": [
+                "entry/StaticRelativeImport.ets"
+            ]
+        },
+        "dependencies": {
+            "@test/pkg": {
+                "language": "js",
+                "path": "modules/scoped/build/declgenV2/Index.d.ets",
+                "ohmUrl": "runtime/entry",
+                "sourceFilePath": "modules/scoped/Index.ets"
+            },
+            "@test/pkg/Foo": {
+                "language": "js",
+                "path": "modules/scoped/build/declgenV2/Foo.d.ets",
+                "ohmUrl": "runtime/Foo",
+                "sourceFilePath": "modules/scoped/Foo.ets"
+            }
+        }
+    }
+}

@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "baseUrl": "..",
+        "paths": {
+            "entry/ParentNormalization": [
+                "entry/ParentNormalization.ets"
+            ]
+        },
+        "dependencies": {
+            "@test/pkg": {
+                "language": "js",
+                "path": "modules/normalized/build/declgenV2/Index.d.ets",
+                "ohmUrl": "runtime/entry",
+                "sourceFilePath": "modules/normalized/Index.ets"
+            },
+            "@test/pkg/Foo": {
+                "language": "js",
+                "path": "modules/normalized/build/declgenV2/Foo.d.ets",
+                "ohmUrl": "runtime/Foo",
+                "sourceFilePath": "modules/normalized/Foo.ets"
+            }
+        }
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "baseUrl": "..",
+        "paths": {
+            "entry/NestedParentImport": [
+                "entry/NestedParentImport.ets"
+            ]
+        },
+        "dependencies": {
+            "@test/nested": {
+                "language": "js",
+                "path": "modules/nested/build/declgenV2/Index.d.ets",
+                "ohmUrl": "runtime/entry",
+                "sourceFilePath": "modules/nested/Index.ets"
+            },
+            "@test/nested/Foo": {
+                "language": "js",
+                "path": "modules/nested/build/declgenV2/Foo.d.ets",
+                "ohmUrl": "runtime/Foo",
+                "sourceFilePath": "modules/nested/Foo.ets"
+            },
+            "@test/nested/src/Nested": {
+                "language": "js",
+                "path": "modules/nested/build/declgenV2/src/Nested.d.ets",
+                "sourceFilePath": "modules/nested/src/Nested.ets",
+                "ohmUrl": "runtime/nested"
+            }
+        }
+    }
+}
