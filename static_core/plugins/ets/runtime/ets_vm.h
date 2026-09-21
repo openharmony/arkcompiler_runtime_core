@@ -184,6 +184,8 @@ public:
         return mm_->GetGCStats();
     }
 
+    AsyncStackSnapshotHandlePtr CloneCurrentAsyncDebuggerStack() const override;
+
     EtsClassLinker *GetClassLinker() const
     {
         return classLinker_.get();

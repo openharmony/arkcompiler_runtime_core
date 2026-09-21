@@ -163,6 +163,9 @@ LaunchResult StacklessJobManager::Launch(Job *job, const LaunchParams &params)
         return LaunchResult::NO_SUITABLE_WORKER;
     }
     job->SetAffinityMask(affinityMask);
+    if (params.asyncDebuggerStack != nullptr) {
+        job->SetAsyncDebuggerStack(params.CloneAsyncDebuggerStack());
+    }
 
     uint64_t stackId = GetAsyncStackHelper().CollectAsyncStack(dfx::StackType::STACK_TYPE_LAUNCH,
                                                                dfx::AsyncStackHelper::DEFAULT_STACK_DEPTH);

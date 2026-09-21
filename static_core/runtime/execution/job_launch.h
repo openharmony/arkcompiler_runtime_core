@@ -15,10 +15,12 @@
 #ifndef PANDA_RUNTIME_EXECUTION_JOB_LAUNCH_H
 #define PANDA_RUNTIME_EXECUTION_JOB_LAUNCH_H
 
-#include "runtime/execution/job_priority.h"
 #include "runtime/execution/job_worker_group.h"
+#include "runtime/execution/async_stack_snapshot_handle.h"
+#include "runtime/execution/job_priority.h"
 
 #include <cstdint>
+#include <utility>
 
 namespace ark {
 
@@ -54,6 +56,14 @@ struct LaunchParams {
     }
     explicit LaunchParams(bool launchImm) : launchImmediately(launchImm) {}
 
+    // Snapshot ownership intentionally makes this type move-only. Launch receives it by const
+    // reference and clones the retained handle, so no in-tree caller needs value-copy semantics.
+    ~LaunchParams() = default;
+    LaunchParams(const LaunchParams &) = delete;
+    LaunchParams &operator=(const LaunchParams &) = delete;
+    LaunchParams(LaunchParams &&) = default;
+    LaunchParams &operator=(LaunchParams &&) = default;
+
     /// priority of launched job
     JobPriority priority = JobPriority::DEFAULT_PRIORITY;  // NOLINT(misc-non-private-member-variables-in-classes)
     /// set of workers that job can be scheduled on
@@ -62,6 +72,19 @@ struct LaunchParams {
     JobEvent *startEvent = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
     /// means job execution in-place on the same worker
     bool launchImmediately = false;  // NOLINT(misc-non-private-member-variables-in-classes)
+
+    /// Snapshot that must be retained by the launched job
+    AsyncStackSnapshotHandlePtr asyncDebuggerStack;  // NOLINT(misc-non-private-member-variables-in-classes)
+
+    AsyncStackSnapshotHandlePtr CloneAsyncDebuggerStack() const
+    {
+        return asyncDebuggerStack == nullptr ? AsyncStackSnapshotHandlePtr {} : asyncDebuggerStack->Clone();
+    }
+
+    AsyncStackSnapshotHandlePtr TakeAsyncDebuggerStack()
+    {
+        return std::move(asyncDebuggerStack);
+    }
 };
 
 }  // namespace ark

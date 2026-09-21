@@ -19,6 +19,7 @@
 #include "runtime/include/value.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
+#include "runtime/execution/async_stack_snapshot_handle.h"
 #include "runtime/execution/job_priority.h"
 #include "runtime/execution/affinity_mask.h"
 
@@ -151,6 +152,8 @@ public:
 
     PANDA_PUBLIC_API static Job *GetCurrent();
     PANDA_PUBLIC_API static void SetCurrent(Job *job);
+    static AsyncStackSnapshotHandle *GetCurrentAsyncDebuggerStack();
+    static AsyncStackSnapshotHandlePtr CloneCurrentAsyncDebuggerStack();
 
     static Job *Create(PandaString name, Id id, EntrypointInfo &&epInfo,
                        JobPriority priority = JobPriority::DEFAULT_PRIORITY, Type type = Type::MUTATOR,
@@ -200,6 +203,31 @@ public:
     /// @param executionCtx updates job's execution context
     inline void SetExecutionContext(JobExecutionContext *executionCtx);
 
+    void SetAsyncDebuggerStack(AsyncStackSnapshotHandlePtr asyncDebuggerStack)
+    {
+        asyncDebuggerStack_ = std::move(asyncDebuggerStack);
+    }
+
+    AsyncStackSnapshotHandle *GetAsyncDebuggerStack() const
+    {
+        return asyncDebuggerStack_.get();
+    }
+
+    AsyncStackSnapshotHandlePtr CloneAsyncDebuggerStack() const
+    {
+        return asyncDebuggerStack_ == nullptr ? AsyncStackSnapshotHandlePtr {} : asyncDebuggerStack_->Clone();
+    }
+
+    AsyncStackSnapshotHandlePtr TakeAsyncDebuggerStack()
+    {
+        return std::move(asyncDebuggerStack_);
+    }
+
+    void ResetAsyncDebuggerStack()
+    {
+        asyncDebuggerStack_.reset();
+    }
+
     inline void SetAsyncStackID(uint64_t asyncStackID)
     {
         asyncStackID_ = asyncStackID;
@@ -235,7 +263,8 @@ public:
           // Atomic with relaxed order reason: no order requirement
           status_(other.status_.load(std::memory_order_relaxed)),
           executionCtx_(other.executionCtx_),
-          asyncStackID_(other.asyncStackID_)
+          asyncStackID_(other.asyncStackID_),
+          asyncDebuggerStack_(std::move(other.asyncDebuggerStack_))
     {
         other.executionCtx_ = nullptr;
         other.asyncStackID_ = 0U;
@@ -243,6 +272,8 @@ public:
         other.status_.store(Status::CREATED, std::memory_order_relaxed);
     }
     Job &operator=(Job &&other) = delete;
+    // Move assignment is intentionally deleted: jobs are polymorphic identity objects. Ownership is transferred
+    // through explicit move construction or LaunchParams, not through reassignment of an existing job.
 
     virtual ~Job() = default;
 
@@ -268,6 +299,8 @@ private:
     JobExecutionContext *executionCtx_ = nullptr;
 
     uint64_t asyncStackID_ = 0U;
+
+    AsyncStackSnapshotHandlePtr asyncDebuggerStack_;
 };
 
 }  // namespace ark

@@ -15,7 +15,9 @@
 
 #include "inspector_server.h"
 
+#include <cmath>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <regex>
 #include <string>
@@ -798,13 +800,32 @@ void InspectorServer::OnCallDebuggerClientDisconnect(std::function<void(PtThread
     });
 }
 
-void InspectorServer::OnCallDebuggerSetAsyncCallStackDepth(std::function<void(PtThread)> &&handler)
+void InspectorServer::OnCallDebuggerSetAsyncCallStackDepth(std::function<void(PtThread, uint32_t)> &&handler)
 {
-    server_.OnCall("Debugger.setAsyncCallStackDepth", [this, handler = std::move(handler)](auto &sessionId, auto &) {
-        auto thread = sessionManager_.GetThreadBySessionId(sessionId);
-        handler(thread);
-        return std::unique_ptr<JsonSerializable>();
+    // clang-format off
+    server_.OnCall("Debugger.setAsyncCallStackDepth",
+        [this, handler = std::move(handler)](auto &sessionId, const JsonObject &params) -> Server::MethodResponse {
+            auto maxDepthProperty = params.GetValue<JsonObject::NumT>("maxDepth");
+            if (!maxDepthProperty) {
+                std::string_view msg = "No 'maxDepth' property";
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg, ErrorCode::INVALID_PARAMS));
+            }
+
+            const auto maxDepthValue = *maxDepthProperty;
+            const auto truncatedMaxDepth = std::trunc(maxDepthValue);
+            if (!std::isfinite(maxDepthValue) || maxDepthValue < 0.0 || maxDepthValue != truncatedMaxDepth ||
+                truncatedMaxDepth > std::numeric_limits<uint32_t>::max()) {
+                std::string_view msg = "Invalid 'maxDepth' property";
+                LOG(INFO, DEBUGGER) << msg;
+                return Unexpected(JRPCError(msg, ErrorCode::INVALID_PARAMS));
+            }
+
+            auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+            handler(thread, static_cast<uint32_t>(truncatedMaxDepth));
+            return std::unique_ptr<JsonSerializable>();
     });
+    // clang-format on
 }
 
 void InspectorServer::OnCallDebuggerSetBlackboxPatterns(std::function<void(PtThread)> &&handler)

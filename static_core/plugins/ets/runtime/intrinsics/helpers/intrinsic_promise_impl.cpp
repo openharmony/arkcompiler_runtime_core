@@ -14,6 +14,7 @@
  */
 
 #include "plugins/ets/runtime/intrinsics/helpers/intrinsic_promise_impl.h"
+#include "plugins/ets/runtime/dfx/static_async_stack_snapshot_manager.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -28,7 +29,7 @@
 namespace ark::ets::intrinsics::helpers {
 
 static LaunchResult LaunchJobWithDependency(JobExecutionContext *executionCtx, Job *job, EtsAsyncContext *asyncCtx,
-                                            EtsPromise *promise)
+                                            EtsPromise *promise, AsyncStackSnapshotHandlePtr asyncDebuggerStack)
 {
     auto *etsCtx = EtsExecutionContext::FromMT(executionCtx);
     asyncCtx->SetAwaitee(etsCtx, promise);
@@ -36,6 +37,7 @@ static LaunchResult LaunchJobWithDependency(JobExecutionContext *executionCtx, J
     auto *dependency = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(jobMan);
     auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(executionCtx->GetWorker()->GetId());
     LaunchParams lParams {job->GetPriority(), groupId, dependency};
+    lParams.asyncDebuggerStack = std::move(asyncDebuggerStack);
     auto launchResult = jobMan->Launch(job, lParams);
     if UNLIKELY (launchResult != LaunchResult::OK) {
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(dependency);
@@ -45,6 +47,11 @@ static LaunchResult LaunchJobWithDependency(JobExecutionContext *executionCtx, J
     // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
     promise->GetEvent<CoroutineMode::STACKLESS>(etsCtx)->AddDependency(dependency);
     return launchResult;
+}
+
+static AsyncStackSnapshotHandlePtr CaptureAwaitStack(EtsExecutionContext *etsCtx)
+{
+    return StaticAsyncStackSnapshotManager::CaptureHandle(etsCtx, "await", true);
 }
 
 static PandaVector<Value> FillEntrypointArgs(Method *method)
@@ -111,47 +118,61 @@ static EtsObject *HandleAwaitStackful(EtsPromise *promise)
     return nullptr;
 }
 
-EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t primCount, int32_t pc)
+bool ValidateAwaitContext(JobExecutionContext *executionCtx, EtsExecutionContext *etsCtx, EtsPromise *promise)
 {
-    JobExecutionContext *executionCtx = JobExecutionContext::GetCurrent();
-    EtsExecutionContext *etsCtx = EtsExecutionContext::FromMT(executionCtx);
     if (promise == nullptr) {
         LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
         ThrowNullPointerException(ctx, executionCtx);
-        return nullptr;
+        return false;
     }
-    auto *jobMan = executionCtx->GetManager();
-    if (jobMan->IsJobSwitchDisabled()) {
+    if (executionCtx->GetManager()->IsJobSwitchDisabled()) {
         ThrowEtsException(etsCtx, PlatformTypes(executionCtx)->coreInvalidJobOperationError,
                           "Cannot await in the current context!");
-        return nullptr;
+        return false;
     }
+    return true;
+}
 
-    [[maybe_unused]] EtsHandleScope scope(etsCtx);
-    EtsHandle<EtsPromise> promiseHandle(etsCtx, promise);
-
-    MarkPromiseHandled(promiseHandle);
-
-    if (Runtime::GetCurrent()->GetOptions().GetCoroutineImpl() == "stackful") {
-        return HandleAwaitStackful(promiseHandle.GetPtr());
+void SetCurrentJobAsyncDebuggerStack(AsyncStackSnapshotHandlePtr &&asyncDebuggerStack)
+{
+    auto *job = Job::GetCurrent();
+    if (job != nullptr) {
+        job->SetAsyncDebuggerStack(std::move(asyncDebuggerStack));
     }
+}
 
+EtsObject *HandleAwaitExistingAsyncContext(EtsExecutionContext *etsCtx, EtsHandle<EtsPromise> &promiseHandle,
+                                           AsyncStackSnapshotHandlePtr &&asyncDebuggerStack)
+{
+    SetCurrentJobAsyncDebuggerStack(std::move(asyncDebuggerStack));
+
+    auto *jobMan = JobExecutionContext::GetCurrent()->GetManager();
+    auto *stacklessJobMan = static_cast<StacklessJobManager *>(jobMan);
+    auto *dependency = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(stacklessJobMan);
     auto *asyncCtx = EtsAsyncContext::GetCurrent(etsCtx);
-    if (asyncCtx != nullptr) {
-        auto *stacklessJobMan = static_cast<StacklessJobManager *>(jobMan);
-        auto *dependency = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(stacklessJobMan);
-        asyncCtx->SetAwaitee(etsCtx, promiseHandle.GetPtr());
-        stacklessJobMan->AwaitAsynchronous(dependency);
-        promiseHandle->GetEvent<CoroutineMode::STACKLESS>(etsCtx)->AddDependency(dependency);
-        return asyncCtx;
-    }
+    asyncCtx->SetAwaitee(etsCtx, promiseHandle.GetPtr());
+    stacklessJobMan->AwaitAsynchronous(dependency);
+    promiseHandle->GetEvent<CoroutineMode::STACKLESS>(etsCtx)->AddDependency(dependency);
+    return asyncCtx;
+}
 
-    asyncCtx = EtsAsyncContext::Create(etsCtx, refCount, primCount, pc);
+struct AsyncContextLaunchInfo {
+    int32_t refCount;
+    int32_t primCount;
+    int32_t pc;
+    AsyncStackSnapshotHandlePtr asyncDebuggerStack;
+};
+
+EtsObject *CreateAsyncContextAndLaunch(JobExecutionContext *executionCtx, EtsExecutionContext *etsCtx,
+                                       EtsHandle<EtsPromise> &promiseHandle, AsyncContextLaunchInfo &&launchInfo)
+{
+    auto *asyncCtx = EtsAsyncContext::Create(etsCtx, launchInfo.refCount, launchInfo.primCount, launchInfo.pc);
     EtsHandle<EtsAsyncContext> asyncCtxHandle(etsCtx, asyncCtx);
     if UNLIKELY (asyncCtxHandle.GetPtr() == nullptr) {
         return nullptr;
     }
-    auto refStor = EtsExecutionContext::FromMT(executionCtx)->GetPandaAniEnv()->GetEtsReferenceStorage();
+
+    auto *refStor = etsCtx->GetPandaAniEnv()->GetEtsReferenceStorage();
     auto *etsAsyncCtxRef = refStor->NewEtsRef(asyncCtx, EtsReference::EtsObjectType::LOCAL);
     if UNLIKELY (etsAsyncCtxRef == nullptr) {
         ThrowOutOfMemoryError(etsCtx->GetMT(), "Cannot allocate async context reference");
@@ -161,14 +182,48 @@ EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t pr
     auto *asyncMethod = StackWalker::Create(etsCtx->GetMT()).GetMethod();
     auto args = FillEntrypointArgs(asyncMethod);
     auto epInfo = Job::ManagedEntrypointInfo {nullptr, asyncMethod, std::move(args)};
+    auto *jobMan = executionCtx->GetManager();
     auto *job = jobMan->CreateJob<SuspendableJob>(asyncMethod->GetFullName(), std::move(epInfo));
     job->SetSuspensionContext(aCtxRef);
-    auto launchResult = LaunchJobWithDependency(executionCtx, job, asyncCtxHandle.GetPtr(), promiseHandle.GetPtr());
+
+    auto launchResult = LaunchJobWithDependency(executionCtx, job, asyncCtxHandle.GetPtr(), promiseHandle.GetPtr(),
+                                                std::move(launchInfo.asyncDebuggerStack));
     if UNLIKELY (launchResult != LaunchResult::OK) {
         jobMan->HandleLaunchResultManaged(launchResult);
         jobMan->DestroyJob(job);
     }
     return asyncCtxHandle.GetPtr();
+}
+
+EtsObject *EtsAwaitPromiseImpl(EtsPromise *promise, int32_t refCount, int32_t primCount, int32_t pc)
+{
+    JobExecutionContext *executionCtx = JobExecutionContext::GetCurrent();
+    EtsExecutionContext *etsCtx = EtsExecutionContext::FromMT(executionCtx);
+    if (!ValidateAwaitContext(executionCtx, etsCtx, promise)) {
+        return nullptr;
+    }
+
+    [[maybe_unused]] EtsHandleScope scope(etsCtx);
+    EtsHandle<EtsPromise> promiseHandle(etsCtx, promise);
+
+    MarkPromiseHandled(promiseHandle);
+    auto asyncDebuggerStack = CaptureAwaitStack(etsCtx);
+    if (UNLIKELY(etsCtx->GetMT()->HasPendingException())) {
+        return nullptr;
+    }
+
+    if (Runtime::GetCurrent()->GetOptions().GetCoroutineImpl() == "stackful") {
+        SetCurrentJobAsyncDebuggerStack(std::move(asyncDebuggerStack));
+        return HandleAwaitStackful(promiseHandle.GetPtr());
+    }
+
+    auto *asyncCtx = EtsAsyncContext::GetCurrent(etsCtx);
+    if (asyncCtx != nullptr) {
+        return HandleAwaitExistingAsyncContext(etsCtx, promiseHandle, std::move(asyncDebuggerStack));
+    }
+
+    auto launchInfo = AsyncContextLaunchInfo {refCount, primCount, pc, std::move(asyncDebuggerStack)};
+    return CreateAsyncContextAndLaunch(executionCtx, etsCtx, promiseHandle, std::move(launchInfo));
 }
 
 static EtsObject *HandleSettledPromise(EtsExecutionContext *etsCtx, EtsHandle<EtsPromise> &promiseHandle)
@@ -241,7 +296,7 @@ void EtsPromiseResolveImpl(EtsExecutionContext *executionCtx, EtsPromise *promis
 
     if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(PlatformTypes(executionCtx)->corePromise)) {
         hpromise->Unlock();
-        auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
+        auto *internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
         SubscribePromiseOnResultObject(hpromise.GetPtr(), internalPromise);
         return;
     }

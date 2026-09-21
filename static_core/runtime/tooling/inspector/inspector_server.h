@@ -88,7 +88,7 @@ public:
     void OnCallDebuggerRemoveBreakpointsByUrl(std::function<void(PtThread, SourceFileFilter)> &&handler);
     void OnCallDebuggerRestartFrame(std::function<void(PtThread, FrameId)> &&handler);
     void OnCallDebuggerResume(std::function<void(PtThread)> &&handler);
-    void OnCallDebuggerSetAsyncCallStackDepth(std::function<void(PtThread)> &&handler);
+    void OnCallDebuggerSetAsyncCallStackDepth(std::function<void(PtThread, uint32_t)> &&handler);
     void OnCallDebuggerSetBlackboxPatterns(std::function<void(PtThread)> &&handler);
     void OnCallDebuggerSmartStepInto(std::function<void(PtThread)> &&handler);
     void OnCallDebuggerSetBreakpoint(std::function<SetBreakpointHandler> &&handler);

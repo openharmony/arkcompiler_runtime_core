@@ -37,6 +37,18 @@ Job *Job::GetCurrent()
     return JobExecutionContext::CastFromMutator(ManagedThread::GetCurrent())->GetJob();
 }
 
+AsyncStackSnapshotHandle *Job::GetCurrentAsyncDebuggerStack()
+{
+    auto *job = GetCurrent();
+    return job == nullptr ? nullptr : job->GetAsyncDebuggerStack();
+}
+
+AsyncStackSnapshotHandlePtr Job::CloneCurrentAsyncDebuggerStack()
+{
+    auto *job = GetCurrent();
+    return job == nullptr ? AsyncStackSnapshotHandlePtr {} : job->CloneAsyncDebuggerStack();
+}
+
 Job::ManagedEntrypointInfo::ManagedEntrypointInfo(ManagedEntrypointInfo &&epInfo)
     : completionEvent(std::exchange(epInfo.completionEvent, nullptr)),
       entrypoint(epInfo.entrypoint),

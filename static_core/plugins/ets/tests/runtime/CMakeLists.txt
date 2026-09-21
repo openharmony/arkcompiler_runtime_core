@@ -16,6 +16,17 @@ add_dependencies(ets_tests is_assignable_from_union_runtime_test_gtests)
 
 panda_ets_add_gtest(
     NO_CORES
+    NAME async_stack_transport_runtime_test
+    SOURCES async_stack_transport_test.cpp
+    LIBRARIES arkbase arkfile arkruntime
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    SANITIZERS ${PANDA_SANITIZERS_LIST}
+    PANDA_STD_LIB $<TARGET_PROPERTY:etsstdlib,FILE>
+    DEPS_TARGETS etsstdlib
+)
+
+panda_ets_add_gtest(
+    NO_CORES
     NAME ets_vm_runtime_test
     SOURCES ets_vm_test.cpp
     LIBRARIES arkbase arkfile arkruntime
@@ -50,6 +61,14 @@ endif()
 panda_add_gtest_with_ani(entrypoint_return_runtime_test
     CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/entrypoint_return_test.cpp
     ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/entrypoint_return_test.ets
+    INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
+    LIBRARIES arkbase arkfile arkruntime
+    TEST_GROUP ets_tests_runtime_gtests
+)
+
+panda_add_gtest_with_ani(async_stack_promise_runtime_test
+    CPP_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/async_stack_promise_test.cpp
+    ETS_SOURCES ${PANDA_ETS_PLUGIN_SOURCE}/tests/runtime/AsyncStackPromiseTest.ets
     INCLUDE_DIRS ${PANDA_ETS_PLUGIN_SOURCE}/runtime
     LIBRARIES arkbase arkfile arkruntime
     TEST_GROUP ets_tests_runtime_gtests

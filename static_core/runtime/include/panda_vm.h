@@ -18,6 +18,7 @@
 #include "include/coretypes/line_string.h"
 #include "include/runtime_options.h"
 #include "jit/profile_saver_worker.h"
+#include "runtime/execution/async_stack_snapshot_handle.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/include/mem/panda_string.h"
@@ -120,6 +121,27 @@ public:
     {
         return mutatorManager_;
     }
+
+    AsyncDebuggerConfigSnapshot GetAsyncDebuggerConfig() const
+    {
+        return asyncDebuggerConfig_.GetSnapshot();
+    }
+
+    void SetAsyncDebuggerEnabled(bool enabled)
+    {
+        asyncDebuggerConfig_.SetEnabled(enabled);
+    }
+
+    void SetAsyncDebuggerMaxAsyncDepth(uint32_t maxAsyncDepth)
+    {
+        asyncDebuggerConfig_.SetMaxAsyncDepth(maxAsyncDepth);
+    }
+
+    bool SetAsyncDebuggerMaxFramesPerSegment(uint32_t maxFramesPerSegment)
+    {
+        return asyncDebuggerConfig_.SetMaxFramesPerSegment(maxFramesPerSegment);
+    }
+
     virtual coretypes::String *CreateString([[maybe_unused]] Method *ctor, [[maybe_unused]] ObjectHeader *obj)
     {
         UNREACHABLE();
@@ -273,11 +295,25 @@ protected:
 
     virtual LoadableAgentHandle CreateDebuggerAgent();
 
+public:
+    /**
+     * @brief Returns a clone of the current mutator's debugger snapshot, if supported.
+     *
+     * The default implementation is deliberately unsupported: generic core virtual machines do not necessarily use
+     * JobExecutionContext and must not interpret their thread state as job state.
+     */
+    virtual AsyncStackSnapshotHandlePtr CloneCurrentAsyncDebuggerStack() const
+    {
+        return AsyncStackSnapshotHandlePtr {};
+    }
+
 private:
     /// Lock used for preventing object heap modifications (for example at GC<->JIT,ManagedCode interaction during STW)
     MutatorLock *mutatorLock_;
     MutatorManager *mutatorManager_ {nullptr};
     uint32_t frameExtSize_ {EMPTY_EXT_FRAME_DATA_SIZE};
+
+    AsyncDebuggerConfig asyncDebuggerConfig_;
     LoadableAgentHandle debuggerAgent_;
 };
 

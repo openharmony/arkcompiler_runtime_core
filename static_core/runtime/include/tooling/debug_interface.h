@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <list>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -25,6 +26,7 @@
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/expected.h"
 #include "libarkfile/file.h"
+#include "runtime/execution/async_stack_snapshot_view.h"
 #include "runtime/include/console_call_type.h"
 #include "runtime/include/coretypes/tagged_value.h"
 #include "runtime/include/mem/panda_containers.h"
@@ -526,6 +528,17 @@ public:
     virtual std::optional<Error> ClearPropertyModificationWatch(BaseClass * /* klass */, PtProperty /* property */)
     {
         return {};
+    }
+
+    /**
+     * @brief Creates a native async stack snapshot view for the current paused thread.
+     *
+     * The method must be called on the paused mutator thread. The default implementation provides feature
+     * detection for runtimes that do not implement debugger async stacks.
+     */
+    virtual std::unique_ptr<AsyncStackSnapshotView> CreateCurrentAsyncStackSnapshotView() const
+    {
+        return nullptr;
     }
 
     NO_COPY_SEMANTIC(DebugInterface);
