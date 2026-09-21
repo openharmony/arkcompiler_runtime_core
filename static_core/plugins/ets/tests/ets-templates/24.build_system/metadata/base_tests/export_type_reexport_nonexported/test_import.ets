@@ -28,5 +28,8 @@ expected_out:
 
 import type { B } from '@panda/lib/lib_types'
 
-let arr: FixedArray<B> = new FixedArray<B>(0)
-console.log(arr.length)
+function lengthOf(arr: FixedArray<B> | undefined): int {
+    return arr === undefined ? 0 : arr.length
+}
+
+console.log(lengthOf(undefined))

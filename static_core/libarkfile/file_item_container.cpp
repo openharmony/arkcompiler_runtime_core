@@ -283,9 +283,9 @@ StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
     return item;
 }
 
-void ItemContainer::SetMetadataItems(MetadataByPackages metadata) const
+bool ItemContainer::SetMetadataItems(MetadataByPackages metadata) const
 {
-    metadata_->SetMetadata(std::move(metadata));
+    return metadata_->SetMetadata(std::move(metadata));
 }
 
 bool ItemContainer::IsMetadataEnabled() const

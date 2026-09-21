@@ -1731,7 +1731,7 @@ public:
     explicit MetadataItems() = default;
     ~MetadataItems() = default;
 
-    void SetMetadata(MetadataByPackages metadata);
+    bool SetMetadata(MetadataByPackages metadata);
 
     bool IsEnabled() const
     {

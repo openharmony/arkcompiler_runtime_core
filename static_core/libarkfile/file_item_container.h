@@ -77,7 +77,7 @@ public:
 
     PANDA_PUBLIC_API ScalarValueItem *GetOrCreateDoubleValueItem(double v);
 
-    PANDA_PUBLIC_API void SetMetadataItems(MetadataByPackages metadata) const;
+    PANDA_PUBLIC_API bool SetMetadataItems(MetadataByPackages metadata) const;
 
     ScalarValueItem *GetOrCreateIdValueItem(BaseItem *v);
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,6 @@
  */
 
 #include "libarkfile/metadata_accessor.h"
-
-#include <algorithm>
-#include <limits>
 
 #include "zlib.h"
 #include "libarkfile/file.h"
@@ -82,71 +79,122 @@ MetadataAccessor::MetadataAccessor(const File &pandaFile)
     LoadMetadata(pandaFile);
 }
 
-bool MetadataAccessor::ProcessModule(const File &pandaFile, const uint32_t *metadata, uint32_t index,
-                                     EncodedMetadata moduleData)
+// Function extracted from 'MetadataAccessor::LoadMetadata' to reduce its size
+static bool ProcessModule(const File &pandaFile, const uint32_t *metadata, uint32_t index, EncodedMetadata &&moduleData,
+                          MetadataByPackages &packageMetadata)
 {
-    const auto baseOff = 1 + index * 3;
-    const auto pkgNameOff = pandaFile.GetBase() + metadata[baseOff];         // NOLINT
-    const auto moduleNameOff = pandaFile.GetBase() + metadata[baseOff + 1];  // NOLINT
-    [[maybe_unused]] const auto size = metadata[baseOff + 2];                // NOLINT
+    const std::size_t baseOff = 1U + static_cast<std::size_t>(index) * 3U;
+    auto const *const fileData = pandaFile.GetBase();
+    auto const fileSize = pandaFile.GetHeader()->fileSize;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    if (metadata[baseOff] >= fileSize || metadata[baseOff + 1U] >= fileSize) {
+        return false;
+    }
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto const *const pkgNameOff = fileData + metadata[baseOff];
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    auto const *const moduleNameOff = fileData + metadata[baseOff + 1];
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     const auto pkgName = pandaFile.GetStringData(pandaFile.GetIdFromPointer(pkgNameOff)).ToString();
     const auto moduleName = pandaFile.GetStringData(pandaFile.GetIdFromPointer(moduleNameOff)).ToString();
 
-    metadata_[pkgName][moduleName] = std::move(moduleData);
+    packageMetadata[pkgName][moduleName] = std::move(moduleData);
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    [[maybe_unused]] const auto size = metadata[baseOff + 2];
     LOG_METADATA(pkgName << ":" << moduleName << " (" << size << " bytes)");
+
+    return true;
+}
+
+// Function extracted from 'MetadataAccessor::LoadMetadata' to reduce its size
+static bool ProcessItems(const File &pandaFile, const uint32_t *metadata, Span<std::uint8_t const> const metadataSpan,
+                         z_stream &zs, MetadataByPackages &packageMetadata)
+{
+    std::size_t totalSize = 0U;
+    const uint32_t numMetadataItems = metadata[0];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    const uint8_t *inPtr = metadataSpan.data();
+    auto inRemaining = metadataSpan.size();
+    LOG_METADATA_NESTING_INC();
+
+#if defined(METADATA_VERBOSE) && METADATA_VERBOSE
+    auto const finalize = [this, &zs, &prevLoggerLevel]([[maybe_unused]] const std::string_view message) -> void {
+#else
+    auto const finalize = [&packageMetadata, &zs]([[maybe_unused]] const std::string_view message) -> bool {
+#endif
+        LOG_METADATA(message);
+        LOG_METADATA_NESTING_DEC();
+        inflateEnd(&zs);
+        LOG_METADATA_DISABLE();
+        packageMetadata.clear();  // Handle errors properly: leave metadata_ empty
+        return false;
+    };
+
+    for (uint32_t i = 0U; i < numMetadataItems; ++i) {
+        const auto size = metadata[1U + i * 3U + 2U];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (size > static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max())) {
+            return finalize("Metadata item size " + std::to_string(size) + " exceeds the limit.");
+        }
+
+        totalSize += size;
+        if (totalSize > static_cast<std::size_t>(std::numeric_limits<std::uint32_t>::max())) {
+            return finalize("Metadata total size " + std::to_string(size) + " exceeds the limit.");
+        }
+
+        EncodedMetadata buf(size);
+        if (!InflateModule(zs, inPtr, inRemaining, buf)) {
+            return finalize("Metadata uncompression failed (" + std::to_string(metadataSpan.size()) + " bytes).");
+        }
+
+        if (!ProcessModule(pandaFile, metadata, i, std::move(buf), packageMetadata)) {
+            return finalize("Cannot access required file data: probably they were corrupted.");
+        }
+    }
+
     return true;
 }
 
 void MetadataAccessor::LoadMetadata(const File &pandaFile)
 {
-    LOG_METADATA_ENABLE();
     const auto metadataInfoSpan = pandaFile.GetMetadata();
-    if (metadataInfoSpan.empty()) {
+    if (metadataInfoSpan.size() < 4U) {
         return;
     }
-    const auto *metadata = reinterpret_cast<const uint32_t *>(metadataInfoSpan.data());
-    const uint32_t numMetadataItems = metadata[0];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 
-    ASSERT((1 + numMetadataItems * INDEX_ITEM_SIZE) * sizeof(uint32_t) <= metadataInfoSpan.size());
-    const auto metadataSpan = metadataInfoSpan.SubSpan((1 + numMetadataItems * INDEX_ITEM_SIZE) * sizeof(uint32_t));
-    LOG_METADATA("loading metadata (" << pandaFile.GetFullFileName() << ", " << numMetadataItems << " modules)");
+    LOG_METADATA_ENABLE();
+    const auto *metadata = reinterpret_cast<const uint32_t *>(metadataInfoSpan.data());
+    const uint32_t numMetadataItems = metadata[0U];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    const std::size_t bytesToRead = (1U + numMetadataItems * INDEX_ITEM_SIZE) * sizeof(uint32_t);
+
+    if (bytesToRead > metadataInfoSpan.size()) {
+        metadata_.clear();  // Handle errors properly: leave metadata_ empty
+        LOG_METADATA("Metadata size is less than required: probably data were corrupted.");
+        LOG_METADATA_DISABLE();
+        return;
+    }
+
+    const auto metadataSpan = metadataInfoSpan.SubSpan(bytesToRead);
+    LOG_METADATA("Loading metadata (" << pandaFile.GetFullFileName() << ", " << numMetadataItems << " modules).");
 
     z_stream zs {};
     if (inflateInit(&zs) != Z_OK) {
-        LOG_METADATA("metadata uncompression init failed");
+        metadata_.clear();  // Handle errors properly: leave metadata_ empty
+        LOG_METADATA("Metadata uncompression init failed.");
         LOG_METADATA_DISABLE();
-        return;  // Handle errors properly: leave metadata_ empty
+        return;
     }
 
-    const uint8_t *inPtr = metadataSpan.data();
-    auto inRemaining = metadataSpan.size();
-    LOG_METADATA_NESTING_INC();
-    for (uint32_t i = 0; i < numMetadataItems; i++) {
-        const auto size = metadata[1 + i * 3 + 2];  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        EncodedMetadata buf(size);
-        if (!InflateModule(zs, inPtr, inRemaining, buf)) {
-            LOG_METADATA("metadata uncompression failed (" << metadataSpan.size() << " bytes)");
-            inflateEnd(&zs);
-            metadata_.clear();
-            LOG_METADATA_NESTING_DEC();
-            LOG_METADATA_DISABLE();
-            return;  // Handle errors properly: leave metadata_ empty
-        }
-        if (!ProcessModule(pandaFile, metadata, i, std::move(buf))) {
-            inflateEnd(&zs);
-            metadata_.clear();
-            LOG_METADATA_NESTING_DEC();
-            LOG_METADATA_DISABLE();
-            return;  // Handle errors properly: leave metadata_ empty
-        }
+    if (ProcessItems(pandaFile, metadata, metadataSpan, zs, metadata_)) {
+        LOG_METADATA_NESTING_DEC();
+        inflateEnd(&zs);
+        LOG_METADATA("metadata mem cache recorded (" << metadata_.size() << " modules)");
+        LOG_METADATA_DISABLE();
     }
-    LOG_METADATA_NESTING_DEC();
-    inflateEnd(&zs);
-    LOG_METADATA("metadata mem cache recorded (" << metadata_.size() << " modules)");
-    LOG_METADATA_DISABLE();
 }
 
-EncodedMetadata MetadataAccessor::CompressMetadata(const MetadataByPackages &metadata)
+std::optional<EncodedMetadata> MetadataAccessor::CompressMetadata(const MetadataByPackages &metadata)
 {
     LOG_METADATA_ENABLE();
 
@@ -164,22 +212,30 @@ EncodedMetadata MetadataAccessor::CompressMetadata(const MetadataByPackages &met
     }
     LOG_METADATA_NESTING_DEC();
 
-    // CC-OFFNXT(WordsTool.95) sensitive word conflict
-    unsigned long entireMetadataSize = entireMetadata.size();  // NOLINT(google-runtime-int)
-    // Free unused trailing memory after compression
-    auto compressedMetadata = std::make_unique<uint8_t[]>(entireMetadataSize);  // NOLINT(modernize-avoid-c-arrays)
-    auto res = compress(compressedMetadata.get(), &entireMetadataSize, entireMetadata.data(), entireMetadataSize);
-    if (res != 0) {
-        compressedMetadata.reset();
-        LOG_METADATA("compressing metadata error (code " << res << ")");
-        return {};  // Handle errors properly
+    if (entireMetadata.size() > static_cast<size_t>(std::numeric_limits<uLong>::max())) {
+        LOG_METADATA("Metadata is too large to compress");
+        LOG_METADATA_DISABLE();
+        return std::nullopt;
     }
 
-    LOG_METADATA("compressed metadata: " << entireMetadata.size() << " bytes -> " << entireMetadataSize << " bytes");
+    const auto sourceSize = static_cast<uLong>(entireMetadata.size());
+    auto compressedCapacity = compressBound(sourceSize);
+    EncodedMetadata compressedMetadata(compressedCapacity);
+    auto compressedSize = compressedCapacity;
+    auto res = compress(compressedMetadata.data(), &compressedSize, entireMetadata.data(), sourceSize);
+    if (res != 0) {
+        LOG_METADATA("compressing metadata error (code " << res << ")");
+        LOG_METADATA_DISABLE();
+        return std::nullopt;  // Handle errors properly
+    }
+
+    compressedMetadata.resize(compressedSize);
+
+    LOG_METADATA("compressed metadata: " << entireMetadata.size() << " bytes -> " << compressedSize << " bytes");
 
     LOG_METADATA_DISABLE();
 
-    return {compressedMetadata.get(), compressedMetadata.get() + entireMetadataSize};
+    return compressedMetadata;
 }
 
 MetadataByModules MetadataAccessor::ExtractMetadataForPackage(const std::string &pkgName)

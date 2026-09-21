@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,10 @@
 #define LIBPANDAFILE_METADATA_ACCESSOR_H_
 
 #include <map>
-#include <string>
-#include <vector>
+#include <optional>
 
 #include "libarkbase/macros.h"
+#include "libarkbase/utils/span.h"
 
 namespace ark::panda_file {
 class File;
@@ -40,12 +40,12 @@ public:
     PANDA_PUBLIC_API MetadataByPackages ExtractMetadata();
     MetadataByModules ExtractMetadataForPackage(const std::string &pkgName);
 
-    [[nodiscard]] static EncodedMetadata CompressMetadata(const MetadataByPackages &metadata);
+    [[nodiscard]] static std::optional<EncodedMetadata> CompressMetadata(const MetadataByPackages &metadata);
 
     NO_COPY_SEMANTIC(MetadataAccessor);
     NO_MOVE_SEMANTIC(MetadataAccessor);
 
-    static constexpr auto INDEX_ITEM_SIZE = 3;
+    static constexpr std::size_t const INDEX_ITEM_SIZE = 3U;
 
 private:
     std::string abcFilename_;
@@ -59,7 +59,6 @@ private:
     MetadataByPackages metadata_;
 
     void LoadMetadata(const File &pandaFile);
-    bool ProcessModule(const File &pandaFile, const uint32_t *metadata, uint32_t index, EncodedMetadata moduleData);
 };
 
 }  // namespace ark::panda_file

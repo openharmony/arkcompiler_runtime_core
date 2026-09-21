@@ -1853,7 +1853,10 @@ bool AsmEmitter::Emit(ItemContainer *items, Program &program, PandaFileToPandaAs
         return false;
     }
 
-    items->SetMetadataItems(program.metadata);
+    if (!items->SetMetadataItems(program.metadata)) {
+        SetLastError("Failed to compress metadata");
+        return false;
+    }
 
     if (profileOpt != nullptr) {
         items->ReorderItems(profileOpt);
