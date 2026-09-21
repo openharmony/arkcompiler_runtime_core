@@ -350,6 +350,10 @@ if (abckit_enable) {
 
 ohos_shared_library("libarktscompiler") {
   sources = libarkcompiler_sources
+  if (current_cpu == "arm64" && !is_mac && !is_mingw && !is_win && !is_debug) {
+    version_script = "libarktscompiler.map"
+    ldflags = [ "-Wl,--exclude-libs,libsec_static.a" ]
+  }
 
   public_configs = _libarktscompiler_calculated_configs
   public_configs += [ "$ark_root:ark_config" ]
