@@ -20,7 +20,7 @@ desc: >-
     native stack, so es2panda SEGFAULTS while compiling/exporting this
     library (rc=139), before the 5120 parser limit is reached. Empirically
     the crash starts around depth ~4000.
-tags: [not-a-test, compile-only]
+tags: [not-a-test, compile-only, negative]
 name: lib_deepnest_export_4500
 arktsconfig: arktsconfig-deepnest_export_4500-lib.json
 es2panda_options: ['emit-metadata']

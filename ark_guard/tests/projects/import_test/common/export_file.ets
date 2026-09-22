@@ -70,7 +70,7 @@ export type S1 = string
 export type S2 = string
 export type UNI = string | boolean | int[]
 
-class ClassType1 {
+export class ClassType1 {
     test(): String {
         return 'Hello World';
     }

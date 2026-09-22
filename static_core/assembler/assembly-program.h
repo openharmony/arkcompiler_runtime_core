@@ -23,6 +23,7 @@
 #include "assembly-record.h"
 #include "assembly-type.h"
 #include "assembly-literals.h"
+#include "libarkfile/metadata_accessor.h"
 
 namespace ark::pandasm {
 
@@ -34,7 +35,7 @@ struct Program {
     using FunctionSynonymsT = std::unordered_map<std::string, std::vector<std::string>>;
     using LiteralArrayTableT = std::map<std::string, LiteralArray>;
     using ArrayTypesT = std::set<Type>;
-    using MetadataT = std::vector<uint8_t>;
+    using MetadataT = panda_file::MetadataByPackages;
 
     panda_file::SourceLang lang {panda_file::SourceLang::PANDA_ASSEMBLY};
     RecordTableT recordTable;

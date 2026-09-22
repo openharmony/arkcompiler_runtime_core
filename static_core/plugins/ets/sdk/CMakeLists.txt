@@ -60,7 +60,7 @@ foreach(FILE ${SDK_SRCS})
     set(ABC_TARGET "sdk_${FILE_NAME}")
     set(ABC_LOC "${CMAKE_CURRENT_BINARY_DIR}/${ABC_TARGET}.abc")
 
-    compile_ets_code(${FILE} ${ABC_LOC} ${ABC_TARGET})
+    compile_ets_code(${FILE} ${ABC_LOC} ${ABC_TARGET} COMPILER_EXTRA_OPTIONS "--read-metadata")
     panda_target_sources(${ABC_TARGET} PRIVATE ${FILE})
 
     add_dependencies(ets_sdk_prereqs ${ABC_TARGET})

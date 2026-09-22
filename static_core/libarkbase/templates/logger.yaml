@@ -73,6 +73,9 @@ components:
   - name: sdk
   - name: ark_guard
   - name: abckit_wrapper
+  - name: metadata_serialization
+  - name: metadata_deserialization
+  - name: metadata_accessor
 
 dfx_components:
   - name: common

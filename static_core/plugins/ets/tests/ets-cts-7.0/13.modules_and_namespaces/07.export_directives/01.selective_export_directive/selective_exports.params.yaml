@@ -16,6 +16,8 @@ cases:
   - importFile: 'single_export'
     importStmt: 'import { CONSTANT_A } from "./single_export"'
   - importFile: 'single_as_export'
+    importStmt: 'import { CONSTANT_A } from "./single_as_export"'
+  - importFile: 'single_as_export'
     importStmt: 'import { CONSTANT_B } from "./single_as_export"'
   - importFile: 'multiple_export'
     importStmt: 'import { foo, bar, baz } from "./multiple_export"'

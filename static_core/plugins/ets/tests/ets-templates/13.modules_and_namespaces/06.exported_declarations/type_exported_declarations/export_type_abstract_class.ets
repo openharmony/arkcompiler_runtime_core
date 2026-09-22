@@ -20,6 +20,6 @@ tags:
 - not-a-test
 ---*/
 
-abstract class AC {}
+export abstract class AC {}
 
 export type {AC}

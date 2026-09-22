@@ -30,7 +30,10 @@ export class Dog extends Animal {
     breed: string = "mixed"
 }
 
-export function describeAnimal(p: Partial<Animal>): string {
+export function describeAnimal(p: Animal | Partial<Animal>): string {
+    if (p instanceof Animal) {
+        return "kind=" + p.kind;
+    }
     let k: string = p.kind !== undefined ? p.kind! : "?"
     return "kind=" + k
 }

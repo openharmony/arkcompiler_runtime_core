@@ -17,11 +17,11 @@
 tags: [not-a-test]
 ---*/
 
-function testFunc(): void {}
+export function testFunc(): void {}
 
-let msg: string = 'hello';
+export let msg: string = 'hello';
 
-class TestClass {
+export class TestClass {
     public testMember: string = 'test_member';
 
     testMethod(): void {}

@@ -37,6 +37,8 @@ parameters:
     extension: ets
     load-runtimes: ets
     work-dir: ${WORK_DIR}/${suite-name}
+    es2panda-test-suite-args:
+        - "--read-metadata"
 
 collections:
     02.lexical_elements: >-

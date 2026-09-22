@@ -20,12 +20,12 @@ tags: [compile-only, not-a-test]
 
 export { A, foo, str }
 
-let str: string = "Hello!";
+export let str: string = "Hello!";
 
-function foo(n: number): number {
+export function foo(n: number): number {
     return n/2;
 }
 
-class A {
+export class A {
     id: int = 55;
 }

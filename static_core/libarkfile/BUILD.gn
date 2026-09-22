@@ -73,6 +73,7 @@ libarkfile_sources = [
   "$ark_root/libarkfile/method_data_accessor.cpp",
   "$ark_root/libarkfile/method_handle_data_accessor.cpp",
   "$ark_root/libarkfile/pgo.cpp",
+  "$ark_root/libarkfile/metadata_accessor.cpp",
 ]
 
 libarkfile_configs = [

@@ -16,6 +16,7 @@
 #ifndef LIBPANDAFILE_FILE_ITEMS_H_
 #define LIBPANDAFILE_FILE_ITEMS_H_
 
+#include "metadata_accessor.h"
 #include "libarkfile/file.h"
 #include "libarkfile/file_writer.h"
 #include "libarkbase/macros.h"
@@ -1727,53 +1728,56 @@ private:
 class ScalarValueItem;
 class ArrayValueItem;
 
-class MetadataItem : public BaseItem {
+class MetadataItems {
 public:
-    explicit MetadataItem(std::vector<uint8_t> metadata) : metadata_(std::move(metadata)) {}
+    explicit MetadataItems() = default;
+    ~MetadataItems() = default;
 
-    ~MetadataItem() override = default;
+    bool SetMetadata(MetadataByPackages metadata);
 
-    DEFAULT_MOVE_SEMANTIC(MetadataItem);
-    DEFAULT_COPY_SEMANTIC(MetadataItem);
-
-    ItemTypes GetItemType() const override
+    bool IsEnabled() const
     {
-        return ItemTypes::METADATA_ITEM;
-    }
-
-    size_t CalculateSize() const override
-    {
-        return metadata_.size();
-    }
-
-    bool Write(Writer *writer) override
-    {
-        writer->WriteBytes(metadata_);
-        return true;
-    }
-
-    std::vector<uint8_t> GetValue() const
-    {
-        return metadata_;
+        return !metadata_.empty();
     }
 
     bool IsEmpty() const
     {
-        return metadata_.empty();
+        return isEmpty_;
     }
 
-    size_t Size() const
+    MetadataByPackages ByModules() const
     {
-        return metadata_.size();
+        return metadata_;
     }
 
-    static bool IsNullOrEmpty(const std::unique_ptr<MetadataItem> &item)
+    EncodedMetadata Compressed() const
     {
-        return item == nullptr || item->IsEmpty();
+        return compressedMetadata_;
     }
+
+    size_t CompressedSize() const
+    {
+        return compressedMetadata_.size();
+    }
+
+    size_t CalculateSize() const;
+
+    size_t NumItems() const
+    {
+        size_t numItems = 0;
+        for (const auto &[_, modules] : metadata_) {
+            numItems += modules.size();
+        }
+        return numItems;
+    }
+
+    DEFAULT_MOVE_SEMANTIC(MetadataItems);
+    DEFAULT_COPY_SEMANTIC(MetadataItems);
 
 private:
-    std::vector<uint8_t> metadata_;
+    MetadataByPackages metadata_;
+    EncodedMetadata compressedMetadata_;
+    bool isEmpty_ = true;
 };
 
 class ValueItem : public BaseItem {

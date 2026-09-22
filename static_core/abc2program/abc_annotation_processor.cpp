@@ -99,6 +99,7 @@ static pandasm::AnnotationElement CreateAnnoElem(std::string &annotationElemName
         annotationElemName, std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<P_TYPE>(value)));
 }
 
+// CC-OFFNXT(huge_method,huge_cyclomatic_complexity,G.FUN.01-CPP) big switch-case, solid logic
 std::optional<pandasm::AnnotationElement> AbcAnnotationProcessor::CreateAnnotationElement(
     const panda_file::AnnotationDataAccessor::Elem &annotationDataAccessorElem, std::string &annotationElemName,
     pandasm::Value::Type valueType)
@@ -171,8 +172,7 @@ std::optional<pandasm::AnnotationElement> AbcAnnotationProcessor::CreateAnnotati
             // Try to get class information if it's a class
             if (entityType == EntityType::CLASS) {
                 panda_file::ClassDataAccessor cda(*file_, entityId);
-                auto nameData = file_->GetStringData(cda.GetClassId());
-                std::string className = StringDataToString(nameData);
+                std::string className = file_->GetStringData(cda.GetClassId()).ToString();
                 std::replace(className.begin(), className.end(), '/', '.');
 
                 auto recordType = pandasm::Type::FromDescriptor(className);
@@ -231,8 +231,7 @@ void AbcAnnotationProcessor::ProcessArrayAnnotationElement(std::vector<pandasm::
         EntityType entityType = AbcFileUtils::GetEntityType(*file_, entityId);
         if (entityType == EntityType::CLASS) {
             panda_file::ClassDataAccessor cda(*file_, entityId);
-            auto nameData = file_->GetStringData(cda.GetClassId());
-            std::string className = StringDataToString(nameData);
+            std::string className = file_->GetStringData(cda.GetClassId()).ToString();
             std::replace(className.begin(), className.end(), '/', '.');
 
             auto recordType = pandasm::Type::FromDescriptor(className);

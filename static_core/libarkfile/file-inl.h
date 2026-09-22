@@ -35,58 +35,6 @@ inline File::StringData File::GetStringData(EntityId id) const
     return strData;
 }
 
-// CC-OFFNXT(G.FUD.06) switch-case
-inline std::string StringDataToString(File::StringData sd)
-{
-    const char *data = utf::Mutf8AsCString(sd.data);
-    std::string result;
-    // * 1.2 because of character replacement in the below loop
-    static constexpr double RESERVE_FACTOR = 1.2;
-    result.reserve(static_cast<size_t>(sd.utf16Length * RESERVE_FACTOR));
-
-    // NOLINTNEXTLINE(readability-implicit-bool-conversion,cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    for (const char *p = data; *p; ++p) {
-        char c = *p;
-        switch (c) {
-            case '\a':
-                result.append("\\a");
-                break;
-            case '\b':
-                result.append("\\b");
-                break;
-            case '\f':
-                result.append("\\f");
-                break;
-            case '\n':
-                result.append("\\n");
-                break;
-            case '\r':
-                result.append("\\r");
-                break;
-            case '\t':
-                result.append("\\t");
-                break;
-            case '\v':
-                result.append("\\v");
-                break;
-            case '\'':
-                result.append("\\'");
-                break;
-            case '\?':
-                result.append("\\?");
-                break;
-            case '\\':
-                result.append("\\\\");
-                break;
-            default:
-                result.push_back(c);
-                break;
-        }
-    }
-    result.shrink_to_fit();
-    return result;
-}
-
 }  // namespace ark::panda_file
 
 #endif

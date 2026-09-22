@@ -19,6 +19,6 @@ tags: [not-a-test, compile-only]
 
 function foo(): void {}
 function bar(): void {}
-function baz(): void {}
+export function baz(): void {}
 
 export { foo, bar, baz as bazBaz }

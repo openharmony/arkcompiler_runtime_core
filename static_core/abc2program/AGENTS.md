@@ -64,7 +64,7 @@ Key data structures:
 
 - **`abc2program_compiler.h` / `abc2program_compiler.cpp`**: **Abc2ProgramCompiler** — **OpenAbcFile**, **GetAbcFile**, **GetAbcStringTable**, **FillProgramData(program)** (builds KeyData, AbcFileProcessor::ProcessFile). Does **not** own the program.
 - **`abc2program_key_data.h` / `abc2program_key_data.cpp`**: **Abc2ProgramKeyData** — file, stringTable, program; recordNameToId_, methodNameToId_, externalFieldTable_; GetFullRecordNameById, GetFullFunctionNameById, GetLiteralArrayIdName, GetFileLanguage, SetFileLanguage; **GetFunctionTable**, **GetExternalFieldTable**, **GetMethodNameToIdTable**, **GetRecordNameToIdTable**.
-- **`abc_string_table.h` / `abc_string_table.cpp`**: **AbcStringTable** — GetStringById, AddStringId, GetStringSet, StringDataToString, Dump.
+- **`abc_string_table.h` / `abc_string_table.cpp`**: **AbcStringTable** — GetStringById, AddStringId, GetStringSet, Dump.
 
 ### File and class processing
 

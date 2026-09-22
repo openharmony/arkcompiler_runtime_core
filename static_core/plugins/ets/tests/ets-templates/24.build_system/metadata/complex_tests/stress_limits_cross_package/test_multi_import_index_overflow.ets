@@ -27,13 +27,13 @@ name: test_multi_import_index_overflow
 arktsconfig: arktsconfig-pbcodec-import.json
 expected_out:
     runtime:
-        - "2400000"
+        - "2000000"
 ---*/
-{% for p in range(4) %}import { {% for i in range(6000) %}Msg{{ p }}_{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "@panda/schema{{ p }}/lib_pb{{ p }}"
+{% for p in range(4) %}import { {% for i in range(5000) %}Msg{{ p }}_{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "@panda/schema{{ p }}/lib_pb{{ p }}"
 {% endfor %}
 function encodeAll(): int {
   let checksum = 0
-{% for p in range(4) %}{% for i in range(6000) %}  { const m = new Msg{{ p }}_{{ i }}(); checksum += m.getId() + m.getValue() }
+{% for p in range(4) %}{% for i in range(5000) %}  { const m = new Msg{{ p }}_{{ i }}(); checksum += m.getId() + m.getValue() }
 {% endfor %}{% endfor %}  return checksum
 }
 

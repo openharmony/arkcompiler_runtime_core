@@ -828,9 +828,10 @@ static void AddBytecodeIndexDependencies(MethodItem *method, const Ins &insn,
                 AddBytecodeIndexDependencies(method, insn, entities.staticMethodItems, entities);
                 return;
             }
+            LOG(ERROR, ASSEMBLER) << "Internal error: bytecode instruction references missing symbol '" << id
+                                  << "', instruction: " << insn.ToString();
             UNREACHABLE();
         }
-        ASSERT_PRINT(it != items.cend(), "Symbol '" << id << "' not found");
 
         auto *item = it->second;
         ASSERT(item->GetIndexType() != panda_file::IndexType::NONE);
@@ -893,6 +894,15 @@ void AsmEmitter::MakeStringItems(ItemContainer *items, const Program &program,
     for (const auto &s : program.strings) {
         auto *item = items->GetOrCreateStringItem(s);
         entities.stringItems.insert({s, item});
+    }
+    if (program.metadata.empty()) {
+        return;
+    }
+    for (const auto &[pkgName, modules] : program.metadata) {
+        entities.stringItems.insert({pkgName, items->GetOrCreateStringItem(pkgName)});
+        for (const auto &[moduleName, _] : modules) {
+            entities.stringItems.insert({moduleName, items->GetOrCreateStringItem(moduleName)});
+        }
     }
 }
 
@@ -1843,7 +1853,10 @@ bool AsmEmitter::Emit(ItemContainer *items, Program &program, PandaFileToPandaAs
         return false;
     }
 
-    items->CreateMetadataItem(program.metadata);
+    if (!items->SetMetadataItems(program.metadata)) {
+        SetLastError("Failed to compress metadata");
+        return false;
+    }
 
     if (profileOpt != nullptr) {
         items->ReorderItems(profileOpt);

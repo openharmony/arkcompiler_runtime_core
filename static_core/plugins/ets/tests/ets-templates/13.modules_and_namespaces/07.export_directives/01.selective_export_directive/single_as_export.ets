@@ -17,5 +17,5 @@ limitations under the License.
 tags: [not-a-test, compile-only]
 ---*/
 
-const CONSTANT_A: int = 42
+export const CONSTANT_A: int = 42
 export { CONSTANT_A as CONSTANT_B }

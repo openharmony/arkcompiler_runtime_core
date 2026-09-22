@@ -248,7 +248,7 @@ AnnotationList AbcFileProcessor::GetETSAnnotation(const panda_file::File::Entity
         annList.push_back({"ets.annotation.class", className});
 
         annList.push_back({"ets.annotation.id", "id_" + std::to_string(annotationId.GetOffset())});
-        annList.push_back({"ets.annotation.element.name", StringDataToString(file_->GetStringData(elemNameId))});
+        annList.push_back({"ets.annotation.element.name", file_->GetStringData(elemNameId).ToString()});
         // type
         if (isArray) {
             elemType = "array";

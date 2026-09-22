@@ -102,6 +102,57 @@ public:
         uint32_t utf16Length;  // NOLINT(misc-non-private-member-variables-in-classes)
         bool isAscii;          // NOLINT(misc-non-private-member-variables-in-classes)
         const uint8_t *data;   // NOLINT(misc-non-private-member-variables-in-classes)
+
+        // CC-OFFNXT(G.FUD.06) switch-case
+        std::string ToString() const
+        {
+            const char *chars = utf::Mutf8AsCString(this->data);
+            std::string result;
+            // * 1.2 because of character replacement in the below loop
+            static constexpr double RESERVE_FACTOR = 1.2;
+            result.reserve(static_cast<size_t>(utf16Length * RESERVE_FACTOR));
+
+            // NOLINTNEXTLINE(readability-implicit-bool-conversion,cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            for (const char *p = chars; *p; ++p) {
+                switch (const char c = *p) {
+                    case '\a':
+                        result.append("\\a");
+                        break;
+                    case '\b':
+                        result.append("\\b");
+                        break;
+                    case '\f':
+                        result.append("\\f");
+                        break;
+                    case '\n':
+                        result.append("\\n");
+                        break;
+                    case '\r':
+                        result.append("\\r");
+                        break;
+                    case '\t':
+                        result.append("\\t");
+                        break;
+                    case '\v':
+                        result.append("\\v");
+                        break;
+                    case '\'':
+                        result.append("\\'");
+                        break;
+                    case '\?':
+                        result.append("\\?");
+                        break;
+                    case '\\':
+                        result.append("\\\\");
+                        break;
+                    default:
+                        result.push_back(c);
+                        break;
+                }
+            }
+            result.shrink_to_fit();
+            return result;
+        }
     };
 
     // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
@@ -214,30 +265,29 @@ public:
         if (header->version < METADATA_SINCE_VERSION) {  // for early versions, interpret export data section in the old
                                                          // way (there is no metadata, only export table)
             Span exportedIdxData = file.SubSpan(header->exportTableOff, header->numExportTable * sizeof(uint32_t));
-            return Span(reinterpret_cast<const uint32_t *>(exportedIdxData.data()), header->numExportTable);
+            return {reinterpret_cast<const uint32_t *>(exportedIdxData.data()), header->numExportTable};
         }
 
         auto exportedIdxData = file.SubSpan(header->exportTableOff, header->numExportTable);
         // for newer versions, the first byte is a flag of whether metadata was recorded
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto isMetadataRecorded = reinterpret_cast<const uint32_t *>(exportedIdxData.data())[0] == 1;
-        ark::Span<const uint8_t> exportedTableSpan;
+        const auto isMetadataEnabled = reinterpret_cast<const uint32_t *>(exportedIdxData.data())[0] == 1;
+        Span<const uint8_t> exportedTableSpan;
 
-        if (isMetadataRecorded) {
+        if (isMetadataEnabled) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            auto metadataSize = reinterpret_cast<const uint32_t *>(
+            const auto exportTableSize = reinterpret_cast<const uint32_t *>(
                 exportedIdxData.SubSpan(METADATA_FLAG_SIZE, sizeof(uint32_t)).data())[0];
-            exportedTableSpan =
-                exportedIdxData.SubSpan(METADATA_FLAG_SIZE + sizeof(uint32_t), header->numExportTable - metadataSize);
+            exportedTableSpan = exportedIdxData.SubSpan(METADATA_FLAG_SIZE + sizeof(uint32_t), exportTableSize);
         } else {  // if not recorded, the remaining data is export table
             exportedTableSpan = exportedIdxData.SubSpan(METADATA_FLAG_SIZE);
         }
 
-        return Span(reinterpret_cast<const uint32_t *>(exportedTableSpan.data()),
-                    exportedTableSpan.size() / sizeof(uint32_t));
+        return {reinterpret_cast<const uint32_t *>(exportedTableSpan.data()),
+                exportedTableSpan.size() / sizeof(uint32_t)};
     }
 
-    bool IsMetadataUsed() const
+    bool IsMetadataEnabled() const
     {
         const Header *header = GetHeader();
         if (header->version < METADATA_SINCE_VERSION) {
@@ -257,21 +307,29 @@ public:
 
         if (header->version < METADATA_SINCE_VERSION) {  // for early versions, interpret export data section in the old
                                                          // way (there is no metadata, only export table)
-            return Span<const uint8_t>();
+            return {};
         }
 
         auto exportedIdxData = file.SubSpan(header->exportTableOff, header->numExportTable);
         // for newer versions, the first byte is a flag of whether metadata was recorded
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto isMetadataRecorded = reinterpret_cast<const uint32_t *>(exportedIdxData.data())[0] == 1;
-        if (!isMetadataRecorded) {  // if not recorded, the remaining data is export table so there is no metadata
-            return Span<const uint8_t>();
+        const auto isMetadataEnabled = reinterpret_cast<const uint32_t *>(exportedIdxData.data())[0] == 1;
+        if (!isMetadataEnabled) {  // if not recorded, the remaining data is export table so there is no metadata
+            return {};
         }
 
-        auto metadataSize =
+        const auto exportTableSize =
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             reinterpret_cast<const uint32_t *>(exportedIdxData.SubSpan(METADATA_FLAG_SIZE, sizeof(uint32_t)).data())[0];
-        return exportedIdxData.SubSpan(header->numExportTable - metadataSize);
+
+        const auto metadataStartPos = METADATA_FLAG_SIZE + sizeof(uint32_t) + exportTableSize;
+
+        if (header->numExportTable == metadataStartPos) {  // metadata is empty
+            return {};
+        }
+
+        const auto metadataSpan = exportedIdxData.SubSpan(metadataStartPos);
+        return {metadataSpan.data(), metadataSpan.size()};
     }
 
     Span<const uint32_t> GetLiteralArrays() const

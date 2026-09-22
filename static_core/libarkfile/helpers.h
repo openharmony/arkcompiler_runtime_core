@@ -21,6 +21,7 @@
 #include "libarkbase/utils/leb128.h"
 #include "libarkbase/utils/logger.h"
 #include "libarkbase/utils/span.h"
+#include "libarkbase/panda_gen_options/generated/logger_options.h"
 
 #include <cstdint>
 

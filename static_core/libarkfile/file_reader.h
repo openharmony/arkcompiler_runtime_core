@@ -78,6 +78,7 @@ private:
     bool ReadLiteralArrayItems();
     bool ReadRegionHeaders();
     bool ReadClasses();
+    bool ReadMetadata();
 
     void EmplaceLiteralVals(std::vector<panda_file::LiteralItem> &literalArray,
                             const panda_file::LiteralDataAccessor::LiteralValue &value,

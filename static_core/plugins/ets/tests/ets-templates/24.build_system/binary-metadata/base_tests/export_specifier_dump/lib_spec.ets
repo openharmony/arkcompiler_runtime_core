@@ -22,7 +22,7 @@ arktsconfig: arktsconfig-lib.json
 es2panda_options: ['emit-metadata']
 ---*/
 
-class InternalCounter {
+export class InternalCounter {
     private _count: int = 0
     increment(): void {
         this._count++
@@ -32,10 +32,10 @@ class InternalCounter {
     }
 }
 
-function internalAdd(a: int, b: int): int {
+export function internalAdd(a: int, b: int): int {
     return a + b
 }
 
-let internalVersion: string = "2.0"
+export let internalVersion: string = "2.0"
 
 export { InternalCounter as Counter, internalAdd as add, internalVersion as VERSION }

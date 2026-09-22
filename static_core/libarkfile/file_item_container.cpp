@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <limits>
 #include <thread>
+#include "libarkfile/metadata_accessor.h"
 #include <type_traits>
 #include "libarkbase/macros.h"
 #include "libarkbase/utils/span.h"
@@ -255,6 +256,7 @@ ItemContainer::ItemContainer()
     codeItemsEnd_ = items_.insert(items_.end(), std::make_unique<EndItem>());
     debugItemsEnd_ = items_.insert(items_.end(), std::make_unique<EndItem>());
     end_ = debugItemsEnd_->get();
+    metadata_ = std::make_unique<MetadataItems>();
 }
 
 ClassItem *ItemContainer::GetOrCreateClassItem(const std::string &str)
@@ -281,9 +283,9 @@ StringItem *ItemContainer::GetOrCreateStringItem(const std::string &str)
     return item;
 }
 
-void ItemContainer::CreateMetadataItem(std::vector<uint8_t> metadata)
+bool ItemContainer::SetMetadataItems(MetadataByPackages metadata) const
 {
-    metadataItem_ = std::make_unique<MetadataItem>(std::move(metadata));
+    return metadata_->SetMetadata(std::move(metadata));
 }
 
 bool ItemContainer::IsMetadataEnabled() const
@@ -301,8 +303,7 @@ uint32_t ItemContainer::GetMetadataSize() const
     if (!IsMetadataEnabled()) {
         return 0;
     }
-    return File::METADATA_FLAG_SIZE +
-           (MetadataItem::IsNullOrEmpty(metadataItem_) ? 0 : metadataItem_->Size() + ID_SIZE);
+    return metadata_->CalculateSize();
 }
 
 LiteralArrayItem *ItemContainer::GetOrCreateLiteralArrayItem(const std::string &id)
@@ -1149,21 +1150,60 @@ bool ItemContainer::WriteItemsParallel(Writer *writer, const std::vector<BaseIte
 
 bool ItemContainer::WriteExportData(Writer *writer)
 {
-    auto isMetadataSkipped = MetadataItem::IsNullOrEmpty(metadataItem_);
+    // Write export class idx and metadata
     // NOLINTNEXTLINE(readability-implicit-bool-conversion)
-    if (!writer->Write<uint32_t>(!isMetadataSkipped)) {
+    if (!writer->Write<uint32_t>(metadata_->IsEnabled())) {
         return false;
     }
-    if (!isMetadataSkipped && !writer->Write<uint32_t>(metadataItem_->Size())) {
+
+    // If metadata isn't enabled, the export map size equals to numExportTable - METADATA_FLAG_SIZE,
+    // then don't write it to keep backward compatibility and save space
+    if (!metadata_->IsEnabled()) {
+        for (const auto &[_, item] : exportMap_) {
+            if (!writer->Write(item->GetOffset())) {
+                return false;
+            }
+        }
+        return writer->Align(ID_SIZE);
+    }
+
+    if (!writer->Write<uint32_t>(exportMap_.size() * ID_SIZE)) {
         return false;
     }
-    for (auto &entry : exportMap_) {
-        if (!writer->Write(entry.second->GetOffset())) {
+
+    for (const auto &[_, item] : exportMap_) {
+        if (!writer->Write(item->GetOffset())) {
             return false;
         }
     }
 
-    return isMetadataSkipped || metadataItem_->Write(writer);
+    if (metadata_->IsEmpty()) {
+        return writer->Align(ID_SIZE);
+    }
+
+    if (!writer->Write<uint32_t>(metadata_->NumItems())) {
+        return false;
+    }
+
+    for (const auto &[pkgName, modules] : metadata_->ByModules()) {
+        for (const auto &[moduleName, metadata] : modules) {
+            if (!writer->Write<uint32_t>(GetOrCreateStringItem(pkgName)->GetOffset())) {
+                return false;
+            }
+            if (!writer->Write<uint32_t>(GetOrCreateStringItem(moduleName)->GetOffset())) {
+                return false;
+            }
+            if (!writer->Write<uint32_t>(metadata.size())) {
+                return false;
+            }
+        }
+    }
+
+    if (!writer->WriteBytes(metadata_->Compressed())) {
+        return false;
+    }
+
+    return writer->Align(ID_SIZE);
 }
 
 bool ItemContainer::PrepareRegionSectionForWrite(RegionSectionMode regionSectionMode, bool *rebuildRegionSection,
@@ -1545,7 +1585,7 @@ bool ItemContainer::IndexItem::Add(IndexedItem *item)
     auto size = GetNumItems();
     ASSERT(size <= maxIndex_);
 
-    if (size == maxIndex_) {
+    if (size >= maxIndex_) {
         return false;
     }
 

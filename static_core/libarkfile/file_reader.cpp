@@ -20,6 +20,7 @@
 #include "libarkfile/bytecode_instruction.h"
 #include "libarkfile/code_data_accessor.h"
 #include "libarkfile/field_data_accessor.h"
+#include "libarkfile/metadata_accessor.h"
 #include "libarkfile/file.h"
 #include "libarkfile/debug_info_updater-inl.h"
 #include "libarkfile/file_items.h"
@@ -76,6 +77,9 @@ bool FileReader::ReadContainer(bool shouldRebuildIndices)
         return false;
     }
     if (!ReadRegionHeaders()) {
+        return false;
+    }
+    if (!ReadMetadata()) {
         return false;
     }
 
@@ -1064,6 +1068,12 @@ bool FileReader::TryCreateFieldItem(File::EntityId fieldId)
     }
 
     return true;
+}
+
+bool FileReader::ReadMetadata()
+{
+    MetadataAccessor ma(*file_);
+    return container_.SetMetadataItems(ma.ExtractMetadata());
 }
 
 bool FileReader::ReadRegionHeaders()

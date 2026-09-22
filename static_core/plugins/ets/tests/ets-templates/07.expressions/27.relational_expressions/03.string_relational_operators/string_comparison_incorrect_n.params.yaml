@@ -13,7 +13,7 @@
 
 --- # List of string comparison conditions
 string_comparison:
-  - {left: "", right: "", op: "=>", result: "false"}
-  - {left: "", right: "", op: "= >", result: "false"}
-  - {left: " ", right: "", op: "=<", result: "false"}
-  - {left: " ", right: "", op: "= <", result: "false"}
+  - {left: "", right: "", op: "=>", result: "false", expected: ["Semantic error ESE0132: The type of parameter 'x' cannot be inferred"]}
+  - {left: "", right: "", op: "= >", result: "false", expected: ["Syntax error ESY0227: Unexpected token '>'."]}
+  - {left: " ", right: "", op: "=<", result: "false", expected: ["Syntax error ESY0228: Unexpected token, expected '>'."]}
+  - {left: " ", right: "", op: "= <", result: "false", expected: ["Syntax error ESY0228: Unexpected token, expected '>'."]}

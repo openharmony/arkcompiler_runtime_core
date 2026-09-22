@@ -16,7 +16,7 @@ cases:
         type MOD_ALIAS0 = Boolean
 
     - decl: |-
-        type MOD_ALIAS1 = Boolean
+        export type MOD_ALIAS1 = Boolean
         export type { MOD_ALIAS1 }
 
     - decl: |-

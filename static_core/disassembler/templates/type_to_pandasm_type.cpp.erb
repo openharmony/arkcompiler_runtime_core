@@ -25,7 +25,7 @@ pandasm::Type Disassembler::PFTypeToPandasmType(const panda_file::Type& type, pa
 % PandaFile::types.each do |type|
     case panda_file::Type::TypeId::<%= type.name.upcase %>:
 % if (type.name == "reference")
-        pandasmType = pandasm::Type::FromDescriptor(StringDataToString(file_->GetStringData(pda.GetReferenceType(refIdx++))));
+        pandasmType = pandasm::Type::FromDescriptor(file_->GetStringData(pda.GetReferenceType(refIdx++)).ToString());
 % elsif (type.name == "tagged")
         pandasmType = pandasm::Type("any", 0);
 % else
@@ -56,7 +56,7 @@ pandasm::Type Disassembler::FieldTypeToPandasmType(const uint32_t& type) const {
         break;
     default:
         panda_file::File::EntityId fieldId(type);
-        std::string typeName = StringDataToString(file_->GetStringData(fieldId));
+        std::string typeName = file_->GetStringData(fieldId).ToString();
 
         fieldType = pandasm::Type::FromDescriptor(typeName);
         break;

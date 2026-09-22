@@ -17,14 +17,14 @@
 tags: [not-a-test, compile-only]
 ---*/
 
-function foo(): int {
+export function foo(): int {
     return 142
 }
 
-class A {
+export class A {
     fld: string = "abc"
 }
 
-const bar: int = 42
+export const bar: int = 42
 
 export { foo as foo1, A as A1, bar as bar1 }

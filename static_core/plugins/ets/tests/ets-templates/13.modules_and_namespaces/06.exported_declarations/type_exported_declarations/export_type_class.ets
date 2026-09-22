@@ -20,7 +20,7 @@ tags:
 - not-a-test
 ---*/
 
-class C {
+export class C {
     test(): String {
         return "Hello World";
     }

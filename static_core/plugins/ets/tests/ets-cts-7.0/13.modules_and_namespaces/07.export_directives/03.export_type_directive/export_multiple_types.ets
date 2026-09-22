@@ -18,16 +18,16 @@ desc: Export multiple types with binding
 tags: [compile-only, not-a-test]
 ---*/
 
-class B {
+export class B {
   f: int = 7
 }
 
-class C {
+export class C {
   f: int = 8
 }
 
-class D {
+export class A {
   f: int = 9
 }
 
-export type {C as D, B, D as E}
+export type {C as D, B, A as E}

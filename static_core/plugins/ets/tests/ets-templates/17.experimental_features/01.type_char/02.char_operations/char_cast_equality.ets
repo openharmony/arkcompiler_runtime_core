@@ -25,16 +25,6 @@ function cmp(a: char, b: Any): boolean {
     return a == (b as char | undefined)
 }
 
-function expectClassCastError(fn: () => void): void {
-    try {
-        fn()
-        arktest.failingAssertion("Expected ClassCastError but no exception was thrown")
-    } catch (e) {
-        arktest.assertTrue(e instanceof ClassCastError,
-            "Expected ClassCastError, got " + Class.of(e).getName())
-    }
-}
-
 function main(): int {
     let suite = new arktest.ArkTestsuite("char_checkcast_equality");
 

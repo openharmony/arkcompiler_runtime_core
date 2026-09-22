@@ -17,7 +17,7 @@ limitations under the License.
 tags: [not-a-test, compile-only]
 ---*/
 
-function foo(): void {}
+export function foo(): void {}
 function bar(): void {}
 function baz(): void {}
 
