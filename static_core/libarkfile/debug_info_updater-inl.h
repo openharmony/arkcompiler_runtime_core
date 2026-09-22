@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,14 +66,20 @@ public:
 
     bool HandleSetFile(uint32_t sourceFileId) const
     {
-        std::string sourceFile = debug_helpers::GetStringFromConstantPool(GetPandaFile(), sourceFileId);
+        auto *sourceFile = debug_helpers::GetStringFromConstantPool(GetPandaFile(), sourceFileId);
+        if (sourceFile == nullptr) {
+            return true;
+        }
         scrapper_->GetOrCreateStringItem(sourceFile);
         return true;
     }
 
     bool HandleSetSourceCode(uint32_t sourceCodeId) const
     {
-        std::string sourceCode = debug_helpers::GetStringFromConstantPool(GetPandaFile(), sourceCodeId);
+        auto *sourceCode = debug_helpers::GetStringFromConstantPool(GetPandaFile(), sourceCodeId);
+        if (sourceCode == nullptr) {
+            return true;
+        }
         scrapper_->GetOrCreateStringItem(sourceCode);
         return true;
     }
@@ -90,8 +96,11 @@ public:
 
     bool HandleStartLocal([[maybe_unused]] int32_t regNumber, uint32_t nameId, uint32_t typeId)
     {
-        std::string name = debug_helpers::GetStringFromConstantPool(GetPandaFile(), nameId);
-        std::string type = debug_helpers::GetStringFromConstantPool(GetPandaFile(), typeId);
+        auto *name = debug_helpers::GetStringFromConstantPool(GetPandaFile(), nameId);
+        auto *type = debug_helpers::GetStringFromConstantPool(GetPandaFile(), typeId);
+        if (name == nullptr || type == nullptr) {
+            return true;
+        }
 
         scrapper_->GetOrCreateStringItem(name);
         scrapper_->GetType(File::EntityId(typeId), type);
@@ -101,13 +110,18 @@ public:
     bool HandleStartLocalExtended([[maybe_unused]] int32_t regNumber, uint32_t nameId, uint32_t typeId,
                                   uint32_t typeSignatureId)
     {
-        std::string name = debug_helpers::GetStringFromConstantPool(GetPandaFile(), nameId);
-        std::string type = debug_helpers::GetStringFromConstantPool(GetPandaFile(), typeId);
-        std::string typeSign = debug_helpers::GetStringFromConstantPool(GetPandaFile(), typeSignatureId);
+        auto *name = debug_helpers::GetStringFromConstantPool(GetPandaFile(), nameId);
+        auto *type = debug_helpers::GetStringFromConstantPool(GetPandaFile(), typeId);
+        auto *typeSign = debug_helpers::GetStringFromConstantPool(GetPandaFile(), typeSignatureId);
+        if (name == nullptr || type == nullptr) {
+            return true;
+        }
 
         scrapper_->GetOrCreateStringItem(name);
         scrapper_->GetType(File::EntityId(typeId), type);
-        scrapper_->GetOrCreateStringItem(typeSign);
+        if (typeSign != nullptr) {
+            scrapper_->GetOrCreateStringItem(typeSign);
+        }
         return true;
     }
 
@@ -192,7 +206,10 @@ public:
 
     bool HandleSetFile(uint32_t sourceFileId) const
     {
-        std::string sourceFile = debug_helpers::GetStringFromConstantPool(GetPandaFile(), sourceFileId);
+        auto *sourceFile = debug_helpers::GetStringFromConstantPool(GetPandaFile(), sourceFileId);
+        if (sourceFile == nullptr) {
+            return true;
+        }
         auto *sourceFileItem = updater_->GetOrCreateStringItem(sourceFile);
         lnpItem_->EmitSetFile(constantPool_, sourceFileItem);
         return true;
@@ -200,7 +217,10 @@ public:
 
     bool HandleSetSourceCode(uint32_t sourceCodeId) const
     {
-        std::string sourceCode = debug_helpers::GetStringFromConstantPool(GetPandaFile(), sourceCodeId);
+        auto *sourceCode = debug_helpers::GetStringFromConstantPool(GetPandaFile(), sourceCodeId);
+        if (sourceCode == nullptr) {
+            return true;
+        }
         auto *sourceCodeItem = updater_->GetOrCreateStringItem(sourceCode);
         lnpItem_->EmitSetFile(constantPool_, sourceCodeItem);
         return true;
@@ -220,8 +240,11 @@ public:
 
     bool HandleStartLocal(int32_t regNumber, uint32_t nameId, uint32_t typeId)
     {
-        std::string name = debug_helpers::GetStringFromConstantPool(GetPandaFile(), nameId);
-        std::string type = debug_helpers::GetStringFromConstantPool(GetPandaFile(), typeId);
+        auto *name = debug_helpers::GetStringFromConstantPool(GetPandaFile(), nameId);
+        auto *type = debug_helpers::GetStringFromConstantPool(GetPandaFile(), typeId);
+        if (name == nullptr || type == nullptr) {
+            return true;
+        }
 
         auto *nameItem = updater_->GetOrCreateStringItem(name);
         auto *typeItem = updater_->GetType(File::EntityId(typeId), type);
@@ -233,15 +256,22 @@ public:
 
     bool HandleStartLocalExtended(int32_t regNumber, uint32_t nameId, uint32_t typeId, uint32_t typeSignatureId)
     {
-        std::string name = debug_helpers::GetStringFromConstantPool(GetPandaFile(), nameId);
-        std::string type = debug_helpers::GetStringFromConstantPool(GetPandaFile(), typeId);
-        std::string typeSign = debug_helpers::GetStringFromConstantPool(GetPandaFile(), typeSignatureId);
+        auto *name = debug_helpers::GetStringFromConstantPool(GetPandaFile(), nameId);
+        auto *type = debug_helpers::GetStringFromConstantPool(GetPandaFile(), typeId);
+        auto *typeSign = debug_helpers::GetStringFromConstantPool(GetPandaFile(), typeSignatureId);
+        if (name == nullptr || type == nullptr) {
+            return true;
+        }
 
         auto *nameItem = updater_->GetOrCreateStringItem(name);
         auto *typeItem = updater_->GetType(File::EntityId(typeId), type);
         auto *typeItemName = (typeItem == nullptr) ? updater_->GetOrCreateStringItem(type) : typeItem->GetNameItem();
-        auto *typeSignatureItem = updater_->GetOrCreateStringItem(typeSign);
+        if (typeSign == nullptr) {
+            lnpItem_->EmitStartLocal(constantPool_, regNumber, nameItem, typeItemName);
+            return true;
+        }
 
+        auto *typeSignatureItem = updater_->GetOrCreateStringItem(typeSign);
         lnpItem_->EmitStartLocalExtended(constantPool_, regNumber, nameItem, typeItemName, typeSignatureItem);
         return true;
     }

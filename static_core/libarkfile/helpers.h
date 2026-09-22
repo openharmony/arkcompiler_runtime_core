@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,13 @@ namespace ark::panda_file::helpers {
 constexpr size_t UINT_BYTE2_SHIFT = 8U;
 constexpr size_t UINT_BYTE3_SHIFT = 16U;
 constexpr size_t UINT_BYTE4_SHIFT = 24U;
+constexpr const char *INVALID_SPAN_OFFSET = "Invalid span offset";
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define THROW_IF(cond, msg)             \
+    if (UNLIKELY(cond)) {               \
+        LOG(FATAL, PANDAFILE) << (msg); \
+    }
 
 template <size_t WIDTH>
 inline auto Read(Span<const uint8_t> *sp)
@@ -41,6 +48,7 @@ inline auto Read(Span<const uint8_t> *sp)
     using UnsignedType = ark::helpers::TypeHelperT<BITWIDTH, false>;
 
     UnsignedType result = 0;
+    THROW_IF(sp->Size() < WIDTH, INVALID_SPAN_OFFSET);
     for (size_t i = 0; i < WIDTH; i++) {
         UnsignedType tmp = static_cast<UnsignedType>((*sp)[i]) << (i * BYTE_WIDTH);
         result |= tmp;
@@ -52,9 +60,12 @@ inline auto Read(Span<const uint8_t> *sp)
 template <>
 inline auto Read<sizeof(uint16_t)>(Span<const uint8_t> *sp)
 {
+    uint16_t result = 0;
+    THROW_IF(sp->Size() < sizeof(uint16_t), INVALID_SPAN_OFFSET);
+
     auto *p = sp->data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    uint16_t result = *(p++);
+    result = *(p++);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic, hicpp-signed-bitwise)
     result |= static_cast<uint16_t>(*p) << UINT_BYTE2_SHIFT;
     *sp = sp->SubSpan(sizeof(uint16_t));
@@ -64,9 +75,12 @@ inline auto Read<sizeof(uint16_t)>(Span<const uint8_t> *sp)
 template <>
 inline auto Read<sizeof(uint32_t)>(Span<const uint8_t> *sp)
 {
+    uint32_t result = 0;
+    THROW_IF(sp->Size() < sizeof(uint32_t), INVALID_SPAN_OFFSET);
+
     auto *p = sp->data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    uint32_t result = *(p++);
+    result = *(p++);
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     result |= static_cast<uint32_t>(*(p++)) << UINT_BYTE2_SHIFT;
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -146,6 +160,13 @@ inline T Align(T n)
 template <class T, class E>
 inline std::optional<T> GetOptionalTaggedValue(Span<const uint8_t> sp, E tag, Span<const uint8_t> *next)
 {
+    // NB! This is a workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
+    // which fails Release builds for GCC 8 and 9.
+    std::optional<T> novalue = {};
+    if (UNLIKELY(sp.Size() == 0U)) {
+        return novalue;
+    }
+
     if (sp[0] == static_cast<uint8_t>(tag)) {
         sp = sp.SubSpan(1);
         T value = static_cast<T>(Read<sizeof(T)>(&sp));
@@ -154,16 +175,13 @@ inline std::optional<T> GetOptionalTaggedValue(Span<const uint8_t> sp, E tag, Sp
     }
     *next = sp;
 
-    // NB! This is a workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
-    // which fails Release builds for GCC 8 and 9.
-    std::optional<T> novalue = {};
     return novalue;
 }
 
 template <class T, class E, class Callback>
 inline void EnumerateTaggedValues(Span<const uint8_t> sp, E tag, Callback cb, Span<const uint8_t> *next)
 {
-    while (sp[0] == static_cast<uint8_t>(tag)) {
+    while (sp.Size() > 0U && sp[0] == static_cast<uint8_t>(tag)) {
         sp = sp.SubSpan(1);
         T value(Read<sizeof(T)>(&sp));
         cb(value);
@@ -179,7 +197,7 @@ inline void EnumerateTaggedValues(Span<const uint8_t> sp, E tag, Callback cb, Sp
 template <class T, class E, class Callback>
 inline bool EnumerateTaggedValuesWithEarlyStop(Span<const uint8_t> sp, E tag, Callback cb)
 {
-    while (sp[0] == static_cast<uint8_t>(tag)) {
+    while (sp.Size() > 0U && sp[0] == static_cast<uint8_t>(tag)) {
         sp = sp.SubSpan(1);
         T value(Read<sizeof(T)>(&sp));
         if (cb(value)) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,18 +85,28 @@ public:
 
     bool HandleStartLocal(int32_t regNumber, uint32_t nameId, uint32_t typeId)
     {
-        const char *name = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), nameId);
-        const char *type = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), typeId);
+        auto *name = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), nameId);
+        auto *type = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), typeId);
+        if (name == nullptr || type == nullptr) {
+            return true;
+        }
         lvt_.push_back({name, type, type, regNumber, state_->GetAddress(), 0});
         return true;
     }
 
     bool HandleStartLocalExtended(int32_t regNumber, uint32_t nameId, uint32_t typeId, uint32_t typeSignatureId)
     {
-        const char *name = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), nameId);
-        const char *type = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), typeId);
-        const char *typeSign = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), typeSignatureId);
-        lvt_.push_back({name, type, typeSign, regNumber, state_->GetAddress(), 0});
+        auto *name = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), nameId);
+        auto *type = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), typeId);
+        auto *typeSign = debug_helpers::GetStringFromConstantPool(state_->GetPandaFile(), typeSignatureId);
+        if (name == nullptr || type == nullptr) {
+            return true;
+        }
+        if (typeSign == nullptr) {
+            lvt_.push_back({name, type, std::string(), regNumber, state_->GetAddress(), 0});
+        } else {
+            lvt_.push_back({name, type, typeSign, regNumber, state_->GetAddress(), 0});
+        }
         return true;
     }
 

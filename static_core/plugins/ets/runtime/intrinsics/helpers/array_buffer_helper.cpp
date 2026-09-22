@@ -229,6 +229,7 @@ constexpr uint8_t FOUR_BYTES_STYLE = 0xF0U;
 constexpr uint8_t THREE_BYTES_STYLE = 0xE0U;
 constexpr uint8_t TWO_BYTES_STYLE1 = 0xD0U;
 constexpr uint8_t TWO_BYTES_STYLE2 = 0xC0U;
+constexpr uint32_t LOWER_10_BITS_MASK = 0x03FFU;
 constexpr uint8_t LOWER_6_BITS_MASK = 0x3FU;
 constexpr uint8_t LOWER_5_BITS_MASK = 0x1FU;
 constexpr uint8_t LOWER_4_BITS_MASK = 0x0FU;
@@ -375,7 +376,7 @@ static void Utf16ToUTF8Bytes(PandaVector<uint8_t> &bytes, uint32_t codePoint)
         codePoint -= UTF16_SPECIAL_VALUE;
         // 10 : a half of 20 , shift right 10 bits
         uint16_t highSurrogate = ((codePoint >> HIGH_SURROGATE_SHIFT) | HIGH_AGENT_MASK);
-        uint16_t lowSurrogate = ((codePoint & LOW_AGENT_MASK) | LOW_AGENT_MASK);
+        uint16_t lowSurrogate = ((codePoint & LOWER_10_BITS_MASK) | LOW_AGENT_MASK);
 
         bytes.push_back(highSurrogate & UTF8_BITS_MASK);
         bytes.push_back(static_cast<uint32_t>(highSurrogate >> UTF8_BITS) & UTF8_BITS_MASK);
