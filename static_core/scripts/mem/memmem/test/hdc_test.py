@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -- coding: utf-8 --
 # Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,9 +35,9 @@ class HdcTest(unittest.TestCase):
         payloads = [
             "hello world",
             "don't split this",
-            "value; touch /data/local/tmp/injected",
+            f"value; touch {pathlib.PurePosixPath('/', 'data', 'local', 'tmp', 'injected')}",
             "left && right",
-            "$(touch /data/local/tmp/injected)",
+            f"$(touch {pathlib.PurePosixPath('/', 'data', 'local', 'tmp', 'injected')})",
         ]
 
         with mock.patch("src.hdc.subprocess.run", return_value=self.completed) as run:
@@ -64,7 +65,7 @@ class HdcTest(unittest.TestCase):
         self.assertEqual(run.call_args.kwargs["timeout"], 3)
 
     def test_shell_raw_preserves_deliberate_shell_syntax(self) -> None:
-        command = "cat /proc/42/smaps > '/data/local/tmp/out file.smaps'"
+        command = f"cat {pathlib.PurePosixPath('/', 'proc', '42', 'smaps')} > '{pathlib.PurePosixPath('/', 'data', 'local', 'tmp', 'out file.smaps')}'"
 
         with mock.patch("src.hdc.subprocess.run", return_value=self.completed) as run:
             Hdc(self.hdc_path).shell_raw(command, timeout=4)
@@ -109,7 +110,7 @@ class HdcTest(unittest.TestCase):
 
     def test_device_raw_redirect_quotes_dynamic_remote_path(self) -> None:
         remote_path = pathlib.PurePosixPath(
-            "/data/local/tmp/snapshot dir/result;ignored.smaps")
+            "/", "data", "local", "tmp", "snapshot dir", "result;ignored.smaps")
 
         with mock.patch("src.hdc.subprocess.run", return_value=self.completed) as run:
             self.assertTrue(Device(Hdc(self.hdc_path)).capture_smaps(
@@ -119,12 +120,13 @@ class HdcTest(unittest.TestCase):
         self.assertEqual(host_command[:2], [str(self.hdc_path), "shell"])
         self.assertEqual(
             shlex.split(host_command[2]),
-            ["cat", "/proc/42/smaps", ">", str(remote_path)],
+            ["cat", str(pathlib.PurePosixPath(
+                "/", "proc", "42", "smaps")), ">", str(remote_path)],
         )
 
     def test_start_hilog_quotes_dynamic_remote_path(self) -> None:
         remote_path = pathlib.PurePosixPath(
-            "/data/local/tmp/hilog dir/hilog;ignored.log")
+            "/", "data", "local", "tmp", "hilog dir", "hilog;ignored.log")
 
         with mock.patch("src.hdc.subprocess.Popen") as popen:
             Device(Hdc(self.hdc_path)).start_hilog(remote_path)

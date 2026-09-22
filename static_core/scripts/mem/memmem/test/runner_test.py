@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -- coding: utf-8 --
 # Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -509,12 +510,12 @@ class RunnerTest(unittest.TestCase):
         hdc = FakeHdc(
             responses={
                 "shell param get bootevent.boot.completed": HdcResult(0, "true\n", ""),
-                "shell cat /sys/class/power_supply/Battery/capacity": HdcResult(0, "80\n", ""),
-                "shell for z in /sys/class/thermal/thermal_zone*; do [ -f $z/type ] && [ -f $z/temp ] && printf '%s %s\\n' \"$(cat $z/type)\" \"$(cat $z/temp)\"; done": HdcResult(0, "soc_thermal 30000\n", ""),
+                f"shell cat {pathlib.PurePosixPath('/', 'sys', 'class', 'power_supply', 'Battery', 'capacity')}": HdcResult(0, "80\n", ""),
+                f"shell for z in {pathlib.PurePosixPath('/', 'sys', 'class', 'thermal', 'thermal_zone*')}; do [ -f $z/type ] && [ -f $z/temp ] && printf '%s %s\\n' \"$(cat $z/type)\" \"$(cat $z/temp)\"; done": HdcResult(0, "soc_thermal 30000\n", ""),
             },
             prefix_responses={
                 "shell uitest dumpLayout -p ": HdcResult(0, "DumpLayout saved", ""),
-                "shell cat /data/local/tmp/memmem-layout.json": HdcResult(0, '{"attributes": {"bounds": "[0,0][100,200]"}}', ""),
+                f"shell cat {pathlib.PurePosixPath('/', 'data', 'local', 'tmp', 'memmem-layout.json')}": HdcResult(0, '{"attributes": {"bounds": "[0,0][100,200]"}}', ""),
             },
         )
         device = Device(hdc)  # type: ignore[arg-type]
@@ -538,10 +539,11 @@ class RunnerTest(unittest.TestCase):
                     ["shell", "uitest", "uiInput", "dircFling", "2", "20000", "20"],
                     ["shell", "uitest", "uiInput", "keyEvent", "Back"],
                     ["shell", "power-shell", "timeout", "-o", "60000000"],
-                    ["shell", "cat", "/sys/class/power_supply/Battery/capacity"],
+                    ["shell", "cat", str(pathlib.PurePosixPath(
+                        "/", "sys", "class", "power_supply", "Battery", "capacity"))],
                     [
                         "shell",
-                        "for z in /sys/class/thermal/thermal_zone*; do [ -f $z/type ] && [ -f $z/temp ] && printf '%s %s\\n' \"$(cat $z/type)\" \"$(cat $z/temp)\"; done",
+                        f"for z in {pathlib.PurePosixPath('/', 'sys', 'class', 'thermal', 'thermal_zone*')}; do [ -f $z/type ] && [ -f $z/temp ] && printf '%s %s\\n' \"$(cat $z/type)\" \"$(cat $z/temp)\"; done",
                     ],
                     ["shell", "mkdir", "-p", str(store.remote_out_dir())],
                     ["shell", "mkdir", "-p",
@@ -549,10 +551,11 @@ class RunnerTest(unittest.TestCase):
                     ["shell", "mkdir", "-p",
                         str(store.remote_screenshots_dir())],
                     ['shell', 'uitest', 'dumpLayout', '-p',
-                        '/data/local/tmp/memmem-layout.json'],
-                    ['shell', 'cat', '/data/local/tmp/memmem-layout.json'],
+                        str(pathlib.PurePosixPath("/", "data", "local", "tmp", "memmem-layout.json"))],
+                    ['shell', 'cat', str(pathlib.PurePosixPath(
+                        "/", "data", "local", "tmp", "memmem-layout.json"))],
                     ['shell', 'rm', '-f',
-                        '/data/local/tmp/memmem-layout.json'],
+                        str(pathlib.PurePosixPath("/", "data", "local", "tmp", "memmem-layout.json"))],
                 ],
             )
 

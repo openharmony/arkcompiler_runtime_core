@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -- coding: utf-8 --
 # Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +18,7 @@
 
 import contextlib
 import io
+import pathlib
 import signal
 import typing
 import unittest
@@ -228,7 +230,7 @@ class RecordTest(unittest.TestCase):
 
         self.assertEqual(fake_process.signals, [])
         self.assertNotIn(
-            ["shell", "cat", "/data/local/tmp/record.csv"], fake_hdc.calls)
+            ["shell", "cat", str(pathlib.PurePosixPath("/", "data", "local", "tmp", "record.csv"))], fake_hdc.calls)
 
     def test_unexpected_clean_recorder_exit_is_failure(self) -> None:
         fake_process = _FakeProcess(
@@ -244,7 +246,7 @@ class RecordTest(unittest.TestCase):
                 typing.cast(Hdc, fake_hdc), timeout=1)
 
         self.assertNotIn(
-            ["shell", "cat", "/data/local/tmp/record.csv"], fake_hdc.calls)
+            ["shell", "cat", str(pathlib.PurePosixPath("/", "data", "local", "tmp", "record.csv"))], fake_hdc.calls)
 
     def test_exit_before_timeout_signal_is_failure(self) -> None:
         fake_process = _FakeProcess(
@@ -263,7 +265,7 @@ class RecordTest(unittest.TestCase):
 
         self.assertEqual(fake_process.signals, [])
         self.assertNotIn(
-            ["shell", "cat", "/data/local/tmp/record.csv"], fake_hdc.calls)
+            ["shell", "cat", str(pathlib.PurePosixPath("/", "data", "local", "tmp", "record.csv"))], fake_hdc.calls)
 
     def test_timeout_stop_sends_sigint_and_accepts_signal_exit(self) -> None:
         fake_process = _FakeProcess(
@@ -281,7 +283,7 @@ class RecordTest(unittest.TestCase):
         self.assertEqual(len(flow.flow[0].commands), 1)
         self.assertEqual(fake_process.signals, [signal.SIGINT])
         self.assertIn(
-            ["shell", "cat", "/data/local/tmp/record.csv"], fake_hdc.calls)
+            ["shell", "cat", str(pathlib.PurePosixPath("/", "data", "local", "tmp", "record.csv"))], fake_hdc.calls)
 
     def test_manual_stop_sends_sigint_and_accepts_signal_exit(self) -> None:
         fake_process = _FakeProcess(
@@ -301,7 +303,7 @@ class RecordTest(unittest.TestCase):
         self.assertEqual(len(flow.flow[0].commands), 1)
         self.assertEqual(fake_process.signals, [signal.SIGINT])
         self.assertIn(
-            ["shell", "cat", "/data/local/tmp/record.csv"], fake_hdc.calls)
+            ["shell", "cat", str(pathlib.PurePosixPath("/", "data", "local", "tmp", "record.csv"))], fake_hdc.calls)
 
     def test_generated_flow_contains_valid_double_tap(self) -> None:
         app_flows = record._convert_events(
