@@ -105,6 +105,11 @@ ALWAYS_INLINE inline void IsValidByType(EtsExecutionContext *executionCtx, ark::
 {
     auto sourceClass = isGetter ? argClass : metaField->ResolveTypeClass();
     auto targetClass = isGetter ? metaField->ResolveTypeClass() : argClass;
+    if (UNLIKELY(sourceClass == nullptr || targetClass == nullptr)) {
+        ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreLinkerUnresolvedClassError,
+                          "Class not found for field type");
+        return;
+    }
     if (UNLIKELY(!targetClass->IsAssignableFrom(sourceClass))) {
         auto errorMsg = targetClass->GetName() + " cannot be cast to " + sourceClass->GetName();
         ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreClassCastError, errorMsg);
@@ -135,8 +140,9 @@ template <bool IS_GETTER>
 inline void LookUpException(ark::Class *klass, Field *rawField)
 {
     auto type = IS_GETTER ? "getter" : "setter";
+    auto rawFieldName = (rawField == nullptr) ? "null" : utf::Mutf8AsCString(rawField->GetName().data);
     auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) + " does not have field and " +
-                    ark::ConvertToString(type) + " with name " + utf::Mutf8AsCString(rawField->GetName().data);
+                    ark::ConvertToString(type) + " with name " + rawFieldName;
     ThrowEtsException(EtsExecutionContext::GetCurrent(), PlatformTypes()->coreLinkerUnresolvedFieldError, errorMsg);
 }
 
@@ -152,17 +158,19 @@ template <bool IS_GETTER>
 ALWAYS_INLINE Field *GetFieldByName(InterpreterCache::Entry *entry, ark::Method *method, Field *rawField,
                                     const uint8_t *address, ark::Class *klass)
 {
+    if (UNLIKELY(rawField == nullptr)) {
+        return nullptr;
+    }
     auto *res = entry->item;
     auto resUint = reinterpret_cast<uint64_t>(res);
     auto fieldPtr = reinterpret_cast<Field *>(resUint & ~METHOD_FLAG_MASK);
-    bool cacheExists = res != nullptr && ((resUint & METHOD_FLAG_MASK) == 1);
+    bool cacheExists = res != nullptr && ((resUint & METHOD_FLAG_MASK) == 0) && address == entry->pc;
     Class *current = klass;
     Field *field = nullptr;
     while (current != nullptr) {
         if (cacheExists && (fieldPtr->GetClass() == current)) {
             return fieldPtr;
         }
-        ASSERT(rawField != nullptr);
         field = LookupFieldByName(rawField->GetName(), current);
         if (field == nullptr) {
             current = current->GetBase();
@@ -181,6 +189,9 @@ template <panda_file::Type::TypeId FIELD_TYPE, bool IS_GETTER>
 ALWAYS_INLINE inline ark::Method *GetAccessorByName(InterpreterCache::Entry *entry, ark::Method *method,
                                                     Field *rawField, const uint8_t *address, ark::Class *klass)
 {
+    if (UNLIKELY(rawField == nullptr)) {
+        return nullptr;
+    }
     auto *res = entry->item;
     auto resUint = reinterpret_cast<uint64_t>(res);
     bool cacheExists = res != nullptr && ((resUint & METHOD_FLAG_MASK) == 1) && address == entry->pc;
@@ -334,14 +345,18 @@ ALWAYS_INLINE inline bool MethodIsSupertypeOf(ClassLinker *linker, Method *super
 
     auto subPDA = panda_file::ProtoDataAccessor(sub.GetPandaFile(), sub.GetEntityId());
     auto superPDA = panda_file::ProtoDataAccessor(super.GetPandaFile(), super.GetEntityId());
-    if (superPDA.GetNumElements() != subPDA.GetNumElements()) {
+    uint32_t numElems = subPDA.GetNumElements();
+    if (superPDA.GetNumElements() != numElems) {
+        return false;
+    }
+    if (numElems == 0) {
         return false;
     }
     if (superPDA.GetReturnType() != subPDA.GetReturnType()) {
         return false;
     }
 
-    uint32_t numArgs = subPDA.GetNumArgs();
+    uint32_t numArgs = numElems - 1;
 
     for (uint32_t i = 0, refIdx = 0; i < numArgs; ++i) {
         if (superPDA.GetArgType(i) != subPDA.GetArgType(i)) {

@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include <cmath>
+#include <limits>
+#include <type_traits>
+
 #include "libarkbase/utils/utf.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
@@ -58,9 +62,22 @@ static std::optional<T> GetBoxedNumericValue(EtsPlatformTypes const *ptypes, Ets
 {
     auto *cls = obj->GetClass();
 
-    auto const getValue = [obj](auto typeId) {
+    auto const getValue = [obj](auto typeId) -> std::optional<T> {
         using Type = typename decltype(typeId)::type;
-        return static_cast<T>(EtsBoxPrimitive<Type>::Unbox(obj));
+        auto raw = EtsBoxPrimitive<Type>::Unbox(obj);
+        if constexpr (std::is_floating_point_v<Type> && std::is_integral_v<T>) {
+            // Cast of an out-of-range floating-point value to an integer type is undefined behaviour,
+            // check that the value is representable in T before the cast.
+            // If T::max is not exactly representable in Type, the cast rounds it up and the upper
+            // bound must be checked inclusively, otherwise the rounded up value slips through.
+            constexpr bool K_MAX_EXACT = std::numeric_limits<T>::digits <= std::numeric_limits<Type>::digits;
+            constexpr auto K_MIN = static_cast<Type>(std::numeric_limits<T>::lowest());
+            constexpr auto K_MAX = static_cast<Type>(std::numeric_limits<T>::max());
+            if (!std::isfinite(raw) || raw < K_MIN || (K_MAX_EXACT ? raw > K_MAX : raw >= K_MAX)) {
+                return std::nullopt;
+            }
+        }
+        return static_cast<T>(raw);
     };
 
     if (cls == ptypes->coreDouble) {
@@ -455,13 +472,25 @@ static void ThrowEtsMethodNotFoundException(EtsExecutionContext *executionCtx, c
 
 static void ThrowEtsInvalidKey(EtsExecutionContext *executionCtx, EtsClass *cls)
 {
-    PandaString message = "Invalid key type: " + cls->GetName()->GetMutf8();
+    EtsString *name = cls->GetName();
+    PandaString message;
+    if (name != nullptr) {
+        message = "Invalid key type: " + name->GetMutf8();
+    } else {
+        message = "Invalid key type: <unknown>";
+    }
     ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
 }
 
 static void ThrowEtsInvalidType(EtsExecutionContext *executionCtx, EtsClass *cls)
 {
-    PandaString message = "Invalid operand type: " + cls->GetName()->GetMutf8();
+    EtsString *name = cls->GetName();
+    PandaString message;
+    if (name != nullptr) {
+        message = "Invalid operand type: " + name->GetMutf8();
+    } else {
+        message = "Invalid operand type: <unknown>";
+    }
     ThrowEtsException(executionCtx, PlatformTypes(executionCtx)->coreTypeError, message);
 }
 
@@ -922,8 +951,16 @@ EtsObject *EtsCall([[maybe_unused]] ManagedThread *mThread, EtsObject *funcObj,
         }
         constexpr size_t UNSAFE_CALL_PARAM_COUNT = 2;
         auto method = funcObj->GetClass()->GetInstanceMethod("unsafeCall", nullptr);
+        if (UNLIKELY(method == nullptr)) {
+            ThrowEtsMethodNotFoundException(executionCtx, funcObj->GetClass()->GetDescriptor(), "unsafeCall", "...");
+            return nullptr;
+        }
         EtsHandle<EtsObject> funcObjHandle(executionCtx, funcObj);
         auto restParam = EtsObjectArray::Create(PlatformTypes(executionCtx)->coreObject, args.size());
+        if (UNLIKELY(restParam == nullptr)) {
+            ASSERT(executionCtx->GetMT()->HasPendingException());
+            return nullptr;
+        }
         for (size_t i = 0; i < args.size(); i++) {
             restParam->Set(i, EtsObject::FromCoreType(args[i].GetPtr()));
         }

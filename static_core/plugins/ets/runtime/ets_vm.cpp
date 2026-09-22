@@ -162,13 +162,13 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
     auto allocator = mm->GetHeapManager()->GetInternalAllocator();
     auto vm = allocator->New<PandaEtsVM>(runtime, options, mm);
     if (vm == nullptr) {
+        mem::MemoryManager::Destroy(mm);
         return Unexpected(PandaString("Cannot create PandaCoreVM"));
     }
 
     auto classLinker = EtsClassLinker::Create(runtime->GetClassLinker());
     if (!classLinker) {
         allocator->Delete(vm);
-        mem::MemoryManager::Destroy(mm);
         return Unexpected(classLinker.Error());
     }
     vm->classLinker_ = std::move(classLinker.Value());
@@ -183,6 +183,10 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
         u_setDataDirectory(icuPath.c_str());
     }
 
+    if (vm->jobManager_ == nullptr) {
+        allocator->Delete(vm);
+        return Unexpected(PandaString("Cannot create jobManager"));
+    }
     vm->jobManager_->InitializeScheduler(runtime, vm);
 
     g_pandaEtsVM = vm;
@@ -340,16 +344,28 @@ static void CreateEtsObjects(PandaVector<CoroutineWorker::LocalObjectData> &obje
         LOG(DEBUG, ETS) << "Initialized number-to-string caches";
         auto *refStorage = executionCtx->GetPandaVM()->GetGlobalObjectStorage();
         auto *cacheRefDouble = refStorage->Add(cacheDouble->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+        if (UNLIKELY(cacheRefDouble == nullptr)) {
+            LOG(ERROR, ETS) << "Failed to add double-to-string cache to global storage";
+            return;
+        }
         objectRefs.push_back(CoroutineWorker::LocalObjectData {
             CoroutineWorker::DataIdx::DOUBLE_TO_STRING_CACHE, cacheRefDouble,
             [refStorage](void *ref) { refStorage->Remove(static_cast<mem::Reference *>(ref)); }});
 
         auto *cacheRefFloat = refStorage->Add(cacheFloat->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+        if (UNLIKELY(cacheRefFloat == nullptr)) {
+            LOG(ERROR, ETS) << "Failed to add float-to-string cache to global storage";
+            return;
+        }
         objectRefs.push_back(CoroutineWorker::LocalObjectData {
             CoroutineWorker::DataIdx::FLOAT_TO_STRING_CACHE, cacheRefFloat,
             [refStorage](void *ref) { refStorage->Remove(static_cast<mem::Reference *>(ref)); }});
 
         auto *cacheRefLong = refStorage->Add(cacheLong->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+        if (UNLIKELY(cacheRefLong == nullptr)) {
+            LOG(ERROR, ETS) << "Failed to add long-to-string cache to global storage";
+            return;
+        }
         objectRefs.push_back(CoroutineWorker::LocalObjectData {
             CoroutineWorker::DataIdx::LONG_TO_STRING_CACHE, cacheRefLong,
             [refStorage](void *ref) { refStorage->Remove(static_cast<mem::Reference *>(ref)); }});
@@ -499,7 +515,8 @@ void PandaEtsVM::PostForkStart()
 {
     isPostFork_ = true;
     // Add a delay GCTask.
-    if ((!Runtime::GetCurrent()->IsZygote()) && (!mm_->GetGC()->GetSettings()->RunGCInPlace())) {
+    if ((!Runtime::GetCurrent()->IsZygote()) && (!mm_->GetGC()->GetSettings()->RunGCInPlace()) &&
+        (mm_->GetGC()->GetSettings()->UseTaskManagerForGC())) {
         // set target footprint to a high value to disable GC during App startup.
         size_t startupTargetFootprint = Runtime::GetOptions().GetHeapSizeLimit() / 2;
         size_t startupLimit = startupTargetFootprint / 2;
@@ -616,11 +633,19 @@ static EtsObjectArray *CreateArgumentsArray(const std::vector<std::string> &args
     [[maybe_unused]] EtsHandleScope scope(executionCtx);
     auto types = PlatformTypes(etsVm);
     EtsObjectArray *etsArray = EtsObjectArray::Create(types->coreString, args.size());
+    if (UNLIKELY(etsArray == nullptr)) {
+        LOG(ERROR, ETS) << "Failed to create arguments array";
+        return nullptr;
+    }
     ASSERT(etsArray->GetClass() == types->coreStringFixedArray);
     EtsHandle<EtsObjectArray> arrayHandle(executionCtx, etsArray);
 
     for (size_t i = 0; i < args.size(); i++) {
         EtsString *str = EtsString::CreateFromMUtf8(args[i].data(), args[i].length());
+        if (UNLIKELY(str == nullptr)) {
+            LOG(ERROR, ETS) << "Failed to create string from argument";
+            return nullptr;
+        }
         ASSERT(arrayHandle.GetPtr() != nullptr);
         arrayHandle.GetPtr()->Set(i, str->AsObject());
     }
@@ -676,6 +701,10 @@ Expected<int, Runtime::Error> PandaEtsVM::InvokeEntrypointImpl(Method *entrypoin
 
     if (entrypoint->GetNumArgs() == 1) {
         EtsObjectArray *etsObjectArray = CreateArgumentsArray(args, this);
+        if (UNLIKELY(etsObjectArray == nullptr)) {
+            LOG(ERROR, RUNTIME) << "Failed to create arguments array";
+            return Unexpected(Runtime::Error::CLASS_NOT_INITIALIZED);
+        }
         argValue = Value(etsObjectArray->GetCoreType());
         entrypointArgs = &argValue;
     }
