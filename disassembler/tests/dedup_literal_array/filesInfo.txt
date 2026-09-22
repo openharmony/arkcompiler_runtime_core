@@ -1,0 +1,2 @@
+/dedup_literal_array/dedup_src1.js;dedup_src1;esm;dedup_literal_array/dedup_src1.js;dedup_src1;false
+/dedup_literal_array/dedup_src2.js;dedup_src2;esm;dedup_literal_array/dedup_src2.js;dedup_src2;false

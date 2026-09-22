@@ -1,0 +1,2 @@
+/dedup_object_buffer/dedup_obj_src1.js;dedup_obj_src1;esm;dedup_object_buffer/dedup_obj_src1.js;dedup_obj_src1;false
+/dedup_object_buffer/dedup_obj_src2.js;dedup_obj_src2;esm;dedup_object_buffer/dedup_obj_src2.js;dedup_obj_src2;false

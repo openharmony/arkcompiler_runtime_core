@@ -441,10 +441,113 @@ host_unittest_action("DisasmSecurityTest") {
   }
 }
 
+dedup_literal_array_src_dir =
+    "//arkcompiler/runtime_core/disassembler/tests/dedup_literal_array/"
+
+action("gen_dedup_filesinfo_action") {
+  script = "handle_fileinfo.py"
+  inputs = [ "${dedup_literal_array_src_dir}filesInfo.txt" ]
+  outputs = [ "$target_out_dir/dedup_literal_array/filesInfo.txt" ]
+  args = [
+    rebase_path("${dedup_literal_array_src_dir}filesInfo.txt"),
+    rebase_path("$target_out_dir/dedup_literal_array/filesInfo.txt"),
+    rebase_path("./"),
+  ]
+}
+
+es2abc_gen_abc("gen_dedup_literal_array_abc") {
+  test_abc = "$target_out_dir/dedup_literal_array.abc"
+  fileinfo_path = rebase_path("$target_out_dir/dedup_literal_array/filesInfo.txt")
+  src_js = "@${fileinfo_path}"
+  dst_file = rebase_path(test_abc)
+  extra_args = [
+    "--module",
+    "--merge-abc",
+  ]
+  out_puts = [ test_abc ]
+}
+
+host_unittest_action("DisasmDedupLiteralArrayTest") {
+  module_out_path = module_output_path
+  sources = [ "disassembler_dedup_literal_array_test.cpp" ]
+  include_dirs = disasm_include_dirs
+  configs = disasm_test_configs
+  external_deps = [ sdk_libc_secshared_dep ]
+  if (enable_hilog) {
+    external_deps += [ "hilog:libhilog" ]
+  }
+  deps = disasm_test_deps
+  test_abc_dir = rebase_path(target_out_dir)
+  defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
+  deps += [
+    ":gen_dedup_filesinfo_action",
+    ":gen_dedup_literal_array_abc",
+    ":gen_dedup_obj_filesinfo_action",
+    ":gen_dedup_object_buffer_abc",
+    ":gen_dedup_cls_filesinfo_action",
+    ":gen_dedup_class_buffer_abc",
+  ]
+}
+
+# --- createobjectwithbuffer scenario ---
+dedup_object_buffer_src_dir =
+    "//arkcompiler/runtime_core/disassembler/tests/dedup_object_buffer/"
+
+action("gen_dedup_obj_filesinfo_action") {
+  script = "handle_fileinfo.py"
+  inputs = [ "${dedup_object_buffer_src_dir}filesInfo.txt" ]
+  outputs = [ "$target_out_dir/dedup_object_buffer/filesInfo.txt" ]
+  args = [
+    rebase_path("${dedup_object_buffer_src_dir}filesInfo.txt"),
+    rebase_path("$target_out_dir/dedup_object_buffer/filesInfo.txt"),
+    rebase_path("./"),
+  ]
+}
+
+es2abc_gen_abc("gen_dedup_object_buffer_abc") {
+  test_abc = "$target_out_dir/dedup_object_buffer.abc"
+  fileinfo_path = rebase_path("$target_out_dir/dedup_object_buffer/filesInfo.txt")
+  src_js = "@${fileinfo_path}"
+  dst_file = rebase_path(test_abc)
+  extra_args = [
+    "--module",
+    "--merge-abc",
+  ]
+  out_puts = [ test_abc ]
+}
+
+# --- defineclasswithbuffer scenario ---
+dedup_class_buffer_src_dir =
+    "//arkcompiler/runtime_core/disassembler/tests/dedup_class_buffer/"
+
+action("gen_dedup_cls_filesinfo_action") {
+  script = "handle_fileinfo.py"
+  inputs = [ "${dedup_class_buffer_src_dir}filesInfo.txt" ]
+  outputs = [ "$target_out_dir/dedup_class_buffer/filesInfo.txt" ]
+  args = [
+    rebase_path("${dedup_class_buffer_src_dir}filesInfo.txt"),
+    rebase_path("$target_out_dir/dedup_class_buffer/filesInfo.txt"),
+    rebase_path("./"),
+  ]
+}
+
+es2abc_gen_abc("gen_dedup_class_buffer_abc") {
+  test_abc = "$target_out_dir/dedup_class_buffer.abc"
+  fileinfo_path = rebase_path("$target_out_dir/dedup_class_buffer/filesInfo.txt")
+  src_js = "@${fileinfo_path}"
+  dst_file = rebase_path(test_abc)
+  extra_args = [
+    "--module",
+    "--merge-abc",
+  ]
+  out_puts = [ test_abc ]
+}
+
 group("host_unittest") {
   testonly = true
   deps = [
     ":DisasmDebugTestAction",
+    ":DisasmDedupLiteralArrayTestAction",
     ":DisasmImmTestAction",
     ":DisasmModuleTestAction",
     ":DisasmReleaseTestAction",

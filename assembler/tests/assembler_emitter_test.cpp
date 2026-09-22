@@ -610,8 +610,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_008, TestSize.Level1)
     double f_f64 = 2.0;
 
     std::vector<FieldData> data {
-        {"f_u1", panda_file::Type::TypeId::U1, f_u1}, {"f_i8", panda_file::Type::TypeId::I8, f_i8},
-        {"f_u8", panda_file::Type::TypeId::U8, f_u8}, {"f_i16", panda_file::Type::TypeId::I16, f_i16},
+        {"f_u1", panda_file::Type::TypeId::U1, f_u1},    {"f_i8", panda_file::Type::TypeId::I8, f_i8},
+        {"f_u8", panda_file::Type::TypeId::U8, f_u8},    {"f_i16", panda_file::Type::TypeId::I16, f_i16},
         {"f_u16", panda_file::Type::TypeId::U16, f_u16}, {"f_i32", panda_file::Type::TypeId::I32, f_i32},
         {"f_u32", panda_file::Type::TypeId::U32, f_u32}, {"f_i64", panda_file::Type::TypeId::I64, f_i64},
         {"f_u64", panda_file::Type::TypeId::U64, f_u64}, {"f_f32", panda_file::Type::TypeId::F32, f_f32},
@@ -846,7 +846,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_011, TestSize.Level1)
     std::vector<Program *> progs;
     progs.push_back(&res1.Value());
     progs.push_back(&res2.Value());
-    const std::string filename = "source.pa";;
+    const std::string filename = "source.pa";
+    ;
     auto pf = AsmEmitter::EmitPrograms(filename, progs, false);
     EXPECT_TRUE(pf);
 }
@@ -991,7 +992,6 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_015, TestSize.Level1)
     AnnotationElement anno_element("_TypeOfInstruction", std::make_unique<ArrayValue>(array_value));
     AnnotationData annotation("_ESSlotNumberAnnotation");
     annotation.AddElement(std::move(anno_element));
-
 
     ScalarValue insn_order_anno(ScalarValue::Create<panda::pandasm::Value::Type::ANNOTATION>(annotation));
 
@@ -1169,7 +1169,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_020, TestSize.Level1)
     std::vector<Program *> progs;
     progs.push_back(&res1.Value());
     progs.push_back(&res2.Value());
-    const std::string filename = "source.pa";;
+    const std::string filename = "source.pa";
+    ;
     auto success = AsmEmitter::EmitPrograms(filename, progs, true);
     EXPECT_TRUE(success);
 }
@@ -1243,9 +1244,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_021, TestSize.Level1)
 
         EXPECT_FALSE(cda.GetSourceLang());
 
-        cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-            EXPECT_EQ(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16);
-        });
+        cda.EnumerateMethods(
+            [&](panda_file::MethodDataAccessor &mda) { EXPECT_EQ(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16); });
     }
 }
 
@@ -1308,9 +1308,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_022, TestSize.Level1)
 
         EXPECT_FALSE(cda.GetSourceLang());
 
-        cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-            EXPECT_EQ(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16);
-        });
+        cda.EnumerateMethods(
+            [&](panda_file::MethodDataAccessor &mda) { EXPECT_EQ(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16); });
     }
 }
 
@@ -1366,9 +1365,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_023, TestSize.Level1)
 
         EXPECT_FALSE(cda.GetSourceLang());
 
-        cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-            EXPECT_EQ(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16);
-        });
+        cda.EnumerateMethods(
+            [&](panda_file::MethodDataAccessor &mda) { EXPECT_EQ(mda.GetProtoIdx(), panda_file::INVALID_INDEX_16); });
     }
 }
 
@@ -1401,7 +1399,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_024, TestSize.Level1)
     std::vector<Program *> progs;
     progs.push_back(&res1.Value());
     progs.push_back(&res2.Value());
-    const std::string filename = "source.pa";;
+    const std::string filename = "source.pa";
+    ;
     auto pf = AsmEmitter::EmitPrograms(filename, progs, false);
     EXPECT_TRUE(pf);
 }
@@ -1435,7 +1434,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_025, TestSize.Level1)
     std::vector<Program *> progs;
     progs.push_back(&res1.Value());
     progs.push_back(&res2.Value());
-    const std::string filename = "source.pa";;
+    const std::string filename = "source.pa";
+    ;
     auto pf = AsmEmitter::EmitPrograms(filename, progs, false);
     EXPECT_FALSE(pf);
     EXPECT_EQ(AsmEmitter::GetLastError(), "Field {Rec.rec} has different value.");
@@ -1470,7 +1470,8 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_026, TestSize.Level1)
     std::vector<Program *> progs;
     progs.push_back(&res1.Value());
     progs.push_back(&res2.Value());
-    const std::string filename = "source.pa";;
+    const std::string filename = "source.pa";
+    ;
     auto pf = AsmEmitter::EmitPrograms(filename, progs, false);
     EXPECT_TRUE(pf);
 }
@@ -1526,8 +1527,523 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_027, TestSize.Level1)
     std::vector<Program *> progs;
     progs.push_back(&res1.Value());
     progs.push_back(&res2.Value());
-    const std::string filename = "source.pa";;
+    const std::string filename = "source.pa";
+    ;
     auto pf = AsmEmitter::EmitPrograms(filename, progs, false);
     EXPECT_TRUE(pf);
 }
+
+// --- Helpers for dedup-literal-array tests ---
+
+static LiteralArray MakeU32LiteralArray(uint32_t v)
+{
+    LiteralArray la;
+    la.literals_.resize(1);
+    la.literals_[0].tag_ = panda_file::LiteralTag::ARRAY_U32;
+    la.literals_[0].value_.emplace<uint32_t>(v);
+    return la;
 }
+
+// Attach a function with a CREATEARRAYWITHBUFFER instruction referencing the given literal-array id.
+// The dedup whitelist requires arrays to be referenced by this instruction type to participate.
+static void AttachArrayBuffer(Program &prog, const std::string &funcName, const std::string &litArrayId)
+{
+    std::vector<std::uint16_t> regs;
+    std::vector<IType> imms = {static_cast<int64_t>(0)};
+    std::vector<std::string> ids = {litArrayId};
+    Function fn(funcName, panda_file::SourceLang::ECMASCRIPT);
+    fn.ins.push_back(InsPtr(Ins::CreateIns(Opcode::CREATEARRAYWITHBUFFER, regs, imms, ids)));
+    prog.function_table.emplace(funcName, std::move(fn));
+}
+
+// Attach a function with a CREATEOBJECTWITHBUFFER instruction referencing the given literal-array id.
+static void AttachObjectBuffer(Program &prog, const std::string &funcName, const std::string &litArrayId)
+{
+    std::vector<std::uint16_t> regs;
+    std::vector<IType> imms = {static_cast<int64_t>(0)};
+    std::vector<std::string> ids = {litArrayId};
+    Function fn(funcName, panda_file::SourceLang::ECMASCRIPT);
+    fn.ins.push_back(InsPtr(Ins::CreateIns(Opcode::CREATEOBJECTWITHBUFFER, regs, imms, ids)));
+    prog.function_table.emplace(funcName, std::move(fn));
+}
+
+static AnnotationData MakeLiteralArrayAnnotation(const std::string &litArrayId)
+{
+    AnnotationElement elem("data", std::make_unique<ScalarValue>(
+                                       ScalarValue::Create<Value::Type::LITERALARRAY>(std::string_view(litArrayId))));
+    std::vector<AnnotationElement> elements;
+    elements.push_back(std::move(elem));
+    return AnnotationData("Anno", std::move(elements));
+}
+
+/**
+ * @tc.name: assembly_emitter_test_028
+ * @tc.desc: Verify AsmEmitter::DeduplicateLiteralArrays merges identical literal arrays across
+ *           programs.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_028, TestSize.Level1)
+{
+    Parser p1;
+    auto res1 = p1.Parse(R"(.record R1 { u32 f })", "s1.pa");
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+    res1.Value().literalarray_table["arr_0"] = MakeU32LiteralArray(1);
+    AttachArrayBuffer(res1.Value(), "s1.func_main_0", "arr_0");
+
+    Parser p2;
+    auto res2 = p2.Parse(R"(.record R2 { u32 f })", "s2.pa");
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+    // Same content as arr_0 but a different id.
+    res2.Value().literalarray_table["arr_1"] = MakeU32LiteralArray(1);
+    AttachArrayBuffer(res2.Value(), "s2.func_main_0", "arr_1");
+
+    std::vector<Program *> progs {&res1.Value(), &res2.Value()};
+    AsmEmitter::DeduplicateLiteralArrays(progs);
+
+    // Canonical entry is kept in the first program.
+    EXPECT_EQ(res1.Value().literalarray_table.size(), 1U);
+    EXPECT_TRUE(res1.Value().literalarray_table.count("arr_0") > 0);
+    // The duplicate entry is removed from the second program.
+    EXPECT_EQ(res2.Value().literalarray_table.size(), 0U);
+    EXPECT_FALSE(res2.Value().literalarray_table.count("arr_1") > 0);
+}
+
+/**
+ * @tc.name: assembly_emitter_test_029
+ * @tc.desc: Verify AsmEmitter::DeduplicateLiteralArrays keeps arrays with distinct content.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_029, TestSize.Level1)
+{
+    Parser p1;
+    auto res1 = p1.Parse(R"(.record R1 { u32 f })", "s1.pa");
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+    Parser p2;
+    auto res2 = p2.Parse(R"(.record R2 { u32 f })", "s2.pa");
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    auto la1 = LiteralArray();
+    la1.literals_.resize(1);
+    la1.literals_[0].tag_ = panda_file::LiteralTag::ARRAY_U32;
+    la1.literals_[0].value_.emplace<uint32_t>(1);
+    res1.Value().literalarray_table["arr_0"] = la1;
+    AttachArrayBuffer(res1.Value(), "s1.func_main_0", "arr_0");
+
+    auto la2 = LiteralArray();
+    la2.literals_.resize(1);
+    la2.literals_[0].tag_ = panda_file::LiteralTag::ARRAY_U32;
+    la2.literals_[0].value_.emplace<uint32_t>(2);
+    res2.Value().literalarray_table["arr_1"] = la2;
+    AttachArrayBuffer(res2.Value(), "s2.func_main_0", "arr_1");
+
+    std::vector<Program *> progs {&res1.Value(), &res2.Value()};
+    AsmEmitter::DeduplicateLiteralArrays(progs);
+
+    EXPECT_EQ(res1.Value().literalarray_table.size(), 1U);
+    EXPECT_EQ(res2.Value().literalarray_table.size(), 1U);
+    EXPECT_TRUE(res1.Value().literalarray_table.count("arr_0") > 0);
+    EXPECT_TRUE(res2.Value().literalarray_table.count("arr_1") > 0);
+}
+
+/**
+ * @tc.name: assembly_emitter_test_030
+ * @tc.desc: Verify DeduplicateLiteralArrays deduplicates arrays that reference nested arrays with
+ *          identical content but different ids (nested references are compared by content, not by id).
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_030, TestSize.Level1)
+{
+    auto makeU32 = [](uint32_t v) {
+        LiteralArray la;
+        la.literals_.resize(1);
+        la.literals_[0].tag_ = panda_file::LiteralTag::ARRAY_U32;
+        la.literals_[0].value_.emplace<uint32_t>(v);
+        return la;
+    };
+    auto makeRef = [](const std::string &nestedId) {
+        LiteralArray la;
+        la.literals_.resize(1);
+        la.literals_[0].tag_ = panda_file::LiteralTag::LITERALARRAY;
+        la.literals_[0].value_.emplace<std::string>(nestedId);
+        return la;
+    };
+
+    Parser p1;
+    auto res1 = p1.Parse(R"(.record R1 { u32 f })", "s1.pa");
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+    res1.Value().literalarray_table["n0"] = makeU32(1);
+    res1.Value().literalarray_table["o0"] = makeRef("n0");
+    AttachArrayBuffer(res1.Value(), "s1.func_main_0", "n0");
+    AttachArrayBuffer(res1.Value(), "s1.func_main_1", "o0");
+
+    Parser p2;
+    auto res2 = p2.Parse(R"(.record R2 { u32 f })", "s2.pa");
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+    res2.Value().literalarray_table["n1"] = makeU32(1);     // same content as n0, different id
+    res2.Value().literalarray_table["o1"] = makeRef("n1");  // structurally equal to o0
+    AttachArrayBuffer(res2.Value(), "s2.func_main_0", "n1");
+    AttachArrayBuffer(res2.Value(), "s2.func_main_1", "o1");
+
+    std::vector<Program *> progs {&res1.Value(), &res2.Value()};
+    AsmEmitter::DeduplicateLiteralArrays(progs);
+
+    // The canonical arrays stay in program 1.
+    EXPECT_EQ(res1.Value().literalarray_table.size(), 2U);
+    EXPECT_TRUE(res1.Value().literalarray_table.count("n0") > 0);
+    EXPECT_TRUE(res1.Value().literalarray_table.count("o0") > 0);
+    // Both duplicates (nested and the referencing array that is equal through nesting) are removed.
+    EXPECT_EQ(res2.Value().literalarray_table.size(), 0U);
+    EXPECT_FALSE(res2.Value().literalarray_table.count("n1") > 0);
+    EXPECT_FALSE(res2.Value().literalarray_table.count("o1") > 0);
+    // The surviving referencing array still points at its canonical nested array.
+    EXPECT_EQ(std::get<std::string>(res1.Value().literalarray_table.at("o0").literals_[0].value_), "n0");
+}
+
+/**
+ * @tc.name: assembly_emitter_test_031
+ * @tc.desc: Verify EmitPrograms integrates DeduplicateLiteralArrays: two programs carrying
+ *          identical-content literal arrays produce a merged abc with a single literal array entry.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_031, TestSize.Level1)
+{
+    Parser p1;
+    auto res1 = p1.Parse(R"(.record R1 { u32 f })", "s1.pa");
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+    res1.Value().literalarray_table["arr_0"] = MakeU32LiteralArray(1);
+    res1.Value().array_types.insert(Type("u32", 1));
+    AttachArrayBuffer(res1.Value(), "R1.func_main_0", "arr_0");
+
+    Parser p2;
+    auto res2 = p2.Parse(R"(.record R2 { u32 f })", "s2.pa");
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+    // Same content as arr_0 but a different id — should be deduplicated by EmitPrograms.
+    res2.Value().literalarray_table["arr_1"] = MakeU32LiteralArray(1);
+    res2.Value().array_types.insert(Type("u32", 1));
+    AttachArrayBuffer(res2.Value(), "R2.func_main_0", "arr_1");
+
+    std::vector<Program *> progs {&res1.Value(), &res2.Value()};
+    const std::string filename = "source.pa";
+    bool ok = AsmEmitter::EmitPrograms(filename, progs, false);
+    EXPECT_TRUE(ok);
+}
+
+/**
+ * @tc.name: assembly_emitter_test_032
+ * @tc.desc: Verify DeduplicateLiteralArrays handles edge cases: empty input is a no-op, and
+ *          duplicate arrays within a single program are also deduplicated.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_032, TestSize.Level1)
+{
+    // Empty progs vector — must not crash and must be a no-op.
+    std::vector<Program *> emptyProgs;
+    AsmEmitter::DeduplicateLiteralArrays(emptyProgs);
+    SUCCEED();
+
+    // Single program with two identical-content arrays under different ids.
+    Parser p;
+    auto res = p.Parse(R"(.record R { u32 f })", "s.pa");
+    EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+    res.Value().literalarray_table["a0"] = MakeU32LiteralArray(7);
+    res.Value().literalarray_table["a1"] = MakeU32LiteralArray(7);  // duplicate of a0
+    AttachArrayBuffer(res.Value(), "s.func_main_0", "a0");
+    AttachArrayBuffer(res.Value(), "s.func_main_1", "a1");
+
+    std::vector<Program *> progs {&res.Value()};
+    AsmEmitter::DeduplicateLiteralArrays(progs);
+
+    // Only the canonical (first) array survives.
+    EXPECT_EQ(res.Value().literalarray_table.size(), 1U);
+    EXPECT_TRUE(res.Value().literalarray_table.count("a0") > 0);
+    EXPECT_FALSE(res.Value().literalarray_table.count("a1") > 0);
+}
+
+// --- Helpers for test_034 (order/type sensitivity) ---
+
+static LiteralArray MakeU32PairLiteralArray(uint32_t a, uint32_t b)
+{
+    constexpr size_t pairSize = 2;
+    LiteralArray la;
+    la.literals_.resize(pairSize);
+    la.literals_[0].tag_ = panda_file::LiteralTag::ARRAY_U32;
+    la.literals_[0].value_.emplace<uint32_t>(a);
+    la.literals_[1].tag_ = panda_file::LiteralTag::ARRAY_U32;
+    la.literals_[1].value_.emplace<uint32_t>(b);
+    return la;
+}
+
+static LiteralArray MakeU16LiteralArray(uint16_t v)
+{
+    LiteralArray la;
+    la.literals_.resize(1);
+    la.literals_[0].tag_ = panda_file::LiteralTag::ARRAY_U16;
+    la.literals_[0].value_.emplace<uint16_t>(v);
+    return la;
+}
+
+/**
+ * @tc.name: assembly_emitter_test_033
+ * @tc.desc: Verify DeduplicateLiteralArrays does NOT merge arrays whose content differs by
+ *          element order or by element type — only byte-identical content is deduplicated.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_033, TestSize.Level1)
+{
+    // --- Element order matters: [1, 2] != [2, 1] ---
+    Parser p1;
+    auto res1 = p1.Parse(R"(.record R1 { u32 f })", "s1.pa");
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+    res1.Value().literalarray_table["ord0"] = MakeU32PairLiteralArray(1, 2);
+    AttachArrayBuffer(res1.Value(), "s1.func_main_0", "ord0");
+
+    Parser p2;
+    auto res2 = p2.Parse(R"(.record R2 { u32 f })", "s2.pa");
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+    res2.Value().literalarray_table["ord1"] = MakeU32PairLiteralArray(2, 1);  // reversed order
+    AttachArrayBuffer(res2.Value(), "s2.func_main_0", "ord1");
+
+    std::vector<Program *> progs {&res1.Value(), &res2.Value()};
+    AsmEmitter::DeduplicateLiteralArrays(progs);
+
+    EXPECT_EQ(res1.Value().literalarray_table.size(), 1U);
+    EXPECT_EQ(res2.Value().literalarray_table.size(), 1U);
+    EXPECT_TRUE(res1.Value().literalarray_table.count("ord0") > 0);
+    EXPECT_TRUE(res2.Value().literalarray_table.count("ord1") > 0);
+
+    // --- Element type matters: [u32 1] != [u16 1] ---
+    Parser p3;
+    auto res3 = p3.Parse(R"(.record R3 { u32 f })", "s3.pa");
+    EXPECT_EQ(p3.ShowError().err, Error::ErrorType::ERR_NONE);
+    res3.Value().literalarray_table["t0"] = MakeU32LiteralArray(1);
+    AttachArrayBuffer(res3.Value(), "s3.func_main_0", "t0");
+
+    Parser p4;
+    auto res4 = p4.Parse(R"(.record R4 { u32 f })", "s4.pa");
+    EXPECT_EQ(p4.ShowError().err, Error::ErrorType::ERR_NONE);
+    res4.Value().literalarray_table["t1"] = MakeU16LiteralArray(1);
+    AttachArrayBuffer(res4.Value(), "s4.func_main_0", "t1");
+
+    std::vector<Program *> progs2 {&res3.Value(), &res4.Value()};
+    AsmEmitter::DeduplicateLiteralArrays(progs2);
+
+    EXPECT_EQ(res3.Value().literalarray_table.size(), 1U);
+    EXPECT_EQ(res4.Value().literalarray_table.size(), 1U);
+    EXPECT_TRUE(res3.Value().literalarray_table.count("t0") > 0);
+    EXPECT_TRUE(res4.Value().literalarray_table.count("t1") > 0);
+}
+
+/**
+ * @tc.name: assembly_emitter_test_034
+ * @tc.desc: Verify EmitPrograms succeeds when annotation element values reference literal arrays
+ *           that are deduplicated across merged programs — the original crash scenario.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_034, TestSize.Level1)
+{
+    Parser p1;
+    auto res1 = p1.Parse(R"(.record R1 { u32 f })", "s1.pa");
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+    res1.Value().literalarray_table["arr_0"] = MakeU32LiteralArray(1);
+    res1.Value().array_types.insert(Type("u32", 1));
+    res1.Value().isGeneratedFromMergedAbc = true;
+    AttachArrayBuffer(res1.Value(), "R1.func_main_0", "arr_0");
+    // Create the annotation record so the emitter can find it in the ClassMap.
+    Record annoRecord("Anno", panda::panda_file::SourceLang::ECMASCRIPT);
+    annoRecord.metadata->SetAccessFlags(panda::ACC_ANNOTATION);
+    res1.Value().record_table.emplace("Anno", std::move(annoRecord));
+
+    Parser p2;
+    auto res2 = p2.Parse(R"(.record R2 { u32 f })", "s2.pa");
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+    // Same content as arr_0 — duplicate will be removed during EmitPrograms.
+    res2.Value().literalarray_table["arr_1"] = MakeU32LiteralArray(1);
+    res2.Value().array_types.insert(Type("u32", 1));
+    res2.Value().isGeneratedFromMergedAbc = true;
+    AttachArrayBuffer(res2.Value(), "R2.func_main_0", "arr_1");
+
+    // Annotation on the record references the canonical id — per the id-per-purpose contract,
+    // annotations never share ids with buffer instructions, so dedup cannot dangle them.
+    std::vector<AnnotationData> recAnnos;
+    recAnnos.push_back(MakeLiteralArrayAnnotation("arr_0"));
+    res2.Value().record_table.at("R2").metadata->SetAnnotations(std::move(recAnnos));
+
+    std::vector<Program *> progs {&res1.Value(), &res2.Value()};
+    const std::string filename = "anno_dedup.pa";
+    bool ok = AsmEmitter::EmitPrograms(filename, progs, false);
+    EXPECT_TRUE(ok);
+}
+
+// Attach a class-definition instruction (layout id at slot 1); such ids are excluded
+// from deduplication.
+static void AttachClassDefFunction(Program &prog, const std::string &funcName, Opcode op, const std::string &methodId,
+                                   const std::string &litArrayId)
+{
+    std::vector<std::uint16_t> regs = {0};
+    std::vector<IType> imms = {static_cast<int64_t>(0), static_cast<int64_t>(0)};
+    std::vector<std::string> ids = {methodId, litArrayId};
+    Function fn(funcName, panda_file::SourceLang::ECMASCRIPT);
+    fn.ins.push_back(InsPtr(Ins::CreateIns(op, regs, imms, ids)));
+    prog.function_table.emplace(funcName, std::move(fn));
+}
+
+/**
+ * @tc.name: assembly_emitter_test_035
+ * @tc.desc: Verify DeduplicateLiteralArrays does NOT merge class layout arrays (referenced by
+ *           DEFINECLASSWITHBUFFER / CALLRUNTIME_DEFINESENDABLECLASS) with other arrays of identical
+ *           content, because the runtime may mutate those layout buffers at class-definition time.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_035, TestSize.Level1)
+{
+    // Program 1 has three arrays with identical content:
+    //   cls_buf    — referenced by DEFINECLASSWITHBUFFER (class layout, must not be deduped)
+    //   send_buf   — referenced by CALLRUNTIME_DEFINESENDABLECLASS (sendable class layout, same)
+    //   arr_canon  — a plain array (eligible for dedup, becomes the canonical id)
+    Parser p1;
+    auto res1 = p1.Parse(R"(.record R1 { u32 f })", "s1.pa");
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+    res1.Value().literalarray_table["cls_buf"] = MakeU32LiteralArray(1);
+    res1.Value().literalarray_table["send_buf"] = MakeU32LiteralArray(1);
+    res1.Value().literalarray_table["arr_canon"] = MakeU32LiteralArray(1);
+    AttachClassDefFunction(res1.Value(), "s1.func_main_0", Opcode::DEFINECLASSWITHBUFFER, "s1.C", "cls_buf");
+    AttachClassDefFunction(res1.Value(), "s1.func_main_1", Opcode::CALLRUNTIME_DEFINESENDABLECLASS, "s1.SC",
+                           "send_buf");
+    AttachArrayBuffer(res1.Value(), "s1.func_main_2", "arr_canon");
+
+    // Program 2 has one plain array with the same content — it IS a duplicate of arr_canon.
+    Parser p2;
+    auto res2 = p2.Parse(R"(.record R2 { u32 f })", "s2.pa");
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+    res2.Value().literalarray_table["arr_dup"] = MakeU32LiteralArray(1);
+    AttachArrayBuffer(res2.Value(), "s2.func_main_0", "arr_dup");
+
+    std::vector<Program *> progs {&res1.Value(), &res2.Value()};
+    AsmEmitter::DeduplicateLiteralArrays(progs);
+
+    // Class layout buffers survive (not merged with plain arrays).
+    EXPECT_TRUE(res1.Value().literalarray_table.count("cls_buf") > 0);
+    EXPECT_TRUE(res1.Value().literalarray_table.count("send_buf") > 0);
+    // The canonical plain array survives.
+    EXPECT_TRUE(res1.Value().literalarray_table.count("arr_canon") > 0);
+    EXPECT_EQ(res1.Value().literalarray_table.size(), 3U);
+    // The duplicate plain array is removed and its instruction/field references would be rewritten.
+    EXPECT_FALSE(res2.Value().literalarray_table.count("arr_dup") > 0);
+    EXPECT_EQ(res2.Value().literalarray_table.size(), 0U);
+    // The class-definition instructions still reference the original (un-rewritten) ids.
+    EXPECT_EQ(res1.Value().function_table.at("s1.func_main_0").ins[0]->GetId(1), "cls_buf");
+    EXPECT_EQ(res1.Value().function_table.at("s1.func_main_1").ins[0]->GetId(1), "send_buf");
+}
+
+/**
+ * @tc.name: assembly_emitter_test_036
+ * @tc.desc: Verify DeduplicateLiteralArrays does not crash on cyclic LITERALARRAY references
+ *           (A→B→A). The cycle is detected and the arrays are not merged.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_036, TestSize.Level1)
+{
+    auto makeRef = [](const std::string &nestedId) {
+        LiteralArray la;
+        la.literals_.resize(1);
+        la.literals_[0].tag_ = panda_file::LiteralTag::LITERALARRAY;
+        la.literals_[0].value_.emplace<std::string>(nestedId);
+        return la;
+    };
+
+    Parser p1;
+    auto res1 = p1.Parse(R"(.record R1 { u32 f })", "s1.pa");
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+    // A → B → A (mutual cycle within one program)
+    res1.Value().literalarray_table["a"] = makeRef("b");
+    res1.Value().literalarray_table["b"] = makeRef("a");
+
+    Parser p2;
+    auto res2 = p2.Parse(R"(.record R2 { u32 f })", "s2.pa");
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+    // Same cycle shape, different ids — should NOT be merged with the first pair.
+    res2.Value().literalarray_table["c"] = makeRef("d");
+    res2.Value().literalarray_table["d"] = makeRef("c");
+
+    std::vector<Program *> progs {&res1.Value(), &res2.Value()};
+    // Must not crash (cycle detection falls back to using the refId as key).
+    AsmEmitter::DeduplicateLiteralArrays(progs);
+
+    // All four cyclic arrays survive — the cycle fallback produces id-unique keys, so no merging.
+    EXPECT_EQ(res1.Value().literalarray_table.size(), 2U);
+    EXPECT_EQ(res2.Value().literalarray_table.size(), 2U);
+}
+
+/**
+ * @tc.name: assembly_emitter_test_037
+ * @tc.desc: Verify DeduplicateLiteralArrays merges identical arrays referenced by
+ *           CREATEOBJECTWITHBUFFER with each other (same instruction-type group).
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_037, TestSize.Level1)
+{
+    Parser p1;
+    auto res1 = p1.Parse(R"(.record R1 { u32 f })", "s1.pa");
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+    res1.Value().literalarray_table["obj_canon"] = MakeU32LiteralArray(1);
+    AttachObjectBuffer(res1.Value(), "s1.func_main_0", "obj_canon");
+
+    Parser p2;
+    auto res2 = p2.Parse(R"(.record R2 { u32 f })", "s2.pa");
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+    res2.Value().literalarray_table["obj_dup"] = MakeU32LiteralArray(1);
+    AttachObjectBuffer(res2.Value(), "s2.func_main_0", "obj_dup");
+
+    std::vector<Program *> progs {&res1.Value(), &res2.Value()};
+    AsmEmitter::DeduplicateLiteralArrays(progs);
+
+    EXPECT_TRUE(res1.Value().literalarray_table.count("obj_canon") > 0);
+    EXPECT_FALSE(res2.Value().literalarray_table.count("obj_dup") > 0);
+    EXPECT_EQ(res1.Value().literalarray_table.size(), 1U);
+    EXPECT_EQ(res2.Value().literalarray_table.size(), 0U);
+    EXPECT_EQ(res2.Value().function_table.at("s2.func_main_0").ins[0]->GetId(0), "obj_canon");
+}
+
+/**
+ * @tc.name: assembly_emitter_test_038
+ * @tc.desc: Verify DeduplicateLiteralArrays does NOT merge a CREATEARRAYWITHBUFFER array with
+ *           a CREATEOBJECTWITHBUFFER array even when content is identical — cross-type merging
+ *           causes runtime constant pool type confusion (JSArray vs JSObject).
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_038, TestSize.Level1)
+{
+    Parser p1;
+    auto res1 = p1.Parse(R"(.record R1 { u32 f })", "s1.pa");
+    EXPECT_EQ(p1.ShowError().err, Error::ErrorType::ERR_NONE);
+    res1.Value().literalarray_table["arr_buf"] = MakeU32LiteralArray(1);
+    AttachArrayBuffer(res1.Value(), "s1.func_main_0", "arr_buf");
+
+    Parser p2;
+    auto res2 = p2.Parse(R"(.record R2 { u32 f })", "s2.pa");
+    EXPECT_EQ(p2.ShowError().err, Error::ErrorType::ERR_NONE);
+    res2.Value().literalarray_table["obj_buf"] = MakeU32LiteralArray(1);
+    AttachObjectBuffer(res2.Value(), "s2.func_main_0", "obj_buf");
+
+    std::vector<Program *> progs {&res1.Value(), &res2.Value()};
+    AsmEmitter::DeduplicateLiteralArrays(progs);
+
+    // Both survive — different instruction-type groups, no cross-merge.
+    EXPECT_TRUE(res1.Value().literalarray_table.count("arr_buf") > 0);
+    EXPECT_TRUE(res2.Value().literalarray_table.count("obj_buf") > 0);
+    EXPECT_EQ(res1.Value().literalarray_table.size(), 1U);
+    EXPECT_EQ(res2.Value().literalarray_table.size(), 1U);
+    EXPECT_EQ(res2.Value().function_table.at("s2.func_main_0").ins[0]->GetId(0), "obj_buf");
+}
+}  // namespace panda::pandasm
