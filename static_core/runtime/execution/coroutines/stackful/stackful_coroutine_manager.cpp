@@ -31,6 +31,7 @@
 #include "runtime/include/runtime.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/thread_scopes.h"
+#include "runtime/include/exceptions.h"
 
 #include "runtime/trace.h"
 
@@ -172,6 +173,8 @@ void StackfulCoroutineManager::OnWorkerShutdown(JobWorkerThread *worker)
 {
     os::memory::LockHolder lock(workersLock_);
     auto workerIt = std::find_if(workers_.begin(), workers_.end(), [worker](auto &&w) { return w == worker; });
+    ASSERT_PRINT(workerIt != workers_.end(),
+                 "StackfulCoroutineManager::OnWorkerShutdown: worker not found in workers list");
     workers_.erase(workerIt);
     // We may have a problem related to the coroutine affinity mask aliasing (The ABA Problem) #23715:
     // 1. Finalizing worker was available for the coroutine (the coroutine had a bit set in the affinity mask)
@@ -239,12 +242,19 @@ void StackfulCoroutineManager::InitializeScheduler(Runtime *runtime, PandaVM *vm
     ScopedJobStats s(&stats_, JobTimeStats::INIT);
     // set limits
     coroStackSizeBytes_ = Runtime::GetCurrent()->GetOptions().GetCoroutineStackSizePages() * os::mem::GetPageSize();
-    if (coroStackSizeBytes_ != AlignUp(coroStackSizeBytes_, PANDA_POOL_ALIGNMENT_IN_BYTES)) {
+    if (coroStackSizeBytes_ == 0 ||
+        coroStackSizeBytes_ != AlignUp(coroStackSizeBytes_, PANDA_POOL_ALIGNMENT_IN_BYTES)) {
         size_t alignmentPages = PANDA_POOL_ALIGNMENT_IN_BYTES / os::mem::GetPageSize();
         LOG(FATAL, COROUTINES) << "Coroutine stack size should be >= " << alignmentPages
                                << " pages and should be aligned to " << alignmentPages << "-page boundary!";
     }
     size_t coroStackAreaSizeBytes = Runtime::GetCurrent()->GetOptions().GetCoroutinesStackMemLimit();
+    // NativeStackAllocator::Initialize allocates one pool of STACK_COUNT_IN_POOL stacks up front.
+    if (coroStackSizeBytes_ > coroStackAreaSizeBytes / NativeStackAllocator::STACK_COUNT_IN_POOL) {
+        LOG(FATAL, COROUTINES) << "Coroutine stack size (" << coroStackSizeBytes_
+                               << " bytes) exceeds coroutines-stack-mem-limit (" << coroStackAreaSizeBytes
+                               << " bytes) / " << static_cast<size_t>(NativeStackAllocator::STACK_COUNT_IN_POOL);
+    }
     coroutineCountLimit_ = coroStackAreaSizeBytes / coroStackSizeBytes_;
 
     CalculateWorkerLimits(exclusiveWorkersLimit_, commonWorkersCount_);
@@ -259,7 +269,7 @@ void StackfulCoroutineManager::InitializeScheduler(Runtime *runtime, PandaVM *vm
         CreateMainCoroAndWorkers(commonWorkersCount_ - 1, runtime, vm);  // 1 is for MAIN here
         LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager(): successfully created and activated " << workers_.size()
                                << " coroutine workers";
-        programCompletionEvent_ = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(this);
+        programCompletionEvent_ = runtime->GetInternalAllocator()->New<GenericEvent>(this);
     }
 }
 
@@ -681,6 +691,9 @@ void StackfulCoroutineManager::HandleLaunchResultManaged(LaunchResult result)
         case LaunchResult::NO_SUITABLE_WORKER:
             ThrowRuntimeException("Unable to launch coroutine: no suitable worker was found");
             break;
+        case LaunchResult::NOT_SUPPORTED:
+            ThrowRuntimeException("Unable to launch coroutine: operation is not supported");
+            break;
         default:
             UNREACHABLE();
     }
@@ -688,14 +701,17 @@ void StackfulCoroutineManager::HandleLaunchResultManaged(LaunchResult result)
 
 LaunchResult StackfulCoroutineManager::Launch(Job *job, const LaunchParams &params)
 {
+    auto *co = Coroutine::GetCurrent();
+    if UNLIKELY (co == nullptr) {
+        return LaunchResult::NOT_SUPPORTED;
+    }
+
     // profiling: scheduler and launch time
     ScopedJobStats sSch(&GetCurrentWorker()->GetPerfStats(), JobTimeStats::SCH_ALL);
     ScopedJobStats sLaunch(&GetCurrentWorker()->GetPerfStats(), JobTimeStats::LAUNCH);
 
     LOG(DEBUG, COROUTINES) << "StackfulCoroutineManager::LaunchWithGroupId started";
 
-    auto *co = Coroutine::GetCurrent();
-    ASSERT(co != nullptr);
     auto *w = co->GetWorker();
     if UNLIKELY (!ValidateLaunchArgs(co, w, params)) {
         return LaunchResult::NOT_SUPPORTED;
@@ -707,7 +723,7 @@ LaunchResult StackfulCoroutineManager::Launch(Job *job, const LaunchParams &para
 
     LaunchResult result = LaunchResult::OK;
     if (params.launchImmediately) {
-        auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(Coroutine::GetCurrent()->GetWorker()->GetId());
+        auto groupId = JobWorkerThreadGroup::GenerateExactWorkerId(w->GetId());
         result = LaunchImmediatelyImpl(job, groupId);
     } else {
         auto groupId = params.groupId;
@@ -1178,6 +1194,7 @@ void StackfulCoroutineManager::CalculateWorkerLimits(size_t &exclusiveWorkersLim
 
     // add preallocated exclusive workers count
     eWorkersLimit += GetConfig().preallocatedExclusiveWorkersCount;
+    eWorkersLimit = std::min(eWorkersLimit, AffinityMask::MAX_WORKERS_COUNT);
 
     // create and activate workers
     size_t numberOfAvailableCores = std::max(static_cast<size_t>(std::thread::hardware_concurrency() / 4ULL),

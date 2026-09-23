@@ -34,6 +34,7 @@
 #include "plugins/ets/runtime/ani/scoped_objects_fix.h"
 #include "plugins/ets/runtime/ets_ani_env.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_platform_types.h"
 #include "plugins/ets/runtime/ets_stubs.h"
@@ -41,6 +42,7 @@
 #include "plugins/ets/runtime/types/ets_array.h"
 #include "plugins/ets/runtime/types/ets_base_enum.h"
 #include "plugins/ets/runtime/types/ets_box_primitive-inl.h"
+#include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_std_core_array.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/execution/job_execution_context_scopes.h"
@@ -6031,12 +6033,19 @@ NO_UB_SANITIZE static ani_status PromiseResolver_Resolve(ani_env *env, ani_resol
     CHECK_PTR_ARG(resolution);
 
     ScopedManagedCodeFix s(env);
-    EtsPromise *promise = s.ToInternalType(resolver);
-    ANI_CHECK_RETURN_IF_EQ(promise, nullptr, ANI_INVALID_ARGS);
+    auto *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsPromise> promise(executionCtx, s.ToInternalType(resolver));
+    EtsHandle<EtsObject> value(executionCtx, s.ToInternalType(resolution));
+    ANI_CHECK_RETURN_IF_EQ(promise.GetPtr(), nullptr, ANI_INVALID_ARGS);
     ani_status status = s.DelGlobalRef(reinterpret_cast<ani_ref>(resolver));
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-    EtsObject *value = s.ToInternalType(resolution);
-    promise->Resolve(s.GetExecutionContext(), value);
+    EtsMutex::LockHolder lock(promise);
+    if (promise->IsPending()) {
+        promise->Resolve(executionCtx, value.GetPtr());
+    } else {
+        return ANI_INVALID_ARGS;
+    }
     return ANI_OK;
 }
 
@@ -6049,12 +6058,19 @@ NO_UB_SANITIZE static ani_status PromiseResolver_Reject(ani_env *env, ani_resolv
     CHECK_PTR_ARG(rejection);
 
     ScopedManagedCodeFix s(env);
-    EtsPromise *promise = s.ToInternalType(resolver);
-    ANI_CHECK_RETURN_IF_EQ(promise, nullptr, ANI_INVALID_ARGS);
+    auto *executionCtx = s.GetExecutionContext();
+    EtsHandleScope scope(executionCtx);
+    EtsHandle<EtsPromise> promise(executionCtx, s.ToInternalType(resolver));
+    EtsHandle<EtsObject> error(executionCtx, s.ToInternalType(rejection));
+    ANI_CHECK_RETURN_IF_EQ(promise.GetPtr(), nullptr, ANI_INVALID_ARGS);
     ani_status status = s.DelGlobalRef(reinterpret_cast<ani_ref>(resolver));
     ANI_CHECK_RETURN_IF_NE(status, ANI_OK, status);
-    EtsObject *error = s.ToInternalType(rejection);
-    promise->Reject(s.GetExecutionContext(), error);
+    EtsMutex::LockHolder lock(promise);
+    if (promise->IsPending()) {
+        promise->Reject(executionCtx, error.GetPtr());
+    } else {
+        return ANI_INVALID_ARGS;
+    }
     return ANI_OK;
 }
 

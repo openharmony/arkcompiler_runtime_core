@@ -213,6 +213,16 @@ JSRefConvert *EtsFieldWrapper::GetRefConvert(InteropCtx *ctx)
     Class *fieldClass =
         classLinker->GetClass(*pandaFile, panda_file::FieldDataAccessor::GetTypeId(*pandaFile, field->GetFileId()),
                               ctx->LinkerCtx(), nullptr);
+    if (UNLIKELY(fieldClass == nullptr)) {
+        auto *executionCtx = EtsExecutionContext::GetCurrent();
+        if (UNLIKELY(executionCtx == nullptr)) {
+            return nullptr;
+        }
+        if (!executionCtx->GetMT()->HasPendingException()) {
+            ctx->ThrowETSError(executionCtx, "Cannot resolve the declared field type");
+        }
+        return nullptr;
+    }
 
     JSRefConvert *refconv = JSRefConvertResolve<ALLOW_INIT>(ctx, fieldClass);
     if (UNLIKELY(refconv == nullptr)) {

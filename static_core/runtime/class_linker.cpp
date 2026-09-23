@@ -395,20 +395,27 @@ static bool SetupFields(ClassInfo &info, panda_file::ClassDataAccessor *dataAcce
     Field *instanceFields = instanceFieldsStart;
 
     uint32_t fieldCount = 0;
-    dataAccessor->EnumerateFields(
-        [&staticFields, &instanceFields, &fieldCount, numFields](panda_file::FieldDataAccessor &fda) {
-            fieldCount++;
-            if (fieldCount > numFields) {  // actual field count is more than numFields
-                return;
-            }
-            Field *field = fda.IsStatic() ? staticFields++ : instanceFields++;
-            InitializeMemory(field, fda.GetFieldId(), fda.GetAccessFlags(),
-                             panda_file::Type::GetTypeFromFieldEncoding(fda.GetType()));
-        });
-    if (numFields != fieldCount) {
+    bool invalidFieldFlags = false;
+    dataAccessor->EnumerateFields([&staticFields, &instanceFields, &fieldCount, &invalidFieldFlags,
+                                   numFields](panda_file::FieldDataAccessor &fda) {
+        fieldCount++;
+        if (fieldCount > numFields) {  // actual field count is more than numFields
+            return;
+        }
+        auto accessFlags = fda.GetAccessFlags();
+        if ((accessFlags & ~ACC_FILE_MASK) != 0U) {
+            invalidFieldFlags = true;
+            return;
+        }
+        Field *field = fda.IsStatic() ? staticFields++ : instanceFields++;
+        InitializeMemory(field, fda.GetFieldId(), accessFlags,
+                         panda_file::Type::GetTypeFromFieldEncoding(fda.GetType()));
+    });
+    if (invalidFieldFlags || numFields != fieldCount) {
         // field count mismatch, possibly bytecode file corruption or attack payload.
         allocator->Free(fields.data());
-        OnError(errorHandler, ClassLinker::Error::FIELD_NOT_FOUND, "invalid field len");
+        OnError(errorHandler, ClassLinker::Error::FIELD_NOT_FOUND,
+                invalidFieldFlags ? "invalid field access flags" : "invalid field len");
         return false;
     }
     // Copy instanceFields to end of staticFields
@@ -1145,7 +1152,7 @@ static void HandleNoExtensionError(LanguageContext &ctx, const uint8_t *descript
     OnError(errorHandler, ClassLinker::Error::CLASS_NOT_FOUND, ss.str());
 }
 
-static void AnnounceClassInContext(Class *klass)
+static void PublishClassMemory([[maybe_unused]] Class *klass)
 {
     // We publish klass pointer and it becomes accessible by other threads.
     // Without memory barrier on the architectures with weak memory order
@@ -1155,7 +1162,6 @@ static void AnnounceClassInContext(Class *klass)
     arch::FullMemoryBarrier();
     // Full barrier is not visible by TSAN so we need annotation here
     TSAN_ANNOTATE_HAPPENS_BEFORE(klass);
-    Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(klass);
 }
 
 // CC-OFFNXT(G.FUN.01, huge_method) solid logic
@@ -1213,6 +1219,7 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
     if (klass == nullptr) {
         return nullptr;
     }
+
     if (Runtime::GetOptions().IsCompilerEnableJit()) {
         auto runtime = Runtime::GetCurrent();
         auto *cha = runtime->GetCha();
@@ -1231,17 +1238,15 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
     }
 
     if (LIKELY(addToRuntime)) {
-        AnnounceClassInContext(klass);
-
+        PublishClassMemory(klass);
         auto *otherKlass = context->InsertClass(klass);
         if (otherKlass != nullptr) {
             // Someone has created the class in the other thread (increase the critical section?)
             FreeClass(klass);
             return otherKlass;
         }
-
+        Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(klass);
         RemoveCreatedClassInExtension(klass);
-
         Runtime::GetCurrent()->GetNotificationManager()->ClassPrepareEvent(klass);
     }
     return klass;
@@ -1302,15 +1307,14 @@ Class *ClassLinker::BuildClassImpl(const uint8_t *descriptor, uint32_t accessFla
     if (Runtime::GetOptions().IsCompilerEnableJit()) {
         runtime->GetCha()->Update(klass);
     }
-    AnnounceClassInContext(klass);
-
+    PublishClassMemory(klass);
     auto *otherKlass = context->InsertClass(klass);
     if (otherKlass != nullptr) {
         // Someone has created the class in the other thread (increase the critical section?)
         FreeClass(klass);
         return otherKlass;
     }
-
+    runtime->GetNotificationManager()->ClassLoadEvent(klass);
     RemoveCreatedClassInExtension(klass);
     runtime->GetNotificationManager()->ClassPrepareEvent(klass);
 
@@ -1559,14 +1563,13 @@ Class *ClassLinker::LoadUnionClass(const uint8_t *descriptor, bool needCopyDescr
         return nullptr;
     }
 
-    AnnounceClassInContext(unionClass);
-
+    PublishClassMemory(unionClass);
     auto *otherKlass = commonContext->InsertClass(unionClass);
     if (otherKlass != nullptr) {
         FreeClass(unionClass);
         return otherKlass;
     }
-
+    Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(unionClass);
     RemoveCreatedClassInExtension(unionClass);
     Runtime::GetCurrent()->GetNotificationManager()->ClassPrepareEvent(unionClass);
 
@@ -1633,14 +1636,13 @@ Class *ClassLinker::LoadArrayClass(const uint8_t *descriptor, bool needCopyDescr
         return nullptr;
     }
 
-    AnnounceClassInContext(arrayClass);
-
+    PublishClassMemory(arrayClass);
     auto *otherKlass = componentClassContext->InsertClass(arrayClass);
     if (otherKlass != nullptr) {
         FreeClass(arrayClass);
         return otherKlass;
     }
-
+    Runtime::GetCurrent()->GetNotificationManager()->ClassLoadEvent(arrayClass);
     RemoveCreatedClassInExtension(arrayClass);
     Runtime::GetCurrent()->GetNotificationManager()->ClassPrepareEvent(arrayClass);
 
@@ -2045,6 +2047,10 @@ void ClassLinker::TryReLinkAotCodeForBoot(const panda_file::File *pf, const comp
                                           panda_file::SourceLang language)
 {
     if (!CanLinkAotEntrypoints()) {
+        return;
+    }
+    if (pf == nullptr || aotPfile == nullptr) {
+        LOG(ERROR, RUNTIME) << "Cannot relink boot AOT code without panda and AOT files";
         return;
     }
 
