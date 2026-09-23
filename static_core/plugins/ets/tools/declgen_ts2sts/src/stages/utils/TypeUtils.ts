@@ -272,6 +272,20 @@ export function createJSValueArrayTypeReferenceNode(context: ts.TransformationCo
   return context.factory.createTypeReferenceNode(arrayIdentifier, [jsValueTypeNode]);
 }
 
+export function cloneTypeParameters(
+  context: ts.TransformationContext,
+  typeParameters: ts.NodeArray<ts.TypeParameterDeclaration> | undefined
+): ts.NodeArray<ts.TypeParameterDeclaration> | undefined {
+  if (typeParameters === undefined) {
+    return undefined;
+  }
+  const cloned = typeParameters.map(
+    (tp): ts.TypeParameterDeclaration =>
+      context.factory.createTypeParameterDeclaration(undefined, tp.name, tp.constraint, tp.default)
+  );
+  return context.factory.createNodeArray(cloned);
+}
+
 export function isIncompatibleBuiltinType(type: ts.TypeReferenceNode): boolean {
   const typeName = type.typeName;
   if (typeName !== undefined && ts.isIdentifier(typeName)) {

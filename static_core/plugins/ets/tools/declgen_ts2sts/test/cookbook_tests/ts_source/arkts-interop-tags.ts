@@ -104,6 +104,28 @@ export enum AnyEnum {
     B = 1
 }
 
+// --- @interop any with generics: type parameters are fully preserved (constraints and defaults kept) ---
+
+/** @interop any */
+export class AnyGenericClass<T> {
+    method(): void {}
+}
+
+/** @interop any */
+export declare interface AnyGenericInterface<T, U> {
+    prop: T;
+}
+
+/** @interop any */
+export class AnyConstrainedClass<T extends Base> {
+    method(): void {}
+}
+
+/** @interop any */
+export class AnyDefaultClass<T = Base> {
+    method(): void {}
+}
+
 // --- @interop break-extends: strips the extends heritage clause ---
 
 /** @interop break-extends */
