@@ -72,8 +72,14 @@ static void RemapInheritedClassEntries(ITable &itable, const VTableDiff &diff)
 
 static Span<ITable::Entry> CloneBaseITable(ClassLinker *classLinker, Class *base, size_t size)
 {
+    if (size == 0) {
+        return {};
+    }
     auto allocator = classLinker->GetAllocator();
-    Span<ITable::Entry> itable {size == 0 ? nullptr : allocator->AllocArray<ITable::Entry>(size), size};
+    Span<ITable::Entry> itable {allocator->AllocArray<ITable::Entry>(size), size};
+    if (itable.Data() == nullptr) {
+        return {};
+    }
 
     for (auto &entry : itable) {
         entry.SetMethods({nullptr, nullptr});
@@ -117,6 +123,9 @@ static Span<ITable::Entry> LinearizeITable(ClassLinker *classLinker, Class *base
     auto interfaces = CollectAllInterfaces(base, classInterfaces);
 
     auto itable = CloneBaseITable(classLinker, base, interfaces.size());
+    if (itable.Data() == nullptr) {
+        return {};
+    }
     auto shift = base != nullptr ? base->GetITable().Size() : 0;
 
     for (auto interface : classInterfaces) {
@@ -139,24 +148,34 @@ static Span<ITable::Entry> LinearizeITable(ClassLinker *classLinker, Class *base
     return itable;
 }
 
+static bool InitializeITableMethods(ClassLinker *classLinker, Span<ITable::Entry> itable, size_t startIndex)
+{
+    for (size_t i = startIndex; i < itable.Size(); i++) {
+        auto &entry = itable[i];
+        auto methods = entry.GetInterface()->GetVirtualMethods();
+        Method **methodsAlloc =
+            methods.Empty() ? nullptr : classLinker->GetAllocator()->AllocArray<Method *>(methods.size());
+        if (!methods.Empty() && methodsAlloc == nullptr) {
+            return false;
+        }
+        entry.SetMethods({methodsAlloc, methods.size()});
+    }
+    return true;
+}
+
 bool EtsITableBuilder::Build(ClassLinker *classLinker, Class *base, Span<Class *> classInterfaces, bool isInterface)
 {
     Span<ITable::Entry> itable =
         classInterfaces.Size() == 0 ? CloneBaseITable(classLinker, base, base != nullptr ? base->GetITable().Size() : 0)
                                     : LinearizeITable(classLinker, base, classInterfaces);
+    if (itable.Data() == nullptr &&
+        (classInterfaces.Size() != 0 || (base != nullptr && base->GetITable().Size() != 0))) {
+        return false;
+    }
 
-    if (!isInterface) {
-        size_t const superItableSize = base != nullptr ? base->GetITable().Size() : 0;
-        for (size_t i = superItableSize; i < itable.Size(); i++) {
-            auto &entry = itable[i];
-            auto methods = entry.GetInterface()->GetVirtualMethods();
-            Method **methodsAlloc = nullptr;
-            if (!methods.Empty()) {
-                methodsAlloc = classLinker->GetAllocator()->AllocArray<Method *>(methods.size());
-            }
-            Span<Method *> methodsArray = {methodsAlloc, methods.size()};
-            entry.SetMethods(methodsArray);
-        }
+    size_t const superItableSize = base != nullptr ? base->GetITable().Size() : 0;
+    if (!isInterface && !InitializeITableMethods(classLinker, itable, superItableSize)) {
+        return false;
     }
 
     itable_ = ITable(itable);

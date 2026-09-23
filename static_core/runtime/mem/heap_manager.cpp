@@ -267,6 +267,7 @@ ObjectHeader *HeapManager::AllocateNonMovableObject(BaseClass *cls, size_t size,
             if (thread == nullptr) {
                 thread = ManagedThread::GetCurrent();
             }
+            // NOLINTNEXTLINE(clang-analyzer-core.NullDereference) managed allocation always has a managed mutator
             [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
             VMHandle<ObjectHeader> handle(thread, object);
             RegisterFinalizedObject(handle.GetPtr(), cls, isObjectFinalizable);

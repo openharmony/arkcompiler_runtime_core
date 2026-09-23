@@ -64,12 +64,14 @@ public:
     {
         auto *weakRef = GetHead();
         while (weakRef != nullptr) {
+            // Save next before Unlink because Unlink clears the current reference's links.
+            auto *next = weakRef->GetNext();
             if (weakRef->GetReferent<false>() == nullptr) {
                 // Finalizer of the cleared reference must be enqueued
                 ASSERT(weakRef->ReleaseFinalizer().IsEmpty());
                 Unlink(executionCtx, weakRef);
             }
-            weakRef = weakRef->GetNext();
+            weakRef = next;
         }
     }
 

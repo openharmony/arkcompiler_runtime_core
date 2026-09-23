@@ -536,6 +536,9 @@ public:
         auto throwLastSavedOffset =
             RoundUp(branchLastSavedOffset + sizeof(BranchLastSaved) * nBranches, alignof(uint64_t));
         auto data = allocator->Alloc(throwLastSavedOffset + sizeof(uint64_t) * nThrows);
+        if (UNLIKELY(data == nullptr)) {
+            return nullptr;
+        }
 
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto vcallsMem = reinterpret_cast<uint8_t *>(data) + vcallDataOffset;

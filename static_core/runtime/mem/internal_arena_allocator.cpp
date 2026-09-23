@@ -78,6 +78,7 @@ void InternalArenaPool::SetArenaPool(InternalArenaAllocator *allocator)
 void InternalArenaPool::Release(InternalArenaAllocator *allocator)
 {
     ASSERT(allocator != nullptr);
+    // NOLINTNEXTLINE(clang-analyzer-core.NullDereference) pool ownership requires a valid allocator
     allocator->Resize(0);
     SetArenaPool(allocator);
 }

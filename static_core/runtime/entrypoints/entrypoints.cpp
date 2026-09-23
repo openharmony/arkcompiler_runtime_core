@@ -723,19 +723,32 @@ static Frame *CreateFrameWithActualArgs(uint32_t nregs, uint32_t numActualArgs, 
 
 extern "C" Frame *CreateFrameForMethod(Method *method, Frame *prev)
 {
-    auto nregs = method->GetNumArgs() + method->GetNumVregs();
+    auto numArgs = method->GetNumArgs();
+    auto numVregs = method->GetNumVregs();
+    if (UNLIKELY(numArgs > UINT32_MAX - numVregs)) {
+        return nullptr;
+    }
+    auto nregs = numArgs + numVregs;
     return CreateFrame<false>(nregs, method, prev);
 }
 
 extern "C" Frame *CreateFrameForMethodDyn(Method *method, Frame *prev)
 {
-    auto nregs = method->GetNumArgs() + method->GetNumVregs();
+    auto numArgs = method->GetNumArgs();
+    auto numVregs = method->GetNumVregs();
+    if (UNLIKELY(numArgs > UINT32_MAX - numVregs)) {
+        return nullptr;
+    }
+    auto nregs = numArgs + numVregs;
     return CreateFrame<true>(nregs, method, prev);
 }
 
 extern "C" Frame *CreateFrameForMethodWithActualArgs(uint32_t numActualArgs, Method *method, Frame *prev)
 {
     auto nargs = std::max(numActualArgs, method->GetNumArgs());
+    if (UNLIKELY(nargs > UINT32_MAX - method->GetNumVregs())) {
+        return nullptr;
+    }
     auto nregs = nargs + method->GetNumVregs();
     return CreateFrameWithActualArgs<false>(nregs, numActualArgs, method, prev);
 }
@@ -743,6 +756,9 @@ extern "C" Frame *CreateFrameForMethodWithActualArgs(uint32_t numActualArgs, Met
 extern "C" Frame *CreateFrameForMethodWithActualArgsDyn(uint32_t numActualArgs, Method *method, Frame *prev)
 {
     auto nargs = std::max(numActualArgs, method->GetNumArgs());
+    if (UNLIKELY(nargs > UINT32_MAX - method->GetNumVregs())) {
+        return nullptr;
+    }
     auto nregs = nargs + method->GetNumVregs();
     return CreateFrameWithActualArgs<true>(nregs, numActualArgs, method, prev);
 }

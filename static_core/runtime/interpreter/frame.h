@@ -225,8 +225,12 @@ public:
 
     ALWAYS_INLINE static inline size_t GetAllocSize(size_t size, uint32_t extSz)
     {
-        return AlignUp(sizeof(Frame) + sizeof(interpreter::VRegister) * size + extSz,
-                       GetAlignmentInBytes(DEFAULT_FRAME_ALIGNMENT));
+        constexpr size_t ALIGNMENT = GetAlignmentInBytes(DEFAULT_FRAME_ALIGNMENT);
+        constexpr size_t FIXED_SIZE = sizeof(Frame) + ALIGNMENT - 1U;
+        if (UNLIKELY(IsAllocSizeOverflow(size, extSz, FIXED_SIZE))) {
+            return SIZE_MAX;
+        }
+        return AlignUp(sizeof(Frame) + sizeof(interpreter::VRegister) * size + extSz, ALIGNMENT);
     }
 
     ALWAYS_INLINE inline bool IsForcePop() const
@@ -423,6 +427,16 @@ public:
     NO_MOVE_SEMANTIC(Frame);
 
 private:
+    ALWAYS_INLINE static inline bool IsAllocSizeOverflow(size_t size, uint32_t extSz, size_t fixedSize)
+    {
+        if constexpr (sizeof(size_t) == sizeof(uint32_t)) {
+            if (extSz > SIZE_MAX - fixedSize) {
+                return true;
+            }
+        }
+        return size > (SIZE_MAX - fixedSize - extSz) / sizeof(interpreter::VRegister);
+    }
+
     Frame *prev_;
     Method *method_;
     uint32_t nregs_;

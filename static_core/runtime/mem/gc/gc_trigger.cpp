@@ -125,7 +125,8 @@ size_t GCTriggerHeap::ComputeTarget(size_t heapSizeBeforeGc, size_t heapSize)
 
 void GCTriggerHeap::FinishPostponeGCIfNeeded(GC *gc, size_t bytesInHeap)
 {
-    if (bytesInHeap - gc->GetSmartGCInitHeapMemSize() >= POSTPONE_GC_LIMIT) {
+    auto initHeapMemSize = gc->GetSmartGCInitHeapMemSize();
+    if (bytesInHeap - initHeapMemSize >= POSTPONE_GC_LIMIT) {
         gc->PostponeGCEnd();
         auto task = MakePandaUnique<GCTask>(GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE, time::GetCurrentTimeInNanos());
         gc->Trigger(std::move(task));
@@ -155,7 +156,7 @@ void GCTriggerHeap::TriggerGcIfNeeded(GC *gc)
 
     size_t bytesInHeap = memStats_->GetFootprintHeap();
     if (!gc->CanAddGCTask()) {
-        if (gc->IsPostponeEnabled()) {
+        if (gc->IsPostponeEnabled() && bytesInHeap >= gc->GetSmartGCInitHeapMemSize()) {
             FinishPostponeGCIfNeeded(gc, bytesInHeap);
         }
         return;
