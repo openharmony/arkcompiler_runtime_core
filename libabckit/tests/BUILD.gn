@@ -141,6 +141,7 @@ abckit_gtests_sources = [
   "ut/extensions/arkts/modify_api/interfaces/interfaces_static_modify_test.cpp",
   "ut/extensions/arkts/modify_api/interfaces/static_interface_set_name.cpp",
   "ut/extensions/arkts/modify_api/modules/modules_dynamic_modify_test.cpp",
+  "ut/extensions/arkts/modify_api/modules_ohmurl/modules_ohmurl_arkts_test.cpp",
   "ut/extensions/arkts/modify_api/modules/modules_static_modify_test.cpp",
   "ut/extensions/arkts/modify_api/namespaces/namespace_static_modify_test.cpp",
   "ut/extensions/js/inspect_api/api_casts/api_casts.cpp",
@@ -150,6 +151,7 @@ abckit_gtests_sources = [
   "ut/extensions/js/modify_api/bigint/load_bigint_test.cpp",
   "ut/extensions/js/modify_api/copy/copy_modify_test.cpp",
   "ut/extensions/js/modify_api/modules/modules_dynamic_modify_test.cpp",
+  "ut/extensions/js/modify_api/modules_ohmurl/modules_ohmurl_test.cpp",
   "ut/extensions/js/modify_api/obj/obj_modify.cpp",
   "ut/extensions/js/modify_api/patch/patch_modify.cpp",
   "ut/extensions/js/modify_api/super_this/super_this_modify.cpp",
@@ -611,6 +613,10 @@ module_output_path = "arkcompiler/runtime_core/libabckit"
 
 template("gen_merge_abc") {
   merge_datas = invoker.merge_datas
+  merge_lang = "ets"
+  if (defined(invoker.source_lang)) {
+    merge_lang = invoker.source_lang
+  }
 
   merge_file_info = merge_datas[0]
   anno_test_abc =
@@ -622,9 +628,9 @@ template("gen_merge_abc") {
   content = ""
   foreach(data, merge_datas) {
     if (defined(invoker.is_ohmurl) && invoker.is_ohmurl == true) {
-      item = "$anno_path_prefix/${data[0]}/${data[1]}.ts;&${data[1]}&;esm;${data[1]}.ts;entry;false;ets"
+      item = "$anno_path_prefix/${data[0]}/${data[1]}.ts;&${data[1]}&;esm;${data[1]}.ts;entry;false;${merge_lang}"
     } else {
-      item = "$anno_path_prefix/${data[0]}/${data[1]}.ts;${data[1]};esm;${data[1]}.ts;entry;false;ets"
+      item = "$anno_path_prefix/${data[0]}/${data[1]}.ts;${data[1]};esm;${data[1]}.ts;entry;false;${merge_lang}"
     }
     if (content == "") {
       content = "${content}echo '$item' > $anno_test_merge_path ; "
@@ -655,6 +661,39 @@ template("gen_merge_abc") {
     in_puts = [ anno_merge_file ]
     out_puts = [ anno_test_abc ]
   }
+}
+
+gen_merge_abc("gen_js_modules_ohmurl_abc") {
+  source_lang = "js"
+  merge_datas = [
+    [
+      "ut/extensions/js/modify_api/modules_ohmurl",
+      "JSmodules_ohmurl",
+    ],
+    [
+      "ut/extensions/js/modify_api/modules_ohmurl",
+      "modules/greet",
+    ],
+    [
+      "ut/extensions/js/modify_api/modules_ohmurl",
+      "modules/versioned",
+    ],
+  ]
+  is_ohmurl = true
+}
+
+gen_merge_abc("gen_arkts_modules_ohmurl_abc") {
+  merge_datas = [
+    [
+      "ut/extensions/arkts/modify_api/modules_ohmurl",
+      "modules_ohmurl",
+    ],
+    [
+      "ut/extensions/arkts/modify_api/modules_ohmurl",
+      "modules/greet",
+    ],
+  ]
+  is_ohmurl = true
 }
 
 gen_merge_abc("gen_anno_abc") {
@@ -1030,6 +1069,8 @@ libabckit_host_unittest_action("abckit_gtests") {
 
   deps += [
     ":gen_anno_abc",
+    ":gen_arkts_modules_ohmurl_abc",
+    ":gen_js_modules_ohmurl_abc",
     ":gen_replace_call_site_abc",
     ":gen_router_table_abc",
   ]

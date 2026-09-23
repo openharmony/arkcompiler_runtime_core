@@ -76,6 +76,13 @@ bool IsAnonymousName(const std::string &funcName);
 panda::pandasm::Function *GetDynFunction(AbckitCoreFunction *function);
 panda::pandasm::Function *GetDynFunction(AbckitCoreClass *klass);
 AbckitModulePayloadDyn *GetDynModulePayload(AbckitCoreModule *mod);
+
+AbckitCoreModule *TryFindModule(const std::string &name, AbckitFile *file);
+
+// Tries to resolve an abc-internal module for a "@normalized:" request by
+// probing record-name candidates derived from the OHMurl import path
+// (see helpers_dynamic.cpp for the candidate list and field conventions).
+AbckitCoreModule *TryFindModuleByOhmUrl(const std::string &requestName, AbckitFile *file);
 AbckitDynamicImportDescriptorPayload *GetDynImportDescriptorPayload(AbckitCoreImportDescriptor *id);
 AbckitDynamicExportDescriptorPayload *GetDynExportDescriptorPayload(AbckitCoreExportDescriptor *ed);
 
