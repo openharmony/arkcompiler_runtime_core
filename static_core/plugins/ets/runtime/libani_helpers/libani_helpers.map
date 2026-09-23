@@ -1,0 +1,36 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Preserve the existing ABI; localize only identified implementation exports. */
+{
+  global:
+    *;
+  local:
+    /* Local stream implementation instances and Ark implementation metadata. */
+    extern "C++" {
+      std::__h::basic_*buf?char?*?::*;
+      vtable?for?std::__h::*;
+      VTT?for?std::__h::*;
+      construction?vtable?for?std::__h::*;
+      std::__h::__*;
+      vtable?for?ark::Arena;
+      vtable?for?ark::os::Error;
+      ark::ClassHelper::PRIMITIVE_RUNTIME_NAMES;
+      guard?variable?for?ark::ClassHelper::PRIMITIVE_RUNTIME_NAMES;
+    };
+    /* CRT entry points are reached through DT_INIT / DT_FINI. */
+    _init;
+    _fini;
+};

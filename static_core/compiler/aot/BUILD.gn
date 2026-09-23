@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -33,6 +33,10 @@ ohos_shared_library("libarkaotmanager") {
     "aot_file.cpp",
     "aot_manager.cpp",
   ]
+  if (current_cpu == "arm64" && !is_mac && !is_mingw && !is_win && !is_debug) {
+    version_script = "libarkaotmanager.map"
+    ldflags = [ "-Wl,--exclude-libs,libsec_static.a" ]
+  }
 
   configs = [
     ":aot_manager_config",

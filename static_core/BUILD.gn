@@ -166,6 +166,17 @@ ark_unittest_group("static_core_tests") {
   deps += plugin_unittests
 }
 
+# Explicit device test build target; execution requires an OH ARM64 environment.
+group("runtime_library_exports_tests") {
+  testonly = true
+  deps = []
+  if (!ark_standalone_build && !ark_static_standalone_build && is_ohos &&
+      current_cpu == "arm64" && !is_debug && !is_mac && !is_mingw && !is_win &&
+      ark_ets_interop_js && enable_codegen) {
+    deps = [ "${ark_root}/tests/runtime_library_exports:runtime_library_exports_test" ]
+  }
+}
+
 config("ark_common_config") {
   if (!ark_static_standalone_build) {
     visibility = [
