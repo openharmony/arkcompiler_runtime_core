@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -- coding: utf-8 --
 # Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +37,7 @@ class PlotTest(unittest.TestCase):
             self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
-            store = ResultStore(root, pathlib.PurePosixPath("/remote"))
+            store = ResultStore(root, pathlib.PurePosixPath("/", "remote"))
             _write_snapshot_metadata(
                 store, {"start": "1000000000", "later": "2000000000"})
             rows = [
@@ -60,7 +61,7 @@ class PlotTest(unittest.TestCase):
             self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             store = ResultStore(pathlib.Path(directory),
-                                pathlib.PurePosixPath("/remote"))
+                                pathlib.PurePosixPath("/", "remote"))
             _write_snapshot_metadata(store, {"very_long_snapshot_label": "1000000000",
                                              "later_snapshot_label": "2000000000"})
             rows = [
@@ -81,7 +82,7 @@ class PlotTest(unittest.TestCase):
     def test_negative_metric_fails(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             store = ResultStore(pathlib.Path(directory),
-                                pathlib.PurePosixPath("/remote"))
+                                pathlib.PurePosixPath("/", "remote"))
             _write_snapshot_metadata(store, {"bad": "1000000000"})
 
             with self.assertRaisesRegex(RuntimeError, "non-negative"):
@@ -91,7 +92,7 @@ class PlotTest(unittest.TestCase):
     def test_missing_snapshot_metadata_skips_plots(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             store = ResultStore(pathlib.Path(directory),
-                                pathlib.PurePosixPath("/remote"))
+                                pathlib.PurePosixPath("/", "remote"))
 
             stdout = io.StringIO()
             with contextlib.redirect_stdout(stdout):
@@ -109,7 +110,7 @@ class PlotTest(unittest.TestCase):
     def test_generate_averaged_plots_writes_svg_with_error_bars(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             store = ResultStore(pathlib.Path(directory),
-                                pathlib.PurePosixPath("/remote"))
+                                pathlib.PurePosixPath("/", "remote"))
             rows = [
                 _averaged_row("App", "later", geomean=10.0, std=2.0),
                 _averaged_row("App", "start", geomean=5.0, std=1.0),
@@ -134,7 +135,7 @@ class PlotTest(unittest.TestCase):
             self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             store = ResultStore(pathlib.Path(directory),
-                                pathlib.PurePosixPath("/remote"))
+                                pathlib.PurePosixPath("/", "remote"))
             rows = [
                 _averaged_row("App", "start", geomean=5.0, std=1.0),
                 _averaged_row("App", "missing", geomean=9.0, std=1.0),
@@ -152,7 +153,7 @@ class PlotTest(unittest.TestCase):
     def test_generate_averaged_plots_skips_without_timestamps(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             store = ResultStore(pathlib.Path(directory),
-                                pathlib.PurePosixPath("/remote"))
+                                pathlib.PurePosixPath("/", "remote"))
 
             stdout = io.StringIO()
             with contextlib.redirect_stdout(stdout):

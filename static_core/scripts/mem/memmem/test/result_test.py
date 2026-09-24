@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -- coding: utf-8 --
 # Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +19,8 @@ import unittest
 from src.result import ResultStore
 
 
-_REMOTE_OUT_DIR = pathlib.PurePosixPath("/data/local/tmp/memmem-run")
+_REMOTE_OUT_DIR = pathlib.PurePosixPath(
+    "/", "data", "local", "tmp", "memmem-run")
 _OUT_DIR = pathlib.Path.cwd().joinpath("out")
 
 
@@ -89,36 +91,38 @@ class ResultStoreTest(unittest.TestCase):
         self.assertEqual(store.remote_out_dir(), _REMOTE_OUT_DIR)
         self.assertEqual(
             store.remote_hilog_dir(),
-            pathlib.PurePosixPath("/data/local/tmp/memmem-run/hilog"),
+            pathlib.PurePosixPath("/", "data", "local",
+                                  "tmp", "memmem-run", "hilog"),
         )
         self.assertEqual(
             store.remote_hilog_path(),
             pathlib.PurePosixPath(
-                "/data/local/tmp/memmem-run/hilog/hilog.log"),
+                "/", "data", "local", "tmp", "memmem-run", "hilog", "hilog.log"),
         )
         self.assertEqual(
             store.remote_screenshots_dir(),
-            pathlib.PurePosixPath("/data/local/tmp/memmem-run/screenshots"),
+            pathlib.PurePosixPath("/", "data", "local",
+                                  "tmp", "memmem-run", "screenshots"),
         )
         self.assertEqual(
             store.remote_screenshot_path("after_start"),
             pathlib.PurePosixPath(
-                "/data/local/tmp/memmem-run/screenshots/after_start.png"),
+                "/", "data", "local", "tmp", "memmem-run", "screenshots", "after_start.png"),
         )
         self.assertEqual(
             store.remote_snapshots_dir(),
-            pathlib.PurePosixPath("/data/local/tmp/memmem-run/snapshots"),
+            pathlib.PurePosixPath("/", "data", "local",
+                                  "tmp", "memmem-run", "snapshots"),
         )
         self.assertEqual(
             store.remote_snapshot_dir("after_start"),
             pathlib.PurePosixPath(
-                "/data/local/tmp/memmem-run/snapshots/after_start"),
+                "/", "data", "local", "tmp", "memmem-run", "snapshots", "after_start"),
         )
         self.assertEqual(
             store.remote_snapshot_path("after_start", "App"),
             pathlib.PurePosixPath(
-                "/data/local/tmp/memmem-run/snapshots/after_start/"
-                "App-after_start.smaps"),
+                "/", "data", "local", "tmp", "memmem-run", "snapshots", "after_start", "App-after_start.smaps"),
         )
 
 

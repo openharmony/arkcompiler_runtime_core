@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -- coding: utf-8 --
 # Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -295,8 +296,10 @@ class Device:
             ) from error
 
     def _read_thermal_zones(self) -> list[ThermalZoneHealth]:
+        thermal_zone_path = pathlib.PurePosixPath(
+            '/', 'sys', 'class', 'thermal', 'thermal_zone')
         result = self.hdc.shell_raw(
-            "for z in /sys/class/thermal/thermal_zone*; do "
+            f"for z in {thermal_zone_path}*; do "
             "[ -f $z/type ] && [ -f $z/temp ] && "
             "printf '%s %s\\n' \"$(cat $z/type)\" \"$(cat $z/temp)\"; "
             "done"

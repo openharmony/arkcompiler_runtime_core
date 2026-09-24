@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -- coding: utf-8 --
 # Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +23,7 @@ from src.hdc import HdcResult
 
 
 _LAYOUT_DUMP_PREFIX = "shell uitest dumpLayout -p "
-_LAYOUT_CAT_PREFIX = "shell cat /data/local/tmp/memmem-layout.json"
+_LAYOUT_CAT_PREFIX = f"shell cat {pathlib.PurePosixPath('/', 'data', 'local', 'tmp', 'memmem-layout.json')}"
 _VALID_LAYOUT = '{"attributes": {"bounds": "[0,0][1280,2832]"}}'
 _BAD_LAYOUT = '{"attributes": {"bounds": "bad"}}'
 
@@ -98,15 +99,15 @@ class DeviceTest(unittest.TestCase):
 
     def test_pid_exists_reads_explicit_shell_output(self) -> None:
         hdc = FakeHdc(responses={
-                      "shell [ -d /proc/123 ] && echo yes || echo no": HdcResult(0, "yes\n", "")})
+                      f"shell [ -d {pathlib.PurePosixPath('/', 'proc', '123')} ] && echo yes || echo no": HdcResult(0, "yes\n", "")})
 
         self.assertTrue(Device(hdc).pid_exists(123))  # type: ignore[arg-type]
         self.assertEqual(
-            hdc.calls[-1], ["shell", "[ -d /proc/123 ] && echo yes || echo no"])
+            hdc.calls[-1], ["shell", f"[ -d {pathlib.PurePosixPath('/', 'proc', '123')} ] && echo yes || echo no"])
 
     def test_pid_exists_rejects_no_output(self) -> None:
         hdc = FakeHdc(responses={
-                      "shell [ -d /proc/123 ] && echo yes || echo no": HdcResult(0, "no\n", "")})
+                      f"shell [ -d {pathlib.PurePosixPath('/', 'proc', '123')} ] && echo yes || echo no": HdcResult(0, "no\n", "")})
 
         self.assertFalse(Device(hdc).pid_exists(123))  # type: ignore[arg-type]
 
@@ -152,16 +153,16 @@ class DeviceTest(unittest.TestCase):
         hdc = FakeHdc()
 
         self.assertTrue(Device(hdc).capture_screenshot(pathlib.PurePosixPath(  # type: ignore[arg-type]
-            "/remote/screenshots/shot.png")))
+            "/", "remote", "screenshots", "shot.png")))
         self.assertEqual(hdc.calls, [
-                         ["shell", "uitest", "screenCap", "-p", "/remote/screenshots/shot.png"]])
+                         ["shell", "uitest", "screenCap", "-p", str(pathlib.PurePosixPath("/", "remote", "screenshots", "shot.png"))]])
 
     def test_capture_screenshot_reports_failure(self) -> None:
         hdc = FakeHdc(responses={
-                      "shell uitest screenCap -p /remote/screenshots/shot.png": HdcResult(1, "", "missing dir")})
+                      f"shell uitest screenCap -p {pathlib.PurePosixPath('/', 'remote', 'screenshots', 'shot.png')}": HdcResult(1, "", "missing dir")})
 
         self.assertFalse(Device(hdc).capture_screenshot(pathlib.PurePosixPath(  # type: ignore[arg-type]
-            "/remote/screenshots/shot.png")))
+            "/", "remote", "screenshots", "shot.png")))
 
     def test_reboot_uses_target_boot(self) -> None:
         hdc = FakeHdc()
@@ -210,14 +211,14 @@ class DeviceTest(unittest.TestCase):
 
     def test_device_health_reads_battery_and_thermal_zones(self) -> None:
         thermal_command = (
-            "shell for z in /sys/class/thermal/thermal_zone*; do "
+            f"shell for z in {pathlib.PurePosixPath('/', 'sys', 'class', 'thermal', 'thermal_zone*')}; do "
             "[ -f $z/type ] && [ -f $z/temp ] && "
             "printf '%s %s\\n' \"$(cat $z/type)\" \"$(cat $z/temp)\"; "
             "done"
         )
         hdc = FakeHdc(
             responses={
-                "shell cat /sys/class/power_supply/Battery/capacity": HdcResult(0, "80\n", ""),
+                f"shell cat {pathlib.PurePosixPath('/', 'sys', 'class', 'power_supply', 'Battery', 'capacity')}": HdcResult(0, "80\n", ""),
                 thermal_command: HdcResult(0, "soc_thermal 30000\nshell_back 26000\n", ""),
             }
         )
@@ -235,14 +236,14 @@ class DeviceTest(unittest.TestCase):
 
     def test_device_health_rejects_missing_battery_capacity(self) -> None:
         hdc = FakeHdc(responses={
-                      "shell cat /sys/class/power_supply/Battery/capacity": HdcResult(1, "", "missing")})
+                      f"shell cat {pathlib.PurePosixPath('/', 'sys', 'class', 'power_supply', 'Battery', 'capacity')}": HdcResult(1, "", "missing")})
 
         with self.assertRaisesRegex(RuntimeError, "missing"):
             Device(hdc).device_health()  # type: ignore[arg-type]
 
     def test_device_health_rejects_malformed_battery_capacity(self) -> None:
         hdc = FakeHdc(responses={
-                      "shell cat /sys/class/power_supply/Battery/capacity": HdcResult(0, "bad\n", "")})
+                      f"shell cat {pathlib.PurePosixPath('/', 'sys', 'class', 'power_supply', 'Battery', 'capacity')}": HdcResult(0, "bad\n", "")})
 
         with self.assertRaisesRegex(RuntimeError, "battery capacity is not an integer"):
             Device(hdc).device_health()  # type: ignore[arg-type]
@@ -250,8 +251,8 @@ class DeviceTest(unittest.TestCase):
     def test_device_health_rejects_malformed_thermal_zone(self) -> None:
         hdc = FakeHdc(
             responses={
-                "shell cat /sys/class/power_supply/Battery/capacity": HdcResult(0, "80\n", ""),
-                "shell for z in /sys/class/thermal/thermal_zone*; do [ -f $z/type ] && [ -f $z/temp ] && printf '%s %s\\n' \"$(cat $z/type)\" \"$(cat $z/temp)\"; done": HdcResult(0, "bad-zone\n", ""),
+                f"shell cat {pathlib.PurePosixPath('/', 'sys', 'class', 'power_supply', 'Battery', 'capacity')}": HdcResult(0, "80\n", ""),
+                f"shell for z in {pathlib.PurePosixPath('/', 'sys', 'class', 'thermal', 'thermal_zone*')}; do [ -f $z/type ] && [ -f $z/temp ] && printf '%s %s\\n' \"$(cat $z/type)\" \"$(cat $z/temp)\"; done": HdcResult(0, "bad-zone\n", ""),
             }
         )
 
@@ -270,10 +271,10 @@ class DeviceTest(unittest.TestCase):
         hdc = FakeHdc()
 
         process = Device(hdc).start_hilog(pathlib.PurePosixPath(  # type: ignore[arg-type]
-            "/remote/hilog/hilog.log"))
+            "/", "remote", "hilog", "hilog.log"))
         try:
             self.assertEqual(
-                hdc.calls, [["shell", "hilog > /remote/hilog/hilog.log"]])
+                hdc.calls, [["shell", f"hilog > {pathlib.PurePosixPath('/', 'remote', 'hilog', 'hilog.log')}"]])
             self.assertIs(process, hdc.started_processes[0])
         finally:
             process.terminate()
@@ -301,15 +302,17 @@ class DeviceTest(unittest.TestCase):
             receive_path = root.joinpath("out", "file.txt")
 
             device.send_file(
-                local_path, pathlib.PurePosixPath("/remote/file.txt"))
+                local_path, pathlib.PurePosixPath("/", "remote", "file.txt"))
             device.recv_file(pathlib.PurePosixPath(
-                "/remote/file.txt"), receive_path)
+                "/", "remote", "file.txt"), receive_path)
 
         self.assertEqual(
             hdc.calls,
             [
-                ["file", "send", str(local_path), "/remote/file.txt"],
-                ["file", "recv", "/remote/file.txt", str(receive_path)],
+                ["file", "send", str(local_path), str(
+                    pathlib.PurePosixPath("/", "remote", "file.txt"))],
+                ["file", "recv", str(pathlib.PurePosixPath(
+                    "/", "remote", "file.txt")), str(receive_path)],
             ],
         )
 

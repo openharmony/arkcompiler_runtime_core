@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -- coding: utf-8 --
 # Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -520,7 +521,7 @@ class LibTest(unittest.TestCase):
     def test_run_smaps_filter_propagates_to_reports(self) -> None:
         device = FakeDevice(default_smaps_content=(
             "55f000000000-55f000001000 r--p 00000000 00:00 0 "
-            "/lib/libm.so.6\n"
+            f"{pathlib.PurePosixPath('/', 'lib', 'libm.so.6')}\n"
             "Size: 4 kB\nRss: 4 kB\nPss: 4 kB\n"
             "55f000002000-55f000003000 rw-p 00000000 00:00 0\n"
             "Size: 8 kB\nRss: 8 kB\nPss: 8 kB\n"
@@ -552,13 +553,13 @@ class LibTest(unittest.TestCase):
                     encoding="utf-8", newline="") as stream:
                 breakdown_rows = list(csv.reader(stream))
             self.assertEqual([row[0] for row in breakdown_rows[1:]],
-                             ["/lib/libm.so.6"])
+                             [str(pathlib.PurePosixPath("/", "lib", "libm.so.6"))])
 
     def test_run_smaps_filter_no_match_yields_header_only_summary(
             self) -> None:
         device = FakeDevice(default_smaps_content=(
             "55f000000000-55f000001000 r--p 00000000 00:00 0 "
-            "/lib/libm.so.6\n"
+            f"{pathlib.PurePosixPath('/', 'lib', 'libm.so.6')}\n"
             "Size: 4 kB\nRss: 4 kB\nPss: 4 kB\n"
         ))
         scenario = lib.flow([

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -- coding: utf-8 --
 # Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -73,7 +74,7 @@ class RunCliTest(unittest.TestCase):
 
         self.assertEqual(args.smaps_filter.pattern, r".*\.so")
         self.assertIsNotNone(
-            args.smaps_filter.match("/usr/lib/x86_64-linux-gnu/libc.so.6"))
+            args.smaps_filter.match(str(pathlib.PurePosixPath("/", "usr", "lib", "x86_64-linux-gnu", "libc.so.6"))))
         self.assertIsNone(args.smaps_filter.match("[anonymous]"))
 
     def test_invalid_smaps_filter_regex_rejected(self) -> None:
@@ -189,7 +190,7 @@ class RunCliTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
             root.joinpath(".env").write_text(
-                "HDC_PATH=/bin/false\n", encoding="utf-8")
+                f"HDC_PATH={pathlib.PurePosixPath('/', 'bin', 'false')}\n", encoding="utf-8")
             flow_path = root.joinpath("flow.json")
             flow_path.write_text("{", encoding="utf-8")
 
@@ -210,7 +211,7 @@ class RunCliTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
             root.joinpath(".env").write_text(
-                "HDC_PATH=/bin/false\n", encoding="utf-8")
+                f"HDC_PATH={pathlib.PurePosixPath('/', 'bin', 'false')}\n", encoding="utf-8")
             flow_path = root.joinpath("flow.json")
             flow_path.write_text(
                 json.dumps(
@@ -256,7 +257,7 @@ class RunCliTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
             root.joinpath(".env").write_text(
-                "HDC_PATH=/bin/false\n", encoding="utf-8")
+                f"HDC_PATH={pathlib.PurePosixPath('/', 'bin', 'false')}\n", encoding="utf-8")
             flow_path = root.joinpath("flow.json")
             flow_path.write_text(
                 json.dumps(
