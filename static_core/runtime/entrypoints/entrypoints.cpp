@@ -153,7 +153,9 @@ extern "C" void WriteTlabStatsEntrypoint([[maybe_unused]] void const *mem, size_
 
     LOG(DEBUG, MM_OBJECT_EVENTS) << "Alloc object in compiled code at " << mem << " size: " << size;
     auto *thread = ManagedThread::GetCurrent();
-    ASSERT(thread != nullptr);
+    if (thread == nullptr) {
+        return;
+    }
 #ifndef ARK_USE_COMMON_RUNTIME
     ASSERT(size <= Runtime::GetOptions().GetMaxTlabSize());
 #endif
@@ -163,7 +165,15 @@ extern "C" void WriteTlabStatsEntrypoint([[maybe_unused]] void const *mem, size_
     [[maybe_unused]] auto tlab = reinterpret_cast<size_t>(thread->GetTLAB());
     EVENT_TLAB_ALLOC(thread->GetId(), tlab, reinterpret_cast<size_t>(mem), size);
     if (mem::PANDA_TRACK_TLAB_ALLOCATIONS) {
-        auto memStats = thread->GetVM()->GetHeapManager()->GetMemStats();
+        auto *vm = thread->GetVM();
+        if (vm == nullptr) {
+            return;
+        }
+        auto *heapManager = vm->GetHeapManager();
+        if (heapManager == nullptr) {
+            return;
+        }
+        auto memStats = heapManager->GetMemStats();
         if (memStats == nullptr) {
             return;
         }

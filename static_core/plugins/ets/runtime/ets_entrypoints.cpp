@@ -82,10 +82,24 @@ static inline bool Launch(EtsExecutionContext *executionCtx, Method *method, con
     auto *jobMan = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
     auto *promiseRef =
         etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr()->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+    if (UNLIKELY(promiseRef == nullptr)) {
+        ThrowOutOfMemoryError(executionCtx->GetMT(), "Cannot create global reference for promise");
+        return false;
+    }
     auto *evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, jobMan);
+    if (UNLIKELY(evt == nullptr)) {
+        etsVm->GetGlobalObjectStorage()->Remove(promiseRef);
+        ThrowOutOfMemoryError(executionCtx->GetMT(), "Cannot allocate completion event");
+        return false;
+    }
     // create the job and put it to the ready queue
     auto epInfo = Job::ManagedEntrypointInfo {evt, method, std::move(args)};
     auto *job = jobMan->CreateJob(method->GetFullName(), std::move(epInfo), EtsCoroutine::LAUNCH);
+    if (UNLIKELY(job == nullptr)) {
+        etsVm->GetGlobalObjectStorage()->Remove(promiseRef);
+        ThrowOutOfMemoryError(executionCtx->GetMT(), "Cannot allocate job");
+        return false;
+    }
     auto launchResult = jobMan->Launch(job, LaunchParams {job->GetPriority()});
     if (UNLIKELY(launchResult != LaunchResult::OK)) {
         jobMan->HandleLaunchResultManaged(launchResult);
@@ -123,8 +137,16 @@ void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHe
     ASSERT(promiseHandle->GetEvent<CoroutineMode::STACKLESS>(executionCtx) == nullptr);
     // NOTE(panferovi): issue with raw args and thisObj??
     auto *mutex = EtsMutex::Create(executionCtx);
+    if (UNLIKELY(mutex == nullptr)) {
+        ThrowOutOfMemoryError(executionCtx->GetMT(), "Cannot allocate mutex");
+        return;
+    }
     promiseHandle->SetMutex(executionCtx, mutex);
     auto *event = EtsEventWithDependencies::Create(executionCtx);
+    if (UNLIKELY(event == nullptr)) {
+        ThrowOutOfMemoryError(executionCtx->GetMT(), "Cannot allocate event");
+        return;
+    }
     promiseHandle->SetEvent<CoroutineMode::STACKLESS>(executionCtx, event);
     bool successfulLaunch = Launch(executionCtx, method, promiseHandle, std::move(values));
     if (UNLIKELY(!successfulLaunch)) {
@@ -268,6 +290,10 @@ extern "C" void ThrowEtsExceptionNoSuchGetterEntrypoint(ObjectHeader *obj, uint3
     auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id), false);
+    if (UNLIKELY(rawField == nullptr)) {
+        HandlePendingException();
+        return;
+    }
     LookUpException<true>(klass, rawField);
 }
 
@@ -276,6 +302,10 @@ extern "C" void ThrowEtsExceptionNoSuchSetterEntrypoint(ObjectHeader *obj, uint3
     auto klass = static_cast<ark::Class *>(obj->ClassAddr<ark::BaseClass>());
     auto *classLinker = Runtime::GetCurrent()->GetClassLinker();
     auto rawField = classLinker->GetField(*caller, caller->GetClass()->ResolveFieldIndex(id), false);
+    if (UNLIKELY(rawField == nullptr)) {
+        HandlePendingException();
+        return;
+    }
     LookUpException<false>(klass, rawField);
 }
 
@@ -413,7 +443,12 @@ extern "C" ObjectHeader *LongToStringDecimalEntrypoint(ObjectHeader *cache, int6
     if (UNLIKELY(cache == nullptr)) {
         return LongToStringDecimalNoCacheEntrypoint(number);
     }
-    return LongToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(), number)->GetCoreType();
+    auto *result = LongToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(), number);
+    if (UNLIKELY(result == nullptr)) {
+        // Pending OOM is already installed; return null so the bridge dispatches the exception
+        return nullptr;
+    }
+    return result->GetCoreType();
 }
 
 extern "C" ObjectHeader *LongToStringDecimalStoreEntrypoint(ObjectHeader *elem, int64_t number)
@@ -422,14 +457,22 @@ extern "C" ObjectHeader *LongToStringDecimalStoreEntrypoint(ObjectHeader *elem, 
     if (UNLIKELY(cache == nullptr)) {
         return LongToStringDecimalNoCacheEntrypoint(number);
     }
-    return LongToStringCache::FromCoreType(cache)
-        ->CacheAndGetNoCheck(EtsExecutionContext::GetCurrent(), number, elem)
-        ->GetCoreType();
+    auto *result =
+        LongToStringCache::FromCoreType(cache)->CacheAndGetNoCheck(EtsExecutionContext::GetCurrent(), number, elem);
+    if (UNLIKELY(result == nullptr)) {
+        // Pending OOM is already installed; return null so the bridge dispatches the exception
+        return nullptr;
+    }
+    return result->GetCoreType();
 }
 
 extern "C" ObjectHeader *LongToStringDecimalNoCacheEntrypoint(int64_t number)
 {
-    return LongToStringCache::GetNoCache(number)->GetCoreType();
+    auto *string = LongToStringCache::GetNoCache(number);
+    if (UNLIKELY(string == nullptr)) {
+        return nullptr;
+    }
+    return string->GetCoreType();
 }
 
 extern "C" ObjectHeader *FloatToStringDecimalEntrypoint(ObjectHeader *cache, uint32_t number)
@@ -437,9 +480,13 @@ extern "C" ObjectHeader *FloatToStringDecimalEntrypoint(ObjectHeader *cache, uin
     if (UNLIKELY(cache == nullptr)) {
         return FloatToStringDecimalNoCacheEntrypoint(number);
     }
-    return FloatToStringCache::FromCoreType(cache)
-        ->GetOrCache(EtsExecutionContext::GetCurrent(), bit_cast<float>(number))
-        ->GetCoreType();
+    auto *result =
+        FloatToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(), bit_cast<float>(number));
+    if (UNLIKELY(result == nullptr)) {
+        // Pending OOM is already installed; return null so the bridge dispatches the exception
+        return nullptr;
+    }
+    return result->GetCoreType();
 }
 
 extern "C" ObjectHeader *FloatToStringDecimalStoreEntrypoint(ObjectHeader *elem, uint32_t number)
@@ -448,14 +495,22 @@ extern "C" ObjectHeader *FloatToStringDecimalStoreEntrypoint(ObjectHeader *elem,
     if (UNLIKELY(cache == nullptr)) {
         return FloatToStringDecimalNoCacheEntrypoint(number);
     }
-    return FloatToStringCache::FromCoreType(cache)
-        ->CacheAndGetNoCheck(EtsExecutionContext::GetCurrent(), bit_cast<float>(number), elem)
-        ->GetCoreType();
+    auto *result = FloatToStringCache::FromCoreType(cache)->CacheAndGetNoCheck(EtsExecutionContext::GetCurrent(),
+                                                                               bit_cast<float>(number), elem);
+    if (UNLIKELY(result == nullptr)) {
+        // Pending OOM is already installed; return null so the bridge dispatches the exception
+        return nullptr;
+    }
+    return result->GetCoreType();
 }
 
 extern "C" ObjectHeader *FloatToStringDecimalNoCacheEntrypoint(uint32_t number)
 {
-    return FloatToStringCache::GetNoCache(bit_cast<float>(number))->GetCoreType();
+    auto *string = FloatToStringCache::GetNoCache(bit_cast<float>(number));
+    if (UNLIKELY(string == nullptr)) {
+        return nullptr;
+    }
+    return string->GetCoreType();
 }
 
 extern "C" ObjectHeader *DoubleToStringDecimalEntrypoint(ObjectHeader *cache, uint64_t number)
@@ -463,9 +518,13 @@ extern "C" ObjectHeader *DoubleToStringDecimalEntrypoint(ObjectHeader *cache, ui
     if (UNLIKELY(cache == nullptr)) {
         return DoubleToStringDecimalNoCacheEntrypoint(number);
     }
-    return DoubleToStringCache::FromCoreType(cache)
-        ->GetOrCache(EtsExecutionContext::GetCurrent(), bit_cast<double>(number))
-        ->GetCoreType();
+    auto *result = DoubleToStringCache::FromCoreType(cache)->GetOrCache(EtsExecutionContext::GetCurrent(),
+                                                                        bit_cast<double>(number));
+    if (UNLIKELY(result == nullptr)) {
+        // Pending OOM is already installed; return null so the bridge dispatches the exception
+        return nullptr;
+    }
+    return result->GetCoreType();
 }
 
 extern "C" ObjectHeader *DoubleToStringDecimalStoreEntrypoint(ObjectHeader *elem, uint64_t number)
@@ -474,14 +533,22 @@ extern "C" ObjectHeader *DoubleToStringDecimalStoreEntrypoint(ObjectHeader *elem
     if (UNLIKELY(cache == nullptr)) {
         return DoubleToStringDecimalNoCacheEntrypoint(number);
     }
-    return DoubleToStringCache::FromCoreType(cache)
-        ->CacheAndGetNoCheck(EtsExecutionContext::GetCurrent(), bit_cast<double>(number), elem)
-        ->GetCoreType();
+    auto *result = DoubleToStringCache::FromCoreType(cache)->CacheAndGetNoCheck(EtsExecutionContext::GetCurrent(),
+                                                                                bit_cast<double>(number), elem);
+    if (UNLIKELY(result == nullptr)) {
+        // Pending OOM is already installed; return null so the bridge dispatches the exception
+        return nullptr;
+    }
+    return result->GetCoreType();
 }
 
 extern "C" ObjectHeader *DoubleToStringDecimalNoCacheEntrypoint(uint64_t number)
 {
-    return DoubleToStringCache::GetNoCache(bit_cast<double>(number))->GetCoreType();
+    auto *string = DoubleToStringCache::GetNoCache(bit_cast<double>(number));
+    if (UNLIKELY(string == nullptr)) {
+        return nullptr;
+    }
+    return string->GetCoreType();
 }
 
 extern "C" void BeginGeneralNativeMethod()
@@ -578,7 +645,15 @@ extern "C" uintptr_t NO_ADDRESS_SANITIZE ResolveCallByNameEntrypoint(const Metho
     auto rawMethod = classLinker->GetMethod(*caller, panda_file::File::EntityId(calleeId));
     if (LIKELY(rawMethod != nullptr)) {
         auto *resolved = ResolveCompatibleVMethod(executionCtx, klass, rawMethod);
-        ASSERT(resolved != nullptr);
+        if (UNLIKELY(resolved == nullptr)) {
+            if (!executionCtx->GetMT()->HasPendingException()) {
+                // No compatible target exists and resolution raised no exception:
+                // report LinkerUnresolvedMethodError like other ets.call.name* paths.
+                LookUpException(klass, rawMethod);
+            }
+            HandlePendingException();
+            UNREACHABLE();
+        }
         return reinterpret_cast<uintptr_t>(resolved);
     }
 

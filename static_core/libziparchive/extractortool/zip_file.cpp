@@ -666,7 +666,7 @@ bool ZipFile::CheckCoherencyLocalHeader(const ZipEntry &zipEntry, uint16_t &extr
         return false;
     }
 
-    if (localHeader.nameSize != nameSize && nameSize < MAX_FILE_NAME - 1) {
+    if (localHeader.nameSize != nameSize) {
         LOG(ERROR, ZIPARCHIVE) << "name corrupted";
         return false;
     }

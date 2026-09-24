@@ -65,6 +65,9 @@ bool IsReusableRegionBoundary(BaseItem *item, BaseItem *containerEnd)
 
 bool IsReusableRegionIndexItem(IndexedItem *item)
 {
+    if (item == nullptr) {
+        return false;
+    }
     if (item->NeedsEmit()) {
         return true;
     }

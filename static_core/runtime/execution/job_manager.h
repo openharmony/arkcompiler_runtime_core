@@ -96,6 +96,9 @@ public:
         auto id = AllocateJobId();
         mem::InternalAllocatorPtr allocator = Runtime::GetCurrent()->GetInternalAllocator();
         auto *job = allocator->New<JobT>(std::move(name), id, std::move(epInfo), priority, type, abortFlag);
+        if (job == nullptr) {
+            FreeJobId(id);
+        }
         return job;
     }
 

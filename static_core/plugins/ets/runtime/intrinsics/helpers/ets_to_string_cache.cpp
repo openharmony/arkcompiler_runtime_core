@@ -54,7 +54,12 @@ EtsToStringCacheElement<T> *EtsToStringCacheElement<T>::Create(EtsExecutionConte
                                                                EtsHandle<EtsString> &stringHandle, T number,
                                                                EtsClass *klass)
 {
-    auto *instance = FromCoreType(EtsObject::Create(executionCtx, klass)->GetCoreType());
+    auto *obj = EtsObject::Create(executionCtx, klass);
+    if (obj == nullptr) {
+        // Pending OOM exception is set by the failed allocation
+        return nullptr;
+    }
+    auto *instance = FromCoreType(obj->GetCoreType());
     instance->SetString(executionCtx, stringHandle.GetPtr());
     instance->SetNumber(number);
     return instance;
@@ -134,8 +139,10 @@ std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::Finis
     EtsHandle<EtsToStringCacheElement<T>> elemHandle(executionCtx, elem);
     // may trigger GC
     auto *string = ToString(number);
-    ASSERT(string != nullptr);
-    ASSERT(elemHandle.GetPtr() != nullptr);
+    if (UNLIKELY(string == nullptr)) {
+        // Pending OOM exception is set by the failed allocation
+        return {nullptr, ToStringResult::STORE_UPDATE};
+    }
     auto storeRes = elemHandle->TryStore(executionCtx, string, number);
     return {string, storeRes};
 }
@@ -150,10 +157,14 @@ std::pair<EtsString *, ToStringResult> EtsToStringCache<T, Derived, Hash>::GetOr
     if (UNLIKELY(elem == nullptr)) {
         [[maybe_unused]] EtsHandleScope scope(executionCtx);
         EtsHandle<EtsString> string(executionCtx, ToString(number));
-        ASSERT(string.GetPtr() != nullptr);
+        if (UNLIKELY(string.GetPtr() == nullptr)) {
+            // Pending OOM exception is set by the failed allocation
+            return {nullptr, ToStringResult::STORE_NEW};
+        }
         // may trigger GC
-        StoreToCache(executionCtx, string, number, index);
-        ASSERT(string.GetPtr() != nullptr);
+        if (UNLIKELY(!StoreToCache(executionCtx, string, number, index))) {
+            return {nullptr, ToStringResult::STORE_NEW};
+        }
         return {string.GetPtr(), ToStringResult::STORE_NEW};
     }
     auto cachedNumber = elem->GetNumber();
@@ -192,14 +203,19 @@ Derived *EtsToStringCache<T, Derived, Hash>::Create(EtsExecutionContext *executi
 }
 
 template <typename T, typename Derived, typename Hash>
-void EtsToStringCache<T, Derived, Hash>::StoreToCache(EtsExecutionContext *executionCtx,
+bool EtsToStringCache<T, Derived, Hash>::StoreToCache(EtsExecutionContext *executionCtx,
                                                       EtsHandle<EtsString> &stringHandle, T number, uint32_t index)
 {
     auto *arrayClass = Base::GetCoreType()->template ClassAddr<Class>();
     auto *elemClass = arrayClass->GetComponentType();
     ASSERT(elemClass->GetObjectSize() == Elem::GetNumberOffset() + sizeof(T));
     auto *elem = Elem::Create(executionCtx, stringHandle, number, EtsClass::FromRuntimeClass(elemClass));
+    if (UNLIKELY(elem == nullptr)) {
+        // Pending OOM exception is set by the failed allocation
+        return false;
+    }
     Base::Set(index, elem);
+    return true;
 }
 
 template class EtsToStringCache<EtsDouble, DoubleToStringCache>;
