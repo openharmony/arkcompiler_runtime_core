@@ -243,7 +243,9 @@ bool Peepholes::PeepholeLdObjByName([[maybe_unused]] GraphVisitor *v, IntrinsicI
     auto runtime = graph->GetRuntime();
     auto fieldId = intrinsic->GetImm(0);
     auto rawField = runtime->ResolveField(method, fieldId, false, !graph->IsAotMode(), nullptr);
-    ASSERT(rawField != nullptr);
+    if (rawField == nullptr) {
+        return false;
+    }
 
     if (TryInsertFieldInst<false>(intrinsic, klassPtr, rawField, fieldId)) {
         return true;
@@ -265,7 +267,9 @@ bool Peepholes::PeepholeStObjByName([[maybe_unused]] GraphVisitor *v, IntrinsicI
     auto runtime = graph->GetRuntime();
     auto fieldId = intrinsic->GetImm(0);
     auto rawField = runtime->ResolveField(method, fieldId, false, !graph->IsAotMode(), nullptr);
-    ASSERT(rawField != nullptr);
+    if (rawField == nullptr) {
+        return false;
+    }
 
     if (TryInsertFieldInst<true>(intrinsic, klassPtr, rawField, fieldId)) {
         return true;

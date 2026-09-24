@@ -52,8 +52,9 @@ compiler::RuntimeInterface::ClassPtr EtsRuntimeInterface::GetClass(MethodPtr met
 
 compiler::RuntimeInterface::FieldPtr EtsRuntimeInterface::ResolveLookUpField(FieldPtr rawField, ClassPtr klass)
 {
-    ASSERT(rawField != nullptr);
-    ASSERT(klass != nullptr);
+    if (rawField == nullptr || klass == nullptr) {
+        return nullptr;
+    }
     Class *current = ClassCast(klass);
     Field *raw = FieldCast(rawField);
     while (current != nullptr) {
@@ -152,7 +153,9 @@ compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallK
         uint32_t const argReftypeShift = method->GetReturnType().IsReference() ? 1 : 0;
         ScopedManagedHeapAccess scope;
         auto cls = classLinker->GetClass(*pf, pda.GetReferenceType(1 + argReftypeShift), linkerCtx);
-        ASSERT(cls != nullptr);
+        if (cls == nullptr) {
+            return InteropCallKind::UNKNOWN;
+        }
         if (!cls->IsStringClass()) {
             return InteropCallKind::CALL_BY_VALUE;
         }

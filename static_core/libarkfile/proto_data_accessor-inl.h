@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,7 +122,11 @@ inline uint32_t ProtoDataAccessor::GetNumElements()
 
 inline uint32_t ProtoDataAccessor::GetNumArgs()
 {
-    return GetNumElements() - 1;
+    auto numElements = GetNumElements();
+    if (numElements == 0) {
+        return 0;
+    }
+    return numElements - 1;
 }
 
 inline File::EntityId ProtoDataAccessor::GetReferenceType(size_t i)

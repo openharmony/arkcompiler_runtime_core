@@ -182,6 +182,7 @@ bool EtsITableBuilder::Resolve(Class *klass)
             ASSERT(disp.method == nullptr);
             auto *base = klass->GetBase();
             ASSERT(base != nullptr);
+            ASSERT(allocator_ != nullptr);
             auto diff = ComputeVTableDiff(allocator_, base->GetVTable(), vtable);
             RemapInheritedClassEntries(itable_, diff);
             continue;
