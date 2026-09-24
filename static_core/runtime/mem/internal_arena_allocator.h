@@ -72,6 +72,9 @@ public:
     template <typename T>
     [[nodiscard]] T *AllocArray(size_t size)
     {
+        if (UNLIKELY(size > SIZE_MAX / sizeof(T))) {
+            return nullptr;
+        }
         return reinterpret_cast<T *>(Alloc(sizeof(T) * size));
     }
 
@@ -169,14 +172,19 @@ private:
 
     Arena *AllocArena(size_t size)
     {
-        void *ptr = allocator_->Alloc(size + sizeof(Arena) + MAX_ALIGNMENT_DRIFT, ARENA_DEFAULT_ALIGNMENT);
+        static constexpr size_t MAX_ARENA_DATA_SIZE = SIZE_MAX - sizeof(Arena) - MAX_ALIGNMENT_DRIFT;
+        if (UNLIKELY(size > MAX_ARENA_DATA_SIZE)) {
+            return nullptr;
+        }
+        size_t totalSize = size + sizeof(Arena) + MAX_ALIGNMENT_DRIFT;
+        void *ptr = allocator_->Alloc(totalSize, ARENA_DEFAULT_ALIGNMENT);
         if (ptr == nullptr) {
             return nullptr;
         }
 
         uintptr_t arenaAddr = ToUintPtr(ptr);
         uintptr_t buffAddr = AlignUp(arenaAddr + sizeof(Arena), ARENA_ALIGNMENT);
-        size_t sizeForBuff = size + sizeof(Arena) + MAX_ALIGNMENT_DRIFT - (buffAddr - arenaAddr);
+        size_t sizeForBuff = totalSize - (buffAddr - arenaAddr);
         ASSERT(sizeForBuff >= size);
         return new (ptr) Arena(sizeForBuff, ToVoidPtr(buffAddr));
     }

@@ -132,6 +132,7 @@ MAKE_ASM_NAME(CompiledCodeToInterpreterBridge):
     // create an interpreter frame
     mov x1, fp
     bl MAKE_ASM_NAME(CreateFrameForMethod)
+    // A null frame denotes size overflow, which verified method metadata makes unreachable for this bridge.
 
     // setup regs as follow
     // x0 - SHORTY_PTR_REG, x1 - SHORTY_REG, x2 - iframe.vregs_ + num_vregs_,

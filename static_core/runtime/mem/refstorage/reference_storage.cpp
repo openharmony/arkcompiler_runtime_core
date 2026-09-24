@@ -472,8 +472,11 @@ RefBlock *ReferenceStorage::CreateBlock()
         return newBlock;
     }
 
-    blocksCount_++;
-    return static_cast<RefBlock *>(frameAllocator_->Alloc(BLOCK_SIZE));
+    auto *newBlock = static_cast<RefBlock *>(frameAllocator_->Alloc(BLOCK_SIZE));
+    if (newBlock != nullptr) {
+        blocksCount_++;
+    }
+    return newBlock;
 }
 
 void ReferenceStorage::RemoveBlock(RefBlock *block)

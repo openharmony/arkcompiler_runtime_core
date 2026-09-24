@@ -30,6 +30,9 @@ bool StaticObjectAccessor::HasProperty([[maybe_unused]] ark::common_vm::Mutator 
                                        const ark::common_vm::BaseObject *obj, const char *name)
 {
     const EtsObject *etsObj = reinterpret_cast<const EtsObject *>(obj);  // NOLINT(modernize-use-auto)
+    if (etsObj == nullptr || name == nullptr) {
+        return false;
+    }
     return etsObj->GetClass()->GetFieldIDByName(name) != nullptr;
 }
 
@@ -39,7 +42,7 @@ ark::mem::BoxedValue StaticObjectAccessor::GetProperty([[maybe_unused]] ark::com
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     ASSERT(executionCtx != nullptr);
     const EtsObject *etsObj = reinterpret_cast<const EtsObject *>(obj);  // NOLINT(modernize-use-auto)
-    if (etsObj == nullptr) {
+    if (etsObj == nullptr || name == nullptr) {
         return nullptr;
     }
     auto fieldIndex = etsObj->GetClass()->GetFieldIndexByName(name);
@@ -56,7 +59,7 @@ bool StaticObjectAccessor::SetProperty([[maybe_unused]] ark::common_vm::Mutator 
     auto *executionCtx = EtsExecutionContext::GetCurrent();
     ASSERT(executionCtx != nullptr);
     auto *etsObj = reinterpret_cast<EtsObject *>(obj);
-    if (etsObj == nullptr) {
+    if (etsObj == nullptr || name == nullptr) {
         return false;
     }
 
@@ -66,7 +69,15 @@ bool StaticObjectAccessor::SetProperty([[maybe_unused]] ark::common_vm::Mutator 
         return false;
     }
 
-    return SetPropertyValue(executionCtx, etsObj, field, reinterpret_cast<EtsObject *>(value));
+    auto *valueObj = reinterpret_cast<EtsObject *>(value);
+    if (valueObj == nullptr) {
+        if (field->GetEtsType() == EtsType::OBJECT) {
+            etsObj->SetFieldObject(field, nullptr);
+            return true;
+        }
+        return false;
+    }
+    return SetPropertyValue(executionCtx, etsObj, field, valueObj);
 }
 
 bool StaticObjectAccessor::HasElementByIdx([[maybe_unused]] ark::common_vm::Mutator *mutator,
@@ -88,8 +99,14 @@ ark::mem::BoxedValue StaticObjectAccessor::GetElementByIdx([[maybe_unused]] ark:
     }
     EtsObject *etsObject = const_cast<EtsObject *>(etsObj);  // NOLINT(modernize-use-auto)
     EtsMethod *method = etsObj->GetClass()->GetDirectMethod(GET_INDEX_METHOD, "I:Lstd/core/Object;");
+    if (UNLIKELY(method == nullptr)) {
+        return nullptr;
+    }
     std::array args {ark::Value(reinterpret_cast<ObjectHeader *>(etsObject)), ark::Value(index)};
     ark::Value value = method->GetPandaMethod()->Invoke(mThread, args.data());
+    if (UNLIKELY(mThread->HasPendingException())) {
+        return nullptr;
+    }
     return reinterpret_cast<ark::mem::BoxedValue>(EtsObject::FromCoreType(value.GetAs<ObjectHeader *>()));
 }
 
@@ -104,6 +121,9 @@ bool StaticObjectAccessor::SetElementByIdx([[maybe_unused]] ark::common_vm::Muta
         return false;
     }
     EtsMethod *method = etsObj->GetClass()->GetDirectMethod(SET_INDEX_METHOD, "ILstd/core/Object;:V");
+    if (UNLIKELY(method == nullptr)) {
+        return false;
+    }
 
     std::array args {ark::Value(reinterpret_cast<ObjectHeader *>(etsObj)), ark::Value(index),
                      ark::Value(reinterpret_cast<ObjectHeader *>(value))};

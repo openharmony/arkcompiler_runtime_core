@@ -561,12 +561,14 @@ public:
     inline uint8_t *GetDataUtf8Writable()
     {
         ASSERT_PRINT(IsUtf8(), "String: Read data as utf8 for utf16 string");
+        // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
         return ToLineString()->GetDataUtf8Writable();
     }
 
     inline uint16_t *GetDataUtf16Writable()
     {
         ASSERT_PRINT(IsUtf16(), "String: Read data as utf16 for mutf8 string");
+        // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
         return ToLineString()->GetDataUtf16Writable();
     }
 
@@ -612,6 +614,7 @@ public:
             return reinterpret_cast<ark::mem::BaseString *>(
                 ObjectAccessor::GetObject(const_cast<const void *>(obj), offset));
         };
+        // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
         ToLineString()->WriteData(std::move(readBarrier), src->ToString(), start, destSize, length);
     }
 

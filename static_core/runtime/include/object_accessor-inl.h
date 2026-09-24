@@ -149,7 +149,7 @@ inline void ObjectAccessor::SetObject(const Mutator *mutator, void *obj, size_t 
     if constexpr (NEED_WRITE_BARRIER) {
         auto *barrierSet = GetBarrierSet(mutator);
         if (barrierSet->IsPreBarrierEnabled()) {
-            ObjectHeader *preVal = GetObject<IS_VOLATILE, IS_DYN>(obj, offset);
+            ObjectHeader *preVal = GetObject<IS_VOLATILE, false, IS_DYN>(obj, offset);
             barrierSet->PreBarrier(preVal);
         }
 
@@ -362,7 +362,7 @@ inline std::pair<bool, ObjectHeader *> ObjectAccessor::CompareAndSetFieldObject(
         // update field with pre barrier
         auto *barrierSet = GetBarrierSet();
         if (barrierSet->IsPreBarrierEnabled()) {
-            barrierSet->PreBarrier(GetObject<false, IS_DYN>(obj, offset));
+            barrierSet->PreBarrier(GetObject<false, false, IS_DYN>(obj, offset));
         }
 
         getResult();

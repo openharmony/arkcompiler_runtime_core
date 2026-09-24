@@ -584,6 +584,9 @@ void Method::StartProfiling()
                     reinterpret_cast<ProfilingData::BranchLastSaved *>(branchLastSavedMem), branches.size()),
                 Span<uint64_t>(reinterpret_cast<uint64_t *>(throwLastSavedMem), throws.size()), branchProfilingEnabled);
         });
+    if (UNLIKELY(profilingData == nullptr)) {
+        return;
+    }
     if (!InitProfilingData(profilingData)) {
         allocator->Free(profilingData);
         return;

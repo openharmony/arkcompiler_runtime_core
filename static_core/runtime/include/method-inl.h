@@ -125,15 +125,24 @@ public:
                                                                            uint32_t numArgs,
                                                                            coretypes::TaggedValue *args)
     {
+        static constexpr uint32_t MIN_COMPILED_CODE_ARGS = 2U;
+        if (UNLIKELY(args == nullptr || numArgs < MIN_COMPILED_CODE_ARGS)) {
+            ark::ThrowIllegalArgumentException("Invalid compiled-code argument array");
+            return TaggedValue::Exception();
+        }
+        return coretypes::TaggedValue(InvokeCompiledCode(thread, method, numArgs, args));
+    }
+
+    ALWAYS_INLINE inline static uint64_t InvokeCompiledCode(ManagedThread *thread, Method *method, uint32_t numArgs,
+                                                            coretypes::TaggedValue *args)
+    {
         Frame *currentFrame = thread->GetCurrentFrame();
         auto frameKind = thread->GetCurrentFrameKind();
-
-        ASSERT(numArgs >= 2U);  // NOTE(asoldatov): Adjust this check
-        uint64_t ret = InvokeCompiledCodeWithArgArrayDyn(reinterpret_cast<uint64_t *>(args), numArgs, currentFrame,
-                                                         method, thread);
+        uint64_t result = InvokeCompiledCodeWithArgArrayDyn(reinterpret_cast<uint64_t *>(args), numArgs, currentFrame,
+                                                            method, thread);
         thread->SetCurrentFrameKind(frameKind);
         thread->SetCurrentFrame(currentFrame);
-        return coretypes::TaggedValue(ret);
+        return result;
     }
 
     ALWAYS_INLINE static Frame *CreateFrame([[maybe_unused]] ManagedThread *thread, uint32_t nregsSize, Method *method,
