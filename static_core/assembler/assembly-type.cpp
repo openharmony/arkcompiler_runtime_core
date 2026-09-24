@@ -205,8 +205,14 @@ static std::pair<std::string_view, size_t> FromDescriptorComponent(std::string_v
     return {prim->second, 1};
 }
 
-static std::pair<std::string, size_t> FromDescriptorImpl(std::string_view descriptor)
+static std::pair<std::string, size_t> FromDescriptorImplWithDepth(std::string_view descriptor, size_t depth,
+                                                                  size_t maxDepth)
 {
+    if (depth > maxDepth) {
+        LOG(WARNING, ASSEMBLER) << "Union descriptor exceeds maximum nesting depth.";
+        return {"", 0};
+    }
+
     if (descriptor.empty()) {
         LOG(WARNING, ASSEMBLER) << "Descriptor is empty";
         return {"", 0};
@@ -237,7 +243,7 @@ static std::pair<std::string, size_t> FromDescriptorImpl(std::string_view descri
             LOG(WARNING, ASSEMBLER) << "Invalid union descriptor: missing component after array rank.";
             return {"", 0};
         }
-        auto [componentDesc, len] = FromDescriptorImpl(descriptor);
+        auto [componentDesc, len] = FromDescriptorImplWithDepth(descriptor, depth + 1, maxDepth);
         if (len == 0 || len > descriptor.size()) {
             LOG(WARNING, ASSEMBLER) << "Invalid union descriptor [" << descriptor << "].";
             return {"", 0};
@@ -257,6 +263,12 @@ static std::pair<std::string, size_t> FromDescriptorImpl(std::string_view descri
     name.pop_back();  // remove the extra comma
     name += "}";
     return {name, unionLen};
+}
+
+static std::pair<std::string, size_t> FromDescriptorImpl(std::string_view descriptor)
+{
+    constexpr size_t MAX_UNION_DEPTH = 8;
+    return FromDescriptorImplWithDepth(descriptor, 0, MAX_UNION_DEPTH);
 }
 
 /* static */

@@ -158,8 +158,14 @@ EtsEvent *EtsEvent::Create(EtsExecutionContext *executionCtx)
     EtsHandleScope scope(executionCtx);
     auto *klass = PlatformTypes(executionCtx)->coreEvent;
     auto hEvent = EtsHandle<EtsEvent>(executionCtx, EtsEvent::FromEtsObject(EtsObject::Create(executionCtx, klass)));
+    if (hEvent.GetPtr() == nullptr) {
+        return nullptr;
+    }
     auto *waitersList = EtsWaitersList::Create(executionCtx);
-    ASSERT(hEvent.GetPtr() != nullptr);
+    if (waitersList == nullptr) {
+        // OOM pending exception is already set by the failed allocation
+        return nullptr;
+    }
     hEvent->SetWaitersList(executionCtx, waitersList);
     return hEvent.GetPtr();
 }

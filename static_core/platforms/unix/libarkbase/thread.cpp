@@ -200,48 +200,63 @@ int ThreadGetStackInfo(NativeHandleType thread, void **stackAddr, size_t *stackS
 #endif /*PANDA_USE_FFRT*/
     pthread_attr_t attr;
     int s = pthread_attr_init(&attr);
-#ifndef PANDA_TARGET_MACOS
-    s += pthread_getattr_np(thread, &attr);
-    if (s == 0) {
-        s += pthread_attr_getguardsize(&attr, guardSize);
-        s += pthread_attr_getstack(&attr, stackAddr, stackSize);
-#if defined(PANDA_TARGET_OHOS)
-        if (getpid() == gettid()) {
-            /**
-             *  konstanting:
-             *  main thread's stack can automatically grow up to the RLIMIT_STACK by means of the OS,
-             *  but MUSL does not care about that and returns the current (already mmap-ped) stack size.
-             *  This can lead to complicated errors, so let's adjust the stack size manually.
-             */
-            struct rlimit lim;
-            s += getrlimit(RLIMIT_STACK, &lim);
-            if (s == 0) {
-                uintptr_t stackHiAddr = ToUintPtr(*stackAddr) + *stackSize;
-                size_t stackSizeLimit = lim.rlim_cur;
-
-                static constexpr size_t OHOS_DEFAULT_STACK_LIMIT_SIZE = 8_MB;
-                // HWASAN sets stack limit size to unlimited, so we manually set it to default OHOS stack size limit
-                stackSizeLimit = stackSizeLimit == std::numeric_limits<size_t>::max() ? OHOS_DEFAULT_STACK_LIMIT_SIZE
-                                                                                      : stackSizeLimit;
-
-                // MUSL returns the currently-mmap'd size for the main thread; recompute the
-                // full stack window from RLIMIT_STACK, anchored at the high address pthread reported.
-                uintptr_t stackLoAddr = stackHiAddr - stackSizeLimit;
-                *stackSize = stackSizeLimit;
-                *stackAddr = ToVoidPtr(stackLoAddr);
-            }
-        }
-#endif /* defined(PANDA_TARGET_OHOS) */
+    if (s != 0) {
+        return s;
     }
+#ifndef PANDA_TARGET_MACOS
+    s = pthread_getattr_np(thread, &attr);
+    if (s != 0) {
+        pthread_attr_destroy(&attr);
+        return s;
+    }
+    s = pthread_attr_getguardsize(&attr, guardSize);
+    if (s != 0) {
+        pthread_attr_destroy(&attr);
+        return s;
+    }
+    s = pthread_attr_getstack(&attr, stackAddr, stackSize);
+    if (s != 0) {
+        pthread_attr_destroy(&attr);
+        return s;
+    }
+#if defined(PANDA_TARGET_OHOS)
+    if (getpid() == gettid()) {
+        /**
+         *  konstanting:
+         *  main thread's stack can automatically grow up to the RLIMIT_STACK by means of the OS,
+         *  but MUSL does not care about that and returns the current (already mmap-ped) stack size.
+         *  This can lead to complicated errors, so let's adjust the stack size manually.
+         */
+        struct rlimit lim;
+        if (getrlimit(RLIMIT_STACK, &lim) != 0) {
+            pthread_attr_destroy(&attr);
+            return -1;
+        }
+        uintptr_t stackHiAddr = ToUintPtr(*stackAddr) + *stackSize;
+        size_t stackSizeLimit = lim.rlim_cur;
+
+        static constexpr size_t OHOS_DEFAULT_STACK_LIMIT_SIZE = 8_MB;
+        // HWASAN sets stack limit size to unlimited, so we manually set it to default OHOS stack size limit
+        stackSizeLimit =
+            stackSizeLimit == std::numeric_limits<size_t>::max() ? OHOS_DEFAULT_STACK_LIMIT_SIZE : stackSizeLimit;
+
+        // MUSL returns the currently-mmap'd size for the main thread; recompute the
+        // full stack window from RLIMIT_STACK, anchored at the high address pthread reported.
+        uintptr_t stackLoAddr = stackHiAddr - stackSizeLimit;
+        *stackSize = stackSizeLimit;
+        *stackAddr = ToVoidPtr(stackLoAddr);
+    }
+#endif /* defined(PANDA_TARGET_OHOS) */
+    pthread_attr_destroy(&attr);
 #else  /* PANDA_TARGET_MACOS */
     void *const stackBottom = pthread_get_stackaddr_np(thread);
     *stackSize = pthread_get_stacksize_np(thread);
     *stackAddr = static_cast<uint8_t *>(stackBottom) - *stackSize;
     // On Darwin this attr is freshly initialized because pthread_getattr_np is unavailable,
     // so guardSize is the default guard size, not necessarily this thread's actual guard.
-    s += pthread_attr_getguardsize(&attr, guardSize);
+    s = pthread_attr_getguardsize(&attr, guardSize);
+    pthread_attr_destroy(&attr);
 #endif /* PANDA_TARGET_MACOS */
-    s += pthread_attr_destroy(&attr);
     return s;
 }
 

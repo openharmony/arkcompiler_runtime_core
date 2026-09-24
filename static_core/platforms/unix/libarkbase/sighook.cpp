@@ -215,12 +215,16 @@ void SignalHook::CallOldAction(int signo, siginfo_t *siginfo, void *ucontextRaw)
     if ((handlerFlags & SA_SIGINFO)) {                                              // NOLINT
         g_signalHooks[signo].oldAction_.sa_sigaction(signo, siginfo, ucontextRaw);  // NOLINT
     } else {
-        if (g_signalHooks[signo].oldAction_.sa_handler == nullptr) {  // NOLINT
+        auto handler = g_signalHooks[signo].oldAction_.sa_handler;  // NOLINT
+        if (handler == SIG_IGN) {                                   // NOLINT
+            return;
+        }
+        if (handler == SIG_DFL) {  // NOLINT
             g_realSigaction(signo, &g_signalHooks[signo].oldAction_, nullptr);
             kill(getpid(), signo);  // send signal again
             return;
         }
-        g_signalHooks[signo].oldAction_.sa_handler(signo);  // NOLINT
+        handler(signo);  // NOLINT
     }
 }
 

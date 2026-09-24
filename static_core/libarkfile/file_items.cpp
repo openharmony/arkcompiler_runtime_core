@@ -767,16 +767,24 @@ void MethodItem::SetDependencyMark()
         debugInfo_->SetDependencyMark();
     }
     for (auto &item : annotations_) {
-        item->SetDependencyMark();
+        if (item != nullptr) {
+            item->SetDependencyMark();
+        }
     }
     for (auto &item : runtimeAnnotations_) {
-        item->SetDependencyMark();
+        if (item != nullptr) {
+            item->SetDependencyMark();
+        }
     }
     for (auto &item : typeAnnotations_) {
-        item->SetDependencyMark();
+        if (item != nullptr) {
+            item->SetDependencyMark();
+        }
     }
     for (auto &item : runtimeTypeAnnotations_) {
-        item->SetDependencyMark();
+        if (item != nullptr) {
+            item->SetDependencyMark();
+        }
     }
     if (paramAnnotations_ != nullptr) {
         paramAnnotations_->SetDependencyMark();

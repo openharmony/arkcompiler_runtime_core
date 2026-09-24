@@ -146,7 +146,8 @@ private:
     using Base = EtsTypedObjectArray<Elem>;
 
     static uint32_t GetIndex(T number);
-    void StoreToCache(EtsExecutionContext *executionCtx, EtsHandle<EtsString> &stringHandle, T number, uint32_t index);
+    /// @return false when the cache element allocation failed (pending OOM is preserved)
+    bool StoreToCache(EtsExecutionContext *executionCtx, EtsHandle<EtsString> &stringHandle, T number, uint32_t index);
     std::pair<EtsString *, ToStringResult> FinishUpdate(EtsExecutionContext *executionCtx, T number,
                                                         EtsToStringCacheElement<T> *elem);
     std::pair<EtsString *, ToStringResult> GetOrCacheImpl(EtsExecutionContext *executionCtx, T number);
