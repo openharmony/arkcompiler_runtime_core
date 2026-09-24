@@ -975,6 +975,7 @@ void EtsClassWrapper::FinalizeClassDefinition(napi_env env, napi_value jsCtor, c
 /*static*/
 napi_value EtsClassWrapper::CreateProxy(napi_env env, napi_value jsCtor, EtsClassWrapper *thisWrapper)
 {
+    ScopedNativeCodeThread nativeScope(EtsExecutionContext::GetCurrent()->GetMT());
     napi_value jsProxyHandlerRef;
     NAPI_CHECK_FATAL(napi_get_reference_value(env, thisWrapper->jsProxyHandlerRef_, &jsProxyHandlerRef));
     napi_value jsProxyCtorRef;
@@ -982,7 +983,6 @@ napi_value EtsClassWrapper::CreateProxy(napi_env env, napi_value jsCtor, EtsClas
 
     napi_value proxyObj;
     std::vector<napi_value> args = {jsCtor, jsProxyHandlerRef};
-    ScopedNativeCodeThread nativeScope(EtsExecutionContext::GetCurrent()->GetMT());
     NAPI_CHECK_FATAL(napi_new_instance(env, jsProxyCtorRef, args.size(), args.data(), &proxyObj));
     return proxyObj;
 }
@@ -1095,6 +1095,12 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
     NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, nullptr, &jsThis, &data));
     auto etsClassWrapper = reinterpret_cast<EtsClassWrapper *>(data);
 
+    auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
+    NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, jsArgs->data(), nullptr, nullptr));
+
+    napi_value jsNewtarget;
+    NAPI_CHECK_FATAL(napi_get_new_target(env, cinfo, &jsNewtarget));
+
     ScopedManagedCodeThread managedScope(executionCtx->GetMT());
     [[maybe_unused]] EtsHandleScope s(executionCtx);
     EtsHandle<EtsObject> objHandle = ctx->AcquirePendingNewInstance();
@@ -1125,12 +1131,6 @@ napi_value EtsClassWrapper::JSCtorCallback(napi_env env, napi_callback_info cinf
         return nullptr;
     }
 
-    auto jsArgs = ctx->GetTempArgs<napi_value>(argc);
-    NAPI_CHECK_FATAL(napi_get_cb_info(env, cinfo, &argc, jsArgs->data(), nullptr, nullptr));
-
-    napi_value jsNewtarget;
-    NAPI_CHECK_FATAL(napi_get_new_target(env, cinfo, &jsNewtarget));
-
     // create new object and wrap it
     if (UNLIKELY(!etsClassWrapper->CreateAndWrap(env, jsNewtarget, jsThis, *jsArgs))) {
         ASSERT(InteropCtx::SanityJSExceptionPending());
@@ -1152,7 +1152,10 @@ bool EtsClassWrapper::CreateAndWrap(napi_env env, napi_value jsNewtarget, napi_v
     }
 
     bool notExtensible;
-    NAPI_CHECK_FATAL(napi_strict_equals(env, jsNewtarget, GetJsCtor(env), &notExtensible));
+    {
+        ScopedNativeCodeThread nativeScope(executionCtx->GetMT());
+        NAPI_CHECK_FATAL(napi_strict_equals(env, jsNewtarget, GetJsCtor(env), &notExtensible));
+    }
 
     EtsClass *instanceClass {};
     if (LIKELY(notExtensible)) {
@@ -1208,7 +1211,10 @@ SharedReference *EtsClassWrapper::SetupSharedReference(InteropCtx *ctx, EtsHandl
     SharedReference *sharedRef;
     if (LIKELY(notExtensible)) {
         sharedRef = ctx->GetSharedRefStorage()->CreateETSObjectRef(ctx, etsObject, jsThis);
-        NAPI_CHECK_FATAL(napi_object_seal(env, jsThis));
+        {
+            ScopedNativeCodeThread nativeScope(EtsExecutionContext::GetCurrent()->GetMT());
+            NAPI_CHECK_FATAL(napi_object_seal(env, jsThis));
+        }
     } else {
         sharedRef = ctx->GetSharedRefStorage()->CreateHybridObjectRef(ctx, etsObject, jsThis);
     }
