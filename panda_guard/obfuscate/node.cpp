@@ -534,13 +534,21 @@ void panda::guard::Node::CreateArray(const InstructionInfo &info)
         return;
     }
 
-    LOG(INFO, PANDAGUARD) << TAG << "found array:" << info.ins_->GetId(0);
+    const std::string idx = info.ins_->GetId(0);
+    auto it = this->arrayTable_.find(idx);
+    if (it != this->arrayTable_.end()) {
+        it->second->defineInsList_.push_back(info);
+        return;
+    }
+
+    LOG(INFO, PANDAGUARD) << TAG << "found array:" << idx;
     auto array = std::make_shared<Array>(this->program_);
     array->node_ = this;
-    array->nameInfo_ = info;
+    array->literalArrayIdx_ = idx;
+    array->defineInsList_.push_back(info);
     array->Create();
 
-    this->arrays_.emplace_back(array);
+    this->arrayTable_.emplace(idx, array);
 }
 
 void panda::guard::Node::FindStLexVarName(const InstructionInfo &info)
@@ -757,7 +765,7 @@ void panda::guard::Node::Update()
         }
     }
 
-    for (const auto &array : this->arrays_) {
+    for (const auto &[_, array] : this->arrayTable_) {
         array->Obfuscate();
     }
 

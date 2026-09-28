@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "configs/guard_context.h"
 #include "program.h"
+#include "util/assert_util.h"
 
 namespace {
 constexpr std::string_view TAG = "[Entity]";
@@ -76,8 +77,12 @@ std::string panda::guard::Entity::GetNameCacheScope() const
 void panda::guard::Entity::UpdateLiteralArrayTableIdx(const std::string &originIdx, const std::string &updatedIdx) const
 {
     auto entry = this->program_->prog_->literalarray_table.extract(originIdx);
+    PANDA_GUARD_ASSERT_PRINT(entry.empty(), TAG, ErrorCode::GENERIC_ERROR,
+                             "literal array not found: " << originIdx << ", target: " << updatedIdx);
     entry.key() = updatedIdx;
-    this->program_->prog_->literalarray_table.insert(std::move(entry));
+    auto result = this->program_->prog_->literalarray_table.insert(std::move(entry));
+    PANDA_GUARD_ASSERT_PRINT(!result.inserted, TAG, ErrorCode::GENERIC_ERROR,
+                             "literal array target already exists: " << updatedIdx << ", source: " << originIdx);
 }
 
 void panda::guard::Entity::SetExportAndRefreshNeedUpdate(bool isExport)
