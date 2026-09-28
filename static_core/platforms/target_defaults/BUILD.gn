@@ -26,20 +26,20 @@ ohos_source_set("arktarget_options_static") {
       sources +=
           [ "$ark_root/platforms/ohos/standalone/ohos_device_helpers.cpp" ]
     } else {
-      sources += [ 
+      sources += [
         "$ark_root/platforms/ohos/ohos_3/ohos_device_helpers.cpp",
         "$ark_root/platforms/ohos/oom_stats.cpp",
       ]
       external_deps += [ "init:libbegetutil" ]
       if (enable_hisysevent) {
-        external_deps += [ 
-          "hisysevent:libhisysevent",
+        external_deps += [
           "faultloggerd:dfx_signalhandler",
+          "hisysevent:libhisysevent",
         ]
       }
     }
   } else {
-    sources = [ 
+    sources = [
       "$ark_root/platforms/common/default_target_options.cpp",
       "$ark_root/platforms/common/oom_stats.cpp",
     ]
@@ -53,6 +53,19 @@ ohos_source_set("arktarget_options_static") {
 
 ohos_shared_library("arktarget_options") {
   deps = [ ":arktarget_options_static" ]
+
+  # Version script that controls the exported symbols of libarktarget_options.so.
+  # GNU ld only: Apple (macOS/iOS) and Windows linkers do not
+  # support --version-script.
+  # Skipped for debug builds (internal symbols are referenced differently
+  # under -O0) and for standalone layouts (no version_script support
+  # in their ohos_shared_library wrapper).
+  if (current_cpu == "arm64" && !is_darwin && !is_mingw && !is_win &&
+      !is_debug && !ark_standalone_build && !ark_static_standalone_build) {
+    version_script =
+        "$ark_root/platforms/target_defaults/arktarget_options.version"
+  }
+
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
   if (is_gcov_tools) {

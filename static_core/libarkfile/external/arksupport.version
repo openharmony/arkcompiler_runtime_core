@@ -1,0 +1,57 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * GNU ld version script for libarksupport.so.
+ *
+ * Whitelist mode: only LoadPandFileExt (extern "C") and the PandaFileWrapper
+ * static member pointers (C++ mangled, in panda_api::panda_file namespace)
+ * are exported; everything else is hidden by `local: *`.
+ *
+ * PandaFileWrapper itself is a header-only class (all methods inline in
+ * panda_file_external.h). The only out-of-line symbols compiled into this
+ * .so are:
+ *   - LoadPandFileExt()             — extern "C", unmangled
+ *   - PandaFileWrapper::pOpenPandafileFromFdExt           — static data ptr
+ *   - PandaFileWrapper::pOpenPandafileFromMemoryExt       — static data ptr
+ *   - PandaFileWrapper::pQueryMethodSymByOffsetExt        — static data ptr
+ *   - PandaFileWrapper::pQueryMethodSymAndLineByOffsetExt — static data ptr
+ *   - PandaFileWrapper::pQueryAllMethodSymsExt            — static data ptr
+ *
+ * The inline methods in the header (compiled into consumers) reference these
+ * static members by mangled name, so they must stay exported. The namespace
+ * wildcard `_ZN4panda_api10panda_file*` covers all of them. PandaFileWrapper
+ * has no virtual functions, so no vtable/typeinfo patterns are needed.
+ */
+
+{
+    global:
+        /* extern "C" loader entry point (unmangled) */
+        LoadPandFileExt;
+        /* PandaFileWrapper static data pointers (panda_api::panda_file).
+           NOTE: the Itanium length prefix counts the namespace name —
+           "panda_api" has 9 characters, so the prefix is `9panda_api`
+           (a wrong prefix like `4panda_api` silently matches nothing and
+           the static pointers get hidden by `local: *`). */
+        _ZN9panda_api10panda_file*;
+        /* const member functions of panda_api::panda_file classes (e.g.
+           PandaFileWrapper::QueryMethodSymAndLineByOffset(uint64_t) const,
+           inline in panda_file_external.h, emitted here with vague
+           linkage) */
+        _ZNK9panda_api10panda_file*;
+
+    local:
+        *;
+};

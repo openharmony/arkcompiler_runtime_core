@@ -131,6 +131,19 @@ ohos_source_set("libarktsfile_static") {
 ohos_shared_library("libarktsfile") {
   deps = [ ":libarktsfile_static" ]
 
+  # Version script that controls the exported symbols of libarktsfile.so.
+  # Blacklist mode (see arktsfile.version): the whole ark::panda_file API
+  # surface stays exported; only std::/CRT/zlib leaks are hidden.
+  # GNU ld only: Apple (macOS/iOS) and Windows linkers do not
+  # support --version-script.
+  # Skipped for debug builds (internal symbols are referenced differently
+  # under -O0) and for standalone layouts (no version_script support
+  # in their ohos_shared_library wrapper).
+  if (current_cpu == "arm64" && !is_darwin && !is_mingw && !is_win &&
+      !is_debug && !ark_standalone_build && !ark_static_standalone_build) {
+    version_script = "$ark_root/libarkfile/arktsfile.version"
+  }
+
   if (is_mingw || is_win) {
     output_extension = "dll"
   } else if (is_darwin) {

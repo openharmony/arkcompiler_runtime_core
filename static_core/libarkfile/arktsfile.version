@@ -1,0 +1,105 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * GNU ld version script for libarktsfile.so.
+ *
+ * Blacklist mode (same approach as plugins/ets/arkruntime.version): symbols
+ * not matched by any pattern below are exported by default, while selected
+ * implementation-internal / leaked symbols are explicitly hidden in
+ * `local`.
+ *
+ * Unlike libarktsbase (which is compiled with -fvisibility=hidden and can
+ * afford a whitelist that mirrors it), libarktsfile has no compile-time
+ * visibility restriction: its whole `ark::panda_file` API surface (File,
+ * data accessors, ItemContainer/file_items writer side, FileReader/
+ * FileWriter, debug_info_extractor, pgo, plus ark::BytecodeEmitter) is
+ * exported today and consumed by ~19 in-repo targets (runtime, assembler,
+ * disassembler, abc2program, bytecode_optimizer, verifier, tools, ets
+ * plugin) as well as SDK consumers via the exported libpandafile_headers.
+ * That surface is too wide and too externally visible to enumerate safely
+ * in a whitelist, so only provable pollution is hidden here.
+ *
+ * NOTE: there is intentionally no `*` wildcard in `global`: a global
+ * catch-all conflicts with the `local` hiding rules below (linker pattern
+ * precedence) and was the root cause of a symbol visibility regression on
+ * libarkruntime (see arkruntime.version). An anonymous version block is
+ * used because only visibility (not symbol versioning) is needed.
+ */
+
+{
+    /* No `global:` tag at all: symbols not matched by any pattern below
+       are exported by default (GNU ld treats unmatched symbols as global).
+       No designed-API symbol collides with the local patterns — all ark
+       C++ symbols start with _ZN3ark/_ZNK3ark, which none of the local
+       patterns can match. If a future local rule ever overreaches, add an
+       exact-name `global:` exception above `local:` (an exact name takes
+       precedence over local wildcards). NOTE: an empty `global:` tag is a
+       linker syntax error — only add the tag together with real symbol
+       names. */
+
+    local:
+        /* ================================================================
+         * C++ standard library / CRT leaks
+         * ================================================================
+         * libarktsfile links the C++ runtime statically into the .so and
+         * its template instantiations leak into .dynsym as pollution.
+         * On OHOS every module carries its own static libc++ copy, so no
+         * other module resolves its std:: symbols against libarktsfile —
+         * hiding these leaks is behavior-preserving. Patterns are scoped
+         * (never bare `_ZTI*`/`_ZTV*`!) so that ark:: typeinfo stays
+         * exported. */
+        /* std:: / std::__1 members and member functions (libc++ mangles
+           as _ZNSt3__1..., libstdc++ as _ZNSt6...) */
+        _ZNSt*;
+        _ZNKSt*;
+        /* std free functions and objects (std::terminate, std::cout, ...) */
+        _ZSt*;
+        /* vtables / typeinfo / typeinfo names for std classes */
+        _ZTVNSt*;
+        _ZTINSt*;
+        _ZTSNSt*;
+        /* RTTI of the Itanium ABI support namespace */
+        _ZTVN10__cxxabiv1*;
+        _ZTIN10__cxxabiv1*;
+        _ZTSN10__cxxabiv1*;
+
+        /* ================================================================
+         * Defensive: libc secshared wrappers
+         * ================================================================
+         * secshared is a shared dependency today, so these are imports
+         * (a `local` rule on an undefined symbol is a no-op), but the
+         * rule guards against config drift to a static linkage. */
+        Sec*;
+
+        /* ================================================================
+         * Defensive: zlib leaks
+         * ================================================================
+         * libarktsfile calls adler32/adler32_combine (file.cpp checksum,
+         * file_writer.cpp) and links both `zlib:libz` and
+         * `zlib:shared_libz`. If the static archive wins the link order,
+         * its symbols leak into .dynsym; if the shared libz wins, these
+         * are imports and the rules are no-ops. No consumer calls zlib
+         * through libarktsfile — anything needing zlib links it
+         * directly. */
+        adler32;
+        adler32_combine;
+        crc32;
+        crc32_combine;
+        uncompress;
+        zlibVersion;
+        get_crc_table;
+        zError;
+};
