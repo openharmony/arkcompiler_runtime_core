@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,6 @@ void panda::guard::Array::RefreshNeedUpdate()
 
 void panda::guard::Array::Update()
 {
-    if (!nameInfo_.IsValid()) {
-        return;
-    }
     if (!node_.has_value()) {
         return;
     }
@@ -36,11 +33,13 @@ void panda::guard::Array::Update()
         return;
     }
 
-    std::string literalArrayIdx = this->nameInfo_.ins_->GetId(INDEX_0);
-    std::string updatedLiteralArrayIdx = literalArrayIdx;
+    std::string updatedLiteralArrayIdx = this->literalArrayIdx_;
     updatedLiteralArrayIdx.replace(updatedLiteralArrayIdx.find(node->name_), node->name_.size(), node->obfName_);
 
-    UpdateLiteralArrayTableIdx(literalArrayIdx, updatedLiteralArrayIdx);
+    UpdateLiteralArrayTableIdx(this->literalArrayIdx_, updatedLiteralArrayIdx);
+    this->literalArrayIdx_ = updatedLiteralArrayIdx;
 
-    this->nameInfo_.ins_->GetId(INDEX_0) = updatedLiteralArrayIdx;
+    for (auto &info : this->defineInsList_) {
+        info.ins_->GetId(INDEX_0) = updatedLiteralArrayIdx;
+    }
 }

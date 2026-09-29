@@ -1,0 +1,20 @@
+{
+  "abcFilePath": "unused.abc",
+  "obfAbcFilePath": "unused.obf.abc",
+  "compileSdkVersion": "",
+  "targetApiVersion": 24,
+  "entryPackageInfo": "",
+  "defaultNameCachePath": "",
+  "obfuscationRules": {
+    "propertyObfuscation": {
+      "enable": false
+    },
+    "toplevelObfuscation": {
+      "enable": false
+    },
+    "fileNameObfuscation": {
+      "enable": true,
+      "reservedFileNames": ["kept"]
+    }
+  }
+}
