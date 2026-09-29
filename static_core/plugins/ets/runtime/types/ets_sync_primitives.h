@@ -178,7 +178,7 @@ public:
 private:
     class Node {
     public:
-        explicit Node(JobManager *jobMan) : event_(jobMan) {}
+        explicit Node(JobManager *jobMan, WaitDiagnosticInfo diagnosticInfo = {}) : event_(jobMan, diagnosticInfo) {}
 
         BlockingEvent &GetEvent()
         {
@@ -449,6 +449,19 @@ public:
     static uint64_t GetReaders(uint64_t state)
     {
         return (state & READERS_MASK) >> STATE_BITS;
+    }
+
+    static uint64_t GetWriters(uint64_t state)
+    {
+        return (state & WRITERS_MASK) >> (STATE_BITS + READER_BITS);
+    }
+
+    static uint64_t NormalizeForDiagnostics(uint64_t state)
+    {
+        auto waitState = HasReadLock(state)    ? WaitState::READ_LOCKED
+                         : HasWriteLock(state) ? WaitState::WRITE_LOCKED
+                                               : WaitState::UNLOCKED;
+        return WaitDiagnosticInfo::EncodeState(waitState, GetReaders(state), GetWriters(state));
     }
 
     static uint64_t IncReaders(uint64_t state)

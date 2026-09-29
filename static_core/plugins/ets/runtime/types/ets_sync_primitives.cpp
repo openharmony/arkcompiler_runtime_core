@@ -90,11 +90,13 @@ void EtsMutex::Lock()
     auto *jobMan = JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager();
     auto handleScope = EtsHandleScope(executionCtx);
     auto mutexH = EtsHandle<EtsMutex>(executionCtx, this);
+    auto diagnosticInfo = WaitDiagnosticInfo {WaitReason::MUTEX_LOCK, WaitMode::MUTEX,
+                                              WaitDiagnosticInfo::EncodeState(WaitState::LOCKED)};
     auto *state = &mutexH.GetPtr()->state_;
 
     while (!TrySpinLockFor(*state, head)) {
         if (IsLocked(head)) {
-            auto awaitee = Node(jobMan);
+            auto awaitee = Node(jobMan, diagnosticInfo);
             awaitee.next = reinterpret_cast<Node *>(head & ~LOCKED_STATE);
             auto newHead = reinterpret_cast<uintptr_t>(&awaitee) | LOCKED_STATE;
             awaitee.GetEvent().Lock();
@@ -315,9 +317,14 @@ void EtsRWLock::ReadLock()
 
     if (!State::HasReadLock(newState)) {
         auto *executionCtx = EtsExecutionContext::GetCurrent();
-        auto event = BlockingEvent {JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager()};
+        auto handleScope = EtsHandleScope(executionCtx);
+        auto rwLockH = EtsHandle<EtsRWLock>(executionCtx, this);
+        auto diagnosticInfo =
+            WaitDiagnosticInfo {WaitReason::RWLOCK_READ, WaitMode::READLOCK, State::NormalizeForDiagnostics(newState)};
+        auto event =
+            BlockingEvent {JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager(), diagnosticInfo};
         auto readAwaitee = EtsWaitersList::Node(&event);
-        EtsSyncPrimitive<EtsRWLock>::SuspendCoroutine(GetReaders(executionCtx), &readAwaitee);
+        EtsSyncPrimitive<EtsRWLock>::SuspendCoroutine(rwLockH->GetReaders(executionCtx), &readAwaitee);
     }
 }
 
@@ -333,9 +340,14 @@ void EtsRWLock::WriteLock()
 
     if (!State::HasWriteLock(newState) || State::HasWriteLock(oldState)) {
         auto *executionCtx = EtsExecutionContext::GetCurrent();
-        auto event = BlockingEvent {JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager()};
+        auto handleScope = EtsHandleScope(executionCtx);
+        auto rwLockH = EtsHandle<EtsRWLock>(executionCtx, this);
+        auto diagnosticInfo = WaitDiagnosticInfo {WaitReason::RWLOCK_WRITE, WaitMode::WRITELOCK,
+                                                  State::NormalizeForDiagnostics(newState)};
+        auto event =
+            BlockingEvent {JobExecutionContext::CastFromMutator(executionCtx->GetMT())->GetManager(), diagnosticInfo};
         auto writeAwaitee = EtsWaitersList::Node(&event);
-        EtsSyncPrimitive<EtsRWLock>::SuspendCoroutine(GetWriters(executionCtx), &writeAwaitee);
+        EtsSyncPrimitive<EtsRWLock>::SuspendCoroutine(rwLockH->GetWriters(executionCtx), &writeAwaitee);
     }
 }
 

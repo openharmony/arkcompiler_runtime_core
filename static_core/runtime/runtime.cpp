@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <filesystem>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -80,6 +81,9 @@
 #include "runtime/tests/intrusive-tests/intrusive_test_option.h"
 #include "runtime/jit/profiling_saver.h"
 #include "runtime/execution/coroutines/native_stack_allocator/native_stack_allocator.h"
+#ifdef PANDA_TARGET_UNIX
+#include "platforms/unix/libarkbase/signal.h"
+#endif
 #ifdef PANDA_OHOS_GET_PARAMETER
 #include "syspara/parameters.h"
 #endif
@@ -100,6 +104,64 @@ os::memory::Mutex Runtime::mutex_;  // NOLINT(fuchsia-statically-constructed-obj
 bool Runtime::isTaskManagerUsed_ = false;
 
 const LanguageContextBase *g_ctxsJsRuntime = nullptr;  // Deprecated. Only for capability with js_runtime.
+
+#ifdef PANDA_TARGET_UNIX
+class RuntimeSignalCatcher final {
+public:
+    RuntimeSignalCatcher()
+    {
+        os::unix::SignalCtl currentSignalMask;
+        os::unix::SignalCtl::GetCurrent(currentSignalMask);
+        sigquitWasBlocked_ = currentSignalMask.IsExist(SIGQUIT);
+
+        signalCtl_.Block();
+    }
+
+    ~RuntimeSignalCatcher()
+    {
+        Stop();
+        if (!sigquitWasBlocked_) {
+            signalCtl_.Unblock();
+        }
+    }
+
+    NO_COPY_SEMANTIC(RuntimeSignalCatcher);
+    NO_MOVE_SEMANTIC(RuntimeSignalCatcher);
+
+    void Start(Runtime *runtime)
+    {
+        if (catcherThread_ != nullptr) {
+            return;
+        }
+        catcherThread_ = std::make_unique<os::unix::SignalCatcherThread>(std::initializer_list<int> {SIGQUIT});
+        catcherThread_->CatchOnlyCatcherThread();
+        catcherThread_->StartThread(&HandleSignal, runtime);
+    }
+
+    void Stop()
+    {
+        if (catcherThread_ == nullptr) {
+            return;
+        }
+        catcherThread_->StopThread();
+        catcherThread_.reset();
+    }
+
+private:
+    static void HandleSignal(int signal, Runtime *runtime)
+    {
+        if (signal != SIGQUIT || Runtime::GetCurrent() != runtime) {
+            return;
+        }
+
+        runtime->GetPandaVM()->DumpForSigQuit(std::cerr);
+    }
+
+    os::unix::SignalCtl signalCtl_ {SIGQUIT};
+    std::unique_ptr<os::unix::SignalCatcherThread> catcherThread_;
+    bool sigquitWasBlocked_ {false};
+};
+#endif
 
 class RuntimeInternalAllocator {
 public:
@@ -418,6 +480,13 @@ bool Runtime::Create(const RuntimeOptions &options)
     mem::InternalAllocatorPtr internalAllocator =
         RuntimeInternalAllocator::Create(options.UseMallocForInternalAllocations());
 
+#ifdef PANDA_TARGET_UNIX
+    std::unique_ptr<RuntimeSignalCatcher> signalCatcher;
+    if (options.GetSignalCatcher() != 0 && options.GetSigquitFlag() != 0) {
+        signalCatcher = std::make_unique<RuntimeSignalCatcher>();
+    }
+#endif
+
     BlockSignals();
 
     CreateDfxController(options);
@@ -428,6 +497,9 @@ bool Runtime::Create(const RuntimeOptions &options)
         LOG(ERROR, RUNTIME) << "Failed to create runtime instance";
         return false;
     }
+#ifdef PANDA_TARGET_UNIX
+    instance_->signalCatcher_ = std::move(signalCatcher);
+#endif
     if (!instance_->Initialize()) {
         LOG(ERROR, RUNTIME) << "Failed to initialize runtime";
         if (instance_->GetPandaVM() != nullptr) {
@@ -456,6 +528,12 @@ bool Runtime::Create(const RuntimeOptions &options)
                 options_.GetSamplingProfilerInterval());
         }
     }
+
+#ifdef PANDA_TARGET_UNIX
+    if (instance_->signalCatcher_ != nullptr) {
+        instance_->signalCatcher_->Start(instance_);
+    }
+#endif
 
     return true;
 }
@@ -600,6 +678,12 @@ bool Runtime::Destroy()
     if (instance_ == nullptr) {
         return false;
     }
+
+#ifdef PANDA_TARGET_UNIX
+    if (instance_->signalCatcher_ != nullptr) {
+        instance_->signalCatcher_->Stop();
+    }
+#endif
 
     trace::ScopedTrace scopedTrace("Runtime shutdown");
     if (instance_->SaveProfileInfo() && instance_->GetClassLinker()->GetAotManager()->HasProfiledMethods()) {
@@ -1741,12 +1825,22 @@ void Runtime::InitNonZygoteOrPostFork([[maybe_unused]] bool isSystemServer, [[ma
 
 void Runtime::PreZygoteFork()
 {
+#ifdef PANDA_TARGET_UNIX
+    if (signalCatcher_ != nullptr) {
+        signalCatcher_->Stop();
+    }
+#endif
     pandaVm_->PreZygoteFork();
 }
 
 void Runtime::PostZygoteFork()
 {
     pandaVm_->PostZygoteFork();
+#ifdef PANDA_TARGET_UNIX
+    if (signalCatcher_ != nullptr) {
+        signalCatcher_->Start(this);
+    }
+#endif
 }
 
 // Returns true if profile saving is enabled. GetJit() will be not null in this case.

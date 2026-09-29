@@ -408,7 +408,7 @@ static ani_boolean PManagerKill(ani_env *env, [[maybe_unused]] ani_object proces
 {
     int integerPid = static_cast<int>(pid);
     auto ownPid = ark::os::thread::GetPid();
-    if (integerPid == 0 || integerPid == -1 || integerPid == ownPid || integerPid == -ownPid) {
+    if (integerPid == 0 || integerPid == -1 || integerPid == -ownPid) {
         ThrowNewError(env, "std.core.IllegalArgumentError", "Invalid pid argument",
                       ark::ets::stdlib::ERROR_CTOR_SIGNATURE);
         return 0U;

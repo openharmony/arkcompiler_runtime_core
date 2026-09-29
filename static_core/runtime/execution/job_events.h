@@ -17,6 +17,7 @@
 
 #include "libarkbase/os/mutex.h"
 #include "runtime/mem/refstorage/reference.h"
+#include <cstdint>
 #include <utility>
 
 namespace ark {
@@ -24,6 +25,80 @@ namespace ark {
 using EventId = int32_t;
 
 class JobManager;
+
+enum class WaitReason : uint8_t {
+    NONE,
+    MUTEX_LOCK,
+    RWLOCK_READ,
+    RWLOCK_WRITE,
+};
+
+enum class WaitMode : uint8_t {
+    NONE,
+    MUTEX,
+    READLOCK,
+    WRITELOCK,
+};
+
+enum class WaitState : uint8_t {
+    UNLOCKED,
+    LOCKED,
+    READ_LOCKED,
+    WRITE_LOCKED,
+};
+
+class WaitDiagnosticInfo {
+public:
+    static constexpr uint64_t STATE_BITS = 2;
+    static constexpr uint64_t COUNTER_BITS = 31;
+    static constexpr uint64_t STATE_MASK = (1ULL << STATE_BITS) - 1;
+    static constexpr uint64_t COUNTER_MASK = (1ULL << COUNTER_BITS) - 1;
+    static constexpr uint64_t READERS_SHIFT = STATE_BITS;
+    static constexpr uint64_t WRITERS_SHIFT = STATE_BITS + COUNTER_BITS;
+
+    constexpr WaitDiagnosticInfo() = default;
+
+    constexpr WaitDiagnosticInfo(WaitReason reason, WaitMode requestedMode, uint64_t normalizedStateAtBlock)
+        : reason_(reason), requestedMode_(requestedMode), normalizedStateAtBlock_(normalizedStateAtBlock)
+    {
+    }
+
+    static constexpr uint64_t EncodeState(WaitState state, uint32_t readers = 0, uint32_t writers = 0)
+    {
+        return static_cast<uint64_t>(state) | ((static_cast<uint64_t>(readers) & COUNTER_MASK) << READERS_SHIFT) |
+               ((static_cast<uint64_t>(writers) & COUNTER_MASK) << WRITERS_SHIFT);
+    }
+
+    WaitState GetStateAtBlock() const
+    {
+        return static_cast<WaitState>(normalizedStateAtBlock_ & STATE_MASK);
+    }
+
+    uint32_t GetReadersAtBlock() const
+    {
+        return static_cast<uint32_t>((normalizedStateAtBlock_ >> READERS_SHIFT) & COUNTER_MASK);
+    }
+
+    uint32_t GetWritersAtBlock() const
+    {
+        return static_cast<uint32_t>((normalizedStateAtBlock_ >> WRITERS_SHIFT) & COUNTER_MASK);
+    }
+
+    WaitReason GetReason() const
+    {
+        return reason_;
+    }
+
+    WaitMode GetRequestedMode() const
+    {
+        return requestedMode_;
+    }
+
+private:
+    WaitReason reason_ {WaitReason::NONE};
+    WaitMode requestedMode_ {WaitMode::NONE};
+    uint64_t normalizedStateAtBlock_ {0};
+};
 
 /**
  * @brief The base class for job events. Cannot be instantiated directly.
@@ -222,13 +297,24 @@ private:
  */
 class BlockingEvent : public JobEvent {
 public:
-    explicit BlockingEvent(JobManager *jobManager) : JobEvent(Type::BLOCKING, jobManager) {}
+    explicit BlockingEvent(JobManager *jobManager, WaitDiagnosticInfo diagnosticInfo = {})
+        : JobEvent(Type::BLOCKING, jobManager), diagnosticInfo_(diagnosticInfo)
+    {
+    }
     ~BlockingEvent() override = default;
 
     NO_COPY_SEMANTIC(BlockingEvent);
     NO_MOVE_SEMANTIC(BlockingEvent);
 
     void Wait() RELEASE(this);
+
+    WaitDiagnosticInfo GetWaitDiagnosticInfo() const
+    {
+        return diagnosticInfo_;
+    }
+
+private:
+    const WaitDiagnosticInfo diagnosticInfo_;
 };
 
 }  // namespace ark
