@@ -8735,6 +8735,9 @@ to numeric operands, the operator is evaluated as follows:
   *compiler-internal integer type* and the result type is that type.
   The *compiler-internal integer type* must be at least 128-bit integer type
   or an arbitrary-precision integer type (like :ref:`Type bigint`).
+  This type is used for intermediate values during constant expression
+  evaluation. Each individual integer literal operand must still satisfy
+  the literal range requirements (see :ref:`Integer Literals`).
 
 .. index::
    compiler-internal integer type

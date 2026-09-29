@@ -557,12 +557,11 @@ Unicode 字符类别 *UNICODE_CLASS_LU*、*UNICODE_CLASS_LL*、*UNICODE_CLASS_LT
 :ref:`Type Inference for Constant Expressions` 总是在常量表达式求值后应用，
 用于把数值常量表达式推断为某个预定义数值类型。
 
-如果整数字面量是常量表达式的一部分（见 :ref:`Constant Expressions`），
-其值可以超出 ``long`` 的范围，但整个整数常量表达式的值必须落在 ``long``
-范围内，或者由上下文决定类型。
+整数字面量必须在``long``的范围内。如果整数字面量是常量表达式的一部分，
+整个整数常量表达式的值也必须在``long``的范围内。超出此范围的整数字面量会导致编译时错误。
 
 下面的示例说明了常量表达式如何通过类型推断确定类型。注意 ``'-'`` 不是整数字面量的一部分，
-而是 :ref:`Unary Minus` 运算符：
+而是 :ref:`Unary Minus` 运算符（`- 9223372036854775808`除外，它被视为最小的``long``类型整数）：
 
 .. code-block:: typescript
    :linenos:
@@ -578,7 +577,6 @@ Unicode 字符类别 *UNICODE_CLASS_LU*、*UNICODE_CLASS_LL*、*UNICODE_CLASS_LT
     const err1: int = 2147483648 // Compile-time error, the value is out of range for 'int'
 
     const max_long = 0x7FFF_FFFF_FFFF_FFFF   // OK, type: long, value: max(long)
-    const min_long = - 0x8000_0000_0000_0000 // OK, type: long, value: min(long)
 
     const err2 = 0x8000_0000_0000_0000 // Compile-time error, the value is too large
     const err3 = 9223372036854775808   // Compile-time error, the value is too large

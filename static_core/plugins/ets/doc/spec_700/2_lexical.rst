@@ -644,14 +644,16 @@ during constants expression evaluation.
 after evaluating a constant expression to infer the type of a numeric constant
 expression, assigning it to a predefined numeric type. 
 
-If an integer literal is a part of a constant expression
-(see :ref:`Constant Expressions`) a value of the literal can be out of range
-of type ``long``, but the value of the whole integer contsant expression
-must be in the range of type ``long`` or the type determined by the context.
+An integer literal must be within the range of type ``long``. If an integer
+literal is a part of a constant expression (see :ref:`Constant Expressions`),
+the value of the whole integer constant expression must also be within the
+range of type ``long``. An integer literal that is out of this range causes a
+compile-time error.
 
 The example below illustrates how type inference is used to determine the type
 of constant expressions (note that ``'-'`` is not a part of an integer literal
-but :ref:`Unary Minus` operator):
+but :ref:`Unary Minus` operator, with the exception of ``- 9223372036854775808``,
+which is treated as the smallest ``long`` integer):
 
 .. code-block:: typescript
   :linenos:
@@ -667,7 +669,6 @@ but :ref:`Unary Minus` operator):
    const err1: int =  2147483648 // Compile-time error, the value is out of range for 'int'
    
    const max_long =   0x7FFF_FFFF_FFFF_FFFF   // OK, type: long, value: max(long)
-   const min_long = - 0x8000_0000_0000_0000 // OK, type: long, value: min(long)
    
    const err2 = 0x8000_0000_0000_0000 // Compile-time error, the value is too large
    const err3 = 9223372036854775808   // Compile-time error, the value is too large
