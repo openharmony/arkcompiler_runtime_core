@@ -1795,12 +1795,14 @@ void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
     napi_env env = ctx->GetJSEnv();
     napi_value completionValue;
 
+    EtsHandleScope handleScope(executionCtx);
+    EtsHandle<EtsObject> valueHandle(executionCtx, value);
     NapiScope napiScope(env);
-    if (value == nullptr) {
+    if (valueHandle.GetPtr() == nullptr) {
         completionValue = GetUndefined(env);
     } else {
-        auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
-        completionValue = refconv->Wrap(ctx, value);
+        auto refconv = JSRefConvertResolve(ctx, valueHandle->GetClass()->GetRuntimeClass());
+        completionValue = refconv->Wrap(ctx, valueHandle.GetPtr());
         if (UNLIKELY(completionValue == nullptr)) {
             return;
         }
