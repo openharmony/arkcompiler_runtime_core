@@ -34,10 +34,15 @@
 #include "libpandabase/os/filesystem.h"
 #include "libpandafile/file.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <type_traits>
+#include <utility>
+#include <vector>
 
 #if __has_include(<filesystem>)
 #include <filesystem>
@@ -96,19 +101,6 @@ AbckitTypeId PandaTypeToAbcKitTypeId(const pandasm::Type &type)
 AbckitString *CreateNameString(std::string &name, AbckitFile *file)
 {
     return CreateStringDynamic(file, name.data(), name.size());
-}
-
-AbckitCoreModule *TryFindModule(const std::string &name, AbckitFile *file)
-{
-    auto tryFindLocal = file->localModules.find(name);
-    if (tryFindLocal != file->localModules.end()) {
-        return tryFindLocal->second.get();
-    }
-    auto tryFindExternal = file->externalModules.find(name);
-    if (tryFindExternal != file->externalModules.end()) {
-        return tryFindExternal->second.get();
-    }
-    return nullptr;
 }
 
 std::string GetModuleRequestName(uint16_t moduleRequestsOffset, const pandasm::LiteralArray *litArr)
@@ -378,7 +370,12 @@ size_t FillRequestIdxSection(ModuleIterateData *data)
         auto relativePathStr = std::get<std::string>(data->moduleLitArr->literals_[idx].value_);
         if (relativePathStr[0] == '@') {
             data->moduleLitArr->literals_[idx++].value_ = relativePathStr;
-            data->m->md.push_back(TryFindModule(relativePathStr, file));
+            // Requests like "@normalized:N&&&<path>&" do not match module record
+            // names directly; probe record-name candidates for the module.
+            auto *foundModule = (relativePathStr.rfind("@normalized:", 0) == 0)
+                                    ? TryFindModuleByOhmUrl(relativePathStr, file)
+                                    : TryFindModule(relativePathStr, file);
+            data->m->md.push_back(foundModule);
         } else {
 #ifdef STD_FILESYSTEM_EXPERIMENTAL
             auto moduleAbsPath = fs::absolute(fs::path(moduleBasePath).append(relativePathStr));
@@ -1041,15 +1038,22 @@ void DumpHierarchy(AbckitFile *file)
     }
 }
 
+// Strips the "./" prefix from a module request name to get a module lookup name.
+static std::string ResolveRequestName(std::string requestName)
+{
+    if (requestName.substr(0, 2U) == "./") {
+        requestName = requestName.substr(2U);
+    }
+    return requestName;
+}
+
 AbckitCoreModule *ResolveUnfoundModule(AbckitCoreModule *m, AbckitFile *file, size_t offset)
 {
     auto mPayload = GetDynModulePayload(m);
     auto literalArr = mPayload->moduleLiteralArray->GetDynamicImpl();
     auto requestIdx = std::get<uint16_t>(literalArr->literals_[offset].value_);
     auto moduleName = std::get<std::string>(literalArr->literals_[requestIdx + 1].value_);
-    if (moduleName.substr(0, 2U) == "./") {
-        moduleName = moduleName.substr(2U);
-    }
+    moduleName = ResolveRequestName(moduleName);
     auto foundModule = TryFindModule(moduleName, file);
     if (foundModule == nullptr) {
         auto md = std::make_unique<AbckitCoreModule>();
@@ -1104,10 +1108,56 @@ void ResolveExportedModule(AbckitFile *file, std::unique_ptr<AbckitCoreModule> &
     ed->exportedModule = exportedModule;
 }
 
+// Module requests are resolved during CreateModule, when not all module records
+// have been collected yet; re-resolves pending (nullptr) entries of `m->md` now
+// that all modules are known. Requests keep their original strings in the
+// module literal array, so re-lookup is lossless.
+static void ReResolvePendingModuleRequests(AbckitCoreModule *m, AbckitFile *file)
+{
+    auto mPayload = GetDynModulePayload(m);
+    const auto &literals = mPayload->moduleLiteralArray->GetDynamicImpl()->literals_;
+    for (size_t idx = 0; idx < m->md.size(); idx++) {
+        if (m->md[idx] != nullptr) {
+            continue;
+        }
+        if (mPayload->moduleRequestsOffset + idx >= literals.size()) {
+            continue;
+        }
+        const auto &lit = literals[mPayload->moduleRequestsOffset + idx];
+        if (!lit.IsStringValue()) {
+            continue;
+        }
+        const auto &requestName = std::get<std::string>(lit.value_);
+        m->md[idx] = (requestName.rfind("@normalized:", 0) == 0) ? TryFindModuleByOhmUrl(requestName, file)
+                                                                 : TryFindModule(ResolveRequestName(requestName), file);
+    }
+}
+
+static bool HasUnresolvedDescriptors(const AbckitCoreModule *m)
+{
+    for (auto &id : m->id) {
+        if (id->importedModule == nullptr) {
+            return true;
+        }
+    }
+    for (auto &ed : m->ed) {
+        if (ed->exportedModule == nullptr) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void ResolveUnfoundModules(AbckitFile *file)
 {
     for (auto &[name, m] : file->localModules) {
-        if (std::find(m->md.begin(), m->md.end(), nullptr) == m->md.end()) {
+        if (std::find(m->md.begin(), m->md.end(), nullptr) != m->md.end()) {
+            ReResolvePendingModuleRequests(m.get(), file);
+        }
+        // Note: the re-resolution above may make all md entries non-null while
+        // import/export descriptors are still unresolved, so the descriptor
+        // loops must not be skipped based on md alone.
+        if (!HasUnresolvedDescriptors(m.get()) && std::find(m->md.begin(), m->md.end(), nullptr) == m->md.end()) {
             continue;
         }
         auto mPayload = GetDynModulePayload(m.get());

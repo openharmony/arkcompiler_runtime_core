@@ -170,8 +170,25 @@ AbckitJsModule *FileAddExternalJsModule(AbckitFile *file, const struct AbckitJsE
     auto modulePayloadDyn = AbckitModulePayloadDyn();
     modulePayloadDyn.absPaths = false;
     m->GetJsImpl()->impl = modulePayloadDyn;
-    file->externalModules.insert({params->name, std::move(m)});
-    return file->externalModules[params->name]->GetJsImpl();
+    // Re-use an existing entry with the same name (e.g. one created on open for
+    // a source-level import) instead of failing.
+    auto [it, inserted] = file->externalModules.try_emplace(params->name, std::move(m));
+    if (!inserted) {
+        // Two cases must be handled without touching GetJsImpl() unconditionally
+        // (it throws when the variant holds a non-Js alternative):
+        //  - the variant holds a non-Js alternative (e.g. an ArkTS impl): replace it;
+        //  - the variant holds a *null* Js impl (default-constructed placeholder):
+        //    the alternative matches but the impl is missing - attach it.
+        auto &existing = it->second->impl;
+        if (!std::holds_alternative<std::unique_ptr<AbckitJsModule>>(existing) ||
+            std::get<std::unique_ptr<AbckitJsModule>>(existing) == nullptr) {
+            existing = std::make_unique<AbckitJsModule>();
+        }
+        it->second->GetJsImpl()->core = it->second.get();
+        it->second->GetJsImpl()->impl = modulePayloadDyn;
+        it->second->target = ABCKIT_TARGET_JS;
+    }
+    return it->second->GetJsImpl();
 }
 
 AbckitArktsModule *FileAddExternalArkTsV1Module(AbckitFile *file,
@@ -200,8 +217,20 @@ AbckitArktsModule *FileAddExternalArkTsV1Module(AbckitFile *file,
     auto modulePayloadDyn = AbckitModulePayloadDyn();
     modulePayloadDyn.absPaths = false;
     m->GetArkTSImpl()->impl.GetDynModule() = modulePayloadDyn;
-    file->externalModules[params->name] = std::move(m);
-    return file->externalModules[params->name]->GetArkTSImpl();
+    // Re-use an existing entry with the same name (see FileAddExternalJsModule).
+    auto [it, inserted] = file->externalModules.try_emplace(params->name, std::move(m));
+    // An entry created on open for a source-level import may hold the variant's
+    // default alternative (a null Js impl) — GetArkTSImpl() would throw
+    // bad_variant_access on it. Check the alternative itself instead.
+    if (!inserted && !std::holds_alternative<std::unique_ptr<AbckitArktsModule>>(it->second->impl)) {
+        it->second->impl = std::make_unique<AbckitArktsModule>();
+        it->second->GetArkTSImpl()->core = it->second.get();
+        it->second->GetArkTSImpl()->impl.GetDynModule() = modulePayloadDyn;
+        // A placeholder created on open has no target of its own; adopting it as
+        // an ArkTS external module also fixes its target for SAME_TARGET checks.
+        it->second->target = ABCKIT_TARGET_ARK_TS_V1;
+    }
+    return it->second->GetArkTSImpl();
 }
 
 void ModuleRemoveImportDynamic(AbckitCoreModule *m, AbckitArktsImportDescriptor *i)
@@ -248,7 +277,11 @@ void ModuleRemoveImportDynamic(AbckitCoreModule *m, AbckitJsImportDescriptor *i)
     m->id.erase(found);
 }
 
-void AddNewModuleRequest(AbckitCoreModule *m, AbckitCoreModule *newModule)
+// When `requestName` is provided it is written into the module request array
+// as-is (used for "@normalized:" OHMurl requests whose string cannot be derived
+// from the record name); otherwise the request string is derived from the
+// module name as before.
+void AddNewModuleRequest(AbckitCoreModule *m, AbckitCoreModule *newModule, const std::string *requestName = nullptr)
 {
     auto mPayload = GetDynModulePayload(m);
     auto *moduleLitArr = mPayload->moduleLiteralArray->GetDynamicImpl();
@@ -256,9 +289,14 @@ void AddNewModuleRequest(AbckitCoreModule *m, AbckitCoreModule *newModule)
     auto requestsIdxNum = std::get<uint32_t>(moduleLitArr->literals_[mPayload->moduleRequestsOffset - 1].value_);
     moduleLitArr->literals_[mPayload->moduleRequestsOffset - 1].value_ = requestsIdxNum + 1;
 
-    std::string moduleRequest = std::string(newModule->moduleName->impl);
-    if (moduleRequest[0] != '@') {
-        moduleRequest = "./" + moduleRequest;
+    std::string moduleRequest;
+    if (requestName != nullptr) {
+        moduleRequest = *requestName;
+    } else {
+        moduleRequest = std::string(newModule->moduleName->impl);
+        if (moduleRequest[0] != '@') {
+            moduleRequest = "./" + moduleRequest;
+        }
     }
     auto literalModuleRequest = pandasm::LiteralArray::Literal {panda_file::LiteralTag::STRING, moduleRequest};
     moduleLitArr->literals_.insert(moduleLitArr->literals_.begin() + m->md.size(), std::move(literalModuleRequest));
@@ -268,6 +306,30 @@ void AddNewModuleRequest(AbckitCoreModule *m, AbckitCoreModule *newModule)
     mPayload->localExportsOffset = mPayload->localExportsOffset + 1;
     mPayload->indirectExportsOffset = mPayload->indirectExportsOffset + 1;
     mPayload->starExportsOffset = mPayload->starExportsOffset + 1;
+}
+
+// Resolves the actual module to be imported and the explicit request string
+// (if any) for a new import. An external module whose name is a
+// "@normalized:" OHMurl acts as a *carrier* of the request string: when an
+// abc-internal record matches the OHMurl, imports are attached to that record
+// (regular module semantics); the OHMurl itself is then used verbatim as the
+// request string for a newly created request. When no record matches, the
+// external module is kept as-is (pure external reference, like "@ohos:").
+struct ImportTarget {
+    AbckitCoreModule *module;     // module to attach the import to
+    bool hasRequestName = false;  // whether `requestName` should be used verbatim for a new request
+    std::string requestName;      // explicit request string ("@normalized:" OHMurl)
+};
+
+static ImportTarget ResolveImportTarget(AbckitCoreModule *imported, AbckitFile *file)
+{
+    if (imported->isExternal && imported->moduleName->impl.rfind("@normalized:", 0) == 0) {
+        auto ohmUrl = std::string(imported->moduleName->impl);
+        if (auto *internalModule = TryFindModuleByOhmUrl(ohmUrl, file); internalModule != nullptr) {
+            return {internalModule, true, std::move(ohmUrl)};
+        }
+    }
+    return {imported, false, ""};
 }
 
 template <class T>
@@ -282,12 +344,13 @@ size_t AddNamespaceImportToModuleLiteralArray(AbckitCoreModule *importing, Abcki
            (!imported->isExternal && importing->file->localModules.find(imported->moduleName->impl.data()) !=
                                          importing->file->localModules.end()));
 
-    auto found = std::find(importing->md.begin(), importing->md.end(), imported);
+    auto target = ResolveImportTarget(imported, importing->file);
+    auto found = std::find(importing->md.begin(), importing->md.end(), target.module);
     uint16_t requestIdx;
     if (found != importing->md.end()) {
         requestIdx = std::distance(importing->md.begin(), found);
     } else {
-        AddNewModuleRequest(importing, imported);
+        AddNewModuleRequest(importing, target.module, target.hasRequestName ? &target.requestName : nullptr);
         requestIdx = importing->md.size() - 1;
     }
 
@@ -319,12 +382,13 @@ size_t AddRegularImportToModuleLiteralArray(AbckitCoreModule *importing, AbckitC
            (!imported->isExternal && importing->file->localModules.find(imported->moduleName->impl.data()) !=
                                          importing->file->localModules.end()));
 
-    auto found = std::find(importing->md.begin(), importing->md.end(), imported);
+    auto target = ResolveImportTarget(imported, importing->file);
+    auto found = std::find(importing->md.begin(), importing->md.end(), target.module);
     uint16_t requestIdx;
     if (found != importing->md.end()) {
         requestIdx = std::distance(importing->md.begin(), found);
     } else {
-        AddNewModuleRequest(importing, imported);
+        AddNewModuleRequest(importing, target.module, target.hasRequestName ? &target.requestName : nullptr);
         requestIdx = importing->md.size() - 1;
     }
 
@@ -360,7 +424,9 @@ AbckitArktsImportDescriptor *ModuleAddImportFromDynamicModuleDynamic(
 {
     auto id = std::make_unique<AbckitCoreImportDescriptor>();
     id->importingModule = importing;
-    id->importedModule = imported;
+    // The target may differ from `imported`: a "@normalized:" carrier resolves
+    // to the abc-internal record (see ResolveImportTarget).
+    id->importedModule = ResolveImportTarget(imported, importing->file).module;
     auto payloadDyn = AbckitDynamicImportDescriptorPayload();
     payloadDyn.isRegularImport = std::strcmp(params->name, "*") != 0;
     payloadDyn.moduleRecordIndexOff = AddImportToModuleLiteralArray(importing, imported, params);
@@ -380,7 +446,9 @@ AbckitJsImportDescriptor *ModuleAddImportFromDynamicModuleDynamic(
 {
     auto id = std::make_unique<AbckitCoreImportDescriptor>();
     id->importingModule = importing;
-    id->importedModule = imported;
+    // The target may differ from `imported`: a "@normalized:" carrier resolves
+    // to the abc-internal record (see ResolveImportTarget).
+    id->importedModule = ResolveImportTarget(imported, importing->file).module;
     auto payloadDyn = AbckitDynamicImportDescriptorPayload();
     payloadDyn.isRegularImport = std::strcmp(params->name, "*") != 0;
     payloadDyn.moduleRecordIndexOff = AddImportToModuleLiteralArray(importing, imported, params);
@@ -430,12 +498,13 @@ size_t AddIndirectExportToModuleLiteralArray(AbckitCoreModule *exporting, Abckit
            (!exported->isExternal && exporting->file->localModules.find(exported->moduleName->impl.data()) !=
                                          exporting->file->localModules.end()));
 
-    auto found = std::find(exporting->md.begin(), exporting->md.end(), exported);
+    auto target = ResolveImportTarget(exported, exporting->file);
+    auto found = std::find(exporting->md.begin(), exporting->md.end(), target.module);
     uint16_t requestIdx;
     if (found != exporting->md.end()) {
         requestIdx = std::distance(exporting->md.begin(), found);
     } else {
-        AddNewModuleRequest(exporting, exported);
+        AddNewModuleRequest(exporting, target.module, target.hasRequestName ? &target.requestName : nullptr);
         requestIdx = exporting->md.size() - 1;
     }
 
@@ -488,12 +557,13 @@ size_t AddStarExportToModuleLiteralArray(AbckitCoreModule *exporting, AbckitCore
            (!exported->isExternal && exporting->file->localModules.find(exported->moduleName->impl.data()) !=
                                          exporting->file->localModules.end()));
 
-    auto found = std::find(exporting->md.begin(), exporting->md.end(), exported);
+    auto target = ResolveImportTarget(exported, exporting->file);
+    auto found = std::find(exporting->md.begin(), exporting->md.end(), target.module);
     uint16_t requestIdx;
     if (found != exporting->md.end()) {
         requestIdx = std::distance(exporting->md.begin(), found);
     } else {
-        AddNewModuleRequest(exporting, exported);
+        AddNewModuleRequest(exporting, target.module, target.hasRequestName ? &target.requestName : nullptr);
         requestIdx = exporting->md.size() - 1;
     }
 

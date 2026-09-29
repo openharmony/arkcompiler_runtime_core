@@ -640,6 +640,101 @@ AbckitDynamicExportDescriptorPayload *GetDynExportDescriptorPayload(AbckitCoreEx
     return edPayload;
 }
 
+// Replaces '/' with '.' in a module path. Module record names use '.' as a
+// separator (e.g. "modules.routerMap"), while OHMurl import paths use '/'
+// (e.g. "modules/routerMap").
+static std::string RecordNameFromImportPath(const std::string &importPath)
+{
+    std::string recordName = importPath;
+    std::replace(recordName.begin(), recordName.end(), '/', '.');
+    return recordName;
+}
+
+// Parses "@normalized:<moduleType>&<moduleName>&<bundleName>&<importPath>&<version>"
+// (trailing fields may be empty, e.g. "@normalized:N&&&modules/routerMap&").
+// Field indices follow the runtime convention (module_path_helper.h):
+// 1 = moduleName, 2 = bundleName, 3 = importPath, 4 = version.
+// Returns importPath (field 3) and version (field 4), or nullopt when the
+// given request is not a normalized OHMurl.
+static std::optional<std::pair<std::string, std::string>> ParseNormalizedOhmUrl(const std::string &requestName)
+{
+    constexpr std::string_view PREFIX = "@normalized:";
+    constexpr size_t importPathIndex = 3;
+    constexpr size_t versionIndex = 4;
+    if (requestName.compare(0, PREFIX.size(), PREFIX) != 0) {
+        return std::nullopt;
+    }
+    // Split the whole request into '&' separated fields; field 0 is the
+    // "@normalized:<moduleType>" prefix itself, so the runtime field indices
+    // documented above can be used directly (e.g.
+    // "@normalized:N&&&modules/routerMap&" has empty fields 1-2 and a
+    // trailing empty version field).
+    std::vector<std::string> fields;
+    size_t start = 0;
+    for (auto pos = requestName.find('&', start); pos != std::string::npos; pos = requestName.find('&', start)) {
+        fields.emplace_back(requestName.substr(start, pos - start));
+        start = pos + 1;
+    }
+    fields.emplace_back(requestName.substr(start));
+
+    const auto field = [&fields](size_t index) -> std::string { return (index < fields.size()) ? fields[index] : ""; };
+    return std::make_pair(field(importPathIndex), field(versionIndex));
+}
+
+AbckitCoreModule *TryFindModule(const std::string &name, AbckitFile *file)
+{
+    auto tryFindLocal = file->localModules.find(name);
+    if (tryFindLocal != file->localModules.end()) {
+        return tryFindLocal->second.get();
+    }
+    auto tryFindExternal = file->externalModules.find(name);
+    if (tryFindExternal != file->externalModules.end()) {
+        return tryFindExternal->second.get();
+    }
+    return nullptr;
+}
+
+// Tries to resolve a module for a "@normalized:" request. Module record names
+// in an OHMurl abc keep the import path as-is ('/' separators) optionally
+// wrapped in '&' and optionally suffixed with '&<version>', e.g.
+// "&modules/routerMap&" for request "@normalized:N&&&modules/routerMap&".
+// Multiple candidate forms are probed because record naming depends on the
+// build configuration (merge-abc adds '&' wrappers, hvigor appends versions).
+AbckitCoreModule *TryFindModuleByOhmUrl(const std::string &requestName, AbckitFile *file)
+{
+    auto parsed = ParseNormalizedOhmUrl(requestName);
+    if (!parsed.has_value()) {
+        return nullptr;
+    }
+    const auto &[importPath, version] = parsed.value();
+    auto recordName = RecordNameFromImportPath(importPath);
+    if (recordName.empty()) {
+        return nullptr;
+    }
+
+    // Record names keep the import path as-is (e.g. "&modules/routerMap&");
+    // also probe the '.'-separated form used by some tooling display layers.
+    std::vector<std::string> candidates;
+    candidates.emplace_back(importPath);
+    candidates.emplace_back("&" + importPath + "&");
+    candidates.emplace_back(recordName);
+    candidates.emplace_back("&" + recordName + "&");
+    if (!version.empty()) {
+        candidates.emplace_back(importPath + "&" + version);
+        candidates.emplace_back("&" + importPath + "&" + version);
+        candidates.emplace_back("&" + importPath + "&" + version + "&");
+        candidates.emplace_back(recordName + "&" + version);
+        candidates.emplace_back("&" + recordName + "&" + version);
+        candidates.emplace_back("&" + recordName + "&" + version + "&");
+    }
+    for (const auto &candidate : candidates) {
+        if (auto *module = TryFindModule(candidate, file); module != nullptr) {
+            return module;
+        }
+    }
+    return nullptr;
+}
+
 std::string GetClassNameFromCtor(const std::string &ctorName, const AbckitLiteralArray *scopeNames)
 {
     ASSERT(IsCtor(ctorName));
