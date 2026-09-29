@@ -76,7 +76,7 @@ ohos_source_set("ets_interop_js_napi_static") {
       "libuv:uv",
       "napi:ace_napi",
       "node:node_header_notice",
-      sdk_libc_secshared_dep,
+      "bounds_checking_function:libsec_shared",
     ]
   } else if (ark_standalone_build && ark_ets_hybrid) {
     deps += [
@@ -91,6 +91,9 @@ ohos_source_set("ets_interop_js_napi_static") {
 ohos_shared_library("ets_interop_js_napi") {
   deps = [ ":ets_interop_js_napi_static" ]
   relative_install_dir = "module"
+  ldflags = [ "-Wl,--version-script=" + rebase_path("libets_interop_js_napi.map") ]
+  cflags = [ "-fvisibility=hidden" ]
+  cflags_cc = [ "-fvisibility-inlines-hidden" ]
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
 }
