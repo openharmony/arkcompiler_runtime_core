@@ -1,0 +1,61 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * GNU ld version script for libarktsziparchive.so.
+ *
+ * Whitelist mode: only symbols matching patterns below are exported;
+ * everything else is hidden by `local: *`.
+ *
+ * The library exposes two kinds of public surface, all under the `ark`
+ * namespace:
+ *   1. C-style zip API declared in zip_archive.h (IsZipMagic,
+ *      OpenArchiveFile, CloseArchiveFile, LocateFile, GetCurrentFileInfo,
+ *      OpenCurrentFile, GetCurrentFileOffset, CloseCurrentFile,
+ *      ExtractToMemory, CreateOrAddFileIntoZip, ...) — consumed by
+ *      libarktsfile and in-repo tests/fuzzers.
+ *   2. extractortool C++ classes in ark::extractor (Extractor, ZipFile,
+ *      ZipFileReader, FileMapper) — the Extractor constructor is called
+ *      by name from the ETS runtime (ets_hotreload.cpp, ets_abc_package.cpp)
+ *      which links this .so.
+ *
+ * The namespace-scoped wildcard `_ZN3ark*` covers all of the above without
+ * needing to enumerate individual Itanium-mangled names (which are fragile
+ * across compiler versions). RTTI/vtable patterns (`_ZTV`, `_ZTI`, `_ZTS`)
+ * are included so that cross-DSO dynamic_cast and exception type matching
+ * keep working for ark-namespaced classes.
+ *
+ * What gets hidden: leaked minizip/zlib third-party symbols, std:: and CRT
+ * internals, and any anonymous-namespace helpers that accidentally obtained
+ * external linkage.
+ */
+
+{
+    global:
+        /* ark namespace functions (zip API + extractortool) */
+        _ZN3ark*;
+        /* ark namespace const member functions (e.g.
+           ark::extractor::ZipFile::GetEntry(...) const) */
+        _ZNK3ark*;
+        /* vtables for ark-namespaced classes */
+        _ZTVN3ark*;
+        /* typeinfo for ark-namespaced classes */
+        _ZTIN3ark*;
+        /* typeinfo names for ark-namespaced classes */
+        _ZTSN3ark*;
+
+    local:
+        *;
+};

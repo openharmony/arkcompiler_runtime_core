@@ -1,0 +1,97 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * GNU ld version script for libarktsbase.so.
+ *
+ * Whitelist mode: only symbols matching the patterns below are exported;
+ * everything else is hidden by `local: *`.
+ *
+ * This script mirrors the compile-time visibility policy that is already
+ * enforced for this library: `libarktsbase_static` is compiled with
+ * `-fvisibility=hidden -fvisibility-inlines-hidden` (see BUILD.gn), and the
+ * public API is explicitly marked `PANDA_PUBLIC_API` (expands to
+ * `__attribute__((visibility("default")))`). A version script cannot
+ * re-export compile-time-hidden symbols, so the exported set is already
+ * exactly the PANDA_PUBLIC_API surface; the patterns below only re-assert
+ * it at link time. Net effect: zero behavior change, plus a backstop that
+ * hides accidental exports (e.g. if the cflags regress, or a future .c/.S
+ * source bypasses cflags_cc).
+ *
+ * All public symbols live in `namespace ark` or nested namespaces
+ * (ark::os, ark::mem, ark::logger, ark::utf, ark::taskmanager, ark::helpers,
+ * ark::time, ...), plus a few legacy `namespace panda` compatibility
+ * wrappers (os/stacktrace_stub.cpp), so the whole API is covered by the
+ * `_ZN3ark*` / `_ZNK3ark*` / `_ZN5panda*` wildcards without enumerating
+ * fragile mangled names.
+ *
+ * Pattern notes (Itanium ABI):
+ *   - `_ZNK3ark*`  — const member functions (e.g.
+ *     ark::helpers::ValueUnit::GetDoubleValue() const). MUST be listed
+ *     separately: `_ZN3ark*` does NOT match the `_ZNK` prefix.
+ *   - `_ZTV/_ZTI/_ZTSN3ark*` — vtable/typeinfo/typeinfo-name for
+ *     PANDA_PUBLIC_API polymorphic classes (cross-DSO dynamic_cast and
+ *     exception matching).
+ *   - `_ZGVN3ark*`, `_ZGVZN3ark*`, `_ZZN3ark*` — guard variables and
+ *     function-local statics of vague-linkage (inline/template) entities.
+ *   - `_ZTv*_N3ark*`, `_ZTv*_NK3ark*` — virtual thunks.
+ *   - Exact names — `extern "C"` symbols are unmangled, so the namespace
+ *     wildcards above cannot match them.
+ *
+ * Verified non-issues for the arm64 OHOS build where this script applies:
+ *   - The malloc/memalign/free interposers in
+ *     platforms/unix/libarkbase/mem_hooks.cpp are guarded by
+ *     PANDA_USE_MEMORY_HOOKS, which excludes musl and ARM targets, so they
+ *     are not compiled here.
+ *   - `__asan_poison/unpoison_memory_region` (utils/asan_interface.h) are
+ *     declarations only — defined by the ASAN runtime, so they appear as
+ *     imports and are not affected by version scripts.
+ *
+ * What gets hidden: leaked std::/libc++ internals from the statically
+ * linked C++ runtime, secshared wrappers, and CRT junk.
+ */
+
+{
+    global:
+        /* extern "C" sigchain API (unmangled), used by libarkruntime */
+        AddSpecialSignalHandlerFn;
+        RemoveSpecialSignalHandlerFn;
+        /* ark namespace functions, methods and data (non-const) */
+        _ZN3ark*;
+        /* ark namespace const member functions (_ZNK prefix) */
+        _ZNK3ark*;
+        /* legacy namespace panda compat wrappers (stacktrace) */
+        _ZN5panda*;
+        _ZNK5panda*;
+        /* vtables for ark-namespaced classes */
+        _ZTVN3ark*;
+        /* typeinfo for ark-namespaced classes */
+        _ZTIN3ark*;
+        /* typeinfo names for ark-namespaced classes */
+        _ZTSN3ark*;
+        /* guard variables for ark static data (template statics) */
+        _ZGVN3ark*;
+        /* function-local statics inside ark inline functions */
+        _ZZN3ark*;
+        /* guard variables for those local statics */
+        _ZGVZN3ark*;
+        /* virtual thunks for ark-namespaced classes */
+        _ZTv*_N3ark*;
+        /* virtual thunks for const member functions */
+        _ZTv*_NK3ark*;
+
+    local:
+        *;
+};

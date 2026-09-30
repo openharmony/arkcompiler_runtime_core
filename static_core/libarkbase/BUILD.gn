@@ -108,6 +108,7 @@ if (is_mingw) {
     "$ark_root/platforms/unix/libarkbase/file.cpp",
     "$ark_root/platforms/unix/libarkbase/filesystem.cpp",
     "$ark_root/platforms/unix/libarkbase/kill.cpp",
+    "$ark_root/platforms/unix/libarkbase/library_loader_load.cpp",
     "$ark_root/platforms/unix/libarkbase/library_loader_resolve_symbol.cpp",
     "$ark_root/platforms/unix/libarkbase/mem.cpp",
     "$ark_root/platforms/unix/libarkbase/native_stack.cpp",
@@ -115,7 +116,6 @@ if (is_mingw) {
     "$ark_root/platforms/unix/libarkbase/system_environment.cpp",
     "$ark_root/platforms/unix/libarkbase/thread.cpp",
     "$ark_root/platforms/unix/libarkbase/trace.cpp",
-    "$ark_root/platforms/unix/libarkbase/library_loader_load.cpp"
   ]
 
   if (!is_darwin) {
@@ -136,15 +136,13 @@ if (is_mingw) {
     }
   } else {
     # Fixes deprecation error for ucontext.
-    defines = [
-      "_XOPEN_SOURCE",
-    ]
+    defines = [ "_XOPEN_SOURCE" ]
     libarkbase_sources += [
       "$ark_root/libarkbase/os/mutex.cpp",
+      "$ark_root/platforms/darwin/libarkbase/mem_hooks.cpp",
       "$ark_root/platforms/unix/libarkbase/exec.cpp",
       "$ark_root/platforms/unix/libarkbase/pipe.cpp",
       "$ark_root/platforms/unix/libarkbase/sighook.cpp",
-      "$ark_root/platforms/darwin/libarkbase/mem_hooks.cpp"
     ]
   }
 }
@@ -257,6 +255,18 @@ ohos_source_set("libarktsbase_static") {
 
 ohos_shared_library("libarktsbase") {
   deps = [ ":libarktsbase_static" ]
+
+  # Version script that controls the exported symbols of libarktsbase.so.
+  # GNU ld only: Apple (macOS/iOS) and Windows linkers do not
+  # support --version-script.
+  # Skipped for debug builds (internal symbols are referenced differently
+  # under -O0) and for standalone layouts (no version_script support
+  # in their ohos_shared_library wrapper).
+  if (current_cpu == "arm64" && !is_darwin && !is_mingw && !is_win &&
+      !is_debug && !ark_standalone_build && !ark_static_standalone_build) {
+    version_script = "$ark_root/libarkbase/arktsbase.version"
+  }
+
   if (is_mingw || is_win) {
     output_extension = "dll"
   } else if (is_darwin) {

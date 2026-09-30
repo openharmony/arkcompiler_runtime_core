@@ -1,0 +1,38 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * GNU ld version script for libarkfileExt.so.
+ *
+ * Whitelist mode: only the five `extern "C"` entry points are exported;
+ * everything else (C++ internals of PandaFileExt, std:: string helpers,
+ * CRT leaks) is hidden by `local: *`.
+ *
+ * The symbols are unmangled `extern "C"` names, so they are listed exactly
+ * as declared in file_ext.h. They are consumed by libarksupport.so via
+ * dlsym-by-name, so the symbol name itself is the ABI contract.
+ */
+
+{
+    global:
+        OpenPandafileFromMemoryExt;
+        OpenPandafileFromFdExt;
+        QueryMethodSymByOffsetExt;
+        QueryMethodSymAndLineByOffsetExt;
+        QueryAllMethodSymsExt;
+
+    local:
+        *;
+};

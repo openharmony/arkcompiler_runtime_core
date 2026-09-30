@@ -64,6 +64,17 @@ ohos_source_set("libarktsziparchive_static") {
 ohos_shared_library("libarktsziparchive") {
   deps = [ ":libarktsziparchive_static" ]
 
+  # Version script that controls the exported symbols of libarktsziparchive.so.
+  # GNU ld only: Apple (macOS/iOS) and Windows linkers do not
+  # support --version-script.
+  # Skipped for debug builds (internal symbols are referenced differently
+  # under -O0) and for standalone layouts (no version_script support
+  # in their ohos_shared_library wrapper).
+  if (current_cpu == "arm64" && !is_darwin && !is_mingw && !is_win &&
+      !is_debug && !ark_standalone_build && !ark_static_standalone_build) {
+    version_script = "$ark_root/libziparchive/arktsziparchive.version"
+  }
+
   if (is_gcov_tools) {
     cflags = coverage_cflags
     ldflags = coverage_ldflags

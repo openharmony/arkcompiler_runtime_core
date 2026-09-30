@@ -1,0 +1,56 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * GNU ld version script for libarktarget_options.so.
+ *
+ * Whitelist mode: only symbols in the `ark` namespace are exported;
+ * everything else is hidden by `local: *`.
+ *
+ * The library currently has no -fvisibility=hidden, so by default every
+ * non-static C++ symbol leaks (including std:: and CRT internals). This
+ * script is where the biggest encapsulation win is: it hides all the
+ * leaked begetutil/hisysevent/std symbols while keeping the three
+ * ark-namespaced APIs callable from libarkruntime:
+ *   - ark::default_target_options::* — getters consumed by runtime.cpp
+ *     and interop_js/interop_context.cpp
+ *   - ark::ohos_device::*            — OHOS-specific helpers forwarded to
+ *     by default_target_options (kept exported for safety; they are
+ *     referenced by name within the same .so but exporting is harmless)
+ *   - ark::oom_stats::OomNotifier    — NotifyBeforeManagedOom called from
+ *     the runtime OOM path
+ *
+ * The namespace-scoped wildcard `_ZN3ark*` covers all of the above without
+ * enumerating individual mangled names. RTTI patterns are included for
+ * cross-DSO dynamic_cast / exception matching of ark-namespaced classes.
+ */
+
+{
+    global:
+        /* ark namespace (default_target_options + ohos_device + oom_stats) */
+        _ZN3ark*;
+        /* ark namespace const member functions (defensive: none today, but
+           a future const getter must not be silently hidden) */
+        _ZNK3ark*;
+        /* vtables for ark-namespaced classes */
+        _ZTVN3ark*;
+        /* typeinfo for ark-namespaced classes */
+        _ZTIN3ark*;
+        /* typeinfo names for ark-namespaced classes */
+        _ZTSN3ark*;
+
+    local:
+        *;
+};
