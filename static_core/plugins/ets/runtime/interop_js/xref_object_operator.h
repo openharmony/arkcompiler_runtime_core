@@ -59,7 +59,7 @@ public:
 
     bool HasProperty(EtsExecutionContext *executionCtx, const uint32_t index) const;
 
-    EtsObject *Instantiate(EtsExecutionContext *executionCtx, Span<VMHandle<ObjectHeader>> args) const;
+    EtsHandle<EtsObject> Instantiate(EtsExecutionContext *executionCtx, Span<VMHandle<ObjectHeader>> args) const;
 
     static std::string TypeOf(EtsExecutionContext *executionCtx, EtsObject *obj);
 

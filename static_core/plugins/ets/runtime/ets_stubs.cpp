@@ -1213,7 +1213,7 @@ EtsObject *EtsCallNew([[maybe_unused]] ManagedThread *mThread, EtsObject *ctor,
             [[maybe_unused]] EtsHandleScope s(executionCtx);
             EtsHandle<EtsObject> ctorHandle(executionCtx, ctor);
             auto xRefObjectOperator = interop::js::XRefObjectOperator::FromEtsObject(ctorHandle);
-            return xRefObjectOperator.Instantiate(executionCtx, args);
+            return xRefObjectOperator.Instantiate(executionCtx, args).GetPtr();
         });
     } else {
         ThrowEtsInvalidType(executionCtx, ctor->GetClass());

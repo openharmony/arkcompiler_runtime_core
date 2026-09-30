@@ -535,19 +535,20 @@ bool XRefObjectOperator::HasProperty(EtsExecutionContext *executionCtx, const ui
     return res;
 }
 
-EtsObject *XRefObjectOperator::Instantiate(EtsExecutionContext *executionCtx, Span<VMHandle<ObjectHeader>> args) const
+EtsHandle<EtsObject> XRefObjectOperator::Instantiate(EtsExecutionContext *executionCtx,
+                                                     Span<VMHandle<ObjectHeader>> args) const
 {
     auto ctx = InteropCtx::Current(executionCtx);
     if (UNLIKELY(ctx == nullptr)) {
         InteropCtx::ThrowETSError(EtsExecutionContext::GetCurrent(), "Current environment does not support interop");
-        return nullptr;
+        return EtsHandle<EtsObject>();
     }
     INTEROP_CODE_SCOPE_ETS_TO_JS(executionCtx);
     auto env = ctx->GetJSEnv();
     NapiScope jsHandleScope(env);
     napi_value jsCtor = this->GetNapiValue(executionCtx);
     if (UNLIKELY(jsCtor == nullptr)) {
-        return nullptr;
+        return EtsHandle<EtsObject>();
     }
 
     // convert static args to dynamic args
@@ -559,7 +560,7 @@ EtsObject *XRefObjectOperator::Instantiate(EtsExecutionContext *executionCtx, Sp
             if (InteropCtx::SanityJSExceptionPending()) {
                 ctx->ForwardJSException(executionCtx);
             }
-            return nullptr;
+            return EtsHandle<EtsObject>();
         }
         dynamicArgs.push_back(dynamicArg);
     }
@@ -572,9 +573,9 @@ EtsObject *XRefObjectOperator::Instantiate(EtsExecutionContext *executionCtx, Sp
     }
     if (jsStatus != napi_ok) {
         ctx->ForwardJSException(executionCtx);
-        return nullptr;
+        return EtsHandle<EtsObject>();
     }
-    return JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsRet).value();
+    return EtsHandle<EtsObject>(executionCtx, JSConvertEtsObject::UnwrapWithNullCheck(ctx, env, jsRet).value());
 }
 
 napi_valuetype XRefObjectOperator::GetValueType(EtsExecutionContext *executionCtx, EtsObject *obj)
