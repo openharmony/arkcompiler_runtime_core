@@ -298,7 +298,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
     constexpr char const *MODE = "rbe";
 #endif
 
-    FILE *fp = fopen(std::string(location).c_str(), MODE);
+    FILE *fp = fopen(ark::os::file::File::GetExtendedFilePath(std::string(location)).c_str(), MODE);
     if (fp == nullptr) {
         LOG(ERROR, PANDAFILE) << "Can't fopen location: " << location;
         return nullptr;
@@ -540,7 +540,8 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode openM
 {
     trace::ScopedTrace scopedTrace("Open panda file " + std::string(filename));
     os::file::Mode mode = GetMode(openMode);
-    os::file::File file = os::file::Open(filename, mode);
+    auto extendedFilename = ark::os::file::File::GetExtendedFilePath(std::string(filename));
+    os::file::File file = os::file::Open(extendedFilename, mode);
     if (!file.IsValid()) {
         PLOG(ERROR, PANDAFILE) << "Failed to open panda file '" << filename << "'";
         return nullptr;

@@ -17,6 +17,8 @@
 #include "libarkfile/file_items.h"
 #include "libarkfile/file_item_container.h"
 #include "libarkfile/file_reader.h"
+#include "libarkfile/file_writer.h"
+#include "libarkbase/os/file.h"
 #include "libarkbase/utils/string_helpers.h"
 #include "zip_archive.h"
 #include "libarkfile/file.h"
@@ -32,6 +34,17 @@
 #endif
 
 #include <vector>
+
+#if !defined(PANDA_TARGET_MOBILE)
+#if __has_include(<filesystem>)
+#include <filesystem>
+namespace fs = std::filesystem;
+#elif __has_include(<experimental/filesystem>)
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
+#include <system_error>
+#endif
 
 #include <gtest/gtest.h>
 
@@ -163,6 +176,39 @@ TEST(File, OpenPandaFile)
     EXPECT_STREQ((pf->GetFilename()).c_str(), zipFilename);
     remove(zipFilename);
 }
+
+#if !defined(PANDA_TARGET_MOBILE)
+TEST(File, WriteAndOpenPandaFile_LongPath_ExceedsWindowsMaxPath)
+{
+    constexpr size_t PATH_SEGMENT_COUNT = 10U;
+    constexpr size_t WINDOWS_MAX_PATH = 260U;
+    std::string longDir;
+    for (size_t i = 0; i < PATH_SEGMENT_COUNT; i++) {
+        longDir += "long_path_segment_0123456789abcdef/";
+    }
+    const std::string longPath = longDir + "long_path_file.abc";
+    ASSERT_GT(longPath.size(), WINDOWS_MAX_PATH);
+
+    std::error_code ec;
+    fs::create_directories(ark::os::file::File::GetExtendedFilePath(longDir), ec);
+    ASSERT_FALSE(ec);
+
+    auto data = GetEmptyPandaFileBytes();
+    {
+        auto extendedPath = ark::os::file::File::GetExtendedFilePath(longPath);
+        FileWriter writer(extendedPath);
+        ASSERT_TRUE(static_cast<bool>(writer));
+        ASSERT_TRUE(writer.WriteBytes(data));
+        ASSERT_TRUE(writer.FinishWrite());
+    }
+
+    auto pf = OpenPandaFile(longPath);
+    ASSERT_NE(pf, nullptr);
+    EXPECT_EQ(pf->GetFilename(), longPath);
+
+    fs::remove_all(ark::os::file::File::GetExtendedFilePath(longDir), ec);
+}
+#endif
 
 TEST(File, OpenPandaFileFromMemory)
 {

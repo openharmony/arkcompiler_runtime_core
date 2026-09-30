@@ -110,7 +110,7 @@ public:
         return "\\";
     }
 
-    static const std::string GetExtendedFilePath(const std::string &path);
+    PANDA_PUBLIC_API static const std::string GetExtendedFilePath(const std::string &path);
 
     static const std::string NormalizeFullPath(const std::string &path);
 
