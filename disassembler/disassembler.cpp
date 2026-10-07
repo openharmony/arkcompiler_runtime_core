@@ -14,6 +14,7 @@
  */
 
 #include "disassembler.h"
+#include "parse_hex_u32.h"
 #include "libpandafile/util/collect_util.h"
 #include "mangling.h"
 #include "utils/logger.h"
@@ -1680,8 +1681,12 @@ void Disassembler::SerializeFieldValue(const pandasm::Field &f, std::stringstrea
     } else if (f.type.GetId() == panda_file::Type::TypeId::REFERENCE && f.type.GetName() == "panda.String") {
         ss << " = \"" << static_cast<std::string>(f.metadata->GetValue().value().GetValue<std::string>()) << "\"";
     } else if (f.type.GetRank() > 0) {
-        uint32_t litArrayOffset =
-            std::stoi(static_cast<std::string>(f.metadata->GetValue().value().GetValue<std::string>()));
+        uint32_t litArrayOffset = 0;
+        std::string offsetStr = static_cast<std::string>(f.metadata->GetValue().value().GetValue<std::string>());
+        if (!ParseDecU32(offsetStr, litArrayOffset)) {
+            LOG(ERROR, DISASSEMBLER) << "> bad literal array offset " << offsetStr;
+            return;
+        }
         std::unordered_set<uint32_t> visiting;
         ss << " = ";
         DumpLiteralArrayByOffset(litArrayOffset, ss, visiting);
@@ -1756,7 +1761,12 @@ void Disassembler::SerializeAnnotationElement(const std::vector<pandasm::Annotat
                << " " << elem.GetName() << " { \"";
             ss << elem.GetValue()->GetAsScalar()->GetValue<std::string>() << "\" }";
         } else if (type == pandasm::Value::Type::LITERALARRAY) {
-            uint32_t litArrayOffset = std::stoi(elem.GetValue()->GetAsScalar()->GetValue<std::string>());
+            uint32_t litArrayOffset = 0;
+            std::string offsetStr = elem.GetValue()->GetAsScalar()->GetValue<std::string>();
+            if (!ParseDecU32(offsetStr, litArrayOffset)) {
+                LOG(ERROR, DISASSEMBLER) << "> bad literal array offset " << offsetStr;
+                continue;
+            }
             std::unordered_set<uint32_t> visiting;
             std::string typeName = getLiteralArrayTypeByOffset(litArrayOffset, visiting);
             ss << "\t" << typeName << " " << elem.GetName() << " { ";
@@ -2087,7 +2097,11 @@ static void translateImmToLabel(pandasm::Ins *pa_ins, LabelTable *label_table, c
                                 BytecodeInstruction bc_ins, BytecodeInstruction bc_ins_last,
                                 panda_file::File::EntityId code_id)
 {
-    const int32_t jmp_offset = std::stoi(pa_ins->Ids().at(0));
+    int32_t jmp_offset = 0;
+    if (!ParseDecI32(pa_ins->Ids().at(0), jmp_offset)) {
+        LOG(ERROR, DISASSEMBLER) << "> bad jump immediate at " << code_id;
+        return;
+    }
     const auto bc_ins_dest = bc_ins.JumpTo(jmp_offset);
     if (bc_ins_last.GetAddress() > bc_ins_dest.GetAddress()) {
         size_t idx = getBytecodeInstructionNumber(BytecodeInstruction(ins_arr), bc_ins_dest);
