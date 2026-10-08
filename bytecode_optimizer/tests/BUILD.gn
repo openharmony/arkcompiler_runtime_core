@@ -86,6 +86,7 @@ host_unittest_action("BytecodeOptimizerTest") {
     "analysis_bytecode_test.cpp",
     "codegen_test.cpp",
     "constant_propagation_test.cpp",
+    "dynamic_cse_test.cpp",
     "excluded_keys_test.cpp",
     "optimize_bytecode_test.cpp",
     "reg_encoder_test.cpp",

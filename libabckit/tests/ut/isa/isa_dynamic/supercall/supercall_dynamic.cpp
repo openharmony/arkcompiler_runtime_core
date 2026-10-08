@@ -299,30 +299,9 @@ static void VerifySuperCallSpreadIr(AbckitGraph *graph)
              {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {2}},
              {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
              {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {9, 3}},
-         }},
-        {{1},
-         {3, 5},
-         {
-             {11, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRY, {}},
-         }},
-        {{2},
-         {4},
-         {
-             {12, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {7}},
-         }},
-        {{3}, {6, 5}, {}},
-        {{2, 4},
-         {7},
-         {
-             {13, ABCKIT_ISA_API_DYNAMIC_OPCODE_CATCHPHI, {}},
-             {14, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW, {13}},
-         }},
-        {{4},
-         {7},
-         {
              {15, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURN, {7}},
          }},
-        {{5, 6}, {}, {}}};
+        {{1}, {}, {}}};
 
     helpers::VerifyGraph(graph, bbSchema);
 }
@@ -364,30 +343,9 @@ static void VerifySuperCallArrowRangeIr(AbckitGraph *graph, bool isWideMode)
              {3, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
              {4, superCall, {0, 3}},
              {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {2}},
-         }},
-        {{1},
-         {3, 5},
-         {
-             {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRY, {}},
-         }},
-        {{2},
-         {4},
-         {
-             {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW_IFSUPERNOTCORRECTCALL, {4}},
-         }},
-        {{3}, {6, 5}, {}},
-        {{2, 4},
-         {7},
-         {
-             {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_CATCHPHI, {}},
-             {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_THROW, {8}},
-         }},
-        {{4},
-         {7},
-         {
              {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURN, {4}},
          }},
-        {{5, 6}, {}, {}}};
+        {{1}, {}, {}}};
 
     helpers::VerifyGraph(graph, bbSchema);
 }

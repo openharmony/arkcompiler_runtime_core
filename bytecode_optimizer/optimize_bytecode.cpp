@@ -27,6 +27,7 @@
 #include "compiler/optimizer/optimizations/regalloc/reg_alloc.h"
 #include "compiler/optimizer/optimizations/vn.h"
 #include "constant_propagation/constant_propagation.h"
+#include "dynamic_cse.h"
 #include "libpandabase/mem/pool_manager.h"
 #include "libpandafile/class_data_accessor-inl.h"
 #include "libpandafile/module_data_accessor-inl.h"
@@ -68,7 +69,9 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
         RunOpts<compiler::BranchElimination>(graph);
     }
 
-    RunOpts<compiler::ValNum, compiler::Lowering, compiler::MoveConstants>(graph);
+    RunOpts<compiler::ValNum>(graph);
+    graph->RunPass<DynamicCse>();
+    RunOpts<compiler::Lowering, compiler::MoveConstants>(graph);
 
     // this pass should run just before register allocator
     graph->RunPass<compiler::Cleanup>();

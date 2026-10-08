@@ -3,29 +3,29 @@
 # ====================
 # LITERALS
 
-_ESModuleRecord_2050 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_2129 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_2026 { 8 [ tag_value:5, string:"EnumTestWithoutInit", tag_value:5, string:"Index", tag_value:5, string:"EnumTestWithNumber", tag_value:5, string:"EnumTestWithString", ]}
+_ESScopeNamesRecord_2105 { 8 [ tag_value:5, string:"EnumTestWithoutInit", tag_value:5, string:"Index", tag_value:5, string:"EnumTestWithNumber", tag_value:5, string:"EnumTestWithString", ]}
 
-_GLOBAL_2078 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@2>#Index, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
+_GLOBAL_2157 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@2>#Index, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
 
-_GLOBAL_2100 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@3>#Index, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
+_GLOBAL_2179 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@3>#Index, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
 
-_GLOBAL_2122 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2201 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_2131 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2210 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_2140 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2219 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_2149 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2228 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_2158 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_2237 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_2167 { 8 [ tag_value:5, string:"add", tag_value:6, method:.#~F>#add, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_2246 { 8 [ tag_value:5, string:"add", tag_value:6, method:.#~F>#add, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
-_GLOBAL_2189 { 8 [ tag_value:5, string:"add", tag_value:6, method:.#~G>#add, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
+_GLOBAL_2268 { 8 [ tag_value:5, string:"add", tag_value:6, method:.#~G>#add, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
 
-_GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
+_GLOBAL_2290 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index, tag_value:9, method_affiliate:2, tag_value:2, i32:1, ]}
 
 
 
@@ -39,13 +39,13 @@ _GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 
 .language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/debug-line-number/TsCommonSyntax.ts _ESModuleRecord_2050
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/debug-line-number/TsCommonSyntax.ts _ESModuleRecord_2129
 }
 .record.source_file 
 
 .language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/debug-line-number/TsCommonSyntax.ts _ESScopeNamesRecord_2026
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/debug-line-number/TsCommonSyntax.ts _ESScopeNamesRecord_2105
 }
 .record.source_file 
 
@@ -495,25 +495,14 @@ _GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	lda v5                                   # line: 22           # column: 0
 	sta v2                                   # line: 22           # column: 0
 	lda v2                                   # line: 4294967295           # column: 4294967295
-	label@13:                                # line: 0           # column: 0
-	throw.ifsupernotcorrectcall 0x0          # line: 4294967295           # column: 4294967295
-	label@14:                                # line: 0           # column: 0
 	return                                   # line: 22           # column: 0
-	label@15:                                # line: 0           # column: 0
-	throw                                    # line: 22           # column: 0
-	label@16:                                # line: 0           # column: 0
-.catchall :
-	try_begin_label : label@13
-	try_end_label : label@14
-	catch_begin_label : label@15
-	catch_end_label : label@16
 
 # LOCAL_VARIABLE_TABLE:
 #	 Start   Length  Register           Name   Signature
-	    4       16         0       4funcObj         any
-	    4       16         1     4newTarget         any
-	    4       16         2           this         any
-	    4       16         3           args         any
+	    4       10         0       4funcObj         any
+	    4       10         1     4newTarget         any
+	    4       10         2           this         any
+	    4       10         3           args         any
 }
 
 .function_kind FunctionKind::FUNCTION
@@ -701,7 +690,7 @@ _GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	mov v2, a2                               # line: 4294967295           # column: 4294967295
 	ldhole                                   # line: 15           # column: 8
 	sta v18                                  # line: 15           # column: 8
-	defineclasswithbuffer 0x0, .#~A=#A, _GLOBAL_2122, 0x0, v18 # line: 15           # column: 8
+	defineclasswithbuffer 0x0, .#~A=#A, _GLOBAL_2201, 0x0, v18 # line: 15           # column: 8
 	sta v16                                  # line: 15           # column: 8
 	sta v17                                  # line: 15           # column: 6
 	lda v16                                  # line: 15           # column: 8
@@ -711,7 +700,7 @@ _GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v5                                   # line: 15           # column: 6
 	ldhole                                   # line: 18           # column: 8
 	sta v18                                  # line: 18           # column: 8
-	defineclasswithbuffer 0x3, .#~B=#B, _GLOBAL_2131, 0x0, v18 # line: 18           # column: 8
+	defineclasswithbuffer 0x3, .#~B=#B, _GLOBAL_2210, 0x0, v18 # line: 18           # column: 8
 	sta v16                                  # line: 18           # column: 8
 	sta v17                                  # line: 18           # column: 6
 	lda v16                                  # line: 18           # column: 8
@@ -721,7 +710,7 @@ _GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v6                                   # line: 18           # column: 6
 	lda v5                                   # line: 22           # column: 16
 	sta v18                                  # line: 22           # column: 18
-	defineclasswithbuffer 0x6, .#~C=#C, _GLOBAL_2140, 0x0, v18 # line: 22           # column: 18
+	defineclasswithbuffer 0x6, .#~C=#C, _GLOBAL_2219, 0x0, v18 # line: 22           # column: 18
 	sta v16                                  # line: 22           # column: 18
 	sta v17                                  # line: 22           # column: 6
 	lda v16                                  # line: 22           # column: 18
@@ -731,7 +720,7 @@ _GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v7                                   # line: 22           # column: 6
 	ldhole                                   # line: 25           # column: 8
 	sta v18                                  # line: 25           # column: 8
-	defineclasswithbuffer 0x9, .#~D=#D, _GLOBAL_2149, 0x0, v18 # line: 25           # column: 8
+	defineclasswithbuffer 0x9, .#~D=#D, _GLOBAL_2228, 0x0, v18 # line: 25           # column: 8
 	sta v16                                  # line: 25           # column: 8
 	sta v17                                  # line: 25           # column: 6
 	lda v16                                  # line: 25           # column: 8
@@ -751,7 +740,7 @@ _GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v8                                   # line: 25           # column: 6
 	ldhole                                   # line: 33           # column: 8
 	sta v18                                  # line: 33           # column: 8
-	defineclasswithbuffer 0xe, .#~E=#E, _GLOBAL_2158, 0x0, v18 # line: 33           # column: 8
+	defineclasswithbuffer 0xe, .#~E=#E, _GLOBAL_2237, 0x0, v18 # line: 33           # column: 8
 	sta v16                                  # line: 33           # column: 8
 	sta v17                                  # line: 33           # column: 6
 	lda v16                                  # line: 33           # column: 8
@@ -767,7 +756,7 @@ _GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v9                                   # line: 33           # column: 6
 	ldhole                                   # line: 37           # column: 8
 	sta v18                                  # line: 37           # column: 8
-	defineclasswithbuffer 0x14, .#~F=#F, _GLOBAL_2167, 0x0, v18 # line: 37           # column: 8
+	defineclasswithbuffer 0x14, .#~F=#F, _GLOBAL_2246, 0x0, v18 # line: 37           # column: 8
 	sta v16                                  # line: 37           # column: 8
 	sta v17                                  # line: 37           # column: 6
 	lda v16                                  # line: 37           # column: 8
@@ -777,7 +766,7 @@ _GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v13                                  # line: 37           # column: 6
 	ldhole                                   # line: 43           # column: 8
 	sta v18                                  # line: 43           # column: 8
-	defineclasswithbuffer 0x17, .#~G=#G, _GLOBAL_2189, 0x0, v18 # line: 43           # column: 8
+	defineclasswithbuffer 0x17, .#~G=#G, _GLOBAL_2268, 0x0, v18 # line: 43           # column: 8
 	sta v16                                  # line: 43           # column: 8
 	sta v17                                  # line: 43           # column: 6
 	lda v16                                  # line: 43           # column: 8
@@ -840,7 +829,7 @@ _GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	callthis3 0x2c, v17, v18, v19, v20       # line: 44           # column: 2
 	ldhole                                   # line: 51           # column: 25
 	sta v18                                  # line: 51           # column: 25
-	defineclasswithbuffer 0x2e, .#~@0=#EnumTestWithoutInit, _GLOBAL_2211, 0x0, v18 # line: 51           # column: 25
+	defineclasswithbuffer 0x2e, .#~@0=#EnumTestWithoutInit, _GLOBAL_2290, 0x0, v18 # line: 51           # column: 25
 	sta v16                                  # line: 51           # column: 25
 	sta v17                                  # line: 51           # column: 6
 	lda v16                                  # line: 51           # column: 25
@@ -850,7 +839,7 @@ _GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v12                                  # line: 51           # column: 6
 	ldhole                                   # line: 65           # column: 24
 	sta v18                                  # line: 65           # column: 24
-	defineclasswithbuffer 0x31, .#~@2=#EnumTestWithNumber, _GLOBAL_2078, 0x0, v18 # line: 65           # column: 24
+	defineclasswithbuffer 0x31, .#~@2=#EnumTestWithNumber, _GLOBAL_2157, 0x0, v18 # line: 65           # column: 24
 	sta v16                                  # line: 65           # column: 24
 	sta v17                                  # line: 65           # column: 6
 	lda v16                                  # line: 65           # column: 24
@@ -860,7 +849,7 @@ _GLOBAL_2211 { 8 [ tag_value:5, string:"Index", tag_value:6, method:.#~@0>#Index
 	sta v10                                  # line: 65           # column: 6
 	ldhole                                   # line: 79           # column: 24
 	sta v18                                  # line: 79           # column: 24
-	defineclasswithbuffer 0x34, .#~@3=#EnumTestWithString, _GLOBAL_2100, 0x0, v18 # line: 79           # column: 24
+	defineclasswithbuffer 0x34, .#~@3=#EnumTestWithString, _GLOBAL_2179, 0x0, v18 # line: 79           # column: 24
 	sta v16                                  # line: 79           # column: 24
 	sta v17                                  # line: 79           # column: 6
 	lda v16                                  # line: 79           # column: 24
